@@ -9,8 +9,8 @@
 // mais as matrizes de alocação, os pesos das perguntas ou a regra de veto — só encontra
 // uma chamada de rede para este endpoint.
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { gerarRecomendacao } from '../webapp-src/src/domain/engine'
-import { validarPayload } from './_validacao'
+import { gerarRecomendacao } from '../webapp-src/src/domain/engine.js'
+import { validarPayload } from './_validacao.js'
 
 export default function handler(req: VercelRequest, res: VercelResponse) {
   // CORS básico: ajuste ALLOWED_ORIGIN nas variáveis de ambiente da Vercel se o front
