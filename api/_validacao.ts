@@ -7,7 +7,7 @@ import type {
   LetraArquitetura,
   RespostasArquitetura,
   RespostasQuestionario,
-} from '../webapp-src/src/domain/types'
+} from '../webapp-src/src/domain/types.js'
 
 const LETRAS_QUESTIONARIO: readonly Letra[] = ['a', 'b', 'c', 'd']
 const LETRAS_ARQUITETURA: readonly LetraArquitetura[] = ['a', 'b', 'c']
