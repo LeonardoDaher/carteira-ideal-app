@@ -1,0 +1,589 @@
+:root {
+  --bg: oklch(16% 0.014 262);
+  /* Mesmos tokens da landing "Link na bio": vidro sobre o degradê de fundo */
+  --surface: rgba(255, 255, 255, 0.05);        /* caixas (vidro) */
+  --surface2: rgba(255, 255, 255, 0.1);        /* variação: chips, trilhas de barra, letras */
+  --stroke: rgba(255, 255, 255, 0.5);          /* contorno das caixas (igual à landing) */
+  --highlight: rgba(255, 255, 255, 0.2);       /* hover (igual à landing) */
+  --highlight-soft: rgba(255, 255, 255, 0.06); /* toque bem leve — ex: card de exemplos, para não atrapalhar a leitura do texto revelado */
+  --border: rgba(255, 255, 255, 0.16);         /* linhas divisórias discretas dentro das caixas */
+  --glass-blur: blur(4px);
+  --text: oklch(96% 0.006 262);
+  --text-muted: oklch(68% 0.02 262);
+  --accent: oklch(84% 0.19 100);
+  --accent-text: oklch(18% 0.02 262);
+  --success: oklch(74% 0.17 150);
+  --warning: oklch(78% 0.15 70);
+  --danger: oklch(63% 0.21 25);
+  --z1: oklch(72% 0.16 145);
+  --z2: oklch(80% 0.16 95);
+  --z3: oklch(72% 0.15 250);
+  --z4: oklch(72% 0.15 300);
+  --z5: oklch(74% 0.16 40);
+
+  /* Paleta dedicada às classes de ativo — 9 tons com 40° de distância entre si no
+     círculo de cores, para nunca haver duas classes parecidas numa mesma carteira. */
+  /* Paleta dedicada às classes de ativo. As 4 mais visíveis usam as cores exatas do
+     gráfico de referência (dourado, vermelho, azul, verde); as demais foram calculadas
+     para nunca ficarem parecidas com nenhuma outra que apareça na mesma carteira —
+     testei as 9 combinações reais do motor e a menor distância entre cores vizinhas é
+     de 27,5° no círculo cromático (o ideal é manter acima de 25°). */
+  --asset-acoes: #f3b218;         /* dourado — Ações e ETFs */
+  --asset-bdrs: #ed1c24;          /* vermelho — BDRs */
+  --asset-cdb: #09a0fa;           /* azul — CDB com liquidez diária */
+  --asset-lcilca: #0d9488;        /* verde-azulado escuro — LCI / LCA (isento, com FGC) */
+  --asset-tesouro: #27a94c;       /* verde — Tesouro Selic */
+  --asset-tesouro-ipca: #2bab96;  /* verde-azulado — Tesouro IPCA+ */
+  --asset-tesouro-pre: #5e50a5;   /* azul-violeta — Tesouro Prefixado */
+  --asset-fiis: #92b234;          /* verde-oliva — Fundos Imobiliários (FIIs) */
+  --asset-ouro: #b851af;          /* violeta — Ouro */
+  --asset-fundosinternacionais: #5e944c; /* verde-oliva — Fundos Internacionais (ETFs) */
+  --asset-cripto: #f7931a;        /* laranja — Criptomoedas */
+
+  /* Paleta do sub-gráfico "Diversificação por segmento" dentro do detalhe de FIIs.
+     Não precisa respeitar a distância angular da paleta de ativos acima porque
+     aparece isolada, num gráfico à parte — só precisa ser distinguível entre si. */
+  /* Paleta do sub-gráfico "Diversificação por segmento" dentro do detalhe de FIIs.
+     9 tons com ~40° de distância entre si no círculo cromático — não precisa ser
+     distinta da paleta de ativos acima porque aparece isolada, num gráfico à parte. */
+  --sector-papel: #3b82f6;      /* azul — Papel / CRIs */
+  --sector-logistica: #f59e0b;  /* laranja — Galpões Logísticos */
+  --sector-shopping: #ef4444;   /* vermelho — Shopping Centers */
+  --sector-rendaurbana: #84cc16; /* verde-limão — Renda Urbana / Varejo */
+  --sector-fiagro: #ec4899;     /* rosa — Fiagros (Agronegócio) */
+  --sector-multi: #a855f7;      /* violeta — FOFs / Multiestratégia */
+  --sector-lajes: #14b8a6;      /* verde-azulado — Lajes Corporativas */
+  --sector-saude: #22c55e;      /* verde — Hospital / Saúde */
+  --sector-energia: #0ea5e9;    /* azul-céu — Energia / Infraestrutura */
+
+  /* Paleta do sub-gráfico "Diversificação por setor" dentro do detalhe de Ações.
+     7 tons distinguíveis entre si — mesma lógica da paleta de segmentos de FIIs acima,
+     isolada num gráfico à parte, sem precisar respeitar a distância angular das demais. */
+  --sector-financeiro: #3b82f6;      /* azul — Financeiro / Bancos */
+  --sector-energia-eletrica: #eab308; /* amarelo — Energia Elétrica */
+  --sector-saneamento: #10b981;      /* verde-esmeralda — Saneamento, Utilidades e Serviços */
+  --sector-commodities: #ef4444;     /* vermelho — Commodities / Básicos */
+  --sector-consumo-saude: #ec4899;   /* rosa — Consumo / Varejo e Saúde */
+  --sector-industria: #8b5cf6;       /* violeta — Indústria e Bens de Capital */
+  --sector-seguros-holding: #06b6d4; /* ciano — Seguros e Holding */
+
+  /* Paleta do sub-gráfico "Alocação setorial global" dentro do detalhe de BDRs.
+     7 tons distinguíveis entre si — mesma lógica das paletas de segmento acima. */
+  --sector-bigtechs: #3b82f6;             /* azul — Big Techs & Inteligência Artificial */
+  --sector-saude-global: #22c55e;         /* verde — Saúde, Farmacêutica e Biotecnologia */
+  --sector-consumo-global: #ec4899;       /* rosa — Consumo Global & Marcas Fortes */
+  --sector-financeiro-global: #eab308;    /* amarelo — Serviços Financeiros & Meios de Pagamento */
+  --sector-industria-defesa: #8b5cf6;     /* violeta — Indústria, Defesa e Logística Global */
+  --sector-energia-global: #ef4444;       /* vermelho — Energia & Commodities Globais */
+  --sector-midia-global: #06b6d4;         /* ciano — Comunicação, Mídia e Entretenimento */
+
+  /* Paleta do sub-gráfico "Diversificação por indexador" dentro do detalhe de CDBs.
+     4 tons distinguíveis entre si — mesma lógica das paletas de segmento acima. */
+  --sector-cdb-posfixado: #3b82f6;   /* azul — Pós-Fixados (CDI) - Curto Prazo / Liquidez */
+  --sector-cdb-ipca: #22c55e;        /* verde — Atrelados à Inflação (IPCA + Taxa) */
+  --sector-cdb-prefixado: #eab308;   /* amarelo — Pré-Fixados (Taxa Fixa) */
+  --sector-cdb-highyield: #ef4444;   /* vermelho — Oportunidade / High Yield (Bancos Médios) */
+
+  /* Paleta do sub-gráfico "Diversificação por estratégia/vencimento" dentro do detalhe
+     de Tesouro Prefixado. 4 tons distinguíveis entre si — mesma lógica das paletas acima. */
+  --sector-pre-curto: #3b82f6;    /* azul — Prefixado Curto Prazo (1 a 3 anos) */
+  --sector-pre-longo: #22c55e;    /* verde — Prefixado Longo Prazo (5 a 10 anos) */
+  --sector-pre-semestral: #eab308; /* amarelo — Com Juros Semestrais (NTN-F) */
+  --sector-pre-marcacao: #ef4444;  /* vermelho — Marcação a Mercado (Tática) */
+
+  --sector-cripto-fundos: #3b82f6;   /* azul — Fundos de Investimento Cripto */
+  --sector-cripto-etf: #eab308;      /* amarelo — ETFs na B3 */
+  --sector-cripto-bdr: #ec4899;      /* rosa — BDRs da B3 */
+  --sector-cripto-spot: #f7931a;     /* laranja — Compra Direta (Mercado Spot) */
+
+  /* Paleta do sub-gráfico "Diversificação por forma de acesso" dentro do detalhe de Ouro.
+     3 tons distinguíveis entre si — mesma lógica das paletas de segmento acima. */
+  --sector-ouro-etf: #eab308;    /* amarelo (tom "ouro") — ETFs na B3 */
+  --sector-ouro-bdr: #3b82f6;    /* azul — BDRs de ETFs Internacionais */
+  --sector-ouro-fundo: #a855f7;  /* violeta — Fundos de Investimento em Ouro */
+
+  /* Paleta do sub-gráfico "Diversificação por estratégia" dentro do detalhe de
+     Fundos Multimercado. 5 tons distinguíveis entre si — mesma lógica das paletas
+     de segmento acima, isolada num gráfico à parte. */
+  --sector-multi-macro: #3b82f6;     /* azul — Macro */
+  --sector-multi-longshort: #ef4444; /* vermelho — Long & Short (Ações) */
+  --sector-multi-quant: #8b5cf6;     /* violeta — Quantitativos (Quant) */
+  --sector-multi-trading: #f59e0b;   /* laranja — Trading / Arbitragem */
+  --sector-multi-juros: #22c55e;     /* verde — Juros e Moedas */
+
+  /* Paleta do sub-gráfico "Diversificação por função" dentro do detalhe de Tesouro
+     Selic. 3 tons distinguíveis entre si — mesma lógica das paletas de segmento acima. */
+  --sector-selic-reserva: #3b82f6;      /* azul — Reserva Imediata */
+  --sector-selic-metas: #22c55e;        /* verde — Metas de Curtíssimo Prazo */
+  --sector-selic-oportunidades: #eab308; /* amarelo — Caixa & Transição de Aportes */
+
+  /* Paleta do sub-gráfico "Diversificação por indexador" dentro do detalhe de LCI/LCA.
+     3 tons distinguíveis entre si — mesma lógica das paletas de segmento acima. */
+  --sector-lcilca-posfixado: #3b82f6;  /* azul — Pós-Fixada (% do CDI) */
+  --sector-lcilca-ipca: #22c55e;       /* verde — Inflação (IPCA + Taxa) */
+  --sector-lcilca-prefixado: #eab308;  /* amarelo — Prefixada (Taxa Fixa) */
+
+  /* Paletas dos sub-gráficos por objetivo dentro do chip "IPCA+" dentro do detalhe de
+     Tesouro Direto (Aposentadoria, Educação e Renda Passiva). 3 tons distinguíveis
+     entre si por objetivo — mesma lógica das paletas de segmento acima. */
+  --sector-ipca-apo-longuissimo: #3b82f6; /* azul — Vencimento Longuíssimo (Sem Cupom) */
+  --sector-ipca-apo-longo: #22c55e;       /* verde — Vencimento Longo (Sem Cupom) */
+  --sector-ipca-apo-medio: #eab308;       /* amarelo — Vencimento Intermediário (Sem Cupom) */
+
+  --sector-ipca-edu-alvo: #3b82f6;          /* azul — Vencimento Alvo (Sem Cupom) */
+  --sector-ipca-edu-intermediario: #22c55e; /* verde — Vencimento Intermediário (Sem Cupom) */
+  --sector-ipca-edu-semestral: #eab308;     /* amarelo — Com Juros Semestrais (Início do Uso) */
+
+  --sector-ipca-renda-semestral-curto: #3b82f6; /* azul — Com Juros Semestrais (Vencimento Mais Próximo) */
+  --sector-ipca-renda-semestral-longo: #22c55e; /* verde — Com Juros Semestrais (Vencimento Mais Longo) */
+  --sector-ipca-renda-reserva: #eab308;         /* amarelo — Sem Cupom (Reforço Futuro) */
+}
+
+/* Tema claro — sobrescreve só as cores de base da interface (fundo, superfícies, texto).
+   Cores de destaque (accent, success/warning/danger) e a paleta de ativos permanecem
+   as mesmas nos dois temas, pois já são vivas o bastante para funcionar em ambos. */
+:root[data-theme='light'] {
+  --bg: oklch(97% 0.006 262);
+  --surface: rgba(255, 255, 255, 0.2);
+  --surface2: rgba(0, 0, 0, 0.07);
+  --stroke: rgba(0, 0, 0, 0.5);
+  --highlight: rgba(0, 0, 0, 0.1);
+  --highlight-soft: rgba(0, 0, 0, 0.035);
+  --border: rgba(0, 0, 0, 0.16);
+  --text: oklch(20% 0.02 262);
+  --text-muted: oklch(42% 0.02 262);
+  --accent-text: oklch(14% 0.02 262);
+}
+
+* {
+  box-sizing: border-box;
+  /* Desliga o destaque cinza que os navegadores mobile aplicam por padrão em qualquer
+     elemento tocável (botões, itens de lista, fatias do gráfico). Sem isso, esse flash
+     do sistema se soma ao nosso próprio destaque (.setor-card-toggle, .aula-card etc.)
+     e escurece demais a caixinha tocada, prejudicando a leitura do texto dentro dela.
+     Os estados de toque continuam existindo — são só os definidos abaixo, mais sutis. */
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body, #root {
+  margin: 0;
+  height: 100%;
+  color: var(--text);
+  font-family: 'IBM Plex Sans', system-ui, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Fundo em degradê (mesma composição e cores da landing). O <body> propaga o fundo para toda a
+   página; html, #root e .app-frame ficam transparentes para o degradê aparecer. */
+body {
+  background: var(--bg) url('./assets/bg-mobile.jpg') no-repeat top center / cover fixed;
+}
+:root[data-theme='light'] body {
+  background-image: url('./assets/bg-mobile-light.jpg');
+}
+@media (min-width: 700px) {
+  body { background-image: url('./assets/bg-desktop.jpg'); }
+  :root[data-theme='light'] body { background-image: url('./assets/bg-desktop-light.jpg'); }
+}
+
+.font-display {
+  font-family: 'Sora', 'IBM Plex Sans', sans-serif;
+}
+
+.app-frame {
+  width: 100%;
+  max-width: 430px;
+  margin: 0 auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+.screen {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  padding: 24px 20px 26px 20px;
+  gap: 14px;
+}
+
+.row { display: flex; align-items: center; gap: 10px; }
+.row-between { display: flex; align-items: center; justify-content: space-between; }
+.col { display: flex; flex-direction: column; }
+.grow { flex-grow: 1; }
+.muted { color: var(--text-muted); }
+.small { font-size: 12px; }
+.tiny { font-size: 10.5px; }
+/* Padrão de texto corrido do app: justificado, exceto pela última linha (que segue
+   o alinhamento normal). Aplicado a blocos explicativos de várias palavras; textos
+   curtos (rótulos, valores, uma palavra) não são afetados visualmente por essa regra. */
+.justify { text-align: justify; }
+
+h1, h2, h3 { margin: 0; font-family: 'Sora', sans-serif; font-weight: 700; }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--stroke);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.card-outline {
+  background: var(--surface);
+  border: 1px solid var(--stroke);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.setor-card-toggle {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px;
+  border-radius: 16px;
+  transition: background 0.15s ease;
+}
+
+.setor-card-toggle:not(:disabled):hover,
+.setor-card-toggle:not(:disabled):active {
+  background: var(--highlight-soft);
+}
+
+/* Enquanto o exemplo está aberto, mantém o mesmo sombreado bem leve na parte de cima
+   (em vez de deixar sem nenhum), como uma pista visual sutil de que aquele card está
+   expandido — sem escurecer a leitura do texto do exemplo logo abaixo. */
+.setor-card-toggle:not(:disabled)[aria-expanded='true'] {
+  background: var(--highlight-soft);
+}
+
+.aula-card {
+  width: 100%;
+  transition: background 0.15s ease;
+}
+
+.aula-card:hover,
+.aula-card:active {
+  background: var(--highlight);
+}
+
+.aula-thumb {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #000;
+  opacity: 0.9;
+  flex-shrink: 0;
+}
+
+.trilha-card {
+  width: 100%;
+  transition: background 0.15s ease;
+}
+
+.trilha-card:not(:disabled):hover,
+.trilha-card:not(:disabled):active {
+  background: var(--highlight);
+}
+
+.trilha-card:disabled {
+  opacity: 0.7;
+}
+
+.trilha-badge {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--surface2);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+}
+
+.btn {
+  display: block;
+  width: 100%;
+  text-align: center;
+  padding: 15px 0;
+  border-radius: 14px;
+  font-weight: 700;
+  font-size: 15px;
+  font-family: 'Sora', sans-serif;
+}
+
+.btn-primary { background: var(--accent); color: var(--accent-text); }
+.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--stroke); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); }
+.btn-outline { background: var(--surface); color: var(--text); border: 1px solid var(--stroke); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); }
+.btn-secondary:hover, .btn-outline:hover { background: var(--highlight); border-color: var(--text); }
+.btn-ghost { background: transparent; color: var(--text-muted); }
+
+.chip {
+  flex: 1;
+  text-align: center;
+  padding: 9px 4px;
+  border-radius: 10px;
+  background: var(--surface2);
+  color: var(--text);
+  font-weight: 600;
+  font-size: 11.5px;
+}
+.chip:hover { background: var(--highlight); }
+.chip.selected { background: var(--accent); color: var(--accent-text); }
+
+.theme-toggle {
+  display: flex;
+  align-self: center;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--stroke);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+.theme-toggle button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.theme-toggle button.selected { background: var(--accent); color: var(--accent-text); }
+
+.vehicle-card {
+  border-radius: 14px;
+  padding: 14px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface);
+  border: 1px solid var(--stroke);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  color: var(--text);
+  font-weight: 600;
+  font-size: 12px;
+}
+.vehicle-card.selected { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+
+.stat-tile {
+  background: var(--surface);
+  border: 1px solid var(--stroke);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border-radius: 14px;
+  padding: 14px 10px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 76px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 8px;
+  font-size: 10.5px;
+  font-weight: 700;
+}
+.badge-alta { background: color-mix(in oklch, var(--success) 20%, transparent); color: var(--success); }
+.badge-media { background: color-mix(in oklch, var(--warning) 20%, transparent); color: var(--warning); }
+.badge-baixa { background: color-mix(in oklch, var(--danger) 20%, transparent); color: var(--danger); }
+
+.progressbar {
+  height: 5px;
+  background: var(--surface2);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.progressbar > div { height: 100%; background: var(--accent); border-radius: 3px; }
+
+.tabbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+}
+.tab { display: flex; flex-direction: column; align-items: center; gap: 6px; color: var(--text-muted); font-size: 13px; font-weight: 500; }
+.tab.active { color: var(--accent); font-weight: 600; }
+
+.icon-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--stroke);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+}
+.icon-btn svg { width: 22px; height: 22px; }
+
+/* --- Extensões para o InvestFit (reaproveitando os mesmos tokens de design) --- */
+
+.quiz-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  padding: 14px;
+  border-radius: 14px;
+  background: var(--surface);
+  border: 1px solid var(--stroke);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  color: var(--text);
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1.35;
+}
+.quiz-option:hover { background: var(--highlight); border-color: var(--text); }
+.quiz-option.selected { background: var(--accent); border-color: var(--accent); color: var(--accent-text); font-weight: 700; }
+
+.quiz-option-letter {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: var(--surface2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Sora', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+}
+.quiz-option.selected .quiz-option-letter { background: var(--accent-text); color: var(--accent); }
+
+.alloc-bar {
+  display: flex;
+  width: 100%;
+  height: 14px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--surface2);
+}
+.alloc-bar > div { height: 100%; }
+
+.alloc-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.alloc-row:last-child { border-bottom: none; }
+
+/* Gráfico de rosca: mesmo efeito das caixinhas ao passar o mouse/dedo numa fatia
+   (realce, contorno e leve subida de 3 px). A fatia original some enquanto a cópia sobe. */
+.pie-topo.ativo { opacity: 0; }
+
+.pie-destaque {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(0);
+  transition: transform 0.2s, opacity 0s linear 0.2s;
+}
+
+.pie-destaque.ativo {
+  opacity: 1;
+  transform: translateY(-3px);
+  transition: transform 0.2s, opacity 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pie-destaque, .pie-destaque.ativo { transition: none; }
+}
+
+/* Linhas de resultado da carteira: cada classe de ativo numa caixinha, com o mesmo efeito
+   das caixinhas da landing (vidro, contorno, desfoque e leve subida ao passar o mouse). */
+.alloc-list { gap: 12px; }
+
+.alloc-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 16px 18px;
+  text-align: left;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--stroke);
+  border-radius: 8px;
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+}
+
+button.alloc-box:hover {
+  background: var(--highlight);
+  border-color: var(--text);
+  transform: translateY(-2px);
+}
+
+button.alloc-box:active {
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .alloc-box { transition: none; }
+  button.alloc-box:hover { transform: none; }
+}
+
+.alloc-dot {
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.perfil-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-family: 'Sora', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+}
+.perfil-badge.Conservador { background: color-mix(in oklch, var(--success) 20%, transparent); color: var(--success); }
+.perfil-badge.Moderado { background: color-mix(in oklch, var(--warning) 20%, transparent); color: var(--warning); }
+.perfil-badge.Arrojado { background: color-mix(in oklch, var(--danger) 20%, transparent); color: var(--danger); }
+
+/* Perfil final da Arquitetura Patrimonial (Seção 4.3 do documento). Reaproveita as
+ * mesmas 3 cores semânticas do suitability: Defensivo = mesma leitura de Conservador,
+ * Equilibrado = Moderado, Crescimento Pleno = Arrojado. */
+.perfil-badge.Defensivo { background: color-mix(in oklch, var(--success) 20%, transparent); color: var(--success); }
+.perfil-badge.Equilibrado { background: color-mix(in oklch, var(--warning) 20%, transparent); color: var(--warning); }
+.perfil-badge.CrescimentoPleno { background: color-mix(in oklch, var(--danger) 20%, transparent); color: var(--danger); }
