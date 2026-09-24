@@ -17,7 +17,7 @@
       property="og:description"
       content="Descubra seu perfil de investidor e uma carteira de referência. Conteúdo educacional."
     />
-    <meta property="og:image" content="https://carteiraideal.app.br/assets/og-image.png" />
+    <meta property="og:image" content="https://carteiraideal.app.br/assets/og-image.png?v=2" />
     <meta property="og:url" content="https://carteiraideal.app.br/" />
     <meta name="twitter:card" content="summary_large_image" />
 
@@ -69,24 +69,18 @@
             </a>
           </li>
           <li>
-            <a href="https://www.udemy.com/course/padroes-de-candlestick/?referralCode=50F1DF78FA45A4B65E49" target="_blank" rel="noopener noreferrer sponsored">Curso de Candlesticks</a>
+            <!-- Abre a aba Simule FII do app direto, sem passar pelo questionário -->
+            <a class="link-2" href="./app/?tela=simuleFii">
+              <span class="link-title"><span class="link-emoji" aria-hidden="true">🏢</span>Simule FII</span>
+              <span class="link-sub">Quanto rendem as cotas dos maiores FIIs do IFIX</span>
+            </a>
           </li>
           <li>
-            <!-- Livro liberado por confiança (script.js). Sem JavaScript, o link leva ao Instagram. -->
-            <a
-              id="livro-link"
-              class="link-2"
-              href="https://www.instagram.com/acarteiraideal/"
-              data-pdf="./assets/livro-os-tres-potes-de-duda.pdf"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-haspopup="dialog"
-            >
-              <span class="link-title">
-                <svg id="livro-cadeado" class="lock" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>
-                Educação Financeira Infantil
-              </span>
-              <span id="livro-sub" class="link-sub">Livro grátis em PDF para quem segue no Instagram</span>
+            <!-- Abre a aba Aprender do app direto. O curso de Candlesticks e o livro infantil
+                 ficam lá dentro, no fim da tela. -->
+            <a class="link-2" href="./app/?tela=aprender">
+              <span class="link-title"><span class="link-emoji" aria-hidden="true">🎓</span>Aprender</span>
+              <span class="link-sub">Aulas curtas, curso de Candlesticks e livro grátis</span>
             </a>
           </li>
           <li>
@@ -112,25 +106,6 @@
         <p class="disclaimer">Conteúdo educacional. Não é recomendação de investimento.</p>
       </footer>
     </main>
-    <dialog id="livro-dialog" aria-labelledby="livro-titulo" aria-describedby="livro-desc">
-      <div class="dlg-body">
-        <button type="button" class="dlg-close" data-fechar aria-label="Fechar">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg>
-        </button>
-        <h2 id="livro-titulo">Livro grátis: Os Três Potes de Duda</h2>
-        <p id="livro-desc">
-          Educação financeira para crianças, em PDF com 54 páginas. É um presente para quem acompanha
-          o Carteira Ideal: siga o perfil no Instagram para liberar o download.
-        </p>
-        <div class="dlg-actions">
-          <a id="livro-seguir" class="btn btn-primary" href="https://www.instagram.com/acarteiraideal/" target="_blank" rel="noopener noreferrer">Seguir @acarteiraideal no Instagram</a>
-          <a id="livro-baixar" class="btn btn-secondary is-locked" aria-disabled="true">Baixar o livro (PDF)</a>
-          <button type="button" id="livro-ja-sigo" class="btn-text">Já sigo o perfil</button>
-        </div>
-        <p id="livro-status" class="dlg-status" role="status" aria-live="polite"></p>
-        <p class="dlg-nota">A liberação é por confiança: não verificamos se você segue. Seguir ajuda o projeto a continuar publicando conteúdo gratuito.</p>
-      </div>
-    </dialog>
     <script src="./script.js"></script>
   </body>
 </html>

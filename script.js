@@ -42,12 +42,15 @@ applyTheme(document.documentElement.classList.contains("light"));
    casos, inclusive se o armazenamento estiver bloqueado.
 
    ATENÇÃO: CHAVE e VERSAO precisam acompanhar CHAVE_ARMAZENAMENTO e VERSAO_ARMAZENAMENTO em
-   app/src/state/useAppState.ts. Se o app mudar a versão, o progresso antigo deixa de valer
+   webapp-src/src/state/useAppState.ts. Se o app mudar a versão, o progresso antigo deixa de valer
    (o app o descarta) e a landing volta ao texto original, de propósito. */
 (function () {
   var CHAVE = "carteiraideal.estado";
   var VERSAO = 2;
-  var TELAS_COM_RESULTADO = ["resultado", "carteira", "simulador", "detalheAtivo", "aprender", "trilha", "aprenderVideo"];
+  // Aprender, Trilha, Aula e Simule FII hoje abrem sem questionário e não são mais salvas como
+  // "última tela" (ver TELAS_AVULSAS em useAppState.ts). Continuam na lista só por causa de
+  // estados salvos por versões anteriores, em que elas existiam apenas depois do resultado.
+  var TELAS_COM_RESULTADO = ["resultado", "carteira", "simulador", "detalheAtivo", "aprender", "trilha", "aprenderVideo", "simuleFii"];
 
   try {
     var bruto = localStorage.getItem(CHAVE);
@@ -68,124 +71,6 @@ applyTheme(document.documentElement.classList.contains("light"));
   }
 })();
 
-/* Livro "Os Três Potes de Duda": liberação por confiança (honor system).
-   Ao tocar no botão do livro, abre um diálogo pedindo para seguir o Instagram. Quem toca em
-   "Seguir" ou em "Já sigo o perfil" libera o download. NÃO há verificação (o Instagram não
-   oferece isso) e o PDF continua em /assets, acessível a quem souber o endereço: é um convite,
-   não uma proteção. A liberação fica salva neste navegador; sem JavaScript, o botão da lista
-   simplesmente abre o Instagram. */
-(function () {
-  var CHAVE = "carteiraideal.livroLiberado";
-  var NOME_ARQUIVO = "Os-Tres-Potes-de-Duda.pdf";
-
-  var link = document.getElementById("livro-link");
-  var dlg = document.getElementById("livro-dialog");
-  if (!link || !dlg) return;
-
-  var sub = document.getElementById("livro-sub");
-  var cadeado = document.getElementById("livro-cadeado");
-  var seguir = document.getElementById("livro-seguir");
-  var baixar = document.getElementById("livro-baixar");
-  var jaSigo = document.getElementById("livro-ja-sigo");
-  var status = document.getElementById("livro-status");
-  var pdf = link.getAttribute("data-pdf");
-
-  var liberado = false;
-  try {
-    liberado = localStorage.getItem(CHAVE) === "1";
-  } catch (e) {
-    /* armazenamento bloqueado: a liberação vale só até fechar a página */
-  }
-
-  function salvarLiberacao() {
-    liberado = true;
-    try {
-      localStorage.setItem(CHAVE, "1");
-    } catch (e) {}
-  }
-
-  /* Botão da lista: depois de liberado, baixa o PDF direto, sem abrir o diálogo.
-     Usa setAttribute/removeAttribute (em vez de .hidden = true/false) porque a
-     propriedade "hidden" não reflete de forma confiável em elementos SVG em todos os
-     navegadores — setar o atributo direto funciona em qualquer elemento. */
-  function ocultar(el, ocultar) {
-    if (!el) return;
-    if (ocultar) el.setAttribute("hidden", "");
-    else el.removeAttribute("hidden");
-  }
-
-  function atualizarLista() {
-    ocultar(cadeado, liberado);
-    if (!liberado) return;
-    link.setAttribute("href", pdf);
-    link.setAttribute("download", NOME_ARQUIVO);
-    link.removeAttribute("target");
-    link.removeAttribute("aria-haspopup");
-    if (sub) sub.textContent = "Livro liberado: toque para baixar";
-  }
-
-  /* Diálogo: o botão de baixar só ganha endereço depois da liberação */
-  function atualizarDialogo(mensagem) {
-    if (liberado) {
-      baixar.setAttribute("href", pdf);
-      baixar.setAttribute("download", NOME_ARQUIVO);
-      baixar.removeAttribute("aria-disabled");
-      baixar.classList.remove("is-locked", "btn-secondary");
-      baixar.classList.add("btn-primary");
-      seguir.classList.remove("btn-primary");
-      seguir.classList.add("btn-secondary");
-      if (jaSigo) jaSigo.hidden = true;
-      status.textContent = mensagem || "Livro liberado. Toque em baixar.";
-    } else {
-      baixar.removeAttribute("href");
-      baixar.setAttribute("aria-disabled", "true");
-      status.textContent = "Siga o perfil para liberar o download.";
-    }
-  }
-
-  function liberar(mensagem) {
-    salvarLiberacao();
-    atualizarDialogo(mensagem);
-    atualizarLista();
-  }
-
-  function abrir() {
-    atualizarDialogo();
-    if (typeof dlg.showModal === "function") dlg.showModal();
-    else dlg.setAttribute("open", "");
-  }
-
-  function fechar() {
-    if (typeof dlg.close === "function") dlg.close();
-    else dlg.removeAttribute("open");
-  }
-
-  link.addEventListener("click", function (ev) {
-    if (liberado) return; /* segue o href: baixa o PDF */
-    ev.preventDefault();
-    abrir();
-  });
-
-  /* "Seguir" abre o Instagram em outra aba (comportamento normal do link) e já libera o download */
-  seguir.addEventListener("click", function () {
-    liberar("Perfil aberto em outra aba. Depois de seguir, volte aqui e baixe o livro.");
-  });
-
-  if (jaSigo) {
-    jaSigo.addEventListener("click", function () {
-      liberar("Obrigado por acompanhar! Livro liberado.");
-      baixar.focus();
-    });
-  }
-
-  baixar.addEventListener("click", function (ev) {
-    if (baixar.getAttribute("aria-disabled") === "true") ev.preventDefault();
-  });
-
-  /* Fechar: botão X, tecla Esc (nativa) ou clique fora da caixa */
-  dlg.addEventListener("click", function (ev) {
-    if (ev.target === dlg || (ev.target.closest && ev.target.closest("[data-fechar]"))) fechar();
-  });
-
-  atualizarLista();
-})();
+/* O botão do livro "Os Três Potes de Duda" (com a liberação por confiança) e o do curso de
+   Candlesticks saíram daqui: agora ficam no fim da tela Aprender do app
+   (webapp-src/src/ui/MateriaisExtras.tsx), que usa a mesma chave carteiraideal.livroLiberado. */

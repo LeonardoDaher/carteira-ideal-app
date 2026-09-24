@@ -5,7 +5,11 @@ Capturas feitas em 22/09/2026 num navegador real, em tela de celular (390 × 844
 ```
 Instagram (bio) → Landing → Onboarding → Idade → 7 perguntas de Suitability
 → 7 perguntas de Arquitetura Patrimonial → Processando (chamada à API) → Resultado
-→ abas: Perfil · Carteira (→ Detalhe do ativo) · Simular · Aprender (→ Trilha → Aula)
+→ abas: Perfil · Carteira (→ Detalhe do ativo) · Simular
+
+Landing → Simule FII           (./app/?tela=simuleFii, sem questionário)
+Landing → Aprender (→ Trilha → Aula; curso de Candlesticks e livro no fim da tela)
+                               (./app/?tela=aprender, sem questionário)
 ```
 
 ---
@@ -18,8 +22,8 @@ Instagram (bio) → Landing → Onboarding → Idade → 7 perguntas de Suitabil
 Primeira tela para quem toca no link da bio do Instagram.
 
 - **Botão amarelo**: "Descobrir meu perfil e carteira de referência" → abre o app. Para quem já respondeu neste aparelho, vira "Ver minha carteira de referência" e abre direto no resultado.
-- **Curso de Candlesticks** (Udemy, link de afiliado).
-- **Educação Financeira Infantil**: livro em PDF liberado para quem segue o perfil (por confiança, sem verificação).
+- **🏢 Simule FII**: abre direto a tela Simule FII do app, sem questionário.
+- **🎓 Aprender**: abre direto a tela Aprender do app, sem questionário. O **Curso de Candlesticks** e o livro **Educação Financeira Infantil**, que antes ficavam aqui, estão no fim dessa tela (decisão D11).
 - **Falar comigo por e-mail**, ícones de Instagram e YouTube, alternância de tema claro/escuro.
 
 <br clear="all">
@@ -92,10 +96,23 @@ Controle deslizante de R$ 100 a R$ 100 mil. A carteira de referência é convert
 
 <br clear="all">
 
-### 4.4 Aba Aprender, Trilha e Aula
+### 4.4 Simule FII (🏢), aberta pela landing
+<img src="jornada/17-simule-fii.jpg" width="260" align="right">
+
+Os 10 maiores fundos imobiliários do IFIX, em botões na ordem de participação no índice. Para o fundo escolhido: valor da cota (fechamento), **último rendimento** estimado por cota, com o mês de referência, e o percentual sobre o valor da cota. A tabela mostra 10, 50, 100, 500, 1.000 e 5.000 cotas, e uma linha para digitar qualquer quantidade, sempre com o **investimento necessário** ao lado da renda mensal. Não há média de meses (decisão D10).
+
+Abaixo ficam três avisos: **atraso e estimativa da CVM** (informa o mês do rendimento exibido e que o valor pode diferir do anunciado, principalmente em meses de emissão de cotas ou de fechamento de semestre), a frase padrão ANBIMA de rentabilidade passada com a observação sobre isenção de IR, e o aviso educacional padrão. A tela é aberta pela landing, fora da barra de abas, e funciona sem o questionário respondido; "← Início" volta à landing. Se os dados do mês ainda não existirem, mostra "Os dados deste mês ainda não foram carregados".
+
+> Captura feita com os valores reais publicados pelo job em 24/09/2026 (GGRC11: cotação R$ 8,95 e rendimento estimado de R$ 0,098 em ago/2026; o valor anunciado pelo fundo foi R$ 0,10).
+
+<br clear="all">
+
+### 4.5 Aprender, Trilha e Aula, abertas pela landing
 <img src="jornada/14-aprender-trilhas.jpg" width="170" align="right"><img src="jornada/15-trilha.jpg" width="170" align="right"><img src="jornada/16-aula.jpg" width="170" align="right">
 
 Duas trilhas: **Conhecendo os ativos** (5 tópicos, 11 aulas) e **O poder da diversificação** (4 tópicos, 4 aulas). Cada aula tem vídeo do YouTube incorporado, descrição e botão "Próxima aula".
+
+No fim da lista de trilhas, em **Mais conteúdo**, ficam os dois botões que vieram da landing: **Curso de Candlesticks** (Udemy, link de afiliado) e **Educação Financeira Infantil** (livro em PDF liberado por confiança para quem segue o Instagram, com o mesmo diálogo de antes). Como o Simule FII, a tela abre sem questionário e tem "← Início" para voltar à landing.
 
 > Na captura da aula, o quadro do vídeo aparece com a mensagem "Host not in allowlist". Isso é uma limitação do ambiente onde as capturas foram feitas, que bloqueia o YouTube. No site publicado o vídeo carrega normalmente.
 

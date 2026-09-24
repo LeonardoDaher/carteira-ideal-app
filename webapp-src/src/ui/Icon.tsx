@@ -176,3 +176,18 @@ export function LoaderIcon(props: IconProps) {
     props,
   )
 }
+
+/** Cadeado do livro bônus (mesmo desenho do que era usado na landing). */
+export function LockIcon(props: IconProps) {
+  return base(
+    <>
+      <rect x="4" y="11" width="16" height="10" rx="2" />
+      <path d="M8 11V7a4 4 0 018 0v4" />
+    </>,
+    props,
+  )
+}
+
+export function XIcon(props: IconProps) {
+  return base(<path d="M6 6l12 12M18 6L6 18" />, props)
+}

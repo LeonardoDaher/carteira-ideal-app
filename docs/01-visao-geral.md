@@ -19,8 +19,9 @@ Resumo: **Suitability (intenção) + Arquitetura Patrimonial (realidade) = carte
 
 | Componente | Onde fica | Função |
 |---|---|---|
-| Landing "link na bio" | `index.html`, `style.css`, `script.js`, `assets/` | Porta de entrada vinda do Instagram: botão para o app, curso de Candlesticks, livro infantil bônus, contato |
-| App | `webapp-src/` (publicado em `/app`) | Questionário, resultado, carteira, simulador e trilhas |
+| Landing "link na bio" | `index.html`, `style.css`, `script.js`, `assets/` | Porta de entrada vinda do Instagram: botão para o app, atalhos diretos para Simule FII e Aprender, contato |
+| App | `webapp-src/` (publicado em `/app`) | Questionário, resultado, carteira, simulador, Simule FII e trilhas |
+| Dados mensais de FIIs | `scripts/atualizar-rendimentos-fii.mjs`, `.github/workflows/`, `config/fiis-ifix.json` | Todo dia 20, busca rendimentos na CVM e cotações na brapi e publica um arquivo estático para a aba Simule FII |
 | Motor de decisão | `webapp-src/src/domain/engine.ts`, executado por `api/recomendacao.ts` | Calcula perfil e carteira no servidor, sem expor a metodologia |
 | Documentação | `docs/` | Esta pasta |
 
@@ -30,6 +31,10 @@ Todo o conteúdo é apresentado como **exemplo educacional, não recomendação 
 
 ## Estágio atual (setembro/2026)
 
-- App completo e funcional: 14 perguntas, 9 Perfis-Mãe, 11 classes, simulador, 2 trilhas com 15 aulas em vídeo.
-- Motor migrado para o servidor (API protegida), com 52 testes automatizados passando.
-- **Ainda não publicado** no endereço definitivo. A versão antiga no GitHub Pages foi desativada ao tornar o repositório antigo privado. Nenhum link foi divulgado no Instagram ainda.
+- App completo e funcional: 14 perguntas, 9 Perfis-Mãe, 11 classes, simulador, aba **Simule FII** (renda estimada com os 10 maiores FIIs do IFIX, a partir do último rendimento) e 2 trilhas com 15 aulas em vídeo.
+- Motor migrado para o servidor (API protegida). 63 testes automatizados do app e 21 do script mensal de FIIs passando.
+- Dados da aba Simule FII atualizados automaticamente todo mês, sem custo (CVM + brapi gratuito), no ar desde 24/09/2026 com os 10 fundos.
+- **No ar em produção**, em `https://carteiraideal.app.br/`, repositório privado `carteira-ideal-app` no GitHub conectado à Vercel com deploy automático.
+- **Link já na bio do Instagram**, testado tocando dentro do próprio app do Instagram, jornada completa até o resultado.
+- Prévia de compartilhamento (WhatsApp/LinkedIn) testada e correta.
+- Pendente: decisão sobre domínio próprio (ver [Próximos passos](06-proximos-passos.md#1-lançamento-fazer-agora)).

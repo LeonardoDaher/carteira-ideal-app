@@ -23,6 +23,23 @@ export type Screen =
 
 export type Tema = 'dark' | 'light'
 
+/** Telas abertas direto pela landing (./app/?tela=aprender e ./app/?tela=simuleFii), sem
+ * depender do questionário. Ficam fora da barra de abas e nunca são salvas como "última
+ * tela": assim o botão amarelo da landing (./app/) continua devolvendo a pessoa ao ponto
+ * em que parou no fluxo do questionário/resultado, e não à aula que ela viu por último. */
+export const TELAS_AVULSAS: readonly Screen[] = ['aprender', 'trilha', 'aprenderVideo', 'simuleFii']
+
+export function ehTelaAvulsa(tela: Screen) {
+  return TELAS_AVULSAS.includes(tela)
+}
+
+/** Valores aceitos no parâmetro ?tela= vindo da landing. */
+const TELAS_PELA_URL: Record<string, Screen> = {
+  resultado: 'resultado',
+  aprender: 'aprender',
+  simuleFii: 'simuleFii',
+}
+
 const CHAVE_ARMAZENAMENTO = 'carteiraideal.estado'
 const VERSAO_ARMAZENAMENTO = 2
 
@@ -45,6 +62,9 @@ export function useAppState() {
   const [trilhaSelecionadaId, setTrilhaSelecionadaId] = useState<string | null>(null)
   const [aulaAtualRef, setAulaAtualRef] = useState<{ trilhaId: string; topicoId: string; aulaId: string } | null>(null)
   const [tema, setTema] = useState<Tema>('dark')
+  // Última tela do fluxo principal (questionário/resultado). É ela que vai para o
+  // armazenamento quando a pessoa está numa tela avulsa (Aprender, Simule FII).
+  const telaDoFluxoRef = useRef<Screen>('onboarding')
 
   // As 14 perguntas do fluxo (7 de suitability + 7 de Arquitetura Patrimonial) são dois
   // questionários paginados independentes — ver useQuestionario.ts. O que os liga um ao
@@ -77,7 +97,13 @@ export function useAppState() {
           const salvo = JSON.parse(bruto) as Partial<EstadoPersistido> | null
           if (salvo && salvo.versao === VERSAO_ARMAZENAMENTO) {
             // Mesma versão: restaura o estado inteiro, como salvo.
-            setScreen(salvo.screen ?? 'onboarding')
+            // Estados salvos por versões anteriores podem ter parado numa tela que hoje é
+            // avulsa. Antes, essas telas só existiam depois do resultado, então o lugar
+            // certo para retomar é o resultado.
+            const telaSalva = salvo.screen ?? 'onboarding'
+            const telaRestaurada = ehTelaAvulsa(telaSalva) ? 'resultado' : telaSalva
+            telaDoFluxoRef.current = telaRestaurada
+            setScreen(telaRestaurada)
             setIdade(salvo.idade ?? 30)
             questionario.restaurar(salvo.respostas)
             arquitetura.restaurar(salvo.respostasArquitetura)
@@ -94,20 +120,24 @@ export function useAppState() {
         }
       }
 
-      // A landing ("Ver minha carteira de referência") linka para ./app/?tela=resultado
-      // quando já existe uma carteira salva neste aparelho. Sem isso, o app abriria na
-      // última tela em que o usuário esteve (ex: no meio de uma trilha de aprendizagem),
-      // contrariando o que o próprio botão prometeu. O parâmetro só empurra para o
-      // resultado — se não houver resultado calculado ainda, a tela de Resultado já
-      // mostra o convite para começar o questionário (não quebra nada).
+      // A landing abre o app em telas específicas pelo parâmetro ?tela=:
+      // - ?tela=resultado: botão "Ver minha carteira de referência", para quem já tem carteira
+      //   salva. Sem isso, o app abriria na última tela em que o usuário esteve. Se ainda não
+      //   houver resultado, a própria tela de Resultado mostra o convite para começar.
+      // - ?tela=aprender e ?tela=simuleFii: botões da landing que abrem essas telas direto,
+      //   sem exigir o questionário.
       try {
         const parametros = new URLSearchParams(window.location.search)
-        if (parametros.get('tela') === 'resultado') {
-          setScreen('resultado')
-          // Remove o parâmetro da URL para não prender a navegação seguinte (troca de
-          // abas, "Voltar", etc.) a essa tela sempre que a página for recarregada.
-          const semParametro = window.location.pathname + window.location.hash
-          window.history.replaceState(null, '', semParametro)
+        const telaPedida = TELAS_PELA_URL[parametros.get('tela') ?? '']
+        if (telaPedida) {
+          setScreen(telaPedida)
+          if (!ehTelaAvulsa(telaPedida)) {
+            // Remove o parâmetro da URL para não prender a navegação seguinte (troca de
+            // abas, "Voltar", etc.) a essa tela sempre que a página for recarregada. Nas
+            // telas avulsas ele fica: recarregar a página mantém a pessoa onde ela está.
+            const semParametro = window.location.pathname + window.location.hash
+            window.history.replaceState(null, '', semParametro)
+          }
         }
       } catch {
         // URL ou history indisponíveis (ambiente de teste, por exemplo): ignora
@@ -131,9 +161,10 @@ export function useAppState() {
 
   useEffect(() => {
     if (!hidratado) return
+    if (!ehTelaAvulsa(screen)) telaDoFluxoRef.current = screen
     const estado: EstadoPersistido = {
       versao: VERSAO_ARMAZENAMENTO,
-      screen,
+      screen: telaDoFluxoRef.current,
       idade,
       respostas: questionario.respostas,
       respostasArquitetura: arquitetura.respostas,

@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="96" height="96" role="img" aria-label="Carteira Ideal">
-  <circle cx="48" cy="48" r="46" fill="#0a0d13" stroke="#e8cb00" stroke-width="3"/>
-  <g transform="translate(24 24) scale(2)" fill="none" stroke="#e8cb00" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M3 17 9 11 13 15 21 7"/>
-    <path d="M15 7h6v6"/>
-  </g>
+  <!-- Aro dourado grosso e fundo quase preto -->
+  <circle cx="48" cy="48" r="44.6" fill="#0a0a0a" stroke="#efb70a" stroke-width="6.8"/>
+  <!-- Seta em zigue-zague: o traço entra na ponta triangular, formando uma peça só -->
+  <path d="M17 67 36 48 48 60 75 33" fill="none" stroke="#efb70a" stroke-width="6.6" stroke-linecap="butt" stroke-linejoin="miter"/>
+  <path d="M61 27H80V46Z" fill="#efb70a"/>
 </svg>

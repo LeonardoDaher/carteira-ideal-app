@@ -18,19 +18,31 @@ Tudo abaixo pode ser feito **pelo navegador**, sem terminal.
 1. Em **vercel.com/new**, entre com a conta do GitHub.
 2. Autorize a Vercel a ver o repositório `carteira-ideal-app` (mesmo sendo privado; o plano gratuito aceita repositórios privados da conta pessoal).
 3. Selecione o repositório → **Deploy**. Não altere nenhuma configuração: o `vercel.json` já informa o comando de build e a pasta de saída.
-4. Ao final, a Vercel mostra um endereço como `carteira-ideal-app.vercel.app`.
+4. Ao final, a Vercel mostra um endereço como `carteira-ideal-app.vercel.app` — funciona imediatamente, e pode continuar sendo usado (ver Passo F para conectar um domínio próprio, opcional).
 
 ### Passo C · Testar antes de divulgar
 
-No celular, pelo endereço da Vercel: landing → botão amarelo → 14 perguntas → resultado → abas Carteira, Simular e Aprender → abrir uma aula e ver o vídeo tocar.
+No celular, pelo endereço da Vercel: landing → botão amarelo → 14 perguntas → resultado → abas Carteira e Simular; depois, de volta à landing, botões Simule FII e Aprender → abrir uma aula e ver o vídeo tocar → no fim do Aprender, conferir o curso de Candlesticks e liberar/baixar o livro.
 
 ### Passo D · Ajustar o endereço de compartilhamento
 
-No `index.html` da raiz, as linhas `og:image` e `og:url` ainda apontam para `leonardodaher.github.io/Carteira-Ideal`. Troque pelo endereço novo (ver 5.2). Sem isso, a prévia do link no WhatsApp/LinkedIn fica sem imagem.
+✅ Já feito (22/09/2026): `og:image` e `og:url` no `index.html` da raiz apontam para `https://carteiraideal.app.br/`, testado e confirmado na prévia do WhatsApp.
 
 ### Passo E · Colocar o link na bio do Instagram
 
 Só depois dos passos C e D.
+
+### Passo F · Domínio próprio (opcional)
+
+✅ Já feito (22/09/2026): domínio `carteiraideal.app.br` registrado no Registro.br e conectado ao projeto na Vercel. Resumo do processo (detalhes em [Registro de decisões, D8](07-registro-de-decisoes.md)):
+
+1. Na Vercel: projeto → **Settings → Domains** → digitar o domínio → Add.
+2. A Vercel mostra os registros DNS a configurar (no nosso caso, um registro **A** com host `@` apontando para um IP).
+3. No Registro.br: **Meus Domínios** → o domínio → **DNS** → **Configurar endereçamento** → colar o IP que a Vercel mostrou.
+4. Aguardar a propagação (levou poucos minutos, no nosso caso) até a Vercel marcar o domínio como válido e emitir o HTTPS automaticamente.
+5. Repetir os passos D e E (og:url/og:image e bio do Instagram) para o domínio novo.
+
+O endereço antigo (`carteira-ideal-app.vercel.app`) continua funcionando — a Vercel não desativa o subdomínio gratuito ao adicionar um domínio próprio.
 
 ## 5.2 Como editar qualquer arquivo pelo navegador
 
@@ -51,6 +63,8 @@ Só depois dos passos C e D.
 | Descrição das 11 classes de ativos | `webapp-src/src/data/assets.ts` |
 | Aulas, trilhas e vídeos | `webapp-src/src/data/trilhas.ts` (campo `youtubeId` = o código depois de `v=` no link do YouTube) |
 | Carteiras-modelo, pesos, veto, travas | `webapp-src/src/domain/engine.ts` ⚠️ ver abaixo |
+| Fundos da aba Simule FII | `config/fiis-ifix.json` (ver seção 5.6) |
+| Textos e avisos da aba Simule FII | `webapp-src/src/screens/SimuleFii.tsx` |
 
 ⚠️ **Mudanças no motor (`engine.ts`) mudam a recomendação de todos os usuários.** Antes de alterar: registre o motivo no [Registro de decisões](07-registro-de-decisoes.md), atualize a [Metodologia](02-metodologia.md) e peça a quem desenvolve para rodar `npm run test`, porque vários testes conferem os percentuais atuais e precisarão ser ajustados junto.
 
@@ -66,7 +80,31 @@ Se o build falhar, a Vercel mantém no ar a última versão boa e mostra o erro 
 npm install          # uma vez
 npm run dev          # só a interface (sem API: o cálculo falha de propósito com "Tentar novamente")
 vercel dev           # interface + API, igual à produção (requer: npm install -g vercel)
-npm run test         # 52 testes
+npm run test         # 63 testes do app + 21 do script mensal de FIIs
 npm run typecheck    # tipos do app e da API
 npm run build        # build de produção em dist-site/
 ```
+
+## 5.6 Operação mensal da aba Simule FII
+
+**Rotina automática.** Todo dia 20, às 9h de Brasília, o GitHub roda o job "Atualizar rendimentos de FIIs". Ele baixa o informe mensal da CVM, busca as cotações na brapi, grava `webapp-src/src/data/rendimentosFii.json` e faz um commit com a mensagem "dados: rendimentos de FIIs (AAAA-MM)". A Vercel publica esse commit sozinha. Não é preciso fazer nada.
+
+**Se o job falhar**, o GitHub manda um e-mail. O app continua no ar com os dados do mês anterior, porque o script nunca grava um arquivo pela metade. Para ver o motivo: GitHub > **Actions** > execução com ✗ > **atualizar** > passo **"Buscar dados e gerar rendimentosFii.json"**. As mensagens são em português:
+
+| Mensagem no log | O que fazer |
+|---|---|
+| `config/fiis-ifix.json ainda não foi conferido…` | Conferir a lista e marcar `"conferidoNaB3": true` |
+| `Variável BRAPI_TOKEN não definida` | Cadastrar (ou recadastrar) o secret `BRAPI_TOKEN` |
+| `ISIN aponta para mais de um CNPJ…` | Descobrir o CNPJ do fundo (aparece nos comunicados dele na B3) e adicionar `"cnpj"` na linha do fundo, como já foi feito com o TRXF11 |
+| `[info] … descartado (… da mediana …)` | Nada: é a trava funcionando. O mês estava distorcido (emissão, fechamento de semestre) e o app mostra o mês típico anterior |
+| `nenhum dos … meses ficou dentro da tolerância` | O fundo fica de fora neste mês. Se acontecer por 2 meses seguidos com um fundo cujo rendimento varia de verdade, aumentar a `"tolerancia"` dele em `config/fiis-ifix.json` |
+| `os … meses mais recentes têm valor idêntico` | Conferir o valor anunciado pelo fundo. O dado é publicado mesmo assim; se estiver errado, avisar quem desenvolve |
+| `rendimento estimado … fora da faixa plausível` | Conferir o fundo manualmente. Se o dado da CVM estiver errado naquele mês, o fundo fica de fora até o mês seguinte |
+| `Coluna não encontrada (…)` | A CVM mudou o formato do arquivo. Enviar o log para quem desenvolve |
+| `brapi respondeu 401/403` | Chave expirada ou revogada: gerar outra em brapi.dev e atualizar o secret |
+
+**Rodar fora do dia 20:** Actions > **Atualizar rendimentos de FIIs** (na lista da esquerda) > **Run workflow**. Não use "Re-run all jobs" dentro de uma execução antiga: ele repete o código daquela data e ignora alterações feitas depois.
+
+**Manutenção do IFIX (janeiro, maio e setembro).** A B3 rebalanceia o índice a cada quatro meses. Confira a carteira teórica em b3.com.br (Índices > IFIX > Composição da carteira), atualize a ordem e os tickers em `config/fiis-ifix.json`, ajuste `"vigencia"` e rode o job manualmente.
+
+**Cuidado com a tradução automática do navegador.** Ela altera o texto dos arquivos na tela do GitHub (por exemplo, `false` vira "falso" e "set a dez" vira "definir dez"). Desative a tradução para github.com antes de editar qualquer arquivo.

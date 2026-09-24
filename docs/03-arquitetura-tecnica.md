@@ -76,7 +76,8 @@ O navegador conhece as **perguntas** (precisa exibi-las) e recebe o **resultado*
 GitHub Actions (dia 20 de cada mês)
   scripts/atualizar-rendimentos-fii.mjs
     ├─ config/fiis-ifix.json ............ os 10 maiores do IFIX (conferidos na B3)
-    ├─ CVM Dados Abertos (zip do ano) ... rendimento estimado por cota, 3 meses
+    ├─ CVM Dados Abertos (zip do ano) ... rendimento estimado por cota: analisa 6 meses,
+    │                                     publica 1 (o mais recente típico pela mediana)
     └─ brapi (plano gratuito) ........... cotação, 1 fundo por requisição
   → grava webapp-src/src/data/rendimentosFii.json → commit → Vercel republica
 App: screens/SimuleFii.tsx lê o JSON estático (cálculos em domain/rendaFii.ts)
@@ -96,7 +97,7 @@ O navegador do cliente nunca chama a CVM nem a brapi, e a chave da brapi fica s�
 | Comando | O que verifica | Situação |
 |---|---|---|
 | `npm run typecheck` | Tipos do app e da API juntos | ✅ sem erros |
-| `npm run test` | 65 testes do app (motor, estado, questionário, visual, tratamento de erro, Simule FII) + 12 do script mensal da CVM | ✅ 65/65 e 12/12 |
+| `npm run test` | 74 testes do app (motor, estado, questionário, visual, tratamento de erro, Simule FII, Aprender com curso e livro) + 21 do script mensal da CVM | ✅ 74/74 e 21/21 |
 | `npm run build` | Build de produção completo | ✅ |
 | Jornada ponta a ponta | Navegador real, servidor local com a API verdadeira, todas as telas | ✅ sem erros de JavaScript |
 

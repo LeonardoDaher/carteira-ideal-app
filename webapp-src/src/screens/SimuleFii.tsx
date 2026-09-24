@@ -4,15 +4,13 @@ import {
   QUANTIDADES_PADRAO,
   formatarCompetencia,
   formatarData,
-  mediaRendimentos,
-  rendimentoBase,
   rendimentoMensalPct,
   simularCotas,
   tabelaSimulacao,
   ultimoRendimento,
 } from '../domain/rendaFii'
-import type { BaseCalculo, SnapshotRendimentosFii } from '../domain/rendaFii'
-import { TabBar } from '../ui/TabBar'
+import type { SnapshotRendimentosFii } from '../domain/rendaFii'
+import { VoltarInicio } from '../ui/VoltarInicio'
 import { AvisoEducacional } from '../ui/AvisoEducacional'
 import type { AppCtx } from '../state/useAppState'
 
@@ -37,23 +35,25 @@ function inteiro(valor: number) {
 }
 
 export function SimuleFii({
-  ctx,
   snapshot = SNAPSHOT_PADRAO,
 }: {
+  /** Recebido como as demais telas. Desde que saiu da barra de abas, esta tela não navega
+   * pelo app (só volta à landing), então não usa o contexto. */
   ctx: AppCtx
   /** Permite injetar dados nos testes. No app, usa o arquivo gerado pelo job mensal. */
   snapshot?: SnapshotRendimentosFii
 }) {
   const fundos = snapshot.fundos
   const [tickerSelecionado, setTickerSelecionado] = useState<string | undefined>(fundos[0]?.ticker)
-  const [base, setBase] = useState<BaseCalculo>('ultimo')
   const [quantidadeLivre, setQuantidadeLivre] = useState('')
 
   const fundo = fundos.find((f) => f.ticker === tickerSelecionado) ?? fundos[0]
 
   return (
     <div className="screen">
-      <div className="col" style={{ gap: 4, paddingTop: 8 }}>
+      <VoltarInicio />
+
+      <div className="col" style={{ gap: 4 }}>
         <h1 style={{ fontSize: 21 }}>Simule sua renda com FIIs</h1>
         <div className="muted small justify">
           Escolha um dos maiores fundos imobiliários do IFIX e veja quanto cada quantidade de cotas rendeu por mês.
@@ -91,7 +91,7 @@ export function SimuleFii({
             </div>
           </div>
 
-          <CartaoFundo fundo={fundo} base={base} setBase={setBase} quantidadeLivre={quantidadeLivre} setQuantidadeLivre={setQuantidadeLivre} />
+          <CartaoFundo fundo={fundo} quantidadeLivre={quantidadeLivre} setQuantidadeLivre={setQuantidadeLivre} />
         </>
       )}
 
@@ -105,37 +105,24 @@ export function SimuleFii({
       </div>
 
       <AvisoEducacional />
-
-      <div className="grow" />
-      <TabBar ctx={ctx} />
     </div>
   )
 }
 
 function CartaoFundo({
   fundo,
-  base,
-  setBase,
   quantidadeLivre,
   setQuantidadeLivre,
 }: {
   fundo: SnapshotRendimentosFii['fundos'][number]
-  base: BaseCalculo
-  setBase: (b: BaseCalculo) => void
   quantidadeLivre: string
   setQuantidadeLivre: (v: string) => void
 }) {
+  // Só o último rendimento: a média de meses foi retirada (decisão D10) porque a estimativa
+  // da CVM se distorce em meses de emissão de cotas e de fechamento de semestre.
   const ultimo = ultimoRendimento(fundo)
-  const media = mediaRendimentos(fundo, 3)
-  const valorBase = rendimentoBase(fundo, base)
+  const valorBase = ultimo?.valorPorCota ?? null
   const pct = valorBase != null && fundo.cotacao != null ? rendimentoMensalPct(valorBase, fundo.cotacao) : null
-  const mesesMedia = fundo.rendimentos.slice(0, 3)
-  const periodoMedia =
-    mesesMedia.length > 1
-      ? `${formatarCompetencia(mesesMedia[mesesMedia.length - 1].competencia)} a ${formatarCompetencia(mesesMedia[0].competencia)}`
-      : mesesMedia[0]
-        ? formatarCompetencia(mesesMedia[0].competencia)
-        : ''
 
   const qtdLivre = Number(quantidadeLivre.replace(/\D/g, ''))
   const linhas = valorBase != null ? tabelaSimulacao(fundo.cotacao, valorBase) : []
@@ -170,28 +157,18 @@ function CartaoFundo({
             <span className="tiny muted">{ultimo ? `por cota, ${formatarCompetencia(ultimo.competencia)}` : ''}</span>
           </div>
           <div className="col" style={{ gap: 2, flex: 1, padding: '10px 12px', borderRadius: 12, background: 'var(--surface2)' }}>
-            <span className="tiny muted">Média de {mesesMedia.length} {mesesMedia.length === 1 ? 'mês' : 'meses'}</span>
-            <span style={{ fontWeight: 700, fontSize: 16 }}>{media != null ? reaisPorCota(media) : '—'}</span>
-            <span className="tiny muted">{periodoMedia ? `por cota, ${periodoMedia}` : ''}</span>
-          </div>
-        </div>
-
-        <div className="col" style={{ gap: 6 }}>
-          <span className="tiny muted">Calcular a tabela com</span>
-          <div className="row" style={{ gap: 6 }} role="group" aria-label="Base do cálculo">
-            <button className={`chip ${base === 'ultimo' ? 'selected' : ''}`} aria-pressed={base === 'ultimo'} onClick={() => setBase('ultimo')}>
-              Último rendimento
-            </button>
-            <button className={`chip ${base === 'media3' ? 'selected' : ''}`} aria-pressed={base === 'media3'} onClick={() => setBase('media3')}>
-              Média dos meses
-            </button>
+            <span className="tiny muted">Sobre o valor da cota</span>
+            <span style={{ fontWeight: 700, fontSize: 16 }}>
+              {pct != null ? `${pct.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}%` : '—'}
+            </span>
+            <span className="tiny muted">ao mês, estimado</span>
           </div>
         </div>
 
         {valorBase != null && (
           <div className="small justify" style={{ lineHeight: 1.5 }}>
-            <strong>1 cota rendeu {reaisPorCota(valorBase)} por mês</strong>
-            {pct != null && <span className="muted">, cerca de {pct.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}% sobre o valor da cota.</span>}
+            <strong>1 cota rendeu cerca de {reaisPorCota(valorBase)}</strong>
+            <span className="muted"> em {ultimo ? formatarCompetencia(ultimo.competencia) : 'mês de referência'}. A tabela abaixo usa esse valor.</span>
           </div>
         )}
       </div>
@@ -240,9 +217,10 @@ function AvisoAtrasoCvm({ snapshot, competencia }: { snapshot: SnapshotRendiment
       <strong>Atenção: dados com atraso.</strong>{' '}
       <span className="muted">
         {competencia ? `O último rendimento exibido é de ${formatarCompetencia(competencia)}. ` : ''}
-        Os valores vêm do Informe Mensal que os fundos enviam à CVM, publicado com 1 a 2 meses de atraso, e são estimados
-        a partir dele. Por isso podem diferir do valor anunciado pelo fundo e não incluem rendimentos anunciados depois.
-        Confira o valor oficial no site do fundo ou da B3.
+        O valor é uma estimativa calculada a partir do Informe Mensal que os fundos enviam à CVM, publicado com 1 a 2
+        meses de atraso. Ele pode diferir do rendimento anunciado pelo fundo, principalmente em meses de emissão de cotas
+        ou de fechamento de semestre, e não inclui rendimentos anunciados depois. Confira o valor oficial no site do fundo
+        ou da B3.
         {snapshot.geradoEm ? ` Cotação e rendimentos atualizados em ${formatarData(snapshot.geradoEm)}.` : ''}
       </span>
     </div>

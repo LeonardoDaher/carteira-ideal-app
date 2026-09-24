@@ -209,6 +209,19 @@ describe('useAppState — link "Ver minha carteira de referência" (?tela=result
   it('sem o parâmetro, continua restaurando a última tela salva normalmente', async () => {
     localStorage.setItem(
       'carteiraideal.estado',
+      JSON.stringify({ versao: 2, screen: 'carteira', idade: 42, respostas: {}, respostasArquitetura: {}, tema: 'dark' }),
+    )
+    window.history.replaceState(null, '', '/app/')
+
+    const { result } = renderHook(() => useAppState())
+    await waitFor(() => expect(result.current.hidratado).toBe(true))
+
+    expect(result.current.screen).toBe('carteira')
+  })
+
+  it('estado salvo por versão anterior numa tela hoje avulsa (ex: trilha) retoma no resultado', async () => {
+    localStorage.setItem(
+      'carteiraideal.estado',
       JSON.stringify({ versao: 2, screen: 'trilha', idade: 42, respostas: {}, respostasArquitetura: {}, tema: 'dark' }),
     )
     window.history.replaceState(null, '', '/app/')
@@ -216,6 +229,68 @@ describe('useAppState — link "Ver minha carteira de referência" (?tela=result
     const { result } = renderHook(() => useAppState())
     await waitFor(() => expect(result.current.hidratado).toBe(true))
 
-    expect(result.current.screen).toBe('trilha')
+    expect(result.current.screen).toBe('resultado')
+  })
+})
+
+describe('useAppState — Aprender e Simule FII abertos pela landing (sem questionário)', () => {
+  const url = () => window.location.pathname + window.location.search + window.location.hash
+
+  afterEach(() => {
+    window.history.replaceState(null, '', '/')
+  })
+
+  it.each([
+    ['aprender', 'aprender'],
+    ['simuleFii', 'simuleFii'],
+  ] as const)('?tela=%s abre a tela sem nenhuma resposta salva', async (parametro, tela) => {
+    window.history.replaceState(null, '', `/app/?tela=${parametro}`)
+
+    const { result } = renderHook(() => useAppState())
+    await waitFor(() => expect(result.current.hidratado).toBe(true))
+
+    expect(result.current.screen).toBe(tela)
+    expect(result.current.resultado).toBeNull()
+    // o parâmetro fica na URL: recarregar a página mantém a pessoa na mesma tela
+    expect(url()).toBe(`/app/?tela=${parametro}`)
+  })
+
+  it('ignora valores desconhecidos no parâmetro', async () => {
+    window.history.replaceState(null, '', '/app/?tela=qualquercoisa')
+
+    const { result } = renderHook(() => useAppState())
+    await waitFor(() => expect(result.current.hidratado).toBe(true))
+
+    expect(result.current.screen).toBe('onboarding')
+  })
+
+  it('não salva as telas avulsas como última tela: o botão amarelo (./app/) volta ao ponto do questionário', async () => {
+    const primeira = renderHook(() => useAppState())
+    await waitFor(() => expect(primeira.result.current.hidratado).toBe(true))
+    act(() => primeira.result.current.iniciarQuestionario())
+    act(() => primeira.result.current.confirmarIdade(42))
+    responderSuitability(primeira.result)
+    await waitFor(() => expect(primeira.result.current.screen).toBe('questionarioArquitetura'))
+    primeira.unmount()
+
+    // Pela landing, abre o Aprender e entra numa trilha
+    window.history.replaceState(null, '', '/app/?tela=aprender')
+    const segunda = renderHook(() => useAppState())
+    await waitFor(() => expect(segunda.result.current.hidratado).toBe(true))
+    expect(segunda.result.current.screen).toBe('aprender')
+    act(() => segunda.result.current.abrirTrilha('t1'))
+    expect(segunda.result.current.screen).toBe('trilha')
+    await waitFor(() => {
+      const salvo = JSON.parse(localStorage.getItem('carteiraideal.estado') ?? '{}')
+      expect(salvo.screen).toBe('questionarioArquitetura')
+    })
+    segunda.unmount()
+
+    // Depois, pelo botão amarelo (sem parâmetro), retoma de onde parou no questionário
+    window.history.replaceState(null, '', '/app/')
+    const terceira = renderHook(() => useAppState())
+    await waitFor(() => expect(terceira.result.current.hidratado).toBe(true))
+    expect(terceira.result.current.screen).toBe('questionarioArquitetura')
+    expect(terceira.result.current.idade).toBe(42)
   })
 })

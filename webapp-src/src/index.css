@@ -430,7 +430,7 @@ button {
   padding: 14px 12px;
   border-top: 1px solid var(--border);
 }
-/* Com 5 abas, os rótulos não podem quebrar linha ("Simule FII" em negrito quebrava). */
+/* Rótulos das abas numa linha só (a barra chegou a ter 5 abas; hoje tem 3). */
 .tab { white-space: nowrap; display: flex; flex-direction: column; align-items: center; gap: 6px; color: var(--text-muted); font-size: 13px; font-weight: 500; }
 .tab.active { color: var(--accent); font-weight: 600; }
 @media (max-width: 380px) {
@@ -634,3 +634,100 @@ button.alloc-box:active {
 /* Aviso de atraso da CVM: mesma caixa dos outros avisos, com a borda esquerda em tom de
    alerta para não se perder entre os textos legais. */
 .aviso-atraso { border-left: 4px solid var(--warning); }
+
+/* ---------------------------------------------------------------------------------------
+   Telas abertas direto pela landing (Aprender e Simule FII)
+   --------------------------------------------------------------------------------------- */
+
+/* "← Início": mesmo visual do "← Voltar" das trilhas, mas é um link para a landing. */
+.voltar-inicio {
+  align-self: flex-start;
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 13px;
+  text-decoration: none;
+}
+.voltar-inicio:hover { color: var(--text); }
+
+/* Botões que vieram da landing ("Curso de Candlesticks" e "Educação Financeira Infantil"),
+   copiando o visual de lá: caixa de vidro, contorno fino, cantos de 8px, texto centralizado. */
+.link-extra {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 16px 16px;
+  background: var(--surface);
+  border: 1px solid var(--stroke);
+  border-radius: 8px;
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  color: var(--text);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+}
+.link-extra:hover {
+  background: var(--highlight);
+  border-color: var(--text);
+  transform: translateY(-2px);
+}
+.link-extra:active { transform: translateY(0); }
+.link-extra:focus-visible { outline: 2px solid var(--text); outline-offset: 3px; }
+
+.link-extra-2 { flex-direction: column; gap: 2px; }
+.link-extra-titulo { display: inline-flex; align-items: center; gap: 8px; }
+.link-extra-sub { font-size: 12px; font-weight: 400; color: var(--text-muted); }
+
+/* Diálogo do livro (liberação por confiança) */
+.livro-dialog {
+  width: min(400px, calc(100% - 32px));
+  margin: auto;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--stroke);
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+.livro-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.6);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+}
+.livro-dialog-corpo { position: relative; padding: 28px 22px 20px; }
+.livro-dialog-fechar {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text);
+}
+.livro-dialog-fechar:hover { background: var(--highlight); }
+.livro-dialog-titulo { font-size: 18px; line-height: 1.3; padding-right: 32px; text-wrap: balance; }
+.livro-dialog-desc { margin: 12px 0 0; font-size: 14px; line-height: 1.55; }
+.livro-dialog .btn { text-decoration: none; }
+.livro-dialog .btn.is-locked { opacity: 0.45; cursor: not-allowed; }
+.livro-dialog .btn.is-locked:hover { background: var(--surface); border-color: var(--stroke); }
+.livro-dialog-ja-sigo {
+  align-self: center;
+  padding: 8px 12px;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.livro-dialog-status { min-height: 1.4em; margin: 12px 0 0; font-size: 13.5px; line-height: 1.4; text-align: center; }
+.livro-dialog-nota { margin: 8px 0 0; font-size: 11.5px; line-height: 1.5; color: var(--text-muted); text-align: center; }

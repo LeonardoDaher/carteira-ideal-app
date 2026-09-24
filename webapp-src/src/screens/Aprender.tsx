@@ -1,12 +1,15 @@
 import { TRILHAS, totalDeAulas, aulasDisponiveis } from '../data/trilhas'
-import { TabBar } from '../ui/TabBar'
+import { VoltarInicio } from '../ui/VoltarInicio'
+import { MateriaisExtras } from '../ui/MateriaisExtras'
 import { ChevronDownIcon, GraduationCapIcon } from '../ui/Icon'
 import type { AppCtx } from '../state/useAppState'
 
 export function Aprender({ ctx }: { ctx: AppCtx }) {
   return (
     <div className="screen">
-      <div className="col" style={{ gap: 4, paddingTop: 8 }}>
+      <VoltarInicio />
+
+      <div className="col" style={{ gap: 4 }}>
         <h1 style={{ fontSize: 21 }}>Trilhas de aprendizagem</h1>
         <div className="muted small">Aulas de ~2 minutos, organizadas em ordem para você seguir passo a passo.</div>
       </div>
@@ -66,8 +69,10 @@ export function Aprender({ ctx }: { ctx: AppCtx }) {
         })}
       </div>
 
-      <div className="grow" />
-      <TabBar ctx={ctx} />
+      <div className="col" style={{ gap: 10, marginTop: 6 }}>
+        <h2 style={{ fontSize: 16 }}>Mais conteúdo</h2>
+        <MateriaisExtras />
+      </div>
     </div>
   )
 }
