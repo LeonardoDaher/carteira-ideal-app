@@ -45,14 +45,22 @@ A mudança para a API tirou a metodologia do código visível. Ainda assim, vale
 ## 6. Técnico
 
 - [ ] **Testes automatizados da API** (`api/recomendacao.ts`): casos 200, 400, 405 e veto, hoje verificados só manualmente.
-- [ ] **Verificação automática a cada envio** (GitHub Actions rodando `typecheck` e `test`), para uma alteração errada no motor não chegar ao ar.
+- [ ] **Verificação automática a cada envio** (GitHub Actions rodando `typecheck` e `test`), para uma alteração errada no motor não chegar ao ar. O GitHub Actions já está em uso pelo job mensal de FIIs, então falta só criar este segundo workflow.
 - [ ] **Monitoramento de erros** da API (logs da Vercel ou um serviço como o Sentry).
 - [ ] **Links pendentes:** o `script.js` da landing avisa no console sobre links marcados como pendentes (`data-todo`). Hoje não há nenhum, mas o mecanismo continua ativo para os próximos.
 
 ## 7. Aba "Simule FII" (decisão D9)
 
-- [ ] **Conferir os 10 maiores do IFIX** na carteira teórica vigente (b3.com.br > Índices > IFIX > Composição da carteira), ajustar `config/fiis-ifix.json` e marcar `"conferidoNaB3": true`. A lista que veio no arquivo é provisória.
-- [ ] **Criar a chave gratuita da brapi** (brapi.dev/dashboard) e cadastrar no GitHub como secret `BRAPI_TOKEN`.
-- [ ] **Cadastrar as variáveis `COMMIT_AUTOR_NOME` e `COMMIT_AUTOR_EMAIL`** no GitHub (aba Variables), com o nome e o e-mail da sua conta, para a Vercel aceitar o deploy do commit automático.
-- [ ] **Rodar o job manualmente a primeira vez** (Actions > Atualizar rendimentos de FIIs > Run workflow) e conferir 2 ou 3 fundos no site da B3 ou do próprio fundo.
-- [ ] **Repetir a conferência do IFIX** em janeiro, maio e setembro.
+- [x] **Lista dos 10 fundos** revisada (CPTS11 substituído por GGRC11) e `"conferidoNaB3": true` (24/09/2026).
+- [x] **Chave gratuita da brapi** criada, testada com o GGRC11 no painel da brapi e cadastrada como secret `BRAPI_TOKEN`.
+- [x] **Variáveis `COMMIT_AUTOR_NOME` e `COMMIT_AUTOR_EMAIL`** cadastradas: os deploys automáticos saem na Vercel como Ready.
+- [x] **Primeira execução** (24/09/2026): 10 fundos publicados, depois de fixar o CNPJ do TRXF11 (ver D9).
+- [x] **Validação da estimativa** (24/09/2026): último mês próximo do anunciado (GGRC11 −2%, MXRF11 −6%, TRXF11 ~0%), mas meses de emissão e de fechamento de semestre distorcidos em até 57%. Média retirada da tela e trava por mediana adotada (D10).
+- [ ] **Conferência mensal por amostragem:** após cada execução, comparar 2 fundos com o valor anunciado. Se as diferenças passarem de 10% com frequência, reavaliar a troca da fonte pela bolsai Pro (D10).
+- [ ] **XPML11:** conferir se o 0,8576 repetido em jun, jul e ago corresponde ao anunciado pelo fundo.
+- [ ] **Acompanhar a primeira execução automática** em 20/10/2026 (primeira no Ubuntu 24.04 fixo e com as ações v5).
+- [ ] **Repetir a conferência do IFIX** em janeiro, maio e setembro (seção 5.6 da operação).
+- [x] **Busca livre de qualquer FII** (decisão D12): feita sem função nova na Vercel, ampliando o job mensal para todos os FIIs do informe da CVM.
+- [ ] **Cota da brapi:** conferir no painel a cota mensal vigente do plano gratuito e ajustar `outrosFundos.maxRequisicoesBrapi` em `config/fiis-ifix.json` se for preciso.
+- [ ] **Primeira execução com a lista ampla:** ler no log a contagem de fundos publicados, indisponíveis e com baixa confiança, e conferir 2 fundos pequenos por amostragem além dos destaques.
+- [ ] **Nova captura** de `docs/jornada/17-simule-fii.jpg` mostrando o campo de busca, depois da primeira execução.

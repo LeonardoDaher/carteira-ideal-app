@@ -7,11 +7,17 @@ import {
   acharColuna,
   competenciaDe,
   divisorEscalaDy,
+  escolherRendimento,
   lerCsv,
+  mesesIdenticos,
   lerNumero,
   montarRendimentos,
+  montarTodosOsFundos,
   prefixoTickerDoIsin,
   rendimentoPlausivel,
+  subtrairMeses,
+  avaliarConfianca,
+  formatarSnapshot,
 } from './atualizar-rendimentos-fii.mjs'
 
 const GERAL = `CNPJ_Fundo_Classe;Data_Referencia;Versao;Nome_Fundo_Classe;Codigo_ISIN
@@ -130,5 +136,161 @@ describe('montarRendimentos', () => {
     const compDuplo = lerCsv(COMPLEMENTO + '33.333.333/0001-33;2026-07-31;1;50,00;0,0090\n')
     const [a] = montarRendimentos(compDuplo, geralDuplo, [{ ticker: 'AAAA11' }])
     assert.match(a.erro, /mesmo mês/)
+  })
+})
+
+// Cenários com os números reais do rendimentosFii.json de 24/09/2026 e com os meses
+// distorcidos identificados na validação contra os valores anunciados pelos fundos.
+const serie = (...valores) => valores.map((v, i) => ({ competencia: `2026-${String(8 - i).padStart(2, '0')}`, valorPorCota: v }))
+
+describe('escolherRendimento', () => {
+  it('GGRC11 (dados reais): mantém agosto, 0,0984 (real anunciado: 0,10)', () => {
+    const { escolhido } = escolherRendimento(serie(0.0984, 0.1504, 0.1217))
+    assert.equal(escolhido.valorPorCota, 0.0984)
+  })
+
+  it('MXRF11 em mês de emissão: descarta o 0,0748 de julho e publica o mês típico anterior', () => {
+    const r = escolherRendimento(serie(0.0748, 0.108, 0.1, 0.1, 0.1, 0.098))
+    assert.equal(r.descartados[0].valorPorCota, 0.0748)
+    assert.equal(r.escolhido.valorPorCota, 0.108)
+  })
+
+  it('TRXF11 em fechamento de semestre: descarta o 1,4606 de junho', () => {
+    const r = escolherRendimento(serie(1.4606, 0.93, 0.93, 0.94, 0.93, 0.92))
+    assert.equal(r.escolhido.valorPorCota, 0.93)
+    assert.equal(r.descartados.length, 1)
+  })
+
+  it('KNIP11 (fundo de inflação): com tolerância própria de 50%, aceita a variação real', () => {
+    assert.equal(escolherRendimento(serie(0.6537, 0.9582, 1.1036), 0.5).escolhido.valorPorCota, 0.6537)
+    // com a tolerância padrão, o mesmo valor seria tratado como distorção
+    assert.equal(escolherRendimento(serie(0.6537, 0.9582, 1.1036), 0.2).escolhido.valorPorCota, 0.9582)
+  })
+
+  it('não publica nada quando os meses são dispersos demais para haver um valor típico', () => {
+    // mediana 2,05: todos os meses ficam a mais de 40% dela
+    assert.equal(escolherRendimento(serie(1, 1.1, 3, 3.2)).escolhido, null)
+  })
+
+  it('com menos de 3 meses, publica o mais recente sinalizando que não houve conferência', () => {
+    const r = escolherRendimento(serie(0.5, 0.9))
+    assert.equal(r.escolhido.valorPorCota, 0.5)
+    assert.equal(r.semReferencia, true)
+  })
+})
+
+describe('mesesIdenticos', () => {
+  it('detecta o padrão do XPML11 (três meses com 0,8576)', () => {
+    assert.equal(mesesIdenticos(serie(0.8576, 0.8576, 0.8576)), 3)
+    assert.equal(mesesIdenticos(serie(0.818, 0.8189, 0.8183)), 1)
+  })
+})
+
+
+// ---------------------------------------------------------------------------------------
+// Lista ampla (decisão D12): todos os FIIs do informe, além dos 10 em destaque
+// ---------------------------------------------------------------------------------------
+
+const GERAL_AMPLO = `CNPJ_Fundo_Classe;Data_Referencia;Versao;Nome_Fundo_Classe;Codigo_ISIN
+11.111.111/0001-11;2026-07-31;1;FUNDO AAAA LOGISTICA FII;BRAAAACTF001
+22.222.222/0001-22;2026-07-31;1;FUNDO BBBB PAPEL FII;BRBBBBCTF005
+44.444.444/0001-44;2026-07-31;1;FUNDO CCCC PEQUENO FII;BRCCCCCTF000
+55.555.555/0001-55;2026-07-31;1;FUNDO DDDD GRANDE FII;BRDDDDCTF003
+66.666.666/0001-66;2026-03-31;1;FUNDO EEEE ENCERRADO FII;BREEEECTF002
+77.777.777/0001-77;2026-07-31;1;FUNDO FFFF RESTRITO FII;BRFFFFCTF009
+88.888.888/0001-88;2026-07-31;1;SEM ISIN FII;
+`
+
+const COMPLEMENTO_AMPLO = `CNPJ_Fundo_Classe;Data_Referencia;Versao;Patrimonio_Liquido;Total_Numero_Cotistas;Valor_Patrimonial_Cotas;Percentual_Dividend_Yield_Mes
+11.111.111/0001-11;2026-06-30;1;500000000;90000;100,00;0,0082
+11.111.111/0001-11;2026-07-31;1;500000000;90000;100,00;0,0085
+22.222.222/0001-22;2026-07-31;1;300000000;50000;9,50;0,0110
+44.444.444/0001-44;2026-06-30;1;20000000;800;10,00;0,0090
+44.444.444/0001-44;2026-07-31;1;20000000;800;10,00;0,0091
+55.555.555/0001-55;2026-06-30;1;2000000000;200000;100,00;0,0080
+55.555.555/0001-55;2026-07-31;1;2000000000;200000;100,00;0,0081
+66.666.666/0001-66;2026-03-31;1;90000000;5000;100,00;0,0070
+77.777.777/0001-77;2026-07-31;1;900000000;12;100,00;0,0090
+88.888.888/0001-88;2026-07-31;1;100000000;3000;100,00;0,0090
+`
+
+describe('montarTodosOsFundos', () => {
+  const geral = lerCsv(GERAL_AMPLO)
+  const complemento = lerCsv(COMPLEMENTO_AMPLO)
+  const opcoes = { destaques: [{ ticker: 'BBBB11' }, { ticker: 'AAAA11' }], mesesMaximoAtraso: 3, minimoCotistas: 100 }
+
+  it('põe os destaques primeiro, na ordem da configuração, e os demais do maior patrimônio para o menor', () => {
+    const { resultados } = montarTodosOsFundos(complemento, geral, opcoes)
+    assert.deepEqual(
+      resultados.map((r) => [r.ticker, r.destaque ?? false]),
+      [['BBBB11', true], ['AAAA11', true], ['DDDD11', false], ['CCCC11', false]],
+    )
+    assert.equal(resultados.find((r) => r.ticker === 'DDDD11').nome, 'FUNDO DDDD GRANDE FII')
+  })
+
+  it('não repete um destaque na lista dos demais', () => {
+    const { resultados } = montarTodosOsFundos(complemento, geral, opcoes)
+    assert.equal(resultados.filter((r) => r.ticker.startsWith('AAAA')).length, 1)
+  })
+
+  it('ignora fundo sem informe recente e registra o motivo', () => {
+    const { ignorados, competenciaMaisRecente } = montarTodosOsFundos(complemento, geral, opcoes)
+    assert.equal(competenciaMaisRecente, '2026-07')
+    assert.deepEqual(
+      ignorados.map((i) => [i.ticker, i.motivo]),
+      [['EEEE11', 'sem-informe-recente']],
+    )
+  })
+
+  it('descarta fundo com poucos cotistas (restrito, em geral fora da bolsa) sem gastar requisição', () => {
+    const r = montarTodosOsFundos(complemento, geral, opcoes)
+    assert.equal(r.poucosCotistas, 1)
+    assert.equal(r.resultados.some((x) => x.ticker === 'FFFF11'), false)
+    const semFiltro = montarTodosOsFundos(complemento, geral, { ...opcoes, minimoCotistas: 0 })
+    assert.equal(semFiltro.resultados.some((x) => x.ticker === 'FFFF11'), true)
+  })
+
+  it('funciona sem as colunas opcionais de patrimônio e cotistas', () => {
+    const semOpcionais = lerCsv(COMPLEMENTO_AMPLO.replace(/Patrimonio_Liquido;Total_Numero_Cotistas;/, 'X;Y;'))
+    const { resultados } = montarTodosOsFundos(semOpcionais, geral, opcoes)
+    // sem patrimônio, os demais ficam em ordem alfabética; sem cotistas, o FFFF11 entra
+    assert.deepEqual(resultados.slice(2).map((r) => r.ticker), ['CCCC11', 'DDDD11', 'FFFF11'])
+  })
+
+  it('mantém o erro do destaque (o script decide se aborta) sem derrubar os demais', () => {
+    const { resultados } = montarTodosOsFundos(complemento, geral, { ...opcoes, destaques: [{ ticker: 'ZZZZ11' }] })
+    assert.match(resultados[0].erro, /CNPJ não encontrado/)
+    assert.ok(resultados.length > 1)
+  })
+})
+
+describe('publicação', () => {
+  it('subtrai meses atravessando a virada do ano', () => {
+    assert.equal(subtrairMeses('2026-07', 2), '2026-05')
+    assert.equal(subtrairMeses('2026-02', 3), '2025-11')
+  })
+
+  it('marca baixa confiança com poucos meses, valor repetido ou cotação parada', () => {
+    const hoje = new Date('2026-10-20T12:00:00Z')
+    assert.deepEqual(avaliarConfianca({ dataCotacao: '2026-10-17', hoje }), [])
+    assert.deepEqual(avaliarConfianca({ semReferencia: true, dataCotacao: '2026-10-17', hoje }), ['poucos-meses'])
+    assert.deepEqual(avaliarConfianca({ identicos: 3, dataCotacao: '2026-10-17', hoje }), ['valor-repetido'])
+    assert.deepEqual(avaliarConfianca({ dataCotacao: '2026-09-30', hoje }), ['pouca-negociacao'])
+  })
+
+  it('grava um fundo por linha e o resultado continua sendo JSON válido', () => {
+    const snapshot = {
+      geradoEm: '2026-10-20T12:00:00.000Z',
+      vigenciaIfix: 'set a dez/2026',
+      destaques: ['AAAA11'],
+      fundos: [
+        { ticker: 'AAAA11', nome: 'A', cotacao: 100, dataCotacao: '2026-10-17', rendimentos: [{ competencia: '2026-08', valorPorCota: 0.85 }] },
+        { ticker: 'BBBB11', nome: 'B', cotacao: 9.5, dataCotacao: '2026-10-17', rendimentos: [{ competencia: '2026-08', valorPorCota: 0.1 }] },
+      ],
+      indisponiveis: [],
+    }
+    const texto = formatarSnapshot(snapshot)
+    assert.deepEqual(JSON.parse(texto), snapshot)
+    assert.equal(texto.split('\n').filter((l) => l.includes('"ticker"')).length, 2)
   })
 })

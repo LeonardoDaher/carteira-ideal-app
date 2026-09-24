@@ -635,6 +635,52 @@ button.alloc-box:active {
    alerta para não se perder entre os textos legais. */
 .aviso-atraso { border-left: 4px solid var(--warning); }
 
+/* Busca livre de FIIs (decisão D12). O campo tem a mesma altura de toque dos botões
+   principais; os resultados são uma lista de linhas, não chips, porque carregam o nome. */
+.busca-fii {
+  width: 100%;
+  min-width: 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--stroke);
+  background: var(--surface2);
+  color: var(--text);
+  font: inherit;
+  font-size: 16px; /* 16px: abaixo disso o Safari do iPhone dá zoom ao focar */
+  font-weight: 600;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.busca-fii::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; } /* "×" azul nativo destoa do tema; Esc limpa */
+.busca-fii::placeholder { color: var(--text-muted); font-weight: 400; }
+.busca-fii:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+.resultados-busca {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-radius: 12px;
+  border: 1px solid var(--stroke);
+  background: var(--surface);
+  overflow: hidden;
+}
+.resultados-busca li + li { border-top: 1px solid var(--border); }
+.resultado-busca {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 11px 14px;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  font: inherit;
+}
+.resultado-busca:hover { background: var(--highlight); }
+.resultado-busca:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.resultado-nome { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
 /* ---------------------------------------------------------------------------------------
    Telas abertas direto pela landing (Aprender e Simule FII)
    --------------------------------------------------------------------------------------- */

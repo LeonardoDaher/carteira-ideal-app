@@ -80,14 +80,14 @@ Se o build falhar, a Vercel mantém no ar a última versão boa e mostra o erro 
 npm install          # uma vez
 npm run dev          # só a interface (sem API: o cálculo falha de propósito com "Tentar novamente")
 vercel dev           # interface + API, igual à produção (requer: npm install -g vercel)
-npm run test         # 63 testes do app + 21 do script mensal de FIIs
+npm run test         # 88 testes do app + 30 do script mensal de FIIs
 npm run typecheck    # tipos do app e da API
 npm run build        # build de produção em dist-site/
 ```
 
 ## 5.6 Operação mensal da aba Simule FII
 
-**Rotina automática.** Todo dia 20, às 9h de Brasília, o GitHub roda o job "Atualizar rendimentos de FIIs". Ele baixa o informe mensal da CVM, busca as cotações na brapi, grava `webapp-src/src/data/rendimentosFii.json` e faz um commit com a mensagem "dados: rendimentos de FIIs (AAAA-MM)". A Vercel publica esse commit sozinha. Não é preciso fazer nada.
+**Rotina automática.** Todo dia 20, às 9h de Brasília, o GitHub roda o job "Atualizar rendimentos de FIIs". Ele baixa o informe mensal da CVM, busca as cotações na brapi (os 10 fundos em destaque e, desde a decisão D12, os demais FIIs listados, para a busca livre), grava `webapp-src/src/data/rendimentosFii.json` e faz um commit com a mensagem "dados: rendimentos de FIIs (AAAA-MM)". A Vercel publica esse commit sozinha. Não é preciso fazer nada.
 
 **Se o job falhar**, o GitHub manda um e-mail. O app continua no ar com os dados do mês anterior, porque o script nunca grava um arquivo pela metade. Para ver o motivo: GitHub > **Actions** > execução com ✗ > **atualizar** > passo **"Buscar dados e gerar rendimentosFii.json"**. As mensagens são em português:
 
@@ -102,8 +102,13 @@ npm run build        # build de produção em dist-site/
 | `rendimento estimado … fora da faixa plausível` | Conferir o fundo manualmente. Se o dado da CVM estiver errado naquele mês, o fundo fica de fora até o mês seguinte |
 | `Coluna não encontrada (…)` | A CVM mudou o formato do arquivo. Enviar o log para quem desenvolve |
 | `brapi respondeu 401/403` | Chave expirada ou revogada: gerar outra em brapi.dev e atualizar o secret |
+| `[info] brapi: … requisições, … não listados, … sem cotação` | Resumo da lista ampla (D12). "Não listados" é normal: são fundos do informe que não negociam na B3. Se aparecer "(limite atingido)", a cota da brapi ou o teto `maxRequisicoesBrapi` acabou antes do fim: os menores fundos ficaram sem cotação neste mês |
+| `brapi pediu para desacelerar (429)` | Nada, se for pontual: o script espera e tenta de novo. Se virar rotina, aumentar `pausaEntreRequisicoesMs` em `outrosFundos` |
+| `Só … fundos no total ficaram válidos (mínimo …)` | A lista ampla encolheu de repente (brapi fora do ar, cota esgotada no início, coluna da CVM renomeada). Rodar de novo no dia seguinte; se repetir, enviar o log para quem desenvolve |
 
 **Rodar fora do dia 20:** Actions > **Atualizar rendimentos de FIIs** (na lista da esquerda) > **Run workflow**. Não use "Re-run all jobs" dentro de uma execução antiga: ele repete o código daquela data e ignora alterações feitas depois.
+
+**Lista ampla (D12).** Os parâmetros ficam em `outrosFundos`, dentro de `config/fiis-ifix.json`: `ativo` (`false` volta a publicar só os 10), `mesesMaximoAtraso`, `minimoCotistas`, `maxRequisicoesBrapi`, `pausaEntreRequisicoesMs` e `minimoFundosTotal`. Problemas em fundos fora do destaque não derrubam o job: o fundo fica de fora ou aparece na busca como "sem dados neste mês", com o motivo.
 
 **Manutenção do IFIX (janeiro, maio e setembro).** A B3 rebalanceia o índice a cada quatro meses. Confira a carteira teórica em b3.com.br (Índices > IFIX > Composição da carteira), atualize a ordem e os tickers em `config/fiis-ifix.json`, ajuste `"vigencia"` e rode o job manualmente.
 

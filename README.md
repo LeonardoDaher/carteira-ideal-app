@@ -14,7 +14,7 @@ webapp-src/         código-fonte do app (React + Vite) — inclui o motor de de
 api/                função serverless (Vercel) que roda o motor — nunca vai para o navegador
 scripts/build-site.mjs   monta a pasta final publicada: landing na raiz + app compilado em /app
 scripts/atualizar-rendimentos-fii.mjs   job mensal da aba "Simule FII" (CVM + brapi → JSON estático)
-config/fiis-ifix.json    os 10 maiores FIIs do IFIX usados na aba "Simule FII"
+config/fiis-ifix.json    os 10 FIIs em destaque (IFIX) e os parâmetros da lista ampla da busca livre
 .github/workflows/  job do GitHub Actions que roda o script acima todo dia 20
 docs/               documentação do projeto (comece por docs/README.md)
 ```

@@ -75,15 +75,19 @@ O navegador conhece as **perguntas** (precisa exibi-las) e recebe o **resultado*
 ```
 GitHub Actions (dia 20 de cada mês)
   scripts/atualizar-rendimentos-fii.mjs
-    ├─ config/fiis-ifix.json ............ os 10 maiores do IFIX (conferidos na B3)
-    ├─ CVM Dados Abertos (zip do ano) ... rendimento estimado por cota: analisa 6 meses,
-    │                                     publica 1 (o mais recente típico pela mediana)
-    └─ brapi (plano gratuito) ........... cotação, 1 fundo por requisição
-  → grava webapp-src/src/data/rendimentosFii.json → commit → Vercel republica
-App: screens/SimuleFii.tsx lê o JSON estático (cálculos em domain/rendaFii.ts)
+    ├─ config/fiis-ifix.json ............ os 10 destaques do IFIX (conferidos na B3)
+    │                                     + parâmetros da lista ampla ("outrosFundos")
+    ├─ CVM Dados Abertos (zip do ano) ... todos os FIIs do informe; rendimento estimado
+    │                                     por cota: analisa 6 meses, publica 1 (o mais
+    │                                     recente típico pela mediana)
+    └─ brapi (plano gratuito) ........... cotação, 1 fundo por requisição, com pausa e
+                                          teto por execução
+  → grava webapp-src/src/data/rendimentosFii.json (destaques, fundos, indisponiveis)
+  → commit → Vercel republica
+App: screens/SimuleFii.tsx lê o JSON estático (busca e cálculos em domain/rendaFii.ts)
 ```
 
-O navegador do cliente nunca chama a CVM nem a brapi, e a chave da brapi fica só nos GitHub Secrets. Detalhes e salvaguardas: decisão D9 no [Registro de decisões](07-registro-de-decisoes.md).
+O navegador do cliente nunca chama a CVM nem a brapi, e a chave da brapi fica só nos GitHub Secrets. Detalhes e salvaguardas: decisões D9, D10 e D12 no [Registro de decisões](07-registro-de-decisoes.md).
 
 ## Decisões técnicas relevantes
 
@@ -97,7 +101,7 @@ O navegador do cliente nunca chama a CVM nem a brapi, e a chave da brapi fica s�
 | Comando | O que verifica | Situação |
 |---|---|---|
 | `npm run typecheck` | Tipos do app e da API juntos | ✅ sem erros |
-| `npm run test` | 74 testes do app (motor, estado, questionário, visual, tratamento de erro, Simule FII, Aprender com curso e livro) + 21 do script mensal da CVM | ✅ 74/74 e 21/21 |
+| `npm run test` | 88 testes do app (motor, estado, questionário, visual, tratamento de erro, Simule FII com busca livre, Aprender com curso e livro) + 30 do script mensal da CVM | ✅ 88/88 e 30/30 |
 | `npm run build` | Build de produção completo | ✅ |
 | Jornada ponta a ponta | Navegador real, servidor local com a API verdadeira, todas as telas | ✅ sem erros de JavaScript |
 

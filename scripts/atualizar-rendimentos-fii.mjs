@@ -4,15 +4,22 @@
 // ou manualmente com:  BRAPI_TOKEN=... node scripts/atualizar-rendimentos-fii.mjs
 //
 // O que faz:
-//   1. Lê a lista de fundos em config/fiis-ifix.json (os 10 maiores do IFIX vigente).
+//   1. Lê os fundos em destaque em config/fiis-ifix.json (os 10 maiores do IFIX vigente).
 //   2. Baixa o Informe Mensal Estruturado de FIIs do Portal de Dados Abertos da CVM
-//      (ano atual e anterior) e calcula o rendimento por cota dos 3 meses mais recentes.
-//   3. Busca a cotação de cada fundo na brapi (plano gratuito: 1 ativo por requisição).
-//   4. Grava webapp-src/src/data/rendimentosFii.json, que o app lê como arquivo estático.
+//      (ano atual e anterior). O arquivo traz TODOS os FIIs registrados: além dos 10 em
+//      destaque, o script aproveita os demais (decisão D12) para a busca livre do app.
+//   3. Estima o rendimento por cota dos 6 meses mais recentes de cada fundo e escolhe UM
+//      para publicar: o mais recente dentro da tolerância em torno da mediana (descarta
+//      meses distorcidos por emissão de cotas ou fechamento de semestre).
+//   4. Busca a cotação de cada fundo na brapi (plano gratuito: 1 ativo por requisição),
+//      com pausa entre chamadas e um teto mensal de requisições (config "outrosFundos").
+//   5. Grava webapp-src/src/data/rendimentosFii.json, que o app lê como arquivo estático.
 //
-// Regra de segurança: se algo parecer errado (coluna não encontrada, poucos fundos com
-// dados, rendimento fora de uma faixa plausível), o script termina com erro SEM gravar o
-// arquivo. O app continua exibindo os dados do mês anterior, e o GitHub avisa da falha.
+// Regras de segurança: se algo parecer errado (coluna obrigatória não encontrada, poucos
+// fundos em destaque válidos, lista ampla muito menor que o esperado), o script termina com
+// erro SEM gravar o arquivo. O app continua exibindo os dados do mês anterior, e o GitHub
+// avisa da falha. Problemas em fundos fora do destaque não derrubam a publicação: o fundo
+// fica de fora ou vai para a lista "indisponiveis", com o motivo.
 
 import { execFileSync } from 'node:child_process'
 import fs from 'node:fs'
@@ -25,7 +32,14 @@ const ARQUIVO_CONFIG = path.join(RAIZ, 'config', 'fiis-ifix.json')
 const ARQUIVO_SAIDA = path.join(RAIZ, 'webapp-src', 'src', 'data', 'rendimentosFii.json')
 const URL_CVM = (ano) => `https://dados.cvm.gov.br/dados/FII/DOC/INF_MENSAL/DADOS/inf_mensal_fii_${ano}.zip`
 const URL_BRAPI = (ticker) => `https://brapi.dev/api/quote/${encodeURIComponent(ticker)}`
-const MESES_HISTORICO = 3
+// Meses de informe analisados por fundo. Só UM é publicado (o mais recente considerado
+// típico), mas a mediana desses meses é a referência para descartar meses distorcidos.
+const MESES_ANALISE = 6
+// Desvio máximo, em relação à mediana, para um mês ser considerado típico. Pode ser
+// sobrescrito em config/fiis-ifix.json ("toleranciaPadrao" ou "tolerancia" por fundo).
+const TOLERANCIA_PADRAO = 0.2
+// A partir de quantos meses com valor idêntico o log avisa de possível informe replicado.
+const MESES_IDENTICOS_SUSPEITOS = 3
 
 // Faixa plausível de rendimento mensal sobre a cota (em %). Fora disso, o dado provavelmente
 // está errado (escala trocada, cotação de outro ativo etc.) e o fundo não é publicado.
@@ -140,122 +154,264 @@ export function competenciaDe(dataReferencia) {
 }
 
 /**
- * Junta as linhas do arquivo "complemento" (valor patrimonial e DY) com as do arquivo
- * "geral" (ISIN e nome) e devolve, por fundo da configuração, os rendimentos por cota dos
- * meses mais recentes.
- *
- * rendimento por cota ≈ DY do mês (fração) × valor patrimonial da cota
- * É uma ESTIMATIVA: o DY do informe é calculado sobre o valor patrimonial, e o valor
- * efetivamente anunciado pelo fundo pode diferir por arredondamento ou ajustes.
+ * Lê os dois arquivos do informe (complemento e geral) uma vez só e monta os índices usados
+ * por montarRendimentos e montarTodosOsFundos:
+ *   cadastro:  CNPJ → { prefixo do ticker (via ISIN), nome }
+ *   porFundo:  CNPJ → competência → linha da versão mais recente
+ *   divisores: competência → divisor da escala do DY
  */
-export function montarRendimentos(linhasComplemento, linhasGeral, fundosConfig, mesesHistorico = MESES_HISTORICO) {
+export function prepararBase(linhasComplemento, linhasGeral) {
   if (linhasComplemento.length === 0) throw new Error('Arquivo "complemento" da CVM veio vazio.')
   if (linhasGeral.length === 0) throw new Error('Arquivo "geral" da CVM veio vazio.')
 
   const cabComp = Object.keys(linhasComplemento[0])
   const cabGeral = Object.keys(linhasGeral[0])
 
-  const colCnpjComp = acharColuna(cabComp, [/^cnpj_fundo_classe$/i, /^cnpj_fundo$/i, /^cnpj/i], { descricao: 'CNPJ no complemento' })
-  const colDataComp = acharColuna(cabComp, [/^data_referencia$/i, /data.*refer/i], { descricao: 'data de referência no complemento' })
-  const colVersaoComp = acharColuna(cabComp, [/^versao$/i], { obrigatoria: false })
-  const colVpCota = acharColuna(cabComp, [/valor_patrimonial_cotas?$/i, /patrimonial.*cota/i], { descricao: 'valor patrimonial da cota' })
-  const colDy = acharColuna(cabComp, [/dividend_yield_mes/i, /dividend_yield/i], { descricao: 'dividend yield do mês' })
+  const col = {
+    cnpjComp: acharColuna(cabComp, [/^cnpj_fundo_classe$/i, /^cnpj_fundo$/i, /^cnpj/i], { descricao: 'CNPJ no complemento' }),
+    dataComp: acharColuna(cabComp, [/^data_referencia$/i, /data.*refer/i], { descricao: 'data de referência no complemento' }),
+    versaoComp: acharColuna(cabComp, [/^versao$/i], { obrigatoria: false }),
+    vpCota: acharColuna(cabComp, [/valor_patrimonial_cotas?$/i, /patrimonial.*cota/i], { descricao: 'valor patrimonial da cota' }),
+    dy: acharColuna(cabComp, [/dividend_yield_mes/i, /dividend_yield/i], { descricao: 'dividend yield do mês' }),
+    // Opcionais: só servem para ordenar e filtrar a lista ampla. Se a CVM renomear, o
+    // script segue sem ordenar por tamanho e sem o filtro de cotistas.
+    pl: acharColuna(cabComp, [/^patrimonio_liquido$/i, /patrimonio_liquido/i], { obrigatoria: false }),
+    cotistas: acharColuna(cabComp, [/^total_numero_cotistas$/i, /total.*cotistas/i], { obrigatoria: false }),
+    cnpjGeral: acharColuna(cabGeral, [/^cnpj_fundo_classe$/i, /^cnpj_fundo$/i, /^cnpj/i], { descricao: 'CNPJ no geral' }),
+    isin: acharColuna(cabGeral, [/isin/i], { obrigatoria: false }),
+    nome: acharColuna(cabGeral, [/^nome_fundo_classe$/i, /^nome_fundo$/i, /^nome/i], { obrigatoria: false }),
+  }
 
-  const colCnpjGeral = acharColuna(cabGeral, [/^cnpj_fundo_classe$/i, /^cnpj_fundo$/i, /^cnpj/i], { descricao: 'CNPJ no geral' })
-  const colIsin = acharColuna(cabGeral, [/isin/i], { obrigatoria: false })
-  const colNome = acharColuna(cabGeral, [/^nome_fundo_classe$/i, /^nome_fundo$/i, /^nome/i], { obrigatoria: false })
-
-  // CNPJ → { prefixo do ticker (via ISIN), nome }
   const cadastro = new Map()
   for (const linha of linhasGeral) {
-    const cnpj = somenteDigitos(linha[colCnpjGeral])
+    const cnpj = somenteDigitos(linha[col.cnpjGeral])
     if (!cnpj) continue
-    const prefixo = colIsin ? prefixoTickerDoIsin(linha[colIsin]) : null
+    const prefixo = col.isin ? prefixoTickerDoIsin(linha[col.isin]) : null
     const anterior = cadastro.get(cnpj) ?? {}
     cadastro.set(cnpj, {
       prefixo: prefixo ?? anterior.prefixo ?? null,
-      nome: (colNome && linha[colNome]) || anterior.nome || null,
+      nome: (col.nome && linha[col.nome]) || anterior.nome || null,
     })
   }
 
   // Escala do DY decidida por competência (o formato pode mudar entre arquivos de anos diferentes)
   const dyPorCompetencia = new Map()
   for (const linha of linhasComplemento) {
-    const comp = competenciaDe(linha[colDataComp])
+    const comp = competenciaDe(linha[col.dataComp])
     if (!comp) continue
     if (!dyPorCompetencia.has(comp)) dyPorCompetencia.set(comp, [])
-    dyPorCompetencia.get(comp).push(lerNumero(linha[colDy]))
+    dyPorCompetencia.get(comp).push(lerNumero(linha[col.dy]))
   }
   const divisores = new Map([...dyPorCompetencia].map(([comp, vals]) => [comp, divisorEscalaDy(vals)]))
 
   // CNPJ → competência → linha da versão mais recente (a CVM publica reapresentações)
   const porFundo = new Map()
   for (const linha of linhasComplemento) {
-    const cnpj = somenteDigitos(linha[colCnpjComp])
-    const comp = competenciaDe(linha[colDataComp])
+    const cnpj = somenteDigitos(linha[col.cnpjComp])
+    const comp = competenciaDe(linha[col.dataComp])
     if (!cnpj || !comp) continue
     if (!porFundo.has(cnpj)) porFundo.set(cnpj, new Map())
     const meses = porFundo.get(cnpj)
-    const versao = colVersaoComp ? lerNumero(linha[colVersaoComp]) ?? 0 : 0
+    const versao = col.versaoComp ? lerNumero(linha[col.versaoComp]) ?? 0 : 0
     const atual = meses.get(comp)
     if (!atual || versao >= atual.versao) meses.set(comp, { versao, linha })
   }
 
-  return fundosConfig.map((fundo) => {
-    const prefixo = fundo.ticker.slice(0, 4).toUpperCase()
-    let cnpj = fundo.cnpj ? somenteDigitos(fundo.cnpj) : null
-    let aviso
-    if (!cnpj) {
-      const candidatos = [...cadastro].filter(([, info]) => info.prefixo === prefixo).map(([c]) => c)
-      if (candidatos.length > 1) {
-        // Com a Resolução CVM 175, fundos migram para um CNPJ novo mantendo ticker e ISIN.
-        // O CNPJ antigo para de enviar informes, então vale o que tem a competência mais recente.
-        const ultimaCompetencia = (c) => [...(porFundo.get(c)?.keys() ?? [])].sort().at(-1) ?? ''
-        const ordenados = candidatos
-          .map((c) => ({ cnpj: c, ultima: ultimaCompetencia(c) }))
-          .sort((a, b) => (a.ultima < b.ultima ? 1 : -1))
-        if (!ordenados[0].ultima || ordenados[0].ultima === ordenados[1].ultima) {
-          return { ticker: fundo.ticker, erro: `ISIN aponta para mais de um CNPJ (${candidatos.join(', ')}) com informes do mesmo mês. Informe "cnpj" em config/fiis-ifix.json.` }
-        }
-        cnpj = ordenados[0].cnpj
-        aviso = `ISIN ligado a ${candidatos.length} CNPJs (${candidatos.join(', ')}); usado ${cnpj}, com informe mais recente (${ordenados[0].ultima}).`
-      } else {
-        cnpj = candidatos[0] ?? null
-      }
-    }
-    if (!cnpj) {
-      return { ticker: fundo.ticker, erro: 'CNPJ não encontrado pelo ISIN. Informe "cnpj" em config/fiis-ifix.json.' }
-    }
+  const competenciaMaisRecente = [...divisores.keys()].sort().at(-1) ?? null
+  return { col, cadastro, porFundo, divisores, competenciaMaisRecente }
+}
 
-    const meses = porFundo.get(cnpj)
-    if (!meses || meses.size === 0) {
-      return { ticker: fundo.ticker, cnpj, erro: 'Nenhum informe mensal encontrado para este CNPJ.' }
-    }
+function ultimaCompetenciaDoCnpj(base, cnpj) {
+  return [...(base.porFundo.get(cnpj)?.keys() ?? [])].sort().at(-1) ?? ''
+}
 
-    const rendimentos = [...meses]
-      .sort(([a], [b]) => (a < b ? 1 : -1))
-      .map(([competencia, { linha }]) => {
-        const dyBruto = lerNumero(linha[colDy])
-        const vpCota = lerNumero(linha[colVpCota])
-        if (dyBruto == null || vpCota == null || vpCota <= 0) return null
-        const valorPorCota = (dyBruto / divisores.get(competencia)) * vpCota
-        return { competencia, valorPorCota: Math.round(valorPorCota * 10000) / 10000 }
-      })
-      .filter((r) => r != null)
-      .slice(0, mesesHistorico)
+/**
+ * Descobre o CNPJ de um prefixo de ticker pelo ISIN do informe "geral".
+ * Com a Resolução CVM 175, fundos migram para um CNPJ novo mantendo ticker e ISIN; o CNPJ
+ * antigo para de enviar informes, então vale o que tem a competência mais recente.
+ */
+export function resolverCnpj(base, prefixo) {
+  const candidatos = [...base.cadastro].filter(([, info]) => info.prefixo === prefixo).map(([c]) => c)
+  if (candidatos.length === 0) return { erro: 'CNPJ não encontrado pelo ISIN. Informe "cnpj" em config/fiis-ifix.json.' }
+  if (candidatos.length === 1) return { cnpj: candidatos[0] }
+  const ordenados = candidatos
+    .map((c) => ({ cnpj: c, ultima: ultimaCompetenciaDoCnpj(base, c) }))
+    .sort((a, b) => (a.ultima < b.ultima ? 1 : -1))
+  if (!ordenados[0].ultima || ordenados[0].ultima === ordenados[1].ultima) {
+    return { erro: `ISIN aponta para mais de um CNPJ (${candidatos.join(', ')}) com informes do mesmo mês. Informe "cnpj" em config/fiis-ifix.json.` }
+  }
+  return {
+    cnpj: ordenados[0].cnpj,
+    aviso: `ISIN ligado a ${candidatos.length} CNPJs (${candidatos.join(', ')}); usado ${ordenados[0].cnpj}, com informe mais recente (${ordenados[0].ultima}).`,
+  }
+}
 
-    if (rendimentos.length === 0) {
-      return { ticker: fundo.ticker, cnpj, erro: 'Informes sem DY ou valor patrimonial preenchidos.' }
-    }
+/**
+ * Rendimentos por cota de um fundo, do mês mais recente para o mais antigo.
+ *
+ * rendimento por cota ≈ DY do mês (fração) × valor patrimonial da cota
+ * É uma ESTIMATIVA: o DY do informe é calculado sobre o valor patrimonial, e o valor
+ * efetivamente anunciado pelo fundo pode diferir por arredondamento ou ajustes.
+ */
+function rendimentosDoFundo(base, fundo, mesesHistorico) {
+  const { col } = base
+  let cnpj = fundo.cnpj ? somenteDigitos(fundo.cnpj) : null
+  let aviso
+  if (!cnpj) {
+    const r = resolverCnpj(base, fundo.ticker.slice(0, 4).toUpperCase())
+    if (r.erro) return { ticker: fundo.ticker, erro: r.erro }
+    cnpj = r.cnpj
+    aviso = r.aviso
+  }
 
-    return {
-      ticker: fundo.ticker,
-      cnpj,
-      nome: fundo.nome ?? cadastro.get(cnpj)?.nome ?? fundo.ticker,
-      rendimentos,
-      ...(aviso ? { aviso } : {}),
+  const meses = base.porFundo.get(cnpj)
+  if (!meses || meses.size === 0) {
+    return { ticker: fundo.ticker, cnpj, erro: 'Nenhum informe mensal encontrado para este CNPJ.' }
+  }
+
+  const ordenados = [...meses].sort(([a], [b]) => (a < b ? 1 : -1))
+  const rendimentos = ordenados
+    .map(([competencia, { linha }]) => {
+      const dyBruto = lerNumero(linha[col.dy])
+      const vpCota = lerNumero(linha[col.vpCota])
+      if (dyBruto == null || vpCota == null || vpCota <= 0) return null
+      const valorPorCota = (dyBruto / base.divisores.get(competencia)) * vpCota
+      return { competencia, valorPorCota: Math.round(valorPorCota * 10000) / 10000 }
+    })
+    .filter((r) => r != null)
+    .slice(0, mesesHistorico)
+
+  if (rendimentos.length === 0) {
+    return { ticker: fundo.ticker, cnpj, erro: 'Informes sem DY ou valor patrimonial preenchidos.' }
+  }
+
+  const linhaRecente = ordenados[0][1].linha
+  const patrimonio = col.pl ? lerNumero(linhaRecente[col.pl]) : null
+  const cotistas = col.cotistas ? lerNumero(linhaRecente[col.cotistas]) : null
+
+  return {
+    ticker: fundo.ticker,
+    cnpj,
+    nome: fundo.nome ?? base.cadastro.get(cnpj)?.nome ?? fundo.ticker,
+    rendimentos,
+    ultimaCompetencia: ordenados[0][0],
+    ...(patrimonio != null ? { patrimonio } : {}),
+    ...(cotistas != null ? { cotistas } : {}),
+    ...(aviso ? { aviso } : {}),
+  }
+}
+
+/**
+ * Junta as linhas do arquivo "complemento" (valor patrimonial e DY) com as do arquivo
+ * "geral" (ISIN e nome) e devolve, por fundo da configuração, os rendimentos por cota dos
+ * meses mais recentes.
+ */
+export function montarRendimentos(linhasComplemento, linhasGeral, fundosConfig, mesesHistorico = MESES_ANALISE) {
+  const base = prepararBase(linhasComplemento, linhasGeral)
+  return fundosConfig.map((fundo) => rendimentosDoFundo(base, fundo, mesesHistorico))
+}
+
+/** "2026-07" menos n meses → "2026-04". */
+export function subtrairMeses(competencia, n) {
+  const [ano, mes] = competencia.split('-').map(Number)
+  const total = ano * 12 + (mes - 1) - n
+  return `${Math.floor(total / 12)}-${String((total % 12) + 1).padStart(2, '0')}`
+}
+
+/**
+ * Lista ampla (decisão D12): os fundos em destaque (config.fundos, os 10 do IFIX) e todos
+ * os demais FIIs do informe que tenham ISIN de cota.
+ *
+ * - O ticker dos demais é o prefixo do ISIN + "11", o padrão das cotas de FII na B3. Se
+ *   o código não existir na bolsa, a brapi responde 404 e o fundo fica de fora.
+ * - Fundos sem informe nos últimos `mesesMaximoAtraso` meses (em relação ao mês mais
+ *   recente do arquivo) são tratados como encerrados ou inadimplentes com a CVM.
+ * - `minimoCotistas` descarta fundos fechados/restritos, que em geral não são negociados
+ *   em bolsa, e poupa requisições da brapi. Só vale se a coluna existir no informe.
+ * - Ordem: destaques na ordem da configuração; depois os demais, do maior patrimônio para
+ *   o menor. Se o limite de requisições da brapi acabar, faltam só os menores.
+ *
+ * Um erro num fundo em destaque é devolvido como erro (o script decide se aborta). Nos
+ * demais, vira item de `ignorados`, sem derrubar nada.
+ */
+export function montarTodosOsFundos(
+  linhasComplemento,
+  linhasGeral,
+  { destaques = [], mesesMaximoAtraso = 3, minimoCotistas = 0, mesesHistorico = MESES_ANALISE } = {},
+) {
+  const base = prepararBase(linhasComplemento, linhasGeral)
+  const limite = base.competenciaMaisRecente ? subtrairMeses(base.competenciaMaisRecente, mesesMaximoAtraso - 1) : ''
+
+  const resultadosDestaque = destaques.map((fundo) => ({ ...rendimentosDoFundo(base, fundo, mesesHistorico), destaque: true }))
+  const prefixosDestaque = new Set(destaques.map((f) => f.ticker.slice(0, 4).toUpperCase()))
+  for (const r of resultadosDestaque) if (r.cnpj) prefixosDestaque.add(base.cadastro.get(r.cnpj)?.prefixo)
+
+  const prefixos = new Set([...base.cadastro.values()].map((i) => i.prefixo).filter((p) => p && !prefixosDestaque.has(p)))
+
+  const outros = []
+  const ignorados = []
+  let poucosCotistas = 0
+  for (const prefixo of prefixos) {
+    const ticker = `${prefixo}11`
+    const r = rendimentosDoFundo(base, { ticker }, mesesHistorico)
+    if (r.erro) {
+      ignorados.push({ ticker, motivo: 'sem-dados', detalhe: r.erro })
+      continue
     }
-  })
+    if (r.ultimaCompetencia < limite) {
+      ignorados.push({ ticker, nome: r.nome, motivo: 'sem-informe-recente', detalhe: `último informe em ${r.ultimaCompetencia}` })
+      continue
+    }
+    if (minimoCotistas > 0 && r.cotistas != null && r.cotistas < minimoCotistas) {
+      poucosCotistas++
+      continue
+    }
+    outros.push(r)
+  }
+  outros.sort((a, b) => (b.patrimonio ?? -1) - (a.patrimonio ?? -1) || a.ticker.localeCompare(b.ticker))
+
+  return { resultados: [...resultadosDestaque, ...outros], ignorados, poucosCotistas, competenciaMaisRecente: base.competenciaMaisRecente }
+}
+
+function mediana(valores) {
+  const ordenados = [...valores].sort((a, b) => a - b)
+  const meio = Math.floor(ordenados.length / 2)
+  return ordenados.length % 2 ? ordenados[meio] : (ordenados[meio - 1] + ordenados[meio]) / 2
+}
+
+/**
+ * Escolhe o rendimento a publicar: o mês mais recente cujo valor fica dentro da tolerância
+ * em torno da mediana dos meses analisados.
+ *
+ * Por quê: a estimativa a partir do informe da CVM se aproxima do resultado contábil do mês
+ * por cota, não do rendimento anunciado. Em meses de emissão de cotas ou de fechamento de
+ * semestre ela se distorce (validação de 24/09/2026: GGRC11 +50% em jul, MXRF11 -25% em jul,
+ * TRXF11 +57% em jun). A mediana de vários meses é resistente a esses pontos fora da curva.
+ *
+ * `rendimentos` vem do mais recente para o mais antigo. Com menos de 3 meses não há
+ * referência confiável: publica o mais recente e avisa.
+ */
+export function escolherRendimento(rendimentos, tolerancia = TOLERANCIA_PADRAO) {
+  if (rendimentos.length === 0) return { escolhido: null, descartados: [], referencia: null }
+  if (rendimentos.length < 3) {
+    return { escolhido: rendimentos[0], descartados: [], referencia: null, semReferencia: true }
+  }
+  const referencia = mediana(rendimentos.map((r) => r.valorPorCota))
+  const descartados = []
+  for (const r of rendimentos) {
+    const desvio = referencia > 0 ? Math.abs(r.valorPorCota - referencia) / referencia : Infinity
+    if (desvio <= tolerancia) return { escolhido: r, descartados, referencia }
+    descartados.push({ ...r, desvio })
+  }
+  return { escolhido: null, descartados, referencia }
+}
+
+/** Quantos dos meses mais recentes repetem exatamente o mesmo valor (sinal de informe replicado). */
+export function mesesIdenticos(rendimentos) {
+  if (rendimentos.length === 0) return 0
+  let n = 1
+  while (n < rendimentos.length && rendimentos[n].valorPorCota === rendimentos[0].valorPorCota) n++
+  return n
 }
 
 /** Confere se o rendimento estimado faz sentido diante da cotação. */
@@ -263,6 +419,37 @@ export function rendimentoPlausivel(valorPorCota, cotacao) {
   if (!(cotacao > 0) || !(valorPorCota > 0)) return false
   const pct = (valorPorCota / cotacao) * 100
   return pct >= RENDIMENTO_MENSAL_MIN_PCT && pct <= RENDIMENTO_MENSAL_MAX_PCT
+}
+
+/**
+ * Sinais de que a estimativa merece menos confiança (o fundo é publicado, mas a tela avisa):
+ *   poucos-meses      menos de 3 meses de informe: não houve conferência pela mediana
+ *   valor-repetido    3 ou mais meses seguidos com o mesmo valor: possível informe replicado
+ *   pouca-negociacao  cotação mais antiga que `diasMaxCotacao`: o fundo quase não negocia,
+ *                     e a cotação exibida pode estar longe do preço atual
+ */
+export function avaliarConfianca({ semReferencia = false, identicos = 1, dataCotacao = null, hoje = new Date(), diasMaxCotacao = 7 }) {
+  const motivos = []
+  if (semReferencia) motivos.push('poucos-meses')
+  if (identicos >= MESES_IDENTICOS_SUSPEITOS) motivos.push('valor-repetido')
+  if (dataCotacao) {
+    const dias = (hoje.getTime() - new Date(`${dataCotacao.slice(0, 10)}T12:00:00Z`).getTime()) / 86_400_000
+    if (dias > diasMaxCotacao) motivos.push('pouca-negociacao')
+  }
+  return motivos
+}
+
+/**
+ * Serializa o arquivo com um fundo por linha: centenas de fundos no formato indentado
+ * deixariam o diff mensal ilegível no GitHub; tudo numa linha só também.
+ */
+export function formatarSnapshot(snapshot) {
+  const linhasDe = (lista) => (lista.length === 0 ? '[]' : `[\n${lista.map((x) => `    ${JSON.stringify(x)}`).join(',\n')}\n  ]`)
+  const campos = Object.entries(snapshot).map(([chave, valor]) => {
+    const texto = Array.isArray(valor) && valor.length > 0 && typeof valor[0] === 'object' ? linhasDe(valor) : JSON.stringify(valor)
+    return `  ${JSON.stringify(chave)}: ${texto}`
+  })
+  return `{\n${campos.join(',\n')}\n}\n`
 }
 
 // ---------------------------------------------------------------------------------------
@@ -290,13 +477,22 @@ async function baixarInformesCvm(ano, pastaTemp) {
   return { complemento: ler('complemento'), geral: ler('geral') }
 }
 
+class ErroBrapi extends Error {
+  constructor(mensagem, status) {
+    super(mensagem)
+    this.status = status
+  }
+}
+
+const esperar = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+
 async function buscarCotacao(ticker, token) {
   const resposta = await fetch(URL_BRAPI(ticker), { headers: { Authorization: `Bearer ${token}` } })
-  if (!resposta.ok) throw new Error(`brapi respondeu ${resposta.status} para ${ticker}.`)
+  if (!resposta.ok) throw new ErroBrapi(`brapi respondeu ${resposta.status} para ${ticker}.`, resposta.status)
   const corpo = await resposta.json()
   const resultado = corpo?.results?.[0]
   const preco = resultado?.regularMarketPrice
-  if (typeof preco !== 'number' || !(preco > 0)) throw new Error(`brapi não trouxe cotação válida para ${ticker}.`)
+  if (typeof preco !== 'number' || !(preco > 0)) throw new ErroBrapi(`brapi não trouxe cotação válida para ${ticker}.`, 200)
   const data = resultado.regularMarketTime ? String(resultado.regularMarketTime).slice(0, 10) : new Date().toISOString().slice(0, 10)
   return { cotacao: Math.round(preco * 100) / 100, dataCotacao: data }
 }
@@ -312,11 +508,13 @@ async function main() {
   const token = process.env.BRAPI_TOKEN
   if (!token) throw new Error('Variável BRAPI_TOKEN não definida (GitHub: Settings > Secrets and variables > Actions).')
 
+  const amplo = { ativo: true, mesesMaximoAtraso: 3, minimoCotistas: 100, maxRequisicoesBrapi: 800, pausaEntreRequisicoesMs: 300, pausaAposLimiteMs: 60_000, minimoFundosTotal: 100, ...(config.outrosFundos ?? {}) }
+
   const pastaTemp = fs.mkdtempSync(path.join(os.tmpdir(), 'cvm-fii-'))
   const anoAtual = new Date().getFullYear()
   const complemento = []
   const geral = []
-  // Ano anterior sempre entra: em jan/fev/mar os 3 meses mais recentes cruzam a virada do ano.
+  // Ano anterior sempre entra: em jan a jun os 6 meses mais recentes cruzam a virada do ano.
   for (const ano of [anoAtual - 1, anoAtual]) {
     const dados = await baixarInformesCvm(ano, pastaTemp)
     if (!dados) continue
@@ -324,44 +522,155 @@ async function main() {
     geral.push(...dados.geral)
   }
 
-  const resultados = montarRendimentos(complemento, geral, config.fundos)
+  const { resultados, ignorados, poucosCotistas, competenciaMaisRecente } = amplo.ativo
+    ? montarTodosOsFundos(complemento, geral, {
+        destaques: config.fundos,
+        mesesMaximoAtraso: amplo.mesesMaximoAtraso,
+        minimoCotistas: amplo.minimoCotistas,
+      })
+    : { resultados: montarRendimentos(complemento, geral, config.fundos).map((r) => ({ ...r, destaque: true })), ignorados: [], poucosCotistas: 0, competenciaMaisRecente: null }
+
+  console.log(
+    `[info] Informe da CVM até ${competenciaMaisRecente ?? '?'}: ${resultados.length} fundos candidatos ` +
+      `(${config.fundos.length} em destaque), ${ignorados.length} ignorados, ${poucosCotistas} com menos de ${amplo.minimoCotistas} cotistas.`,
+  )
 
   const fundos = []
-  const problemas = []
+  const indisponiveis = ignorados.filter((i) => i.motivo === 'sem-informe-recente').map(({ ticker, nome, motivo }) => ({ ticker, nome, motivo }))
+  const problemasDestaque = []
+  let requisicoes = 0
+  let naoListados = 0
+  let semCotacao = 0
+  let limiteEsgotado = false
+  const fmt = (v) => v.toFixed(4).replace('.', ',')
+
   for (const r of resultados) {
+    // Problemas nos fundos em destaque aparecem sempre no log e contam para a trava de
+    // publicação; nos demais, o fundo só fica de fora (ou vai para "indisponiveis").
+    const registrar = (motivo, mensagem) => {
+      if (r.destaque) problemasDestaque.push(`${r.ticker}: ${mensagem}`)
+      if (motivo) indisponiveis.push({ ticker: r.ticker, nome: r.nome ?? r.ticker, motivo })
+    }
+
     if (r.erro) {
-      problemas.push(`${r.ticker}: ${r.erro}`)
+      registrar(null, r.erro)
       continue
     }
-    if (r.aviso) console.log(`[info] ${r.ticker}: ${r.aviso}`)
+    if (r.aviso && r.destaque) console.log(`[info] ${r.ticker}: ${r.aviso}`)
+
+    const fundoConfig = r.destaque ? config.fundos.find((f) => f.ticker === r.ticker) ?? {} : {}
+    const tolerancia = fundoConfig.tolerancia ?? config.toleranciaPadrao ?? TOLERANCIA_PADRAO
+    const { escolhido, descartados, referencia, semReferencia } = escolherRendimento(r.rendimentos, tolerancia)
+    if (r.destaque) {
+      for (const d of descartados) {
+        console.log(
+          `[info] ${r.ticker}: ${d.competencia} descartado (${fmt(d.valorPorCota)} está ${Math.round(d.desvio * 100)}% ` +
+            `da mediana de ${fmt(referencia)}; tolerância ${Math.round(tolerancia * 100)}%).`,
+        )
+      }
+      if (semReferencia) console.warn(`[aviso] ${r.ticker}: só ${r.rendimentos.length} mês(es) de informe; publicado sem conferência pela mediana.`)
+    }
+    if (!escolhido) {
+      registrar('rendimento-atipico', `nenhum dos ${r.rendimentos.length} meses ficou dentro da tolerância de ${Math.round(tolerancia * 100)}% em torno da mediana.`)
+      continue
+    }
+    if (!(escolhido.valorPorCota > 0)) {
+      // Fundo que não distribuiu no mês escolhido (DY zero): nada a simular.
+      registrar('sem-rendimento', 'sem rendimento distribuído no mês de referência.')
+      continue
+    }
+    const identicos = mesesIdenticos(r.rendimentos)
+    if (identicos >= MESES_IDENTICOS_SUSPEITOS && r.destaque) {
+      console.warn(`[aviso] ${r.ticker}: os ${identicos} meses mais recentes têm valor idêntico (${fmt(r.rendimentos[0].valorPorCota)}). Possível informe replicado: conferir com o valor anunciado pelo fundo.`)
+    }
+
+    if (limiteEsgotado || requisicoes >= amplo.maxRequisicoesBrapi) {
+      limiteEsgotado = true
+      if (r.destaque) problemasDestaque.push(`${r.ticker}: limite de requisições da brapi atingido antes deste fundo.`)
+      semCotacao++
+      continue
+    }
+
+    let cotacaoObtida
     try {
-      // Sequencial de propósito: o plano gratuito da brapi aceita 1 requisição simultânea.
-      const { cotacao, dataCotacao } = await buscarCotacao(r.ticker, token)
-      if (!rendimentoPlausivel(r.rendimentos[0].valorPorCota, cotacao)) {
-        const pct = ((r.rendimentos[0].valorPorCota / cotacao) * 100).toFixed(2)
-        problemas.push(`${r.ticker}: rendimento estimado de ${pct}% ao mês sobre a cota está fora da faixa plausível.`)
+      // Sequencial de propósito: o plano gratuito da brapi aceita 1 ativo por requisição.
+      // A pausa entre chamadas evita estourar o limite por minuto com centenas de fundos.
+      if (requisicoes > 0) await esperar(amplo.pausaEntreRequisicoesMs)
+      requisicoes++
+      try {
+        cotacaoObtida = await buscarCotacao(r.ticker, token)
+      } catch (erro) {
+        if (erro.status !== 429) throw erro
+        console.warn(`[aviso] brapi pediu para desacelerar (429) em ${r.ticker}; nova tentativa em ${Math.round(amplo.pausaAposLimiteMs / 1000)} s.`)
+        await esperar(amplo.pausaAposLimiteMs)
+        requisicoes++
+        cotacaoObtida = await buscarCotacao(r.ticker, token)
+      }
+    } catch (erro) {
+      if (erro.status === 429) {
+        // Segundo 429 seguido: cota do plano acabou. Publica o que já tem.
+        limiteEsgotado = true
+        console.warn('[aviso] brapi continuou recusando (429). Os fundos restantes ficam sem cotação neste mês.')
+        if (r.destaque) problemasDestaque.push(`${r.ticker}: ${erro.message}`)
+        semCotacao++
         continue
       }
-      fundos.push({ ticker: r.ticker, nome: r.nome, cotacao, dataCotacao, rendimentos: r.rendimentos })
-    } catch (erro) {
-      problemas.push(`${r.ticker}: ${erro.message}`)
+      if (!r.destaque && (erro.status === 404 || erro.status === 400)) {
+        naoListados++ // código "XXXX11" não existe na B3: fundo não listado, fica de fora em silêncio
+        continue
+      }
+      registrar('sem-cotacao', erro.message)
+      semCotacao++
+      continue
     }
+
+    const { cotacao, dataCotacao } = cotacaoObtida
+    if (!rendimentoPlausivel(escolhido.valorPorCota, cotacao)) {
+      const pct = ((escolhido.valorPorCota / cotacao) * 100).toFixed(2)
+      registrar('fora-da-faixa', `rendimento estimado de ${pct}% ao mês sobre a cota está fora da faixa plausível.`)
+      continue
+    }
+
+    const motivos = avaliarConfianca({ semReferencia, identicos, dataCotacao })
+    // Publica só o mês escolhido: a tela mostra o último rendimento típico, sem média (D10).
+    fundos.push({
+      ticker: r.ticker,
+      nome: r.nome,
+      cotacao,
+      dataCotacao,
+      rendimentos: [escolhido],
+      ...(motivos.length > 0 ? { confianca: 'baixa', motivosConfianca: motivos } : {}),
+    })
   }
 
-  for (const p of problemas) console.warn(`[aviso] ${p}`)
+  for (const p of problemasDestaque) console.warn(`[aviso] ${p}`)
+  const baixaConfianca = fundos.filter((f) => f.confianca === 'baixa').length
+  console.log(
+    `[info] brapi: ${requisicoes} requisições, ${naoListados} códigos não listados na B3, ${semCotacao} sem cotação` +
+      `${limiteEsgotado ? ' (limite atingido)' : ''}. Publicáveis: ${fundos.length} (${baixaConfianca} com baixa confiança); indisponíveis: ${indisponiveis.length}.`,
+  )
 
+  // Trava 1 (a mesma de antes): os fundos em destaque precisam estar quase todos válidos.
+  const tickersDestaque = config.fundos.map((f) => f.ticker)
+  const destaquesValidos = fundos.filter((f) => tickersDestaque.includes(f.ticker)).length
   const minimo = config.minimoFundosParaPublicar ?? Math.ceil(config.fundos.length * 0.8)
-  if (fundos.length < minimo) {
-    throw new Error(`Só ${fundos.length} de ${config.fundos.length} fundos ficaram válidos (mínimo ${minimo}). Arquivo NÃO atualizado.`)
+  if (destaquesValidos < minimo) {
+    throw new Error(`Só ${destaquesValidos} de ${config.fundos.length} fundos em destaque ficaram válidos (mínimo ${minimo}). Arquivo NÃO atualizado.`)
+  }
+  // Trava 2: a lista ampla não pode encolher de repente (coluna renomeada, brapi fora do ar).
+  if (amplo.ativo && fundos.length < amplo.minimoFundosTotal) {
+    throw new Error(`Só ${fundos.length} fundos no total ficaram válidos (mínimo ${amplo.minimoFundosTotal}). Arquivo NÃO atualizado.`)
   }
 
   const snapshot = {
     geradoEm: new Date().toISOString(),
     vigenciaIfix: config.vigencia,
+    destaques: tickersDestaque.filter((t) => fundos.some((f) => f.ticker === t)),
     fundos,
+    indisponiveis: indisponiveis.sort((a, b) => a.ticker.localeCompare(b.ticker)),
   }
-  fs.writeFileSync(ARQUIVO_SAIDA, JSON.stringify(snapshot, null, 2) + '\n')
-  console.log(`rendimentosFii.json atualizado com ${fundos.length} fundos.`)
+  fs.writeFileSync(ARQUIVO_SAIDA, formatarSnapshot(snapshot))
+  console.log(`rendimentosFii.json atualizado com ${fundos.length} fundos (${destaquesValidos} em destaque).`)
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

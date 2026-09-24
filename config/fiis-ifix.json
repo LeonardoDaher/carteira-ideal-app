@@ -1,18 +1,51 @@
 {
-  "_leia": "Lista dos 10 maiores FIIs do IFIX, na ordem de participação no índice. A B3 rebalanceia o IFIX a cada 4 meses (jan, mai, set): a cada rebalanceamento, confira a carteira teórica em b3.com.br (Índices > IFIX > Composição da carteira), atualize os tickers e 'vigencia' e marque 'conferidoNaB3': true. O campo 'cnpj' é opcional: só preencha se o script avisar que não achou o fundo pelo ISIN.",
+  "_leia": "Lista dos 10 maiores FIIs do IFIX, na ordem de participação no índice. A B3 rebalanceia o IFIX a cada 4 meses (jan, mai, set): a cada rebalanceamento, confira a carteira teórica em b3.com.br (Índices > IFIX > Composição da carteira), atualize os tickers e 'vigencia' e marque 'conferidoNaB3': true. O campo 'cnpj' é opcional: só preencha se o script avisar que não achou o fundo pelo ISIN. 'toleranciaPadrao' é o desvio máximo aceito em relação à mediana dos últimos 6 meses (0.2 = 20%): meses fora disso são tratados como distorcidos (emissão de cotas, fechamento de semestre) e o app mostra o mês típico anterior. Fundos cujo rendimento varia de verdade todo mês (ex.: fundos de inflação como o KNIP11) podem ter 'tolerancia' própria, mais larga. Os 10 fundos abaixo são os DESTAQUES (chips da tela e trava de publicação). Desde a decisão D12, o script também publica os demais FIIs do Informe Mensal da CVM para a busca livre; os parâmetros dessa lista ampla ficam em 'outrosFundos' (ver o bloco '_leia' dentro dele).",
   "vigencia": "set a dez/2026",
   "conferidoNaB3": true,
   "minimoFundosParaPublicar": 8,
+  "toleranciaPadrao": 0.2,
+  "outrosFundos": {
+    "_leia": "Lista ampla (D12). 'ativo': false volta a publicar só os destaques. 'mesesMaximoAtraso': fundos sem informe nos últimos N meses ficam de fora (encerrados ou atrasados com a CVM). 'minimoCotistas': fundos com menos cotistas costumam ser restritos, fora da bolsa; filtrá-los poupa requisições. 'maxRequisicoesBrapi': teto por execução, para não estourar a cota mensal do plano gratuito (confira a cota vigente no painel da brapi). 'minimoFundosTotal': se menos fundos que isso ficarem válidos, o arquivo NÃO é atualizado.",
+    "ativo": true,
+    "mesesMaximoAtraso": 3,
+    "minimoCotistas": 100,
+    "maxRequisicoesBrapi": 800,
+    "pausaEntreRequisicoesMs": 300,
+    "pausaAposLimiteMs": 60000,
+    "minimoFundosTotal": 100
+  },
   "fundos": [
-    { "ticker": "KNIP11" },
-    { "ticker": "KNCR11" },
-    { "ticker": "HGLG11" },
-    { "ticker": "XPML11" },
-    { "ticker": "BTLG11" },
-    { "ticker": "KNRI11" },
-    { "ticker": "MXRF11" },
-    { "ticker": "GGRC11" },
-    { "ticker": "XPLG11" },
-    { "ticker": "TRXF11", "cnpj": "28.548.288/0001-52" }
+    {
+      "ticker": "KNIP11",
+      "tolerancia": 0.5
+    },
+    {
+      "ticker": "KNCR11"
+    },
+    {
+      "ticker": "HGLG11"
+    },
+    {
+      "ticker": "XPML11"
+    },
+    {
+      "ticker": "BTLG11"
+    },
+    {
+      "ticker": "KNRI11"
+    },
+    {
+      "ticker": "MXRF11"
+    },
+    {
+      "ticker": "GGRC11"
+    },
+    {
+      "ticker": "XPLG11"
+    },
+    {
+      "ticker": "TRXF11",
+      "cnpj": "28.548.288/0001-52"
+    }
   ]
 }

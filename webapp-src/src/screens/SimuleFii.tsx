@@ -1,15 +1,21 @@
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import dadosRendimentos from '../data/rendimentosFii.json'
 import {
   QUANTIDADES_PADRAO,
+  TEXTO_MOTIVO_CONFIANCA,
+  TEXTO_MOTIVO_INDISPONIVEL,
+  acharIndisponivel,
+  buscarFundos,
   formatarCompetencia,
+  fundosEmDestaque,
+  nomeCurto,
   formatarData,
   rendimentoMensalPct,
   simularCotas,
   tabelaSimulacao,
   ultimoRendimento,
 } from '../domain/rendaFii'
-import type { SnapshotRendimentosFii } from '../domain/rendaFii'
+import type { FundoFii, SnapshotRendimentosFii } from '../domain/rendaFii'
 import { VoltarInicio } from '../ui/VoltarInicio'
 import { AvisoEducacional } from '../ui/AvisoEducacional'
 import type { AppCtx } from '../state/useAppState'
@@ -44,10 +50,16 @@ export function SimuleFii({
   snapshot?: SnapshotRendimentosFii
 }) {
   const fundos = snapshot.fundos
-  const [tickerSelecionado, setTickerSelecionado] = useState<string | undefined>(fundos[0]?.ticker)
+  const destaques = fundosEmDestaque(snapshot)
+  const [tickerSelecionado, setTickerSelecionado] = useState<string | undefined>(destaques[0]?.ticker ?? fundos[0]?.ticker)
   const [quantidadeLivre, setQuantidadeLivre] = useState('')
 
-  const fundo = fundos.find((f) => f.ticker === tickerSelecionado) ?? fundos[0]
+  const fundo = fundos.find((f) => f.ticker === tickerSelecionado) ?? destaques[0] ?? fundos[0]
+
+  const selecionar = (ticker: string) => {
+    setTickerSelecionado(ticker)
+    setQuantidadeLivre('')
+  }
 
   return (
     <div className="screen">
@@ -56,7 +68,8 @@ export function SimuleFii({
       <div className="col" style={{ gap: 4 }}>
         <h1 style={{ fontSize: 21 }}>Simule sua renda com FIIs</h1>
         <div className="muted small justify">
-          Escolha um dos maiores fundos imobiliários do IFIX e veja quanto cada quantidade de cotas rendeu por mês.
+          Busque um fundo imobiliário pelo código ou pelo nome, ou escolha um dos maiores do IFIX, e veja quanto cada
+          quantidade de cotas rendeu por mês.
         </div>
       </div>
 
@@ -70,28 +83,35 @@ export function SimuleFii({
         </div>
       ) : (
         <>
-          <div className="col" style={{ gap: 6 }}>
-            <span className="tiny muted">
-              Ordem de participação no IFIX{snapshot.vigenciaIfix ? ` (carteira de ${snapshot.vigenciaIfix})` : ''}
-            </span>
-            <div className="grade-tickers" role="group" aria-label="Fundo imobiliário">
-              {fundos.map((f) => (
-                <button
-                  key={f.ticker}
-                  className={`chip ${f.ticker === fundo.ticker ? 'selected' : ''}`}
-                  aria-pressed={f.ticker === fundo.ticker}
-                  onClick={() => {
-                    setTickerSelecionado(f.ticker)
-                    setQuantidadeLivre('')
-                  }}
-                >
-                  {f.ticker}
-                </button>
-              ))}
-            </div>
-          </div>
+          <BuscaFundo snapshot={snapshot} onSelecionar={selecionar} />
 
-          <CartaoFundo fundo={fundo} quantidadeLivre={quantidadeLivre} setQuantidadeLivre={setQuantidadeLivre} />
+          {destaques.length > 0 && (
+            <div className="col" style={{ gap: 6 }}>
+              <span className="tiny muted">
+                Maiores do IFIX, em ordem de participação
+                {snapshot.vigenciaIfix ? ` (carteira de ${snapshot.vigenciaIfix})` : ''}
+              </span>
+              <div className="grade-tickers" role="group" aria-label="Maiores fundos do IFIX">
+                {destaques.map((f) => (
+                  <button
+                    key={f.ticker}
+                    className={`chip ${f.ticker === fundo.ticker ? 'selected' : ''}`}
+                    aria-pressed={f.ticker === fundo.ticker}
+                    onClick={() => selecionar(f.ticker)}
+                  >
+                    {f.ticker}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <CartaoFundo
+            key={fundo.ticker}
+            fundo={fundo}
+            quantidadeLivre={quantidadeLivre}
+            setQuantidadeLivre={setQuantidadeLivre}
+          />
         </>
       )}
 
@@ -101,10 +121,93 @@ export function SimuleFii({
         <strong>Rentabilidade obtida no passado não representa garantia de rentabilidade futura.</strong> O rendimento de
         um FII muda todo mês e pode diminuir ou ser suspenso. A cotação também oscila: o valor investido pode cair. Os
         rendimentos costumam ser isentos de IR para pessoa física quando o fundo e o investidor cumprem as condições
-        previstas em lei.
+        previstas em lei. Encontrar um fundo na busca não é uma indicação de compra.
       </div>
 
       <AvisoEducacional />
+    </div>
+  )
+}
+
+/**
+ * Busca livre (decisão D12): qualquer FII com dado publicável no mês, por código ou por
+ * parte do nome. Os resultados são botões comuns numa lista: Tab percorre, Enter escolhe;
+ * Enter no campo escolhe o primeiro resultado.
+ */
+function BuscaFundo({ snapshot, onSelecionar }: { snapshot: SnapshotRendimentosFii; onSelecionar: (ticker: string) => void }) {
+  const [termo, setTermo] = useState('')
+  const idResultados = useId()
+  const resultados = buscarFundos(snapshot.fundos, termo)
+  const buscando = termo.trim().length >= 2
+  const indisponivel = buscando && resultados.length === 0 ? acharIndisponivel(snapshot, termo) : null
+
+  const escolher = (f: FundoFii) => {
+    onSelecionar(f.ticker)
+    setTermo('')
+  }
+
+  return (
+    <div className="col" style={{ gap: 6 }}>
+      <input
+        type="search"
+        className="busca-fii"
+        placeholder="Código ou nome, ex.: HGLG11"
+        aria-label="Buscar fundo imobiliário por código ou nome"
+        aria-controls={idResultados}
+        autoCapitalize="characters"
+        autoCorrect="off"
+        spellCheck={false}
+        enterKeyHint="search"
+        value={termo}
+        onChange={(e) => setTermo(e.target.value.slice(0, 40))}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && resultados[0]) {
+            e.preventDefault()
+            escolher(resultados[0])
+          }
+          if (e.key === 'Escape') setTermo('')
+        }}
+      />
+
+      <div id={idResultados} aria-live="polite">
+        {buscando && resultados.length > 0 && (
+          <ul className="resultados-busca" aria-label="Fundos encontrados">
+            {resultados.map((f) => (
+              <li key={f.ticker}>
+                <button className="resultado-busca" onClick={() => escolher(f)}>
+                  <span style={{ fontWeight: 700 }}>{f.ticker}</span>
+                  <span className="tiny muted resultado-nome">{nomeCurto(f.nome)}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {buscando && resultados.length === 0 && (
+          <div className="card-outline small justify" style={{ lineHeight: 1.5 }} role="status">
+            {indisponivel ? (
+              <>
+                <strong>{indisponivel.ticker} está sem dados neste mês:</strong>{' '}
+                <span className="muted">{TEXTO_MOTIVO_INDISPONIVEL[indisponivel.motivo]}. Tente novamente na próxima atualização.</span>
+              </>
+            ) : (
+              <>
+                <strong>Nenhum fundo encontrado para “{termo.trim()}”.</strong>{' '}
+                <span className="muted">
+                  Confira o código (4 letras e 11, como HGLG11) ou busque por parte do nome. Só aparecem fundos negociados
+                  na B3 que enviaram o Informe Mensal à CVM recentemente.
+                </span>
+              </>
+            )}
+          </div>
+        )}
+      </div>
+
+      {!buscando && (
+        <span className="tiny muted">
+          {snapshot.fundos.length.toLocaleString('pt-BR')} fundos com dados nesta atualização.
+        </span>
+      )}
     </div>
   )
 }
@@ -138,7 +241,7 @@ function CartaoFundo({
               className="tiny muted"
               style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
             >
-              {fundo.nome}
+              {nomeCurto(fundo.nome)}
             </span>
           </div>
           <div className="col" style={{ gap: 2, alignItems: 'flex-end', flexShrink: 0 }}>
@@ -164,6 +267,20 @@ function CartaoFundo({
             <span className="tiny muted">ao mês, estimado</span>
           </div>
         </div>
+
+        {fundo.confianca === 'baixa' && (
+          <div className="card-outline small justify aviso-atraso" style={{ lineHeight: 1.5 }} role="note">
+            <strong>Estimativa menos confiável.</strong>{' '}
+            <span className="muted">
+              {(fundo.motivosConfianca ?? [])
+                .map((m) => TEXTO_MOTIVO_CONFIANCA[m])
+                .join('; ')
+                .replace(/^./, (c) => c.toUpperCase())}
+              {fundo.motivosConfianca?.length ? '. ' : ''}
+              Confira o valor anunciado pelo fundo antes de usar este número.
+            </span>
+          </div>
+        )}
 
         {valorBase != null && (
           <div className="small justify" style={{ lineHeight: 1.5 }}>
