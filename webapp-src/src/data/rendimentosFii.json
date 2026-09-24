@@ -1,5 +1,186 @@
 {
-  "geradoEm": null,
-  "vigenciaIfix": null,
-  "fundos": []
+  "geradoEm": "2026-09-24T15:44:52.220Z",
+  "vigenciaIfix": "set a dez/2026",
+  "fundos": [
+    {
+      "ticker": "KNIP11",
+      "nome": "KINEA INDICES DE PREÇOS FII RESPONSABILIDADE LIMITADA",
+      "cotacao": 89.22,
+      "dataCotacao": "2026-09-24",
+      "rendimentos": [
+        {
+          "competencia": "2026-08",
+          "valorPorCota": 0.6537
+        },
+        {
+          "competencia": "2026-07",
+          "valorPorCota": 0.9582
+        },
+        {
+          "competencia": "2026-06",
+          "valorPorCota": 1.1036
+        }
+      ]
+    },
+    {
+      "ticker": "KNCR11",
+      "nome": "KINEA RENDIMENTOS IMOBILIARIOS FII RESPONSABILIDADE LIMITADA",
+      "cotacao": 105.22,
+      "dataCotacao": "2026-09-24",
+      "rendimentos": [
+        {
+          "competencia": "2026-08",
+          "valorPorCota": 1.1513
+        },
+        {
+          "competencia": "2026-07",
+          "valorPorCota": 1.2504
+        },
+        {
+          "competencia": "2026-06",
+          "valorPorCota": 1.1011
+        }
+      ]
+    },
+    {
+      "ticker": "HGLG11",
+      "nome": "PÁTRIA LOG - FUNDO DE INVESTIMENTO IMOBILIÁRIO",
+      "cotacao": 147.38,
+      "dataCotacao": "2026-09-24",
+      "rendimentos": [
+        {
+          "competencia": "2026-08",
+          "valorPorCota": 1.1676
+        },
+        {
+          "competencia": "2026-07",
+          "valorPorCota": 1.1688
+        },
+        {
+          "competencia": "2026-06",
+          "valorPorCota": 1.1039
+        }
+      ]
+    },
+    {
+      "ticker": "XPML11",
+      "nome": "XP MALLS FII",
+      "cotacao": 98.12,
+      "dataCotacao": "2026-09-24",
+      "rendimentos": [
+        {
+          "competencia": "2026-08",
+          "valorPorCota": 0.8576
+        },
+        {
+          "competencia": "2026-07",
+          "valorPorCota": 0.8576
+        },
+        {
+          "competencia": "2026-06",
+          "valorPorCota": 0.8576
+        }
+      ]
+    },
+    {
+      "ticker": "BTLG11",
+      "nome": "BTGP LOGISTICA FII",
+      "cotacao": 98,
+      "dataCotacao": "2026-09-24",
+      "rendimentos": [
+        {
+          "competencia": "2026-08",
+          "valorPorCota": 0.8988
+        },
+        {
+          "competencia": "2026-07",
+          "valorPorCota": 1.0126
+        },
+        {
+          "competencia": "2026-06",
+          "valorPorCota": 0.9165
+        }
+      ]
+    },
+    {
+      "ticker": "KNRI11",
+      "nome": "KINEA RENDA IMOBILIARIA FII RESPONSABILIDADE LIMITADA",
+      "cotacao": 154.93,
+      "dataCotacao": "2026-09-24",
+      "rendimentos": [
+        {
+          "competencia": "2026-08",
+          "valorPorCota": 1.1012
+        },
+        {
+          "competencia": "2026-07",
+          "valorPorCota": 1.0991
+        },
+        {
+          "competencia": "2026-06",
+          "valorPorCota": 1.3832
+        }
+      ]
+    },
+    {
+      "ticker": "MXRF11",
+      "nome": "FII MAXI RENDA RL",
+      "cotacao": 9.03,
+      "dataCotacao": "2026-09-24",
+      "rendimentos": [
+        {
+          "competencia": "2026-08",
+          "valorPorCota": 0.0938
+        },
+        {
+          "competencia": "2026-07",
+          "valorPorCota": 0.0748
+        },
+        {
+          "competencia": "2026-06",
+          "valorPorCota": 0.108
+        }
+      ]
+    },
+    {
+      "ticker": "GGRC11",
+      "nome": "ZAGROS RENDA IMOBILIÁRIA FII RESPONSABIL",
+      "cotacao": 8.96,
+      "dataCotacao": "2026-09-24",
+      "rendimentos": [
+        {
+          "competencia": "2026-08",
+          "valorPorCota": 0.0984
+        },
+        {
+          "competencia": "2026-07",
+          "valorPorCota": 0.1504
+        },
+        {
+          "competencia": "2026-06",
+          "valorPorCota": 0.1217
+        }
+      ]
+    },
+    {
+      "ticker": "XPLG11",
+      "nome": "XP LOG FII RL",
+      "cotacao": 91.92,
+      "dataCotacao": "2026-09-24",
+      "rendimentos": [
+        {
+          "competencia": "2026-08",
+          "valorPorCota": 0.818
+        },
+        {
+          "competencia": "2026-07",
+          "valorPorCota": 0.8189
+        },
+        {
+          "competencia": "2026-06",
+          "valorPorCota": 0.8183
+        }
+      ]
+    }
+  ]
 }
