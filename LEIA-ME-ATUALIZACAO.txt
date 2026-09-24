@@ -1,0 +1,46 @@
+CARTEIRA IDEAL - ATUALIZAÇÃO "SIMULE FII" (24/09/2026)
+======================================================
+
+Nova aba 🏢 "Simule FII": para os 10 maiores FIIs do IFIX, mostra cotação, último
+rendimento, média de 3 meses e a renda mensal estimada para 10 a 5.000 cotas (ou
+qualquer quantidade), com o investimento necessário ao lado. Dados da CVM + brapi
+gratuito, atualizados uma vez por mês, com o aviso de atraso exibido no app.
+Detalhes: docs/07-registro-de-decisoes.md, decisão D9.
+
+Verificado antes da entrega: 65/65 testes do app, 12/12 do script mensal, typecheck
+e lint sem erros, build de produção OK, tela conferida no celular (360 e 390 px) nos
+temas claro e escuro, motor de alocação continua fora do código do navegador.
+
+ARQUIVOS NOVOS
+  .github/workflows/atualizar-rendimentos-fii.yml   job mensal (dia 20)
+  config/fiis-ifix.json                             lista dos 10 fundos (CONFERIR NA B3)
+  scripts/atualizar-rendimentos-fii.mjs             busca CVM + brapi e gera o JSON
+  scripts/atualizar-rendimentos-fii.test.mjs        testes do script
+  webapp-src/src/domain/rendaFii.ts                 cálculos da aba
+  webapp-src/src/domain/rendaFii.test.ts
+  webapp-src/src/screens/SimuleFii.tsx              a tela
+  webapp-src/src/screens/SimuleFii.test.tsx
+  webapp-src/src/data/rendimentosFii.json           dados (vazio até o 1º job rodar)
+
+ARQUIVOS ALTERADOS (substituir pelos deste pacote)
+  package.json, webapp-src/tsconfig.app.json, webapp-src/src/index.css,
+  webapp-src/src/state/useAppState.ts, webapp-src/src/ui/TabBar.tsx,
+  webapp-src/src/App.tsx, docs/03, docs/06, docs/07
+
+ATENÇÃO AO SUBIR PELO NAVEGADOR
+  A pasta ".github" começa com ponto e alguns sistemas a escondem ao arrastar.
+  Se ela não subir, crie o arquivo no GitHub em Add file > Create new file,
+  digite o caminho .github/workflows/atualizar-rendimentos-fii.yml e cole o conteúdo.
+
+PARA LIGAR OS DADOS (uma vez só) - também em docs/06-proximos-passos.md, bloco 7
+  1. Conferir os 10 maiores do IFIX na B3, ajustar config/fiis-ifix.json e marcar
+     "conferidoNaB3": true. A lista que veio é provisória.
+  2. Criar a chave gratuita em brapi.dev/dashboard e cadastrar no GitHub:
+     Settings > Secrets and variables > Actions > Secrets > BRAPI_TOKEN
+  3. Na mesma tela, aba Variables: COMMIT_AUTOR_NOME e COMMIT_AUTOR_EMAIL com o nome
+     e o e-mail da sua conta do GitHub (para a Vercel aceitar o deploy automático).
+  4. Actions > "Atualizar rendimentos de FIIs" > Run workflow. Depois, conferir 2 ou
+     3 fundos no site da B3 ou do próprio fundo.
+
+Enquanto o passo 4 não rodar, a aba aparece normalmente com a mensagem "Os dados deste
+mês ainda não foram carregados" - nada quebra.

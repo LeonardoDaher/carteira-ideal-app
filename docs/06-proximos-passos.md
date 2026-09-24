@@ -4,13 +4,13 @@ Organizados por prioridade. Os itens do bloco 1 são necessários para lançar; 
 
 ## 1. Lançamento (fazer agora)
 
-- [ ] Criar o repositório privado `carteira-ideal-app` e subir os arquivos ([5.1 A](05-publicacao-e-operacao.md#passo-a--subir-os-arquivos-para-um-repositório-privado-no-github)).
-- [ ] Conectar à Vercel e publicar ([5.1 B](05-publicacao-e-operacao.md#passo-b--publicar-na-vercel)).
-- [ ] Testar a jornada completa no celular, incluindo um vídeo.
-- [ ] Decidir o endereço definitivo: `*.vercel.app` gratuito ou domínio próprio (ex.: `carteiraideal.com.br`, registrado no Registro.br e apontado para a Vercel em *Settings → Domains*). Domínio próprio passa mais credibilidade e não muda se um dia a hospedagem mudar.
-- [ ] Atualizar `og:image` e `og:url` no `index.html` para o endereço definitivo.
-- [ ] Testar a prévia do link colando o endereço numa conversa do WhatsApp.
-- [ ] Colocar o link na bio do Instagram.
+- [x] Criar o repositório privado `carteira-ideal-app` e subir os arquivos ([5.1 A](05-publicacao-e-operacao.md#passo-a--subir-os-arquivos-para-um-repositório-privado-no-github)).
+- [x] Conectar à Vercel e publicar ([5.1 B](05-publicacao-e-operacao.md#passo-b--publicar-na-vercel)).
+- [x] Testar a jornada completa no celular, incluindo um vídeo.
+- [x] Domínio próprio registrado e conectado: `carteiraideal.app.br` (ver decisão D8 no [Registro de decisões](07-registro-de-decisoes.md)). O endereço `carteira-ideal-app.vercel.app` continua ativo, mas não é mais divulgado.
+- [x] Atualizar `og:image` e `og:url` no `index.html` para o endereço definitivo (`https://carteiraideal.app.br/`).
+- [x] Testar a prévia do link colando o endereço numa conversa do WhatsApp.
+- [x] Colocar o link na bio do Instagram — testado tocando dentro do próprio app do Instagram.
 - [ ] Decidir o destino do repositório antigo `Carteira-Ideal` (já privado): manter como arquivo histórico ou apagar.
 
 ## 2. Proteção da metodologia
@@ -48,3 +48,11 @@ A mudança para a API tirou a metodologia do código visível. Ainda assim, vale
 - [ ] **Verificação automática a cada envio** (GitHub Actions rodando `typecheck` e `test`), para uma alteração errada no motor não chegar ao ar.
 - [ ] **Monitoramento de erros** da API (logs da Vercel ou um serviço como o Sentry).
 - [ ] **Links pendentes:** o `script.js` da landing avisa no console sobre links marcados como pendentes (`data-todo`). Hoje não há nenhum, mas o mecanismo continua ativo para os próximos.
+
+## 7. Aba "Simule FII" (decisão D9)
+
+- [ ] **Conferir os 10 maiores do IFIX** na carteira teórica vigente (b3.com.br > Índices > IFIX > Composição da carteira), ajustar `config/fiis-ifix.json` e marcar `"conferidoNaB3": true`. A lista que veio no arquivo é provisória.
+- [ ] **Criar a chave gratuita da brapi** (brapi.dev/dashboard) e cadastrar no GitHub como secret `BRAPI_TOKEN`.
+- [ ] **Cadastrar as variáveis `COMMIT_AUTOR_NOME` e `COMMIT_AUTOR_EMAIL`** no GitHub (aba Variables), com o nome e o e-mail da sua conta, para a Vercel aceitar o deploy do commit automático.
+- [ ] **Rodar o job manualmente a primeira vez** (Actions > Atualizar rendimentos de FIIs > Run workflow) e conferir 2 ou 3 fundos no site da B3 ou do próprio fundo.
+- [ ] **Repetir a conferência do IFIX** em janeiro, maio e setembro.

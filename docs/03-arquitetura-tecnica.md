@@ -70,6 +70,20 @@ O navegador conhece as **perguntas** (precisa exibi-las) e recebe o **resultado*
 - `respostasArquitetura`: letras `a` a `c`, opcional (sem ela, o motor usa a matriz de fallback).
 - Respostas: `200` com o resultado (`perfilFinalCarteira`, `carteira` em %, `alertas`, `vetoAplicado`, `capacidadeReal`...), `400` para dados inválidos, `405` para método diferente de POST, `500` para erro interno.
 
+## Aba "Simule FII" (dados mensais)
+
+```
+GitHub Actions (dia 20 de cada mês)
+  scripts/atualizar-rendimentos-fii.mjs
+    ├─ config/fiis-ifix.json ............ os 10 maiores do IFIX (conferidos na B3)
+    ├─ CVM Dados Abertos (zip do ano) ... rendimento estimado por cota, 3 meses
+    └─ brapi (plano gratuito) ........... cotação, 1 fundo por requisição
+  → grava webapp-src/src/data/rendimentosFii.json → commit → Vercel republica
+App: screens/SimuleFii.tsx lê o JSON estático (cálculos em domain/rendaFii.ts)
+```
+
+O navegador do cliente nunca chama a CVM nem a brapi, e a chave da brapi fica só nos GitHub Secrets. Detalhes e salvaguardas: decisão D9 no [Registro de decisões](07-registro-de-decisoes.md).
+
 ## Decisões técnicas relevantes
 
 - **Por que o motor ficou em `webapp-src/src/domain/` e não dentro de `api/`?** Para os testes automatizados do motor (`engine.test.ts`, 26 testes) continuarem funcionando sem alteração. O app não importa mais esse arquivo; só a API importa. O build do app foi verificado: nenhum trecho do motor aparece em `dist-site/app/index.html`.
@@ -82,7 +96,7 @@ O navegador conhece as **perguntas** (precisa exibi-las) e recebe o **resultado*
 | Comando | O que verifica | Situação |
 |---|---|---|
 | `npm run typecheck` | Tipos do app e da API juntos | ✅ sem erros |
-| `npm run test` | 52 testes (motor, estado, questionário, visual, tratamento de erro) | ✅ 52/52 |
+| `npm run test` | 65 testes do app (motor, estado, questionário, visual, tratamento de erro, Simule FII) + 12 do script mensal da CVM | ✅ 65/65 e 12/12 |
 | `npm run build` | Build de produção completo | ✅ |
 | Jornada ponta a ponta | Navegador real, servidor local com a API verdadeira, todas as telas | ✅ sem erros de JavaScript |
 

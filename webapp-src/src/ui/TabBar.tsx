@@ -4,6 +4,7 @@ const ABAS: { screen: Screen; label: string; icone: string }[] = [
   { screen: 'resultado', label: 'Perfil', icone: '🧭' },
   { screen: 'carteira', label: 'Carteira', icone: '📊' },
   { screen: 'simulador', label: 'Simular', icone: '🧮' },
+  { screen: 'simuleFii', label: 'Simule FII', icone: '🏢' },
   { screen: 'aprender', label: 'Aprender', icone: '🎓' },
 ]
 

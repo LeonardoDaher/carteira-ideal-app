@@ -427,11 +427,16 @@ button {
   display: flex;
   align-items: center;
   justify-content: space-around;
-  padding: 14px 20px;
+  padding: 14px 12px;
   border-top: 1px solid var(--border);
 }
-.tab { display: flex; flex-direction: column; align-items: center; gap: 6px; color: var(--text-muted); font-size: 13px; font-weight: 500; }
+/* Com 5 abas, os rótulos não podem quebrar linha ("Simule FII" em negrito quebrava). */
+.tab { white-space: nowrap; display: flex; flex-direction: column; align-items: center; gap: 6px; color: var(--text-muted); font-size: 13px; font-weight: 500; }
 .tab.active { color: var(--accent); font-weight: 600; }
+@media (max-width: 380px) {
+  .tabbar { padding: 14px 4px; }
+  .tab { font-size: 11.5px; }
+}
 
 .icon-btn {
   width: 40px;
@@ -587,3 +592,45 @@ button.alloc-box:active {
 .perfil-badge.Defensivo { background: color-mix(in oklch, var(--success) 20%, transparent); color: var(--success); }
 .perfil-badge.Equilibrado { background: color-mix(in oklch, var(--warning) 20%, transparent); color: var(--warning); }
 .perfil-badge.CrescimentoPleno { background: color-mix(in oklch, var(--danger) 20%, transparent); color: var(--danger); }
+
+/* ---------------------------------------------------------------------------------------
+   Aba "Simule FII" (screens/SimuleFii.tsx)
+   --------------------------------------------------------------------------------------- */
+
+/* Os 10 tickers do IFIX em 2 linhas de 5, em vez de chips esticados ocupando a tela. */
+.grade-tickers {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+}
+
+/* Tabela cotas × investimento × renda: 3 colunas alinhadas; valores à direita para
+   facilitar comparar ordens de grandeza de cima para baixo. */
+.tabela-fii {
+  display: grid;
+  grid-template-columns: minmax(64px, 0.8fr) 1.2fr 1fr;
+  gap: 8px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-variant-numeric: tabular-nums;
+}
+.tabela-fii > :not(:first-child) { text-align: right; }
+.tabela-fii:last-child { border-bottom: none; }
+.tabela-fii-cabecalho { padding-top: 0; font-weight: 600; }
+
+.input-cotas {
+  width: 100%;
+  min-width: 0;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--stroke);
+  background: var(--surface2);
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+}
+.input-cotas:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+/* Aviso de atraso da CVM: mesma caixa dos outros avisos, com a borda esquerda em tom de
+   alerta para não se perder entre os textos legais. */
+.aviso-atraso { border-left: 4px solid var(--warning); }

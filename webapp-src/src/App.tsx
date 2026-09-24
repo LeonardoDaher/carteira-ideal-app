@@ -12,6 +12,7 @@ import { DetalheAtivo } from './screens/DetalheAtivo'
 import { Aprender } from './screens/Aprender'
 import { Trilha } from './screens/Trilha'
 import { AprenderVideo } from './screens/AprenderVideo'
+import { SimuleFii } from './screens/SimuleFii'
 
 function App() {
   const ctx = useAppState()
@@ -31,6 +32,7 @@ function App() {
     simulador: () => <Simulador ctx={ctx} />,
     detalheAtivo: () => <DetalheAtivo ctx={ctx} key={ctx.ativoSelecionado} />,
     aprender: () => <Aprender ctx={ctx} />,
+    simuleFii: () => <SimuleFii ctx={ctx} />,
     trilha: () => <Trilha ctx={ctx} key={ctx.trilhaSelecionadaId} />,
     aprenderVideo: () => <AprenderVideo ctx={ctx} key={ctx.aulaAtualRef ? `${ctx.aulaAtualRef.trilhaId}:${ctx.aulaAtualRef.topicoId}:${ctx.aulaAtualRef.aulaId}` : 'nenhuma'} />,
   }

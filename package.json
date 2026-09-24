@@ -8,8 +8,9 @@
     "build:app": "cd webapp-src && tsc -b && vite build",
     "build": "npm run build:app && node scripts/build-site.mjs",
     "lint": "cd webapp-src && oxlint",
-    "test": "cd webapp-src && vitest run",
-    "typecheck": "tsc -b"
+    "test": "cd webapp-src && vitest run && cd .. && node --test \"scripts/*.test.mjs\"",
+    "typecheck": "tsc -b",
+    "atualizar-fii": "node scripts/atualizar-rendimentos-fii.mjs"
   },
   "dependencies": {
     "react": "^19.2.8",

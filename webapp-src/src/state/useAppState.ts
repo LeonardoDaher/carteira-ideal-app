@@ -19,6 +19,7 @@ export type Screen =
   | 'aprender'
   | 'trilha'
   | 'aprenderVideo'
+  | 'simuleFii'
 
 export type Tema = 'dark' | 'light'
 
