@@ -1,0 +1,52 @@
+# Atualiza uma vez por mês os dados da aba "Simule FII" (rendimentos da CVM + cotação da brapi).
+#
+# Dia 20: o Informe Mensal de FIIs é entregue à CVM até o dia 15 do mês seguinte à
+# competência, e o portal de dados abertos é atualizado semanalmente. No dia 20, o mês
+# anterior já costuma estar publicado.
+#
+# Se o script encontrar algo errado, o job falha SEM alterar o arquivo: o app continua
+# mostrando os dados do mês anterior e o GitHub envia um e-mail avisando da falha.
+#
+# Configuração necessária (uma vez só): Settings > Secrets and variables > Actions >
+# New repository secret > nome BRAPI_TOKEN, valor = chave gerada em brapi.dev/dashboard.
+
+name: Atualizar rendimentos de FIIs
+
+on:
+  schedule:
+    - cron: '0 12 20 * *' # dia 20 de cada mês, 12h UTC (9h de Brasília)
+  workflow_dispatch: {} # botão "Run workflow" para rodar manualmente
+
+permissions:
+  contents: write
+
+jobs:
+  atualizar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Buscar dados e gerar rendimentosFii.json
+        env:
+          BRAPI_TOKEN: ${{ secrets.BRAPI_TOKEN }}
+        run: node scripts/atualizar-rendimentos-fii.mjs
+
+      - name: Publicar (commit) se houver mudança
+        run: |
+          if git diff --quiet webapp-src/src/data/rendimentosFii.json; then
+            echo "Sem mudanças nos dados."
+            exit 0
+          fi
+          # A Vercel (plano Hobby, repositório privado) pode bloquear o deploy de commits cujo
+          # autor não é o dono do projeto. Por isso o autor vem das variáveis COMMIT_AUTOR_NOME
+          # e COMMIT_AUTOR_EMAIL (Settings > Secrets and variables > Actions > aba Variables),
+          # preenchidas com o mesmo nome/e-mail da sua conta do GitHub.
+          git config user.name "${{ vars.COMMIT_AUTOR_NOME || 'github-actions[bot]' }}"
+          git config user.email "${{ vars.COMMIT_AUTOR_EMAIL || '41898283+github-actions[bot]@users.noreply.github.com' }}"
+          git add webapp-src/src/data/rendimentosFii.json
+          git commit -m "dados: rendimentos de FIIs ($(date -u +%Y-%m))"
+          git push
