@@ -204,12 +204,24 @@ export function montarRendimentos(linhasComplemento, linhasGeral, fundosConfig, 
   return fundosConfig.map((fundo) => {
     const prefixo = fundo.ticker.slice(0, 4).toUpperCase()
     let cnpj = fundo.cnpj ? somenteDigitos(fundo.cnpj) : null
+    let aviso
     if (!cnpj) {
       const candidatos = [...cadastro].filter(([, info]) => info.prefixo === prefixo).map(([c]) => c)
       if (candidatos.length > 1) {
-        return { ticker: fundo.ticker, erro: `ISIN aponta para mais de um CNPJ (${candidatos.join(', ')}). Informe "cnpj" em config/fiis-ifix.json.` }
+        // Com a Resolução CVM 175, fundos migram para um CNPJ novo mantendo ticker e ISIN.
+        // O CNPJ antigo para de enviar informes, então vale o que tem a competência mais recente.
+        const ultimaCompetencia = (c) => [...(porFundo.get(c)?.keys() ?? [])].sort().at(-1) ?? ''
+        const ordenados = candidatos
+          .map((c) => ({ cnpj: c, ultima: ultimaCompetencia(c) }))
+          .sort((a, b) => (a.ultima < b.ultima ? 1 : -1))
+        if (!ordenados[0].ultima || ordenados[0].ultima === ordenados[1].ultima) {
+          return { ticker: fundo.ticker, erro: `ISIN aponta para mais de um CNPJ (${candidatos.join(', ')}) com informes do mesmo mês. Informe "cnpj" em config/fiis-ifix.json.` }
+        }
+        cnpj = ordenados[0].cnpj
+        aviso = `ISIN ligado a ${candidatos.length} CNPJs (${candidatos.join(', ')}); usado ${cnpj}, com informe mais recente (${ordenados[0].ultima}).`
+      } else {
+        cnpj = candidatos[0] ?? null
       }
-      cnpj = candidatos[0] ?? null
     }
     if (!cnpj) {
       return { ticker: fundo.ticker, erro: 'CNPJ não encontrado pelo ISIN. Informe "cnpj" em config/fiis-ifix.json.' }
@@ -241,6 +253,7 @@ export function montarRendimentos(linhasComplemento, linhasGeral, fundosConfig, 
       cnpj,
       nome: fundo.nome ?? cadastro.get(cnpj)?.nome ?? fundo.ticker,
       rendimentos,
+      ...(aviso ? { aviso } : {}),
     }
   })
 }
@@ -320,6 +333,7 @@ async function main() {
       problemas.push(`${r.ticker}: ${r.erro}`)
       continue
     }
+    if (r.aviso) console.log(`[info] ${r.ticker}: ${r.aviso}`)
     try {
       // Sequencial de propósito: o plano gratuito da brapi aceita 1 requisição simultânea.
       const { cotacao, dataCotacao } = await buscarCotacao(r.ticker, token)

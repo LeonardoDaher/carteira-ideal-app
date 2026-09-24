@@ -112,4 +112,23 @@ describe('montarRendimentos', () => {
     assert.match(z.erro, /CNPJ não encontrado/)
     assert.equal(a.rendimentos.length, 3)
   })
+
+  it('fundo migrado para CNPJ novo (CVM 175): usa o CNPJ com informe mais recente', () => {
+    const geralMigrado = lerCsv(GERAL + '33.333.333/0001-33;2026-07-31;1;FUNDO AAAA NOVO CNPJ;BRAAAACTF001\n')
+    const compMigrado = lerCsv(
+      COMPLEMENTO.replace(/11\.111\.111\/0001-11;2026-07-31;[^\n]*\n/g, '') +
+        '33.333.333/0001-33;2026-07-31;1;100,00;0,0090\n',
+    )
+    const [a] = montarRendimentos(compMigrado, geralMigrado, [{ ticker: 'AAAA11' }])
+    assert.equal(a.cnpj, '33333333000133')
+    assert.equal(a.rendimentos[0].valorPorCota, 0.9)
+    assert.match(a.aviso, /informe mais recente \(2026-07\)/)
+  })
+
+  it('continua pedindo o CNPJ manual quando os dois têm informe do mesmo mês', () => {
+    const geralDuplo = lerCsv(GERAL + '33.333.333/0001-33;2026-07-31;1;OUTRO;BRAAAACTF001\n')
+    const compDuplo = lerCsv(COMPLEMENTO + '33.333.333/0001-33;2026-07-31;1;50,00;0,0090\n')
+    const [a] = montarRendimentos(compDuplo, geralDuplo, [{ ticker: 'AAAA11' }])
+    assert.match(a.erro, /mesmo mês/)
+  })
 })
