@@ -1,7 +1,7 @@
 {
   "_leia": "Lista dos 10 maiores FIIs do IFIX, na ordem de participação no índice. A B3 rebalanceia o IFIX a cada 4 meses (jan, mai, set): a cada rebalanceamento, confira a carteira teórica em b3.com.br (Índices > IFIX > Composição da carteira), atualize os tickers e 'vigencia' e marque 'conferidoNaB3': true. O campo 'cnpj' é opcional: só preencha se o script avisar que não achou o fundo pelo ISIN.",
   "vigencia": "set a dez/2026",
-  "conferidoNaB3": false,
+  "conferidoNaB3": true,
   "minimoFundosParaPublicar": 8,
   "fundos": [
     { "ticker": "KNIP11" },
