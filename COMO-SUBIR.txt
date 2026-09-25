@@ -1,7 +1,7 @@
 CARTEIRA IDEAL · D20 · LAYOUT PARA COMPUTADOR + INSTALAR COMO APLICATIVO
 Versão de 25/09/2026
 
-Este zip traz SOMENTE os 21 arquivos alterados ou novos, já nas pastas certas do repositório.
+Este zip traz SOMENTE os 22 arquivos alterados ou novos, já nas pastas certas do repositório.
 Os arquivos de dados (rendimentosFii.json, mercadoOficial.json, bdrs.json) NÃO estão aqui de
 propósito: os do GitHub têm os dados reais gerados pelos jobs e não podem ser sobrescritos.
 
@@ -19,7 +19,7 @@ ARQUIVOS ALTERADOS
   webapp-src/index.html                    (liga o manifest)
   webapp-src/src/App.tsx                   (classe tela-* no frame)
   webapp-src/src/index.css                 (bloco "D20" no fim do arquivo, com o menu lateral)
-  webapp-src/src/screens/Resultado.tsx
+  webapp-src/src/screens/Resultado.tsx     ("Refazer o questionário" no botão amarelo)
   webapp-src/src/screens/Carteira.tsx
   webapp-src/src/screens/Simulador.tsx
   webapp-src/src/screens/SimuleTesouro.tsx
@@ -28,10 +28,11 @@ ARQUIVOS ALTERADOS
   webapp-src/src/screens/DetalheAtivo.tsx  (só o texto "Toque"/"Clique")
   webapp-src/src/ui/GraficoJuros.tsx       (só o texto "Toque"/"Passe o mouse")
   webapp-src/src/ui/TabBar.tsx             (logo no topo do menu lateral)
-  webapp-src/src/screens/Onboarding.tsx    (classe para esconder o nome repetido no computador)
+  webapp-src/src/screens/Onboarding.tsx    (logo no topo, acima do Claro/Escuro)
+  webapp-src/src/ui/VoltarInicio.tsx       (logo ao lado do "← Início")
 
 ARQUIVOS NOVOS
-  webapp-src/src/ui/Marca.tsx              (logo + nome, no início de cada tela)
+  webapp-src/src/ui/Marca.tsx              (logo + nome, no início de cada tela, no celular e no computador)
   webapp-src/public/manifest.webmanifest
   webapp-src/public/icon-192.png
   webapp-src/public/icon-512.png
@@ -39,4 +40,4 @@ ARQUIVOS NOVOS
 
 CONFERIDO ANTES DA ENTREGA
   149 testes do app e 106 dos scripts passando, checagem de tipos e build de produção OK,
-  capturas em 1440x900 (computador) e 390x844 (celular). No celular nada muda.
+  capturas em 1440x900 (computador) e 390x844 (celular). No celular: logo no topo das telas e botão "Refazer" amarelo; o resto do layout não muda.

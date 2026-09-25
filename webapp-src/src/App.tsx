@@ -16,6 +16,9 @@ import { SimuleFii } from './screens/SimuleFii'
 import { SimuleTesouro } from './screens/SimuleTesouro'
 import { SimuleBdr } from './screens/SimuleBdr'
 import { Marca } from './ui/Marca'
+import type { Screen } from './state/useAppState'
+
+const TELAS_COM_LOGO_PROPRIA: Screen[] = ['onboarding', 'aprender', 'simuleTesouro', 'simuleFii', 'simuleBdr']
 
 function App() {
   const ctx = useAppState()
@@ -44,10 +47,13 @@ function App() {
 
   // A classe tela-* deixa o CSS escolher a largura da tela no computador (D20): questionário
   // estreito, leitura média, painéis largos. No celular todas ocupam a mesma coluna de sempre.
-  // Logo no topo de cada tela, só no computador. Nas telas com abas ela fica no menu lateral.
+  // Logo no topo de cada tela (D20). As telas com "← Início" já trazem a logo ao lado do
+  // link (VoltarInicio) e a tela inicial a traz acima do seletor Claro/Escuro. No computador,
+  // nas telas com abas, a logo fica no topo do menu lateral e esta some pelo CSS.
+  const temLogoPropria = TELAS_COM_LOGO_PROPRIA.includes(ctx.screen)
   return (
     <div className={`app-frame tela-${ctx.screen}`}>
-      <Marca className="marca-topo" />
+      {!temLogoPropria && <Marca className="marca-topo" />}
       {screens[ctx.screen]()}
     </div>
   )

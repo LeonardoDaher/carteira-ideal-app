@@ -1006,8 +1006,41 @@ button.alloc-box:active {
 .desk-main,
 .desk-side { display: contents; }
 
-/* Logo (D20): escondida no celular; o computador a mostra nas regras abaixo. */
-.marca { display: none; }
+/* Logo (D20): no início de cada tela, no celular e no computador. */
+.marca {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text);
+  text-decoration: none;
+  border-radius: 10px;
+}
+.marca:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+.marca-logo { width: 30px; height: 30px; flex-shrink: 0; }
+.marca-nome {
+  font-family: 'Sora', 'IBM Plex Sans', sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+}
+/* Telas sem "← Início": logo sozinha no alto, alinhada ao conteúdo. */
+.marca-topo { padding: 20px 20px 0; align-self: flex-start; }
+.marca-topo + .screen { padding-top: 14px; }
+/* Telas com "← Início": logo à esquerda e o link na mesma linha, à direita. */
+.topo-pagina {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.topo-pagina .voltar-inicio { align-self: center; }
+/* Tela inicial: logo centralizada, acima do seletor Claro/Escuro. */
+.marca-onboarding { align-self: center; gap: 12px; }
+.marca-onboarding .marca-logo { width: 36px; height: 36px; }
+.marca-onboarding .marca-nome { font-size: 22px; }
+/* No celular a barra de abas fica embaixo: a logo dela só aparece no menu lateral. */
+.marca-menu { display: none; }
 
 .app-frame { min-height: 100dvh; }
 
@@ -1027,27 +1060,14 @@ button.alloc-box:active {
   .screen { padding: 36px 32px 48px; gap: 18px; }
   .screen h1 { font-size: 26px !important; }
 
-  /* --- Logo no início de cada tela --- */
-  .marca {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    color: var(--text);
-    text-decoration: none;
-    border-radius: 10px;
-  }
-  .marca:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
-  .marca-logo { width: 36px; height: 36px; flex-shrink: 0; }
-  .marca-nome {
-    font-family: 'Sora', 'IBM Plex Sans', sans-serif;
-    font-weight: 700;
-    font-size: 21px;
-    letter-spacing: 0.2px;
-    white-space: nowrap;
-  }
-  .marca-topo { padding: 28px 32px 0; align-self: flex-start; }
-  /* A tela inicial tinha o próprio nome com outro ícone: no computador vale a logo oficial. */
-  .tela-onboarding .marca-onboarding { display: none; }
+  /* --- Logo no início de cada tela: um pouco maior no computador --- */
+  .marca { gap: 12px; }
+  .marca-logo { width: 36px; height: 36px; }
+  .marca-nome { font-size: 21px; }
+  .marca-onboarding .marca-logo { width: 40px; height: 40px; }
+  .marca-onboarding .marca-nome { font-size: 24px; }
+  .marca-topo { padding: 28px 32px 0; }
+  .marca-topo + .screen { padding-top: 20px; }
   /* Telas com menu lateral: a logo vai para o topo do menu, não acima do conteúdo. */
   .tela-resultado > .marca-topo,
   .tela-carteira > .marca-topo,
@@ -1055,10 +1075,10 @@ button.alloc-box:active {
   .tela-resultado .screen,
   .tela-carteira .screen,
   .tela-simulador .screen { padding-top: 36px; }
-  .marca-topo + .screen { padding-top: 20px; }
 
   /* Menu compacto (960 a 1199 px): só o símbolo, centralizado, separado das abas por uma linha. */
   .marca-menu {
+    display: flex;
     justify-content: center;
     padding: 2px 0 12px;
     margin-bottom: 6px;

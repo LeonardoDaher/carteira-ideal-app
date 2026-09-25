@@ -1,10 +1,13 @@
 import { BarChartIcon, ClipboardListIcon, CompassIcon, MoonIcon, SunIcon } from '../ui/Icon'
 import { AvisoEducacional } from '../ui/AvisoEducacional'
+import { Marca } from '../ui/Marca'
 import type { AppCtx } from '../state/useAppState'
 
 export function Onboarding({ ctx }: { ctx: AppCtx }) {
   return (
     <div className="screen">
+      <Marca className="marca-onboarding" />
+
       <div className="theme-toggle">
         <button className={ctx.tema === 'light' ? 'selected' : ''} onClick={() => ctx.setTema('light')}>
           <SunIcon size={14} /> Claro
@@ -12,16 +15,6 @@ export function Onboarding({ ctx }: { ctx: AppCtx }) {
         <button className={ctx.tema === 'dark' ? 'selected' : ''} onClick={() => ctx.setTema('dark')}>
           <MoonIcon size={14} /> Escuro
         </button>
-      </div>
-
-      <div className="row marca-onboarding" style={{ justifyContent: 'center', gap: 10, paddingTop: 4 }}>
-        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2">
-          <path d="M3 17 9 11 13 15 21 7" strokeLinecap="round" strokeLinejoin="round" />
-          <path d="M15 7h6v6" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-        <span className="font-display" style={{ fontWeight: 700, fontSize: 22, letterSpacing: 0.3, whiteSpace: 'nowrap' }}>
-          Carteira Ideal
-        </span>
       </div>
 
       <div className="col" style={{ gap: 8, marginTop: 10 }}>

@@ -112,7 +112,7 @@ export function Resultado({ ctx }: { ctx: AppCtx }) {
         </div>
       )}
 
-      <button className="btn btn-outline area-acao" onClick={ctx.limparDados}>
+      <button className="btn btn-primary area-acao" onClick={ctx.limparDados}>
         Refazer o questionário
       </button>
       </div>
