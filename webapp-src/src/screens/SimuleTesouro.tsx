@@ -1,5 +1,5 @@
 import { useId, useState } from 'react'
-import dadosMercado from '../data/mercadoOficial.json'
+import { SNAPSHOT_MERCADO } from '../data/snapshotMercado'
 import {
   LEITURA_DA_TAXA,
   dataCurta,
@@ -16,7 +16,7 @@ import { VoltarInicio } from '../ui/VoltarInicio'
 import { AvisoEducacional } from '../ui/AvisoEducacional'
 import type { AppCtx } from '../state/useAppState'
 
-const SNAPSHOT_PADRAO = dadosMercado as SnapshotMercado
+const SNAPSHOT_PADRAO = SNAPSHOT_MERCADO
 
 const FAMILIAS: { familia: string; rotulo: string; indexador: Indexador }[] = [
   { familia: 'Tesouro Selic', rotulo: 'Selic', indexador: 'selic' },

@@ -294,3 +294,19 @@ Com isso, a média de 3 meses exibida na tela chegava a superestimar a renda em 
 **Correção após a primeira execução (25/09/2026).** O job falhou sem gravar nada, como previsto nas travas. Duas causas, ambas corrigidas:
 - **Selic meta com data futura.** A série 432 vem preenchida até a véspera da próxima reunião do Copom (o log mostrou "13,75% em 2026-11-04"). A consulta "últimos 2" pegava essas datas, o que faria a trava do histórico acusar diferença. Agora todos os indicadores são lidos por período terminando hoje (30 dias para trás nos diários, 150 nos mensais), e datas futuras são descartadas.
 - **Instabilidade do SGS.** A API devolveu HTTP 502 e páginas de erro em XML (com status 200). Duas falhas se resolveram na nova tentativa, mas a janela de 9 anos de dados diários da Selic (1999 a 2008) falhou as 3 vezes, embora o limite oficial seja de 10 anos. Agora: janelas de 3 anos, 1 segundo de pausa entre consultas, 4 tentativas com espera crescente (3, 6 e 12 segundos) e, quando a resposta não é JSON, o log mostra o começo do que veio.
+
+### D17 · Textos do Tesouro e da ISA Energia revisados com a lista real de títulos (25/09/2026)
+
+**Contexto.** A primeira execução bem-sucedida do job de mercado (D15, data-base 24/09/2026, 58 títulos) listou nas linhas `[conteudo]` os títulos citados nos textos educacionais que não estão à venda. Hoje o Tesouro oferece IPCA+ sem cupom só em 2029, 2032, 2035, 2040, 2045 e 2050, e Prefixado sem cupom só até 2032.
+
+**Decisão.** Trocar cada exemplo por um título à venda e, quando há menos títulos disponíveis que no texto antigo, reduzir a contagem do grupo (`fundos`), sem mexer nos percentuais:
+- **IPCA+ Aposentadoria:** longuíssimo 2040, 2045 e 2050 (saiu 2048); longo 2032 e 2035; intermediário 2029 (saiu 2027). De 8 para 6 títulos.
+- **IPCA+ Educação:** alvo 2029 e 2032 (saíram 2031, 2033 e 2034); intermediário 2035 (saíram 2036 e 2037); semestral 2030 (saiu 2033). De 8 para 4 títulos. A nota passa a citar o Tesouro Educa+, feito para esse objetivo, para quem precisa de datas exatas.
+- **IPCA+ Renda passiva:** com juros semestrais 2030, 2032, 2035 e 2037 (saíram 2029, 2031 e 2033). Continua com 8.
+- **Prefixado:** longo passa a ser 2031 e 2032 (saíram 2033 e 2035), com o rótulo "acima de 4 anos" no lugar de "5 a 10 anos"; tático passa a ser o Prefixado com Juros Semestrais 2037, o mais longo à venda. De 8 para 7. A taxa de exemplo fixa ("11% a 12% a.a.") saiu; o texto aponta para "Taxas de hoje".
+- **Tesouro Selic:** 2029 e 2031 continuam à venda; sem mudança.
+- **Ações:** TRPL4 (ISA CTEEP) virou ISAE4 (ISA Energia Brasil) em 18/11/2024.
+
+**Rotina.** A cada execução semanal, as linhas `[conteudo]` do log mostram se algum exemplo voltou a sair de venda. Quando aparecerem, repetir esta revisão.
+
+**Correção do build (25/09/2026).** O primeiro commit de dados reais (`dados: mercado oficial`) falhou na Vercel com TS2352: o TypeScript lê cada ponto do histórico (`["1999-03-05", 45]`) como lista genérica `(string | number)[]`, e não como o par `[data, valor]` do tipo `PontoHistorico`, e recusa a conversão direta. Com o arquivo inicial vazio o erro não aparecia, e por isso passou em todos os testes locais. Agora o JSON é lido num ponto único, `webapp-src/src/data/snapshotMercado.ts`, com conversão via `unknown`: o build não depende mais do conteúdo do arquivo. O formato continua garantido pelo script e pelos testes dele. **Lição:** testar o build também com um arquivo de dados preenchido, não só com o inicial vazio.

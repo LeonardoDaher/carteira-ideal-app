@@ -1,4 +1,4 @@
-import dadosMercado from '../data/mercadoOficial.json'
+import { SNAPSHOT_MERCADO } from '../data/snapshotMercado'
 import {
   DIAS_PARA_AVISO_DEFASAGEM,
   LEITURA_DA_TAXA,
@@ -12,7 +12,7 @@ import {
 import type { Indexador, SnapshotMercado } from '../domain/mercadoOficial'
 import { TargetIcon } from './Icon'
 
-const SNAPSHOT_PADRAO = dadosMercado as SnapshotMercado
+const SNAPSHOT_PADRAO = SNAPSHOT_MERCADO
 
 /**
  * Títulos à venda de uma família do Tesouro Direto na última data-base publicada, em ordem

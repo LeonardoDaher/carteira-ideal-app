@@ -14,22 +14,22 @@ const objetivosIPCA: ObjetivoAlocacao[] = [
     resumo:
       'Foco em maximizar o efeito dos juros compostos reais ao longo de décadas: a maior fatia fica em vencimentos longuíssimos sem cupom, com uma parcela menor em vencimentos mais próximos para começar a servir de ponte quando a aposentadoria se aproximar.',
     setores: [
-      { label: 'Vencimento Longuíssimo (Sem Cupom)', pct: 55, cor: 'var(--sector-ipca-apo-longuissimo)', fundos: 4, unidade: 'titulo', funcao: 'Maximiza o efeito dos juros compostos reais ao longo de décadas — o rendimento é reinvestido automaticamente até o vencimento, sem o desconto do IR a cada cupom.' },
-      { label: 'Vencimento Longo (Sem Cupom)', pct: 30, cor: 'var(--sector-ipca-apo-longo)', fundos: 3, unidade: 'titulo', funcao: 'Vencimento intermediário dentro da estratégia — ainda décadas de reinvestimento automático pela frente, mas já começa a amadurecer perto do período em que a aposentadoria se torna mais concreta.' },
+      { label: 'Vencimento Longuíssimo (Sem Cupom)', pct: 55, cor: 'var(--sector-ipca-apo-longuissimo)', fundos: 3, unidade: 'titulo', funcao: 'Maximiza o efeito dos juros compostos reais ao longo de décadas — o rendimento é reinvestido automaticamente até o vencimento, sem o desconto do IR a cada cupom.' },
+      { label: 'Vencimento Longo (Sem Cupom)', pct: 30, cor: 'var(--sector-ipca-apo-longo)', fundos: 2, unidade: 'titulo', funcao: 'Vencimento intermediário dentro da estratégia — ainda décadas de reinvestimento automático pela frente, mas já começa a amadurecer perto do período em que a aposentadoria se torna mais concreta.' },
       { label: 'Vencimento Intermediário (Sem Cupom)', pct: 15, cor: 'var(--sector-ipca-apo-medio)', fundos: 1, unidade: 'titulo', funcao: 'Vencimento mais próximo da estratégia — a primeira fatia a virar liquidez quando a aposentadoria se aproximar, servindo de ponte para o início do usufruto.' },
     ],
     blocos: [
       {
         titulo: 'Exemplos por vencimento (ilustrativo — títulos e taxas mudam com frequência, não é recomendação de compra)',
         itens: [
-          { nome: 'Vencimento Longuíssimo (Sem Cupom) — 55%', detalhe: 'Tesouro IPCA+ 2040, Tesouro IPCA+ 2045, Tesouro IPCA+ 2048 e Tesouro IPCA+ 2050 — os vencimentos mais longos disponíveis no Tesouro Direto. Ideal para quem ainda tem décadas até a aposentadoria e quer priorizar o efeito bola de neve dos juros reais.', cor: 'var(--sector-ipca-apo-longuissimo)' },
-          { nome: 'Vencimento Longo (Sem Cupom) — 30%', detalhe: 'Tesouro IPCA+ 2029, Tesouro IPCA+ 2032 e Tesouro IPCA+ 2035 — vencimentos escalonados para reduzir o risco de reinvestir tudo num único momento da curva de juros real. Ideal para quem está a 10-15 anos da aposentadoria.', cor: 'var(--sector-ipca-apo-longo)' },
-          { nome: 'Vencimento Intermediário (Sem Cupom) — 15%', detalhe: 'Tesouro IPCA+ 2027 — vencimento mais curto dentro da estratégia de aposentadoria. Ideal para quem está a menos de 5 anos de começar a usar parte do patrimônio.', cor: 'var(--sector-ipca-apo-medio)' },
+          { nome: 'Vencimento Longuíssimo (Sem Cupom) — 55%', detalhe: 'Tesouro IPCA+ 2040, Tesouro IPCA+ 2045 e Tesouro IPCA+ 2050 — os vencimentos sem cupom mais longos disponíveis no Tesouro Direto. Ideal para quem ainda tem décadas até a aposentadoria e quer priorizar o efeito bola de neve dos juros reais.', cor: 'var(--sector-ipca-apo-longuissimo)' },
+          { nome: 'Vencimento Longo (Sem Cupom) — 30%', detalhe: 'Tesouro IPCA+ 2032 e Tesouro IPCA+ 2035 — vencimentos escalonados para reduzir o risco de reinvestir tudo num único momento da curva de juros real. Ideal para quem está a 10-15 anos da aposentadoria.', cor: 'var(--sector-ipca-apo-longo)' },
+          { nome: 'Vencimento Intermediário (Sem Cupom) — 15%', detalhe: 'Tesouro IPCA+ 2029 — vencimento mais curto dentro da estratégia de aposentadoria. Ideal para quem está a menos de 5 anos de começar a usar parte do patrimônio.', cor: 'var(--sector-ipca-apo-medio)' },
         ],
       },
     ],
     notaSetores:
-      'Para aposentadoria, priorizar títulos IPCA+ sem cupom é o que faz a diferença: cada cupom semestral recebido antecipadamente sofre desconto de Imposto de Renda e perde parte do efeito bola de neve dos juros compostos. Uma carteira de referência com 8 títulos, escalonados entre 2027 e 2050, evita concentrar tudo numa única data e cria uma transição natural conforme a aposentadoria se aproxima.',
+      'Para aposentadoria, priorizar títulos IPCA+ sem cupom é o que faz a diferença: cada cupom semestral recebido antecipadamente sofre desconto de Imposto de Renda e perde parte do efeito bola de neve dos juros compostos. Uma carteira de referência com 6 títulos, escalonados entre 2029 e 2050, evita concentrar tudo numa única data e cria uma transição natural conforme a aposentadoria se aproxima.',
   },
   {
     id: 'educacao',
@@ -37,22 +37,22 @@ const objetivosIPCA: ObjetivoAlocacao[] = [
     resumo:
       'Vencimentos calibrados para coincidir com a data em que o dinheiro vai ser usado (início da faculdade ou curso), com uma pequena fatia de juros semestrais para começar a gerar caixa assim que as primeiras despesas surgirem.',
     setores: [
-      { label: 'Vencimento Alvo (Sem Cupom)', pct: 60, cor: 'var(--sector-ipca-edu-alvo)', fundos: 4, unidade: 'titulo', funcao: 'Vencimento calibrado para coincidir com o início do curso ou faculdade — sem cupom, para reinvestir tudo até a data em que o dinheiro será efetivamente usado.' },
-      { label: 'Vencimento Intermediário (Sem Cupom)', pct: 25, cor: 'var(--sector-ipca-edu-intermediario)', fundos: 3, unidade: 'titulo', funcao: 'Fatia intermediária, pensada para reforçar os anos seguintes do curso enquanto o restante da estratégia continua rendendo até os vencimentos mais distantes.' },
+      { label: 'Vencimento Alvo (Sem Cupom)', pct: 60, cor: 'var(--sector-ipca-edu-alvo)', fundos: 2, unidade: 'titulo', funcao: 'Vencimento calibrado para coincidir com o início do curso ou faculdade — sem cupom, para reinvestir tudo até a data em que o dinheiro será efetivamente usado.' },
+      { label: 'Vencimento Intermediário (Sem Cupom)', pct: 25, cor: 'var(--sector-ipca-edu-intermediario)', fundos: 1, unidade: 'titulo', funcao: 'Fatia intermediária, pensada para reforçar os anos seguintes do curso enquanto o restante da estratégia continua rendendo até os vencimentos mais distantes.' },
       { label: 'Com Juros Semestrais (Início do Uso)', pct: 15, cor: 'var(--sector-ipca-edu-semestral)', fundos: 1, unidade: 'titulo', funcao: 'Paga cupons a cada 6 meses — útil para complementar mensalidades ou despesas correntes assim que o curso começa, sem precisar vender o título principal.' },
     ],
     blocos: [
       {
         titulo: 'Exemplos por vencimento (ilustrativo — títulos e taxas mudam com frequência, não é recomendação de compra)',
         itens: [
-          { nome: 'Vencimento Alvo (Sem Cupom) — 60%', detalhe: 'Tesouro IPCA+ 2031, Tesouro IPCA+ 2032, Tesouro IPCA+ 2033 e Tesouro IPCA+ 2034 — vencimentos escalonados para cobrir, ano a ano, os primeiros anos de faculdade ou curso. Ideal para quem já sabe a data aproximada de início.', cor: 'var(--sector-ipca-edu-alvo)' },
-          { nome: 'Vencimento Intermediário (Sem Cupom) — 25%', detalhe: 'Tesouro IPCA+ 2035, Tesouro IPCA+ 2036 e Tesouro IPCA+ 2037 — cobrem os anos finais do curso, mantendo o rendimento protegido da inflação até bem perto da data de uso. Ideal para completar a faculdade sem precisar vender títulos antes do vencimento.', cor: 'var(--sector-ipca-edu-intermediario)' },
-          { nome: 'Com Juros Semestrais (Início do Uso) — 15%', detalhe: 'Tesouro IPCA+ com Juros Semestrais 2033 — gera renda recorrente a partir do início do curso, complementando o caixa mês a mês. Ideal para quem quer folga de liquidez logo nos primeiros anos.', cor: 'var(--sector-ipca-edu-semestral)' },
+          { nome: 'Vencimento Alvo (Sem Cupom) — 60%', detalhe: 'Tesouro IPCA+ 2029 e Tesouro IPCA+ 2032 — os vencimentos sem cupom mais próximos à venda, para cobrir os primeiros anos de faculdade ou curso. Ideal para quem já sabe a data aproximada de início.', cor: 'var(--sector-ipca-edu-alvo)' },
+          { nome: 'Vencimento Intermediário (Sem Cupom) — 25%', detalhe: 'Tesouro IPCA+ 2035 — cobre os anos finais do curso, mantendo o rendimento protegido da inflação até bem perto da data de uso. Ideal para completar a faculdade sem precisar vender títulos antes do vencimento.', cor: 'var(--sector-ipca-edu-intermediario)' },
+          { nome: 'Com Juros Semestrais (Início do Uso) — 15%', detalhe: 'Tesouro IPCA+ com Juros Semestrais 2030 — gera renda recorrente a partir do início do curso, complementando o caixa mês a mês. Ideal para quem quer folga de liquidez logo nos primeiros anos.', cor: 'var(--sector-ipca-edu-semestral)' },
         ],
       },
     ],
     notaSetores:
-      'Diferente da aposentadoria, aqui a data de vencimento importa mais do que maximizar o efeito bola de neve: os títulos principais (2031 a 2034) devem coincidir com o início do curso, para evitar vender antes do vencimento e correr risco de marcação a mercado justamente na hora de usar o dinheiro. Uma carteira de referência com 8 títulos escalonados ano a ano cobre o curso inteiro sem depender de um único vencimento.',
+      'Diferente da aposentadoria, aqui a data de vencimento importa mais do que maximizar o efeito bola de neve: os títulos principais (hoje, 2029 e 2032) devem coincidir com o início do curso, para evitar vender antes do vencimento e correr risco de marcação a mercado justamente na hora de usar o dinheiro. Como o Tesouro hoje oferece IPCA+ sem cupom só a cada 3 a 5 anos, uma carteira de referência com 4 títulos cobre o curso sem depender de um único vencimento. Para quem quer datas exatas, existe o Tesouro Educa+, criado para esse objetivo: a partir do ano escolhido, paga 60 parcelas mensais corrigidas pela inflação, uma para cada mês de 5 anos de curso.',
   },
   {
     id: 'renda-passiva',
@@ -68,7 +68,7 @@ const objetivosIPCA: ObjetivoAlocacao[] = [
       {
         titulo: 'Exemplos por vencimento (ilustrativo — títulos e taxas mudam com frequência, não é recomendação de compra)',
         itens: [
-          { nome: 'Com Juros Semestrais (Vencimento Mais Próximo) — 45%', detalhe: 'Tesouro IPCA+ com Juros Semestrais 2029, 2031, 2033 e 2035 — vencimentos escalonados que já geram um fluxo de cupons semestrais nos próximos anos. Ideal para quem quer complementar a renda no curto/médio prazo.', cor: 'var(--sector-ipca-renda-semestral-curto)' },
+          { nome: 'Com Juros Semestrais (Vencimento Mais Próximo) — 45%', detalhe: 'Tesouro IPCA+ com Juros Semestrais 2030, 2032, 2035 e 2037 — vencimentos escalonados que já geram um fluxo de cupons semestrais nos próximos anos. Ideal para quem quer complementar a renda no curto/médio prazo.', cor: 'var(--sector-ipca-renda-semestral-curto)' },
           { nome: 'Com Juros Semestrais (Vencimento Mais Longo) — 30%', detalhe: 'Tesouro IPCA+ com Juros Semestrais 2040, 2045 e 2050 — garantem cupons de renda protegidos da inflação por décadas. Ideal para quem quer manter o fluxo de renda passiva por muito tempo, sem se preocupar em recomprar títulos.', cor: 'var(--sector-ipca-renda-semestral-longo)' },
           { nome: 'Sem Cupom (Reforço Futuro) — 25%', detalhe: 'Tesouro IPCA+ 2032 — cresce sem o desconto de IR a cada cupom, funcionando como reserva de valorização para reforçar a renda mais à frente ou aproveitar boas taxas de reinvestimento.', cor: 'var(--sector-ipca-renda-reserva)' },
         ],

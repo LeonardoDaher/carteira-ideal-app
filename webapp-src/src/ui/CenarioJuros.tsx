@@ -1,4 +1,4 @@
-import dadosMercado from '../data/mercadoOficial.json'
+import { SNAPSHOT_MERCADO } from '../data/snapshotMercado'
 import {
   DIAS_PARA_AVISO_DEFASAGEM,
   dataCurta,
@@ -12,7 +12,7 @@ import type { SnapshotMercado } from '../domain/mercadoOficial'
 import { BarChartIcon } from './Icon'
 import { GraficoJuros } from './GraficoJuros'
 
-const SNAPSHOT_PADRAO = dadosMercado as SnapshotMercado
+const SNAPSHOT_PADRAO = SNAPSHOT_MERCADO
 
 /**
  * Cenário de juros e inflação (Banco Central), com o gráfico histórico. Aparece nas telas
