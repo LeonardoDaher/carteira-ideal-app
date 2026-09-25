@@ -1,0 +1,52 @@
+# Atualiza uma vez por semana os dados oficiais de mercado (decisões D15 e D16):
+# indicadores do Banco Central (Selic meta, CDI, IPCA, dólar PTAX), histórico da Selic e
+# do IPCA, Boletim Focus e taxas/preços do Tesouro Direto (Tesouro Transparente).
+# Fontes públicas e gratuitas: não precisa de secret.
+#
+# Terça-feira, 13h UTC (10h de Brasília): pega os dados de segunda já publicados e não
+# coincide com o horário do job de FIIs (dia 20, 12h UTC).
+#
+# Se o script encontrar algo errado, o job falha SEM alterar o arquivo: o app continua
+# mostrando os dados da semana anterior e o GitHub envia um e-mail avisando da falha.
+# As linhas [conteudo] do log listam títulos citados nos textos educacionais que não estão
+# mais à venda: é só aviso, a correção do texto é manual.
+
+name: Atualizar dados oficiais de mercado
+
+on:
+  schedule:
+    - cron: '0 13 * * 2' # toda terça-feira, 13h UTC (10h de Brasília)
+  workflow_dispatch: {} # botão "Run workflow" para rodar manualmente
+
+permissions:
+  contents: write
+
+jobs:
+  atualizar:
+    runs-on: ubuntu-24.04 # fixo, mesmo motivo do job de FIIs
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Buscar dados e gerar mercadoOficial.json
+        run: node scripts/atualizar-mercado-oficial.mjs
+
+      - name: Publicar (commit) se houver mudança
+        run: |
+          if git diff --quiet webapp-src/src/data/mercadoOficial.json; then
+            echo "Sem mudanças nos dados."
+            exit 0
+          fi
+          # Mesmo autor do job de FIIs (variáveis COMMIT_AUTOR_NOME e COMMIT_AUTOR_EMAIL),
+          # para a Vercel no plano Hobby aceitar o deploy.
+          git config user.name "${{ vars.COMMIT_AUTOR_NOME || 'github-actions[bot]' }}"
+          git config user.email "${{ vars.COMMIT_AUTOR_EMAIL || '41898283+github-actions[bot]@users.noreply.github.com' }}"
+          git add webapp-src/src/data/mercadoOficial.json
+          git commit -m "dados: mercado oficial ($(date -u +%Y-%m-%d))"
+          # Se outro job (ou você) publicou algo enquanto este rodava, traz antes de enviar.
+          git pull --rebase
+          git push
