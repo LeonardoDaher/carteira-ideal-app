@@ -199,10 +199,6 @@ export function DetalheAtivo({ ctx }: { ctx: AppCtx }) {
         </div>
       )}
 
-      {tesouroExibido && <TaxasTesouroHoje familia={tesouroExibido.familia} indexador={tesouroExibido.indexador} />}
-
-      {mostraCenario && <CenarioJuros />}
-
       {setoresAtuais && (
         <div className="col" style={{ gap: 8 }}>
           <div className="row" style={{ gap: 6, fontWeight: 700, fontSize: 13.5 }}>
@@ -242,7 +238,7 @@ export function DetalheAtivo({ ctx }: { ctx: AppCtx }) {
                         </div>
                         <div className="row" style={{ gap: 6, alignItems: 'center' }}>
                           {s.fundos !== undefined && (
-                            <span className="tiny muted" style={{ background: 'var(--surface2)', borderRadius: 999, padding: '2px 8px' }}>
+                            <span className="contagem-setor">
                               {s.fundos} {rotuloUnidade(s.unidade, s.fundos)}
                             </span>
                           )}
@@ -303,6 +299,11 @@ export function DetalheAtivo({ ctx }: { ctx: AppCtx }) {
           </div>
         </div>
       ))}
+
+      {/* Dados oficiais de mercado (D15): depois da carteira e dos exemplos, antes da análise */}
+      {tesouroExibido && <TaxasTesouroHoje familia={tesouroExibido.familia} indexador={tesouroExibido.indexador} />}
+
+      {mostraCenario && <CenarioJuros />}
 
       <div className="col" style={{ gap: 8 }}>
         <div className="row" style={{ gap: 6, fontWeight: 700, fontSize: 13.5 }}><BrainIcon size={15} /> Como um consultor CEA/CNPI analisa</div>

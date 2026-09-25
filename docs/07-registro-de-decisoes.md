@@ -310,3 +310,11 @@ Com isso, a média de 3 meses exibida na tela chegava a superestimar a renda em 
 **Rotina.** A cada execução semanal, as linhas `[conteudo]` do log mostram se algum exemplo voltou a sair de venda. Quando aparecerem, repetir esta revisão.
 
 **Correção do build (25/09/2026).** O primeiro commit de dados reais (`dados: mercado oficial`) falhou na Vercel com TS2352: o TypeScript lê cada ponto do histórico (`["1999-03-05", 45]`) como lista genérica `(string | number)[]`, e não como o par `[data, valor]` do tipo `PontoHistorico`, e recusa a conversão direta. Com o arquivo inicial vazio o erro não aparecia, e por isso passou em todos os testes locais. Agora o JSON é lido num ponto único, `webapp-src/src/data/snapshotMercado.ts`, com conversão via `unknown`: o build não depende mais do conteúdo do arquivo. O formato continua garantido pelo script e pelos testes dele. **Lição:** testar o build também com um arquivo de dados preenchido, não só com o inicial vazio.
+
+### D18 · Ajustes visuais no detalhe do ativo (25/09/2026)
+
+**Pedido do responsável.**
+- **Ordem da tela:** "Taxas de hoje" e "Juros e inflação no Brasil" passam a ficar **depois** da carteira por segmento e dos exemplos, logo antes de "Como um consultor analisa". A carteira de referência vem primeiro; os dados de mercado são contexto.
+- **Contagem de ativos por segmento** ("4 títulos", "3 fundos"): a pílula cinza, que quebrava em duas linhas, virou uma caixa amarela com texto escuro (classe `.contagem-setor`), no mesmo desenho do botão selecionado do Simule FII. Fica sempre numa linha; em nomes de segmento longos, o nome ocupa uma linha a mais.
+
+Conferido em navegador nos dois temas, com a tela real de detalhe (Tesouro, IPCA+, Renda Passiva).

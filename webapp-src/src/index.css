@@ -951,3 +951,19 @@ button.alloc-box:active {
   font-variant-numeric: tabular-nums;
 }
 .tabela-premissas [role='columnheader'] { font-weight: 600; color: var(--text); }
+
+/* Quantidade de ativos de cada segmento no detalhe (ex.: "4 títulos"): caixa amarela com
+   texto escuro, o mesmo desenho do botão selecionado do Simule FII. Uma linha só, para
+   não quebrar em "4 / títulos" como a pílula cinza antiga. */
+.contagem-setor {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--accent-text);
+  font-size: 11.5px;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
