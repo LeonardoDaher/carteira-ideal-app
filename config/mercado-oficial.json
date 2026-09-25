@@ -1,5 +1,5 @@
 {
-  "_leia": "Configuração do job semanal de dados oficiais (decisão D15). Fontes públicas e gratuitas: SGS do Banco Central e Tesouro Transparente. 'faixa' é o intervalo plausível de cada valor: se o dado vier fora dele, o job falha SEM gravar o arquivo (protege contra código de série trocado ou mudança de unidade). 'maxDiasAtraso' é a idade máxima do último dado, em dias corridos.",
+  "_leia": "Configuração do job semanal de dados oficiais (decisão D15). Fontes públicas e gratuitas: SGS do Banco Central e Tesouro Transparente. 'faixa' é o intervalo plausível de cada valor: se o dado vier fora dele, o job falha SEM gravar o arquivo (protege contra código de série trocado ou mudança de unidade). 'maxDiasAtraso' é a idade máxima do último dado, em dias corridos. Os indicadores são lidos por período terminando hoje: a Selic meta (432) vem preenchida até a véspera da próxima reunião do Copom, com datas no futuro, que o script descarta.",
   "indicadores": [
     {
       "chave": "selicMeta",
@@ -96,9 +96,9 @@
     ]
   },
   "historico": {
-    "_leia": "Histórico para o gráfico de juros da tela (D15). O SGS limita cada consulta por período a 10 anos, então o script busca em janelas de 'janelaAnos'. A Selic meta é diária, mas só muda nas reuniões do Copom: o script guarda só os pontos de mudança (mais o último dia), o que reduz milhares de dias a cerca de 150 pontos. 'minimoPontos' e 'faixa' são travas: fora disso, nada é gravado.",
+    "_leia": "Histórico para o gráfico de juros da tela (D15). O SGS limita cada consulta por período a 10 anos, mas na prática devolve erro em consultas diárias longas (visto em 25/09/2026 com 9 anos de Selic): o script usa janelas de 'janelaAnos' (3). A Selic meta é diária, mas só muda nas reuniões do Copom: o script guarda só os pontos de mudança (mais o último dia), o que reduz milhares de dias a cerca de 150 pontos. 'minimoPontos' e 'faixa' são travas: fora disso, nada é gravado.",
     "desde": "1999-03-05",
-    "janelaAnos": 9,
+    "janelaAnos": 3,
     "series": [
       {
         "chave": "selicMeta",

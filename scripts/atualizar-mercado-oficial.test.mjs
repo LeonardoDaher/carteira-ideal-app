@@ -13,6 +13,7 @@ import {
   janelasDeConsulta,
   lerFocus,
   lerHistoricoSgs,
+  lerJson,
   validarFocus,
   validarHistorico,
   dataBrParaIso,
@@ -77,6 +78,21 @@ describe('lerSerieSgs', () => {
   it('devolve o último valor e o anterior, em ordem de data', () => {
     const r = lerSerieSgs([{ data: '24/09/2026', valor: '5.3120' }, { data: '23/09/2026', valor: '5.3000' }])
     assert.deepEqual(r, { data: '2026-09-24', valor: 5.312, dataAnterior: '2026-09-23', valorAnterior: 5.3 })
+  })
+  it('descarta datas futuras (Selic meta preenchida até a próxima reunião do Copom)', () => {
+    const corpo = [
+      { data: '24/09/2026', valor: '13.75' },
+      { data: '25/09/2026', valor: '13.75' },
+      { data: '04/11/2026', valor: '13.75' },
+    ]
+    assert.equal(lerSerieSgs(corpo, 'Selic', '2026-09-25').data, '2026-09-25')
+    assert.throws(() => lerSerieSgs([{ data: '04/11/2026', valor: '13.75' }], 'Selic', '2026-09-25'), /até hoje/)
+    assert.deepEqual(lerHistoricoSgs(corpo, 'Selic', '2026-09-25').at(-1), ['2026-09-25', 13.75])
+  })
+  it('lerJson mostra o começo da página de erro quando não vem JSON', async () => {
+    const xml = { text: async () => '<?xml version="1.0"?>\n<erro>  Serviço indisponível </erro>' }
+    await assert.rejects(lerJson(xml), /não é JSON: "<\?xml version="1.0"\?> <erro> Serviço indisponível <\/erro>"/)
+    assert.deepEqual(await lerJson({ text: async () => '[1]' }), [1])
   })
   it('falha com lista vazia ou formato inesperado', () => {
     assert.throws(() => lerSerieSgs([], 'X'), /não devolveu dados/)
@@ -302,34 +318,47 @@ function historicoFalso(codigo, inicioBr, fimBr) {
 
 const dataIsoParaBrTeste = (iso) => iso.split('-').reverse().join('/')
 
-function fetchFalso({ sgs = VALORES_SGS, csv = CSV_TESOURO, falhasSgs = 0 } = {}) {
+const corpoTexto = (dados) => ({ ok: true, status: 200, text: async () => JSON.stringify(dados) })
+
+/**
+ * Imita as três fontes. Consultas do SGS por período curto (até 200 dias) são as dos
+ * indicadores; as longas, do histórico. A Selic meta vem com um dia no futuro, como na
+ * API real, e o script precisa descartá-lo.
+ */
+function fetchFalso({ sgs = VALORES_SGS, csv = CSV_TESOURO, falhasSgs = 0, xmlNoHistorico = 0 } = {}) {
   let falhas = falhasSgs
+  let xml = xmlNoHistorico
   return async (url) => {
     const focus = /ExpectativasMercadoAnuais.*Indicador%20eq%20'(\w+)'/.exec(url)
     if (focus) {
       const valores = focus[1] === 'IPCA' ? [4.8, 4.0, 3.6, 3.5, 3.5] : [14.75, 12.5, 10.5, 10, 10]
       const value = valores.map((Mediana, i) => ({ Indicador: focus[1], Data: '2026-09-19', DataReferencia: String(2026 + i), Mediana, baseCalculo: 0 }))
-      return { ok: true, status: 200, json: async () => ({ value }) }
+      return corpoTexto({ value })
     }
     const periodo = /bcdata\.sgs\.(\d+)\/dados\?formato=json&dataInicial=([\d/]+)&dataFinal=([\d/]+)/.exec(url)
     if (periodo) {
-      return { ok: true, status: 200, json: async () => historicoFalso(periodo[1], periodo[2], periodo[3]) }
-    }
-    const m = /bcdata\.sgs\.(\d+)\//.exec(url)
-    if (m) {
-      if (falhas-- > 0) return { ok: false, status: 503 }
-      const mensal = ['433', '13522'].includes(m[1])
-      const datas = mensal ? ['01/07/2026', '01/08/2026'] : ['23/09/2026', '24/09/2026']
-      return { ok: true, status: 200, json: async () => datas.map((data) => ({ data, valor: sgs[m[1]] })) }
+      const [, codigo, ini, fim] = periodo
+      const dias = (Date.parse(dataBrParaIso(fim)) - Date.parse(dataBrParaIso(ini))) / 86_400_000
+      if (dias <= 200) {
+        if (falhas-- > 0) return { ok: false, status: 502 }
+        const mensal = ['433', '13522'].includes(codigo)
+        const datas = mensal ? ['01/07/2026', '01/08/2026'] : ['23/09/2026', '24/09/2026']
+        if (codigo === '432') datas.push('04/11/2026') // data futura, como na API real
+        return corpoTexto(datas.map((data) => ({ data, valor: sgs[codigo] })))
+      }
+      if (xml-- > 0) return { ok: true, status: 200, text: async () => '<?xml version="1.0"?><erro>indisponível</erro>' }
+      const pontos = historicoFalso(codigo, ini, fim)
+      if (codigo === '432' && fim === '25/09/2026') pontos.push({ data: '04/11/2026', valor: '15.00' })
+      return corpoTexto(pontos)
     }
     return { ok: true, status: 200, arrayBuffer: async () => new TextEncoder().encode(csv).buffer }
   }
 }
 
 describe('executar (ponta a ponta)', () => {
-  it('grava o arquivo quando tudo passa, inclusive após uma falha temporária do SGS', async () => {
+  it('grava o arquivo quando tudo passa, inclusive após falhas temporárias do SGS (502 e XML)', async () => {
     const { raiz, saida } = montarRaiz()
-    const snap = await executar({ buscar: fetchFalso({ falhasSgs: 1 }), hoje: HOJE, raiz, pausaBaseMs: 0 })
+    const snap = await executar({ buscar: fetchFalso({ falhasSgs: 1, xmlNoHistorico: 3 }), hoje: HOJE, raiz, pausaBaseMs: 0, pausaEntreConsultasMs: 0 })
     const gravado = JSON.parse(fs.readFileSync(saida, 'utf8'))
     assert.equal(gravado.indicadores.selicMeta.valor, 15)
     assert.equal(gravado.derivados.jurosReaisExPost.valor, jurosReaisExPost(15, 5.1))
@@ -350,26 +379,26 @@ describe('executar (ponta a ponta)', () => {
     const { raiz, saida } = montarRaiz()
     // Indicador atual diz 5.20; o histórico termina em 5.10
     const buscar = fetchFalso({ sgs: { ...VALORES_SGS, 13522: '5.20' } })
-    await assert.rejects(executar({ buscar, hoje: HOJE, raiz, pausaBaseMs: 0 }), /NÃO atualizado/)
+    await assert.rejects(executar({ buscar, hoje: HOJE, raiz, pausaBaseMs: 0, pausaEntreConsultasMs: 0 }), /NÃO atualizado/)
     assert.equal(fs.readFileSync(saida, 'utf8'), 'ANTERIOR')
   })
 
   it('NÃO grava se um indicador vier fora da faixa', async () => {
     const { raiz, saida } = montarRaiz()
     const buscar = fetchFalso({ sgs: { ...VALORES_SGS, 432: '1500' } })
-    await assert.rejects(executar({ buscar, hoje: HOJE, raiz, pausaBaseMs: 0 }), /NÃO atualizado/)
+    await assert.rejects(executar({ buscar, hoje: HOJE, raiz, pausaBaseMs: 0, pausaEntreConsultasMs: 0 }), /NÃO atualizado/)
     assert.equal(fs.readFileSync(saida, 'utf8'), 'ANTERIOR')
   })
 
   it('NÃO grava se o arquivo do Tesouro estiver defasado', async () => {
     const { raiz, saida } = montarRaiz()
-    await assert.rejects(executar({ buscar: fetchFalso(), hoje: new Date('2026-10-15T12:00:00Z'), raiz, pausaBaseMs: 0 }), /NÃO atualizado/)
+    await assert.rejects(executar({ buscar: fetchFalso(), hoje: new Date('2026-10-15T12:00:00Z'), raiz, pausaBaseMs: 0, pausaEntreConsultasMs: 0 }), /NÃO atualizado/)
     assert.equal(fs.readFileSync(saida, 'utf8'), 'ANTERIOR')
   })
 
   it('NÃO grava se o SGS falhar em todas as tentativas', async () => {
     const { raiz, saida } = montarRaiz()
-    await assert.rejects(executar({ buscar: fetchFalso({ falhasSgs: 99 }), hoje: HOJE, raiz, pausaBaseMs: 0 }), /falhou após 3 tentativas/)
+    await assert.rejects(executar({ buscar: fetchFalso({ falhasSgs: 99 }), hoje: HOJE, raiz, pausaBaseMs: 0, pausaEntreConsultasMs: 0 }), /falhou após 4 tentativas/)
     assert.equal(fs.readFileSync(saida, 'utf8'), 'ANTERIOR')
   })
 })

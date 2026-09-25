@@ -32,9 +32,10 @@ import { acharColuna, lerCsv, lerNumero } from './atualizar-rendimentos-fii.mjs'
 const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const CAMINHO_CONFIG = path.join('config', 'mercado-oficial.json')
 const CAMINHO_SAIDA = path.join('webapp-src', 'src', 'data', 'mercadoOficial.json')
-// O SGS limita a consulta "últimos N" a 20 valores (desde 26/03/2025). Bastam 2.
-const URL_SGS = (codigo) => `https://api.bcb.gov.br/dados/serie/bcdata.sgs.${codigo}/dados/ultimos/2?formato=json`
-// Consulta por período (histórico do gráfico). Datas no formato dd/mm/aaaa, até 10 anos.
+// Consulta por período (indicadores e histórico). Datas dd/mm/aaaa, até 10 anos (limite do SGS
+// desde 26/03/2025). Os indicadores também usam período, terminando hoje, e não "últimos N":
+// a Selic meta (432) vem preenchida até a véspera da próxima reunião do Copom, com datas no
+// futuro, e "últimos N" devolveria essas datas.
 const URL_SGS_PERIODO = (codigo, inicio, fim) =>
   `https://api.bcb.gov.br/dados/serie/bcdata.sgs.${codigo}/dados?formato=json&dataInicial=${inicio}&dataFinal=${fim}`
 // Boletim Focus: projeções anuais, só a data de coleta mais recente interessa.
@@ -43,8 +44,10 @@ const URL_FOCUS = (indicador) =>
   `?$filter=${encodeURIComponent(`Indicador eq '${indicador}' and baseCalculo eq 0`)}` +
   `&$orderby=${encodeURIComponent('Data desc')}&$top=60` +
   '&$select=Indicador,Data,DataReferencia,Mediana,baseCalculo&$format=json'
-const TENTATIVAS = 3
+const TENTATIVAS = 4
 const TIMEOUT_MS = 60_000
+// Quantos dias para trás buscar cada indicador (o último valor até hoje fica dentro disso).
+const JANELA_INDICADOR_DIAS = { diaria: 30, mensal: 150 }
 const INDEXADORES_OBRIGATORIOS = ['selic', 'prefixado', 'ipca']
 
 // ---------------------------------------------------------------------------------------
@@ -83,14 +86,17 @@ export function decodificarTexto(bytes) {
  * Lê a resposta do SGS ([{ data: "dd/mm/aaaa", valor: "15.00" }, ...]) e devolve o último
  * valor e o anterior. Resposta fora do formato → erro com a descrição do que veio.
  */
-export function lerSerieSgs(corpo, descricao = 'série') {
+export function lerSerieSgs(corpo, descricao = 'série', hojeIso = null) {
   if (!Array.isArray(corpo) || corpo.length === 0) {
     throw new Error(`SGS não devolveu dados para ${descricao}.`)
   }
-  const pontos = corpo.map((p) => ({ data: dataBrParaIso(p?.data), valor: lerNumero(p?.valor) }))
+  let pontos = corpo.map((p) => ({ data: dataBrParaIso(p?.data), valor: lerNumero(p?.valor) }))
   if (pontos.some((p) => p.data == null || p.valor == null)) {
     throw new Error(`SGS devolveu formato inesperado para ${descricao}: ${JSON.stringify(corpo).slice(0, 200)}`)
   }
+  // Descarta datas futuras (Selic meta preenchida até a próxima reunião do Copom).
+  if (hojeIso) pontos = pontos.filter((p) => p.data <= hojeIso)
+  if (pontos.length === 0) throw new Error(`SGS não devolveu dados até hoje para ${descricao}.`)
   pontos.sort((a, b) => a.data.localeCompare(b.data))
   const ultimo = pontos.at(-1)
   const anterior = pontos.length > 1 ? pontos.at(-2) : null
@@ -241,13 +247,14 @@ export function janelasDeConsulta(desdeIso, hoje = new Date(), anos = 9) {
 }
 
 /** Resposta do SGS por período → pares [data ISO, valor], em ordem de data. */
-export function lerHistoricoSgs(corpo, descricao = 'série') {
+export function lerHistoricoSgs(corpo, descricao = 'série', hojeIso = null) {
   if (!Array.isArray(corpo)) throw new Error(`SGS devolveu formato inesperado no histórico de ${descricao}.`)
   const pontos = []
   for (const p of corpo) {
     const data = dataBrParaIso(p?.data)
     const valor = lerNumero(p?.valor)
     if (data == null || valor == null) throw new Error(`SGS devolveu ponto inválido no histórico de ${descricao}: ${JSON.stringify(p)}`)
+    if (hojeIso && data > hojeIso) continue
     pontos.push([data, valor])
   }
   return pontos.sort((a, b) => a[0].localeCompare(b[0]))
@@ -399,6 +406,20 @@ export function formatarMercado(snapshot) {
 
 const esperar = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
+/**
+ * Lê a resposta como JSON. Quando o Banco Central devolve uma página de erro (XML ou HTML)
+ * com status 200, o erro mostra o começo do que veio, para o log dizer o motivo.
+ */
+export async function lerJson(resposta) {
+  const texto = await resposta.text()
+  try {
+    return JSON.parse(texto)
+  } catch {
+    const trecho = texto.replace(/\s+/g, ' ').trim().slice(0, 200)
+    throw new Error(`resposta não é JSON: "${trecho}"`)
+  }
+}
+
 /** fetch com timeout e novas tentativas (o SGS oscila e às vezes devolve HTML de erro). */
 async function buscarComTentativas(buscar, url, ler, descricao, pausaBaseMs) {
   let ultimoErro
@@ -411,7 +432,7 @@ async function buscarComTentativas(buscar, url, ler, descricao, pausaBaseMs) {
       ultimoErro = erro
       if (tentativa < TENTATIVAS) {
         console.warn(`[aviso] ${descricao}: tentativa ${tentativa} falhou (${erro.message}). Tentando de novo.`)
-        await esperar(pausaBaseMs * tentativa)
+        await esperar(pausaBaseMs * 2 ** (tentativa - 1))
       }
     }
   }
@@ -422,15 +443,23 @@ async function buscarComTentativas(buscar, url, ler, descricao, pausaBaseMs) {
  * Executa o job. Os parâmetros existem para o teste de ponta a ponta (fetch falso, data fixa,
  * pasta temporária); no uso normal, nada precisa ser passado.
  */
-export async function executar({ buscar = fetch, hoje = new Date(), raiz = RAIZ, pausaBaseMs = 3000 } = {}) {
+export async function executar({ buscar = fetch, hoje = new Date(), raiz = RAIZ, pausaBaseMs = 3000, pausaEntreConsultasMs = 1000 } = {}) {
   const config = JSON.parse(fs.readFileSync(path.join(raiz, CAMINHO_CONFIG), 'utf8'))
   const problemas = []
+  const hojeIso = hoje.toISOString().slice(0, 10)
+  // Uma consulta por vez, com pausa: o SGS oscila (502, páginas de erro) quando recebe muitas seguidas.
+  const buscarSgs = async (url, ler, descricao) => {
+    await esperar(pausaEntreConsultasMs)
+    return buscarComTentativas(buscar, url, ler, descricao, pausaBaseMs)
+  }
 
   // 1. Indicadores do Banco Central
   const indicadores = {}
   for (const ind of config.indicadores) {
     const descricao = `${ind.nome} (SGS ${ind.codigoSgs})`
-    const serie = await buscarComTentativas(buscar, URL_SGS(ind.codigoSgs), async (r) => lerSerieSgs(await r.json(), descricao), descricao, pausaBaseMs)
+    const inicio = new Date(hoje.getTime() - JANELA_INDICADOR_DIAS[ind.periodicidade] * 86_400_000).toISOString().slice(0, 10)
+    const url = URL_SGS_PERIODO(ind.codigoSgs, dataIsoParaBr(inicio), dataIsoParaBr(hojeIso))
+    const serie = await buscarSgs(url, async (r) => lerSerieSgs(await lerJson(r), descricao, hojeIso), descricao)
     problemas.push(...validarIndicador(ind, serie, hoje))
     indicadores[ind.chave] = { nome: ind.nome, unidade: ind.unidade, codigoSgs: ind.codigoSgs, ...serie }
     console.log(`[indicador] ${ind.nome}: ${serie.valor} ${ind.unidade} em ${serie.data}.`)
@@ -444,7 +473,7 @@ export async function executar({ buscar = fetch, hoje = new Date(), raiz = RAIZ,
       const brutos = []
       for (const j of janelas) {
         const descricao = `Histórico ${serie.nome} (SGS ${serie.codigoSgs}, ${j.inicio} a ${j.fim})`
-        brutos.push(...(await buscarComTentativas(buscar, URL_SGS_PERIODO(serie.codigoSgs, j.inicio, j.fim), async (r) => lerHistoricoSgs(await r.json(), serie.nome), descricao, pausaBaseMs)))
+        brutos.push(...(await buscarSgs(URL_SGS_PERIODO(serie.codigoSgs, j.inicio, j.fim), async (r) => lerHistoricoSgs(await lerJson(r), serie.nome, hojeIso), descricao)))
       }
       const pontos = consolidarHistorico(brutos, serie.comprimir)
       problemas.push(...validarHistorico(serie, pontos, indicadores[serie.chave]))
@@ -475,7 +504,7 @@ export async function executar({ buscar = fetch, hoje = new Date(), raiz = RAIZ,
     focus = {}
     for (const ind of config.focus.indicadores) {
       const descricao = `Focus ${ind.nomeFocus}`
-      const lido = await buscarComTentativas(buscar, URL_FOCUS(ind.nomeFocus), async (r) => lerFocus(await r.json(), hoje.getUTCFullYear(), descricao), descricao, pausaBaseMs)
+      const lido = await buscarSgs(URL_FOCUS(ind.nomeFocus), async (r) => lerFocus(await lerJson(r), hoje.getUTCFullYear(), descricao), descricao)
       problemas.push(...validarFocus(ind, lido, config.focus, hoje))
       focus.data = focus.data && focus.data > lido.data ? focus.data : lido.data
       focus[ind.chave] = lido.porAno
