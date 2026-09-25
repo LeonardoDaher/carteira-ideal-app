@@ -253,7 +253,7 @@ export const TEXTO_MOTIVO_CONFIANCA: Record<MotivoConfianca, string> = {
 
 export const TEXTO_MOTIVO_INDISPONIVEL: Record<MotivoIndisponivel, string> = {
   'sem-informe-recente': 'o fundo não enviou o Informe Mensal à CVM nos últimos meses',
-  'sem-dy-informado': 'o fundo não informa à CVM o rendimento de cada mês, então não há como estimar a renda por aqui. Confira os rendimentos no site do fundo',
+  'sem-dy-informado': 'este fundo não informa à CVM o rendimento de cada mês, por isso não conseguimos simular a renda aqui. Os rendimentos pagos estão publicados no site da administradora do fundo',
   'cadastro-ambiguo': 'o código do fundo aparece ligado a mais de um cadastro na CVM, e não dá para saber qual é o dele sem conferência manual',
   'rendimento-atipico': 'os valores dos últimos meses variaram demais para indicar um rendimento típico',
   'sem-rendimento': 'o fundo não distribuiu rendimento no mês de referência',

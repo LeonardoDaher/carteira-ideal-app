@@ -635,6 +635,26 @@ button.alloc-box:active {
    alerta para não se perder entre os textos legais. */
 .aviso-atraso { border-left: 4px solid var(--warning); }
 
+/* Título de cada setor da lista de FIIs (D13): centralizado, grande e no amarelo da marca,
+   para a lista longa ser lida como seções e não como um bloco de botões. */
+.titulo-setor {
+  margin: 0;
+  text-align: center;
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--accent);
+}
+/* No tema claro, amarelo sobre fundo claro some: contorno fino no tom escuro da paleta
+   (o mesmo do texto dos botões amarelos). Feito com sombras em 8 direções, que funciona em
+   todos os navegadores, ao contrário de -webkit-text-stroke, que "come" o desenho da letra. */
+:root[data-theme='light'] .titulo-setor {
+  text-shadow:
+    -1px -1px 0 var(--accent-text), 0 -1px 0 var(--accent-text), 1px -1px 0 var(--accent-text),
+    -1px 0 0 var(--accent-text), 1px 0 0 var(--accent-text),
+    -1px 1px 0 var(--accent-text), 0 1px 0 var(--accent-text), 1px 1px 0 var(--accent-text);
+}
+
 /* Busca livre de FIIs (decisão D12). O campo tem a mesma altura de toque dos botões
    principais; os resultados são uma lista de linhas, não chips, porque carregam o nome. */
 .busca-fii {

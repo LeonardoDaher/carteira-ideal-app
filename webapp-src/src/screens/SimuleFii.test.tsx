@@ -170,6 +170,8 @@ describe('SimuleFii: busca livre (D12)', () => {
     render(<SimuleFii ctx={ctx} snapshot={snap} />)
     buscar('vgir')
     expect(screen.getByText(/não informa à CVM o rendimento/)).toBeDefined()
+    expect(screen.getByText(/site da administradora do fundo/)).toBeDefined()
+    expect(screen.queryByText(/Tente novamente/)).toBeNull() // não vai mudar no mês que vem
     expect(screen.queryByText(/variaram demais/)).toBeNull()
   })
 
@@ -206,8 +208,9 @@ describe('SimuleFii: lista por liquidez e setor (D13)', () => {
     render(<SimuleFii ctx={ctx} snapshot={d13} />)
     expect(screen.getByRole('group', { name: 'Fundos do setor Logística' })).toBeDefined()
     expect(screen.getByRole('group', { name: 'Fundos do setor Papel (CRI)' })).toBeDefined()
-    expect(screen.getByText('Logística (2)')).toBeDefined()
-    expect(screen.getByText(/mostra os 3 fundos negociados/)).toBeDefined()
+    expect(screen.getByRole('heading', { name: 'Logística' })).toBeDefined()
+    expect(screen.getByText(/Somente são disponibilizadas as informações/)).toBeDefined()
+    expect(screen.getByText(/favor consultar na busca acima/)).toBeDefined()
     expect(screen.queryByRole('button', { name: 'VGIP11' })).toBeNull() // abaixo do corte: fora da lista
   })
 

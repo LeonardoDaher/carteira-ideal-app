@@ -96,19 +96,16 @@ export function SimuleFii({
 
           {snapshot.volumeMinimoDiario != null && (
             <div className="small muted justify" style={{ lineHeight: 1.5 }}>
-              A lista abaixo mostra os {exibidos.length} fundos negociados, em média, acima de{' '}
-              <strong>{formatarVolume(snapshot.volumeMinimoDiario)} por dia</strong> no último mês: liquidez suficiente
-              para comprar e vender sem mexer muito no preço. Os demais aparecem pela busca. O setor é o informado pelo
-              próprio fundo à CVM.
+              Somente são disponibilizadas as informações dos fundos imobiliários que negociam, em média, acima de{' '}
+              <strong>{formatarVolume(snapshot.volumeMinimoDiario)} por dia</strong>. Para os demais fundos, com valores
+              de negociação inferiores a {formatarVolume(snapshot.volumeMinimoDiario)}, favor consultar na busca acima.
             </div>
           )}
 
-          <div className="col" style={{ gap: 14 }}>
+          <div className="col" style={{ gap: 18 }}>
             {grupos.map((g) => (
-              <div key={g.setor} className="col" style={{ gap: 6 }}>
-                <span className="tiny muted" style={{ fontWeight: 600 }}>
-                  {g.setor} ({g.fundos.length})
-                </span>
+              <div key={g.setor} className="col" style={{ gap: 8 }}>
+                <h2 className="titulo-setor font-display">{g.setor}</h2>
                 <div className="grade-tickers" role="group" aria-label={`Fundos do setor ${g.setor}`}>
                   {g.fundos.map((f) => (
                     <button
@@ -209,7 +206,8 @@ function BuscaFundo({ snapshot, onSelecionar }: { snapshot: SnapshotRendimentosF
             {indisponivel ? (
               <>
                 <strong>{indisponivel.ticker} está sem dados neste mês:</strong>{' '}
-                <span className="muted">{TEXTO_MOTIVO_INDISPONIVEL[indisponivel.motivo]}. Tente novamente na próxima atualização.</span>
+                <span className="muted">{TEXTO_MOTIVO_INDISPONIVEL[indisponivel.motivo]}
+                  {indisponivel.motivo === 'sem-dy-informado' ? '.' : '. Tente novamente na próxima atualização.'}</span>
               </>
             ) : (
               <>

@@ -199,7 +199,12 @@ Com isso, a média de 3 meses exibida na tela chegava a superestimar a renda em 
 
 **Primeira execução (25/09/2026) e ajustes.** 54 fundos na lista e 219 na busca. Os mais negociados foram TRXF11, KNCR11, HGLG11, MXRF11 e XPML11, todos acima de R$ 20 milhões por dia. Dois ajustes:
 - **Setores.** "Híbrido 23" contra "Papel (CRI) 8" não correspondia ao mercado: muitos fundos de CRI se declaram "Híbrido" no segmento, mas informam o mandato "Títulos e Valores Mobiliários". O mandato passou a ter prioridade sobre o segmento, e o log lista os tickers de cada setor (linhas `[setor]`) para revisão.
-- **VGIP11 e VGIR11.** O diagnóstico mostrou DY 0,0000 nos 6 meses: a gestora não preenche esse campo no informe da CVM. Não há estimativa possível pela CVM. Esses fundos ganharam o motivo próprio `sem-dy-informado`, e a busca orienta a conferir os rendimentos no site do fundo. Para exibi-los com valor, só com fonte de rendimentos anunciados (bolsai Pro ou brapi Startup) ou com digitação manual.
+- **VGIP11 e VGIR11.** O diagnóstico mostrou DY 0,0000 nos 6 meses: a gestora não preenche esse campo no informe da CVM. Não há estimativa possível pela CVM. Esses fundos ganharam o motivo próprio `sem-dy-informado`, e a busca orienta a conferir os rendimentos no site do fundo. Decisão do responsável pelo produto: não digitar à mão nem assinar fonte paga. A tela informa que o fundo não reporta o rendimento à CVM e que os rendimentos pagos estão no site da administradora.
+
+**Ajustes de tela pedidos pelo responsável (25/09/2026).**
+- O texto do critério passou a ser: "Somente são disponibilizadas as informações dos fundos imobiliários que negociam, em média, acima de R$ 1 milhão por dia. Para os demais fundos, com valores de negociação inferiores a R$ 1 milhão, favor consultar na busca acima."
+- Os nomes de setor viraram títulos centralizados, maiores e no amarelo da marca. No tema claro, o amarelo ganha um contorno fino no tom escuro da paleta, porque amarelo sobre fundo claro fica ilegível.
+- A busca por fundo que não informa DY à CVM diz que os rendimentos estão no site da administradora do fundo, sem sugerir "tente na próxima atualização", porque isso não muda de um mês para o outro.
 
 **Pontos a acompanhar na primeira execução.**
 - O número de fundos na lista. A estimativa era de 40 a 50, mas quem decide é o critério. Se ficar grande demais, o corte sobe em `volumeMinimoDiario`.
