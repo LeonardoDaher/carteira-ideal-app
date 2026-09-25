@@ -14,6 +14,7 @@ import { Trilha } from './screens/Trilha'
 import { AprenderVideo } from './screens/AprenderVideo'
 import { SimuleFii } from './screens/SimuleFii'
 import { SimuleTesouro } from './screens/SimuleTesouro'
+import { SimuleBdr } from './screens/SimuleBdr'
 
 function App() {
   const ctx = useAppState()
@@ -35,6 +36,7 @@ function App() {
     aprender: () => <Aprender ctx={ctx} />,
     simuleFii: () => <SimuleFii ctx={ctx} />,
     simuleTesouro: () => <SimuleTesouro ctx={ctx} />,
+    simuleBdr: () => <SimuleBdr ctx={ctx} />,
     trilha: () => <Trilha ctx={ctx} key={ctx.trilhaSelecionadaId} />,
     aprenderVideo: () => <AprenderVideo ctx={ctx} key={ctx.aulaAtualRef ? `${ctx.aulaAtualRef.trilhaId}:${ctx.aulaAtualRef.topicoId}:${ctx.aulaAtualRef.aulaId}` : 'nenhuma'} />,
   }

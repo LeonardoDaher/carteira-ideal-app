@@ -21,6 +21,7 @@ export type Screen =
   | 'aprenderVideo'
   | 'simuleFii'
   | 'simuleTesouro'
+  | 'simuleBdr'
 
 export type Tema = 'dark' | 'light'
 
@@ -31,11 +32,11 @@ export type Tema = 'dark' | 'light'
  */
 export const CHAVE_TEMA_COMPARTILHADA = 'theme'
 
-/** Telas abertas direto pela landing (./app/?tela=aprender, simuleFii e simuleTesouro), sem
+/** Telas abertas direto pela landing (./app/?tela=aprender, simuleFii, simuleTesouro e simuleBdr), sem
  * depender do questionário. Ficam fora da barra de abas e nunca são salvas como "última
  * tela": assim o botão amarelo da landing (./app/) continua devolvendo a pessoa ao ponto
  * em que parou no fluxo do questionário/resultado, e não à aula que ela viu por último. */
-export const TELAS_AVULSAS: readonly Screen[] = ['aprender', 'trilha', 'aprenderVideo', 'simuleFii', 'simuleTesouro']
+export const TELAS_AVULSAS: readonly Screen[] = ['aprender', 'trilha', 'aprenderVideo', 'simuleFii', 'simuleTesouro', 'simuleBdr']
 
 export function ehTelaAvulsa(tela: Screen) {
   return TELAS_AVULSAS.includes(tela)
@@ -47,6 +48,7 @@ const TELAS_PELA_URL: Record<string, Screen> = {
   aprender: 'aprender',
   simuleFii: 'simuleFii',
   simuleTesouro: 'simuleTesouro',
+  simuleBdr: 'simuleBdr',
 }
 
 const CHAVE_ARMAZENAMENTO = 'carteiraideal.estado'
@@ -140,7 +142,7 @@ export function useAppState() {
       // - ?tela=resultado: botão "Ver minha carteira de referência", para quem já tem carteira
       //   salva. Sem isso, o app abriria na última tela em que o usuário esteve. Se ainda não
       //   houver resultado, a própria tela de Resultado mostra o convite para começar.
-      // - ?tela=aprender, ?tela=simuleFii e ?tela=simuleTesouro: botões da landing que abrem essas telas direto,
+      // - ?tela=aprender, ?tela=simuleFii, ?tela=simuleTesouro e ?tela=simuleBdr: botões da landing que abrem essas telas direto,
       //   sem exigir o questionário.
       try {
         const parametros = new URLSearchParams(window.location.search)

@@ -1,0 +1,68 @@
+{
+  "_leia": "Configuração do job diário de BDRs (decisão D19). O job só publica com 'conferidoPeloResponsavel': true. A lista exibida é: os 'maxAcoes' BDRs de ações (códigos terminados em 31 a 35) e os 'maxEtfs' BDRs de ETF (terminados em 39) com maior volume financeiro médio nos últimos 21 pregões completos, acima do piso de cada grupo. Tickers em 'excluir' nunca entram (empresas de origem ou operação brasileira listadas no exterior). Tickers terminados em 31, 32 ou 33 que não estejam em 'excluir' nem em 'revisados' geram uma linha [revisar] no log, para decisão manual.",
+  "conferidoPeloResponsavel": true,
+  "maxAcoes": 35,
+  "maxEtfs": 5,
+  "pisoVolumeAcoes": 300000,
+  "pisoVolumeEtfs": 100000,
+  "minimoAcoesParaPublicar": 25,
+  "minimoEtfsParaPublicar": 3,
+  "minimoBdrsNaLista": 300,
+  "candidatosAcoes": 100,
+  "candidatosEtfs": 30,
+  "maxRequisicoesBrapi": 250,
+  "pausaEntreRequisicoesMs": 300,
+  "pausaAposLimiteMs": 60000,
+  "horarioCorteFechamento": "18:30",
+  "controle": {
+    "_leia": "BDRs de controle: se menos de 'minimo' deles vierem com cotação e histórico válidos, o problema é geral (brapi fora do ar, plano mudou) e o arquivo NÃO é atualizado.",
+    "minimo": 4,
+    "tickers": ["AAPL34", "MSFT34", "NVDC34", "AMZO34", "GOGL34"]
+  },
+  "excluir": {
+    "_leia": "Empresas de origem ou operação brasileira listadas no exterior (decisão D19). Não entram na lista mesmo com volume alto.",
+    "tickers": ["ROXO34", "XPBR31", "INBR32", "JBSS32", "STOC34", "PAGS34"]
+  },
+  "revisados": {
+    "_leia": "Códigos terminados em 31, 32 ou 33 que o responsável já decidiu manter. Não geram a linha [revisar] no log.",
+    "tickers": ["AURA33"]
+  },
+  "setores": {
+    "_leia": "Tradução da classificação da brapi (em inglês) para o setor exibido. Setor sem tradução aparece em inglês e gera uma linha [setor] no log.",
+    "Technology Services": "Software e internet",
+    "Electronic Technology": "Semicondutores e hardware",
+    "Finance": "Financeiro",
+    "Retail Trade": "Varejo e e-commerce",
+    "Consumer Non-Durables": "Consumo não durável",
+    "Consumer Durables": "Automóveis e bens duráveis",
+    "Health Technology": "Saúde e farmacêuticas",
+    "Health Services": "Serviços de saúde",
+    "Commercial Services": "Serviços e meios de pagamento",
+    "Communications": "Telecomunicações e mídia",
+    "Non-Energy Minerals": "Mineração e metais",
+    "Energy Minerals": "Petróleo e gás",
+    "Utilities": "Energia elétrica e saneamento",
+    "Transportation": "Transporte e logística",
+    "Consumer Services": "Turismo, lazer e serviços",
+    "Process Industries": "Química e agroindústria",
+    "Producer Manufacturing": "Indústria",
+    "Industrial Services": "Serviços industriais",
+    "Distribution Services": "Distribuição"
+  },
+  "setorPorTicker": {
+    "_leia": "Correção manual do setor de um BDR de ações, quando a classificação da brapi não é a que o investidor usa.",
+    "AURA33": "Mineração de ouro"
+  },
+  "gruposEtf": {
+    "_leia": "Grupo exibido para cada BDR de ETF (a brapi classifica todos como 'Miscellaneous'). ETF sem grupo aparece em 'Outros' e gera uma linha [categoria] no log.",
+    "BSLV39": "Metais preciosos",
+    "BSIL39": "Metais preciosos",
+    "BURA39": "Temáticos",
+    "BCTE39": "Temáticos",
+    "BLTP39": "Renda fixa EUA",
+    "IBIT39": "Cripto"
+  },
+  "nomes": {
+    "_leia": "Correção manual do nome exibido, quando o nome extraído da brapi vier estranho. Formato: \"TICKER\": \"Nome\"."
+  }
+}

@@ -318,3 +318,44 @@ Com isso, a média de 3 meses exibida na tela chegava a superestimar a renda em 
 - **Contagem de ativos por segmento** ("4 títulos", "3 fundos"): a pílula cinza, que quebrava em duas linhas, virou uma caixa amarela com texto escuro (classe `.contagem-setor`), no mesmo desenho do botão selecionado do Simule FII. Fica sempre numa linha; em nomes de segmento longos, o nome ocupa uma linha a mais.
 
 Conferido em navegador nos dois temas, com a tela real de detalhe (Tesouro, IPCA+, Renda Passiva).
+
+### D19 · BDRs: 40 mais negociados, cotação diária de fechamento (25/09/2026)
+
+**Contexto.** Primeira das novas frentes de renda variável (BDRs, ETFs, ações e cripto), feitas uma por vez, cada uma com seu job. Regra geral decidida pelo responsável para todas elas: **telas estritamente descritivas**, com dado bruto, ordem por liquidez e agrupamento por setor, sem ranking nem múltiplos de avaliação (P/L, LPA, P/VP). Motivo: manter o app longe da atividade de análise de valores mobiliários (Resolução CVM 20), além da fronteira com consultoria já registrada (Resolução CVM 19).
+
+**Testes feitos no navegador (25/09/2026), plano gratuito da brapi.**
+- A listagem (`/api/quote/list?type=bdr`) funciona e traz os 879 BDRs listados, com fechamento, variação do dia, volume e setor, em uma requisição.
+- A consulta individual com `range=3mo&interval=1d` funciona (AAPL34: 64 pregões, nome longo com a proporção "Repr 0.05 Sh").
+- O campo `volume` é **quantidade de papéis**, e a listagem ordena por ele: isso favorece BDRs baratos. O MUTC34 (R$ 938 por papel) aparecia em 21º e é o 3º em reais; o NFLX34 (R$ 7,41) caía de 11º para 27º.
+- Os testes foram feitos com o pregão aberto: o AAPL34 aparecia com R$ 3,9 mi no dia, contra média de R$ 26,2 mi nos 21 pregões completos anteriores. Por isso a seleção usa só pregões completos e o job roda depois do fechamento.
+
+**Decisão.**
+- **Universo:** 35 BDRs de ações (códigos 31 a 35) e 5 BDRs de ETF (código 39), os de maior **volume financeiro médio dos últimos 21 pregões completos** (mesma régua dos FIIs, D13), acima de um piso: R$ 300 mil/dia para ações, R$ 100 mil/dia para ETFs. BDR de ETF fica nesta aba; ETF brasileiro (IVVB11, BOVA11, HASH11) fica no futuro job de ETFs.
+- **Fora da lista:** empresas de origem ou operação brasileira listadas no exterior: ROXO34 (Nubank), XPBR31 (XP), INBR32 (Inter), JBSS32 (JBS), STOC34 (StoneCo), PAGS34 (PagSeguro). O filtro não pode ser pelo final do código (Nubank, StoneCo e PagSeguro terminam em 34), por isso é uma lista em `config/bdrs.json`. Códigos 31 a 33 novos entre os mais negociados geram a linha `[revisar]` no log, sem exclusão automática.
+- **AURA33 dentro**, no setor "Mineração de ouro", por decisão do responsável (BDR do setor de ouro).
+- **MELI34 (Mercado Livre) e S2GM34 (Sigma Lithium) dentro**, por decisão do responsável: são empresas estrangeiras, embora o Brasil seja o maior mercado do Mercado Livre e a mina da Sigma fique em Minas Gerais. O critério de exclusão vale para empresas de **origem** brasileira ou cuja operação é essencialmente brasileira.
+- **Setores:** a classificação da brapi (em inglês) é traduzida no config. Tecnologia fica dividida em "Software e internet" e "Semicondutores e hardware", porque juntas seriam metade da lista. BDRs de ETF, que a brapi classifica todos como "Miscellaneous", ganham grupos próprios (Metais preciosos, Renda fixa EUA, Temáticos, Cripto).
+- **Frequência:** diária, nos dias úteis, às 19h de Brasília. O preço de um BDR muda todo dia por dois motivos (a ação lá fora e o dólar), então a cotação semanal ficaria defasada rápido demais. A tela destaca "Fechamento de DD/MM" e a variação de 3 meses, não a variação do dia.
+- **Dados publicados por BDR:** código, nome da empresa, setor, fechamento e data, variação de 3 meses, volume médio em reais, mínima e máxima de 52 semanas e proporção BDR/ação ("20 BDRs = 1 ação"). Sem P/L e sem LPA, embora a brapi os devolva.
+
+**Mecanismo.** `scripts/atualizar-bdrs.mjs`, workflow `.github/workflows/atualizar-bdrs.yml`, saída `webapp-src/src/data/bdrs.json`, config `config/bdrs.json`. Uma requisição de listagem, os 100 BDRs de ações e 30 de ETF com maior volume em reais no dia como candidatos (mais os de controle e os publicados no dia anterior, para a lista não oscilar por um dia fraco), e uma requisição por candidato. Cerca de 130 requisições por execução e 2.900 por mês. A função de volume médio é a mesma do job de FIIs (importada de `atualizar-rendimentos-fii.mjs`), para as duas abas usarem exatamente a mesma régua de liquidez.
+
+**Salvaguardas.**
+- Só publica com `"conferidoPeloResponsavel": true` no config.
+- Listagem com menos de 300 BDRs, menos de 4 dos 5 BDRs de controle (AAPL34, MSFT34, NVDC34, AMZO34, GOGL34) válidos, menos de 25 BDRs de ações ou 3 de ETF acima do piso, ou pregão mais recente com mais de 7 dias: o job falha sem gravar.
+- Cotação fora de R$ 0,10 a R$ 10.000, variação de 3 meses fora de −90% a +500% ou sem histórico de volume: o BDR fica de fora e aparece no log.
+- Pregão em andamento (execução manual antes das 18h30) é descartado.
+- Sem pregão novo (feriado da B3, execução repetida): o arquivo não é regravado, sem commit nem deploy.
+- `npm run build` antes do commit, como no job de mercado.
+
+**A acompanhar na primeira execução.** Conferir no log as linhas `[revisar]`, `[setor]` e `[categoria]`, e comparar o volume médio de 2 ou 3 BDRs com um site de cotações.
+
+**Tela "Simule BDR" (mesmo dia).** `screens/SimuleBdr.tsx`, aberta por `./app/?tela=simuleBdr` e pelo botão 🌎 da landing, no molde do Simule FII:
+- **Busca igual à dos FIIs**, a pedido do responsável. Alcança todos os BDRs listados (menos os excluídos) sem requisição extra: o job grava no mesmo arquivo a lista `busca`, montada com o dado da própria listagem (fechamento, setor, volume do último pregão). Busca por código sempre; por nome só quando a brapi informa o nome (os 40 da lista e boa parte dos BDRs patrocinados e de ETF). BDR da busca que está na lista abre o cartão completo; fora da lista, abre um cartão resumido com o aviso "Fora da lista por volume" e, se não negociou no último pregão, o aviso de que o preço pode ser de um dia anterior.
+- **Lista:** um bloco por setor (caixa amarela, como no Simule FII), com os BDRs em ordem de volume, e um bloco "BDRs de ETF" no fim.
+- **Cartão:** preço de fechamento e data, setor, volume médio, variação de 3 meses (em reais, já com o dólar), faixa de 52 semanas e proporção ("20 BDRs = 1 ação"). Sem P/L, sem LPA, sem cor de alta ou queda.
+- **Simulação:** R$ 1 mil, 5 mil (padrão), 10 mil ou valor digitado → quantos BDRs inteiros o valor compra, valor investido, sobra e equivalente em ações. Só a divisão pelo preço, sem custos e sem projeção de retorno.
+- **Avisos fixos:** como o IR funciona nos BDRs (15% sobre o ganho na venda, 20% em day trade, sem a isenção de R$ 20 mil; dividendos já com imposto retido na origem, 30% nos EUA, e tabela progressiva pelo carnê-leão no Brasil), risco cambial, frase padrão de rentabilidade passada, critério da lista e aviso educacional.
+- **Tamanho:** com os ~870 BDRs na busca, o arquivo fica perto de 110 KB (cerca de 15 KB a mais no download compactado do app).
+
+Conferido em navegador (390 px, temas claro e escuro) com dados simulados no formato real, incluindo o build de produção com esses dados.

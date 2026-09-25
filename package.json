@@ -11,7 +11,8 @@
     "test": "cd webapp-src && vitest run && cd .. && node --test \"scripts/*.test.mjs\"",
     "typecheck": "tsc -b",
     "atualizar-fii": "node scripts/atualizar-rendimentos-fii.mjs",
-    "atualizar-mercado": "node scripts/atualizar-mercado-oficial.mjs"
+    "atualizar-mercado": "node scripts/atualizar-mercado-oficial.mjs",
+    "atualizar-bdrs": "node scripts/atualizar-bdrs.mjs"
   },
   "dependencies": {
     "react": "^19.2.8",

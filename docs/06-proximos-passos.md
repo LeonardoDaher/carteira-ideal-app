@@ -30,7 +30,7 @@ A mudança para a API tirou a metodologia do código visível. Ainda assim, vale
 
 ## 4. Governança da metodologia (visão de consultoria)
 
-- [ ] **Revisão periódica das carteiras-modelo.** As 9 carteiras são fixas e não reagem ao cenário (nível da Selic, curva de juros, câmbio). Sugestão: revisão semestral documentada, com data e justificativa no [Registro de decisões](07-registro-de-decisoes.md), e o número da versão da metodologia exibido na tela de resultado.
+- [ ] **Revisão periódica das carteiras-modelo.** As 9 carteiras são fixas e não reagem ao cenário (nível da Selic, curva de juros, câmbio). Desde a D15, o job semanal traz Selic, IPCA, juro real, dólar e Focus para `mercadoOficial.json`: os números da revisão já estão à mão. Sugestão: revisão semestral documentada, com data e justificativa no [Registro de decisões](07-registro-de-decisoes.md), e o número da versão da metodologia exibido na tela de resultado.
 - [ ] **Graduar o veto.** Hoje um, dois ou três pilares duros em [A] têm o mesmo efeito. Avaliar se três vetos simultâneos deveriam gerar uma orientação mais forte (por exemplo, priorizar quitar dívidas e montar reserva antes de investir).
 - [ ] **Coerência com o enquadramento educacional.** Revisar textos como "Como um consultor CEA/CNPI analisa" para garantir que continuem soando educativos e não como recomendação individual.
 
@@ -65,3 +65,25 @@ A mudança para a API tirou a metodologia do código visível. Ainda assim, vale
 - [ ] **Primeira execução com a lista ampla:** ler no log a contagem de fundos publicados, indisponíveis e com baixa confiança, e conferir 2 fundos pequenos por amostragem além dos destaques.
 - [ ] **Lista por liquidez e setor (D13), primeira execução:** conferir quantos fundos entraram, se os setores declarados à CVM fazem sentido (corrigir em `setores`) e se o volume médio de 2 ou 3 fundos bate com um site de cotações.
 - [ ] **Nova captura** de `docs/jornada/17-simule-fii.jpg` mostrando a busca e a lista por setor, depois da primeira execução.
+
+## 8. Dados oficiais e aba "Simule Tesouro" (decisões D15 a D17)
+
+- [x] **Job semanal** de dados oficiais (Banco Central, Focus, Tesouro Transparente), sem custo e sem secret.
+- [x] **Primeira execução** (25/09/2026): Selic 13,75%, IPCA 12m 4,22%, Focus de 18/09, 58 títulos. Corrigidos a Selic com data futura e a instabilidade do SGS.
+- [x] **Aba Simule Tesouro** no ar, com simulador (IR, custódia, valor em dinheiro de hoje), taxas de hoje e gráfico de juros desde 1999.
+- [x] **Build com dados reais** corrigido (conversão do JSON via `unknown` em `data/snapshotMercado.ts`).
+- [x] **Textos do Tesouro revisados** com a lista real de títulos e TRPL4 → ISAE4 (D17).
+- [ ] **Comparar uma simulação** com o simulador oficial do Tesouro Direto (mesmo título e valor). Diferença de poucos por cento é esperada.
+- [ ] **Proteção do job:** rodar `npm run build` no próprio job antes do commit, para dados novos nunca quebrarem o site.
+- [ ] **Rotina semanal:** olhar as linhas `[conteudo]` do log; se aparecerem, revisar os textos (D17).
+- [ ] **Nova captura** `docs/jornada/18-simule-tesouro.jpg`.
+- [ ] **Avaliar incluir o Tesouro Renda+ e o Educa+** no simulador (hoje fora: fluxo de renda mensal e regras próprias de custódia).
+
+## 9. Aba "Simule BDR" (decisão D19)
+
+- [x] **Job diário** (dias úteis, 19h de Brasília), 35 BDRs de ações e 5 de ETF por volume médio de 21 pregões, busca com todos os demais.
+- [x] **Tela** com lista por setor, busca, simulação de compra e avisos de IR e câmbio.
+- [ ] **Primeira execução:** ler no log as linhas `[revisar]`, `[setor]` e `[categoria]` e ajustar `config/bdrs.json`; conferir o volume médio de 2 ou 3 BDRs num site de cotações.
+- [ ] **Grupos dos BDRs de ETF:** completar `gruposEtf` conforme os ETFs que entrarem na lista.
+- [ ] **Nova captura** `docs/jornada/19-simule-bdr.jpg`.
+- [ ] **Próximas frentes, uma por vez, cada uma em sua conversa:** ETFs da B3, criptomoedas e ações da B3.

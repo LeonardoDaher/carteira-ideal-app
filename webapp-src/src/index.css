@@ -967,3 +967,20 @@ button.alloc-box:active {
   white-space: nowrap;
   flex-shrink: 0;
 }
+
+/* ---------------------------------------------------------------------------------------
+   Aba "Simule BDR" (screens/SimuleBdr.tsx, decisão D19)
+   --------------------------------------------------------------------------------------- */
+
+/* Resultado da simulação de compra: rótulo à esquerda, valor à direita, mesma régua de
+   linhas da tabela do Simule FII. */
+.tabela-bdr {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+  font-variant-numeric: tabular-nums;
+}
+.tabela-bdr > :last-child { text-align: right; }
+.tabela-bdr:last-child { border-bottom: none; }

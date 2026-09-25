@@ -121,3 +121,55 @@ npm run build        # build de produção em dist-site/
 **Manutenção do IFIX (janeiro, maio e setembro).** A B3 rebalanceia o índice a cada quatro meses. Confira a carteira teórica em b3.com.br (Índices > IFIX > Composição da carteira), atualize a ordem e os tickers em `config/fiis-ifix.json`, ajuste `"vigencia"` e rode o job manualmente.
 
 **Cuidado com a tradução automática do navegador.** Ela altera o texto dos arquivos na tela do GitHub (por exemplo, `false` vira "falso" e "set a dez" vira "definir dez"). Desative a tradução para github.com antes de editar qualquer arquivo.
+
+## 5.7 Operação semanal dos dados oficiais de mercado (Simule Tesouro)
+
+**Rotina automática.** Toda terça-feira, às 10h de Brasília, o GitHub roda o job "Atualizar dados oficiais de mercado" (decisões D15 e D16). Ele busca no Banco Central a Selic meta, o CDI, o IPCA, o dólar PTAX, o histórico da Selic e do IPCA desde 1999 e o Boletim Focus, e no Tesouro Transparente as taxas e preços de todos os títulos do Tesouro Direto. Grava `webapp-src/src/data/mercadoOficial.json` e faz um commit com a mensagem "dados: mercado oficial (AAAA-MM-DD)". A Vercel publica esse commit sozinha. Não precisa de secret: as fontes são públicas.
+
+**Onde os dados aparecem.** Na aba **Simule Tesouro Direto** (botão 🏛️ da landing) e nas telas de detalhe do Tesouro, CDB e LCI/LCA ("Taxas de hoje" e "Juros e inflação no Brasil").
+
+**Se o job falhar**, o GitHub manda um e-mail e o site continua com os dados da semana anterior. Para ver o motivo: **Actions** > execução com ✗ > **atualizar** > passo **"Buscar dados e gerar mercadoOficial.json"**.
+
+| Mensagem no log | O que fazer |
+|---|---|
+| `[indicador] …`, `[historico] …`, `[focus] …`, `[tesouro] …` | Resumo do que foi lido. Conferir de vez em quando contra o site do Banco Central e do Tesouro Direto |
+| `[aviso] … tentativa N falhou (HTTP 502)` ou `(resposta não é JSON: "<?xml…")` | Nada, se uma tentativa seguinte deu certo: o Banco Central oscila. O script tenta 4 vezes com espera crescente |
+| `[erro] … falhou após 4 tentativas` | Rodar de novo mais tarde (Run workflow). Se repetir em dias diferentes, enviar o log para quem desenvolve |
+| `[trava] …: valor … fora da faixa plausível` | Um código de série pode ter mudado. Enviar o log para quem desenvolve |
+| `[trava] Tesouro: data-base … dias atrás` | O Tesouro Transparente não atualizou o arquivo. Rodar de novo no dia seguinte |
+| `[trava] Focus …: sem projeção para …` | Virada de ano ou boletim atrasado. Rodar de novo no dia seguinte |
+| `[trava] Histórico …: último ponto … não bate com o valor atual` | As consultas vieram desencontradas. Rodar de novo; se repetir, enviar o log |
+| `[descartado] …` | Título com taxa implausível, deixado de fora. Nada a fazer se for pontual |
+| `[aviso] Tipo de título desconhecido …` | O Tesouro lançou um tipo novo. Avisar quem desenvolve para incluí-lo |
+| `[conteudo] … cita "Tesouro …", que não está à venda` | Um exemplo dos textos educacionais saiu de venda. Revisar `tesouroIPCA.ts`, `tesouroPrefixado.ts` ou `tesouroSelic.ts` (ver D17). O job não falha por isso |
+
+**Se o deploy de dados falhar na Vercel** (commit "dados: mercado oficial" com status Error), abrir o log do deploy e enviar para quem desenvolve. Foi o que aconteceu no primeiro commit de dados reais (ver D16, correção do build).
+
+**Rodar fora de terça:** Actions > **Atualizar dados oficiais de mercado** > **Run workflow**. Nunca "Re-run all jobs" numa execução antiga.
+
+## 5.8 Operação diária dos BDRs (decisão D19)
+
+**Rotina automática.** De segunda a sexta, às 19h de Brasília, o GitHub roda o job "Atualizar BDRs". Ele busca na brapi a listagem de BDRs e o histórico de 3 meses dos candidatos, grava `webapp-src/src/data/bdrs.json` (a lista de 40 e a lista de busca com os demais BDRs), confere se o site compila e faz um commit "dados: BDRs (AAAA-MM-DD)". Em feriado da B3 nada muda e nada é publicado. Usa o mesmo secret `BRAPI_TOKEN` do job de FIIs.
+
+**Se o job falhar**, o GitHub manda um e-mail e o app continua com os dados do último dia bom. Para ver o motivo: Actions > execução com ✗ > **atualizar** > passo **"Buscar dados e gerar bdrs.json"**.
+
+| Mensagem no log | O que fazer |
+|---|---|
+| `config/bdrs.json ainda não foi conferido…` | Revisar as listas `excluir` e `revisados` e marcar `"conferidoPeloResponsavel": true` |
+| `Variável BRAPI_TOKEN não definida` | Cadastrar (ou recadastrar) o secret `BRAPI_TOKEN` |
+| `brapi respondeu 401/403…` | Chave expirada, revogada ou plano sem acesso: gerar outra em brapi.dev e atualizar o secret |
+| `A listagem da brapi trouxe só … BDRs` | A brapi mudou ou estava fora do ar. Rodar de novo no dia seguinte; se repetir, enviar o log para quem desenvolve |
+| `Só … de 5 BDRs de controle ficaram válidos` | Problema geral na brapi. Rodar de novo mais tarde |
+| `Só … BDRs de ações/ETF passaram no piso de liquidez` | A lista encolheu de repente (cota esgotada, brapi instável). Rodar de novo no dia seguinte |
+| `O pregão mais recente no histórico é de …, mais de 7 dias atrás` | O histórico da brapi parou de atualizar. Enviar o log para quem desenvolve |
+| `[revisar] XXXX32: código de BDR patrocinado…` | Decidir: empresa de origem ou operação brasileira vai para `excluir`; as demais vão para `revisados` (ambos em `config/bdrs.json`). O BDR continua publicado até a decisão |
+| `[setor] XXXX34 (…)` | Setor da brapi sem tradução. Incluir a tradução no bloco `setores`, ou o setor do BDR em `setorPorTicker` |
+| `[categoria] XXXX39` | BDR de ETF sem grupo: incluir em `gruposEtf` (ex.: `"XXXX39": "Metais preciosos"`). Enquanto isso, aparece em "Outros" |
+| `[info] XXXX34: …` | BDR com dado inválido ou sem resposta: fica de fora só naquele dia |
+| `[info] Mais negociados: …` / `Menos negociados da lista: …` | Conferir 2 ou 3 volumes num site de cotações de vez em quando |
+| `brapi pediu para desacelerar (429)` | Nada, se for pontual. Se virar rotina, aumentar `pausaEntreRequisicoesMs` em `config/bdrs.json` |
+| `Sem pregão novo desde …: arquivo mantido.` | Nada: feriado ou execução repetida no mesmo dia |
+
+**Parâmetros** em `config/bdrs.json`: `maxAcoes` (35), `maxEtfs` (5), `pisoVolumeAcoes` e `pisoVolumeEtfs` (em reais por dia), `candidatosAcoes` e `candidatosEtfs` (quantos são consultados por dia), `maxRequisicoesBrapi` (teto por execução) e `horarioCorteFechamento`.
+
+**Rodar fora do horário:** Actions > **Atualizar BDRs** > **Run workflow**. Antes das 18h30, o pregão do dia é ignorado e a lista sai com o fechamento do dia anterior.
