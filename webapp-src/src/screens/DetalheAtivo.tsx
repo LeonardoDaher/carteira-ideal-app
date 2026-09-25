@@ -6,6 +6,9 @@ import { AlertTriangleIcon, BarChartIcon, BrainIcon, ChevronDownIcon, PinIcon, T
 import { SectorPieChart } from '../ui/AllocBar'
 import type { AppCtx } from '../state/useAppState'
 import type { AtivoKey } from '../domain/types'
+import { ATIVOS_COM_CENARIO, TESOURO_POR_ATIVO } from '../domain/mercadoOficial'
+import { TaxasTesouroHoje } from '../ui/TaxasTesouroHoje'
+import { CenarioJuros } from '../ui/CenarioJuros'
 
 /** Pluraliza a unidade contada em `setores[].fundos` (fundo/fundos, ação/ações ou BDR/BDRs). */
 function rotuloUnidade(unidade: 'fundo' | 'acao' | 'bdr' | 'cdb' | 'etf' | 'moeda' | 'titulo' | 'lci' | undefined, qtd: number): string {
@@ -72,6 +75,10 @@ export function DetalheAtivo({ ctx }: { ctx: AppCtx }) {
   }
 
   const info = ATIVOS[ativo]
+  // Dados oficiais (D15): no agregado "Tesouro Direto", as taxas acompanham o chip
+  // escolhido (Selic, Prefixado ou IPCA+).
+  const tesouroExibido = TESOURO_POR_ATIVO[tipoAtivo?.chave ?? ativo]
+  const mostraCenario = ATIVOS_COM_CENARIO.includes(tipoAtivo?.chave ?? ativo)
   // Quando o ativo agrega outras classes na exibição (ex.: Tesouro Direto agrega
   // Selic + Prefixado + IPCA+), o "peso na carteira" mostrado aqui é a soma das
   // classes agregadas, não só o valor bruto da chave `ativo`.
@@ -191,6 +198,10 @@ export function DetalheAtivo({ ctx }: { ctx: AppCtx }) {
           )}
         </div>
       )}
+
+      {tesouroExibido && <TaxasTesouroHoje familia={tesouroExibido.familia} indexador={tesouroExibido.indexador} />}
+
+      {mostraCenario && <CenarioJuros />}
 
       {setoresAtuais && (
         <div className="col" style={{ gap: 8 }}>

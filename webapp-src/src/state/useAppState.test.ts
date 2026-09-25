@@ -264,6 +264,7 @@ describe('useAppState — Aprender e Simule FII abertos pela landing (sem questi
   it.each([
     ['aprender', 'aprender'],
     ['simuleFii', 'simuleFii'],
+    ['simuleTesouro', 'simuleTesouro'],
   ] as const)('?tela=%s abre a tela sem nenhuma resposta salva', async (parametro, tela) => {
     window.history.replaceState(null, '', `/app/?tela=${parametro}`)
 

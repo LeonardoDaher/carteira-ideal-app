@@ -231,3 +231,62 @@ Com isso, a média de 3 meses exibida na tela chegava a superestimar a renda em 
 - Quando o tema muda no app, a mesma chave é gravada, e a landing acompanha na volta. A gravação só acontece depois da leitura, para o padrão escuro não apagar a escolha feita na landing.
 - `webapp-src/index.html` aplica o tema antes da primeira pintura, para o app não piscar no escuro enquanto carrega.
 - Testado no navegador: landing no claro → Simule FII no claro → "Início" → landing no claro → Aprender no claro.
+
+### D15 · Dados oficiais de mercado: Banco Central e Tesouro Direto, uma vez por semana (25/09/2026)
+
+**Contexto.** Os textos de `analises/tesouro*.ts` citam títulos e vencimentos fixos, que envelhecem sem aviso, e as 9 carteiras-modelo não têm nenhuma referência de cenário (Selic, inflação, câmbio). Pendência registrada em docs/06, bloco 4 (revisão periódica das carteiras-modelo).
+
+**Decisão.** Novo job semanal no mesmo padrão do Simule FII (D9): script no GitHub Actions, arquivo estático versionado, nenhuma chamada externa saindo do navegador, custo zero.
+- **Banco Central (SGS):** Selic meta (432), CDI anualizado (4389), IPCA do mês (433), IPCA 12 meses (13522) e dólar PTAX de venda (1). Último valor e o anterior.
+- **Tesouro Transparente:** arquivo "Preço e taxa dos títulos do Tesouro Direto", só a data-base mais recente. Cada título com taxa e preço de compra e de venda (valores da manhã), indexador, tipo de taxa, cupom e se está à venda.
+- **Derivado:** juro real ex-post (Selic meta descontada do IPCA 12 meses), como termômetro de cenário, não previsão de retorno.
+- **Histórico para o gráfico:** Selic meta (432) e IPCA 12 meses (13522) desde 05/03/1999, início da série da meta. O SGS limita a consulta por período a 10 anos, então o script busca em janelas de 9 anos. A Selic meta vem diária, mas só muda nas reuniões do Copom: o script guarda só os pontos de mudança e o último dia, o que dá cerca de 150 pontos.
+- Saída em `webapp-src/src/data/mercadoOficial.json`. Configuração em `config/mercado-oficial.json`.
+
+**Salvaguardas.**
+- Cada indicador tem faixa plausível e idade máxima no config. Fora disso, o job falha sem gravar (protege contra código de série trocado ou mudança de unidade).
+- Tesouro: data-base com até 7 dias, pelo menos 10 títulos à venda e pelo menos um Selic, um Prefixado e um IPCA+ à venda. Título à venda com taxa fora da faixa é descartado e aparece no log.
+- Qualquer falha = arquivo não atualizado; o app segue com os dados da semana anterior.
+- SGS com 3 tentativas e pausa crescente (o serviço oscila). A consulta "últimos N" do SGS é limitada a 20 valores desde 26/03/2025; o job usa 2.
+- Histórico: número mínimo de pontos, faixa plausível (a Selic de 1999 chegou a 45%, por isso a faixa vai até 50%) e o último ponto precisa ser igual ao valor atual do indicador. Se não bater, as duas consultas estão desencontradas e nada é gravado.
+
+**Leitura das taxas.** As três famílias não falam a mesma língua: no Tesouro Selic a taxa é o ágio/deságio sobre a Selic, no IPCA+ (e Renda+, Educa+) é o juro real acima da inflação, no Prefixado é a taxa nominal. O campo `tipoTaxa` (`agioSobreSelic`, `jurosReais`, `nominal`) existe para a tela nunca comparar esses números diretamente. No Renda+ e no Educa+ o ano do nome comercial não é o vencimento; o nome gerado traz o vencimento explícito.
+
+**Conferência do conteúdo.** A cada execução, o job procura nomes de títulos nos arquivos de `analises/tesouro*.ts` e lista no log (linhas `[conteudo]`) os que não estão à venda. Só avisa: a correção do texto é decisão editorial.
+
+**Tela (DetalheAtivo).**
+- **Taxas de hoje** (`ui/TaxasTesouroHoje.tsx`): no agregado Tesouro Direto, acompanha o chip escolhido (Selic, Prefixado ou IPCA+). Lista todos os títulos à venda da família, **em ordem de vencimento, nunca por maior taxa**, com a taxa escrita na régua certa ("Selic + 0,05%", "IPCA + 7,45%", "14,10% a.a."), o preço por título, uma frase explicando a régua, a data e a fonte, e o aviso de que a lista não é indicação de compra.
+- **Juros e inflação no Brasil** (`ui/CenarioJuros.tsx`): nas telas de Tesouro, CDB com liquidez diária e LCI/LCA. Mostra Selic meta (com a data da última decisão do Copom que a alterou), CDI, IPCA 12 meses, juro real ex-post e dólar PTAX.
+- **Gráfico** (`ui/GraficoJuros.tsx`, SVG próprio, sem biblioteca): Selic meta em degraus e IPCA 12 meses em linha, com períodos de 5 anos, 10 anos (padrão, porque os 45% de 1999 achatam a escala) e desde 1999. Tocar, arrastar ou usar as setas do teclado mostra o mês com Selic, IPCA e juro real. A leitura abre no último mês completo, com o IPCA já divulgado. O leitor de tela recebe um resumo do período (mínima, máxima e valor atual).
+- Cores do gráfico próprias por tema (`--grafico-selic`, `--grafico-ipca`): no tema claro, o amarelo de destaque some como linha fina, por isso usa um tom mais escuro da mesma família.
+- **Fora do Resultado, de propósito.** O cenário fica só nas telas de renda fixa, e o texto diz que a carteira de referência não muda conforme esses números. Colocá-lo ao lado da carteira sugeriria que a alocação reage à conjuntura, o que não acontece.
+- Antes da primeira execução do job, as taxas mostram um aviso para consultar o site do Tesouro Direto, e o quadro de cenário não aparece. Com dado de mais de 10 dias, as duas seções avisam da possível defasagem.
+
+**Manutenção.** Se o Tesouro Transparente mudar o endereço do arquivo, atualizar `tesouro.urlCsv` no config. Se aparecer tipo novo de título no log (`Tipo de título desconhecido`), incluí-lo em `classificarTitulo`.
+
+### D16 · Aba "Simule Tesouro" aberta pela landing (25/09/2026)
+
+**Contexto.** Pedido do responsável: uma aba própria do Tesouro Direto, no molde do Simule FII (D9, D11), além da seção já colocada no detalhe do Tesouro (D15), que continua lá.
+
+**O que a aba tem** (`screens/SimuleTesouro.tsx`, aberta por `./app/?tela=simuleTesouro`, botão 🏛️ na landing):
+- Escolha do tipo (Selic, Prefixado, IPCA+) e do título, todos os sem cupom à venda, **em ordem de vencimento**, com a taxa escrita na régua certa.
+- Valor: R$ 1 mil, 5 mil (padrão), 10 mil, 50 mil ou digitado.
+- Resultado: valor bruto no vencimento, custódia da B3, IR, valor líquido, o mesmo valor **em dinheiro de hoje** (descontada a inflação projetada), rentabilidade líquida ao ano e ganho acima da inflação.
+- "Como a conta é feita" (fechado por padrão), com a tabela do Focus usada, a tabela do IR e a regra da custódia.
+- O quadro de juros e o gráfico da D15, sem a frase sobre a carteira de referência, que aqui não se aplica.
+
+**Regras do cálculo** (`domain/simulaTesouro.ts`, no app, porque é aritmética sobre dado público, não metodologia):
+- Prefixado: taxa contratada. IPCA+: juro real composto com o IPCA projetado ano a ano. Selic: média entre a Selic no início e a projeção para o fim de cada ano, mais o ágio/deságio do título.
+- Premissa de inflação e Selic: **mediana do Boletim Focus** (Banco Central, API Olinda, recurso ExpectativasMercadoAnuais), buscada pelo job semanal. Depois do último ano projetado, repete o último valor.
+- Custódia da B3: 0,20% a.a. sobre o valor médio do título em cada ano, cobrada no vencimento (regra vigente desde 2025, sem cobrança semestral). Tesouro Selic: só sobre o que passar de R$ 10 mil, supondo ser o único Tesouro Selic do CPF (a tela avisa).
+- IR regressivo pelo prazo total (22,5% / 20% / 17,5% / 15%), sobre o ganho já descontada a custódia.
+- Prazo em dias corridos / 365; o Tesouro usa dias úteis / 252. A tela diz que o valor exato pode diferir um pouco.
+- Mínimo de compra: 1% do preço do título, com piso de R$ 30; abaixo disso, aviso.
+
+**Fora do simulador, de propósito.** Títulos com juros semestrais: pagam cupom a cada seis meses, já tributado, e o resultado dependeria de uma premissa de reinvestimento. Aparecem com a taxa, e a tela explica por que não entram. Renda+ e Educa+ também ficam fora (fluxo de renda mensal, regras próprias de custódia).
+
+**Job semanal (D15) ampliado.** Busca o Focus de IPCA e Selic. Travas: coleta com até 14 dias, projeção para pelo menos o ano corrente e os 2 seguintes, valores dentro da faixa plausível. Qualquer falha impede a gravação, como nos demais dados.
+
+**Conferência feita.** IPCA + 7,45% por 8 anos e 8 meses, R$ 10 mil, Focus perto de 3,6%: bruto de cerca de R$ 25,3 mil, custódia de cerca de R$ 287, IR de 15% e ganho real líquido de cerca de 6,1% ao ano, coerente com a conta de cabeça. Os testes conferem à mão um Prefixado de 2 anos (bruto, custódia, IR, líquido e valor em dinheiro de hoje) e a isenção do Selic.
+
+**A acompanhar.** Na primeira execução, conferir no log a linha `[focus]` contra o boletim publicado no site do Banco Central, e comparar uma simulação com o simulador oficial do Tesouro Direto para o mesmo título e valor. Diferenças de poucos por cento são esperadas (dias corridos, premissas); diferenças grandes indicam erro.

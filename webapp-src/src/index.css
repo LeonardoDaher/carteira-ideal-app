@@ -794,3 +794,160 @@ button.alloc-box:active {
 }
 .livro-dialog-status { min-height: 1.4em; margin: 12px 0 0; font-size: 13.5px; line-height: 1.4; text-align: center; }
 .livro-dialog-nota { margin: 8px 0 0; font-size: 11.5px; line-height: 1.5; color: var(--text-muted); text-align: center; }
+
+/* ---------------------------------------------------------------------------------------
+   Dados oficiais de mercado (decisão D15): taxas do Tesouro, cenário e gráfico de juros
+   --------------------------------------------------------------------------------------- */
+
+/* Cores das duas séries do gráfico. No tema claro o amarelo de destaque some como linha
+   fina sobre fundo claro: usa um tom mais escuro da mesma família. */
+:root {
+  --grafico-selic: var(--accent);
+  --grafico-ipca: oklch(72% 0.13 235);
+}
+:root[data-theme='light'] {
+  --grafico-selic: oklch(58% 0.15 85);
+  --grafico-ipca: oklch(50% 0.15 250);
+}
+
+/* Linha de um título: nome e vencimento à esquerda, taxa e preço alinhados à direita. */
+.taxa-linha {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.taxa-linha:last-child { border-bottom: none; }
+.taxa-valor {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Indicadores do Banco Central: grade que cabe 3 por linha no celular. */
+.cenario-grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+  gap: 12px 10px;
+  margin: 0;
+}
+.cenario-item { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.cenario-item dd { margin: 0; }
+.cenario-valor {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Gráfico de juros */
+.grafico-juros {
+  width: 100%;
+  height: auto;
+  display: block;
+  touch-action: pan-y; /* o arraste horizontal lê o gráfico; o vertical continua rolando a tela */
+  cursor: crosshair;
+  border-radius: 8px;
+}
+.grafico-juros:focus-visible { outline: 2px solid var(--grafico-selic); outline-offset: 4px; }
+.grafico-juros-grade { stroke: var(--border); stroke-width: 1; }
+.grafico-juros-eixo { fill: var(--text-muted); font-size: 9.5px; font-family: 'IBM Plex Sans', sans-serif; font-variant-numeric: tabular-nums; }
+.grafico-juros-linha { fill: none; stroke-linejoin: round; stroke-linecap: round; }
+.grafico-juros-linha.selic { stroke: var(--grafico-selic); stroke-width: 2.4; }
+.grafico-juros-linha.ipca { stroke: var(--grafico-ipca); stroke-width: 1.6; }
+.grafico-juros-guia { stroke: var(--text-muted); stroke-width: 1; stroke-dasharray: 2 3; }
+.grafico-juros-ponto { stroke: var(--bg); stroke-width: 1.5; }
+.grafico-juros-ponto.selic { fill: var(--grafico-selic); }
+.grafico-juros-ponto.ipca { fill: var(--grafico-ipca); }
+
+/* Leitura do mês escolhido, acima do gráfico. */
+.grafico-juros-leitura {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 14px;
+  font-size: 12px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  min-height: 18px;
+}
+.grafico-juros-leitura strong { color: var(--text); font-weight: 700; }
+.grafico-juros-mes { color: var(--text); font-weight: 700; min-width: 58px; }
+.grafico-juros-marca {
+  display: inline-block;
+  width: 12px;
+  height: 3px;
+  border-radius: 2px;
+  margin-right: 5px;
+  vertical-align: middle;
+}
+.grafico-juros-marca.selic { background: var(--grafico-selic); }
+.grafico-juros-marca.ipca { background: var(--grafico-ipca); }
+
+/* ---------------------------------------------------------------------------------------
+   Aba "Simule Tesouro" (screens/SimuleTesouro.tsx, decisão D16)
+   --------------------------------------------------------------------------------------- */
+
+/* Título escolhível: mesma caixa de vidro das demais, contorno amarelo quando escolhido. */
+.titulo-opcao {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--stroke);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+.titulo-opcao:hover { background: var(--highlight); }
+.titulo-opcao:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.titulo-opcao.selecionado {
+  border: 2px solid var(--accent);
+  padding: 11px 13px; /* compensa o contorno mais grosso, para a lista não "pular" */
+  background: color-mix(in oklch, var(--accent) 12%, var(--surface));
+}
+
+/* Tabela do resultado: rótulo à esquerda, valor à direita, números alinhados. */
+.tabela-simulacao { display: flex; flex-direction: column; }
+.linha-simulacao {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.linha-simulacao > :first-child { color: var(--text-muted); }
+.linha-simulacao > :last-child { text-align: right; white-space: nowrap; }
+.linha-simulacao.destaque { border-bottom: none; font-weight: 700; }
+.linha-simulacao.destaque > :first-child { color: var(--text); }
+
+.caixa-numero {
+  gap: 2px;
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--surface2);
+  font-variant-numeric: tabular-nums;
+}
+
+/* "Como a conta é feita": fechado por padrão, para o resultado vir primeiro. */
+.premissas-tesouro summary { list-style-position: inside; }
+.tabela-premissas {
+  display: grid;
+  grid-template-columns: auto 1fr 1.4fr;
+  gap: 4px 14px;
+  font-variant-numeric: tabular-nums;
+}
+.tabela-premissas [role='columnheader'] { font-weight: 600; color: var(--text); }

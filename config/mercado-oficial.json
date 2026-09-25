@@ -1,0 +1,152 @@
+{
+  "_leia": "Configuração do job semanal de dados oficiais (decisão D15). Fontes públicas e gratuitas: SGS do Banco Central e Tesouro Transparente. 'faixa' é o intervalo plausível de cada valor: se o dado vier fora dele, o job falha SEM gravar o arquivo (protege contra código de série trocado ou mudança de unidade). 'maxDiasAtraso' é a idade máxima do último dado, em dias corridos.",
+  "indicadores": [
+    {
+      "chave": "selicMeta",
+      "codigoSgs": 432,
+      "nome": "Selic meta (Copom)",
+      "unidade": "% a.a.",
+      "periodicidade": "diaria",
+      "faixa": [
+        2,
+        30
+      ],
+      "maxDiasAtraso": 10
+    },
+    {
+      "chave": "cdi",
+      "codigoSgs": 4389,
+      "nome": "CDI anualizado (base 252)",
+      "unidade": "% a.a.",
+      "periodicidade": "diaria",
+      "faixa": [
+        2,
+        30
+      ],
+      "maxDiasAtraso": 10
+    },
+    {
+      "chave": "ipcaMes",
+      "codigoSgs": 433,
+      "nome": "IPCA do mês",
+      "unidade": "% no mês",
+      "periodicidade": "mensal",
+      "faixa": [
+        -2,
+        5
+      ],
+      "maxDiasAtraso": 80
+    },
+    {
+      "chave": "ipca12m",
+      "codigoSgs": 13522,
+      "nome": "IPCA acumulado em 12 meses",
+      "unidade": "% em 12 meses",
+      "periodicidade": "mensal",
+      "faixa": [
+        -3,
+        20
+      ],
+      "maxDiasAtraso": 80
+    },
+    {
+      "chave": "dolarPtax",
+      "codigoSgs": 1,
+      "nome": "Dólar PTAX (venda)",
+      "unidade": "R$ por US$",
+      "periodicidade": "diaria",
+      "faixa": [
+        2,
+        15
+      ],
+      "maxDiasAtraso": 10
+    }
+  ],
+  "tesouro": {
+    "_leia": "Arquivo 'Preço e Taxa dos títulos do Tesouro Direto' do Tesouro Transparente (histórico completo, atualizado diariamente). Só a data-base mais recente é publicada. 'faixaTaxa' por indexador: Selic é o ágio/deságio sobre a Selic, IPCA/IGP-M é o juro real, prefixado é a taxa nominal, todos em % a.a. Título à venda com taxa fora da faixa é descartado e registrado no log.",
+    "urlCsv": "https://www.tesourotransparente.gov.br/ckan/dataset/df56aa42-484a-4a59-8184-7676580c81e3/resource/796d2059-14e9-44e3-80c9-2d9e30b405c1/download/PrecoTaxaTesouroDireto.csv",
+    "maxDiasAtraso": 7,
+    "minimoTitulosAVenda": 10,
+    "faixaTaxa": {
+      "selic": [
+        -0.5,
+        1.5
+      ],
+      "prefixado": [
+        2,
+        30
+      ],
+      "ipca": [
+        0,
+        15
+      ],
+      "igpm": [
+        0,
+        15
+      ]
+    }
+  },
+  "conferirConteudo": {
+    "_leia": "Arquivos de conteúdo educacional em que o job procura nomes de títulos (ex.: 'Tesouro IPCA+ 2045') e avisa no log, sem falhar, quando um título citado não está mais à venda.",
+    "pasta": "webapp-src/src/data/analises",
+    "arquivos": [
+      "tesouroSelic.ts",
+      "tesouroIPCA.ts",
+      "tesouroPrefixado.ts"
+    ]
+  },
+  "historico": {
+    "_leia": "Histórico para o gráfico de juros da tela (D15). O SGS limita cada consulta por período a 10 anos, então o script busca em janelas de 'janelaAnos'. A Selic meta é diária, mas só muda nas reuniões do Copom: o script guarda só os pontos de mudança (mais o último dia), o que reduz milhares de dias a cerca de 150 pontos. 'minimoPontos' e 'faixa' são travas: fora disso, nada é gravado.",
+    "desde": "1999-03-05",
+    "janelaAnos": 9,
+    "series": [
+      {
+        "chave": "selicMeta",
+        "codigoSgs": 432,
+        "nome": "Selic meta",
+        "unidade": "% a.a.",
+        "comprimir": true,
+        "faixa": [
+          1,
+          50
+        ],
+        "minimoPontos": 50
+      },
+      {
+        "chave": "ipca12m",
+        "codigoSgs": 13522,
+        "nome": "IPCA 12 meses",
+        "unidade": "% em 12 meses",
+        "comprimir": false,
+        "faixa": [
+          -3,
+          25
+        ],
+        "minimoPontos": 200
+      }
+    ]
+  },
+  "focus": {
+    "_leia": "Boletim Focus (Banco Central, API Olinda, recurso ExpectativasMercadoAnuais): mediana das projeções de mercado para o ano corrente e os seguintes. É a premissa do simulador do Tesouro para IPCA+ (inflação) e Tesouro Selic (juros). baseCalculo 0 = conjunto padrão do boletim. 'minimoAnos': quantos anos, a partir do corrente, precisam vir; 'faixa' por indicador: fora dela, nada é gravado.",
+    "maxDiasAtraso": 14,
+    "minimoAnos": 3,
+    "indicadores": [
+      {
+        "chave": "ipca",
+        "nomeFocus": "IPCA",
+        "faixa": [
+          -2,
+          20
+        ]
+      },
+      {
+        "chave": "selic",
+        "nomeFocus": "Selic",
+        "faixa": [
+          1,
+          40
+        ]
+      }
+    ]
+  }
+}
