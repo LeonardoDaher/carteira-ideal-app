@@ -203,7 +203,7 @@ Com isso, a média de 3 meses exibida na tela chegava a superestimar a renda em 
 
 **Ajustes de tela pedidos pelo responsável (25/09/2026).**
 - O texto do critério passou a ser: "Somente são disponibilizadas as informações dos fundos imobiliários que negociam, em média, acima de R$ 1 milhão por dia. Para os demais fundos, com valores de negociação inferiores a R$ 1 milhão, favor consultar na busca acima."
-- Os nomes de setor viraram títulos alinhados à esquerda (a primeira versão era centralizada), maiores e no amarelo da marca. No tema claro, o amarelo ganha um contorno fino no tom escuro da paleta, porque amarelo sobre fundo claro fica ilegível.
+- Os nomes de setor passaram por três versões. Primeiro, texto amarelo centralizado, com contorno no tema claro. Depois, o mesmo texto alinhado à esquerda. Na versão final, cada setor é uma caixa amarela na largura toda, com o nome em escuro e centralizado, no mesmo desenho do botão principal da landing ("Ver minha carteira de referência"). O visual é igual nos dois temas.
 - A busca por fundo que não informa DY à CVM diz que os rendimentos estão no site da administradora do fundo, sem sugerir "tente na próxima atualização", porque isso não muda de um mês para o outro.
 
 **Revisão dos setores (25/09/2026).** Mesmo com o mandato priorizado, a autodeclaração à CVM ainda divergia do mercado em 15 fundos da lista, entre eles HGLG11 e BTLG11 em "Híbrido" e MXRF11 em "Logística". As correções seguras foram para o bloco `setores` de `config/fiis-ifix.json`, com dois setores novos, Agro (RZTR11) e Energia (SNEL11). Na confirmação do responsável:

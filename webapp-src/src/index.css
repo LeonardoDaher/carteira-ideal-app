@@ -635,24 +635,21 @@ button.alloc-box:active {
    alerta para não se perder entre os textos legais. */
 .aviso-atraso { border-left: 4px solid var(--warning); }
 
-/* Título de cada setor da lista de FIIs (D13): alinhado à esquerda, grande e no amarelo da
-   marca, para a lista longa ser lida como seções e não como um bloco de botões. */
+/* Título de cada setor da lista de FIIs (D13): caixa amarela na largura toda, com o texto
+   escuro centralizado, no mesmo desenho do botão principal da landing ("Ver minha carteira
+   de referência": fundo accent, cantos de 8px). Amarelo com texto escuro funciona igual nos
+   dois temas, então não há variação para o tema claro. É um título, não um botão: sem hover. */
 .titulo-setor {
   margin: 0;
-  text-align: left;
-  font-size: 19px;
+  width: 100%;
+  padding: 12px 20px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--accent-text);
+  text-align: center;
+  font-size: 18px;
   font-weight: 700;
   line-height: 1.2;
-  color: var(--accent);
-}
-/* No tema claro, amarelo sobre fundo claro some: contorno fino no tom escuro da paleta
-   (o mesmo do texto dos botões amarelos). Feito com sombras em 8 direções, que funciona em
-   todos os navegadores, ao contrário de -webkit-text-stroke, que "come" o desenho da letra. */
-:root[data-theme='light'] .titulo-setor {
-  text-shadow:
-    -1px -1px 0 var(--accent-text), 0 -1px 0 var(--accent-text), 1px -1px 0 var(--accent-text),
-    -1px 0 0 var(--accent-text), 1px 0 0 var(--accent-text),
-    -1px 1px 0 var(--accent-text), 0 1px 0 var(--accent-text), 1px 1px 0 var(--accent-text);
 }
 
 /* Busca livre de FIIs (decisão D12). O campo tem a mesma altura de toque dos botões
