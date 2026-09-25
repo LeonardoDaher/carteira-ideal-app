@@ -1,4 +1,5 @@
-# Atualiza uma vez por mês os dados da aba "Simule FII" (rendimentos da CVM + cotação da brapi).
+# Atualiza uma vez por mês os dados da aba "Simule FII" (rendimentos da CVM + cotação da brapi):
+# os 10 fundos em destaque do IFIX e, desde a decisão D12, os demais FIIs listados, para a busca livre.
 #
 # Dia 20: o Informe Mensal de FIIs é entregue à CVM até o dia 15 do mês seguinte à
 # competência, e o portal de dados abertos é atualizado semanalmente. No dia 20, o mês
@@ -22,11 +23,14 @@ permissions:
 
 jobs:
   atualizar:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04 # fixo: evita surpresa com a migração do ubuntu-latest para o 26 (out/2026)
+    # Desde a D12 o job consulta centenas de fundos na brapi, com pausa entre chamadas:
+    # leva alguns minutos. O teto evita um job preso consumindo minutos do GitHub.
+    timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
 
