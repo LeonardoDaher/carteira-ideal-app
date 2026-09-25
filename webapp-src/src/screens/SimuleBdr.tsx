@@ -48,7 +48,10 @@ export function SimuleBdr({
   const levarAoCartao = () => {
     requestAnimationFrame(() => {
       const semAnimacao = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-      document.getElementById('cartao-bdr')?.scrollIntoView?.({ behavior: semAnimacao ? 'auto' : 'smooth', block: 'start' })
+      const cartao = document.getElementById('cartao-bdr')
+      // No computador o cartão fica fixo ao lado da lista e já está visível: não rola (D20).
+      if (cartao && window.matchMedia?.('(min-width: 960px)').matches) return
+      cartao?.scrollIntoView?.({ behavior: semAnimacao ? 'auto' : 'smooth', block: 'start' })
     })
   }
 
@@ -95,7 +98,9 @@ export function SimuleBdr({
           </span>
         </div>
       ) : (
-        <>
+        // No computador: busca e lista por setor à esquerda, cartão do BDR fixo à direita (D20).
+        <div className="desk-split">
+          <div className="desk-main">
           <BuscaBdr busca={snapshot.busca ?? []} onSelecionar={abrirDaBusca} />
 
           {snapshot.criterio && (
@@ -127,6 +132,9 @@ export function SimuleBdr({
             )}
           </div>
 
+          </div>
+
+          <div className="desk-side">
           <CartaoBdr
             selecao={selecao}
             dataPregao={snapshot.dataPregao}
@@ -135,7 +143,8 @@ export function SimuleBdr({
             valorLivre={valorLivre}
             setValorLivre={setValorLivre}
           />
-        </>
+          </div>
+        </div>
       )}
 
       <div className="card-outline small justify" style={{ lineHeight: 1.5 }} role="note">

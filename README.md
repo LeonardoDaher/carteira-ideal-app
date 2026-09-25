@@ -19,6 +19,15 @@ config/fiis-ifix.json    os 10 FIIs em destaque (IFIX) e os parâmetros da lista
 docs/               documentação do projeto (comece por docs/README.md)
 ```
 
+## Computador e instalação como aplicativo (D20)
+
+O app se adapta à tela: no celular continua a coluna única de sempre; a partir de 960 px de
+largura as telas de painel (Resultado, Carteira, Simular, Simule Tesouro/FII/BDR) viram duas
+colunas e a barra de abas vira um menu lateral fixo à esquerda. Todo o CSS dessa adaptação está no bloco "D20" no
+fim de `webapp-src/src/index.css`. O app também pode ser instalado (Chrome/Edge: ícone
+"Instalar" na barra de endereço), pelo `webapp-src/public/manifest.webmanifest`. Detalhes em
+`docs/07-registro-de-decisoes.md`, decisão D20.
+
 ## Por que a hospedagem mudou de GitHub Pages para Vercel
 
 Versões anteriores deste projeto rodavam 100% no GitHub Pages, com o app compilado como um único

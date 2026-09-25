@@ -79,7 +79,9 @@ export function SimuleTesouro({
           </span>
         </div>
       ) : (
-        <>
+        // No computador: escolha do título e do valor à esquerda, resultado fixo à direita (D20).
+        <div className="desk-split">
+          <div className="desk-main">
           <div className="col" style={{ gap: 8 }}>
             <div className="row" style={{ gap: 6 }} role="group" aria-label="Tipo de título">
               {FAMILIAS.map((f) => (
@@ -140,7 +142,9 @@ export function SimuleTesouro({
               onChange={(e) => setValorLivre(e.target.value.replace(/\D/g, '').slice(0, 10))}
             />
           </div>
+          </div>
 
+          <div className="desk-side">
           {titulo && (
             <CartaoSimulacao titulo={titulo} resultado={resultado} semPremissas={!premissas} abaixoDoMinimo={abaixoDoMinimo} valor={valor} />
           )}
@@ -174,7 +178,8 @@ export function SimuleTesouro({
               </div>
             </details>
           )}
-        </>
+          </div>
+        </div>
       )}
 
       <CenarioJuros snapshot={snapshot} aoLadoDaCarteira={false} />

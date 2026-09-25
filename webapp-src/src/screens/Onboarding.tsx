@@ -14,7 +14,7 @@ export function Onboarding({ ctx }: { ctx: AppCtx }) {
         </button>
       </div>
 
-      <div className="row" style={{ justifyContent: 'center', gap: 10, paddingTop: 4 }}>
+      <div className="row marca-onboarding" style={{ justifyContent: 'center', gap: 10, paddingTop: 4 }}>
         <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2">
           <path d="M3 17 9 11 13 15 21 7" strokeLinecap="round" strokeLinejoin="round" />
           <path d="M15 7h6v6" strokeLinecap="round" strokeLinejoin="round" />

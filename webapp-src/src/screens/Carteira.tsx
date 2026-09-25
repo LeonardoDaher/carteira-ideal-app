@@ -19,16 +19,23 @@ export function Carteira({ ctx }: { ctx: AppCtx }) {
     <div className="screen">
       <div className="col" style={{ gap: 4, paddingTop: 8 }}>
         <h1 style={{ fontSize: 21 }}>Carteira de referência, explicada</h1>
-        <div className="muted small">Toque em qualquer item para ver a análise completa daquela classe.</div>
+        <div className="muted small">
+          <span className="so-toque">Toque</span><span className="so-mouse">Clique</span> em qualquer item para ver a análise completa daquela classe.
+        </div>
       </div>
 
-      <div style={{ padding: '4px 0 8px' }}>
-        <PieChart carteira={carteiraParaExibicao(resultado.carteira)} onSlicePress={ctx.abrirDetalheAtivo} />
+      {/* No computador: gráfico fixo à esquerda, explicação das classes à direita (D20). */}
+      <div className="desk-split">
+        <div className="desk-side desk-side-esquerda">
+          <div style={{ padding: '4px 0 8px' }}>
+            <PieChart carteira={carteiraParaExibicao(resultado.carteira)} onSlicePress={ctx.abrirDetalheAtivo} />
+          </div>
+        </div>
+        <div className="desk-main">
+          <AllocLegend carteira={carteiraParaExibicao(resultado.carteira)} comDescricao onItemPress={ctx.abrirDetalheAtivo} />
+          <AvisoEducacional />
+        </div>
       </div>
-
-      <AllocLegend carteira={carteiraParaExibicao(resultado.carteira)} comDescricao onItemPress={ctx.abrirDetalheAtivo} />
-
-      <AvisoEducacional />
 
       <div className="grow" />
       <TabBar ctx={ctx} />

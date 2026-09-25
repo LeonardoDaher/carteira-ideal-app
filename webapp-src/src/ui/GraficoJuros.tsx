@@ -176,7 +176,7 @@ export function GraficoJuros({ selic, ipca }: { selic: SerieHistorica; ipca?: Se
       </svg>
 
       <div className="tiny muted" style={{ textAlign: 'center' }}>
-        Toque ou arraste sobre o gráfico para ver cada mês. A distância entre as linhas é o juro real.
+        <span className="so-toque">Toque ou arraste sobre</span><span className="so-mouse">Passe o mouse sobre</span> o gráfico para ver cada mês. A distância entre as linhas é o juro real.
       </div>
     </div>
   )

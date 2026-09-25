@@ -66,7 +66,10 @@ export function SimuleFii({
     // toque ter resposta visível. Sem animação se o aparelho pede menos movimento.
     requestAnimationFrame(() => {
       const semAnimacao = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-      document.getElementById('cartao-fundo-fii')?.scrollIntoView?.({ behavior: semAnimacao ? 'auto' : 'smooth', block: 'start' })
+      const cartao = document.getElementById('cartao-fundo-fii')
+      // No computador o cartão fica fixo ao lado da lista e já está visível: não rola (D20).
+      if (cartao && window.matchMedia?.('(min-width: 960px)').matches) return
+      cartao?.scrollIntoView?.({ behavior: semAnimacao ? 'auto' : 'smooth', block: 'start' })
     })
   }
 
@@ -91,7 +94,9 @@ export function SimuleFii({
           </span>
         </div>
       ) : (
-        <>
+        // No computador: busca e lista por setor à esquerda, cartão do fundo fixo à direita (D20).
+        <div className="desk-split">
+          <div className="desk-main">
           <BuscaFundo snapshot={snapshot} onSelecionar={selecionar} />
 
           {snapshot.volumeMinimoDiario != null && (
@@ -122,12 +127,16 @@ export function SimuleFii({
             ))}
           </div>
 
+          </div>
+
+          <div className="desk-side">
           <CartaoFundo
             fundo={fundo}
             foraDaLista={!estaNaLista(snapshot, fundo)}
             volumeMinimo={snapshot.volumeMinimoDiario}
             quantidadeLivre={quantidadeLivre} setQuantidadeLivre={setQuantidadeLivre} />
-        </>
+          </div>
+        </div>
       )}
 
       <AvisoAtrasoCvm snapshot={snapshot} competencia={fundo ? ultimoRendimento(fundo)?.competencia : undefined} />

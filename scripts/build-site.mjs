@@ -49,9 +49,11 @@ async function main() {
     }
   }
 
-  // 2) App compilado, dentro de /app — mesma URL relativa que a landing já usa ("./app/")
+  // 2) App compilado, dentro de /app — mesma URL relativa que a landing já usa ("./app/").
+  // Copia a pasta dist inteira (D20): além do index.html, ela traz o que o Vite copia de
+  // webapp-src/public — manifest.webmanifest e ícones, usados para instalar o app.
   await mkdir(path.join(saida, 'app'), { recursive: true })
-  await cp(appCompilado, path.join(saida, 'app', 'index.html'))
+  await cp(path.dirname(appCompilado), path.join(saida, 'app'), { recursive: true })
 
   console.log(`[build-site] Site montado em ${path.relative(raiz, saida)}/ (landing + app/)`)
 }

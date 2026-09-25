@@ -359,3 +359,20 @@ Conferido em navegador nos dois temas, com a tela real de detalhe (Tesouro, IPCA
 - **Tamanho:** com os ~870 BDRs na busca, o arquivo fica perto de 110 KB (cerca de 15 KB a mais no download compactado do app).
 
 Conferido em navegador (390 px, temas claro e escuro) com dados simulados no formato real, incluindo o build de produção com esses dados.
+
+### D20 · Layout para computador e instalação como aplicativo (25/09/2026)
+
+**Contexto.** O app já funcionava em qualquer navegador de computador, mas travado numa coluna de celular de 430 px (`.app-frame`), com a barra de abas embaixo. Numa tela de 1440 px isso sobrava espaço dos lados e obrigava a rolar muito nos simuladores (a lista de códigos ficava longe do cartão do ativo).
+
+**Decisão.** Três camadas, todas só de apresentação, sem tocar no motor (`engine.ts`), na API, nos jobs nem no formato dos dados salvos:
+- **Camada 1 · Largura e navegação.** A partir de 960 px, cada tela ganha uma largura pela classe `tela-*` no `.app-frame` (`App.tsx`): questionário e aulas em 680 px, Aprender e detalhe do ativo em 840 px, painéis (Resultado, Carteira, Simular e os três simuladores) em 1120 px. A barra de abas vira um menu lateral fixo à esquerda (painel de vidro, no molde do NotebookLM), a pedido do responsável, para liberar a altura da tela: entre 960 e 1199 px fica compacto (ícone em cima, nome embaixo); a partir de 1200 px mostra o nome "Carteira Ideal" e ícone ao lado do texto.
+- **Camada 2 · Duas colunas.** Resultado: perfil, explicação e alertas à esquerda, gráfico e legenda à direita. Carteira: gráfico fixo à esquerda, explicação das classes à direita. Simular: controle do valor fixo à esquerda, valores por classe em grade de duas colunas. Simule Tesouro, FII e BDR: escolha à esquerda, cartão do resultado fixo à direita (sem a rolagem automática até o cartão, que no computador já está visível). Textos de instrução trocam "Toque" por "Clique" / "Passe o mouse" quando há mouse.
+- **Camada 3 · Instalar.** `webapp-src/public/manifest.webmanifest` e ícones 192/512 (inclusive versão "maskable"). Chrome e Edge mostram o botão "Instalar" na barra de endereço; no celular, "Adicionar à tela inicial" passa a usar o ícone e o nome certos. `scripts/build-site.mjs` agora copia a pasta `webapp-src/dist` inteira para `/app` (antes só o `index.html`).
+
+**Ajuste após revisão do responsável (mesmo dia).** A primeira versão prendia a coluna fixa com `overflow-y: auto` e altura máxima, o que recortava a sombra do gráfico, os contornos de foco e o fim dos cartões em janelas baixas; e as descrições em 10,5 px justificadas ficavam apertadas no computador. Agora a coluna não recorta nada e só fica fixa em janelas com pelo menos 720 px de altura; no computador, `.tiny` vai a 12 px, `.small` a 13 px, e texto pequeno deixa de ser justificado.
+
+**Logo em todas as telas (mesmo dia, a pedido do responsável).** Novo componente `ui/Marca.tsx`, com o mesmo desenho de `assets/logo-mark.svg` e o nome "Carteira Ideal" em Sora. No computador aparece no início de todas as telas: acima do conteúdo nas telas sem menu (`App.tsx`) e no topo do menu lateral nas telas com abas (`TabBar.tsx`); no menu compacto (960 a 1199 px) só o símbolo. A logo é um link para a landing, como o "← Início". Na tela inicial, a linha de nome com o ícone antigo fica escondida no computador, para não repetir a marca. No celular a logo não aparece e nada muda.
+
+**Mecanismo.** Invólucros `.desk-grid`, `.desk-split`, `.desk-main` e `.desk-side` no JSX. Abaixo de 960 px eles têm `display: contents`: não existem para o layout e os filhos seguem na mesma coluna, com o mesmo espaçamento de antes. Todo o CSS novo está no fim de `webapp-src/src/index.css`, no bloco "D20".
+
+**Conferido.** 149 testes do app e 106 dos scripts passando; build de produção; capturas em 1440×900 e 390×844, com dados de exemplo no formato real, confirmando o celular sem mudança.

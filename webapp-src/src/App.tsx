@@ -15,6 +15,7 @@ import { AprenderVideo } from './screens/AprenderVideo'
 import { SimuleFii } from './screens/SimuleFii'
 import { SimuleTesouro } from './screens/SimuleTesouro'
 import { SimuleBdr } from './screens/SimuleBdr'
+import { Marca } from './ui/Marca'
 
 function App() {
   const ctx = useAppState()
@@ -41,7 +42,15 @@ function App() {
     aprenderVideo: () => <AprenderVideo ctx={ctx} key={ctx.aulaAtualRef ? `${ctx.aulaAtualRef.trilhaId}:${ctx.aulaAtualRef.topicoId}:${ctx.aulaAtualRef.aulaId}` : 'nenhuma'} />,
   }
 
-  return <div className="app-frame">{screens[ctx.screen]()}</div>
+  // A classe tela-* deixa o CSS escolher a largura da tela no computador (D20): questionário
+  // estreito, leitura média, painéis largos. No celular todas ocupam a mesma coluna de sempre.
+  // Logo no topo de cada tela, só no computador. Nas telas com abas ela fica no menu lateral.
+  return (
+    <div className={`app-frame tela-${ctx.screen}`}>
+      <Marca className="marca-topo" />
+      {screens[ctx.screen]()}
+    </div>
+  )
 }
 
 export default App

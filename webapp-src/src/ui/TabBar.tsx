@@ -1,4 +1,5 @@
 import type { AppCtx, Screen } from '../state/useAppState'
+import { Marca } from './Marca'
 
 // "Simule FII" e "Aprender" saíram da barra: agora são abertas direto pela landing
 // (./app/?tela=simuleFii e ./app/?tela=aprender), sem depender do questionário.
@@ -12,6 +13,7 @@ const ABAS: { screen: Screen; label: string; icone: string }[] = [
 export function TabBar({ ctx }: { ctx: AppCtx }) {
   return (
     <div className="tabbar">
+      <Marca className="marca-menu" />
       {ABAS.map((aba) => (
         <button
           key={aba.screen}

@@ -29,6 +29,9 @@ export function Simulador({ ctx }: { ctx: AppCtx }) {
         <div className="muted small justify">Quanto você pretende investir? A carteira de referência se ajusta automaticamente.</div>
       </div>
 
+      {/* No computador: controle do valor fixo à esquerda, divisão por classe em grade à direita (D20). */}
+      <div className="desk-split">
+      <div className="desk-side desk-side-esquerda">
       <div className="card col" style={{ gap: 10 }}>
         <div className="row-between">
           <span className="small muted">Valor a investir</span>
@@ -50,8 +53,10 @@ export function Simulador({ ctx }: { ctx: AppCtx }) {
           <span>R$ 100 mil</span>
         </div>
       </div>
+      </div>
 
-      <div className="col" style={{ gap: 8 }}>
+      <div className="desk-main">
+      <div className="col grade-simulador" style={{ gap: 8 }}>
         {entradas
           .sort((a, b) => b[1] - a[1])
           .map(([ativo, pct]) => (
@@ -71,6 +76,8 @@ export function Simulador({ ctx }: { ctx: AppCtx }) {
       </div>
 
       <AvisoEducacional />
+      </div>
+      </div>
 
       <div className="grow" />
       <TabBar ctx={ctx} />

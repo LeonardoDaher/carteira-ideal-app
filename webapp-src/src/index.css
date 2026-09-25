@@ -984,3 +984,226 @@ button.alloc-box:active {
 }
 .tabela-bdr > :last-child { text-align: right; }
 .tabela-bdr:last-child { border-bottom: none; }
+
+/* =========================================================================================
+   D20 · Layout para computador
+   -----------------------------------------------------------------------------------------
+   Regra de ouro: no celular NADA muda. Os invólucros .desk-grid / .desk-split / .desk-main /
+   .desk-side usam display: contents abaixo de 960px, então os filhos continuam na mesma
+   coluna, com o mesmo espaçamento (gap) da .screen de sempre. A partir de 960px eles viram
+   grade de duas colunas. A largura de cada tela vem da classe tela-* no .app-frame (App.tsx).
+   ========================================================================================= */
+
+/* Texto de instrução: "Toque" em tela de toque, "Clique" / "Passe o mouse" com mouse. */
+.so-mouse { display: none; }
+@media (hover: hover) and (pointer: fine) {
+  .so-toque { display: none; }
+  .so-mouse { display: inline; }
+}
+
+.desk-grid,
+.desk-split,
+.desk-main,
+.desk-side { display: contents; }
+
+/* Logo (D20): escondida no celular; o computador a mostra nas regras abaixo. */
+.marca { display: none; }
+
+.app-frame { min-height: 100dvh; }
+
+@media (min-width: 960px) {
+  /* --- Larguras por tipo de tela --- */
+  .app-frame { max-width: 1120px; }
+  .app-frame.tela-onboarding,
+  .app-frame.tela-idade,
+  .app-frame.tela-questionario,
+  .app-frame.tela-questionarioArquitetura,
+  .app-frame.tela-processando,
+  .app-frame.tela-trilha,
+  .app-frame.tela-aprenderVideo { max-width: 680px; }
+  .app-frame.tela-detalheAtivo,
+  .app-frame.tela-aprender { max-width: 840px; }
+
+  .screen { padding: 36px 32px 48px; gap: 18px; }
+  .screen h1 { font-size: 26px !important; }
+
+  /* --- Logo no início de cada tela --- */
+  .marca {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--text);
+    text-decoration: none;
+    border-radius: 10px;
+  }
+  .marca:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+  .marca-logo { width: 36px; height: 36px; flex-shrink: 0; }
+  .marca-nome {
+    font-family: 'Sora', 'IBM Plex Sans', sans-serif;
+    font-weight: 700;
+    font-size: 21px;
+    letter-spacing: 0.2px;
+    white-space: nowrap;
+  }
+  .marca-topo { padding: 28px 32px 0; align-self: flex-start; }
+  /* A tela inicial tinha o próprio nome com outro ícone: no computador vale a logo oficial. */
+  .tela-onboarding .marca-onboarding { display: none; }
+  /* Telas com menu lateral: a logo vai para o topo do menu, não acima do conteúdo. */
+  .tela-resultado > .marca-topo,
+  .tela-carteira > .marca-topo,
+  .tela-simulador > .marca-topo { display: none; }
+  .tela-resultado .screen,
+  .tela-carteira .screen,
+  .tela-simulador .screen { padding-top: 36px; }
+  .marca-topo + .screen { padding-top: 20px; }
+
+  /* Menu compacto (960 a 1199 px): só o símbolo, centralizado, separado das abas por uma linha. */
+  .marca-menu {
+    justify-content: center;
+    padding: 2px 0 12px;
+    margin-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  .marca-menu .marca-logo { width: 34px; height: 34px; }
+  .marca-menu .marca-nome { display: none; font-size: 17px; }
+
+  /* --- Barra de abas vira menu lateral à esquerda (D20) ---
+     Só existe nas telas com abas (Perfil, Carteira, Simular). Essas telas reservam uma faixa
+     à esquerda no .app-frame e o menu fica fixo nela, alinhado ao conteúdo centralizado.
+     Entre 960 e 1199 px o menu fica compacto (ícone em cima, nome embaixo), para sobrar
+     largura às duas colunas; a partir de 1200 px mostra ícone e nome lado a lado. */
+  .app-frame.tela-resultado,
+  .app-frame.tela-carteira,
+  .app-frame.tela-simulador {
+    max-width: calc(1120px + var(--menu-lateral));
+    padding-left: var(--menu-lateral);
+  }
+  :root { --menu-lateral: 104px; }
+
+  .tabbar {
+    position: fixed;
+    z-index: 20;
+    top: 24px;
+    bottom: 24px;
+    left: max(16px, calc(50% - (1120px + var(--menu-lateral)) / 2 + 16px));
+    width: calc(var(--menu-lateral) - 24px);
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    gap: 6px;
+    padding: 14px 8px;
+    border: 1px solid var(--stroke);
+    border-radius: 16px;
+    background: var(--surface);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+  }
+  .tab {
+    padding: 10px 4px;
+    border-radius: 10px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .tab > span:first-child { font-size: 20px !important; }
+  .tab:hover { color: var(--text); background: var(--highlight-soft); }
+  .tab.active { background: var(--surface2); }
+  .tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* --- Grades de duas colunas --- */
+  .desk-grid,
+  .desk-split {
+    display: grid;
+    gap: 18px 40px;
+    align-items: start;
+  }
+  .desk-main,
+  .desk-side {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-width: 0;
+  }
+
+  /* Lista/controles à esquerda (mais larga), resultado fixo à direita. */
+  .desk-split { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); }
+  /* Sem overflow/max-height de propósito: recortar a coluna cortava a sombra do gráfico,
+     os contornos de foco e o fim dos cartões em telas baixas. A coluna só fica fixa
+     (sticky) quando a janela tem altura para mostrá-la inteira (regra min-height abaixo). */
+  /* Variante com a coluna fixa à esquerda (gráfico da Carteira, valor do Simulador). */
+  .desk-split:has(> .desk-side-esquerda) { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.3fr); }
+  .desk-side-esquerda { order: -1; }
+
+
+  /* --- Resultado: perfil à esquerda, gráfico fixo à direita --- */
+  .grade-resultado {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas:
+      'cab     graf'
+      'desc    graf'
+      'alertas graf'
+      'aviso   graf'
+      'acao    graf'
+      '.       graf';
+    grid-template-rows: auto auto auto auto auto 1fr;
+  }
+  .area-cabecalho { grid-area: cab; }
+  .area-descricao { grid-area: desc; }
+  .area-alertas   { grid-area: alertas; }
+  .area-aviso     { grid-area: aviso; }
+  .area-acao      { grid-area: acao; justify-self: start; min-width: 260px; }
+  .area-grafico   { grid-area: graf; margin-top: 0 !important; }
+
+  /* --- Leitura no computador: textos de apoio um pouco maiores e sem justificar
+     (justificado em fonte pequena abre buracos entre as palavras). --- */
+  .small { font-size: 13px; }
+  .tiny { font-size: 12px; line-height: 1.5; }
+  .tiny.justify,
+  .justify .tiny { text-align: left; }
+
+  /* --- Simulador: valores por classe em duas colunas --- */
+  .grade-simulador {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* --- Listas de códigos (FII / BDR): mais colunas cabem na largura --- */
+  .grade-tickers { grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); }
+
+  /* --- Interação com mouse --- */
+  .chip,
+  .titulo-opcao,
+  .btn { cursor: pointer; }
+  .chip:focus-visible,
+  .titulo-opcao:focus-visible,
+  .btn:focus-visible,
+  .voltar-inicio:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+}
+
+/* Coluna fixa (resultado ao lado da lista) só quando a janela é alta o bastante para ela
+   caber inteira; em janelas baixas ela rola junto com a página, sem nada escondido. */
+@media (min-width: 960px) and (min-height: 720px) {
+  .desk-side { position: sticky; top: 24px; }
+  .area-grafico { position: sticky; top: 24px; }
+}
+
+/* A partir de 1200 px: menu lateral largo, com o nome do app e ícone ao lado do texto. */
+@media (min-width: 1200px) {
+  :root { --menu-lateral: 232px; }
+  .tabbar { padding: 18px 12px; gap: 4px; }
+  .marca-menu { justify-content: flex-start; padding: 2px 8px 14px; }
+  .marca-menu .marca-nome { display: inline; }
+  .tab {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 12px;
+    padding: 11px 12px;
+    font-size: 14px;
+  }
+  .tab > span:first-child { font-size: 18px !important; }
+}
+
+/* Telas muito largas: um respiro maior entre as colunas. */
+@media (min-width: 1280px) {
+  .desk-grid,
+  .desk-split { column-gap: 56px; }
+}

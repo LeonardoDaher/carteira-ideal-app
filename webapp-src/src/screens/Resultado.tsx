@@ -56,7 +56,10 @@ export function Resultado({ ctx }: { ctx: AppCtx }) {
 
   return (
     <div className="screen">
-      <div className="col" style={{ alignItems: 'center', gap: 10, paddingTop: 8 }}>
+      {/* desk-grid: no celular é invisível (display: contents) e tudo segue em coluna; no
+          computador vira grade com o perfil à esquerda e o gráfico fixo à direita (D20). */}
+      <div className="desk-grid grade-resultado">
+      <div className="col area-cabecalho" style={{ alignItems: 'center', gap: 10, paddingTop: 8 }}>
         <div className="small muted" style={{ fontSize: 14, fontWeight: 700 }}>
           {resultado.perfilFinalCarteira ? 'Seu perfil de carteira de referência é' : perfilPatrimonial ? 'Seu perfil da Arquitetura Patrimonial é' : 'Seu perfil de investidor é'}
         </div>
@@ -80,11 +83,11 @@ export function Resultado({ ctx }: { ctx: AppCtx }) {
         )}
       </div>
 
-      <div className="card small justify" style={{ lineHeight: 1.5 }}>
+      <div className="card small justify area-descricao" style={{ lineHeight: 1.5 }}>
         {perfilPatrimonial ? DESCRICAO_PATRIMONIAL[perfilPatrimonial] : DESCRICAO_PERFIL[resultado.perfilFinal]}
       </div>
 
-      <div className="col" style={{ gap: 10, marginTop: 4 }}>
+      <div className="col area-grafico" style={{ gap: 10, marginTop: 4 }}>
         <div className="row-between">
           <span style={{ fontWeight: 700, fontSize: 14 }}>Carteira de referência</span>
           <span className="muted small">Prazo {resultado.prazo === 'curto' ? 'curto' : resultado.prazo === 'medio' ? 'médio' : 'longo'}</span>
@@ -92,14 +95,16 @@ export function Resultado({ ctx }: { ctx: AppCtx }) {
         <div style={{ padding: '4px 0 8px' }}>
           <PieChart carteira={carteiraParaExibicao(resultado.carteira)} onSlicePress={ctx.abrirDetalheAtivo} />
         </div>
-        <div className="muted tiny" style={{ textAlign: 'center' }}>Toque numa fatia ou num item da lista para ver a análise detalhada</div>
+        <div className="muted tiny" style={{ textAlign: 'center' }}>
+          <span className="so-toque">Toque</span><span className="so-mouse">Clique</span> numa fatia ou num item da lista para ver a análise detalhada
+        </div>
         <AllocLegend carteira={carteiraParaExibicao(resultado.carteira)} onItemPress={ctx.abrirDetalheAtivo} />
       </div>
 
-      <AvisoEducacional />
+      <div className="area-aviso"><AvisoEducacional /></div>
 
       {resultado.alertas.length > 0 && (
-        <div className="card-outline col" style={{ gap: 8 }}>
+        <div className="card-outline col area-alertas" style={{ gap: 8 }}>
           <div style={{ fontWeight: 700, fontSize: 13.5 }}>Por que esse exemplo?</div>
           {resultado.alertas.map((alerta, i) => (
             <div key={i} className="muted tiny justify" style={{ lineHeight: 1.4 }}>• {alerta}</div>
@@ -107,9 +112,10 @@ export function Resultado({ ctx }: { ctx: AppCtx }) {
         </div>
       )}
 
-      <button className="btn btn-outline" onClick={ctx.limparDados}>
+      <button className="btn btn-outline area-acao" onClick={ctx.limparDados}>
         Refazer o questionário
       </button>
+      </div>
 
       <div className="grow" />
       <TabBar ctx={ctx} />

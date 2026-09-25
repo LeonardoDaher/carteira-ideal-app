@@ -271,7 +271,7 @@ export function DetalheAtivo({ ctx }: { ctx: AppCtx }) {
           </div>
 
           <div className="tiny muted" style={{ textAlign: 'center' }}>
-            Toque num segmento para ver exemplos ilustrativos • a proporção real muda com o tempo e depende dos ativos que você escolher.
+            <span className="so-toque">Toque</span><span className="so-mouse">Clique</span> num segmento para ver exemplos ilustrativos • a proporção real muda com o tempo e depende dos ativos que você escolher.
           </div>
 
           {notaSetoresAtual && (
