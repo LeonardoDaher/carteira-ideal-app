@@ -40,7 +40,7 @@ export interface FundoFii {
 export type MotivoConfianca = 'poucos-meses' | 'rendimento-variavel' | 'mes-antigo' | 'valor-repetido' | 'pouca-negociacao'
 
 
-export type MotivoIndisponivel = 'sem-informe-recente' | 'cadastro-ambiguo' | 'rendimento-atipico' | 'sem-rendimento' | 'sem-cotacao' | 'fora-da-faixa'
+export type MotivoIndisponivel = 'sem-informe-recente' | 'sem-dy-informado' | 'cadastro-ambiguo' | 'rendimento-atipico' | 'sem-rendimento' | 'sem-cotacao' | 'fora-da-faixa'
 
 /** Fundo conhecido pelo job, mas sem dado publicável neste mês (e o porquê). */
 export interface FundoIndisponivel {
@@ -253,6 +253,7 @@ export const TEXTO_MOTIVO_CONFIANCA: Record<MotivoConfianca, string> = {
 
 export const TEXTO_MOTIVO_INDISPONIVEL: Record<MotivoIndisponivel, string> = {
   'sem-informe-recente': 'o fundo não enviou o Informe Mensal à CVM nos últimos meses',
+  'sem-dy-informado': 'o fundo não informa à CVM o rendimento de cada mês, então não há como estimar a renda por aqui. Confira os rendimentos no site do fundo',
   'cadastro-ambiguo': 'o código do fundo aparece ligado a mais de um cadastro na CVM, e não dá para saber qual é o dele sem conferência manual',
   'rendimento-atipico': 'os valores dos últimos meses variaram demais para indicar um rendimento típico',
   'sem-rendimento': 'o fundo não distribuiu rendimento no mês de referência',

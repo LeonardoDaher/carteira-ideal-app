@@ -361,6 +361,13 @@ describe('setorDoFundo', () => {
     assert.equal(setorDoFundo({ nome: 'X', segmento: 'Outros' }), 'Outros')
   })
 
+  it('mandato "Títulos e Valores Mobiliários" vence o segmento "Híbrido" (fundo de CRI)', () => {
+    assert.equal(setorDoFundo({ nome: 'KINEA RENDIMENTOS', segmento: 'Híbrido', mandato: 'Títulos e Valores Mobiliários' }), 'Papel (CRI)')
+    assert.equal(setorDoFundo({ nome: 'KINEA RENDA', segmento: 'Híbrido', mandato: 'Renda' }), 'Híbrido')
+    // fundo de fundos continua reconhecido pelo nome, mesmo com mandato de títulos
+    assert.equal(setorDoFundo({ nome: 'KINEA FOF', segmento: 'Híbrido', mandato: 'Títulos e Valores Mobiliários' }), 'Fundo de fundos')
+  })
+
   it('a correção manual da configuração vence a classificação da CVM', () => {
     assert.equal(setorDoFundo({ segmento: 'Híbrido', correcao: 'Logística' }), 'Logística')
   })

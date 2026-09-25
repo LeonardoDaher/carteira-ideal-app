@@ -467,6 +467,9 @@ export function setorDoFundo({ nome = '', segmento = '', mandato = '', correcao 
   const seg = semAcento(segmento)
   const man = semAcento(mandato)
   if (/\bfof\b|\bfofii\b|fundo de fundos|fdo de fundos|\bfundos de investimento imobiliario\b/.test(n)) return 'Fundo de fundos'
+  // O mandato vem antes do segmento: muitos fundos de CRI se declaram "Híbrido" no segmento,
+  // mas o mandato "Títulos e Valores Mobiliários" diz o que eles são (1ª execução da D13).
+  if (/titulos|valores mob/.test(man)) return 'Papel (CRI)'
   if (/logist|galpo|industrial/.test(seg)) return 'Logística'
   if (/shopping/.test(seg)) return 'Shoppings'
   if (/laje|corporativ|escritori/.test(seg)) return 'Escritórios'
@@ -690,6 +693,11 @@ async function main() {
           `escolhido ${escolhido ? `${escolhido.competencia}=${escolhido.valorPorCota.toFixed(4)}` : 'nenhum'}${variavel ? ' (variável)' : ''}`,
       )
     }
+    if (r.rendimentos.every((x) => !(x.valorPorCota > 0))) {
+      // Caso VGIP11/VGIR11: o fundo não preenche o DY no informe. Não há o que estimar.
+      registrar('sem-dy-informado', `nenhum dos ${r.rendimentos.length} meses tem rendimento informado à CVM.`)
+      continue
+    }
     if (!escolhido) {
       registrar('rendimento-atipico', `nenhum dos ${r.rendimentos.length} meses ficou dentro da tolerância de ${Math.round(tolerancia * 100)}% em torno da mediana.`)
       continue
@@ -794,9 +802,12 @@ async function main() {
     console.log(`[info] Mais negociados: ${porVolume.slice(0, 5).map((f) => `${f.ticker} ${mi(f.volumeMedio)}`).join(', ')}.`)
     console.log(`[info] Menos negociados da lista: ${porVolume.slice(-3).map((f) => `${f.ticker} ${mi(f.volumeMedio)}`).join(', ')}.`)
   }
-  const contagemSetores = {}
-  for (const f of liquidos) contagemSetores[f.setor] = (contagemSetores[f.setor] ?? 0) + 1
-  console.log(`[info] Setores: ${Object.entries(contagemSetores).sort((a, b) => b[1] - a[1]).map(([s, n]) => `${s} ${n}`).join(', ')}.`)
+  const porSetor = {}
+  for (const f of liquidos) (porSetor[f.setor] ??= []).push(f.ticker)
+  const setoresOrdenados = Object.entries(porSetor).sort((a, b) => b[1].length - a[1].length)
+  console.log(`[info] Setores: ${setoresOrdenados.map(([s, t]) => `${s} ${t.length}`).join(', ')}.`)
+  // Um por linha, para revisar a classificação e corrigir no bloco "setores" da configuração.
+  for (const [setor, tickers] of setoresOrdenados) console.log(`[setor] ${setor}: ${tickers.sort().join(', ')}`)
 
   // Trava 1: os 10 maiores do IFIX precisam ter passado nas checagens de dado e cotação.
   // Servem de amostra de controle: se eles falham, o problema é geral (CVM ou brapi).

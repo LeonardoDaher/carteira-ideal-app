@@ -197,6 +197,10 @@ Com isso, a média de 3 meses exibida na tela chegava a superestimar a renda em 
 
 **Tela.** Ao tocar num fundo, a tela rola até o cartão, porque com dezenas de botões ele fica abaixo da dobra. A rolagem é sem animação quando o aparelho pede menos movimento. O aviso legal passou a dizer que estar na lista não é indicação de compra, porque o critério é só a liquidez.
 
+**Primeira execução (25/09/2026) e ajustes.** 54 fundos na lista e 219 na busca. Os mais negociados foram TRXF11, KNCR11, HGLG11, MXRF11 e XPML11, todos acima de R$ 20 milhões por dia. Dois ajustes:
+- **Setores.** "Híbrido 23" contra "Papel (CRI) 8" não correspondia ao mercado: muitos fundos de CRI se declaram "Híbrido" no segmento, mas informam o mandato "Títulos e Valores Mobiliários". O mandato passou a ter prioridade sobre o segmento, e o log lista os tickers de cada setor (linhas `[setor]`) para revisão.
+- **VGIP11 e VGIR11.** O diagnóstico mostrou DY 0,0000 nos 6 meses: a gestora não preenche esse campo no informe da CVM. Não há estimativa possível pela CVM. Esses fundos ganharam o motivo próprio `sem-dy-informado`, e a busca orienta a conferir os rendimentos no site do fundo. Para exibi-los com valor, só com fonte de rendimentos anunciados (bolsai Pro ou brapi Startup) ou com digitação manual.
+
 **Pontos a acompanhar na primeira execução.**
 - O número de fundos na lista. A estimativa era de 40 a 50, mas quem decide é o critério. Se ficar grande demais, o corte sobe em `volumeMinimoDiario`.
 - Se os nomes de setor declarados à CVM estão coerentes. Corrigir os que não estiverem em `setores`.

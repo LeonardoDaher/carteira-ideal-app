@@ -106,6 +106,7 @@ npm run build        # build de produção em dist-site/
 | `[info] XXXX11: ISIN aponta para mais de um CNPJ…` (fundo fora do destaque) | Nada obrigatório: o fundo aparece na busca como "sem dados neste mês" com o motivo. Se for um fundo importante, descobrir o CNPJ certo nos comunicados dele e avisar quem desenvolve |
 | `[info] Liquidez: N fundos acima de R$ 1 mi/dia na lista por setor; …` | Resumo da lista (D13). Os demais fundos com dado ficam só na busca |
 | `[info] Mais negociados: …` / `Menos negociados da lista: …` | Conferir 2 ou 3 desses volumes num site de cotações. Se não baterem, avisar quem desenvolve |
+| `[setor] Híbrido: …` (uma linha por setor) | Tickers de cada setor. Revise: se um fundo estiver no setor errado, corrija no bloco `setores` de `config/fiis-ifix.json` |
 | `[info] Setores: …` | Contagem por setor. Setor estranho para um fundo? Corrigir no bloco `setores` de `config/fiis-ifix.json` (ex.: `"XXXX11": "Logística"`) |
 | `A brapi não devolveu histórico de volume (range=1mo)…` | O plano gratuito ou a API mudou. Enviar o log para quem desenvolve |
 | `Só … fundos passaram no critério de liquidez (mínimo …)` | Algo encolheu a lista de repente (brapi fora do ar, cota esgotada). Rodar de novo no dia seguinte |

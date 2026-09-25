@@ -165,6 +165,14 @@ describe('SimuleFii: busca livre (D12)', () => {
     expect(screen.queryByText(/Confira o código/)).toBeNull()
   })
 
+  it('fundo que não informa DY à CVM (caso VGIR11) recebe a explicação certa', () => {
+    const snap: SnapshotRendimentosFii = { ...amplo, indisponiveis: [{ ticker: 'VGIR11', nome: 'VALORA CRI CDI FII', motivo: 'sem-dy-informado' }] }
+    render(<SimuleFii ctx={ctx} snapshot={snap} />)
+    buscar('vgir')
+    expect(screen.getByText(/não informa à CVM o rendimento/)).toBeDefined()
+    expect(screen.queryByText(/variaram demais/)).toBeNull()
+  })
+
   it('orienta quando nada é encontrado', () => {
     render(<SimuleFii ctx={ctx} snapshot={amplo} />)
     buscar('QWER11')
