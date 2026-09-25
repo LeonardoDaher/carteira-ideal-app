@@ -1,0 +1,60 @@
+# Atualiza nos dias úteis os dados da aba de BDRs (decisão D19): os 35 BDRs de ações e os
+# 5 BDRs de ETF com maior volume médio em reais nos últimos 21 pregões, com cotação de
+# fechamento. Fonte: brapi no plano gratuito (mesmo secret BRAPI_TOKEN do job de FIIs).
+#
+# Segunda a sexta, 22h UTC (19h de Brasília): depois do fechamento da B3, para gravar o
+# preço de fechamento e não um preço no meio do pregão. Não coincide com os jobs de FIIs
+# (dia 20, 12h UTC) e de mercado (terça, 13h UTC).
+#
+# Consumo da brapi: cerca de 130 requisições por execução (1 listagem + candidatos), perto de
+# 2.900 por mês. Somado às ~550 do job de FIIs, fica bem abaixo das 15.000 do plano gratuito.
+#
+# Se o script encontrar algo errado, o job falha SEM alterar o arquivo: o app continua
+# mostrando os dados do último dia bom e o GitHub envia um e-mail avisando da falha.
+# Em feriado da B3 a brapi devolve o pregão anterior: o arquivo não muda e nada é publicado.
+
+name: Atualizar BDRs
+
+on:
+  schedule:
+    - cron: '0 22 * * 1-5' # segunda a sexta, 22h UTC (19h de Brasília)
+  workflow_dispatch: {} # botão "Run workflow" para rodar manualmente
+
+permissions:
+  contents: write
+
+jobs:
+  atualizar:
+    runs-on: ubuntu-24.04 # fixo, mesmo motivo dos outros jobs
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Buscar dados e gerar bdrs.json
+        env:
+          BRAPI_TOKEN: ${{ secrets.BRAPI_TOKEN }}
+        run: node scripts/atualizar-bdrs.mjs
+
+      # Compila o site com os dados novos ANTES de publicar (mesma proteção do job de mercado).
+      - name: Conferir se o site compila com os dados novos
+        run: |
+          npm ci
+          npm run build
+
+      - name: Publicar (commit) se houver mudança
+        run: |
+          if git diff --quiet webapp-src/src/data/bdrs.json; then
+            echo "Sem mudanças nos dados."
+            exit 0
+          fi
+          git config user.name "${{ vars.COMMIT_AUTOR_NOME || 'github-actions[bot]' }}"
+          git config user.email "${{ vars.COMMIT_AUTOR_EMAIL || '41898283+github-actions[bot]@users.noreply.github.com' }}"
+          git add webapp-src/src/data/bdrs.json
+          git commit -m "dados: BDRs ($(date -u +%Y-%m-%d))"
+          git pull --rebase
+          git push
