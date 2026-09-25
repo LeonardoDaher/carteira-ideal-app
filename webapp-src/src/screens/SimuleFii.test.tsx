@@ -98,11 +98,10 @@ describe('SimuleFii: busca livre (D12)', () => {
   const buscar = (texto: string) =>
     fireEvent.change(screen.getByLabelText(/buscar fundo imobiliário/i), { target: { value: texto } })
 
-  it('mostra só os destaques como atalho e conta os fundos disponíveis', () => {
+  it('arquivo antigo: mostra os destaques como botões e os demais só pela busca', () => {
     render(<SimuleFii ctx={ctx} snapshot={amplo} />)
     expect(screen.getByRole('button', { name: 'AAAA11' })).toBeDefined()
     expect(screen.queryByRole('button', { name: 'CCCC11' })).toBeNull()
-    expect(screen.getByText(/3 fundos com dados/)).toBeDefined()
   })
 
   it('acha um fundo fora dos destaques pelo nome, sem acento, e abre a simulação', () => {
@@ -170,5 +169,55 @@ describe('SimuleFii: busca livre (D12)', () => {
     render(<SimuleFii ctx={ctx} snapshot={amplo} />)
     buscar('QWER11')
     expect(screen.getByText(/Nenhum fundo encontrado para “QWER11”/)).toBeDefined()
+  })
+})
+
+describe('SimuleFii: lista por liquidez e setor (D13)', () => {
+  const fundo = (ticker: string, setor: string, volumeMedio: number | null, valorPorCota = 0.8) => ({
+    ticker,
+    nome: `FUNDO ${ticker}`,
+    setor,
+    volumeMedio,
+    cotacao: 100,
+    dataCotacao: '2026-09-19',
+    rendimentos: [{ competencia: '2026-07', valorPorCota }],
+  })
+  const d13: SnapshotRendimentosFii = {
+    geradoEm: '2026-09-20T12:00:00Z',
+    volumeMinimoDiario: 1_000_000,
+    fundos: [
+      fundo('HGLG11', 'Logística', 9_000_000),
+      fundo('BTLG11', 'Logística', 5_000_000),
+      fundo('KNCR11', 'Papel (CRI)', 20_000_000),
+      fundo('VGIP11', 'Papel (CRI)', 400_000, 0.9),
+    ],
+    indisponiveis: [],
+  }
+
+  it('mostra os fundos líquidos agrupados por setor e explica o critério', () => {
+    render(<SimuleFii ctx={ctx} snapshot={d13} />)
+    expect(screen.getByRole('group', { name: 'Fundos do setor Logística' })).toBeDefined()
+    expect(screen.getByRole('group', { name: 'Fundos do setor Papel (CRI)' })).toBeDefined()
+    expect(screen.getByText('Logística (2)')).toBeDefined()
+    expect(screen.getByText(/mostra os 3 fundos negociados/)).toBeDefined()
+    expect(screen.queryByRole('button', { name: 'VGIP11' })).toBeNull() // abaixo do corte: fora da lista
+  })
+
+  it('a busca alcança fundo abaixo do corte e o cartão avisa da liquidez', () => {
+    render(<SimuleFii ctx={ctx} snapshot={d13} />)
+    fireEvent.change(screen.getByLabelText(/buscar fundo imobiliário/i), { target: { value: 'vgip' } })
+    expect(screen.getByText(/baixa liquidez/)).toBeDefined()
+    fireEvent.click(screen.getByRole('button', { name: /VGIP11/ }))
+    expect(screen.getByText('VGIP11', { selector: '.font-display' })).toBeDefined()
+    expect(screen.getByText(/Fora da lista por liquidez/)).toBeDefined()
+    expect(screen.getByText(/negocia em média R\$ 400 mil por dia/)).toBeDefined()
+    expect(screen.getByText('R$ 4.500,00')).toBeDefined() // 5.000 cotas × R$ 0,90
+  })
+
+  it('fundo da lista mostra setor e liquidez no cartão, sem aviso de liquidez', () => {
+    render(<SimuleFii ctx={ctx} snapshot={d13} />)
+    fireEvent.click(screen.getByRole('button', { name: 'KNCR11' }))
+    expect(screen.getByText(/Papel \(CRI\), negocia R\$ 20 milhões por dia/)).toBeDefined()
+    expect(screen.queryByText(/Fora da lista por liquidez/)).toBeNull()
   })
 })

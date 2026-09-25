@@ -169,3 +169,35 @@ Com isso, a média de 3 meses exibida na tela chegava a superestimar a renda em 
 - Prefixos de ISIN que começam com número (ex.: `0D70`) são códigos internos de fundos não listados, porque ticker da B3 sempre começa com letra. Eles eram cerca de 90 dos 333 indisponíveis e, com a regra acima, passariam a gastar requisições. Agora ficam de fora antes de qualquer consulta.
 - Mês antigo: fundo cujo mês publicado fica 3 ou mais meses atrás do mês mais recente do informe recebe baixa confiança com o motivo `mes-antigo`. Na primeira execução, o HBRH11 saiu com dez/2025, e o PNRC11, o XPIN11, o SPG211 e o RFOF11 com mar ou abr/2026.
 - Efeito esperado: mais fundos publicados e mais requisições à brapi (até cerca de 550 por execução, ainda abaixo do teto de 800), com o job levando alguns minutos a mais.
+
+### D13 · Simule FII: lista por liquidez e setor, com a busca mantida (25/09/2026)
+
+**Contexto.** A busca livre (D12) abriu mais de 200 fundos, muitos pequenos e com dado frágil: mês antigo, cotação parada, rendimento irregular. O responsável pelo produto quis uma vitrine mais enxuta e confiável, organizada como o investidor pensa: por setor.
+
+**Decisão.**
+- **Lista principal:** só os fundos com **volume financeiro médio acima de R$ 1 milhão por dia** no último mês (21 pregões), agrupados por setor. Os 10 maiores do IFIX entram pelo mesmo critério, sem destaque separado. A tela explica o critério.
+- **Busca mantida** para qualquer outro fundo com dado no mês. Se o fundo encontrado estiver abaixo do corte, o cartão mostra "Fora da lista por liquidez", com o volume médio, e explica o risco de comprar ou vender com pouca liquidez.
+- **Cotação e rendimento continuam como antes:** CVM e brapi no plano gratuito, com as mesmas travas e avisos de confiança.
+
+**Como é calculado.**
+- **Liquidez.** A consulta da brapi passou a pedir o histórico do último mês (`range=1mo&interval=1d`) na mesma requisição da cotação, sem custo extra de cota. O volume médio é a soma de cotas negociadas × fechamento de cada dia, dividida pelo número de dias. Dias sem negócio contam como zero, de propósito, porque liquidez é justamente a frequência de negócios. O plano gratuito permite histórico de até 3 meses.
+- **Setor.** Vem do segmento que o próprio fundo declara no Informe Mensal da CVM, traduzido para nomes que o investidor reconhece: Logística, Shoppings, Escritórios, Papel (CRI), Híbrido, Fundo de fundos, Saúde, Hotéis, Residencial, Varejo e renda urbana, Educacional e Outros. Fundo de fundos é reconhecido pelo nome, porque costuma se declarar como "Títulos e Val. Mob.". Quando a classificação declarada não for a que o mercado usa, a correção fica no bloco `setores` de `config/fiis-ifix.json`.
+- **Ordem.** Setores com mais fundos primeiro e "Outros" por último. Dentro de cada setor, ordem alfabética, que é neutra e não sugere ranking de rendimento.
+
+**Papel dos 10 do IFIX.** Viraram só **controle de qualidade** da publicação: se menos de 8 deles passarem nas checagens de dado e cotação, o problema é geral e o arquivo não é atualizado.
+
+**Travas novas.**
+- Menos de 20 fundos acima do corte (`minimoFundosTotal`) impede a publicação.
+- Se a brapi não devolver histórico de volume para nenhum fundo, o job para com uma mensagem própria, porque isso indica que o plano ou o parâmetro `range` mudou.
+
+**Log para conferência.** Cada execução registra:
+- quantos fundos ficaram na lista e quantos só na busca;
+- os 5 mais negociados e os 3 menos negociados da lista, para conferir por amostragem num site de cotações;
+- a contagem por setor.
+
+**Tela.** Ao tocar num fundo, a tela rola até o cartão, porque com dezenas de botões ele fica abaixo da dobra. A rolagem é sem animação quando o aparelho pede menos movimento. O aviso legal passou a dizer que estar na lista não é indicação de compra, porque o critério é só a liquidez.
+
+**Pontos a acompanhar na primeira execução.**
+- O número de fundos na lista. A estimativa era de 40 a 50, mas quem decide é o critério. Se ficar grande demais, o corte sobe em `volumeMinimoDiario`.
+- Se os nomes de setor declarados à CVM estão coerentes. Corrigir os que não estiverem em `setores`.
+- Se o volume médio calculado bate com o de um site de cotações para 2 ou 3 fundos.

@@ -15,6 +15,10 @@ export interface RendimentoMensal {
 export interface FundoFii {
   ticker: string
   nome: string
+  /** Setor exibido na tela, derivado do segmento declarado à CVM (decisão D13). */
+  setor?: string
+  /** Volume financeiro médio diário do último mês, em R$ (critério de entrada da lista). */
+  volumeMedio?: number | null
   /** Última cotação obtida na atualização mensal (R$). `null` se a cotação falhou. */
   cotacao: number | null
   /** Data da cotação, no formato AAAA-MM-DD. */
@@ -35,6 +39,7 @@ export interface FundoFii {
 
 export type MotivoConfianca = 'poucos-meses' | 'rendimento-variavel' | 'mes-antigo' | 'valor-repetido' | 'pouca-negociacao'
 
+
 export type MotivoIndisponivel = 'sem-informe-recente' | 'cadastro-ambiguo' | 'rendimento-atipico' | 'sem-rendimento' | 'sem-cotacao' | 'fora-da-faixa'
 
 /** Fundo conhecido pelo job, mas sem dado publicável neste mês (e o porquê). */
@@ -49,12 +54,15 @@ export interface SnapshotRendimentosFii {
   /** Momento em que o job mensal gerou o arquivo (ISO 8601). `null` = nunca rodou. */
   geradoEm: string | null
   /** Período de vigência da carteira teórica do IFIX usada para escolher os fundos. */
-  vigenciaIfix: string | null
-  /** Tickers exibidos como atalho (os maiores do IFIX), na ordem de participação no índice.
-   * Ausente em arquivos anteriores à D12: aí os destaques são os 10 primeiros fundos. */
+  /** Formato até a D12. A partir da D13 o arquivo não traz mais esse campo. */
+  vigenciaIfix?: string | null
+  /** Corte de liquidez usado pelo job (R$ por dia). Presente a partir da D13; se faltar,
+   * o arquivo é do formato antigo e a tela mostra só os 10 maiores do IFIX. */
+  volumeMinimoDiario?: number
+  /** Formato até a D12: tickers dos 10 maiores do IFIX. */
   destaques?: string[]
-  /** Todos os fundos com dado publicável: destaques primeiro, depois do maior patrimônio
-   * para o menor. */
+  /** Todos os fundos com dado no mês. A lista por setor mostra só os de volume acima do
+   * corte; a busca alcança todos. */
   fundos: FundoFii[]
   indisponiveis?: FundoIndisponivel[]
 }
@@ -124,8 +132,60 @@ export function mesesDeAtraso(competencia: string, hoje: Date): number | null {
 }
 
 // ---------------------------------------------------------------------------------------
-// Busca livre (decisão D12)
+// Lista por liquidez e setor (decisão D13)
 // ---------------------------------------------------------------------------------------
+
+/** Os 10 maiores do IFIX, para arquivos no formato anterior à D13. */
+export function fundosEmDestaque(snapshot: SnapshotRendimentosFii): FundoFii[] {
+  if (!snapshot.destaques) return snapshot.fundos.slice(0, 10)
+  return snapshot.destaques
+    .map((t) => snapshot.fundos.find((f) => f.ticker === t))
+    .filter((f): f is FundoFii => f != null)
+}
+
+export interface GrupoSetor {
+  setor: string
+  fundos: FundoFii[]
+}
+
+/**
+ * Agrupa por setor: setores com mais fundos primeiro, "Outros" sempre por último; dentro
+ * de cada setor, ordem alfabética (neutra, sem sugerir ranking de rendimento).
+ * Arquivo no formato antigo (sem corte de liquidez) vira um grupo só com os 10 do IFIX.
+ */
+export function agruparPorSetor(snapshot: SnapshotRendimentosFii): GrupoSetor[] {
+  if (snapshot.volumeMinimoDiario == null) {
+    const antigos = fundosEmDestaque(snapshot)
+    return antigos.length > 0 ? [{ setor: 'Maiores do IFIX', fundos: antigos }] : []
+  }
+  const mapa = new Map<string, FundoFii[]>()
+  for (const f of snapshot.fundos.filter((x) => estaNaLista(snapshot, x))) {
+    const setor = f.setor || 'Outros'
+    if (!mapa.has(setor)) mapa.set(setor, [])
+    mapa.get(setor)!.push(f)
+  }
+  return [...mapa]
+    .map(([setor, fundos]) => ({ setor, fundos: [...fundos].sort((a, b) => a.ticker.localeCompare(b.ticker)) }))
+    .sort((a, b) => {
+      if (a.setor === 'Outros') return 1
+      if (b.setor === 'Outros') return -1
+      return b.fundos.length - a.fundos.length || a.setor.localeCompare(b.setor, 'pt-BR')
+    })
+}
+
+/** Fundo com volume médio acima do corte: entra na lista por setor. Os demais, só na busca. */
+export function estaNaLista(snapshot: SnapshotRendimentosFii, fundo: FundoFii): boolean {
+  if (snapshot.volumeMinimoDiario == null) return true
+  return fundo.volumeMedio != null && fundo.volumeMedio >= snapshot.volumeMinimoDiario
+}
+
+/** 12345678 → "R$ 12 milhões"; 1500000 → "R$ 1,5 milhão"; 350000 → "R$ 350 mil". */
+export function formatarVolume(valor: number): string {
+  if (valor < 1e6) return `R$ ${Math.round(valor / 1000).toLocaleString('pt-BR')} mil`
+  const mi = valor / 1e6
+  const texto = mi.toLocaleString('pt-BR', { maximumFractionDigits: mi >= 10 ? 0 : 1 })
+  return `R$ ${texto} ${mi < 2 ? 'milhão' : 'milhões'}`
+}
 
 /** Maiúsculas, sem acento e sem espaço sobrando: "  kinéa  rend" → "KINEA REND". */
 export function normalizarBusca(texto: string): string {
@@ -135,14 +195,6 @@ export function normalizarBusca(texto: string): string {
     .toUpperCase()
     .replace(/\s+/g, ' ')
     .trim()
-}
-
-/** Os fundos exibidos como atalho. Arquivos antigos, sem "destaques", usam os 10 primeiros. */
-export function fundosEmDestaque(snapshot: SnapshotRendimentosFii): FundoFii[] {
-  if (!snapshot.destaques) return snapshot.fundos.slice(0, 10)
-  return snapshot.destaques
-    .map((t) => snapshot.fundos.find((f) => f.ticker === t))
-    .filter((f): f is FundoFii => f != null)
 }
 
 /**
@@ -177,8 +229,8 @@ export function acharIndisponivel(snapshot: SnapshotRendimentosFii, termo: strin
 
 /**
  * Os nomes do informe da CVM vêm por extenso ("FUNDO DE INVESTIMENTO IMOBILIÁRIO KINEA
- * RENDA IMOBILIÁRIA - RESPONSABILIDADE LIMITADA"). Na lista de resultados, o que distingue
- * um fundo do outro é o miolo.
+ * RENDA IMOBILIÁRIA - RESPONSABILIDADE LIMITADA"). No cartão, o que distingue um fundo do
+ * outro é o miolo.
  */
 export function nomeCurto(nome: string): string {
   const curto = nome

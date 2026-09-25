@@ -18,6 +18,8 @@ import {
   subtrairMeses,
   avaliarConfianca,
   formatarSnapshot,
+  setorDoFundo,
+  volumeMedioDiario,
 } from './atualizar-rendimentos-fii.mjs'
 
 const GERAL = `CNPJ_Fundo_Classe;Data_Referencia;Versao;Nome_Fundo_Classe;Codigo_ISIN
@@ -330,5 +332,59 @@ describe('publicação', () => {
     const texto = formatarSnapshot(snapshot)
     assert.deepEqual(JSON.parse(texto), snapshot)
     assert.equal(texto.split('\n').filter((l) => l.includes('"ticker"')).length, 2)
+  })
+})
+
+// ---------------------------------------------------------------------------------------
+// Lista por liquidez e setor (decisão D13)
+// ---------------------------------------------------------------------------------------
+
+describe('setorDoFundo', () => {
+  it('traduz o segmento declarado à CVM para o nome que o investidor conhece', () => {
+    assert.equal(setorDoFundo({ segmento: 'Logística' }), 'Logística')
+    assert.equal(setorDoFundo({ segmento: 'Shoppings' }), 'Shoppings')
+    assert.equal(setorDoFundo({ segmento: 'Lajes Corporativas' }), 'Escritórios')
+    assert.equal(setorDoFundo({ segmento: 'Títulos e Val. Mob.' }), 'Papel (CRI)')
+    assert.equal(setorDoFundo({ segmento: 'Híbrido' }), 'Híbrido')
+    assert.equal(setorDoFundo({ segmento: 'Hospital' }), 'Saúde')
+    assert.equal(setorDoFundo({ segmento: 'Agências de Bancos' }), 'Varejo e renda urbana')
+  })
+
+  it('reconhece fundo de fundos pelo nome, mesmo que o segmento diga outra coisa', () => {
+    assert.equal(setorDoFundo({ nome: 'HEDGE TOP FOFII 3 FUNDO DE INVESTIMENTO IMOBILIÁRIO', segmento: 'Títulos e Val. Mob.' }), 'Fundo de fundos')
+    assert.equal(setorDoFundo({ nome: 'FUNDO DE FUNDOS DE INVESTIMENTO IMOBILIÁRIO KINEA FII', segmento: 'Outros' }), 'Fundo de fundos')
+  })
+
+  it('usa mandato e nome quando o segmento vem vazio', () => {
+    assert.equal(setorDoFundo({ nome: 'X', segmento: '', mandato: 'Títulos e Valores Mobiliários' }), 'Papel (CRI)')
+    assert.equal(setorDoFundo({ nome: 'VALORA CRI CDI FII', segmento: '' }), 'Papel (CRI)')
+    assert.equal(setorDoFundo({ nome: 'X', segmento: 'Outros' }), 'Outros')
+  })
+
+  it('a correção manual da configuração vence a classificação da CVM', () => {
+    assert.equal(setorDoFundo({ segmento: 'Híbrido', correcao: 'Logística' }), 'Logística')
+  })
+})
+
+describe('volumeMedioDiario', () => {
+  const dia = (d, close, volume) => ({ date: d, close, volume })
+
+  it('converte cotas negociadas em reais (volume × fechamento) e tira a média', () => {
+    const hist = [dia(1, 100, 20000), dia(2, 100, 10000)] // R$ 2 mi e R$ 1 mi
+    assert.equal(volumeMedioDiario(hist), 1_500_000)
+  })
+
+  it('dia sem negócio entra como zero, porque liquidez é frequência de negócios', () => {
+    assert.equal(volumeMedioDiario([dia(1, 10, 300000), dia(2, 10, 0), dia(3, 10, 0)]), 1_000_000)
+  })
+
+  it('usa só as sessões mais recentes, em ordem de data', () => {
+    const hist = [dia(3, 10, 100), dia(1, 10, 999999999), dia(2, 10, 100)]
+    assert.equal(volumeMedioDiario(hist, 2), 1000)
+  })
+
+  it('sem histórico devolve null (não inventa liquidez)', () => {
+    assert.equal(volumeMedioDiario(undefined), null)
+    assert.equal(volumeMedioDiario([]), null)
   })
 })

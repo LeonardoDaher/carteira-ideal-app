@@ -5,9 +5,11 @@ import {
   TEXTO_MOTIVO_CONFIANCA,
   TEXTO_MOTIVO_INDISPONIVEL,
   acharIndisponivel,
+  agruparPorSetor,
   buscarFundos,
+  estaNaLista,
   formatarCompetencia,
-  fundosEmDestaque,
+  formatarVolume,
   nomeCurto,
   formatarData,
   rendimentoMensalPct,
@@ -49,16 +51,23 @@ export function SimuleFii({
   /** Permite injetar dados nos testes. No app, usa o arquivo gerado pelo job mensal. */
   snapshot?: SnapshotRendimentosFii
 }) {
-  const fundos = snapshot.fundos
-  const destaques = fundosEmDestaque(snapshot)
-  const [tickerSelecionado, setTickerSelecionado] = useState<string | undefined>(destaques[0]?.ticker ?? fundos[0]?.ticker)
+  const grupos = agruparPorSetor(snapshot)
+  const exibidos = grupos.flatMap((g) => g.fundos)
+  const [tickerSelecionado, setTickerSelecionado] = useState<string | undefined>(exibidos[0]?.ticker)
   const [quantidadeLivre, setQuantidadeLivre] = useState('')
 
-  const fundo = fundos.find((f) => f.ticker === tickerSelecionado) ?? destaques[0] ?? fundos[0]
+  // A busca pode escolher um fundo fora da lista por setor: procura em todos.
+  const fundo = snapshot.fundos.find((f) => f.ticker === tickerSelecionado) ?? exibidos[0]
 
   const selecionar = (ticker: string) => {
     setTickerSelecionado(ticker)
     setQuantidadeLivre('')
+    // Com dezenas de botões, o cartão fica abaixo da dobra: leva a pessoa até ele, para o
+    // toque ter resposta visível. Sem animação se o aparelho pede menos movimento.
+    requestAnimationFrame(() => {
+      const semAnimacao = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+      document.getElementById('cartao-fundo-fii')?.scrollIntoView?.({ behavior: semAnimacao ? 'auto' : 'smooth', block: 'start' })
+    })
   }
 
   return (
@@ -68,8 +77,8 @@ export function SimuleFii({
       <div className="col" style={{ gap: 4 }}>
         <h1 style={{ fontSize: 21 }}>Simule sua renda com FIIs</h1>
         <div className="muted small justify">
-          Busque um fundo imobiliário pelo código ou pelo nome, ou escolha um dos maiores do IFIX, e veja quanto cada
-          quantidade de cotas rendeu por mês.
+          Escolha um fundo imobiliário na lista ou busque pelo código ou nome, e veja quanto cada quantidade de cotas
+          rendeu por mês.
         </div>
       </div>
 
@@ -85,33 +94,42 @@ export function SimuleFii({
         <>
           <BuscaFundo snapshot={snapshot} onSelecionar={selecionar} />
 
-          {destaques.length > 0 && (
-            <div className="col" style={{ gap: 6 }}>
-              <span className="tiny muted">
-                Maiores do IFIX, em ordem de participação
-                {snapshot.vigenciaIfix ? ` (carteira de ${snapshot.vigenciaIfix})` : ''}
-              </span>
-              <div className="grade-tickers" role="group" aria-label="Maiores fundos do IFIX">
-                {destaques.map((f) => (
-                  <button
-                    key={f.ticker}
-                    className={`chip ${f.ticker === fundo.ticker ? 'selected' : ''}`}
-                    aria-pressed={f.ticker === fundo.ticker}
-                    onClick={() => selecionar(f.ticker)}
-                  >
-                    {f.ticker}
-                  </button>
-                ))}
-              </div>
+          {snapshot.volumeMinimoDiario != null && (
+            <div className="small muted justify" style={{ lineHeight: 1.5 }}>
+              A lista abaixo mostra os {exibidos.length} fundos negociados, em média, acima de{' '}
+              <strong>{formatarVolume(snapshot.volumeMinimoDiario)} por dia</strong> no último mês: liquidez suficiente
+              para comprar e vender sem mexer muito no preço. Os demais aparecem pela busca. O setor é o informado pelo
+              próprio fundo à CVM.
             </div>
           )}
 
+          <div className="col" style={{ gap: 14 }}>
+            {grupos.map((g) => (
+              <div key={g.setor} className="col" style={{ gap: 6 }}>
+                <span className="tiny muted" style={{ fontWeight: 600 }}>
+                  {g.setor} ({g.fundos.length})
+                </span>
+                <div className="grade-tickers" role="group" aria-label={`Fundos do setor ${g.setor}`}>
+                  {g.fundos.map((f) => (
+                    <button
+                      key={f.ticker}
+                      className={`chip ${f.ticker === fundo.ticker ? 'selected' : ''}`}
+                      aria-pressed={f.ticker === fundo.ticker}
+                      onClick={() => selecionar(f.ticker)}
+                    >
+                      {f.ticker}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+
           <CartaoFundo
-            key={fundo.ticker}
             fundo={fundo}
-            quantidadeLivre={quantidadeLivre}
-            setQuantidadeLivre={setQuantidadeLivre}
-          />
+            foraDaLista={!estaNaLista(snapshot, fundo)}
+            volumeMinimo={snapshot.volumeMinimoDiario}
+            quantidadeLivre={quantidadeLivre} setQuantidadeLivre={setQuantidadeLivre} />
         </>
       )}
 
@@ -121,7 +139,7 @@ export function SimuleFii({
         <strong>Rentabilidade obtida no passado não representa garantia de rentabilidade futura.</strong> O rendimento de
         um FII muda todo mês e pode diminuir ou ser suspenso. A cotação também oscila: o valor investido pode cair. Os
         rendimentos costumam ser isentos de IR para pessoa física quando o fundo e o investidor cumprem as condições
-        previstas em lei. Encontrar um fundo na busca não é uma indicação de compra.
+        previstas em lei. Estar na lista ou na busca não é uma indicação de compra: o critério da lista é só a liquidez.
       </div>
 
       <AvisoEducacional />
@@ -176,7 +194,10 @@ function BuscaFundo({ snapshot, onSelecionar }: { snapshot: SnapshotRendimentosF
               <li key={f.ticker}>
                 <button className="resultado-busca" onClick={() => escolher(f)}>
                   <span style={{ fontWeight: 700 }}>{f.ticker}</span>
-                  <span className="tiny muted resultado-nome">{nomeCurto(f.nome)}</span>
+                  <span className="tiny muted resultado-nome">
+                    {nomeCurto(f.nome)}
+                    {!estaNaLista(snapshot, f) ? ', baixa liquidez' : ''}
+                  </span>
                 </button>
               </li>
             ))}
@@ -194,8 +215,8 @@ function BuscaFundo({ snapshot, onSelecionar }: { snapshot: SnapshotRendimentosF
               <>
                 <strong>Nenhum fundo encontrado para “{termo.trim()}”.</strong>{' '}
                 <span className="muted">
-                  Confira o código (4 letras e 11, como HGLG11) ou busque por parte do nome. Só aparecem fundos negociados
-                  na B3 que enviaram o Informe Mensal à CVM recentemente.
+                  Confira o código (4 letras e 11, como HGLG11) ou busque por parte do nome. A busca alcança os fundos
+                  negociados na B3 que enviaram o Informe Mensal à CVM recentemente.
                 </span>
               </>
             )}
@@ -203,21 +224,21 @@ function BuscaFundo({ snapshot, onSelecionar }: { snapshot: SnapshotRendimentosF
         )}
       </div>
 
-      {!buscando && (
-        <span className="tiny muted">
-          {snapshot.fundos.length.toLocaleString('pt-BR')} fundos com dados nesta atualização.
-        </span>
-      )}
     </div>
   )
 }
 
 function CartaoFundo({
   fundo,
+  foraDaLista = false,
+  volumeMinimo,
   quantidadeLivre,
   setQuantidadeLivre,
 }: {
-  fundo: SnapshotRendimentosFii['fundos'][number]
+  fundo: FundoFii
+  /** Fundo abaixo do corte de liquidez, aberto pela busca. */
+  foraDaLista?: boolean
+  volumeMinimo?: number
   quantidadeLivre: string
   setQuantidadeLivre: (v: string) => void
 }) {
@@ -233,7 +254,7 @@ function CartaoFundo({
 
   return (
     <>
-      <div className="card col" style={{ gap: 14 }}>
+      <div id="cartao-fundo-fii" className="card col" style={{ gap: 14, scrollMarginTop: 12 }}>
         <div className="row-between" style={{ alignItems: 'flex-start', gap: 12 }}>
           <div className="col" style={{ gap: 2, minWidth: 0 }}>
             <span className="font-display" style={{ fontWeight: 700, fontSize: 24 }}>{fundo.ticker}</span>
@@ -243,6 +264,13 @@ function CartaoFundo({
             >
               {nomeCurto(fundo.nome)}
             </span>
+            {(fundo.setor || fundo.volumeMedio != null) && (
+              <span className="tiny muted">
+                {[fundo.setor, fundo.volumeMedio != null ? `negocia ${formatarVolume(fundo.volumeMedio)} por dia` : null]
+                  .filter(Boolean)
+                  .join(', ')}
+              </span>
+            )}
           </div>
           <div className="col" style={{ gap: 2, alignItems: 'flex-end', flexShrink: 0 }}>
             <span className="tiny muted">Valor da cota</span>
@@ -267,6 +295,18 @@ function CartaoFundo({
             <span className="tiny muted">ao mês, estimado</span>
           </div>
         </div>
+
+        {foraDaLista && volumeMinimo != null && (
+          <div className="card-outline small justify aviso-atraso" style={{ lineHeight: 1.5 }} role="note">
+            <strong>Fora da lista por liquidez.</strong>{' '}
+            <span className="muted">
+              {fundo.volumeMedio != null
+                ? `Este fundo negocia em média ${formatarVolume(fundo.volumeMedio)} por dia, abaixo do corte de ${formatarVolume(volumeMinimo)}. `
+                : 'Não foi possível medir o volume negociado deste fundo. '}
+              Com pouca liquidez, comprar ou vender pode levar tempo ou exigir aceitar um preço pior.
+            </span>
+          </div>
+        )}
 
         {fundo.confianca === 'baixa' && (
           <div className="card-outline small justify aviso-atraso" style={{ lineHeight: 1.5 }} role="note">

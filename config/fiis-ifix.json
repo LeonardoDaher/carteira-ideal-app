@@ -1,19 +1,23 @@
 {
-  "_leia": "Lista dos 10 maiores FIIs do IFIX, na ordem de participação no índice. A B3 rebalanceia o IFIX a cada 4 meses (jan, mai, set): a cada rebalanceamento, confira a carteira teórica em b3.com.br (Índices > IFIX > Composição da carteira), atualize os tickers e 'vigencia' e marque 'conferidoNaB3': true. O campo 'cnpj' é opcional: só preencha se o script avisar que não achou o fundo pelo ISIN. 'toleranciaPadrao' é o desvio máximo aceito em relação à mediana dos últimos 6 meses (0.2 = 20%): meses fora disso são tratados como distorcidos (emissão de cotas, fechamento de semestre) e o app mostra o mês típico anterior. Fundos cujo rendimento varia de verdade todo mês (ex.: fundos de inflação como o KNIP11) podem ter 'tolerancia' própria, mais larga. Os 10 fundos abaixo são os DESTAQUES (chips da tela e trava de publicação). Desde a decisão D12, o script também publica os demais FIIs do Informe Mensal da CVM para a busca livre; os parâmetros dessa lista ampla ficam em 'outrosFundos' (ver o bloco '_leia' dentro dele).",
+  "_leia": "Os 10 fundos em 'fundos' são o CONTROLE da publicação: os 10 maiores do IFIX, que sempre têm dado bom. Se menos de 'minimoFundosParaPublicar' deles passarem nas checagens, o arquivo não é atualizado. A lista exibida no app é outra: todos os FIIs com volume médio acima de 'outrosFundos.volumeMinimoDiario' (decisão D13). A B3 rebalanceia o IFIX a cada 4 meses (jan, mai, set): confira a carteira teórica em b3.com.br e atualize os tickers e 'vigencia'. 'cnpj' é opcional: só preencha se o script avisar que não achou o fundo pelo ISIN. 'tolerancia' ver D10.",
   "vigencia": "set a dez/2026",
   "conferidoNaB3": true,
   "minimoFundosParaPublicar": 8,
   "toleranciaPadrao": 0.2,
   "outrosFundos": {
-    "_leia": "Lista ampla (D12). 'ativo': false volta a publicar só os destaques. 'mesesMaximoAtraso': fundos sem informe nos últimos N meses ficam de fora (encerrados ou atrasados com a CVM). 'minimoCotistas': fundos com menos cotistas costumam ser restritos, fora da bolsa; filtrá-los poupa requisições. 'maxRequisicoesBrapi': teto por execução, para não estourar a cota mensal do plano gratuito (confira a cota vigente no painel da brapi). 'minimoFundosTotal': se menos fundos que isso ficarem válidos, o arquivo NÃO é atualizado. 'publicarVariaveis': fundos cujo rendimento varia muito (ex.: CRI atrelado ao IPCA) são publicados com o mês mais próximo da mediana e marcados como baixa confiança; false volta a descartá-los. Não vale para os destaques, que seguem a 'tolerancia' de cada um.",
-    "ativo": true,
+    "_leia": "Parâmetros da lista (D12 e D13). 'volumeMinimoDiario': corte de liquidez em reais por dia, média dos últimos 21 pregões. 'mesesMaximoAtraso': fundos sem informe nos últimos N meses ficam de fora. 'minimoCotistas': fundos com menos cotistas são restritos, fora da bolsa; filtrá-los poupa requisições. 'maxRequisicoesBrapi': teto por execução (cota do plano gratuito: 15.000 por mês). 'minimoFundosTotal': se menos fundos que isso passarem no corte, o arquivo NÃO é atualizado. 'publicarVariaveis': fundos de rendimento muito variável entram com o mês mais próximo da mediana, como baixa confiança. 'depurar': tickers cujos meses e volume são impressos no log.",
     "mesesMaximoAtraso": 3,
     "minimoCotistas": 100,
     "maxRequisicoesBrapi": 800,
     "pausaEntreRequisicoesMs": 300,
     "pausaAposLimiteMs": 60000,
-    "minimoFundosTotal": 100,
-    "publicarVariaveis": true
+    "minimoFundosTotal": 20,
+    "publicarVariaveis": true,
+    "depurar": [
+      "VGIP11",
+      "VGIR11"
+    ],
+    "volumeMinimoDiario": 1000000
   },
   "fundos": [
     {
@@ -48,5 +52,8 @@
       "ticker": "TRXF11",
       "cnpj": "28.548.288/0001-52"
     }
-  ]
+  ],
+  "setores": {
+    "_leia": "Correção manual do setor exibido, quando a classificação declarada à CVM não é a que o mercado usa. Formato: \"TICKER11\": \"Logística\". Setores usados pelo app: Logística, Shoppings, Escritórios, Papel (CRI), Híbrido, Fundo de fundos, Saúde, Hotéis, Residencial, Varejo e renda urbana, Educacional, Outros (ou qualquer outro nome)."
+  }
 }

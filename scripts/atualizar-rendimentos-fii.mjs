@@ -4,21 +4,24 @@
 // ou manualmente com:  BRAPI_TOKEN=... node scripts/atualizar-rendimentos-fii.mjs
 //
 // O que faz:
-//   1. Lê os fundos em destaque em config/fiis-ifix.json (os 10 maiores do IFIX vigente).
+//   1. Lê os fundos de controle em config/fiis-ifix.json (os 10 maiores do IFIX vigente):
+//      se eles falham, o problema é geral e nada é publicado.
 //   2. Baixa o Informe Mensal Estruturado de FIIs do Portal de Dados Abertos da CVM
-//      (ano atual e anterior). O arquivo traz TODOS os FIIs registrados: além dos 10 em
-//      destaque, o script aproveita os demais (decisão D12) para a busca livre do app.
+//      (ano atual e anterior). O arquivo traz TODOS os FIIs registrados, com o setor
+//      declarado por cada um.
 //   3. Estima o rendimento por cota dos 6 meses mais recentes de cada fundo e escolhe UM
 //      para publicar: o mais recente dentro da tolerância em torno da mediana (descarta
 //      meses distorcidos por emissão de cotas ou fechamento de semestre).
-//   4. Busca a cotação de cada fundo na brapi (plano gratuito: 1 ativo por requisição),
-//      com pausa entre chamadas e um teto mensal de requisições (config "outrosFundos").
-//   5. Grava webapp-src/src/data/rendimentosFii.json, que o app lê como arquivo estático.
+//   4. Busca na brapi (plano gratuito: 1 ativo por requisição) a cotação e o histórico do
+//      último mês, com pausa entre chamadas e um teto de requisições (config "outrosFundos").
+//   5. Grava webapp-src/src/data/rendimentosFii.json com todos os fundos com dado, cada um
+//      com setor e volume médio. O app lista por setor os que negociam acima de R$ 1 milhão
+//      por dia (decisão D13); os demais aparecem só pela busca, com aviso de liquidez.
 //
 // Regras de segurança: se algo parecer errado (coluna obrigatória não encontrada, poucos
 // fundos em destaque válidos, lista ampla muito menor que o esperado), o script termina com
 // erro SEM gravar o arquivo. O app continua exibindo os dados do mês anterior, e o GitHub
-// avisa da falha. Problemas em fundos fora do destaque não derrubam a publicação: o fundo
+// avisa da falha. Problemas em fundos fora do controle não derrubam a publicação: o fundo
 // fica de fora ou vai para a lista "indisponiveis", com o motivo.
 
 import { execFileSync } from 'node:child_process'
@@ -31,10 +34,14 @@ const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const ARQUIVO_CONFIG = path.join(RAIZ, 'config', 'fiis-ifix.json')
 const ARQUIVO_SAIDA = path.join(RAIZ, 'webapp-src', 'src', 'data', 'rendimentosFii.json')
 const URL_CVM = (ano) => `https://dados.cvm.gov.br/dados/FII/DOC/INF_MENSAL/DADOS/inf_mensal_fii_${ano}.zip`
-const URL_BRAPI = (ticker) => `https://brapi.dev/api/quote/${encodeURIComponent(ticker)}`
+// range=1mo traz o histórico diário do último mês na mesma requisição da cotação: é dele
+// que sai o volume médio usado no critério de liquidez (decisão D13).
+const URL_BRAPI = (ticker) => `https://brapi.dev/api/quote/${encodeURIComponent(ticker)}?range=1mo&interval=1d`
 // Meses de informe analisados por fundo. Só UM é publicado (o mais recente considerado
 // típico), mas a mediana desses meses é a referência para descartar meses distorcidos.
 const MESES_ANALISE = 6
+// Pregões usados na média de volume (cerca de um mês).
+const SESSOES_LIQUIDEZ = 21
 // Desvio máximo, em relação à mediana, para um mês ser considerado típico. Pode ser
 // sobrescrito em config/fiis-ifix.json ("toleranciaPadrao" ou "tolerancia" por fundo).
 const TOLERANCIA_PADRAO = 0.2
@@ -180,6 +187,9 @@ export function prepararBase(linhasComplemento, linhasGeral) {
     cnpjGeral: acharColuna(cabGeral, [/^cnpj_fundo_classe$/i, /^cnpj_fundo$/i, /^cnpj/i], { descricao: 'CNPJ no geral' }),
     isin: acharColuna(cabGeral, [/isin/i], { obrigatoria: false }),
     nome: acharColuna(cabGeral, [/^nome_fundo_classe$/i, /^nome_fundo$/i, /^nome/i], { obrigatoria: false }),
+    // Setor declarado pelo fundo à CVM (D13). Opcionais: sem elas, tudo vira "Outros".
+    segmento: acharColuna(cabGeral, [/^segmento_atuacao$/i, /segmento/i], { obrigatoria: false }),
+    mandato: acharColuna(cabGeral, [/^mandato$/i, /mandato/i], { obrigatoria: false }),
   }
 
   const cadastro = new Map()
@@ -191,6 +201,8 @@ export function prepararBase(linhasComplemento, linhasGeral) {
     cadastro.set(cnpj, {
       prefixo: prefixo ?? anterior.prefixo ?? null,
       nome: (col.nome && linha[col.nome]) || anterior.nome || null,
+      segmento: (col.segmento && linha[col.segmento]) || anterior.segmento || null,
+      mandato: (col.mandato && linha[col.mandato]) || anterior.mandato || null,
     })
   }
 
@@ -293,6 +305,8 @@ function rendimentosDoFundo(base, fundo, mesesHistorico) {
     ticker: fundo.ticker,
     cnpj,
     nome: fundo.nome ?? base.cadastro.get(cnpj)?.nome ?? fundo.ticker,
+    segmento: base.cadastro.get(cnpj)?.segmento ?? null,
+    mandato: base.cadastro.get(cnpj)?.mandato ?? null,
     rendimentos,
     ultimaCompetencia: ordenados[0][0],
     ...(patrimonio != null ? { patrimonio } : {}),
@@ -439,6 +453,50 @@ export function rendimentoPlausivel(valorPorCota, cotacao) {
   return pct >= RENDIMENTO_MENSAL_MIN_PCT && pct <= RENDIMENTO_MENSAL_MAX_PCT
 }
 
+const semAcento = (t) => String(t ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+
+/**
+ * Setor exibido na tela (D13), a partir do segmento e do mandato que o próprio fundo
+ * declara no Informe Mensal da CVM. A classificação da CVM tem nomes técnicos ("Títulos e
+ * Val. Mob."); aqui viram nomes que o investidor reconhece. `correcao` (config "setores")
+ * vence tudo, para os casos em que o fundo se declara de um jeito e o mercado o vê de outro.
+ */
+export function setorDoFundo({ nome = '', segmento = '', mandato = '', correcao = null } = {}) {
+  if (correcao) return correcao
+  const n = semAcento(nome)
+  const seg = semAcento(segmento)
+  const man = semAcento(mandato)
+  if (/\bfof\b|\bfofii\b|fundo de fundos|fdo de fundos|\bfundos de investimento imobiliario\b/.test(n)) return 'Fundo de fundos'
+  if (/logist|galpo|industrial/.test(seg)) return 'Logística'
+  if (/shopping/.test(seg)) return 'Shoppings'
+  if (/laje|corporativ|escritori/.test(seg)) return 'Escritórios'
+  if (/titulos|val\.? ?mob|valores mob|receb|cri\b/.test(seg)) return 'Papel (CRI)'
+  if (/hospital|saude/.test(seg)) return 'Saúde'
+  if (/hotel/.test(seg)) return 'Hotéis'
+  if (/residenc/.test(seg)) return 'Residencial'
+  if (/agencia|varejo|renda urbana/.test(seg)) return 'Varejo e renda urbana'
+  if (/educac/.test(seg)) return 'Educacional'
+  if (/hibrido|multi/.test(seg)) return 'Híbrido'
+  if (/titulos|valores mob/.test(man) || /\bcri\b|recebiveis|credito imob/.test(n)) return 'Papel (CRI)'
+  return 'Outros'
+}
+
+/**
+ * Volume financeiro médio diário (R$) das últimas `sessoes` sessões do histórico da brapi.
+ * O campo `volume` do histórico é quantidade de cotas; volume × fechamento dá reais. Dias
+ * sem negócio entram como zero, porque liquidez é justamente a frequência de negócios.
+ */
+export function volumeMedioDiario(historico, sessoes = 21) {
+  if (!Array.isArray(historico) || historico.length === 0) return null
+  const dias = historico
+    .filter((d) => d && typeof d.close === 'number')
+    .sort((a, b) => (a.date ?? 0) - (b.date ?? 0))
+    .slice(-sessoes)
+  if (dias.length === 0) return null
+  const total = dias.reduce((soma, d) => soma + (Number(d.volume) > 0 ? Number(d.volume) * d.close : 0), 0)
+  return total / dias.length
+}
+
 /**
  * Sinais de que a estimativa merece menos confiança (o fundo é publicado, mas a tela avisa):
  *   poucos-meses      menos de 3 meses de informe: não houve conferência pela mediana
@@ -527,7 +585,11 @@ async function buscarCotacao(ticker, token) {
   const preco = resultado?.regularMarketPrice
   if (typeof preco !== 'number' || !(preco > 0)) throw new ErroBrapi(`brapi não trouxe cotação válida para ${ticker}.`, 200)
   const data = resultado.regularMarketTime ? String(resultado.regularMarketTime).slice(0, 10) : new Date().toISOString().slice(0, 10)
-  return { cotacao: Math.round(preco * 100) / 100, dataCotacao: data }
+  return {
+    cotacao: Math.round(preco * 100) / 100,
+    dataCotacao: data,
+    volumeMedio: volumeMedioDiario(resultado.historicalDataPrice, SESSOES_LIQUIDEZ),
+  }
 }
 
 async function main() {
@@ -541,7 +603,7 @@ async function main() {
   const token = process.env.BRAPI_TOKEN
   if (!token) throw new Error('Variável BRAPI_TOKEN não definida (GitHub: Settings > Secrets and variables > Actions).')
 
-  const amplo = { ativo: true, mesesMaximoAtraso: 3, minimoCotistas: 100, maxRequisicoesBrapi: 800, pausaEntreRequisicoesMs: 300, pausaAposLimiteMs: 60_000, minimoFundosTotal: 100, publicarVariaveis: true, ...(config.outrosFundos ?? {}) }
+  const amplo = { ativo: true, mesesMaximoAtraso: 3, minimoCotistas: 100, maxRequisicoesBrapi: 800, pausaEntreRequisicoesMs: 300, pausaAposLimiteMs: 60_000, minimoFundosTotal: 20, publicarVariaveis: true, volumeMinimoDiario: 1_000_000, ...(config.outrosFundos ?? {}) }
 
   const pastaTemp = fs.mkdtempSync(path.join(os.tmpdir(), 'cvm-fii-'))
   const anoAtual = new Date().getFullYear()
@@ -563,6 +625,15 @@ async function main() {
       })
     : { resultados: montarRendimentos(complemento, geral, config.fundos).map((r) => ({ ...r, destaque: true })), ignorados: [], poucosCotistas: 0, competenciaMaisRecente: null }
 
+  // Diagnóstico: fundos listados em outrosFundos.depurar têm os meses analisados impressos
+  // no log, para entender por que um fundo específico ficou de fora.
+  const depurar = new Set((amplo.depurar ?? []).map((t) => String(t).toUpperCase()))
+  for (const t of depurar) {
+    const ign = ignorados.find((i) => i.ticker === t)
+    if (ign) console.log(`[depurar] ${t}: ignorado antes da análise (${ign.motivo}${ign.detalhe ? `: ${ign.detalhe}` : ''}).`)
+    else if (!resultados.some((r) => r.ticker === t)) console.log(`[depurar] ${t}: não está entre os candidatos (código inexistente no informe, prefixo de ISIN diferente ou menos de ${amplo.minimoCotistas} cotistas).`)
+  }
+
   console.log(
     `[info] Informe da CVM até ${competenciaMaisRecente ?? '?'}: ${resultados.length} fundos candidatos ` +
       `(${config.fundos.length} em destaque), ${ignorados.length} ignorados, ${poucosCotistas} com menos de ${amplo.minimoCotistas} cotistas.`,
@@ -578,6 +649,10 @@ async function main() {
   let naoListados = 0
   let semCotacao = 0
   let limiteEsgotado = false
+  let semHistorico = 0
+  const poucaLiquidez = []
+  const destaquesComDado = new Set() // destaques que passaram nas checagens, antes do corte de liquidez
+  const setoresCorrigidos = Object.fromEntries(Object.entries(config.setores ?? {}).filter(([k]) => !k.startsWith('_')))
   const fmt = (v) => v.toFixed(4).replace('.', ',')
 
   for (const r of resultados) {
@@ -607,6 +682,13 @@ async function main() {
         )
       }
       if (semReferencia) console.warn(`[aviso] ${r.ticker}: só ${r.rendimentos.length} mês(es) de informe; publicado sem conferência pela mediana.`)
+    }
+    if (depurar.has(r.ticker)) {
+      const meses = r.rendimentos.map((x) => `${x.competencia}=${x.valorPorCota.toFixed(4)}`).join(' ')
+      console.log(
+        `[depurar] ${r.ticker} (CNPJ ${r.cnpj}): ${meses} | mediana ${referencia != null ? referencia.toFixed(4) : '—'} | ` +
+          `escolhido ${escolhido ? `${escolhido.competencia}=${escolhido.valorPorCota.toFixed(4)}` : 'nenhum'}${variavel ? ' (variável)' : ''}`,
+      )
     }
     if (!escolhido) {
       registrar('rendimento-atipico', `nenhum dos ${r.rendimentos.length} meses ficou dentro da tolerância de ${Math.round(tolerancia * 100)}% em torno da mediana.`)
@@ -662,11 +744,21 @@ async function main() {
       continue
     }
 
-    const { cotacao, dataCotacao } = cotacaoObtida
+    const { cotacao, dataCotacao, volumeMedio } = cotacaoObtida
     if (!rendimentoPlausivel(escolhido.valorPorCota, cotacao)) {
       const pct = ((escolhido.valorPorCota / cotacao) * 100).toFixed(2)
       registrar('fora-da-faixa', `rendimento estimado de ${pct}% ao mês sobre a cota está fora da faixa plausível.`)
       continue
+    }
+    if (r.destaque) destaquesComDado.add(r.ticker)
+    // Todos os fundos com dado são publicados: os de volume acima do corte formam a lista
+    // por setor; os demais aparecem só pela busca, com aviso de liquidez (D13).
+    if (volumeMedio == null) {
+      semHistorico++
+      if (r.destaque) problemasDestaque.push(`${r.ticker}: brapi não devolveu histórico de volume.`)
+    } else {
+      if (depurar.has(r.ticker)) console.log(`[depurar] ${r.ticker}: volume médio R$ ${Math.round(volumeMedio).toLocaleString('pt-BR')}/dia.`)
+      if (volumeMedio < amplo.volumeMinimoDiario) poucaLiquidez.push(r.ticker)
     }
 
     const motivos = avaliarConfianca({ semReferencia, variavel, identicos, dataCotacao, competencia: escolhido.competencia, competenciaMaisRecente })
@@ -674,6 +766,8 @@ async function main() {
     fundos.push({
       ticker: r.ticker,
       nome: r.nome,
+      setor: setorDoFundo({ nome: r.nome, segmento: r.segmento, mandato: r.mandato, correcao: setoresCorrigidos[r.ticker] }),
+      volumeMedio: volumeMedio == null ? null : Math.round(volumeMedio / 1000) * 1000,
       cotacao,
       dataCotacao,
       rendimentos: [escolhido],
@@ -684,31 +778,50 @@ async function main() {
   for (const p of problemasDestaque) console.warn(`[aviso] ${p}`)
   const baixaConfianca = fundos.filter((f) => f.confianca === 'baixa').length
   console.log(
-    `[info] brapi: ${requisicoes} requisições, ${naoListados} códigos não listados na B3, ${semCotacao} sem cotação` +
-      `${limiteEsgotado ? ' (limite atingido)' : ''}. Publicáveis: ${fundos.length} (${baixaConfianca} com baixa confiança); indisponíveis: ${indisponiveis.length}.`,
+    `[info] brapi: ${requisicoes} requisições, ${naoListados} códigos não listados na B3, ${semCotacao} sem cotação, ` +
+      `${semHistorico} sem histórico de volume${limiteEsgotado ? ' (limite atingido)' : ''}.`,
   )
-
-  // Trava 1 (a mesma de antes): os fundos em destaque precisam estar quase todos válidos.
-  const tickersDestaque = config.fundos.map((f) => f.ticker)
-  const destaquesValidos = fundos.filter((f) => tickersDestaque.includes(f.ticker)).length
-  const minimo = config.minimoFundosParaPublicar ?? Math.ceil(config.fundos.length * 0.8)
-  if (destaquesValidos < minimo) {
-    throw new Error(`Só ${destaquesValidos} de ${config.fundos.length} fundos em destaque ficaram válidos (mínimo ${minimo}). Arquivo NÃO atualizado.`)
+  const mi = (v) => `R$ ${(v / 1e6).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} mi`
+  const liquidos = fundos.filter((f) => f.volumeMedio != null && f.volumeMedio >= amplo.volumeMinimoDiario)
+  console.log(
+    `[info] Liquidez: ${liquidos.length} fundos acima de ${mi(amplo.volumeMinimoDiario)}/dia na lista por setor; ` +
+      `${poucaLiquidez.length} abaixo do corte e ${semHistorico} sem histórico, só na busca. ` +
+      `Total com dado: ${fundos.length} (${baixaConfianca} com baixa confiança); indisponíveis: ${indisponiveis.length}.`,
+  )
+  const porVolume = [...liquidos].sort((a, b) => b.volumeMedio - a.volumeMedio)
+  if (porVolume.length > 0) {
+    // Para conferir por amostragem num site de cotações: os mais e os menos negociados da lista.
+    console.log(`[info] Mais negociados: ${porVolume.slice(0, 5).map((f) => `${f.ticker} ${mi(f.volumeMedio)}`).join(', ')}.`)
+    console.log(`[info] Menos negociados da lista: ${porVolume.slice(-3).map((f) => `${f.ticker} ${mi(f.volumeMedio)}`).join(', ')}.`)
   }
-  // Trava 2: a lista ampla não pode encolher de repente (coluna renomeada, brapi fora do ar).
-  if (amplo.ativo && fundos.length < amplo.minimoFundosTotal) {
-    throw new Error(`Só ${fundos.length} fundos no total ficaram válidos (mínimo ${amplo.minimoFundosTotal}). Arquivo NÃO atualizado.`)
+  const contagemSetores = {}
+  for (const f of liquidos) contagemSetores[f.setor] = (contagemSetores[f.setor] ?? 0) + 1
+  console.log(`[info] Setores: ${Object.entries(contagemSetores).sort((a, b) => b[1] - a[1]).map(([s, n]) => `${s} ${n}`).join(', ')}.`)
+
+  // Trava 1: os 10 maiores do IFIX precisam ter passado nas checagens de dado e cotação.
+  // Servem de amostra de controle: se eles falham, o problema é geral (CVM ou brapi).
+  const minimo = config.minimoFundosParaPublicar ?? Math.ceil(config.fundos.length * 0.8)
+  if (destaquesComDado.size < minimo) {
+    throw new Error(`Só ${destaquesComDado.size} de ${config.fundos.length} fundos de controle (IFIX) ficaram válidos (mínimo ${minimo}). Arquivo NÃO atualizado.`)
+  }
+  // Trava 2: sem histórico de volume para ninguém, o plano da brapi mudou ou o parâmetro range deixou de valer.
+  if (semHistorico > 0 && liquidos.length === 0) {
+    throw new Error('A brapi não devolveu histórico de volume (range=1mo) para nenhum fundo. Confira o plano e a documentação. Arquivo NÃO atualizado.')
+  }
+  // Trava 3: a lista não pode encolher de repente.
+  if (liquidos.length < amplo.minimoFundosTotal) {
+    throw new Error(`Só ${liquidos.length} fundos passaram no critério de liquidez (mínimo ${amplo.minimoFundosTotal}). Arquivo NÃO atualizado.`)
   }
 
   const snapshot = {
     geradoEm: new Date().toISOString(),
-    vigenciaIfix: config.vigencia,
-    destaques: tickersDestaque.filter((t) => fundos.some((f) => f.ticker === t)),
-    fundos,
+    volumeMinimoDiario: amplo.volumeMinimoDiario,
+    sessoesLiquidez: SESSOES_LIQUIDEZ,
+    fundos: fundos.sort((a, b) => a.ticker.localeCompare(b.ticker)),
     indisponiveis: indisponiveis.sort((a, b) => a.ticker.localeCompare(b.ticker)),
   }
   fs.writeFileSync(ARQUIVO_SAIDA, formatarSnapshot(snapshot))
-  console.log(`rendimentosFii.json atualizado com ${fundos.length} fundos (${destaquesValidos} em destaque).`)
+  console.log(`rendimentosFii.json atualizado: ${liquidos.length} fundos na lista por setor, ${fundos.length} na busca.`)
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

@@ -63,4 +63,5 @@ A mudança para a API tirou a metodologia do código visível. Ainda assim, vale
 - [x] **Busca livre de qualquer FII** (decisão D12): feita sem função nova na Vercel, ampliando o job mensal para todos os FIIs do informe da CVM.
 - [ ] **Cota da brapi:** conferir no painel a cota mensal vigente do plano gratuito e ajustar `outrosFundos.maxRequisicoesBrapi` em `config/fiis-ifix.json` se for preciso.
 - [ ] **Primeira execução com a lista ampla:** ler no log a contagem de fundos publicados, indisponíveis e com baixa confiança, e conferir 2 fundos pequenos por amostragem além dos destaques.
-- [ ] **Nova captura** de `docs/jornada/17-simule-fii.jpg` mostrando o campo de busca, depois da primeira execução.
+- [ ] **Lista por liquidez e setor (D13), primeira execução:** conferir quantos fundos entraram, se os setores declarados à CVM fazem sentido (corrigir em `setores`) e se o volume médio de 2 ou 3 fundos bate com um site de cotações.
+- [ ] **Nova captura** de `docs/jornada/17-simule-fii.jpg` mostrando a busca e a lista por setor, depois da primeira execução.

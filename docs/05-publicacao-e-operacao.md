@@ -80,7 +80,7 @@ Se o build falhar, a Vercel mantém no ar a última versão boa e mostra o erro 
 npm install          # uma vez
 npm run dev          # só a interface (sem API: o cálculo falha de propósito com "Tentar novamente")
 vercel dev           # interface + API, igual à produção (requer: npm install -g vercel)
-npm run test         # 88 testes do app + 30 do script mensal de FIIs
+npm run test         # 97 testes do app + 42 do script mensal de FIIs
 npm run typecheck    # tipos do app e da API
 npm run build        # build de produção em dist-site/
 ```
@@ -104,6 +104,12 @@ npm run build        # build de produção em dist-site/
 | `brapi respondeu 401/403` | Chave expirada ou revogada: gerar outra em brapi.dev e atualizar o secret |
 | `[info] brapi: … requisições, … não listados, … sem cotação` | Resumo da lista ampla (D12). "Não listados" é normal: são fundos do informe que não negociam na B3. Se aparecer "(limite atingido)", a cota da brapi ou o teto `maxRequisicoesBrapi` acabou antes do fim: os menores fundos ficaram sem cotação neste mês |
 | `[info] XXXX11: ISIN aponta para mais de um CNPJ…` (fundo fora do destaque) | Nada obrigatório: o fundo aparece na busca como "sem dados neste mês" com o motivo. Se for um fundo importante, descobrir o CNPJ certo nos comunicados dele e avisar quem desenvolve |
+| `[info] Liquidez: N fundos acima de R$ 1 mi/dia na lista por setor; …` | Resumo da lista (D13). Os demais fundos com dado ficam só na busca |
+| `[info] Mais negociados: …` / `Menos negociados da lista: …` | Conferir 2 ou 3 desses volumes num site de cotações. Se não baterem, avisar quem desenvolve |
+| `[info] Setores: …` | Contagem por setor. Setor estranho para um fundo? Corrigir no bloco `setores` de `config/fiis-ifix.json` (ex.: `"XXXX11": "Logística"`) |
+| `A brapi não devolveu histórico de volume (range=1mo)…` | O plano gratuito ou a API mudou. Enviar o log para quem desenvolve |
+| `Só … fundos passaram no critério de liquidez (mínimo …)` | Algo encolheu a lista de repente (brapi fora do ar, cota esgotada). Rodar de novo no dia seguinte |
+| `[depurar] XXXX11: …` | Diagnóstico pedido em `outrosFundos.depurar`: mostra os 6 meses estimados, a mediana e o mês escolhido do fundo. Serve para entender por que um fundo específico ficou de fora. Depois de resolvido, pode esvaziar a lista |
 | `brapi pediu para desacelerar (429)` | Nada, se for pontual: o script espera e tenta de novo. Se virar rotina, aumentar `pausaEntreRequisicoesMs` em `outrosFundos` |
 | `Só … fundos no total ficaram válidos (mínimo …)` | A lista ampla encolheu de repente (brapi fora do ar, cota esgotada no início, coluna da CVM renomeada). Rodar de novo no dia seguinte; se repetir, enviar o log para quem desenvolve |
 

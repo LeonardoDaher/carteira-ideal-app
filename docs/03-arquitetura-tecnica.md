@@ -87,7 +87,7 @@ GitHub Actions (dia 20 de cada mês)
 App: screens/SimuleFii.tsx lê o JSON estático (busca e cálculos em domain/rendaFii.ts)
 ```
 
-O navegador do cliente nunca chama a CVM nem a brapi, e a chave da brapi fica só nos GitHub Secrets. Detalhes e salvaguardas: decisões D9, D10 e D12 no [Registro de decisões](07-registro-de-decisoes.md).
+O navegador do cliente nunca chama a CVM nem a brapi, e a chave da brapi fica só nos GitHub Secrets. Detalhes e salvaguardas: decisões D9, D10, D12 e D13 no [Registro de decisões](07-registro-de-decisoes.md).
 
 ## Decisões técnicas relevantes
 
@@ -101,7 +101,7 @@ O navegador do cliente nunca chama a CVM nem a brapi, e a chave da brapi fica s�
 | Comando | O que verifica | Situação |
 |---|---|---|
 | `npm run typecheck` | Tipos do app e da API juntos | ✅ sem erros |
-| `npm run test` | 88 testes do app (motor, estado, questionário, visual, tratamento de erro, Simule FII com busca livre, Aprender com curso e livro) + 30 do script mensal da CVM | ✅ 88/88 e 30/30 |
+| `npm run test` | 97 testes do app (motor, estado, questionário, visual, tratamento de erro, Simule FII com lista por setor e busca, Aprender com curso e livro) + 42 do script mensal da CVM | ✅ 97/97 e 42/42 |
 | `npm run build` | Build de produção completo | ✅ |
 | Jornada ponta a ponta | Navegador real, servidor local com a API verdadeira, todas as telas | ✅ sem erros de JavaScript |
 

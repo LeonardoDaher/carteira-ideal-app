@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import {
+  agruparPorSetor,
+  estaNaLista,
+  formatarVolume,
   acharIndisponivel,
   buscarFundos,
   fundosEmDestaque,
@@ -119,5 +122,48 @@ describe('busca livre (D12)', () => {
     expect(nomeCurto('FII - FII PATRIA LOG')).toBe('PATRIA LOG')
     expect(nomeCurto('RBR LOG FII')).toBe('RBR LOG')
     expect(nomeCurto('FII')).toBe('FII')
+  })
+})
+
+describe('lista por liquidez e setor (D13)', () => {
+  const g = (ticker: string, setor: string | undefined, volumeMedio: number | null): FundoFii => ({ ...f(ticker, ticker), setor, volumeMedio })
+  const snap: SnapshotRendimentosFii = {
+    geradoEm: null,
+    volumeMinimoDiario: 1_000_000,
+    fundos: [
+      g('HGLG11', 'Logística', 9e6),
+      g('BTLG11', 'Logística', 5e6),
+      g('XPLG11', 'Logística', 3e6),
+      g('KNCR11', 'Papel (CRI)', 20e6),
+      g('ZZZZ11', undefined, 2e6),
+      g('VISC11', 'Shoppings', 4e6),
+      g('PEQN11', 'Shoppings', 300_000), // abaixo do corte: só na busca
+      g('SEMV11', 'Papel (CRI)', null), // sem histórico: só na busca
+    ],
+  }
+
+  it('só fundos acima do corte entram na lista; o resto fica para a busca', () => {
+    expect(estaNaLista(snap, snap.fundos[0])).toBe(true)
+    expect(estaNaLista(snap, snap.fundos[6])).toBe(false)
+    expect(estaNaLista(snap, snap.fundos[7])).toBe(false)
+  })
+
+  it('agrupa por setor: maior grupo primeiro, "Outros" por último, tickers em ordem alfabética', () => {
+    const grupos = agruparPorSetor(snap)
+    expect(grupos.map((x) => x.setor)).toEqual(['Logística', 'Papel (CRI)', 'Shoppings', 'Outros'])
+    expect(grupos[0].fundos.map((x) => x.ticker)).toEqual(['BTLG11', 'HGLG11', 'XPLG11'])
+    expect(grupos.flatMap((x) => x.fundos).some((x) => x.ticker === 'PEQN11' || x.ticker === 'SEMV11')).toBe(false)
+  })
+
+  it('arquivo no formato antigo vira um grupo só com os maiores do IFIX', () => {
+    const antigo: SnapshotRendimentosFii = { geradoEm: null, vigenciaIfix: 'x', destaques: ['HGLG11'], fundos: snap.fundos }
+    expect(agruparPorSetor(antigo)).toEqual([{ setor: 'Maiores do IFIX', fundos: [snap.fundos[0]] }])
+  })
+
+  it('formata volume em mil e milhões', () => {
+    expect(formatarVolume(1_000_000)).toBe('R$ 1 milhão')
+    expect(formatarVolume(1_500_000)).toBe('R$ 1,5 milhão')
+    expect(formatarVolume(12_345_678)).toBe('R$ 12 milhões')
+    expect(formatarVolume(350_000)).toBe('R$ 350 mil')
   })
 })
