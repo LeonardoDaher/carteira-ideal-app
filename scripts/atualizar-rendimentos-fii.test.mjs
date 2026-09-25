@@ -172,6 +172,23 @@ describe('escolherRendimento', () => {
     assert.equal(escolherRendimento(serie(1, 1.1, 3, 3.2)).escolhido, null)
   })
 
+  it('fora do destaque, fundo de inflação (caso VGIP11) publica o mês mais próximo da mediana, marcado como variável', () => {
+    const valores = serie(0.6, 1.5, 0.7, 1.4, 0.65, 1.45)
+    assert.equal(escolherRendimento(valores).escolhido, null) // regra dos destaques: descarta
+    const r = escolherRendimento(valores, 0.2, { aceitarVariavel: true })
+    assert.equal(r.variavel, true)
+    // mediana = (0,7 + 1,4) / 2 = 1,05; mais próximos: 1,4 (33%) e 0,7 (33%) → vale o mais recente
+    assert.equal(r.escolhido.valorPorCota, 0.7)
+    assert.equal(r.escolhido.desvio, undefined) // não vaza campo interno para o JSON
+    assert.equal(r.descartados.length, 5)
+  })
+
+  it('aceitarVariavel não muda nada quando há mês típico', () => {
+    const r = escolherRendimento(serie(0.0748, 0.108, 0.1, 0.1, 0.1, 0.098), 0.2, { aceitarVariavel: true })
+    assert.equal(r.escolhido.valorPorCota, 0.108)
+    assert.equal(r.variavel, undefined)
+  })
+
   it('com menos de 3 meses, publica o mais recente sinalizando que não houve conferência', () => {
     const r = escolherRendimento(serie(0.5, 0.9))
     assert.equal(r.escolhido.valorPorCota, 0.5)
@@ -250,6 +267,21 @@ describe('montarTodosOsFundos', () => {
     assert.equal(semFiltro.resultados.some((x) => x.ticker === 'FFFF11'), true)
   })
 
+  it('CNPJ ambíguo fora do destaque vira "cadastro-ambiguo" (fundo real, código certo)', () => {
+    const geralDuplo = lerCsv(GERAL_AMPLO + '99.999.999/0001-99;2026-07-31;1;OUTRO CCCC;BRCCCCCTF000\n')
+    const compDuplo = lerCsv(COMPLEMENTO_AMPLO + '99.999.999/0001-99;2026-07-31;1;1000;500;10,00;0,0090\n')
+    const { ignorados, resultados } = montarTodosOsFundos(compDuplo, geralDuplo, opcoes)
+    assert.deepEqual(ignorados.find((i) => i.ticker === 'CCCC11')?.motivo, 'cadastro-ambiguo')
+    assert.equal(resultados.some((r) => r.ticker === 'CCCC11'), false)
+  })
+
+  it('ignora prefixo de ISIN que começa com número (fundo não listado, caso "0D7011")', () => {
+    const geralNum = lerCsv(GERAL_AMPLO + '12.121.212/0001-12;2026-07-31;1;BTG INCORPORACAO FII;BR0D70CTF001\n')
+    const compNum = lerCsv(COMPLEMENTO_AMPLO + '12.121.212/0001-12;2026-07-31;1;900000000;5000;100,00;0,0090\n')
+    const { resultados, ignorados } = montarTodosOsFundos(compNum, geralNum, opcoes)
+    assert.equal([...resultados, ...ignorados].some((r) => r.ticker.startsWith('0D70')), false)
+  })
+
   it('funciona sem as colunas opcionais de patrimônio e cotistas', () => {
     const semOpcionais = lerCsv(COMPLEMENTO_AMPLO.replace(/Patrimonio_Liquido;Total_Numero_Cotistas;/, 'X;Y;'))
     const { resultados } = montarTodosOsFundos(semOpcionais, geral, opcoes)
@@ -276,6 +308,12 @@ describe('publicação', () => {
     assert.deepEqual(avaliarConfianca({ semReferencia: true, dataCotacao: '2026-10-17', hoje }), ['poucos-meses'])
     assert.deepEqual(avaliarConfianca({ identicos: 3, dataCotacao: '2026-10-17', hoje }), ['valor-repetido'])
     assert.deepEqual(avaliarConfianca({ dataCotacao: '2026-09-30', hoje }), ['pouca-negociacao'])
+    assert.deepEqual(avaliarConfianca({ variavel: true, dataCotacao: '2026-10-17', hoje }), ['rendimento-variavel'])
+    // caso HBRH11: informe até ago/2026, publicado dez/2025
+    const base = { dataCotacao: '2026-10-17', hoje, competenciaMaisRecente: '2026-08' }
+    assert.deepEqual(avaliarConfianca({ ...base, competencia: '2025-12' }), ['mes-antigo'])
+    assert.deepEqual(avaliarConfianca({ ...base, competencia: '2026-05' }), ['mes-antigo'])
+    assert.deepEqual(avaliarConfianca({ ...base, competencia: '2026-06' }), []) // 2 meses: aceitável (D10)
   })
 
   it('grava um fundo por linha e o resultado continua sendo JSON válido', () => {

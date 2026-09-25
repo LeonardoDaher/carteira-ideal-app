@@ -346,7 +346,11 @@ export function montarTodosOsFundos(
   const prefixosDestaque = new Set(destaques.map((f) => f.ticker.slice(0, 4).toUpperCase()))
   for (const r of resultadosDestaque) if (r.cnpj) prefixosDestaque.add(base.cadastro.get(r.cnpj)?.prefixo)
 
-  const prefixos = new Set([...base.cadastro.values()].map((i) => i.prefixo).filter((p) => p && !prefixosDestaque.has(p)))
+  // Ticker da B3 sempre começa com letra. Prefixo de ISIN começando com número (ex.:
+  // "0D70") é código interno de fundo não listado: fica de fora sem gastar requisição.
+  const prefixos = new Set(
+    [...base.cadastro.values()].map((i) => i.prefixo).filter((p) => p && /^[A-Z]/.test(p) && !prefixosDestaque.has(p)),
+  )
 
   const outros = []
   const ignorados = []
@@ -355,7 +359,10 @@ export function montarTodosOsFundos(
     const ticker = `${prefixo}11`
     const r = rendimentosDoFundo(base, { ticker }, mesesHistorico)
     if (r.erro) {
-      ignorados.push({ ticker, motivo: 'sem-dados', detalhe: r.erro })
+      // CNPJ ambíguo é um fundo real com código certo: vai para "indisponiveis", para a
+      // tela não mandar a pessoa conferir um código que está correto.
+      const motivo = /mais de um CNPJ/.test(r.erro) ? 'cadastro-ambiguo' : 'sem-dados'
+      ignorados.push({ ticker, motivo, detalhe: r.erro })
       continue
     }
     if (r.ultimaCompetencia < limite) {
@@ -390,8 +397,11 @@ function mediana(valores) {
  *
  * `rendimentos` vem do mais recente para o mais antigo. Com menos de 3 meses não há
  * referência confiável: publica o mais recente e avisa.
+ *
+ * Com `aceitarVariavel`, quando nenhum mês fica dentro da tolerância, publica o mês mais
+ * próximo da mediana (empate: o mais recente) e devolve `variavel: true`.
  */
-export function escolherRendimento(rendimentos, tolerancia = TOLERANCIA_PADRAO) {
+export function escolherRendimento(rendimentos, tolerancia = TOLERANCIA_PADRAO, { aceitarVariavel = false } = {}) {
   if (rendimentos.length === 0) return { escolhido: null, descartados: [], referencia: null }
   if (rendimentos.length < 3) {
     return { escolhido: rendimentos[0], descartados: [], referencia: null, semReferencia: true }
@@ -402,6 +412,14 @@ export function escolherRendimento(rendimentos, tolerancia = TOLERANCIA_PADRAO) 
     const desvio = referencia > 0 ? Math.abs(r.valorPorCota - referencia) / referencia : Infinity
     if (desvio <= tolerancia) return { escolhido: r, descartados, referencia }
     descartados.push({ ...r, desvio })
+  }
+  if (aceitarVariavel && referencia > 0) {
+    // Fundo cujo rendimento varia de verdade (ex.: CRI atrelado ao IPCA, como o VGIP11):
+    // nenhum mês fica perto da mediana, mas o mais próximo dela é o retrato mais típico.
+    // Usado só fora dos destaques e sempre publicado como baixa confiança (decisão D12).
+    const maisProximo = descartados.reduce((a, b) => (b.desvio < a.desvio ? b : a))
+    const { desvio: _desvio, ...escolhido } = maisProximo
+    return { escolhido, descartados: descartados.filter((d) => d !== maisProximo), referencia, variavel: true }
   }
   return { escolhido: null, descartados, referencia }
 }
@@ -424,14 +442,29 @@ export function rendimentoPlausivel(valorPorCota, cotacao) {
 /**
  * Sinais de que a estimativa merece menos confiança (o fundo é publicado, mas a tela avisa):
  *   poucos-meses      menos de 3 meses de informe: não houve conferência pela mediana
+ *   rendimento-variavel  nenhum mês perto da mediana; publicado o mais próximo dela
+ *   mes-antigo        mês publicado 3 ou mais meses atrás do mais recente do informe
  *   valor-repetido    3 ou mais meses seguidos com o mesmo valor: possível informe replicado
  *   pouca-negociacao  cotação mais antiga que `diasMaxCotacao`: o fundo quase não negocia,
  *                     e a cotação exibida pode estar longe do preço atual
  */
-export function avaliarConfianca({ semReferencia = false, identicos = 1, dataCotacao = null, hoje = new Date(), diasMaxCotacao = 7 }) {
+export function avaliarConfianca({
+  semReferencia = false,
+  variavel = false,
+  identicos = 1,
+  dataCotacao = null,
+  competencia = null,
+  competenciaMaisRecente = null,
+  hoje = new Date(),
+  diasMaxCotacao = 7,
+}) {
   const motivos = []
   if (semReferencia) motivos.push('poucos-meses')
+  if (variavel) motivos.push('rendimento-variavel')
   if (identicos >= MESES_IDENTICOS_SUSPEITOS) motivos.push('valor-repetido')
+  // O informe já tem 1 a 2 meses de atraso; 3 meses ou mais atrás do mês mais recente do
+  // arquivo quer dizer que os meses recentes do fundo foram descartados ou faltam.
+  if (competencia && competenciaMaisRecente && competencia < subtrairMeses(competenciaMaisRecente, 2)) motivos.push('mes-antigo')
   if (dataCotacao) {
     const dias = (hoje.getTime() - new Date(`${dataCotacao.slice(0, 10)}T12:00:00Z`).getTime()) / 86_400_000
     if (dias > diasMaxCotacao) motivos.push('pouca-negociacao')
@@ -508,7 +541,7 @@ async function main() {
   const token = process.env.BRAPI_TOKEN
   if (!token) throw new Error('Variável BRAPI_TOKEN não definida (GitHub: Settings > Secrets and variables > Actions).')
 
-  const amplo = { ativo: true, mesesMaximoAtraso: 3, minimoCotistas: 100, maxRequisicoesBrapi: 800, pausaEntreRequisicoesMs: 300, pausaAposLimiteMs: 60_000, minimoFundosTotal: 100, ...(config.outrosFundos ?? {}) }
+  const amplo = { ativo: true, mesesMaximoAtraso: 3, minimoCotistas: 100, maxRequisicoesBrapi: 800, pausaEntreRequisicoesMs: 300, pausaAposLimiteMs: 60_000, minimoFundosTotal: 100, publicarVariaveis: true, ...(config.outrosFundos ?? {}) }
 
   const pastaTemp = fs.mkdtempSync(path.join(os.tmpdir(), 'cvm-fii-'))
   const anoAtual = new Date().getFullYear()
@@ -536,7 +569,10 @@ async function main() {
   )
 
   const fundos = []
-  const indisponiveis = ignorados.filter((i) => i.motivo === 'sem-informe-recente').map(({ ticker, nome, motivo }) => ({ ticker, nome, motivo }))
+  const indisponiveis = ignorados
+    .filter((i) => i.motivo === 'sem-informe-recente' || i.motivo === 'cadastro-ambiguo')
+    .map(({ ticker, nome, motivo }) => ({ ticker, nome: nome ?? ticker, motivo }))
+  for (const i of ignorados.filter((x) => x.motivo === 'cadastro-ambiguo')) console.log(`[info] ${i.ticker}: ${i.detalhe}`)
   const problemasDestaque = []
   let requisicoes = 0
   let naoListados = 0
@@ -560,7 +596,9 @@ async function main() {
 
     const fundoConfig = r.destaque ? config.fundos.find((f) => f.ticker === r.ticker) ?? {} : {}
     const tolerancia = fundoConfig.tolerancia ?? config.toleranciaPadrao ?? TOLERANCIA_PADRAO
-    const { escolhido, descartados, referencia, semReferencia } = escolherRendimento(r.rendimentos, tolerancia)
+    const { escolhido, descartados, referencia, semReferencia, variavel } = escolherRendimento(r.rendimentos, tolerancia, {
+      aceitarVariavel: !r.destaque && amplo.publicarVariaveis,
+    })
     if (r.destaque) {
       for (const d of descartados) {
         console.log(
@@ -631,7 +669,7 @@ async function main() {
       continue
     }
 
-    const motivos = avaliarConfianca({ semReferencia, identicos, dataCotacao })
+    const motivos = avaliarConfianca({ semReferencia, variavel, identicos, dataCotacao, competencia: escolhido.competencia, competenciaMaisRecente })
     // Publica só o mês escolhido: a tela mostra o último rendimento típico, sem média (D10).
     fundos.push({
       ticker: r.ticker,

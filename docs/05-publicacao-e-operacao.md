@@ -103,6 +103,7 @@ npm run build        # build de produção em dist-site/
 | `Coluna não encontrada (…)` | A CVM mudou o formato do arquivo. Enviar o log para quem desenvolve |
 | `brapi respondeu 401/403` | Chave expirada ou revogada: gerar outra em brapi.dev e atualizar o secret |
 | `[info] brapi: … requisições, … não listados, … sem cotação` | Resumo da lista ampla (D12). "Não listados" é normal: são fundos do informe que não negociam na B3. Se aparecer "(limite atingido)", a cota da brapi ou o teto `maxRequisicoesBrapi` acabou antes do fim: os menores fundos ficaram sem cotação neste mês |
+| `[info] XXXX11: ISIN aponta para mais de um CNPJ…` (fundo fora do destaque) | Nada obrigatório: o fundo aparece na busca como "sem dados neste mês" com o motivo. Se for um fundo importante, descobrir o CNPJ certo nos comunicados dele e avisar quem desenvolve |
 | `brapi pediu para desacelerar (429)` | Nada, se for pontual: o script espera e tenta de novo. Se virar rotina, aumentar `pausaEntreRequisicoesMs` em `outrosFundos` |
 | `Só … fundos no total ficaram válidos (mínimo …)` | A lista ampla encolheu de repente (brapi fora do ar, cota esgotada no início, coluna da CVM renomeada). Rodar de novo no dia seguinte; se repetir, enviar o log para quem desenvolve |
 

@@ -33,9 +33,9 @@ export interface FundoFii {
   motivosConfianca?: MotivoConfianca[]
 }
 
-export type MotivoConfianca = 'poucos-meses' | 'valor-repetido' | 'pouca-negociacao'
+export type MotivoConfianca = 'poucos-meses' | 'rendimento-variavel' | 'mes-antigo' | 'valor-repetido' | 'pouca-negociacao'
 
-export type MotivoIndisponivel = 'sem-informe-recente' | 'rendimento-atipico' | 'sem-rendimento' | 'sem-cotacao' | 'fora-da-faixa'
+export type MotivoIndisponivel = 'sem-informe-recente' | 'cadastro-ambiguo' | 'rendimento-atipico' | 'sem-rendimento' | 'sem-cotacao' | 'fora-da-faixa'
 
 /** Fundo conhecido pelo job, mas sem dado publicável neste mês (e o porquê). */
 export interface FundoIndisponivel {
@@ -191,12 +191,17 @@ export function nomeCurto(nome: string): string {
 
 export const TEXTO_MOTIVO_CONFIANCA: Record<MotivoConfianca, string> = {
   'poucos-meses': 'o fundo tem poucos meses de informe à CVM, então não deu para comparar com meses anteriores',
+  'rendimento-variavel':
+    'o rendimento deste fundo varia bastante de um mês para o outro (comum em fundos atrelados à inflação), então o valor exibido é o do mês mais próximo do meio da faixa dos últimos 6 meses, e a renda real pode ser maior ou menor',
+  'mes-antigo':
+    'o mês exibido é antigo, porque os meses mais recentes do informe deste fundo variaram demais ou não estão disponíveis, então a renda atual pode ser diferente',
   'valor-repetido': 'o informe repete o mesmo valor há vários meses, o que pode indicar dado copiado de um mês para o outro',
   'pouca-negociacao': 'a cota quase não foi negociada recentemente, então o preço exibido pode estar longe do atual',
 }
 
 export const TEXTO_MOTIVO_INDISPONIVEL: Record<MotivoIndisponivel, string> = {
   'sem-informe-recente': 'o fundo não enviou o Informe Mensal à CVM nos últimos meses',
+  'cadastro-ambiguo': 'o código do fundo aparece ligado a mais de um cadastro na CVM, e não dá para saber qual é o dele sem conferência manual',
   'rendimento-atipico': 'os valores dos últimos meses variaram demais para indicar um rendimento típico',
   'sem-rendimento': 'o fundo não distribuiu rendimento no mês de referência',
   'sem-cotacao': 'não conseguimos obter a cotação do fundo nesta atualização',

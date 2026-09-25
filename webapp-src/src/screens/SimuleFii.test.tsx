@@ -136,6 +136,36 @@ describe('SimuleFii: busca livre (D12)', () => {
     expect(screen.getByText(/variaram demais/)).toBeDefined()
   })
 
+  it('fundo de rendimento variável aparece com o aviso próprio (caso VGIP11)', () => {
+    const snap: SnapshotRendimentosFii = {
+      ...amplo,
+      fundos: [
+        ...amplo.fundos,
+        {
+          ticker: 'VVVV11',
+          nome: 'FUNDO IPCA',
+          cotacao: 80,
+          dataCotacao: '2026-09-19',
+          rendimentos: [{ competencia: '2026-07', valorPorCota: 0.9 }],
+          confianca: 'baixa',
+          motivosConfianca: ['rendimento-variavel'],
+        },
+      ],
+    }
+    render(<SimuleFii ctx={ctx} snapshot={snap} />)
+    buscar('VVVV')
+    fireEvent.click(screen.getByRole('button', { name: /VVVV11/ }))
+    expect(screen.getByText(/varia bastante de um mês para o outro/)).toBeDefined()
+  })
+
+  it('código certo com cadastro ambíguo na CVM não manda conferir o código', () => {
+    const snap: SnapshotRendimentosFii = { ...amplo, indisponiveis: [{ ticker: 'AMBG11', nome: 'AMBG11', motivo: 'cadastro-ambiguo' }] }
+    render(<SimuleFii ctx={ctx} snapshot={snap} />)
+    buscar('AMBG11')
+    expect(screen.getByText(/mais de um cadastro na CVM/)).toBeDefined()
+    expect(screen.queryByText(/Confira o código/)).toBeNull()
+  })
+
   it('orienta quando nada é encontrado', () => {
     render(<SimuleFii ctx={ctx} snapshot={amplo} />)
     buscar('QWER11')
