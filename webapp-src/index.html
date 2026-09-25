@@ -8,6 +8,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2096%2096%22%20width=%2296%22%20height=%2296%22%3E%0A%20%20%3Ccircle%20cx=%2248%22%20cy=%2248%22%20r=%2244.6%22%20fill=%22%230a0a0a%22%20stroke=%22%23efb70a%22%20stroke-width=%226.8%22/%3E%0A%20%20%3Cpath%20d=%22M17%2067%2036%2048%2048%2060%2075%2033%22%20fill=%22none%22%20stroke=%22%23efb70a%22%20stroke-width=%226.6%22%20stroke-linecap=%22butt%22%20stroke-linejoin=%22miter%22/%3E%0A%20%20%3Cpath%20d=%22M61%2027H80V46Z%22%20fill=%22%23efb70a%22/%3E%0A%3C/svg%3E%0A" />
     <title>Carteira Ideal</title>
+    <!-- Aplica o tema da landing (chave "theme") antes da primeira pintura, para o app não
+         piscar no escuro enquanto o React carrega. O React confirma o mesmo valor depois. -->
+    <script>
+      try {
+        if (localStorage.getItem('theme') === 'light') document.documentElement.setAttribute('data-theme', 'light')
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

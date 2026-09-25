@@ -351,7 +351,7 @@ export function subtrairMeses(competencia, n) {
 export function montarTodosOsFundos(
   linhasComplemento,
   linhasGeral,
-  { destaques = [], mesesMaximoAtraso = 3, minimoCotistas = 0, mesesHistorico = MESES_ANALISE } = {},
+  { destaques = [], mesesMaximoAtraso = 3, minimoCotistas = 0, mesesHistorico = MESES_ANALISE, renomeados = {} } = {},
 ) {
   const base = prepararBase(linhasComplemento, linhasGeral)
   const limite = base.competenciaMaisRecente ? subtrairMeses(base.competenciaMaisRecente, mesesMaximoAtraso - 1) : ''
@@ -370,8 +370,12 @@ export function montarTodosOsFundos(
   const ignorados = []
   let poucosCotistas = 0
   for (const prefixo of prefixos) {
-    const ticker = `${prefixo}11`
-    const r = rendimentosDoFundo(base, { ticker }, mesesHistorico)
+    // O ISIN não muda quando o fundo troca de código na B3 (ex.: RVBI11 → PSEC11 em
+    // 24/10/2025). "renomeados" na configuração leva do código antigo ao atual.
+    const tickerIsin = `${prefixo}11`
+    const ticker = renomeados[tickerIsin] ?? tickerIsin
+    const r = { ...rendimentosDoFundo(base, { ticker: tickerIsin }, mesesHistorico), ticker }
+    if (ticker !== tickerIsin) r.tickerAnterior = tickerIsin
     if (r.erro) {
       // CNPJ ambíguo é um fundo real com código certo: vai para "indisponiveis", para a
       // tela não mandar a pessoa conferir um código que está correto.
@@ -625,6 +629,7 @@ async function main() {
         destaques: config.fundos,
         mesesMaximoAtraso: amplo.mesesMaximoAtraso,
         minimoCotistas: amplo.minimoCotistas,
+        renomeados: Object.fromEntries(Object.entries(config.renomeados ?? {}).filter(([k]) => !k.startsWith('_'))),
       })
     : { resultados: montarRendimentos(complemento, geral, config.fundos).map((r) => ({ ...r, destaque: true })), ignorados: [], poucosCotistas: 0, competenciaMaisRecente: null }
 
@@ -726,7 +731,14 @@ async function main() {
       if (requisicoes > 0) await esperar(amplo.pausaEntreRequisicoesMs)
       requisicoes++
       try {
-        cotacaoObtida = await buscarCotacao(r.ticker, token)
+        try {
+          cotacaoObtida = await buscarCotacao(r.ticker, token)
+        } catch (erro) {
+          // Código renomeado que a brapi ainda não conhece: tenta o antigo antes de desistir.
+          if (!r.tickerAnterior || (erro.status !== 404 && erro.status !== 400)) throw erro
+          requisicoes++
+          cotacaoObtida = await buscarCotacao(r.tickerAnterior, token)
+        }
       } catch (erro) {
         if (erro.status !== 429) throw erro
         console.warn(`[aviso] brapi pediu para desacelerar (429) em ${r.ticker}; nova tentativa em ${Math.round(amplo.pausaAposLimiteMs / 1000)} s.`)
@@ -773,6 +785,7 @@ async function main() {
     // Publica só o mês escolhido: a tela mostra o último rendimento típico, sem média (D10).
     fundos.push({
       ticker: r.ticker,
+      ...(r.tickerAnterior ? { tickerAnterior: r.tickerAnterior } : {}),
       nome: r.nome,
       setor: setorDoFundo({ nome: r.nome, segmento: r.segmento, mandato: r.mandato, correcao: setoresCorrigidos[r.ticker] }),
       volumeMedio: volumeMedio == null ? null : Math.round(volumeMedio / 1000) * 1000,

@@ -165,6 +165,27 @@ describe('useAppState — persistência', () => {
     expect(result.current.tema).toBe('light')
   })
 
+  it('usa o tema escolhido na landing (chave "theme"), mesmo com outro tema no estado do app', async () => {
+    localStorage.setItem('theme', 'light')
+    localStorage.setItem(
+      'carteiraideal.estado',
+      JSON.stringify({ versao: 2, screen: 'onboarding', idade: 30, respostas: {}, respostasArquitetura: {}, tema: 'dark' }),
+    )
+    const { result } = renderHook(() => useAppState())
+    await waitFor(() => expect(result.current.hidratado).toBe(true))
+    expect(result.current.tema).toBe('light')
+    expect(document.documentElement.getAttribute('data-theme')).toBe('light')
+  })
+
+  it('trocar o tema no app grava na chave da landing, e abrir o app não apaga a escolha', async () => {
+    localStorage.setItem('theme', 'light')
+    const { result } = renderHook(() => useAppState())
+    await waitFor(() => expect(result.current.hidratado).toBe(true))
+    expect(localStorage.getItem('theme')).toBe('light') // não foi sobrescrito pelo padrão escuro
+    act(() => result.current.setTema('dark'))
+    await waitFor(() => expect(localStorage.getItem('theme')).toBe('dark'))
+  })
+
   it('ignora estado salvo corrompido sem travar o app', async () => {
     localStorage.setItem('carteiraideal.estado', '{ isso não é json válido')
 

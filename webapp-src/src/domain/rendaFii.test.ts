@@ -80,6 +80,12 @@ describe('busca livre (D12)', () => {
     expect(normalizarBusca('  kinéa   rend ')).toBe('KINEA REND')
   })
 
+  it('acha fundo renomeado pelo código antigo (RVBI11 → PSEC11)', () => {
+    const psec = { ...f('PSEC11', 'PATRIA SECURITIES FII'), tickerAnterior: 'RVBI11' }
+    expect(buscarFundos([...lista, psec], 'rvbi11').map((x) => x.ticker)).toEqual(['PSEC11'])
+    expect(buscarFundos([...lista, psec], 'psec')[0].ticker).toBe('PSEC11')
+  })
+
   it('acha pelo código completo ou só pelas 4 letras', () => {
     expect(buscarFundos(lista, 'hglg11').map((x) => x.ticker)).toEqual(['HGLG11'])
     expect(buscarFundos(lista, 'HGLG')[0].ticker).toBe('HGLG11')

@@ -14,6 +14,8 @@ export interface RendimentoMensal {
 
 export interface FundoFii {
   ticker: string
+  /** Código anterior, quando o fundo trocou de código na B3 (ex.: PSEC11, antes RVBI11). */
+  tickerAnterior?: string
   nome: string
   /** Setor exibido na tela, derivado do segmento declarado à CVM (decisão D13). */
   setor?: string
@@ -208,8 +210,9 @@ export function buscarFundos(fundos: FundoFii[], termo: string, limite = 8): Fun
   const pontuados: { fundo: FundoFii; nota: number; ordem: number }[] = []
   fundos.forEach((fundo, ordem) => {
     const ticker = fundo.ticker.toUpperCase()
+    const anterior = fundo.tickerAnterior?.toUpperCase()
     let nota: number | null = null
-    if (ticker === q || ticker === `${q}11`) nota = 0
+    if (ticker === q || ticker === `${q}11` || anterior === q || anterior === `${q}11`) nota = 0
     else if (ticker.startsWith(q)) nota = 1
     else if (normalizarBusca(fundo.nome).includes(q)) nota = 2
     if (nota != null) pontuados.push({ fundo, nota, ordem })

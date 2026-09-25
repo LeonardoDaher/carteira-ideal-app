@@ -635,11 +635,11 @@ button.alloc-box:active {
    alerta para não se perder entre os textos legais. */
 .aviso-atraso { border-left: 4px solid var(--warning); }
 
-/* Título de cada setor da lista de FIIs (D13): centralizado, grande e no amarelo da marca,
-   para a lista longa ser lida como seções e não como um bloco de botões. */
+/* Título de cada setor da lista de FIIs (D13): alinhado à esquerda, grande e no amarelo da
+   marca, para a lista longa ser lida como seções e não como um bloco de botões. */
 .titulo-setor {
   margin: 0;
-  text-align: center;
+  text-align: left;
   font-size: 19px;
   font-weight: 700;
   line-height: 1.2;

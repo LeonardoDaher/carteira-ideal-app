@@ -23,6 +23,13 @@ export type Screen =
 
 export type Tema = 'dark' | 'light'
 
+/**
+ * Chave do tema compartilhada com a landing (script.js e o <script> do index.html da raiz).
+ * É a fonte única da preferência: quem troca o tema na landing e abre o app pelos botões
+ * (Simule FII, Aprender, questionário) continua no mesmo tema, e vice-versa.
+ */
+export const CHAVE_TEMA_COMPARTILHADA = 'theme'
+
 /** Telas abertas direto pela landing (./app/?tela=aprender e ./app/?tela=simuleFii), sem
  * depender do questionário. Ficam fora da barra de abas e nunca são salvas como "última
  * tela": assim o botão amarelo da landing (./app/) continua devolvendo a pessoa ao ponto
@@ -120,6 +127,13 @@ export function useAppState() {
         }
       }
 
+      // O tema escolhido na landing vence o que estiver no estado salvo do app: é a escolha
+      // mais recente, porque a landing é a porta de entrada. Antes, o app só olhava o
+      // próprio estado e abria no escuro mesmo com a landing no claro.
+      const temaCompartilhado = await storage.getItem(CHAVE_TEMA_COMPARTILHADA)
+      if (cancelado) return
+      if (temaCompartilhado === 'light' || temaCompartilhado === 'dark') setTema(temaCompartilhado)
+
       // A landing abre o app em telas específicas pelo parâmetro ?tela=:
       // - ?tela=resultado: botão "Ver minha carteira de referência", para quem já tem carteira
       //   salva. Sem isso, o app abriria na última tela em que o usuário esteve. Se ainda não
@@ -158,6 +172,13 @@ export function useAppState() {
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', tema)
   }, [tema])
+
+  // Grava na chave compartilhada só depois de ler o que já existia: antes da hidratação o
+  // tema é o padrão (escuro), e gravá-lo apagaria a escolha feita na landing.
+  useEffect(() => {
+    if (!hidratado) return
+    storage.setItem(CHAVE_TEMA_COMPARTILHADA, tema)
+  }, [hidratado, tema])
 
   useEffect(() => {
     if (!hidratado) return

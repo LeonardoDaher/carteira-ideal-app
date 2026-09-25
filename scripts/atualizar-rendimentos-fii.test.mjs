@@ -284,6 +284,14 @@ describe('montarTodosOsFundos', () => {
     assert.equal([...resultados, ...ignorados].some((r) => r.ticker.startsWith('0D70')), false)
   })
 
+  it('código renomeado na B3 (caso RVBI11 → PSEC11) usa o código atual e guarda o antigo', () => {
+    const { resultados } = montarTodosOsFundos(complemento, geral, { ...opcoes, renomeados: { 'DDDD11': 'NOVO11' } })
+    const r = resultados.find((x) => x.nome === 'FUNDO DDDD GRANDE FII')
+    assert.equal(r.ticker, 'NOVO11')
+    assert.equal(r.tickerAnterior, 'DDDD11')
+    assert.equal(r.rendimentos.length, 2) // os dados continuam vindo do CNPJ certo
+  })
+
   it('funciona sem as colunas opcionais de patrimônio e cotistas', () => {
     const semOpcionais = lerCsv(COMPLEMENTO_AMPLO.replace(/Patrimonio_Liquido;Total_Numero_Cotistas;/, 'X;Y;'))
     const { resultados } = montarTodosOsFundos(semOpcionais, geral, opcoes)

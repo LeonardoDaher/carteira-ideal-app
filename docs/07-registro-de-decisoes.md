@@ -203,10 +203,31 @@ Com isso, a média de 3 meses exibida na tela chegava a superestimar a renda em 
 
 **Ajustes de tela pedidos pelo responsável (25/09/2026).**
 - O texto do critério passou a ser: "Somente são disponibilizadas as informações dos fundos imobiliários que negociam, em média, acima de R$ 1 milhão por dia. Para os demais fundos, com valores de negociação inferiores a R$ 1 milhão, favor consultar na busca acima."
-- Os nomes de setor viraram títulos centralizados, maiores e no amarelo da marca. No tema claro, o amarelo ganha um contorno fino no tom escuro da paleta, porque amarelo sobre fundo claro fica ilegível.
+- Os nomes de setor viraram títulos alinhados à esquerda (a primeira versão era centralizada), maiores e no amarelo da marca. No tema claro, o amarelo ganha um contorno fino no tom escuro da paleta, porque amarelo sobre fundo claro fica ilegível.
 - A busca por fundo que não informa DY à CVM diz que os rendimentos estão no site da administradora do fundo, sem sugerir "tente na próxima atualização", porque isso não muda de um mês para o outro.
+
+**Revisão dos setores (25/09/2026).** Mesmo com o mandato priorizado, a autodeclaração à CVM ainda divergia do mercado em 15 fundos da lista, entre eles HGLG11 e BTLG11 em "Híbrido" e MXRF11 em "Logística". As correções seguras foram para o bloco `setores` de `config/fiis-ifix.json`, com dois setores novos, Agro (RZTR11) e Energia (SNEL11). Na confirmação do responsável:
+- KORE11 foi para Escritórios.
+- TRXB11, JSAF11 e VGHF11 foram para Híbrido: são carteiras mistas, não papel puro.
+- CPUR11, EIRA11, GARE11, IBBP11, PQAG11 e TJKB11 ficaram como declarados à CVM.
+
+**Códigos renomeados.** O RVBI11 passou a negociar como **PSEC11** em 24/10/2025, sem mudar a política de investimento, e foi classificado como Fundo de fundos. O ISIN no informe da CVM mantém o prefixo antigo, então o app exibia RVBI11. Criado o bloco `renomeados` em `config/fiis-ifix.json`, no formato código antigo → código atual. O fundo aparece com o código atual, a busca pelo antigo continua encontrando-o e, se a brapi ainda não reconhecer o código novo, o script consulta o antigo. Outras trocas de código entram no mesmo bloco.
 
 **Pontos a acompanhar na primeira execução.**
 - O número de fundos na lista. A estimativa era de 40 a 50, mas quem decide é o critério. Se ficar grande demais, o corte sobe em `volumeMinimoDiario`.
 - Se os nomes de setor declarados à CVM estão coerentes. Corrigir os que não estiverem em `setores`.
 - Se o volume médio calculado bate com o de um site de cotações para 2 ou 3 fundos.
+
+### D14 · Tema claro/escuro único entre landing e app (25/09/2026)
+
+**Problema.** O tema escolhido na landing valia só para a landing. Quem trocava para o claro e abria o Simule FII, o Aprender ou o questionário caía no escuro.
+
+**Causa.** Eram dois sistemas separados:
+- a landing guardava a escolha na chave `theme` do navegador;
+- o app guardava o tema dentro do próprio estado (`carteiraideal.estado`), começava no escuro e só oferecia a troca na tela de abertura do questionário.
+
+**Correção.**
+- A chave `theme` virou a fonte única da preferência. Ao abrir, o app lê essa chave, e ela vence o tema do estado salvo, porque a landing é a porta de entrada e guarda a escolha mais recente.
+- Quando o tema muda no app, a mesma chave é gravada, e a landing acompanha na volta. A gravação só acontece depois da leitura, para o padrão escuro não apagar a escolha feita na landing.
+- `webapp-src/index.html` aplica o tema antes da primeira pintura, para o app não piscar no escuro enquanto carrega.
+- Testado no navegador: landing no claro → Simule FII no claro → "Início" → landing no claro → Aprender no claro.

@@ -54,6 +54,30 @@
     }
   ],
   "setores": {
-    "_leia": "Correção manual do setor exibido, quando a classificação declarada à CVM não é a que o mercado usa. Formato: \"TICKER11\": \"Logística\". Setores usados pelo app: Logística, Shoppings, Escritórios, Papel (CRI), Híbrido, Fundo de fundos, Saúde, Hotéis, Residencial, Varejo e renda urbana, Educacional, Outros (ou qualquer outro nome)."
+    "_leia": "Correção manual do setor exibido, quando a classificação declarada à CVM não é a que o mercado usa (muitos fundos se declaram 'Híbrido'). Formato: \"TICKER11\": \"Logística\". Setores usados: Logística, Shoppings, Escritórios, Papel (CRI), Híbrido, Fundo de fundos, Varejo e renda urbana, Saúde, Hotéis, Residencial, Educacional, Agro, Energia, Outros (ou qualquer outro nome). Revisão inicial em 25/09/2026 a partir das linhas [setor] do log.",
+    "HGLG11": "Logística",
+    "BTLG11": "Logística",
+    "GGRC11": "Logística",
+    "MXRF11": "Papel (CRI)",
+    "CPTS11": "Papel (CRI)",
+    "BRCR11": "Escritórios",
+    "JSRE11": "Escritórios",
+    "TEPP11": "Escritórios",
+    "FATN11": "Escritórios",
+    "MIDW11": "Shoppings",
+    "TRXF11": "Varejo e renda urbana",
+    "HGRU11": "Varejo e renda urbana",
+    "XPSF11": "Fundo de fundos",
+    "RZTR11": "Agro",
+    "SNEL11": "Energia",
+    "PSEC11": "Fundo de fundos",
+    "KORE11": "Escritórios",
+    "TRXB11": "Híbrido",
+    "JSAF11": "Híbrido",
+    "VGHF11": "Híbrido"
+  },
+  "renomeados": {
+    "_leia": "Fundos que trocaram de código na B3. O ISIN no informe da CVM continua com o prefixo antigo, então o app mostraria o código velho. Formato: \"CODIGOANTIGO11\": \"CODIGONOVO11\". A busca pelo código antigo continua encontrando o fundo.",
+    "RVBI11": "PSEC11"
   }
 }
