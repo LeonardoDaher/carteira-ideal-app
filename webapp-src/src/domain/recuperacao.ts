@@ -79,6 +79,22 @@ function centavos(valor: number): number {
   return Math.round(valor * 100) / 100
 }
 
+/**
+ * Converte a taxa ao ano em taxa equivalente ao mês, por juros compostos (12% ao ano ≈ 0,9489% ao
+ * mês, e não 1%). Financiamentos costumam informar a taxa ao ano; cartão e cheque especial, ao mês.
+ * Quatro casas decimais: o bastante para o plano de quitação sem inventar precisão.
+ */
+export function jurosMensalDeAnual(anual: number): number {
+  if (anual <= 0) return 0
+  return Math.round(((1 + anual / 100) ** (1 / 12) - 1) * 1_000_000) / 10_000
+}
+
+/** O caminho inverso, para mostrar a taxa ao ano de uma taxa ao mês (3% ao mês ≈ 42,58% ao ano). */
+export function jurosAnualDeMensal(mensal: number): number {
+  if (mensal <= 0) return 0
+  return Math.round(((1 + mensal / 100) ** 12 - 1) * 10_000) / 100
+}
+
 /** Dívida cara em aberto: tipo caro ou juros a partir de LIMIAR_JUROS_CARO ao mês. */
 export function ehDividaCara(d: Divida): boolean {
   return d.saldo > 0 && (TIPOS_DE_DIVIDA[d.tipo].cara || d.jurosMensal >= LIMIAR_JUROS_CARO)

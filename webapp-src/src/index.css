@@ -1380,6 +1380,16 @@ button.alloc-box:active {
    quer ver sumir); as parcelas mínimas saem em violeta, antes dos potes, como as contas. */
 .pote-quitar { background: var(--danger); }
 .seg-dividas { background: var(--z4); }
+/* Título "Minhas dívidas": mesma cor da barra e do pote Quitar (var(--z4)), para o roxo das
+   dívidas ser reconhecível em qualquer lugar da tela (pedido do responsável). */
+.mm-titulo-dividas {
+  display: inline-block;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--z4);
+  color: #1a1025;
+}
 
 .sr-only {
   position: absolute;

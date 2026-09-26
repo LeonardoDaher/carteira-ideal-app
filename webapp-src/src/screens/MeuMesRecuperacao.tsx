@@ -18,7 +18,9 @@ import {
   ORDEM_DOS_TIPOS,
   TIPOS_DE_DIVIDA,
   ehDividaCara,
+  jurosAnualDeMensal,
   jurosDoMes,
+  jurosMensalDeAnual,
   minimoNaoCobreJuros,
   primeiraVitoria,
   simularQuitacao,
@@ -113,14 +115,19 @@ export function PainelRecuperacao({ orcamento, onDesligar }: { orcamento: Orcame
 
 // ---------------------------------------------------------------- cadastro de dívidas
 
-type Rascunho = { nome: string; tipo: TipoDivida; saldo: number; juros: string; minimo: number }
-const RASCUNHO_VAZIO: Rascunho = { nome: '', tipo: 'cartao-rotativo', saldo: 0, juros: '14', minimo: 0 }
+/** A taxa pode ser digitada ao mês ou ao ano (financiamentos costumam informar ao ano). Guardada sempre ao mês. */
+type PeriodoJuros = 'mes' | 'ano'
+type Rascunho = { nome: string; tipo: TipoDivida; saldo: number; juros: string; periodo: PeriodoJuros; minimo: number }
+const RASCUNHO_VAZIO: Rascunho = { nome: '', tipo: 'cartao-rotativo', saldo: 0, juros: '14', periodo: 'mes', minimo: 0 }
 
-const textoJuros = (v: number | null) => (v == null ? '' : v.toLocaleString('pt-BR', { maximumFractionDigits: 2 }))
-const lerJuros = (t: string) => Math.min(100, lerReais(t))
+const textoJuros = (v: number | null) => (v == null ? '' : v.toLocaleString('pt-BR', { maximumFractionDigits: 4 }))
+/** Limites de sanidade: 100% ao mês, ou 1.000% ao ano. */
+const lerJuros = (t: string, periodo: PeriodoJuros) => Math.min(periodo === 'ano' ? 1000 : 100, lerReais(t))
+const jurosMensalDoRascunho = (r: Rascunho) =>
+  r.periodo === 'ano' ? jurosMensalDeAnual(lerJuros(r.juros, 'ano')) : lerJuros(r.juros, 'mes')
 
 function comoDivida(r: Rascunho): Omit<Divida, 'id' | 'saldoInicial'> {
-  return { nome: r.nome.trim(), tipo: r.tipo, saldo: r.saldo, jurosMensal: lerJuros(r.juros), parcelaMinima: r.minimo }
+  return { nome: r.nome.trim(), tipo: r.tipo, saldo: r.saldo, jurosMensal: jurosMensalDoRascunho(r), parcelaMinima: r.minimo }
 }
 
 export function MinhasDividas({
@@ -150,6 +157,14 @@ export function MinhasDividas({
   const valido = rascunho.nome.trim().length > 0 && rascunho.saldo > 0
   const previa = { ...comoDivida(rascunho), id: '', saldoInicial: rascunho.saldo }
   const referencia = TIPOS_DE_DIVIDA[rascunho.tipo].jurosReferencia
+  // Mostra a taxa equivalente no outro período, por juros compostos (12% ao ano ≈ 0,95% ao mês, e não 1%).
+  const jurosDigitado = lerJuros(rascunho.juros, rascunho.periodo)
+  const conversaoJuros =
+    jurosDigitado <= 0
+      ? null
+      : rascunho.periodo === 'ano'
+        ? `${pct(jurosDigitado)} ao ano equivalem a ${pct(jurosMensalDeAnual(jurosDigitado))} ao mês.`
+        : `${pct(jurosDigitado)} ao mês equivalem a ${pct(jurosAnualDeMensal(jurosDigitado))} ao ano.`
   const formVisivel = aberto || editandoId != null || dividas.length > 0
 
   const quitouAsCaras =
@@ -164,8 +179,10 @@ export function MinhasDividas({
   function mudarTipo(tipo: TipoDivida) {
     // Troca a taxa só se a pessoa ainda não digitou a dela (campo vazio ou igual à referência).
     const anterior = textoJuros(TIPOS_DE_DIVIDA[rascunho.tipo].jurosReferencia)
-    const juros = rascunho.juros === '' || rascunho.juros === anterior ? textoJuros(TIPOS_DE_DIVIDA[tipo].jurosReferencia) : rascunho.juros
-    setRascunho({ ...rascunho, tipo, juros })
+    const trocar = rascunho.juros === '' || (rascunho.periodo === 'mes' && rascunho.juros === anterior)
+    // A referência é sempre ao mês: ao usá-la, o campo volta para "ao mês".
+    if (trocar) setRascunho({ ...rascunho, tipo, juros: textoJuros(TIPOS_DE_DIVIDA[tipo].jurosReferencia), periodo: 'mes' })
+    else setRascunho({ ...rascunho, tipo })
   }
 
   function salvar() {
@@ -178,7 +195,7 @@ export function MinhasDividas({
 
   return (
     <div className="card col" style={{ gap: 12 }}>
-      <span style={{ fontWeight: 700 }}>Minhas dívidas</span>
+      <span className="mm-titulo-dividas">Minhas dívidas</span>
 
       {dividas.length === 0 && !aberto && (
         <>
@@ -221,7 +238,7 @@ export function MinhasDividas({
                     aria-label={`Editar ${d.nome}`}
                     onClick={() =>
                       carregar(
-                        { nome: d.nome, tipo: d.tipo, saldo: d.saldo, juros: textoJuros(d.jurosMensal), minimo: d.parcelaMinima },
+                        { nome: d.nome, tipo: d.tipo, saldo: d.saldo, juros: textoJuros(d.jurosMensal), periodo: 'mes', minimo: d.parcelaMinima },
                         d.id,
                       )
                     }
@@ -300,8 +317,21 @@ export function MinhasDividas({
 
           <div className="col" style={{ gap: 4 }}>
             <label htmlFor={idJuros} className="small" style={{ fontWeight: 600 }}>
-              Juros ao mês (%)
+              {rascunho.periodo === 'ano' ? 'Juros ao ano (%)' : 'Juros ao mês (%)'}
             </label>
+            <div className="row" style={{ gap: 6 }} role="group" aria-label="A taxa informada é">
+              {(['mes', 'ano'] as const).map((p) => (
+                <button
+                  key={p}
+                  type="button"
+                  className={`chip ${rascunho.periodo === p ? 'selected' : ''}`}
+                  aria-pressed={rascunho.periodo === p}
+                  onClick={() => setRascunho({ ...rascunho, periodo: p })}
+                >
+                  {p === 'mes' ? 'Ao mês' : 'Ao ano'}
+                </button>
+              ))}
+            </div>
             <span className="mm-campo">
               <input
                 id={idJuros}
@@ -317,9 +347,15 @@ export function MinhasDividas({
                 %
               </span>
             </span>
+            {conversaoJuros && (
+              <span className="small" role="status">
+                {conversaoJuros}
+              </span>
+            )}
             <span id={idDicaJuros} className="tiny muted justify">
-              Procure "juros ao mês" ou "CET" no contrato ou no app.
-              {referencia != null && ` Se não achar, ${pct(referencia)} é uma referência aproximada para este tipo; troque pela sua taxa.`}
+              Procure a taxa de juros ou o CET no contrato ou no app. Financiamento e consignado costumam informar a taxa ao ano;
+              cartão e cheque especial, ao mês.
+              {referencia != null && ` Se não achar, ${pct(referencia)} ao mês é uma referência aproximada para este tipo; troque pela sua taxa.`}
             </span>
           </div>
 

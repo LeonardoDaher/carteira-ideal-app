@@ -10,6 +10,8 @@ import {
   simularQuitacao,
   somaParcelasMinimas,
   validarRecuperacao,
+  jurosAnualDeMensal,
+  jurosMensalDeAnual,
 } from './recuperacao'
 import type { Divida, Recuperacao } from './recuperacao'
 import {
@@ -291,3 +293,18 @@ describe('compatibilidade das cópias', () => {
     expect(validarOrcamento({ ...antigo, potes: { guardar: 0, crescer: 0, quitar: -5 } })).toBeNull()
   })
 })
+
+describe('juros ao ano e ao mês (juros compostos)', () => {
+  it('converte ao ano para ao mês, e não divide por 12', () => {
+    expect(jurosMensalDeAnual(12)).toBe(0.9489)
+    expect(jurosMensalDeAnual(0)).toBe(0)
+    // ~42,58% ao ano é o limiar de dívida cara (3% ao mês)
+    expect(jurosMensalDeAnual(42.58)).toBeCloseTo(3, 2)
+  })
+
+  it('o caminho inverso, para mostrar na tela', () => {
+    expect(jurosAnualDeMensal(3)).toBe(42.58)
+    expect(jurosAnualDeMensal(1)).toBe(12.68)
+  })
+})
+

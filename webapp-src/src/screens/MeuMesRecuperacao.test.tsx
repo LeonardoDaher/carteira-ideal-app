@@ -255,4 +255,32 @@ describe('Meu Mês, Modo Recuperação', () => {
     await screen.findByRole('button', { name: 'Cadastrar uma dívida' })
     expect(screen.queryByText('Trilha Sair das dívidas')).toBeNull()
   })
+
+  it('financiamento com juros ao ano: converte para ao mês por juros compostos', async () => {
+    salvar(exemplo)
+    render(<MeuMes ctx={ctx} hoje={hoje} />)
+    fireEvent.click(await screen.findByRole('button', { name: 'Cadastrar uma dívida' }))
+    fireEvent.change(screen.getByLabelText('Nome da dívida'), { target: { value: 'Carro' } })
+    fireEvent.change(screen.getByLabelText('Tipo'), { target: { value: 'financiamento' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Ao ano' }))
+    fireEvent.change(screen.getByLabelText('Juros ao ano (%)'), { target: { value: '12' } })
+    expect(screen.getByText('12% ao ano equivalem a 0,95% ao mês.')).toBeTruthy()
+    fireEvent.change(screen.getByLabelText('Quanto deve hoje'), { target: { value: '30.000' } })
+    fireEvent.change(screen.getByLabelText('Parcela ou pagamento mínimo por mês'), { target: { value: '900' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Adicionar dívida' }))
+
+    const carro = lerSalvo().recuperacao!.dividas.find((d) => d.nome === 'Carro')!
+    expect(carro.jurosMensal).toBe(0.9489)
+    // Financiamento a 12% ao ano não é dívida cara: o Modo Recuperação continua desligado.
+    expect(screen.queryByText('Modo Recuperação ligado')).toBeNull()
+  })
+
+  it('taxa ao mês mostra o equivalente ao ano', async () => {
+    salvar(exemplo)
+    render(<MeuMes ctx={ctx} hoje={hoje} />)
+    fireEvent.click(await screen.findByRole('button', { name: 'Cadastrar uma dívida' }))
+    fireEvent.change(screen.getByLabelText('Juros ao mês (%)'), { target: { value: '3' } })
+    expect(screen.getByText('3% ao mês equivalem a 42,58% ao ano.')).toBeTruthy()
+  })
 })
+
