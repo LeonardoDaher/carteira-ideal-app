@@ -764,8 +764,12 @@ type Rascunho = {
   /** Conta anual: boleto/Pix, cartão à vista ou cartão parcelado (ajuste após a Etapa 4). */
   pagamentoAnual: PagamentoAnual
   parcelas: number
-  /** Total cobrado no cartão, com juros e taxas (parcelado). 0 = ainda não informado. */
-  totalCartao: number
+  /**
+   * Valor de cada parcela no cartão, com juros e taxas (parcelado). 0 = ainda não informado.
+   * Ajuste de 26/09/2026: antes o campo pedia o total, e a pessoa digitava a parcela (120 virava
+   * 12x de 10). O total gravado é parcela × vezes.
+   */
+  parcelaCartao: number
   /**
    * Conta do ano no cartão cujo último vencimento já passou: a pessoa já está pagando esse
    * parcelamento (true) ou ele começa no próximo vencimento (false, o padrão). Ajuste de 26/09/2026.
@@ -780,7 +784,7 @@ const RASCUNHO_VAZIO: Rascunho = {
   noCartao: false,
   pagamentoAnual: 'boleto',
   parcelas: 10,
-  totalCartao: 0,
+  parcelaCartao: 0,
   jaComecou: false,
 }
 
@@ -801,7 +805,7 @@ function rascunhoDaConta(c: Conta): Rascunho {
     noCartao: !!c.cartaoDesde,
     pagamentoAnual: !ca ? 'boleto' : ca.parcelas > 1 ? 'parcelado' : 'avista',
     parcelas: ca && ca.parcelas > 1 ? ca.parcelas : 10,
-    totalCartao: ca && ca.parcelas > 1 ? ca.total : 0,
+    parcelaCartao: ca && ca.parcelas > 1 ? centavos(ca.total / ca.parcelas) : 0,
     // Já começou quando o início gravado é um vencimento (e não o mês do cadastro).
     jaComecou: !!ca && vencimentoAnterior(c, ca.desde) === ca.desde,
   }
@@ -810,7 +814,13 @@ function rascunhoDaConta(c: Conta): Rascunho {
 /** Texto do custo do parcelamento: quanto a mais, em % do valor e ao mês. */
 function custoDoParcelamento(valor: number, total: number, parcelas: number): string {
   if (total <= valor) {
-    return 'Sem juros? Confira no simulador do cartão: parcelar imposto ou conta no cartão costuma ter juros e taxa de serviço.'
+    // Ajuste de 26/09/2026: seguro e matrícula costumam sair em 10x ou 12x sem juros de verdade; a
+    // mensagem confirma e lembra do desconto à vista, que é o custo escondido do sem juros.
+    return (
+      `Sem juros: ${parcelas}x de ${reais(centavos(total / parcelas))}, o mesmo valor da conta, só dividido. ` +
+      'Pergunte se há desconto para pagar à vista: se houver, o parcelado sem juros sai mais caro. ' +
+      'Em imposto (IPVA, IPTU) no cartão, confira também a taxa de serviço, que costuma vir embutida.'
+    )
   }
   const aMais = total - valor
   const pct = Math.round((aMais / valor) * 1000) / 10
@@ -862,7 +872,12 @@ function MinhasContas({
   const nomeRef = useRef<HTMLInputElement>(null)
 
   const parcelado = rascunho.tipo === 'anual' && rascunho.pagamentoAnual === 'parcelado'
-  const valido = rascunho.nome.trim().length > 0 && rascunho.valor > 0 && (!parcelado || rascunho.totalCartao > 0)
+  const totalParcelado = centavos(rascunho.parcelaCartao * rascunho.parcelas)
+  // O cartão não cobra menos que a conta: total abaixo do valor é quase sempre a parcela digitada
+  // no lugar errado. A folga de 1 centavo por parcela cobre o arredondamento (1.000 em 3x de 333,33).
+  const totalAbaixoDaConta = parcelado && rascunho.parcelaCartao > 0 && totalParcelado < rascunho.valor - rascunho.parcelas * 0.01
+  const valido =
+    rascunho.nome.trim().length > 0 && rascunho.valor > 0 && (!parcelado || (rascunho.parcelaCartao > 0 && !totalAbaixoDaConta))
   const nomesUsados = new Set(contas.map((c) => c.nome.toLowerCase()))
   const sugestoes = CONTAS_SUGERIDAS.filter((s) => !nomesUsados.has(s.nome.toLowerCase()))
   const sugestoesVisiveis = todasSugestoes ? sugestoes : sugestoes.slice(0, SUGESTOES_VISIVEIS)
@@ -908,7 +923,7 @@ function MinhasContas({
         const mesmoJeito = anterior && anterior.parcelas > 1 === parcelas > 1
         conta.cartaoAnual = {
           parcelas,
-          total: parcelado ? rascunho.totalCartao : rascunho.valor,
+          total: parcelado ? Math.max(totalParcelado, rascunho.valor) : rascunho.valor,
           // Parcelamento que começou num vencimento recente e ainda tem fatura: começa nele, para as
           // parcelas que faltam aparecerem já. Editar uma conta antiga corrige o início dela.
           desde: menorMes(
@@ -943,7 +958,11 @@ function MinhasContas({
                         !c.cartaoAnual
                           ? ''
                           : c.cartaoAnual.parcelas > 1
-                            ? `, no cartão em ${c.cartaoAnual.parcelas}x (total ${reais(c.cartaoAnual.total)})`
+                            ? `, no cartão em ${c.cartaoAnual.parcelas}x (total ${reais(c.cartaoAnual.total)})` +
+                              // Gravada antes do ajuste de 26/09/2026 com a parcela no lugar do total.
+                              (c.cartaoAnual.total < c.valor - c.cartaoAnual.parcelas * 0.01
+                                ? '. Total menor que a conta: toque em Editar e confira o valor da parcela'
+                                : '')
                             : ', no cartão à vista'
                       }`
                     : c.cartaoDesde
@@ -1122,16 +1141,29 @@ function MinhasContas({
                   </select>
                 </label>
                 <CampoReais
-                  key={`total-${versaoForm}`}
-                  rotulo="Total cobrado no cartão, com juros e taxas"
-                  valor={rascunho.totalCartao}
-                  onMudar={(v) => setRascunho((r) => ({ ...r, totalCartao: v }))}
-                  dica="Veja na simulação do parcelamento: é a soma de todas as parcelas."
+                  key={`parcela-${versaoForm}`}
+                  rotulo="Valor de cada parcela no cartão"
+                  valor={rascunho.parcelaCartao}
+                  onMudar={(v) => setRascunho((r) => ({ ...r, parcelaCartao: v }))}
+                  dica="Está na simulação do parcelamento, já com juros e taxas."
                 />
-                {rascunho.valor > 0 && rascunho.totalCartao > 0 && (
-                  <div className="small justify mm-situacao mm-cartao-amarelo" role="status">
-                    {custoDoParcelamento(rascunho.valor, rascunho.totalCartao, rascunho.parcelas)}
+                {rascunho.parcelaCartao > 0 && (
+                  <div className="small" role="status" style={{ fontWeight: 600 }}>
+                    {rascunho.parcelas}x de {reais(rascunho.parcelaCartao)} = {reais(totalParcelado)} no total
                   </div>
+                )}
+                {totalAbaixoDaConta ? (
+                  <div className="small justify mm-situacao mm-cartao-vermelho" role="alert">
+                    {reais(totalParcelado)} no total é menos que o valor da conta ({reais(rascunho.valor)}), e o cartão não cobra menos
+                    que a conta. Confira: aqui vai o valor de cada parcela, e em "Valor total no ano", o valor da conta inteira.
+                  </div>
+                ) : (
+                  rascunho.valor > 0 &&
+                  rascunho.parcelaCartao > 0 && (
+                    <div className="small justify mm-situacao mm-cartao-amarelo" role="status">
+                      {custoDoParcelamento(rascunho.valor, totalParcelado, rascunho.parcelas)}
+                    </div>
+                  )
                 )}
                 {parcelamentoPodeTerComecado(rascunho.mesVencimento, rascunho.parcelas, mesDeHoje) && (
                   <div className="col" style={{ gap: 6 }}>

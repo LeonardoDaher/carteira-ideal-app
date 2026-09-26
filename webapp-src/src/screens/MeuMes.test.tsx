@@ -271,8 +271,9 @@ describe('MeuMes', () => {
       fireEvent.change(screen.getByLabelText('Valor total no ano'), { target: { value: '1.200' } })
       fireEvent.click(screen.getByRole('button', { name: 'Cartão parcelado' }))
       const adicionar = screen.getByRole('button', { name: 'Adicionar conta' }) as HTMLButtonElement
-      expect(adicionar.disabled).toBe(true) // falta o total com juros
-      fireEvent.change(screen.getByLabelText('Total cobrado no cartão, com juros e taxas'), { target: { value: '1.400' } })
+      expect(adicionar.disabled).toBe(true) // falta o valor da parcela
+      fireEvent.change(screen.getByLabelText('Valor de cada parcela no cartão'), { target: { value: '140' } })
+      expect(screen.getByText(/10x de R\$\s140,00 = R\$\s1\.400,00 no total/)).toBeTruthy()
       expect(screen.getByText(/Parcelando em 10x, você paga R\$\s200,00 a mais \(16,7% sobre o valor\), cerca de 2,9\d?% ao mês/)).toBeTruthy()
       fireEvent.click(adicionar)
 
@@ -292,7 +293,7 @@ describe('MeuMes', () => {
       fireEvent.change(screen.getByLabelText('Valor total no ano'), { target: { value: '1.000' } })
       fireEvent.change(screen.getByLabelText(/Mês do vencimento/), { target: { value: '9' } })
       fireEvent.click(screen.getByRole('button', { name: 'Cartão parcelado' }))
-      fireEvent.change(screen.getByLabelText('Total cobrado no cartão, com juros e taxas'), { target: { value: '1.000' } })
+      fireEvent.change(screen.getByLabelText('Valor de cada parcela no cartão'), { target: { value: '100' } })
       // Padrão: é o próximo vencimento (setembro de 2027).
       expect(screen.getByText(/1ª parcela entra no gasto do cartão em setembro de 2027/)).toBeTruthy()
       fireEvent.click(screen.getByRole('button', { name: 'Sim, já estou pagando' }))
@@ -323,6 +324,63 @@ describe('MeuMes', () => {
       expect(screen.queryByRole('button', { name: 'Aluguel ou financiamento' })).toBeNull()
     })
 
+    it('parcela digitada: 12x de 120 grava total de 1.440; total abaixo da conta é barrado (ajuste de 26/09/2026)', async () => {
+      salvar({ ...exemplo, contas: [exemplo.contas[0]] })
+      render(<MeuMes ctx={ctx} hoje={hoje} />)
+      fireEvent.change(await screen.findByLabelText('Nome da conta'), { target: { value: 'Seguro do carro' } })
+      fireEvent.click(screen.getByRole('button', { name: 'Uma vez por ano' }))
+      fireEvent.change(screen.getByLabelText('Valor total no ano'), { target: { value: '1.200' } })
+      fireEvent.click(screen.getByRole('button', { name: 'Cartão parcelado' }))
+      fireEvent.change(screen.getByLabelText('Em quantas vezes'), { target: { value: '12' } })
+      const adicionar = screen.getByRole('button', { name: 'Adicionar conta' }) as HTMLButtonElement
+      // O erro do relato: 10 por parcela dá 120 no total, menos que a conta.
+      fireEvent.change(screen.getByLabelText('Valor de cada parcela no cartão'), { target: { value: '10' } })
+      expect(screen.getByRole('alert').textContent).toMatch(/o cartão não cobra menos\s+que a conta/)
+      expect(adicionar.disabled).toBe(true)
+      fireEvent.change(screen.getByLabelText('Valor de cada parcela no cartão'), { target: { value: '120' } })
+      expect(screen.queryByRole('alert')).toBeNull()
+      expect(screen.getByText(/12x de R\$\s120,00 = R\$\s1\.440,00 no total/)).toBeTruthy()
+      fireEvent.click(adicionar)
+      expect(lerSalvo().contas.find((c) => c.nome === 'Seguro do carro')!.cartaoAnual).toMatchObject({ parcelas: 12, total: 1440 })
+    })
+
+    it('12x sem juros: parcela de 100 numa conta de 1.200 é aceita e explicada', async () => {
+      salvar({ ...exemplo, contas: [exemplo.contas[0]] })
+      render(<MeuMes ctx={ctx} hoje={hoje} />)
+      fireEvent.change(await screen.findByLabelText('Nome da conta'), { target: { value: 'Seguro do carro' } })
+      fireEvent.click(screen.getByRole('button', { name: 'Uma vez por ano' }))
+      fireEvent.change(screen.getByLabelText('Valor total no ano'), { target: { value: '1.200' } })
+      fireEvent.click(screen.getByRole('button', { name: 'Cartão parcelado' }))
+      fireEvent.change(screen.getByLabelText('Em quantas vezes'), { target: { value: '12' } })
+      fireEvent.change(screen.getByLabelText('Valor de cada parcela no cartão'), { target: { value: '100' } })
+      expect(screen.queryByRole('alert')).toBeNull()
+      expect(screen.getByText(/Sem juros: 12x de R\$\s100,00, o mesmo valor da conta/)).toBeTruthy()
+      fireEvent.click(screen.getByRole('button', { name: 'Adicionar conta' }))
+      expect(lerSalvo().contas.find((c) => c.nome === 'Seguro do carro')!.cartaoAnual).toMatchObject({ parcelas: 12, total: 1200 })
+    })
+
+    it('arredondamento: 1.000 em 3x de 333,33 é aceito e grava 1.000', async () => {
+      salvar({ ...exemplo, contas: [exemplo.contas[0]] })
+      render(<MeuMes ctx={ctx} hoje={hoje} />)
+      fireEvent.change(await screen.findByLabelText('Nome da conta'), { target: { value: 'Matrícula' } })
+      fireEvent.click(screen.getByRole('button', { name: 'Uma vez por ano' }))
+      fireEvent.change(screen.getByLabelText('Valor total no ano'), { target: { value: '1.000' } })
+      fireEvent.click(screen.getByRole('button', { name: 'Cartão parcelado' }))
+      fireEvent.change(screen.getByLabelText('Em quantas vezes'), { target: { value: '3' } })
+      fireEvent.change(screen.getByLabelText('Valor de cada parcela no cartão'), { target: { value: '333,33' } })
+      expect(screen.queryByRole('alert')).toBeNull()
+      fireEvent.click(screen.getByRole('button', { name: 'Adicionar conta' }))
+      expect(lerSalvo().contas.find((c) => c.nome === 'Matrícula')!.cartaoAnual).toMatchObject({ parcelas: 3, total: 1000 })
+    })
+
+    it('conta gravada com a parcela no lugar do total aparece marcada na lista', async () => {
+      salvar({ ...exemplo, contas: [{ id: 's', nome: 'Seguro do carro', valor: 1200, tipo: 'anual', mesVencimento: 7, cartaoAnual: { parcelas: 12, total: 120, desde: '2026-07' } }] })
+      render(<MeuMes ctx={ctx} hoje={hoje} />)
+      expect(await screen.findByText(/Total menor que a conta: toque em Editar/)).toBeTruthy()
+      fireEvent.click(screen.getAllByRole('button', { name: 'Editar Seguro do carro' }).at(-1)!)
+      expect(screen.getByRole('alert')).toBeTruthy()
+    })
+
     it('"Apagar tudo e começar de novo" fica numa caixa amarela e pede confirmação', async () => {
       const confirmar = vi.spyOn(window, 'confirm').mockReturnValue(false)
       salvar(exemplo)
@@ -348,7 +406,7 @@ describe('MeuMes', () => {
       render(<MeuMes ctx={ctx} hoje={hoje} />)
       fireEvent.click((await screen.findAllByRole('button', { name: 'Editar IPVA' }))[0])
       fireEvent.click(screen.getByRole('button', { name: 'Cartão parcelado' }))
-      fireEvent.change(screen.getByLabelText('Total cobrado no cartão, com juros e taxas'), { target: { value: '1.300' } })
+      fireEvent.change(screen.getByLabelText('Valor de cada parcela no cartão'), { target: { value: '130' } })
       fireEvent.click(screen.getByRole('button', { name: 'Salvar alterações' }))
       expect(confirmar).toHaveBeenCalled()
       expect(lerSalvo().contas.find((c) => c.id === 'ipva')!.cartaoAnual).toBeUndefined()

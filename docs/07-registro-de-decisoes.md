@@ -481,6 +481,13 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 - Nada é removido sozinho: o app só avisa (mesma regra da Etapa 4, de não marcar nada pela pessoa). Formato dos dados sem mudança.
 - **Conferido.** 318 testes do app (4 novos) e 106 dos scripts; typecheck, lint e build sem erros.
 
+**Quarta rodada (26/09/2026): valor da parcela no lugar do total.** Relato: seguro do carro de R$ 1.200 em 12x de R$ 120 apareceu como 12x de R$ 10. O campo pedia o "total cobrado no cartão", e o responsável digitou a parcela (R$ 120), que o app dividiu por 12. A tela ainda mostrava "Sem juros?", porque o total era menor que a conta.
+- O campo passou a ser **"Valor de cada parcela no cartão"**, que é o número que aparece na simulação do cartão. Logo abaixo, a conta fica à vista: "12x de R$ 120,00 = R$ 1.440,00 no total". O dado gravado continua sendo o total (`cartaoAnual.total` = parcela × vezes), sem mudar o formato.
+- **Trava:** total abaixo do valor da conta (folga de 1 centavo por parcela para arredondamento) mostra um alerta vermelho e bloqueia o salvar, porque o cartão não cobra menos que a conta.
+- **Conta já gravada errada:** aparece em Minhas contas com "Total menor que a conta: toque em Editar e confira o valor da parcela". Ao editar, o alerta aparece até corrigir.
+- **Conferido.** 320 testes do app (2 novos, 3 ajustados) e 106 dos scripts; typecheck, lint e build sem erros.
+- **Parcelado sem juros** (pergunta seguinte do responsável): funciona digitando a parcela sem juros (1.200 em 12x = R$ 100). A mensagem "Sem juros? Confira..." soava como desconfiança; agora confirma ("Sem juros: 12x de R$ 100,00, o mesmo valor da conta"), lembra de perguntar pelo desconto à vista (o custo escondido do sem juros) e, só para imposto no cartão, da taxa de serviço. Arredondamento testado (1.000 em 3x de 333,33 grava 1.000). 322 testes do app.
+
 ### D22 · Análise jurídica sem objeção; site 100% gratuito, sem link de curso pago (26/09/2026)
 
 **Parecer.** A análise jurídica foi feita pelo próprio responsável pelo projeto, que é advogado, em 26/09/2026: sem objeção à fronteira com a consultoria de valores mobiliários (Resolução CVM 19/2021) e à relação com o suitability (Resolução CVM 30/2021), abrangendo também o Meu Mês (plano de quitação, roteiro de negociação), a trilha "Sair das dívidas" e a sugestão dos Pilares 1 e 2. Por ser do próprio autor, é uma análise interna, e não um parecer independente. Recomendação registrada: buscar um parecer independente de especialista em mercado de capitais antes de monetizar, de uma divulgação paga em escala ou de qualquer mudança na natureza do conteúdo (ranking de ativos, recomendação individual, cobrança).
