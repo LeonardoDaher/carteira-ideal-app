@@ -11,6 +11,10 @@ import {
   inicioDaAnualNoCartao,
   quandoApareceNoCartao,
   pareceDivida,
+  acertarPeloTotal,
+  aVistaLancadasNoMes,
+  totalInformado,
+  gastoNoCartao,
   contasEmDobroComDividas,
   CONTAS_SUGERIDAS,
   parcelamentoPodeTerComecado,
@@ -18,7 +22,6 @@ import {
   parcelaAnualNoMes,
   contasNoCartao,
   faturaDoMes,
-  gastoNoCartao,
   parcelaNoMes,
   parcelasFuturas,
   semaforoDoCartao,
@@ -527,5 +530,52 @@ describe('conta x dívida: a mesma parcela não pode contar duas vezes (ajuste d
     expect(contasEmDobroComDividas(base(contas, []))).toEqual([])
     expect(contasEmDobroComDividas(base(contas, [{ ...financiamento, saldo: 0 }]))).toEqual([])
     expect(contasEmDobroComDividas(base(contas, [{ ...financiamento, tipo: 'cartao-rotativo' }]))).toEqual([])
+  })
+})
+
+describe('compras à vista do mês de uma vez (ajuste de 26/09/2026)', () => {
+  const base = (compras: Orcamento['cartao']['compras'], contas: Conta[] = []): Orcamento => ({
+    ...ORCAMENTO_VAZIO,
+    salario: 5000,
+    contas,
+    cartao: { teto: 3000, compras },
+  })
+  const streaming: Conta = { id: 'n', nome: 'Streaming', valor: 50, tipo: 'mensal', cartaoDesde: '2026-01' }
+  const geladeira = { id: 'g', descricao: 'Geladeira', valor: 3000, mes: '2026-08', parcelas: 10 }
+
+  it('parcelas e contas no cartão ficam fora; o total à vista soma por cima delas', () => {
+    const orc = acertarPeloTotal(base([geladeira], [streaming]), '2026-09', 800)
+    expect(aVistaLancadasNoMes(orc, '2026-09')).toBe(0)
+    expect(orc.cartao.compras.find((c) => c.id === 'total-2026-09')).toMatchObject({ valor: 800, parcelas: 1, mes: '2026-09', descricao: 'Compras à vista do mês' })
+    expect(gastoNoCartao(orc, '2026-09')).toBe(1150) // 300 geladeira + 50 streaming + 800 à vista
+    expect(totalInformado(orc, '2026-09')).toBe(800)
+    expect(totalInformado(orc, '2026-10')).toBeNull()
+    expect(gastoNoCartao(orc, '2026-10')).toBe(350) // não vaza para o mês seguinte
+  })
+
+  it('compras à vista já anotadas fazem parte do total e são descontadas', () => {
+    const mercado = { id: 'm', descricao: 'Mercado', valor: 300, mes: '2026-09', parcelas: 1 }
+    const orc = acertarPeloTotal(base([mercado, geladeira]), '2026-09', 800)
+    expect(orc.cartao.compras.find((c) => c.id === 'total-2026-09')!.valor).toBe(500)
+    expect(totalInformado(orc, '2026-09')).toBe(800)
+  })
+
+  it('atualizar troca o valor; zero tira o lançamento', () => {
+    let orc = acertarPeloTotal(base([]), '2026-09', 1000)
+    orc = acertarPeloTotal(orc, '2026-09', 1200)
+    expect(orc.cartao.compras).toHaveLength(1)
+    expect(gastoNoCartao(orc, '2026-09')).toBe(1200)
+    expect(acertarPeloTotal(orc, '2026-09', 0).cartao.compras).toEqual([])
+  })
+
+  it('compra à vista anotada depois sai do lançamento de uma vez; parcelada não mexe nele', () => {
+    let orc = acertarPeloTotal(base([]), '2026-09', 1000)
+    orc = { ...orc, cartao: { ...orc.cartao, compras: [...orc.cartao.compras, { id: 'm', descricao: 'Mercado', valor: 400, mes: '2026-09', parcelas: 1 }] } }
+    orc = acertarPeloTotal(orc, '2026-09', 1000)
+    expect(orc.cartao.compras.find((c) => c.id === 'total-2026-09')!.valor).toBe(600)
+    orc = { ...orc, cartao: { ...orc.cartao, compras: [...orc.cartao.compras, { id: 't', descricao: 'TV', valor: 2000, mes: '2026-09', parcelas: 5 }] } }
+    orc = acertarPeloTotal(orc, '2026-09', 1000)
+    expect(orc.cartao.compras.find((c) => c.id === 'total-2026-09')!.valor).toBe(600)
+    expect(gastoNoCartao(orc, '2026-09')).toBe(1400) // 1.000 à vista + 400 da 1ª parcela da TV
   })
 })

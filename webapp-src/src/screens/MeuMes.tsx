@@ -5,6 +5,9 @@ import {
   NOMES_DOS_MESES,
   centavos,
   chaveMes,
+  ehTotalDoMes,
+  aVistaLancadasNoMes,
+  totalInformado,
   contasEmDobroComDividas,
   pareceDivida,
   temDividaComParcelaFixa,
@@ -131,6 +134,8 @@ export function MeuMes({
               mesDeHoje={mesDeHoje}
               onTeto={est.setTeto}
               onAdicionar={est.adicionarCompra}
+              onEditar={est.editarCompra}
+              onAcertarTotal={est.acertarTotal}
               onRemover={est.removerCompra}
               onPacto={est.setPacto}
             />
@@ -455,6 +460,8 @@ function CartaoDoMes({
   mesDeHoje,
   onTeto,
   onAdicionar,
+  onEditar,
+  onAcertarTotal,
   onRemover,
   onPacto,
 }: {
@@ -463,6 +470,8 @@ function CartaoDoMes({
   mesDeHoje: string
   onTeto: (v: number) => void
   onAdicionar: (c: Omit<Compra, 'id'>) => void
+  onEditar: (id: string, c: Omit<Compra, 'id'>) => void
+  onAcertarTotal: (mes: string, total: number) => void
   onRemover: (id: string) => void
   onPacto: (mes: string | null) => void
 }) {
@@ -486,22 +495,66 @@ function CartaoDoMes({
   const [versaoForm, setVersaoForm] = useState(0)
   // Pacto de não parcelar (Etapa 3): parcelar exige um passo a mais, confirmado na hora.
   const [quebrandoPacto, setQuebrandoPacto] = useState(false)
+  // Edição de compra (ajuste de 26/09/2026), no mesmo padrão de Minhas contas.
+  const [editandoId, setEditandoId] = useState<string | null>(null)
+  const formRef = useRef<HTMLDivElement>(null)
+  const descricaoRef = useRef<HTMLInputElement>(null)
   const idDescricao = useId()
   const idParcelas = useId()
   const recuperacao = modoRecuperacaoAtivo(orcamento)
   const { pactoDesde } = recuperacaoDe(orcamento)
-  const parcelamentoLiberado = !pactoDesde || quebrandoPacto
+  const compraEditada = editandoId ? orcamento.cartao.compras.find((c) => c.id === editandoId) : undefined
+  // Corrigir uma compra que já era parcelada não é parcelar de novo: o pacto não trava a edição dela.
+  const parcelamentoLiberado = !pactoDesde || quebrandoPacto || (compraEditada?.parcelas ?? 1) > 1
+  // A compra editada continua no mês em que foi feita; as parcelas seguem a partir dele.
+  const mesDaCompra = compraEditada?.mes ?? mes
   const valido = descricao.trim().length > 0 && valor > 0
-  const parcelaPrevista = parcelas > 1 ? parcelaNoMes({ id: '', descricao, valor, mes, parcelas }, mes) : 0
+  const parcelaPrevista = parcelas > 1 ? parcelaNoMes({ id: '', descricao, valor, mes: mesDaCompra, parcelas }, mesDaCompra) : 0
 
-  function lancar() {
-    if (!valido) return
-    onAdicionar({ descricao: descricao.trim(), valor, mes, parcelas: parcelamentoLiberado ? parcelas : 1 })
+  function limpar() {
     setDescricao('')
     setValor(0)
     setParcelas(1)
     setQuebrandoPacto(false)
+    setEditandoId(null)
     setVersaoForm((v) => v + 1)
+  }
+
+  // Lançamento pelo total (ajuste de 26/09/2026).
+  const totalDoMes = totalInformado(orcamento, mes)
+  const [totalAberto, setTotalAberto] = useState(false)
+  const mesPassado = somarMeses(mes, -1)
+  const totalMesPassado = totalInformado(orcamento, mesPassado)
+  const [totalPassadoAberto, setTotalPassadoAberto] = useState(false)
+  const totalRef = useRef<HTMLDivElement>(null)
+
+  function lancar() {
+    if (!valido) return
+    const dados = { descricao: descricao.trim(), valor, mes: mesDaCompra, parcelas: parcelamentoLiberado ? parcelas : 1 }
+    if (compraEditada) onEditar(compraEditada.id, dados)
+    else onAdicionar(dados)
+    // Com as compras à vista lançadas de uma vez, uma compra à vista anotada depois já faz parte
+    // desse total: sai do lançamento de uma vez, e o total continua o mesmo (ou cresce, se passar
+    // dele). Compra parcelada não mexe no total à vista.
+    if (totalDoMes != null) onAcertarTotal(mes, totalDoMes)
+    limpar()
+  }
+
+  function abrirTotal() {
+    setTotalAberto(true)
+    totalRef.current?.scrollIntoView?.({ behavior: 'smooth', block: 'start' })
+  }
+
+  /** Abre a compra no formulário e leva a pessoa até ele (o formulário fica abaixo da lista). */
+  function abrirParaEditar(compra: Compra) {
+    setDescricao(compra.descricao)
+    setValor(compra.valor)
+    setParcelas(compra.parcelas)
+    setQuebrandoPacto(false)
+    setEditandoId(compra.id)
+    setVersaoForm((v) => v + 1)
+    formRef.current?.scrollIntoView?.({ behavior: 'smooth', block: 'start' })
+    descricaoRef.current?.focus({ preventScroll: true })
   }
 
   function quebrarPacto() {
@@ -593,24 +646,22 @@ function CartaoDoMes({
                 <span className="col grow" style={{ gap: 2, minWidth: 0 }}>
                   <span className="mm-item-nome">{compra.descricao}</span>
                   <span className="tiny muted">
-                    {compra.parcelas > 1
-                      ? `Parcela ${parcela} de ${compra.parcelas} (total ${reais(compra.valor)})`
-                      : 'À vista'}
+                    {ehTotalDoMes(compra)
+                      ? totalDoMes != null && totalDoMes > compra.valor
+                        ? `À vista, lançadas de uma vez (total à vista do mês: ${reais(totalDoMes)})`
+                        : 'À vista, lançadas de uma vez'
+                      : compra.parcelas > 1
+                        ? `Parcela ${parcela} de ${compra.parcelas} (total ${reais(compra.valor)})`
+                        : 'À vista'}
                   </span>
                 </span>
                 <span className="mm-item-valor">{reais(v)}</span>
                 <button
-                  className="mm-link tiny muted"
-                  aria-label={`Remover ${compra.descricao}`}
-                  onClick={() => {
-                    const aviso =
-                      compra.parcelas > 1
-                        ? `Remover "${compra.descricao}" e todas as ${compra.parcelas} parcelas?`
-                        : `Remover "${compra.descricao}"?`
-                    if (window.confirm(aviso)) onRemover(compra.id)
-                  }}
+                  className="mm-link small"
+                  aria-label={`Editar ${compra.descricao}`}
+                  onClick={() => (ehTotalDoMes(compra) ? abrirTotal() : abrirParaEditar(compra))}
                 >
-                  Remover
+                  Editar
                 </button>
               </li>
             ))}
@@ -631,13 +682,58 @@ function CartaoDoMes({
         />
       )}
 
-      <div className="col mm-form" style={{ gap: 10 }}>
-        <span className="small" style={{ fontWeight: 700 }}>Lançar compra em {nomeDoMes(mes)}</span>
+      <div ref={totalRef}>
+        <TotalDoMes
+          key={`${mes}-${totalDoMes ?? 'sem'}`}
+          mes={mes}
+          aberto={totalAberto || totalDoMes != null}
+          onAbrir={setTotalAberto}
+          totalAtual={totalDoMes}
+          jaLancado={aVistaLancadasNoMes(orcamento, mes)}
+          recuperacao={recuperacao}
+          onAcertar={(t) => onAcertarTotal(mes, t)}
+        />
+      </div>
+
+      {/* Primeiro mês no app (ajuste de 26/09/2026): a fatura que se paga agora traz as compras à
+          vista do mês passado, que ainda não estão no app. Atalho para lançá-las sem voltar o mês. */}
+      {mes === mesDeHoje && (totalMesPassado != null || aVistaLancadasNoMes(orcamento, mesPassado) === 0) && (
+        <TotalDoMes
+          key={`${mesPassado}-${totalMesPassado ?? 'sem'}`}
+          mes={mesPassado}
+          aberto={totalPassadoAberto}
+          onAbrir={setTotalPassadoAberto}
+          totalAtual={totalMesPassado}
+          jaLancado={aVistaLancadasNoMes(orcamento, mesPassado)}
+          recuperacao={false}
+          onAcertar={(t) => {
+            onAcertarTotal(mesPassado, t)
+            setTotalPassadoAberto(false)
+          }}
+          rotuloAbrir={
+            totalMesPassado != null
+              ? `Compras à vista de ${nomeDoMes(mesPassado)} (fatura de ${nomeDoMes(mes)}): ${reais(totalMesPassado)}. Corrigir`
+              : `Primeiro mês no app? Lance as compras à vista de ${nomeDoMes(mesPassado)}, que você paga na fatura de ${nomeDoMes(mes)}`
+          }
+          contexto={`Elas entram na fatura de ${nomeDoMes(mes)}, que você paga agora, e aparecem em Contas do mês.`}
+        />
+      )}
+
+      <div className="col mm-form" style={{ gap: 10 }} ref={formRef}>
+        <span className="small" style={{ fontWeight: 700 }}>
+          {compraEditada ? `Editar compra: ${compraEditada.descricao}` : `Lançar compra em ${nomeDoMes(mes)}`}
+        </span>
+        {compraEditada && compraEditada.mes !== mes && (
+          <span className="tiny muted justify">
+            Compra feita em {mesPorExtenso(compraEditada.mes)}: continua nesse mês, e as parcelas seguem a partir dele.
+          </span>
+        )}
         <label htmlFor={idDescricao} className="small" style={{ fontWeight: 600 }}>
           O que foi
         </label>
         <input
           id={idDescricao}
+          ref={descricaoRef}
           className="input-cotas"
           value={descricao}
           maxLength={40}
@@ -673,12 +769,34 @@ function CartaoDoMes({
           <span className="small justify mm-alerta-parcela" role="note">
             {quebrandoPacto ? 'Esta compra quebra o seu pacto. ' : recuperacao ? 'No Modo Recuperação, parcelar é fazer dívida nova. ' : ''}
             Parcelar compromete os próximos {parcelas - 1} {parcelas === 2 ? 'mês' : 'meses'}: cerca de {reais(parcelaPrevista)} por
-            mês até {mesPorExtenso(somarMeses(mes, parcelas - 1))}, somados a tudo o que você comprar depois.
+            mês até {mesPorExtenso(somarMeses(mesDaCompra, parcelas - 1))}, somados a tudo o que você comprar depois.
           </span>
         )}
         <button className="btn btn-primary" disabled={!valido} onClick={lancar}>
-          Lançar compra
+          {compraEditada ? 'Salvar alterações' : 'Lançar compra'}
         </button>
+        {compraEditada && (
+          <div className="row" style={{ gap: 8 }}>
+            <button className="btn btn-outline" onClick={limpar}>
+              Cancelar
+            </button>
+            <button
+              className="btn btn-outline mm-perigo"
+              onClick={() => {
+                const aviso =
+                  compraEditada.parcelas > 1
+                    ? `Remover "${compraEditada.descricao}" e todas as ${compraEditada.parcelas} parcelas?`
+                    : `Remover "${compraEditada.descricao}"?`
+                if (window.confirm(aviso)) {
+                  onRemover(compraEditada.id)
+                  limpar()
+                }
+              }}
+            >
+              Remover
+            </button>
+          </div>
+        )}
       </div>
 
       {futuras.length > 0 && (
@@ -694,6 +812,100 @@ function CartaoDoMes({
           ))}
         </div>
       )}
+    </div>
+  )
+}
+
+/**
+ * Compras à vista do mês lançadas de uma vez (ajuste de 26/09/2026). Parceladas e contas no cartão
+ * não entram aqui: são lançadas em separado. As compras à vista já anotadas uma a uma fazem parte
+ * do total e são descontadas.
+ */
+function TotalDoMes({
+  mes,
+  aberto,
+  onAbrir,
+  totalAtual,
+  jaLancado,
+  recuperacao,
+  onAcertar,
+  rotuloAbrir,
+  contexto,
+}: {
+  mes: string
+  /** Texto do link que abre o bloco (padrão: compras à vista do mês). */
+  rotuloAbrir?: string
+  /** Frase extra no topo do bloco (ex.: em que fatura essas compras entram). */
+  contexto?: string
+  aberto: boolean
+  onAbrir: (v: boolean) => void
+  totalAtual: number | null
+  /** Compras à vista do mês já lançadas uma a uma. */
+  jaLancado: number
+  recuperacao: boolean
+  onAcertar: (total: number) => void
+}) {
+  const [total, setTotal] = useState(totalAtual ?? 0)
+  const diferenca = centavos(total - jaLancado)
+  const abaixo = total > 0 && diferenca < 0
+  if (!aberto) {
+    return (
+      <button className="mm-link small" style={{ alignSelf: 'flex-start' }} onClick={() => onAbrir(true)}>
+        {rotuloAbrir ?? 'Lançar as compras à vista do mês de uma vez'}
+      </button>
+    )
+  }
+  return (
+    <div className="col mm-form" style={{ gap: 10 }}>
+      <span className="small" style={{ fontWeight: 700 }}>Compras à vista de {nomeDoMes(mes)}, de uma vez</span>
+      <span className="small muted justify">
+        {contexto && `${contexto} `}Some tudo o que você comprou à vista no cartão em {nomeDoMes(mes)} e digite aqui, sem anotar
+        uma por uma.
+        {jaLancado > 0 && ` As compras à vista que você já anotou (${reais(jaLancado)}) fazem parte desse total e são descontadas.`}
+      </span>
+      <span className="small justify mm-alerta-parcela" role="note">
+        Parcelado fica de fora: compra parcelada, lance abaixo em "Lançar compra", com o número de vezes; conta do ano ou de
+        todo mês no cartão, em Minhas contas. Assim os próximos meses já contam as parcelas.
+      </span>
+      <CampoReais rotulo={`Total à vista no cartão em ${nomeDoMes(mes)}`} valor={total} onMudar={setTotal} />
+      {abaixo ? (
+        <div className="small justify mm-situacao mm-cartao-vermelho" role="alert">
+          {reais(total)} é menos do que as compras à vista que você já anotou neste mês ({reais(jaLancado)}). Confira o total, ou
+          edite as compras anotadas.
+        </div>
+      ) : (
+        total > 0 &&
+        jaLancado > 0 && (
+          <div className="small" role="status" style={{ fontWeight: 600 }}>
+            {diferenca > 0 ? `${reais(diferenca)} entram como compras à vista do mês.` : 'Tudo já está anotado: nada a acrescentar.'}
+          </div>
+        )
+      )}
+      {recuperacao && (
+        <span className="tiny muted justify">No Modo Recuperação, anotar compra por compra ajuda a frear antes de chegar ao teto.</span>
+      )}
+      <button className="btn btn-primary" disabled={total <= 0 || abaixo} onClick={() => onAcertar(total)}>
+        {totalAtual != null ? 'Atualizar total à vista' : 'Lançar total à vista'}
+      </button>
+      <div className="row" style={{ gap: 8 }}>
+        {totalAtual != null ? (
+          <button
+            className="btn btn-outline"
+            onClick={() => {
+              if (window.confirm('Tirar o total à vista deste mês e voltar a anotar compra por compra? As compras anotadas continuam.')) {
+                onAcertar(0)
+                onAbrir(false)
+              }
+            }}
+          >
+            Voltar a anotar uma por uma
+          </button>
+        ) : (
+          <button className="btn btn-outline" onClick={() => onAbrir(false)}>
+            Cancelar
+          </button>
+        )}
+      </div>
     </div>
   )
 }

@@ -135,6 +135,106 @@ describe('MeuMes', () => {
     expect(lerSalvo().pagamentos).toEqual({})
   })
 
+  it('editar uma compra do cartão: corrige valor e parcelas no mesmo lançamento (ajuste de 26/09/2026)', async () => {
+    salvar({ ...exemplo, cartao: { teto: 1000, compras: [{ id: 'k1', descricao: 'Mercado', valor: 50, mes: '2026-10', parcelas: 1 }] } })
+    render(<MeuMes ctx={ctx} hoje={hoje} />)
+    fireEvent.click(await screen.findByRole('button', { name: 'Editar Mercado' }))
+    expect(screen.getByText('Editar compra: Mercado')).toBeTruthy()
+    expect((screen.getByLabelText('O que foi') as HTMLInputElement).value).toBe('Mercado')
+    fireEvent.change(screen.getByLabelText('O que foi'), { target: { value: 'Mercado do mês' } })
+    fireEvent.change(screen.getByLabelText('Valor da compra'), { target: { value: '500' } })
+    fireEvent.change(screen.getByLabelText('Forma de pagamento'), { target: { value: '2' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Salvar alterações' }))
+    expect(lerSalvo().cartao.compras).toEqual([{ id: 'k1', descricao: 'Mercado do mês', valor: 500, mes: '2026-10', parcelas: 2 }])
+    expect(screen.getByRole('button', { name: 'Lançar compra' })).toBeTruthy()
+  })
+
+  it('compra parcelada editada em outro mês continua no mês em que foi feita', async () => {
+    salvar({ ...exemplo, cartao: { teto: 1000, compras: [{ id: 'k1', descricao: 'Geladeira', valor: 3000, mes: '2026-09', parcelas: 10 }] } })
+    render(<MeuMes ctx={ctx} hoje={hoje} />)
+    fireEvent.click(await screen.findByRole('button', { name: 'Editar Geladeira' }))
+    expect(screen.getByText(/Compra feita em setembro de 2026: continua nesse mês/)).toBeTruthy()
+    fireEvent.change(screen.getByLabelText('Valor da compra'), { target: { value: '3.200' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Salvar alterações' }))
+    expect(lerSalvo().cartao.compras[0]).toMatchObject({ valor: 3200, mes: '2026-09', parcelas: 10 })
+  })
+
+  it('cancelar a edição não muda a compra; remover pelo formulário pede confirmação', async () => {
+    const confirmar = vi.spyOn(window, 'confirm').mockReturnValue(true)
+    salvar({ ...exemplo, cartao: { teto: 1000, compras: [{ id: 'k1', descricao: 'Mercado', valor: 50, mes: '2026-10', parcelas: 1 }] } })
+    render(<MeuMes ctx={ctx} hoje={hoje} />)
+    fireEvent.click(await screen.findByRole('button', { name: 'Editar Mercado' }))
+    fireEvent.change(screen.getByLabelText('Valor da compra'), { target: { value: '999' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Cancelar' }))
+    expect(lerSalvo().cartao.compras[0].valor).toBe(50)
+    fireEvent.click(screen.getByRole('button', { name: 'Editar Mercado' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Remover' }))
+    expect(confirmar).toHaveBeenCalledWith('Remover "Mercado"?')
+    expect(lerSalvo().cartao.compras).toEqual([])
+  })
+
+  it('compras à vista do mês de uma vez; parceladas ficam fora (ajuste de 26/09/2026)', async () => {
+    salvar({
+      ...exemplo,
+      cartao: {
+        teto: 3000,
+        compras: [
+          { id: 'g', descricao: 'Geladeira', valor: 3000, mes: '2026-09', parcelas: 10 },
+          { id: 'p', descricao: 'Padaria', valor: 100, mes: '2026-10', parcelas: 1 },
+        ],
+      },
+    })
+    render(<MeuMes ctx={ctx} hoje={hoje} />)
+    fireEvent.click(await screen.findByRole('button', { name: 'Lançar as compras à vista do mês de uma vez' }))
+    expect(screen.getByText(/Parcelado fica de fora/)).toBeTruthy()
+    expect(screen.getByText(/já anotou \(R\$\s100,00\) fazem parte desse total/)).toBeTruthy()
+    fireEvent.change(screen.getByLabelText('Total à vista no cartão em outubro'), { target: { value: '50' } })
+    expect(screen.getByRole('alert').textContent).toMatch(/menos do que as compras à vista que você já anotou/)
+    expect((screen.getByRole('button', { name: 'Lançar total à vista' }) as HTMLButtonElement).disabled).toBe(true)
+    fireEvent.change(screen.getByLabelText('Total à vista no cartão em outubro'), { target: { value: '1.000' } })
+    expect(screen.getByText(/R\$\s900,00 entram como compras à vista do mês/)).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Lançar total à vista' }))
+    expect(lerSalvo().cartao.compras.find((c) => c.id === 'total-2026-10')).toMatchObject({ valor: 900, parcelas: 1 })
+    expect(screen.getByText('Compras à vista do mês')).toBeTruthy()
+    // 1.000 à vista + 300 da geladeira (parcela 2 de 10).
+    expect(screen.getByText(/Gasto em outubro/).parentElement!.textContent).toMatch(/R\$\s1\.300,00/)
+
+    // Compra parcelada depois não mexe no total à vista.
+    fireEvent.change(screen.getByLabelText('O que foi'), { target: { value: 'TV' } })
+    fireEvent.change(screen.getByLabelText('Valor da compra'), { target: { value: '2.000' } })
+    fireEvent.change(screen.getByLabelText('Forma de pagamento'), { target: { value: '5' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Lançar compra' }))
+    expect(lerSalvo().cartao.compras.find((c) => c.id === 'total-2026-10')!.valor).toBe(900)
+
+    vi.spyOn(window, 'confirm').mockReturnValue(true)
+    fireEvent.click(screen.getByRole('button', { name: 'Voltar a anotar uma por uma' }))
+    expect(lerSalvo().cartao.compras.map((c) => c.descricao)).toEqual(['Geladeira', 'Padaria', 'TV'])
+  })
+
+  it('primeiro mês: lança as compras à vista do mês passado, que caem na fatura deste mês (ajuste de 26/09/2026)', async () => {
+    salvar({ ...exemplo, cartao: { teto: 3000, compras: [] } })
+    render(<MeuMes ctx={ctx} hoje={hoje} />)
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'Primeiro mês no app? Lance as compras à vista de setembro, que você paga na fatura de outubro' }),
+    )
+    expect(screen.getByText(/Elas entram na fatura de outubro, que você paga agora/)).toBeTruthy()
+    fireEvent.change(screen.getByLabelText('Total à vista no cartão em setembro'), { target: { value: '1.500' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Lançar total à vista' }))
+    expect(lerSalvo().cartao.compras.find((c) => c.id === 'total-2026-09')).toMatchObject({ valor: 1500, mes: '2026-09', parcelas: 1 })
+    // A fatura de outubro, em Contas do mês, traz as compras de setembro.
+    expect(screen.getAllByText('Fatura do cartão').some((e) => /R\$\s1\.500,00/.test(e.closest('li')?.textContent ?? ''))).toBe(true)
+    // O atalho fica para corrigir, e o gasto de outubro não muda.
+    expect(screen.getByRole('button', { name: /Compras à vista de setembro \(fatura de outubro\): R\$\s1\.500,00\. Corrigir/ })).toBeTruthy()
+    expect(screen.getByText(/Gasto em outubro/).parentElement!.textContent).toMatch(/R\$\s0,00/)
+  })
+
+  it('o atalho do mês passado some quando ele já tem compras à vista anotadas uma a uma', async () => {
+    salvar({ ...exemplo, cartao: { teto: 3000, compras: [{ id: 'm', descricao: 'Mercado', valor: 200, mes: '2026-09', parcelas: 1 }] } })
+    render(<MeuMes ctx={ctx} hoje={hoje} />)
+    await screen.findByText('Seu teto por mês')
+    expect(screen.queryByRole('button', { name: /Primeiro mês no app/ })).toBeNull()
+  })
+
   it('restaurar um arquivo que não é cópia não altera nada', async () => {
     salvar(exemplo)
     render(<MeuMes ctx={ctx} hoje={hoje} />)

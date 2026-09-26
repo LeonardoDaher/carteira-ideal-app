@@ -880,3 +880,49 @@ export function contasEmDobroComDividas(orc: Orcamento): Conta[] {
   if (!temDividaComParcelaFixa(orc)) return []
   return orc.contas.filter((c) => c.tipo === 'mensal' && pareceDivida(c.nome))
 }
+
+// ---------------------------------------------------------------- compras à vista do mês de uma vez
+
+/**
+ * Compras à vista do mês lançadas de uma vez (ajuste de 26/09/2026). Quem não quer anotar compra
+ * por compra informa só o total do que comprou à vista no cartão no mês. Parceladas (compras e
+ * contas do ano) e contas no cartão ficam de fora: seguem lançadas em separado, porque comprometem
+ * os meses seguintes. Compras à vista já lançadas uma a uma no mês fazem parte do total e são
+ * descontadas; o resto vira uma compra à vista especial, uma por mês, com id fixo. O formato dos
+ * dados não muda.
+ */
+export const DESCRICAO_AVISTA_DO_MES = 'Compras à vista do mês'
+
+export function idTotalDoMes(mes: string): string {
+  return `total-${mes}`
+}
+
+export function ehTotalDoMes(compra: Compra): boolean {
+  return compra.id.startsWith('total-')
+}
+
+/** Compras à vista de `mes` lançadas uma a uma (sem o lançamento de uma vez). */
+export function aVistaLancadasNoMes(orc: Orcamento, mes: string): number {
+  return centavos(
+    orc.cartao.compras.filter((c) => !ehTotalDoMes(c) && c.mes === mes && c.parcelas <= 1).reduce((t, c) => t + c.valor, 0),
+  )
+}
+
+/** O total à vista que a pessoa informou para `mes`, ou null se ela lança compra por compra. */
+export function totalInformado(orc: Orcamento, mes: string): number | null {
+  const lancamento = orc.cartao.compras.find((c) => c.id === idTotalDoMes(mes))
+  return lancamento ? centavos(lancamento.valor + aVistaLancadasNoMes(orc, mes)) : null
+}
+
+/**
+ * Lança as compras à vista de `mes` pelo total: o que passa das compras à vista já lançadas uma a
+ * uma vira "Compras à vista do mês". Total 0 (ou igual ao já lançado) tira o lançamento. Total
+ * menor que o já lançado não é aceito aqui (a tela avisa).
+ */
+export function acertarPeloTotal(orc: Orcamento, mes: string, total: number): Orcamento {
+  const id = idTotalDoMes(mes)
+  const outras = orc.cartao.compras.filter((c) => c.id !== id)
+  const diferenca = centavos(total - aVistaLancadasNoMes(orc, mes))
+  const compras = total > 0 && diferenca > 0 ? [...outras, { id, descricao: DESCRICAO_AVISTA_DO_MES, valor: diferenca, mes, parcelas: 1 }] : outras
+  return { ...orc, cartao: { ...orc.cartao, compras } }
+}

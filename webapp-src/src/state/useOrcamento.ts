@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { storage } from '../data/storage'
-import { ORCAMENTO_VAZIO, PREFIXO_DIVIDA, alternarPagamento, recuperacaoDe, validarOrcamento } from '../domain/orcamento'
+import { ORCAMENTO_VAZIO, PREFIXO_DIVIDA, acertarPeloTotal, alternarPagamento, recuperacaoDe, validarOrcamento } from '../domain/orcamento'
 import type { Compra, Conta, Orcamento } from '../domain/orcamento'
 import type { Divida, MetodoQuitacao, Recuperacao } from '../domain/recuperacao'
 
@@ -95,6 +95,19 @@ export function useOrcamento() {
     setOrcamento((o) => ({ ...o, cartao: { ...o.cartao, compras: [...o.cartao.compras, { ...compra, id }] } }))
   }, [])
 
+  /** Corrige uma compra lançada (ajuste de 26/09/2026: antes só dava para remover). */
+  const editarCompra = useCallback((id: string, dados: Omit<Compra, 'id'>) => {
+    setOrcamento((o) => ({
+      ...o,
+      cartao: { ...o.cartao, compras: o.cartao.compras.map((c) => (c.id === id ? { ...dados, id } : c)) },
+    }))
+  }, [])
+
+  /** Lança as compras à vista do mês de uma vez, pelo total (ajuste de 26/09/2026). */
+  const acertarTotal = useCallback((mes: string, total: number) => {
+    setOrcamento((o) => acertarPeloTotal(o, mes, total))
+  }, [])
+
   const removerCompra = useCallback((id: string) => {
     setOrcamento((o) => ({ ...o, cartao: { ...o.cartao, compras: o.cartao.compras.filter((c) => c.id !== id) } }))
   }, [])
@@ -164,6 +177,8 @@ export function useOrcamento() {
     ticar,
     setTeto,
     adicionarCompra,
+    editarCompra,
+    acertarTotal,
     removerCompra,
     adicionarDivida,
     editarDivida,
