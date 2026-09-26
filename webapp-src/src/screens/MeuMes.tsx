@@ -284,9 +284,9 @@ function ContasDoMes({
         <div style={{ width: `${progresso}%` }} />
       </div>
 
-      {mensais.length > 0 && <ListaDeItens titulo="Todo mês" itens={mensais} mes={mes} onTicar={onTicar} onEditar={onEditar} />}
+      {mensais.length > 0 && <ListaDeItens titulo="Todo mês" cor="seg-contas" itens={mensais} mes={mes} onTicar={onTicar} onEditar={onEditar} />}
       {anuais.length > 0 && (
-        <ListaDeItens titulo="Cofrinhos das contas do ano" itens={anuais} mes={mes} onTicar={onTicar} onEditar={onEditar} />
+        <ListaDeItens titulo="Cofrinhos das contas do ano" cor="seg-cofrinhos" itens={anuais} mes={mes} onTicar={onTicar} onEditar={onEditar} />
       )}
       {pagasNoCartao.length > 0 && (
         <span className="tiny muted justify">
@@ -300,8 +300,8 @@ function ContasDoMes({
           cofrinho, as parcelas entram nas faturas a partir de {NOMES_DOS_MESES[(c.mesVencimento ?? 1) % 12]}.
         </span>
       ))}
-      {fatura.length > 0 && <ListaDeItens titulo="Cartão de crédito" itens={fatura} mes={mes} onTicar={onTicar} />}
-      {dividas.length > 0 && <ListaDeItens titulo="Dívidas (plano de quitação)" itens={dividas} mes={mes} onTicar={onTicar} />}
+      {fatura.length > 0 && <ListaDeItens titulo="Cartão de crédito" cor="seg-cartao" itens={fatura} mes={mes} onTicar={onTicar} />}
+      {dividas.length > 0 && <ListaDeItens titulo="Dívidas (plano de quitação)" cor="seg-dividas" itens={dividas} mes={mes} onTicar={onTicar} />}
 
       <div className="row-between mm-rodape-lista">
         <span className="small">{tudoPago ? 'Tudo pago neste mês.' : 'Ainda falta pagar'}</span>
@@ -313,12 +313,19 @@ function ContasDoMes({
 
 function ListaDeItens({
   titulo,
+  cor,
   itens,
   mes,
   onTicar,
   onEditar,
 }: {
   titulo: string
+  /**
+   * Classe da bolinha correspondente em "Para onde vai o salário" (seg-contas, seg-cofrinhos,
+   * seg-cartao, seg-dividas): o título do grupo vira uma caixinha nessa cor, no mesmo esquema de
+   * "Minhas dívidas" (ajuste de 26/09/2026).
+   */
+  cor: string
   itens: ItemDoMes[]
   mes: string
   onTicar: (mes: string, id: string, valor: number) => void
@@ -327,7 +334,7 @@ function ListaDeItens({
 }) {
   return (
     <div className="col" style={{ gap: 2 }}>
-      <span className="tiny muted" style={{ fontWeight: 600 }}>{titulo}</span>
+      <span className={`mm-titulo-cor mm-titulo-cor-pequeno ${cor}`}>{titulo}</span>
       <ul className="mm-lista">
         {itens.map((item) => {
           const desc = descricaoItem(item, mes)
@@ -1292,7 +1299,7 @@ function MinhasContas({
 
   return (
     <div className="card col" style={{ gap: 12 }}>
-      <span style={{ fontWeight: 700 }}>Minhas contas</span>
+      <span className="mm-titulo-cor seg-contas">Minhas contas</span>
 
       {contas.length > 0 && (
         <ul className="mm-lista">
