@@ -7,6 +7,9 @@ import {
   coberturaDoCofrinho,
   custoAnual,
   gastoNoTeto,
+  inicioDaAnualNoCartao,
+  quandoApareceNoCartao,
+  parcelamentoPodeTerComecado,
   jurosDoParcelamento,
   parcelaAnualNoMes,
   contasNoCartao,
@@ -429,6 +432,46 @@ describe('conta anual paga no cartão (ajuste após a Etapa 4)', () => {
   it('parcelado depois de já ter guardado: o cofrinho abate as primeiras parcelas', () => {
     const orc = base(ipva({ parcelas: 10, total: 1400, desde: '2026-10' }), { '2026-09': { ipva: 300 } })
     expect([coberturaDoCofrinho(orc, '2027-02'), coberturaDoCofrinho(orc, '2027-03'), coberturaDoCofrinho(orc, '2027-04'), coberturaDoCofrinho(orc, '2027-05')]).toEqual([140, 140, 20, 0])
+  })
+
+  it('parcelado entra no teto do mês da parcela (ajuste de 26/09/2026)', () => {
+    const orc = base(ipva({ parcelas: 10, total: 1400, desde: '2026-10' }))
+    expect(gastoNoTeto(orc, '2027-01')).toBe(140)
+    expect(gastoNoTeto(orc, '2027-10')).toBe(140)
+    expect(gastoNoTeto(orc, '2027-11')).toBe(0)
+  })
+
+  it('parcelado com cofrinho guardado: o teto só pesa o que sai do salário', () => {
+    const orc = base(ipva({ parcelas: 10, total: 1400, desde: '2026-10' }), { '2026-09': { ipva: 300 } })
+    expect([gastoNoTeto(orc, '2027-01'), gastoNoTeto(orc, '2027-02'), gastoNoTeto(orc, '2027-03'), gastoNoTeto(orc, '2027-04')]).toEqual([0, 0, 120, 140])
+  })
+
+  it('teto sugerido abre espaço para a conta do ano parcelada no cartão', () => {
+    const boleto = base({ id: 'ipva', nome: 'IPVA', valor: 1200, tipo: 'anual', mesVencimento: 1 })
+    const parcelado = base(ipva({ parcelas: 10, total: 1400, desde: '2026-10' }))
+    // Boleto: 4.000 − 100 = 3.900. Parcelado: 4.000 − 116,67 + 116,67 = 4.000.
+    expect(tetoSugerido(boleto)).toBe(3900)
+    expect(tetoSugerido(parcelado)).toBe(4000)
+  })
+
+  it('início no cartão: só volta ao vencimento passado se a pessoa diz que já está pagando', () => {
+    expect(inicioDaAnualNoCartao(9, 10, '2026-09', false)).toBe('2026-09') // vence este mês
+    expect(parcelamentoPodeTerComecado(9, 10, '2026-09')).toBe(false)
+    expect(parcelamentoPodeTerComecado(8, 10, '2026-09')).toBe(true)
+    expect(inicioDaAnualNoCartao(8, 10, '2026-09', true)).toBe('2026-08') // parcelou em agosto
+    expect(inicioDaAnualNoCartao(8, 10, '2026-09', false)).toBe('2026-09') // é o de agosto de 2027
+    expect(inicioDaAnualNoCartao(8, 1, '2026-09', true)).toBe('2026-08') // à vista em agosto: fatura agora
+    expect(parcelamentoPodeTerComecado(3, 3, '2026-09')).toBe(false) // acabou em maio
+    expect(inicioDaAnualNoCartao(3, 3, '2026-09', true)).toBe('2026-09')
+    const orc = base({ ...ipva({ parcelas: 10, total: 1000, desde: inicioDaAnualNoCartao(8, 10, '2026-09', true) }), mesVencimento: 8 })
+    expect(gastoNoTeto(orc, '2026-09')).toBe(100) // parcela 2 de 10 já pesa em setembro
+    expect(faturaDoMes(orc, '2026-09')).toBe(100) // e a 1ª é paga na fatura de setembro
+  })
+
+  it('explica quando a 1ª parcela aparece', () => {
+    expect(quandoApareceNoCartao(9, 10, '2026-09', false)).toMatch(/deste mês e já conta para o seu teto.*fatura de outubro de 2026.*junho de 2027/)
+    expect(quandoApareceNoCartao(1, 10, '2026-09', true)).toMatch(/parcela 9 de 10 já entra/)
+    expect(quandoApareceNoCartao(1, 10, '2026-09', false)).toMatch(/em janeiro de 2027.*nada muda/)
   })
 
   it('parcelas assumidas só aparecem depois do vencimento', () => {

@@ -381,12 +381,16 @@ export function gastoNoCartao(orc: Orcamento, mes: string): number {
 }
 
 /**
- * O que conta para o teto e o semáforo: tudo menos as contas anuais, que são planejadas (vêm do
- * cofrinho ou foram parceladas de propósito) e não devem acender o vermelho no mês do IPVA.
+ * O que conta para o teto e o semáforo: tudo o que vai sair do salário na fatura seguinte.
+ * Compras, parcelas e contas mensais no cartão entram inteiras. Das contas do ano no cartão,
+ * entra só a parte que o cofrinho não cobre: à vista com o cofrinho completo não pesa (o dinheiro
+ * já estava guardado e não deve acender o vermelho no mês do IPVA); parcelada pesa a parcela
+ * inteira, porque não tem cofrinho, a não ser o que já estava guardado no ciclo (ajuste de
+ * 26/09/2026: antes, toda conta do ano ficava fora do teto e a parcela não aparecia no semáforo).
  */
 export function gastoNoTeto(orc: Orcamento, mes: string): number {
-  const anuais = anuaisNoCartao(orc, mes).reduce((t, a) => t + a.valor, 0)
-  return centavos(gastoNoCartao(orc, mes) - anuais)
+  const doCofrinho = anuaisNoCartao(orc, mes).reduce((t, a) => t + coberturaDaConta(orc, a.conta, mes), 0)
+  return centavos(gastoNoCartao(orc, mes) - doCofrinho)
 }
 
 /** A fatura paga em `mes` traz as compras do mês anterior. */
@@ -442,7 +446,10 @@ export function tetoSugerido(orc: Orcamento): number | null {
   const terceiroPote = modoRecuperacaoAtivo(orc) ? (orc.potes.quitar ?? 0) : orc.potes.crescer
   const livre = orc.salario - custoMensalDeVida(orc) - orc.potes.guardar - terceiroPote
   const contasNoCartao = orc.contas.reduce((t, c) => t + (c.tipo === 'mensal' && c.cartaoDesde ? c.valor : 0), 0)
-  return livre > 0 ? Math.floor((livre + contasNoCartao) / 10) * 10 : null
+  // A conta do ano parcelada no cartão não tem cofrinho: o 1/12 dela que o custo de vida separa
+  // passa pelo cartão, em parcelas, e também ocupa o teto (ajuste de 26/09/2026).
+  const parceladas = orc.contas.reduce((t, c) => t + (anualParcelada(c) ? custoAnual(c) / 12 : 0), 0)
+  return livre > 0 ? Math.floor(centavos(livre + contasNoCartao + parceladas) / 10) * 10 : null
 }
 
 // ---------------------------------------------------------------- reserva
@@ -761,21 +768,50 @@ function guardadoNoCiclo(conta: Conta, pagamentos: Orcamento['pagamentos'], venc
 }
 
 /**
- * Quanto da fatura paga em `mes` sai do cofrinho das contas anuais, e não do salário: o que foi
- * guardado no ciclo cobre as cobranças da conta no cartão, na ordem, até acabar.
+ * Quanto da cobrança de uma conta anual no cartão em `mesDoGasto` o cofrinho cobre: o que foi
+ * guardado no ciclo paga as cobranças da conta, na ordem, até acabar.
  */
+export function coberturaDaConta(orc: Orcamento, conta: Conta, mesDoGasto: string): number {
+  const p = parcelaAnualNoMes(conta, mesDoGasto)
+  if (!p) return 0
+  let usado = 0
+  for (let m = p.vencimento; m < mesDoGasto; m = somarMeses(m, 1)) usado += parcelaAnualNoMes(conta, m)?.valor ?? 0
+  const disponivel = Math.max(0, guardadoNoCiclo(conta, orc.pagamentos, p.vencimento) - usado)
+  return centavos(Math.min(p.valor, disponivel))
+}
+
+/** Quanto da fatura paga em `mes` sai do cofrinho das contas anuais, e não do salário. */
 export function coberturaDoCofrinho(orc: Orcamento, mes: string): number {
   const mesDoGasto = somarMeses(mes, -1)
-  let total = 0
-  for (const conta of orc.contas) {
-    const p = parcelaAnualNoMes(conta, mesDoGasto)
-    if (!p) continue
-    let usado = 0
-    for (let m = p.vencimento; m < mesDoGasto; m = somarMeses(m, 1)) usado += parcelaAnualNoMes(conta, m)?.valor ?? 0
-    const disponivel = Math.max(0, guardadoNoCiclo(conta, orc.pagamentos, p.vencimento) - usado)
-    total += Math.min(p.valor, disponivel)
-  }
-  return centavos(total)
+  return centavos(orc.contas.reduce((t, conta) => t + coberturaDaConta(orc, conta, mesDoGasto), 0))
+}
+
+/** Vencimento de `mesVencimento` em `mesDeHoje` ou antes dele. */
+function ultimoVencimento(mesVencimento: number, mesDeHoje: string): string {
+  return somarMeses(mesDeHoje, -((Number(mesDeHoje.slice(5)) - mesVencimento + 12) % 12))
+}
+
+/**
+ * Um parcelamento no cartão desse vencimento pode já estar em andamento: o último vencimento foi
+ * antes deste mês e ainda tem fatura a pagar agora ou depois. Só nesse caso a tela pergunta se a
+ * pessoa já está pagando (ajuste de 26/09/2026), porque o app não tem como adivinhar: um IPVA de
+ * janeiro cadastrado em outubro pode ser o de janeiro passado (parcela 10) ou o próximo.
+ */
+export function parcelamentoPodeTerComecado(mesVencimento: number, parcelas: number, mesDeHoje: string): boolean {
+  const v = ultimoVencimento(mesVencimento, mesDeHoje)
+  return v < mesDeHoje && diferencaMeses(v, mesDeHoje) <= parcelas
+}
+
+/**
+ * Mês de início (`desde`) de uma conta anual que passa a ser paga no cartão agora. Se a pessoa
+ * diz que o parcelamento do último vencimento já começou (e ele ainda tem fatura), o início é esse
+ * vencimento: as parcelas que faltam aparecem já, no gasto e no teto. Senão, vale a partir deste
+ * mês, e a 1ª cobrança cai no próximo vencimento (que pode ser este mês).
+ */
+export function inicioDaAnualNoCartao(mesVencimento: number, parcelas: number, mesDeHoje: string, jaComecou: boolean): string {
+  return jaComecou && parcelamentoPodeTerComecado(mesVencimento, parcelas, mesDeHoje)
+    ? ultimoVencimento(mesVencimento, mesDeHoje)
+    : mesDeHoje
 }
 
 /**
@@ -794,4 +830,24 @@ export function jurosDoParcelamento(valorAVista: number, total: number, parcelas
     else alto = meio
   }
   return Math.round(((baixo + alto) / 2) * 10000) / 100
+}
+
+/**
+ * Explica, antes de salvar, em que mês a 1ª parcela entra no gasto do cartão (e no teto) e em
+ * que fatura ela é paga (ajuste de 26/09/2026: a dúvida "começa a aparecer no mês que vem?").
+ */
+export function quandoApareceNoCartao(mesVencimento: number, parcelas: number, mesDeHoje: string, jaComecou: boolean): string {
+  const nome = (m: string) => `${NOMES_DOS_MESES[Number(m.slice(5)) - 1].toLowerCase()} de ${m.slice(0, 4)}`
+  const inicio = inicioDaAnualNoCartao(mesVencimento, parcelas, mesDeHoje, jaComecou)
+  if (inicio < mesDeHoje) {
+    const atual = diferencaMeses(inicio, mesDeHoje) + 1
+    return atual <= parcelas
+      ? `Parcelamento que começou em ${nome(inicio)}: a parcela ${atual} de ${parcelas} já entra no gasto do cartão deste mês e conta para o seu teto.`
+      : `A última parcela caiu em ${nome(somarMeses(inicio, parcelas - 1))} e é paga na fatura deste mês.`
+  }
+  const vencimento = somarMeses(mesDeHoje, (mesVencimento - Number(mesDeHoje.slice(5)) + 12) % 12)
+  const ultima = nome(somarMeses(vencimento, parcelas - 1))
+  return vencimento === mesDeHoje
+    ? `A 1ª parcela entra no gasto do cartão deste mês e já conta para o seu teto. Ela é paga na fatura de ${nome(somarMeses(mesDeHoje, 1))}; a última cai em ${ultima}.`
+    : `A 1ª parcela entra no gasto do cartão em ${nome(vencimento)} e conta para o teto desse mês; até lá, nada muda. A última cai em ${ultima}.`
 }

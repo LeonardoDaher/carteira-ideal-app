@@ -3,7 +3,12 @@ import { CampoReais } from '../ui/CampoReais'
 import {
   CONTAS_SUGERIDAS,
   NOMES_DOS_MESES,
+  centavos,
   chaveMes,
+  inicioDaAnualNoCartao,
+  quandoApareceNoCartao,
+  parcelamentoPodeTerComecado,
+  vencimentoAnterior,
   anuaisNoCartao,
   anualParcelada,
   comprasDoMes,
@@ -77,7 +82,8 @@ export function MeuMes({
 
       <div className="col" style={{ gap: 4 }}>
         <h1 style={{ fontSize: 21 }}>Meu mês</h1>
-        <div className="muted small justify">
+        {/* Texto de abertura maior (ajuste de 26/09/2026): em 12px, apagado, passava despercebido. */}
+        <div className="muted justify mm-abertura">
           Anote suas contas uma vez. Quando o salário cair, é só ir ticando, e você sabe exatamente quanto sobra para guardar,
           investir e gastar.
         </div>
@@ -456,11 +462,12 @@ function CartaoDoMes({
   onPacto: (mes: string | null) => void
 }) {
   const { teto } = orcamento.cartao
-  // O teto e o semáforo olham o gasto do dia a dia; as contas do ano no cartão são planejadas
-  // e aparecem à parte (ajuste após a Etapa 4).
+  // O teto e o semáforo olham tudo o que vai sair do salário na fatura: compras, parcelas, contas
+  // mensais e as parcelas das contas do ano. Só o que o cofrinho já guardou fica fora (ajuste de
+  // 26/09/2026: antes, a conta do ano parcelada não aparecia no teto).
   const gasto = gastoNoTeto(orcamento, mes)
   const anuais = anuaisNoCartao(orcamento, mes)
-  const totalAnuais = anuais.reduce((t, a) => t + a.valor, 0)
+  const doCofrinho = centavos(gastoNoCartao(orcamento, mes) - gasto)
   const sem = semaforoDoCartao(gasto, teto)
   const compras = comprasDoMes(orcamento, mes)
   const contasCartao = contasNoCartao(orcamento, mes)
@@ -518,9 +525,9 @@ function CartaoDoMes({
           </div>
         </div>
       )}
-      {totalAnuais > 0 && (
+      {doCofrinho > 0 && (
         <div className="small muted">
-          + {reais(totalAnuais)} de contas do ano no cartão, fora do teto. Total na fatura de {proximoMes}:{' '}
+          + {reais(doCofrinho)} de contas do ano pagos pelo cofrinho, fora do teto. Total na fatura de {proximoMes}:{' '}
           {reais(gastoNoCartao(orcamento, mes))}.
         </div>
       )}
@@ -754,6 +761,11 @@ type Rascunho = {
   parcelas: number
   /** Total cobrado no cartão, com juros e taxas (parcelado). 0 = ainda não informado. */
   totalCartao: number
+  /**
+   * Conta do ano no cartão cujo último vencimento já passou: a pessoa já está pagando esse
+   * parcelamento (true) ou ele começa no próximo vencimento (false, o padrão). Ajuste de 26/09/2026.
+   */
+  jaComecou: boolean
 }
 const RASCUNHO_VAZIO: Rascunho = {
   nome: '',
@@ -764,6 +776,7 @@ const RASCUNHO_VAZIO: Rascunho = {
   pagamentoAnual: 'boleto',
   parcelas: 10,
   totalCartao: 0,
+  jaComecou: false,
 }
 
 const ROTULO_PAGAMENTO_ANUAL: Record<PagamentoAnual, string> = {
@@ -784,6 +797,8 @@ function rascunhoDaConta(c: Conta): Rascunho {
     pagamentoAnual: !ca ? 'boleto' : ca.parcelas > 1 ? 'parcelado' : 'avista',
     parcelas: ca && ca.parcelas > 1 ? ca.parcelas : 10,
     totalCartao: ca && ca.parcelas > 1 ? ca.total : 0,
+    // Já começou quando o início gravado é um vencimento (e não o mês do cadastro).
+    jaComecou: !!ca && vencimentoAnterior(c, ca.desde) === ca.desde,
   }
 }
 
@@ -800,6 +815,8 @@ function custoDoParcelamento(valor: number, total: number, parcelas: number): st
     (aoMes ? `, cerca de ${aoMes.toLocaleString('pt-BR')}% ao mês.` : '.')
   )
 }
+const menorMes = (a: string, b: string) => (a < b ? a : b)
+
 /** Quantas sugestões aparecem antes de "Ver mais sugestões". */
 const SUGESTOES_VISIVEIS = 6
 
@@ -881,7 +898,12 @@ function MinhasContas({
         conta.cartaoAnual = {
           parcelas,
           total: parcelado ? rascunho.totalCartao : rascunho.valor,
-          desde: mesmoJeito ? anterior.desde : mesDeHoje,
+          // Parcelamento que começou num vencimento recente e ainda tem fatura: começa nele, para as
+          // parcelas que faltam aparecerem já. Editar uma conta antiga corrige o início dela.
+          desde: menorMes(
+            mesmoJeito ? anterior.desde : mesDeHoje,
+            inicioDaAnualNoCartao(rascunho.mesVencimento, parcelas, mesDeHoje, rascunho.jaComecou),
+          ),
         }
       }
     } else {
@@ -1083,6 +1105,28 @@ function MinhasContas({
                     {custoDoParcelamento(rascunho.valor, rascunho.totalCartao, rascunho.parcelas)}
                   </div>
                 )}
+                {parcelamentoPodeTerComecado(rascunho.mesVencimento, rascunho.parcelas, mesDeHoje) && (
+                  <div className="col" style={{ gap: 6 }}>
+                    <span className="small" style={{ fontWeight: 600 }}>
+                      Você já está pagando o parcelamento de {NOMES_DOS_MESES[rascunho.mesVencimento - 1].toLowerCase()}?
+                    </span>
+                    <div className="row" style={{ gap: 6, flexWrap: 'wrap' }} role="group" aria-label="Parcelamento já começou">
+                      {([true, false] as const).map((sim) => (
+                        <button
+                          key={String(sim)}
+                          className={`chip ${rascunho.jaComecou === sim ? 'selected' : ''}`}
+                          aria-pressed={rascunho.jaComecou === sim}
+                          onClick={() => setRascunho({ ...rascunho, jaComecou: sim })}
+                        >
+                          {sim ? 'Sim, já estou pagando' : 'Não, é o próximo'}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div className="small justify mm-situacao" role="note">
+                  {quandoApareceNoCartao(rascunho.mesVencimento, rascunho.parcelas, mesDeHoje, rascunho.jaComecou)}
+                </div>
                 <span className="tiny muted justify">
                   Antes de parcelar no cartão, veja se a prefeitura ou a Secretaria da Fazenda oferece desconto à vista ou
                   parcelamento sem juros no boleto: costuma sair mais barato. Parcelado, a conta não tem cofrinho: as parcelas entram
@@ -1188,8 +1232,7 @@ function CopiaDeSeguranca({
         </span>
       )}
       <button
-        className="mm-link tiny muted"
-        style={{ alignSelf: 'flex-start' }}
+        className="mm-apagar-tudo"
         onClick={() => {
           if (window.confirm('Apagar salário, contas e todos os tiques deste aparelho? Não dá para desfazer.')) onApagar()
         }}

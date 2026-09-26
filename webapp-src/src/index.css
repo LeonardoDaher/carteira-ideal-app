@@ -1517,3 +1517,25 @@ select option:disabled { color: #6b7280 !important; -webkit-text-fill-color: #6b
 .mm-linha .mm-item { min-width: 0; }
 .mm-editar { flex: none; min-height: 44px; padding: 0 2px; color: var(--text-muted); }
 .mm-editar:hover { color: var(--text); }
+
+/* Ajustes de 26/09/2026 (segunda rodada do Meu Mês).
+   1. Texto de abertura do Meu Mês: de 12px para 15px, com entrelinha confortável. */
+.mm-abertura { font-size: 15px; line-height: 1.5; }
+/* 2. "Apagar tudo e começar de novo": saiu do link cinza pequeno, fácil de perder, para uma
+      caixa amarela com texto escuro, no mesmo desenho do botão principal. Continua pedindo
+      confirmação antes de apagar. */
+.mm-apagar-tudo {
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--accent-text);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+  cursor: pointer;
+}
+.mm-apagar-tudo:hover { filter: brightness(1.05); }
+.mm-apagar-tudo:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }

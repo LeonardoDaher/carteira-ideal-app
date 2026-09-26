@@ -284,6 +284,38 @@ describe('MeuMes', () => {
       expect(screen.getByText(/no cartão em 10x \(total R\$\s1\.400,00\)/)).toBeTruthy()
     })
 
+    it('parcelamento já em andamento: pergunta, e a parcela do mês pesa no teto (ajuste de 26/09/2026)', async () => {
+      salvar({ ...exemplo, contas: [exemplo.contas[0]], cartao: { teto: 1000, compras: [] } })
+      render(<MeuMes ctx={ctx} hoje={hoje} />)
+      fireEvent.change(await screen.findByLabelText('Nome da conta'), { target: { value: 'IPTU' } })
+      fireEvent.click(screen.getByRole('button', { name: 'Uma vez por ano' }))
+      fireEvent.change(screen.getByLabelText('Valor total no ano'), { target: { value: '1.000' } })
+      fireEvent.change(screen.getByLabelText(/Mês do vencimento/), { target: { value: '9' } })
+      fireEvent.click(screen.getByRole('button', { name: 'Cartão parcelado' }))
+      fireEvent.change(screen.getByLabelText('Total cobrado no cartão, com juros e taxas'), { target: { value: '1.000' } })
+      // Padrão: é o próximo vencimento (setembro de 2027).
+      expect(screen.getByText(/1ª parcela entra no gasto do cartão em setembro de 2027/)).toBeTruthy()
+      fireEvent.click(screen.getByRole('button', { name: 'Sim, já estou pagando' }))
+      expect(screen.getByText(/a parcela 2 de 10 já entra no gasto do cartão deste mês/)).toBeTruthy()
+      fireEvent.click(screen.getByRole('button', { name: 'Adicionar conta' }))
+
+      expect(lerSalvo().contas.find((c) => c.nome === 'IPTU')!.cartaoAnual!.desde).toBe('2026-09')
+      const cartao = screen.getByText('Seu teto por mês').closest('.card') as HTMLElement
+      expect(txt(cartao)).toMatch(/Gasto em outubro\s?R\$ 100,00 de R\$ 1\.000,00/)
+      expect(txt(cartao)).toContain('parcela 2 de 10')
+    })
+
+    it('"Apagar tudo e começar de novo" fica numa caixa amarela e pede confirmação', async () => {
+      const confirmar = vi.spyOn(window, 'confirm').mockReturnValue(false)
+      salvar(exemplo)
+      render(<MeuMes ctx={ctx} hoje={hoje} />)
+      const botao = await screen.findByRole('button', { name: 'Apagar tudo e começar de novo' })
+      expect(botao.className).toContain('mm-apagar-tudo')
+      fireEvent.click(botao)
+      expect(confirmar).toHaveBeenCalled()
+      expect(lerSalvo().salario).toBe(4000)
+    })
+
     it('conta anual no cartão à vista: o cofrinho continua e avisa que vai no cartão', async () => {
       salvar({ ...exemplo, contas: [{ ...exemplo.contas[1], cartaoAnual: { parcelas: 1, total: 1200, desde: '2026-10' } }] })
       render(<MeuMes ctx={ctx} hoje={hoje} />)
