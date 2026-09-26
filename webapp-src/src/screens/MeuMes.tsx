@@ -1,10 +1,16 @@
-import { useId, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { CampoReais } from '../ui/CampoReais'
 import {
   CONTAS_SUGERIDAS,
   NOMES_DOS_MESES,
   chaveMes,
+  anuaisNoCartao,
+  anualParcelada,
   comprasDoMes,
+  gastoNoTeto,
+  jurosDoParcelamento,
+  MAX_PARCELAS_ANUAL,
+  contasNoCartao,
   gastoNoCartao,
   gerarCopia,
   itensDoMes,
@@ -54,6 +60,9 @@ export function MeuMes({
 }) {
   const est = useOrcamento()
   const [mes, setMes] = useState(() => chaveMes(hoje))
+  // "Editar" na lista do mês abre a conta no formulário de Minhas contas (ajuste após a Etapa 4).
+  const [pedidoEdicao, setPedidoEdicao] = useState<{ id: string; vez: number } | null>(null)
+  const editarConta = (id: string) => setPedidoEdicao((p) => ({ id, vez: (p?.vez ?? 0) + 1 }))
 
   if (!est.hidratado) return <div className="screen" />
 
@@ -81,7 +90,17 @@ export function MeuMes({
           <div className="desk-main">
             <NavegarMes mes={mes} onMudar={setMes} mesDeHoje={mesDeHoje} />
             {recuperacao && <PainelRecuperacao orcamento={orcamento} onDesligar={() => est.setLigadoManual(false)} />}
-            <ContasDoMes orcamento={orcamento} mes={mes} onTicar={est.ticar} />
+            <ContasDoMes orcamento={orcamento} mes={mes} onTicar={est.ticar} onEditar={editarConta} />
+            {/* Cadastro das contas logo abaixo da lista do mês, antes do cartão (ajuste após a Etapa 4). */}
+            <MinhasContas
+              contas={orcamento.contas}
+              mesDeHoje={mesDeHoje}
+              pactoAtivo={!!recuperacaoDe(orcamento).pactoDesde}
+              pedidoEdicao={pedidoEdicao}
+              onAdicionar={est.adicionarConta}
+              onEditar={est.editarConta}
+              onRemover={est.removerConta}
+            />
             <MinhasDividas
               orcamento={orcamento}
               onAdicionar={est.adicionarDivida}
@@ -103,12 +122,6 @@ export function MeuMes({
               onAdicionar={est.adicionarCompra}
               onRemover={est.removerCompra}
               onPacto={est.setPacto}
-            />
-            <MinhasContas
-              contas={orcamento.contas}
-              onAdicionar={est.adicionarConta}
-              onEditar={est.editarConta}
-              onRemover={est.removerConta}
             />
           </div>
           <div className="desk-side">
@@ -185,7 +198,11 @@ function nomeDoMes(mes: string) {
 // ---------------------------------------------------------------- checklist
 
 function descricaoItem(item: ItemDoMes, mes: string): string | null {
-  if (item.origem === 'fatura') return `Compras de ${nomeDoMes(somarMeses(mes, -1))} no cartão.`
+  if (item.origem === 'fatura') {
+    const base = `Compras de ${nomeDoMes(somarMeses(mes, -1))} no cartão.`
+    const cobertura = item.cobertura ?? 0
+    return cobertura > 0 ? `${base} ${reais(cobertura)} sai do cofrinho das contas do ano, e não do salário.` : base
+  }
   if (item.origem === 'divida') {
     const { minimo, extra } = item.divida!
     return extra > 0 ? `Mínima ${reais(minimo)} + ${reais(extra)} do pote Quitar.` : 'Parcela mínima.'
@@ -193,18 +210,25 @@ function descricaoItem(item: ItemDoMes, mes: string): string | null {
   const { conta } = item
   if (conta.tipo !== 'anual' || !conta.mesVencimento) return null
   const guardado = item.guardadoAntes > 0 ? ` ${reais(item.guardadoAntes)} já no cofrinho.` : ''
+  const noCartao = conta.cartaoAnual?.parcelas === 1
+  const mesDaFatura = NOMES_DOS_MESES[conta.mesVencimento % 12]
+  if (item.venceNesteMes && noCartao)
+    return `Vence este mês, no cartão à vista: complete o cofrinho, que paga a fatura de ${mesDaFatura}.${guardado}`
   if (item.venceNesteMes) return `Vence este mês: ${reais(conta.valor)}.${guardado}`
-  return `Cofrinho para ${NOMES_DOS_MESES[conta.mesVencimento - 1]} (${reais(conta.valor)}).${guardado}`
+  const sufixo = noCartao ? ' Vai no cartão à vista.' : ''
+  return `Cofrinho para ${NOMES_DOS_MESES[conta.mesVencimento - 1]} (${reais(conta.valor)}).${guardado}${sufixo}`
 }
 
 function ContasDoMes({
   orcamento,
   mes,
   onTicar,
+  onEditar,
 }: {
   orcamento: Orcamento
   mes: string
   onTicar: (mes: string, id: string, valor: number) => void
+  onEditar: (contaId: string) => void
 }) {
   const itens = itensDoMes(orcamento, mes)
   const resumo = resumoDoMes(orcamento, mes)
@@ -212,8 +236,12 @@ function ContasDoMes({
   const anuais = itens.filter((i) => i.conta.tipo === 'anual')
   const fatura = itens.filter((i) => i.origem === 'fatura')
   const dividas = itens.filter((i) => i.origem === 'divida')
+  const pagasNoCartao = contasNoCartao(orcamento, mes).filter((c) => !itens.some((i) => i.conta.id === c.id))
+  const anuaisParceladas = orcamento.contas.filter(
+    (c) => anualParcelada(c) && mes >= c.cartaoAnual!.desde && !itens.some((i) => i.conta.id === c.id),
+  )
 
-  if (itens.length === 0) {
+  if (itens.length === 0 && pagasNoCartao.length === 0 && anuaisParceladas.length === 0) {
     return (
       <div className="card col" style={{ gap: 6 }}>
         <span style={{ fontWeight: 700 }}>Nenhuma conta ainda</span>
@@ -226,6 +254,7 @@ function ContasDoMes({
   }
 
   const tudoPago = resumo.itensTicados === resumo.totalItens
+  const progresso = resumo.totalItens > 0 ? (resumo.itensTicados / resumo.totalItens) * 100 : 100
   return (
     <div className="card col" style={{ gap: 12 }}>
       <div className="row-between" style={{ alignItems: 'baseline', gap: 8 }}>
@@ -235,11 +264,25 @@ function ContasDoMes({
         </span>
       </div>
       <div className="mm-progresso" aria-hidden="true">
-        <div style={{ width: `${(resumo.itensTicados / resumo.totalItens) * 100}%` }} />
+        <div style={{ width: `${progresso}%` }} />
       </div>
 
-      {mensais.length > 0 && <ListaDeItens titulo="Todo mês" itens={mensais} mes={mes} onTicar={onTicar} />}
-      {anuais.length > 0 && <ListaDeItens titulo="Cofrinhos das contas do ano" itens={anuais} mes={mes} onTicar={onTicar} />}
+      {mensais.length > 0 && <ListaDeItens titulo="Todo mês" itens={mensais} mes={mes} onTicar={onTicar} onEditar={onEditar} />}
+      {anuais.length > 0 && (
+        <ListaDeItens titulo="Cofrinhos das contas do ano" itens={anuais} mes={mes} onTicar={onTicar} onEditar={onEditar} />
+      )}
+      {pagasNoCartao.length > 0 && (
+        <span className="tiny muted justify">
+          {pagasNoCartao.length === 1 ? `${pagasNoCartao[0].nome} é paga` : `${pagasNoCartao.map((c) => c.nome).join(', ')} são pagas`} no cartão:
+          {pagasNoCartao.length === 1 ? ' entra' : ' entram'} no gasto do cartão deste mês e na fatura do mês seguinte.
+        </span>
+      )}
+      {anuaisParceladas.map((c) => (
+        <span key={c.id} className="tiny muted justify">
+          {c.nome} vai parcelada no cartão ({c.cartaoAnual!.parcelas}x de {reais(c.cartaoAnual!.total / c.cartaoAnual!.parcelas)}): sem
+          cofrinho, as parcelas entram nas faturas a partir de {NOMES_DOS_MESES[(c.mesVencimento ?? 1) % 12]}.
+        </span>
+      ))}
       {fatura.length > 0 && <ListaDeItens titulo="Cartão de crédito" itens={fatura} mes={mes} onTicar={onTicar} />}
       {dividas.length > 0 && <ListaDeItens titulo="Dívidas (plano de quitação)" itens={dividas} mes={mes} onTicar={onTicar} />}
 
@@ -256,11 +299,14 @@ function ListaDeItens({
   itens,
   mes,
   onTicar,
+  onEditar,
 }: {
   titulo: string
   itens: ItemDoMes[]
   mes: string
   onTicar: (mes: string, id: string, valor: number) => void
+  /** Só para as contas cadastradas: fatura e dívidas se editam nos próprios blocos. */
+  onEditar?: (contaId: string) => void
 }) {
   return (
     <div className="col" style={{ gap: 2 }}>
@@ -269,8 +315,8 @@ function ListaDeItens({
         {itens.map((item) => {
           const desc = descricaoItem(item, mes)
           return (
-            <li key={item.conta.id}>
-              <label className={`mm-item ${item.ticado ? 'ticado' : ''}`}>
+            <li key={item.conta.id} className="mm-linha">
+              <label className={`mm-item grow ${item.ticado ? 'ticado' : ''}`}>
                 <input
                   type="checkbox"
                   className="mm-check"
@@ -283,6 +329,11 @@ function ListaDeItens({
                 </span>
                 <span className="mm-item-valor">{reais(item.valorDoMes)}</span>
               </label>
+              {onEditar && item.origem === 'conta' && (
+                <button className="mm-link small mm-editar" aria-label={`Editar ${item.conta.nome}`} onClick={() => onEditar(item.conta.id)}>
+                  Editar
+                </button>
+              )}
             </li>
           )
         })}
@@ -405,9 +456,14 @@ function CartaoDoMes({
   onPacto: (mes: string | null) => void
 }) {
   const { teto } = orcamento.cartao
-  const gasto = gastoNoCartao(orcamento, mes)
+  // O teto e o semáforo olham o gasto do dia a dia; as contas do ano no cartão são planejadas
+  // e aparecem à parte (ajuste após a Etapa 4).
+  const gasto = gastoNoTeto(orcamento, mes)
+  const anuais = anuaisNoCartao(orcamento, mes)
+  const totalAnuais = anuais.reduce((t, a) => t + a.valor, 0)
   const sem = semaforoDoCartao(gasto, teto)
   const compras = comprasDoMes(orcamento, mes)
+  const contasCartao = contasNoCartao(orcamento, mes)
   const futuras = parcelasFuturas(orcamento, mes)
   const sugerido = tetoSugerido(orcamento)
   const proximoMes = nomeDoMes(somarMeses(mes, 1))
@@ -462,6 +518,12 @@ function CartaoDoMes({
           </div>
         </div>
       )}
+      {totalAnuais > 0 && (
+        <div className="small muted">
+          + {reais(totalAnuais)} de contas do ano no cartão, fora do teto. Total na fatura de {proximoMes}:{' '}
+          {reais(gastoNoCartao(orcamento, mes))}.
+        </div>
+      )}
       <div className={`small justify mm-situacao mm-cartao-${sem}`} role="status">
         {mensagemSemaforo(sem, gasto, teto, proximoMes)}
       </div>
@@ -485,12 +547,35 @@ function CartaoDoMes({
         </div>
       )}
 
-      {compras.length > 0 && (
+      {(compras.length > 0 || contasCartao.length > 0 || anuais.length > 0) && (
         <div className="col" style={{ gap: 2 }}>
           <span className="tiny muted" style={{ fontWeight: 600 }}>
             No cartão em {nomeDoMes(mes)} (fatura de {proximoMes})
           </span>
           <ul className="mm-lista">
+            {/* Contas pagas no cartão (ajuste após a Etapa 4): editadas em Minhas contas. */}
+            {anuais.map((a) => (
+              <li key={`anual-${a.conta.id}`} className="mm-conta">
+                <span className="col grow" style={{ gap: 2, minWidth: 0 }}>
+                  <span className="mm-item-nome">{a.conta.nome}</span>
+                  <span className="tiny muted">
+                    {a.conta.cartaoAnual!.parcelas > 1
+                      ? `Conta do ano, parcela ${a.parcela} de ${a.conta.cartaoAnual!.parcelas} (total ${reais(a.conta.cartaoAnual!.total)})`
+                      : 'Conta do ano, à vista: o cofrinho paga esta parte da fatura'}
+                  </span>
+                </span>
+                <span className="mm-item-valor">{reais(a.valor)}</span>
+              </li>
+            ))}
+            {contasCartao.map((c) => (
+              <li key={`conta-${c.id}`} className="mm-conta">
+                <span className="col grow" style={{ gap: 2, minWidth: 0 }}>
+                  <span className="mm-item-nome">{c.nome}</span>
+                  <span className="tiny muted">Conta de todo mês</span>
+                </span>
+                <span className="mm-item-valor">{reais(c.valor)}</span>
+              </li>
+            ))}
             {compras.map(({ compra, parcela, valor: v }) => (
               <li key={compra.id} className="mm-conta">
                 <span className="col grow" style={{ gap: 2, minWidth: 0 }}>
@@ -656,16 +741,83 @@ function Potes({
 
 // ---------------------------------------------------------------- cadastro de contas
 
-type Rascunho = { nome: string; valor: number; tipo: TipoConta; mesVencimento: number }
-const RASCUNHO_VAZIO: Rascunho = { nome: '', valor: 0, tipo: 'mensal', mesVencimento: 1 }
+type PagamentoAnual = 'boleto' | 'avista' | 'parcelado'
+type Rascunho = {
+  nome: string
+  valor: number
+  tipo: TipoConta
+  mesVencimento: number
+  /** Conta mensal paga no cartão. */
+  noCartao: boolean
+  /** Conta anual: boleto/Pix, cartão à vista ou cartão parcelado (ajuste após a Etapa 4). */
+  pagamentoAnual: PagamentoAnual
+  parcelas: number
+  /** Total cobrado no cartão, com juros e taxas (parcelado). 0 = ainda não informado. */
+  totalCartao: number
+}
+const RASCUNHO_VAZIO: Rascunho = {
+  nome: '',
+  valor: 0,
+  tipo: 'mensal',
+  mesVencimento: 1,
+  noCartao: false,
+  pagamentoAnual: 'boleto',
+  parcelas: 10,
+  totalCartao: 0,
+}
+
+const ROTULO_PAGAMENTO_ANUAL: Record<PagamentoAnual, string> = {
+  boleto: 'Boleto ou Pix',
+  avista: 'Cartão à vista',
+  parcelado: 'Cartão parcelado',
+}
+
+function rascunhoDaConta(c: Conta): Rascunho {
+  const ca = c.cartaoAnual
+  return {
+    ...RASCUNHO_VAZIO,
+    nome: c.nome,
+    valor: c.valor,
+    tipo: c.tipo,
+    mesVencimento: c.mesVencimento ?? 1,
+    noCartao: !!c.cartaoDesde,
+    pagamentoAnual: !ca ? 'boleto' : ca.parcelas > 1 ? 'parcelado' : 'avista',
+    parcelas: ca && ca.parcelas > 1 ? ca.parcelas : 10,
+    totalCartao: ca && ca.parcelas > 1 ? ca.total : 0,
+  }
+}
+
+/** Texto do custo do parcelamento: quanto a mais, em % do valor e ao mês. */
+function custoDoParcelamento(valor: number, total: number, parcelas: number): string {
+  if (total <= valor) {
+    return 'Sem juros? Confira no simulador do cartão: parcelar imposto ou conta no cartão costuma ter juros e taxa de serviço.'
+  }
+  const aMais = total - valor
+  const pct = Math.round((aMais / valor) * 1000) / 10
+  const aoMes = jurosDoParcelamento(valor, total, parcelas)
+  return (
+    `Parcelando em ${parcelas}x, você paga ${reais(aMais)} a mais (${pct.toLocaleString('pt-BR')}% sobre o valor)` +
+    (aoMes ? `, cerca de ${aoMes.toLocaleString('pt-BR')}% ao mês.` : '.')
+  )
+}
+/** Quantas sugestões aparecem antes de "Ver mais sugestões". */
+const SUGESTOES_VISIVEIS = 6
 
 function MinhasContas({
   contas,
+  mesDeHoje,
+  pactoAtivo,
+  pedidoEdicao,
   onAdicionar,
   onEditar,
   onRemover,
 }: {
   contas: Conta[]
+  mesDeHoje: string
+  /** Pacto de não parcelar (Modo Recuperação): parcelar conta do ano pede confirmação. */
+  pactoAtivo: boolean
+  /** "Editar" tocado na lista do mês: abre essa conta aqui. `vez` muda a cada toque. */
+  pedidoEdicao: { id: string; vez: number } | null
   onAdicionar: (c: Omit<Conta, 'id'>) => void
   onEditar: (id: string, c: Omit<Conta, 'id'>) => void
   onRemover: (id: string) => void
@@ -674,12 +826,19 @@ function MinhasContas({
   const [editandoId, setEditandoId] = useState<string | null>(null)
   // Muda a cada conta carregada para edição, para o campo de valor reiniciar com o valor dela.
   const [versaoForm, setVersaoForm] = useState(0)
+  const [todasSugestoes, setTodasSugestoes] = useState(false)
   const idNome = useId()
   const idMes = useId()
+  const idParcelas = useId()
+  const formRef = useRef<HTMLDivElement>(null)
+  const nomeRef = useRef<HTMLInputElement>(null)
 
-  const valido = rascunho.nome.trim().length > 0 && rascunho.valor > 0
+  const parcelado = rascunho.tipo === 'anual' && rascunho.pagamentoAnual === 'parcelado'
+  const valido = rascunho.nome.trim().length > 0 && rascunho.valor > 0 && (!parcelado || rascunho.totalCartao > 0)
   const nomesUsados = new Set(contas.map((c) => c.nome.toLowerCase()))
   const sugestoes = CONTAS_SUGERIDAS.filter((s) => !nomesUsados.has(s.nome.toLowerCase()))
+  const sugestoesVisiveis = todasSugestoes ? sugestoes : sugestoes.slice(0, SUGESTOES_VISIVEIS)
+  const contaEditada = editandoId ? contas.find((c) => c.id === editandoId) : undefined
 
   function carregar(r: Rascunho, id: string | null) {
     setRascunho(r)
@@ -687,12 +846,49 @@ function MinhasContas({
     setVersaoForm((v) => v + 1)
   }
 
+  /** Abre a conta no formulário e leva a pessoa até ele (o formulário fica abaixo da lista). */
+  function abrirParaEditar(c: Conta) {
+    carregar(rascunhoDaConta(c), c.id)
+    formRef.current?.scrollIntoView?.({ behavior: 'smooth', block: 'start' })
+    nomeRef.current?.focus({ preventScroll: true })
+  }
+
+  useEffect(() => {
+    if (!pedidoEdicao) return
+    const c = contas.find((x) => x.id === pedidoEdicao.id)
+    if (c) abrirParaEditar(c)
+    // Só reage a um novo pedido; `contas` muda a cada tique e não deve reabrir o formulário.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pedidoEdicao])
+
   function salvar() {
     if (!valido) return
-    const conta: Omit<Conta, 'id'> =
-      rascunho.tipo === 'anual'
-        ? { nome: rascunho.nome.trim(), valor: rascunho.valor, tipo: 'anual', mesVencimento: rascunho.mesVencimento }
-        : { nome: rascunho.nome.trim(), valor: rascunho.valor, tipo: 'mensal' }
+    let conta: Omit<Conta, 'id'>
+    if (rascunho.tipo === 'anual') {
+      conta = { nome: rascunho.nome.trim(), valor: rascunho.valor, tipo: 'anual', mesVencimento: rascunho.mesVencimento }
+      if (rascunho.pagamentoAnual !== 'boleto') {
+        if (
+          parcelado &&
+          pactoAtivo &&
+          !window.confirm('Parcelar quebra o seu pacto de não parcelar: é dívida nova com o salário dos próximos meses. Parcelar mesmo assim?')
+        )
+          return
+        const parcelas = parcelado ? rascunho.parcelas : 1
+        const anterior = contaEditada?.cartaoAnual
+        // Mesmo jeito de pagar: mantém o mês de início. Mudou: vale a partir deste mês, e os meses
+        // anteriores continuam como eram.
+        const mesmoJeito = anterior && anterior.parcelas > 1 === parcelas > 1
+        conta.cartaoAnual = {
+          parcelas,
+          total: parcelado ? rascunho.totalCartao : rascunho.valor,
+          desde: mesmoJeito ? anterior.desde : mesDeHoje,
+        }
+      }
+    } else {
+      conta = { nome: rascunho.nome.trim(), valor: rascunho.valor, tipo: 'mensal' }
+      // Quem já pagava no cartão mantém o mês de início; quem passa agora começa neste mês.
+      if (rascunho.noCartao) conta.cartaoDesde = contaEditada?.cartaoDesde ?? mesDeHoje
+    }
     if (editandoId) onEditar(editandoId, conta)
     else onAdicionar(conta)
     carregar(RASCUNHO_VAZIO, null)
@@ -709,14 +905,21 @@ function MinhasContas({
               <span className="col grow" style={{ gap: 2, minWidth: 0 }}>
                 <span className="mm-item-nome">{c.nome}</span>
                 <span className="tiny muted">
-                  {c.tipo === 'anual' ? `Anual, vence em ${NOMES_DOS_MESES[(c.mesVencimento ?? 1) - 1]}` : 'Todo mês'}
+                  {c.tipo === 'anual'
+                    ? `Anual, vence em ${NOMES_DOS_MESES[(c.mesVencimento ?? 1) - 1]}${
+                        !c.cartaoAnual
+                          ? ''
+                          : c.cartaoAnual.parcelas > 1
+                            ? `, no cartão em ${c.cartaoAnual.parcelas}x (total ${reais(c.cartaoAnual.total)})`
+                            : ', no cartão à vista'
+                      }`
+                    : c.cartaoDesde
+                      ? 'Todo mês, no cartão de crédito'
+                      : 'Todo mês'}
                 </span>
               </span>
               <span className="mm-item-valor">{reais(c.valor)}</span>
-              <button
-                className="mm-link small"
-                onClick={() => carregar({ nome: c.nome, valor: c.valor, tipo: c.tipo, mesVencimento: c.mesVencimento ?? 1 }, c.id)}
-              >
+              <button className="mm-link small" aria-label={`Editar ${c.nome}`} onClick={() => abrirParaEditar(c)}>
                 Editar
               </button>
             </li>
@@ -724,36 +927,47 @@ function MinhasContas({
         </ul>
       )}
 
-      <div className="col mm-form" style={{ gap: 10 }}>
-        <span className="small" style={{ fontWeight: 700 }}>{editandoId ? 'Editar conta' : 'Adicionar conta'}</span>
+      <div className="col mm-form" style={{ gap: 10 }} ref={formRef}>
+        <span className="small" style={{ fontWeight: 700 }}>{editandoId ? `Editar conta: ${contaEditada?.nome ?? ''}` : 'Adicionar conta'}</span>
+
+        {/* O nome vem primeiro, com exemplos: qualquer conta pode ser cadastrada, e as sugestões
+            são só atalhos (antes, a lista de sugestões vinha antes do campo e parecia obrigatória). */}
+        <label htmlFor={idNome} className="col" style={{ gap: 4 }}>
+          <span className="small" style={{ fontWeight: 600 }}>Nome da conta</span>
+          <input
+            id={idNome}
+            ref={nomeRef}
+            className="input-cotas"
+            value={rascunho.nome}
+            maxLength={40}
+            placeholder="Ex.: Academia, Diarista, Pensão, Streaming"
+            onChange={(e) => setRascunho({ ...rascunho, nome: e.target.value })}
+          />
+        </label>
 
         {!editandoId && sugestoes.length > 0 && (
           <div className="col" style={{ gap: 6 }}>
-            <span className="tiny muted">Toque numa sugestão ou escreva o nome:</span>
+            <span className="tiny muted">Ou toque num atalho para preencher o nome:</span>
             <div className="mm-sugestoes">
-              {sugestoes.map((s) => (
+              {sugestoesVisiveis.map((s) => (
                 <button
                   key={s.nome}
                   className="mm-sugestao"
-                  onClick={() => carregar({ ...RASCUNHO_VAZIO, nome: s.nome, tipo: s.tipo, mesVencimento: s.mesVencimento ?? 1, valor: rascunho.valor }, null)}
+                  onClick={() =>
+                    carregar({ ...RASCUNHO_VAZIO, nome: s.nome, tipo: s.tipo, mesVencimento: s.mesVencimento ?? 1, valor: rascunho.valor }, null)
+                  }
                 >
                   {s.nome}
                 </button>
               ))}
+              {sugestoes.length > SUGESTOES_VISIVEIS && (
+                <button className="mm-link small" onClick={() => setTodasSugestoes((v) => !v)}>
+                  {todasSugestoes ? 'Menos atalhos' : `Mais ${sugestoes.length - SUGESTOES_VISIVEIS} atalhos`}
+                </button>
+              )}
             </div>
           </div>
         )}
-
-        <label htmlFor={idNome} className="col" style={{ gap: 4 }}>
-          <span className="small" style={{ fontWeight: 600 }}>Nome</span>
-          <input
-            id={idNome}
-            className="input-cotas"
-            value={rascunho.nome}
-            maxLength={40}
-            onChange={(e) => setRascunho({ ...rascunho, nome: e.target.value })}
-          />
-        </label>
 
         <div className="row" style={{ gap: 6 }} role="group" aria-label="Frequência">
           {(['mensal', 'anual'] as const).map((t) => (
@@ -776,6 +990,30 @@ function MinhasContas({
           dica={rascunho.tipo === 'mensal' ? 'Conta que varia, como luz ou mercado: use a média dos últimos meses.' : undefined}
         />
 
+        {rascunho.tipo === 'mensal' && (
+          <div className="col" style={{ gap: 6 }}>
+            <span className="small" style={{ fontWeight: 600 }}>Como você paga</span>
+            <div className="row" style={{ gap: 6, flexWrap: 'wrap' }} role="group" aria-label="Como você paga">
+              {([false, true] as const).map((cartao) => (
+                <button
+                  key={String(cartao)}
+                  className={`chip ${rascunho.noCartao === cartao ? 'selected' : ''}`}
+                  aria-pressed={rascunho.noCartao === cartao}
+                  onClick={() => setRascunho({ ...rascunho, noCartao: cartao })}
+                >
+                  {cartao ? 'Cartão de crédito' : 'Boleto, Pix ou débito'}
+                </button>
+              ))}
+            </div>
+            {rascunho.noCartao && (
+              <span className="tiny muted justify">
+                A conta sai da lista do mês e entra no gasto do cartão, contando para o seu teto. Ela é paga na fatura do mês
+                seguinte, junto com as compras.
+              </span>
+            )}
+          </div>
+        )}
+
         {rascunho.tipo === 'anual' && (
           <label htmlFor={idMes} className="col" style={{ gap: 4 }}>
             <span className="small" style={{ fontWeight: 600 }}>Mês do vencimento</span>
@@ -791,8 +1029,68 @@ function MinhasContas({
                 </option>
               ))}
             </select>
-            <span className="tiny muted">Parcelado em cota única ou em várias vezes? Use o mês da primeira parcela.</span>
+            <span className="tiny muted">No boleto em várias vezes? Use o mês da primeira parcela.</span>
           </label>
+        )}
+
+        {rascunho.tipo === 'anual' && (
+          <div className="col" style={{ gap: 6 }}>
+            <span className="small" style={{ fontWeight: 600 }}>Como você paga</span>
+            <div className="row" style={{ gap: 6, flexWrap: 'wrap' }} role="group" aria-label="Como você paga a conta do ano">
+              {(['boleto', 'avista', 'parcelado'] as const).map((forma) => (
+                <button
+                  key={forma}
+                  className={`chip ${rascunho.pagamentoAnual === forma ? 'selected' : ''}`}
+                  aria-pressed={rascunho.pagamentoAnual === forma}
+                  onClick={() => setRascunho({ ...rascunho, pagamentoAnual: forma })}
+                >
+                  {ROTULO_PAGAMENTO_ANUAL[forma]}
+                </button>
+              ))}
+            </div>
+            {rascunho.pagamentoAnual === 'avista' && (
+              <span className="tiny muted justify">
+                O cofrinho continua todo mês. No vencimento, a conta vai para o cartão, e no mês seguinte o dinheiro do cofrinho paga
+                essa parte da fatura: não sai do salário duas vezes.
+              </span>
+            )}
+            {parcelado && (
+              <div className="col" style={{ gap: 8 }}>
+                <label htmlFor={idParcelas} className="col" style={{ gap: 4 }}>
+                  <span className="small" style={{ fontWeight: 600 }}>Em quantas vezes</span>
+                  <select
+                    id={idParcelas}
+                    className="input-cotas"
+                    value={rascunho.parcelas}
+                    onChange={(e) => setRascunho({ ...rascunho, parcelas: Number(e.target.value) })}
+                  >
+                    {Array.from({ length: MAX_PARCELAS_ANUAL - 1 }, (_, i) => i + 2).map((n) => (
+                      <option key={n} value={n}>
+                        {n}x
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <CampoReais
+                  key={`total-${versaoForm}`}
+                  rotulo="Total cobrado no cartão, com juros e taxas"
+                  valor={rascunho.totalCartao}
+                  onMudar={(v) => setRascunho((r) => ({ ...r, totalCartao: v }))}
+                  dica="Veja na simulação do parcelamento: é a soma de todas as parcelas."
+                />
+                {rascunho.valor > 0 && rascunho.totalCartao > 0 && (
+                  <div className="small justify mm-situacao mm-cartao-amarelo" role="status">
+                    {custoDoParcelamento(rascunho.valor, rascunho.totalCartao, rascunho.parcelas)}
+                  </div>
+                )}
+                <span className="tiny muted justify">
+                  Antes de parcelar no cartão, veja se a prefeitura ou a Secretaria da Fazenda oferece desconto à vista ou
+                  parcelamento sem juros no boleto: costuma sair mais barato. Parcelado, a conta não tem cofrinho: as parcelas entram
+                  nas faturas a partir do mês seguinte ao vencimento.
+                </span>
+              </div>
+            )}
+          </div>
         )}
 
         <button className="btn btn-primary" disabled={!valido} onClick={salvar}>

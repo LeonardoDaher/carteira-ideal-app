@@ -1485,3 +1485,25 @@ button.alloc-box:active {
 .aula-links a { color: var(--text); font-weight: 600; text-underline-offset: 3px; }
 .mm-trilha { gap: 4px; text-align: left; width: 100%; cursor: pointer; color: var(--text); }
 .mm-trilha:hover { background: var(--highlight); }
+
+/* Ajustes após a Etapa 4 (uso real do responsável).
+   1. Lista suspensa de meses, tipos e parcelas: no tema escuro, alguns navegadores abriam as
+      opções com texto claro sobre fundo claro. As opções agora têm sempre texto escuro sobre
+      fundo branco, legíveis nos dois temas. */
+select option,
+select optgroup {
+  color: #111418 !important;
+  background-color: #ffffff !important;
+  -webkit-text-fill-color: #111418;
+  font-weight: 500;
+}
+/* A caixa aberta segue o esquema claro em qualquer tema: o navegador desenha a lista com
+   fundo branco e texto preto, sem herdar o texto claro do tema escuro. A caixa fechada
+   continua com as cores do tema. */
+select { color-scheme: light; }
+select option:disabled { color: #6b7280 !important; -webkit-text-fill-color: #6b7280; }
+/* 2. "Editar" ao lado de cada conta da lista do mês, fora da área que tica. */
+.mm-linha { display: flex; align-items: center; gap: 10px; }
+.mm-linha .mm-item { min-width: 0; }
+.mm-editar { flex: none; min-height: 44px; padding: 0 2px; color: var(--text-muted); }
+.mm-editar:hover { color: var(--text); }

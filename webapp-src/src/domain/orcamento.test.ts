@@ -3,6 +3,13 @@ import {
   ID_FATURA,
   ORCAMENTO_VAZIO,
   comprasDoMes,
+  contaNoCartao,
+  coberturaDoCofrinho,
+  custoAnual,
+  gastoNoTeto,
+  jurosDoParcelamento,
+  parcelaAnualNoMes,
+  contasNoCartao,
   faturaDoMes,
   gastoNoCartao,
   parcelaNoMes,
@@ -318,5 +325,127 @@ describe('cartão de crédito', () => {
     expect(validarOrcamento({ ...base, cartao: { teto: 100, compras: [{ ...tenis, mes: 'outubro' }] } })).toBeNull()
     expect(validarOrcamento({ ...base, cartao: { teto: -1, compras: [] } })).toBeNull()
     expect(validarOrcamento({ ...base, cartao: { teto: 100, compras: [tenis] } })?.cartao.compras).toEqual([tenis])
+  })
+})
+
+describe('contas pagas no cartão (ajuste após a Etapa 4)', () => {
+  const orc: Orcamento = {
+    salario: 4000,
+    reserva: 0,
+    potes: { guardar: 500, crescer: 300 },
+    contas: [
+      { id: 'aluguel', nome: 'Aluguel', valor: 1500, tipo: 'mensal' },
+      { id: 'stream', nome: 'Streaming', valor: 40, tipo: 'mensal', cartaoDesde: '2026-10' },
+    ],
+    pagamentos: {},
+    cartao: { teto: 0, compras: [{ id: 'x', descricao: 'Tênis', valor: 300, mes: '2026-10', parcelas: 3 }] },
+  }
+
+  it('só vale para contas mensais, a partir do mês escolhido', () => {
+    expect(contaNoCartao(orc.contas[1], '2026-09')).toBe(false)
+    expect(contaNoCartao(orc.contas[1], '2026-10')).toBe(true)
+    expect(contaNoCartao({ id: 'a', nome: 'IPVA', valor: 1200, tipo: 'anual', mesVencimento: 1, cartaoDesde: '2026-01' }, '2026-10')).toBe(false)
+  })
+
+  it('sai da lista do mês a partir do mês do cartão; antes, continua como conta', () => {
+    expect(itensDoMes(orc, '2026-10').map((i) => i.conta.id)).not.toContain('stream')
+    expect(itensDoMes(orc, '2026-09').map((i) => i.conta.id)).toContain('stream')
+  })
+
+  it('conta ticada antes de passar para o cartão continua ticada naquele mês', () => {
+    const ticado = { ...orc, pagamentos: { '2026-10': { stream: 40 } } }
+    expect(itensDoMes(ticado, '2026-10').find((i) => i.conta.id === 'stream')?.ticado).toBe(true)
+  })
+
+  it('entra no gasto do cartão do mês e na fatura do mês seguinte', () => {
+    expect(gastoNoCartao(orc, '2026-10')).toBe(140) // 100 da parcela + 40
+    expect(faturaDoMes(orc, '2026-11')).toBe(140)
+    expect(resumoDoMes(orc, '2026-11').fatura).toBe(140)
+    expect(resumoDoMes(orc, '2026-10').contasMensais).toBe(1500)
+    expect(contasNoCartao(orc, '2026-10').map((c) => c.id)).toEqual(['stream'])
+  })
+
+  it('não aparece como parcela já assumida', () => {
+    expect(parcelasFuturas(orc, '2026-10').map((p) => p.valor)).toEqual([100, 100])
+  })
+
+  it('o teto sugerido abre espaço para as contas no cartão', () => {
+    // Gastar típico: 4.000 − 1.540 − 500 − 300 = 1.660; + 40 da conta no cartão = 1.700
+    expect(tetoSugerido(orc)).toBe(1700)
+  })
+
+  it('a validação aceita o campo novo e rejeita mês inválido; contas antigas voltam idênticas', () => {
+    expect(validarOrcamento(orc)?.contas[1].cartaoDesde).toBe('2026-10')
+    expect(validarOrcamento(orc)?.contas[0]).toEqual({ id: 'aluguel', nome: 'Aluguel', valor: 1500, tipo: 'mensal' })
+    const ruim = { ...orc, contas: [{ ...orc.contas[1], cartaoDesde: '2026-13' }] }
+    expect(validarOrcamento(ruim)).toBeNull()
+  })
+})
+
+describe('conta anual paga no cartão (ajuste após a Etapa 4)', () => {
+  const ipva = (cartaoAnual: Conta['cartaoAnual']): Conta => ({ id: 'ipva', nome: 'IPVA', valor: 1200, tipo: 'anual', mesVencimento: 1, cartaoAnual })
+  const base = (conta: Conta, pagamentos: Orcamento['pagamentos'] = {}): Orcamento => ({
+    salario: 4000,
+    reserva: 0,
+    potes: { guardar: 0, crescer: 0 },
+    contas: [conta],
+    pagamentos,
+    cartao: { teto: 1000, compras: [] },
+  })
+  const cofrinhoCompleto = { '2026-10': { ipva: 300 }, '2026-11': { ipva: 300 }, '2026-12': { ipva: 300 }, '2027-01': { ipva: 300 } }
+
+  it('à vista: o cofrinho continua e, no mês seguinte, paga a fatura (não sai do salário de novo)', () => {
+    const orc = base(ipva({ parcelas: 1, total: 1200, desde: '2026-10' }), cofrinhoCompleto)
+    expect(itensDoMes(orc, '2026-10').find((i) => i.conta.id === 'ipva')?.valorDoMes).toBe(300)
+    expect(gastoNoCartao(orc, '2027-01')).toBe(1200)
+    expect(gastoNoTeto(orc, '2027-01')).toBe(0) // planejada: não acende o semáforo
+    expect(faturaDoMes(orc, '2027-02')).toBe(1200)
+    expect(coberturaDoCofrinho(orc, '2027-02')).toBe(1200)
+    const fatura = itensDoMes(orc, '2027-02').find((i) => i.origem === 'fatura')!
+    expect(fatura.valorDoMes).toBe(0)
+    expect(fatura.cobertura).toBe(1200)
+    expect(resumoDoMes(orc, '2027-02').fatura).toBe(0)
+  })
+
+  it('à vista com cofrinho incompleto: só a diferença sai do salário', () => {
+    const { '2027-01': _jan, ...semJaneiro } = cofrinhoCompleto
+    const orc = base(ipva({ parcelas: 1, total: 1200, desde: '2026-10' }), semJaneiro)
+    expect(coberturaDoCofrinho(orc, '2027-02')).toBe(900)
+    expect(resumoDoMes(orc, '2027-02').fatura).toBe(300)
+  })
+
+  it('parcelado: sem cofrinho; as parcelas (com juros) entram nas faturas', () => {
+    const orc = base(ipva({ parcelas: 10, total: 1400, desde: '2026-10' }))
+    expect(itensDoMes(orc, '2026-10').map((i) => i.conta.id)).not.toContain('ipva')
+    expect(parcelaAnualNoMes(orc.contas[0], '2026-12')).toBeNull()
+    expect(parcelaAnualNoMes(orc.contas[0], '2027-01')).toEqual({ valor: 140, parcela: 1, vencimento: '2027-01' })
+    expect(parcelaAnualNoMes(orc.contas[0], '2027-10')?.parcela).toBe(10)
+    expect(parcelaAnualNoMes(orc.contas[0], '2027-11')).toBeNull()
+    expect(resumoDoMes(orc, '2027-02').fatura).toBe(140)
+    // Custo de vida pelo total cobrado no cartão
+    expect(custoAnual(orc.contas[0])).toBe(1400)
+  })
+
+  it('parcelado depois de já ter guardado: o cofrinho abate as primeiras parcelas', () => {
+    const orc = base(ipva({ parcelas: 10, total: 1400, desde: '2026-10' }), { '2026-09': { ipva: 300 } })
+    expect([coberturaDoCofrinho(orc, '2027-02'), coberturaDoCofrinho(orc, '2027-03'), coberturaDoCofrinho(orc, '2027-04'), coberturaDoCofrinho(orc, '2027-05')]).toEqual([140, 140, 20, 0])
+  })
+
+  it('parcelas assumidas só aparecem depois do vencimento', () => {
+    const orc = base(ipva({ parcelas: 10, total: 1400, desde: '2026-10' }))
+    expect(parcelasFuturas(orc, '2026-10')).toEqual([])
+    expect(parcelasFuturas(orc, '2027-01')).toHaveLength(9)
+  })
+
+  it('custo do parcelamento: juros ao mês embutidos', () => {
+    expect(jurosDoParcelamento(1200, 1200, 10)).toBeNull()
+    const i = jurosDoParcelamento(1200, 1400, 10)!
+    expect(i).toBeGreaterThan(2.7)
+    expect(i).toBeLessThan(3)
+  })
+
+  it('validação: aceita o campo, rejeita parcelas fora de 1 a 12', () => {
+    expect(validarOrcamento(base(ipva({ parcelas: 3, total: 1250, desde: '2026-10' })))?.contas[0].cartaoAnual).toEqual({ parcelas: 3, total: 1250, desde: '2026-10' })
+    expect(validarOrcamento(base(ipva({ parcelas: 13, total: 1250, desde: '2026-10' })))).toBeNull()
   })
 })

@@ -29,7 +29,28 @@ export type Conta = {
   tipo: TipoConta
   /** Só para contas anuais: mês do vencimento, de 1 (janeiro) a 12 (dezembro). */
   mesVencimento?: number
+  /**
+   * Só para contas mensais (ajuste após a Etapa 4): mês ("AAAA-MM") a partir do qual a conta é
+   * paga no cartão de crédito. Desse mês em diante ela sai da lista de contas, entra no gasto do
+   * cartão (conta para o teto e o semáforo) e é paga na fatura do mês seguinte. Os meses
+   * anteriores continuam como eram. Ausente = boleto, Pix ou débito.
+   */
+  cartaoDesde?: string
+  /**
+   * Só para contas anuais: paga no cartão de crédito, à vista (`parcelas` 1) ou parcelada (2 a 12).
+   * `total` é o que o cartão cobra, com juros e taxas (à vista, normalmente igual a `valor`).
+   * A cobrança cai no mês do vencimento, a partir do vencimento de `desde` em diante.
+   * - À vista: o cofrinho continua; no mês seguinte, ele paga a fatura (não sai do salário de novo).
+   * - Parcelado: sem cofrinho; as parcelas entram nas faturas. O que já estava guardado no ciclo
+   *   abate as primeiras parcelas.
+   */
+  cartaoAnual?: CartaoAnual
 }
+
+export type CartaoAnual = { parcelas: number; total: number; desde: string }
+
+/** Máximo de parcelas de uma conta anual no cartão (acima disso, o ciclo seguinte se sobreporia). */
+export const MAX_PARCELAS_ANUAL = 12
 
 /** Compra no cartão. `mes` é o mês da compra; a parcela de cada mês entra na fatura do seguinte. */
 export type Compra = {
@@ -183,11 +204,28 @@ export type ItemDoMes = {
    * a mais do pote Quitar. Num item ticado, é o valor registrado dividido pela mínima de hoje.
    */
   divida?: { minimo: number; extra: number }
+  /** Só na fatura: quanto dela sai do cofrinho de uma conta anual paga no cartão. */
+  cobertura?: number
+}
+
+/** A conta é paga no cartão em `mes`? Só contas mensais, a partir do mês escolhido. */
+export function contaNoCartao(conta: Conta, mes: string): boolean {
+  return conta.tipo === 'mensal' && !!conta.cartaoDesde && mes >= conta.cartaoDesde
+}
+
+/** Contas pagas no cartão em `mes`: entram no gasto do cartão desse mês e na fatura do seguinte. */
+export function contasNoCartao(orc: Orcamento, mes: string): Conta[] {
+  return orc.contas.filter((c) => contaNoCartao(c, mes))
 }
 
 export function itensDoMes(orc: Orcamento, mes: string): ItemDoMes[] {
   const pagosNoMes = orc.pagamentos[mes] ?? {}
-  const itens: ItemDoMes[] = orc.contas.map((conta) => {
+  // Conta paga no cartão não sai do salário neste mês: ela vai na fatura do mês seguinte. Se já
+  // tinha sido ticada neste mês (antes de passar para o cartão), o tique continua valendo.
+  // Conta anual parcelada no cartão não tem cofrinho: as parcelas vêm pelas faturas.
+  const semCofrinho = (conta: Conta) => anualParcelada(conta) && mes >= conta.cartaoAnual!.desde
+  const contas = orc.contas.filter((conta) => (!contaNoCartao(conta, mes) && !semCofrinho(conta)) || conta.id in pagosNoMes)
+  const itens: ItemDoMes[] = contas.map((conta) => {
     const ticado = conta.id in pagosNoMes
     const anual = conta.tipo === 'anual' && !!conta.mesVencimento
     const venceNesteMes = anual && mesesAteVencimento(mes, conta.mesVencimento!) === 0
@@ -196,16 +234,20 @@ export function itensDoMes(orc: Orcamento, mes: string): ItemDoMes[] {
     return { conta, origem: 'conta' as const, valorDoMes, venceNesteMes, guardadoAntes: guardadoNoCofrinho(conta, orc.pagamentos, mes), ticado }
   })
   // A fatura do mês (compras do mês anterior) entra como mais uma conta a ticar.
+  // Parte da fatura pode sair do cofrinho de uma conta anual paga no cartão: só o resto sai do salário.
   const fatura = faturaDoMes(orc, mes)
+  const cobertura = coberturaDoCofrinho(orc, mes)
   const faturaTicada = ID_FATURA in pagosNoMes
   if (fatura > 0 || faturaTicada) {
+    const doSalario = centavos(fatura - cobertura)
     itens.push({
-      conta: { id: ID_FATURA, nome: 'Fatura do cartão', valor: fatura, tipo: 'mensal' },
+      conta: { id: ID_FATURA, nome: 'Fatura do cartão', valor: doSalario, tipo: 'mensal' },
       origem: 'fatura',
-      valorDoMes: faturaTicada ? pagosNoMes[ID_FATURA] : fatura,
+      valorDoMes: faturaTicada ? pagosNoMes[ID_FATURA] : doSalario,
       venceNesteMes: false,
       guardadoAntes: 0,
       ticado: faturaTicada,
+      cobertura,
     })
   }
   // Dívidas: o pagamento do mês que o plano de quitação manda fazer em cada uma. O plano parte
@@ -326,9 +368,25 @@ export function parcelaNoMes(compra: Compra, mes: string): number {
   return mes === fim ? centavos(compra.valor - base * (n - 1)) : base
 }
 
-/** Quanto foi para o cartão em `mes`: compras à vista do mês e parcelas que caem nele. */
-export function gastoNoCartao(orc: Orcamento, mes: string): number {
+/** Compras lançadas no cartão que caem em `mes`: à vista do mês e parcelas. */
+export function comprasNoCartao(orc: Orcamento, mes: string): number {
   return centavos(orc.cartao.compras.reduce((t, c) => t + parcelaNoMes(c, mes), 0))
+}
+
+/** Quanto foi para o cartão em `mes`: compras, parcelas, contas mensais e anuais pagas no cartão. */
+export function gastoNoCartao(orc: Orcamento, mes: string): number {
+  const contas = contasNoCartao(orc, mes).reduce((t, c) => t + c.valor, 0)
+  const anuais = anuaisNoCartao(orc, mes).reduce((t, a) => t + a.valor, 0)
+  return centavos(comprasNoCartao(orc, mes) + contas + anuais)
+}
+
+/**
+ * O que conta para o teto e o semáforo: tudo menos as contas anuais, que são planejadas (vêm do
+ * cofrinho ou foram parceladas de propósito) e não devem acender o vermelho no mês do IPVA.
+ */
+export function gastoNoTeto(orc: Orcamento, mes: string): number {
+  const anuais = anuaisNoCartao(orc, mes).reduce((t, a) => t + a.valor, 0)
+  return centavos(gastoNoCartao(orc, mes) - anuais)
 }
 
 /** A fatura paga em `mes` traz as compras do mês anterior. */
@@ -364,7 +422,10 @@ export function parcelasFuturas(orc: Orcamento, mes: string): { mes: string; val
   const lista: { mes: string; valor: number }[] = []
   for (let i = 1; i <= 12; i++) {
     const m = somarMeses(mes, i)
-    const valor = gastoNoCartao(orc, m)
+    // Parcelas de compras e das contas anuais já parceladas (vencimento até `mes`). As contas
+    // mensais no cartão são de todo mês e aparecem à parte.
+    const anuais = anuaisNoCartao(orc, m).filter((a) => a.conta.cartaoAnual!.parcelas > 1 && a.vencimento <= mes)
+    const valor = centavos(comprasNoCartao(orc, m) + anuais.reduce((t, a) => t + a.valor, 0))
     if (valor > 0) lista.push({ mes: m, valor })
   }
   return lista
@@ -374,12 +435,14 @@ export function parcelasFuturas(orc: Orcamento, mes: string): { mes: string; val
  * Teto que cabe no orçamento: o pote Gastar de um mês típico (salário − contas mensais − 1/12
  * das anuais − parcelas mínimas − Guardar − Fazer Crescer, ou Quitar no Modo Recuperação).
  * O cartão é pago com o salário do mês seguinte, então gastar mais do que isso aperta o
- * próximo mês. `null` quando não sobra nada.
+ * próximo mês. As contas pagas no cartão também ocupam o teto, então entram por cima do
+ * Gastar. `null` quando não sobra nada para o dia a dia.
  */
 export function tetoSugerido(orc: Orcamento): number | null {
   const terceiroPote = modoRecuperacaoAtivo(orc) ? (orc.potes.quitar ?? 0) : orc.potes.crescer
   const livre = orc.salario - custoMensalDeVida(orc) - orc.potes.guardar - terceiroPote
-  return livre > 0 ? Math.floor(livre / 10) * 10 : null
+  const contasNoCartao = orc.contas.reduce((t, c) => t + (c.tipo === 'mensal' && c.cartaoDesde ? c.valor : 0), 0)
+  return livre > 0 ? Math.floor((livre + contasNoCartao) / 10) * 10 : null
 }
 
 // ---------------------------------------------------------------- reserva
@@ -390,7 +453,7 @@ export function tetoSugerido(orc: Orcamento): number | null {
  * emergência, e não depende do mês escolhido na tela.
  */
 export function custoMensalDeVida(orc: Orcamento): number {
-  const contas = orc.contas.reduce((t, c) => t + (c.tipo === 'anual' ? c.valor / 12 : c.valor), 0)
+  const contas = orc.contas.reduce((t, c) => t + (c.tipo === 'anual' ? custoAnual(c) / 12 : c.valor), 0)
   return centavos(contas + somaParcelasMinimas(recuperacaoDe(orc).dividas))
 }
 
@@ -548,9 +611,32 @@ export function validarOrcamento(bruto: unknown): Orcamento | null {
     if (!c || typeof c !== 'object') return null
     const k = c as Record<string, unknown>
     if (typeof k.id !== 'string' || typeof k.nome !== 'string' || !numeroValido(k.valor)) return null
-    if (k.tipo === 'mensal') contas.push({ id: k.id, nome: k.nome, valor: k.valor, tipo: 'mensal' })
-    else if (k.tipo === 'anual' && Number.isInteger(k.mesVencimento) && (k.mesVencimento as number) >= 1 && (k.mesVencimento as number) <= 12)
-      contas.push({ id: k.id, nome: k.nome, valor: k.valor, tipo: 'anual', mesVencimento: k.mesVencimento as number })
+    if (k.tipo === 'mensal') {
+      if (k.cartaoDesde !== undefined && (typeof k.cartaoDesde !== 'string' || !/^\d{4}-(0[1-9]|1[0-2])$/.test(k.cartaoDesde))) return null
+      const conta: Conta = { id: k.id, nome: k.nome, valor: k.valor, tipo: 'mensal' }
+      // Só entra se veio: contas e cópias anteriores voltam idênticas.
+      if (k.cartaoDesde !== undefined) conta.cartaoDesde = k.cartaoDesde as string
+      contas.push(conta)
+    }
+    else if (k.tipo === 'anual' && Number.isInteger(k.mesVencimento) && (k.mesVencimento as number) >= 1 && (k.mesVencimento as number) <= 12) {
+      const conta: Conta = { id: k.id, nome: k.nome, valor: k.valor, tipo: 'anual', mesVencimento: k.mesVencimento as number }
+      if (k.cartaoAnual !== undefined) {
+        const ca = k.cartaoAnual as Record<string, unknown> | null
+        if (
+          !ca ||
+          typeof ca !== 'object' ||
+          !Number.isInteger(ca.parcelas) ||
+          (ca.parcelas as number) < 1 ||
+          (ca.parcelas as number) > MAX_PARCELAS_ANUAL ||
+          !numeroValido(ca.total) ||
+          typeof ca.desde !== 'string' ||
+          !/^\d{4}-(0[1-9]|1[0-2])$/.test(ca.desde)
+        )
+          return null
+        conta.cartaoAnual = { parcelas: ca.parcelas as number, total: ca.total as number, desde: ca.desde }
+      }
+      contas.push(conta)
+    }
     else return null
   }
 
@@ -627,3 +713,85 @@ export const CONTAS_SUGERIDAS: { nome: string; tipo: TipoConta; mesVencimento?: 
   { nome: 'Seguro da moto', tipo: 'anual' },
   { nome: 'Material escolar e matrícula', tipo: 'anual', mesVencimento: 1 },
 ]
+
+// ---------------------------------------------------------------- conta anual no cartão
+
+/** Custo real da conta anual no ano: no cartão com juros, o total cobrado. */
+export function custoAnual(conta: Conta): number {
+  return conta.cartaoAnual ? Math.max(conta.valor, conta.cartaoAnual.total) : conta.valor
+}
+
+export function anualParcelada(conta: Conta): boolean {
+  return conta.tipo === 'anual' && !!conta.cartaoAnual && conta.cartaoAnual.parcelas > 1
+}
+
+/** Último vencimento em `mes` ou antes dele. */
+export function vencimentoAnterior(conta: Conta, mes: string): string {
+  return somarMeses(mes, -((Number(mes.slice(5)) - (conta.mesVencimento ?? 1) + 12) % 12))
+}
+
+/**
+ * Cobrança da conta anual que cai no cartão em `mes`: a parcela do vencimento mais recente,
+ * se ele já é do período no cartão e a parcela existe. Mesma regra de arredondamento das compras.
+ */
+export function parcelaAnualNoMes(conta: Conta, mes: string): { valor: number; parcela: number; vencimento: string } | null {
+  const c = conta.cartaoAnual
+  if (conta.tipo !== 'anual' || !c || !conta.mesVencimento) return null
+  const vencimento = vencimentoAnterior(conta, mes)
+  if (vencimento < c.desde) return null
+  const valor = parcelaNoMes({ id: '', descricao: '', valor: c.total, mes: vencimento, parcelas: c.parcelas }, mes)
+  return valor > 0 ? { valor, parcela: diferencaMeses(vencimento, mes) + 1, vencimento } : null
+}
+
+/** Cobranças das contas anuais no cartão em `mes`. */
+export function anuaisNoCartao(orc: Orcamento, mes: string): { conta: Conta; valor: number; parcela: number; vencimento: string }[] {
+  const lista: { conta: Conta; valor: number; parcela: number; vencimento: string }[] = []
+  for (const conta of orc.contas) {
+    const p = parcelaAnualNoMes(conta, mes)
+    if (p) lista.push({ conta, ...p })
+  }
+  return lista
+}
+
+/** Soma dos depósitos no cofrinho do ciclo que termina no `vencimento` (inclusive). */
+function guardadoNoCiclo(conta: Conta, pagamentos: Orcamento['pagamentos'], vencimento: string): number {
+  let soma = 0
+  for (let m = somarMeses(vencimento, -11); m <= vencimento; m = somarMeses(m, 1)) soma += pagamentos[m]?.[conta.id] ?? 0
+  return centavos(soma)
+}
+
+/**
+ * Quanto da fatura paga em `mes` sai do cofrinho das contas anuais, e não do salário: o que foi
+ * guardado no ciclo cobre as cobranças da conta no cartão, na ordem, até acabar.
+ */
+export function coberturaDoCofrinho(orc: Orcamento, mes: string): number {
+  const mesDoGasto = somarMeses(mes, -1)
+  let total = 0
+  for (const conta of orc.contas) {
+    const p = parcelaAnualNoMes(conta, mesDoGasto)
+    if (!p) continue
+    let usado = 0
+    for (let m = p.vencimento; m < mesDoGasto; m = somarMeses(m, 1)) usado += parcelaAnualNoMes(conta, m)?.valor ?? 0
+    const disponivel = Math.max(0, guardadoNoCiclo(conta, orc.pagamentos, p.vencimento) - usado)
+    total += Math.min(p.valor, disponivel)
+  }
+  return centavos(total)
+}
+
+/**
+ * Juros ao mês embutidos num parcelamento (taxa que iguala as parcelas ao valor à vista, com a
+ * primeira paga um mês depois). `null` quando não há juros. Aproximação para mostrar o custo.
+ */
+export function jurosDoParcelamento(valorAVista: number, total: number, parcelas: number): number | null {
+  if (parcelas < 2 || total <= valorAVista || valorAVista <= 0) return null
+  const parcela = total / parcelas
+  const presente = (i: number) => parcela * (1 - (1 + i) ** -parcelas) / i
+  let baixo = 1e-7
+  let alto = 1
+  for (let k = 0; k < 100; k++) {
+    const meio = (baixo + alto) / 2
+    if (presente(meio) > valorAVista) baixo = meio
+    else alto = meio
+  }
+  return Math.round(((baixo + alto) / 2) * 10000) / 100
+}
