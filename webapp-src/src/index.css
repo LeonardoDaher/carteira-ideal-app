@@ -712,7 +712,7 @@ button.alloc-box:active {
 }
 .voltar-inicio:hover { color: var(--text); }
 
-/* Botões que vieram da landing ("Curso de Candlesticks" e "Educação Financeira Infantil"),
+/* Botão que veio da landing ("Educação Financeira Infantil"; o do curso saiu na D22),
    copiando o visual de lá: caixa de vidro, contorno fino, cantos de 8px, texto centralizado. */
 .link-extra {
   display: flex;
@@ -1161,6 +1161,7 @@ button.alloc-box:active {
       'cab     graf'
       'desc    graf'
       'alertas graf'
+      'ponte   graf'
       'aviso   graf'
       'acao    graf'
       '.       graf';
@@ -1169,6 +1170,7 @@ button.alloc-box:active {
   .area-cabecalho { grid-area: cab; }
   .area-descricao { grid-area: desc; }
   .area-alertas   { grid-area: alertas; }
+  .area-ponte     { grid-area: ponte; }
   .area-aviso     { grid-area: aviso; }
   .area-acao      { grid-area: acao; justify-self: start; min-width: 260px; }
   .area-grafico   { grid-area: graf; margin-top: 0 !important; }
@@ -1227,3 +1229,259 @@ button.alloc-box:active {
   .desk-grid,
   .desk-split { column-gap: 56px; }
 }
+
+/* ================================================================================
+   D21 · Meu Mês — controle do mês no molde dos Três Potes de Duda.
+   As cores dos potes são as do livro: 🟢 Gastar, 🔵 Guardar, 🟡 Fazer Crescer.
+   Contas e cofrinhos ficam em tons neutros: são o que sai antes de qualquer pote.
+   ================================================================================ */
+.pote-gastar { background: var(--z1); }
+.pote-guardar { background: var(--z3); }
+.pote-crescer { background: var(--z2); }
+.seg-contas { background: var(--text-muted); }
+.seg-cofrinhos { background: color-mix(in oklch, var(--text-muted) 55%, transparent); }
+
+.mm-mes-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.mm-mes-nav .icon-btn { font-size: 26px; line-height: 1; width: 44px; height: 44px; }
+.mm-mes-nome { font-size: 18px; font-weight: 700; }
+.mm-mes-nome::first-letter { text-transform: uppercase; }
+
+.mm-link {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  /* Só família e peso: font-size fica com .tiny/.small quando presentes. */
+  font-family: inherit;
+  font-weight: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.mm-link:not(.tiny):not(.small) { font-size: inherit; }
+
+.mm-progresso { height: 6px; border-radius: 3px; background: var(--surface2); overflow: hidden; }
+.mm-progresso > div { height: 100%; background: var(--z1); transition: width 0.25s ease; }
+
+.mm-lista { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.mm-lista > li + li { border-top: 1px solid var(--border); }
+
+/* A linha inteira é tocável (label), com 48px de altura mínima para o dedo. */
+.mm-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 8px 0;
+  cursor: pointer;
+}
+.mm-item-nome { font-weight: 600; font-size: 14px; overflow-wrap: anywhere; }
+.mm-item-valor { font-weight: 600; font-size: 14px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.mm-item.ticado .mm-item-nome,
+.mm-item.ticado .mm-item-valor { color: var(--text-muted); text-decoration: line-through; text-decoration-thickness: 1px; }
+
+/* O tique: caixa redonda que enche de verde, como a caneta no papel. */
+.mm-check {
+  appearance: none;
+  -webkit-appearance: none;
+  flex: none;
+  width: 26px;
+  height: 26px;
+  margin: 0;
+  border-radius: 50%;
+  border: 2px solid var(--stroke);
+  background: transparent;
+  display: grid;
+  place-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.mm-check::after {
+  content: '';
+  width: 11px;
+  height: 6px;
+  border-left: 2.5px solid var(--accent-text);
+  border-bottom: 2.5px solid var(--accent-text);
+  transform: rotate(-45deg) translate(1px, -1px) scale(0);
+  transition: transform 0.15s ease;
+}
+.mm-check:checked { background: var(--z1); border-color: var(--z1); }
+.mm-check:checked::after { transform: rotate(-45deg) translate(1px, -1px) scale(1); }
+.mm-check:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.mm-rodape-lista { border-top: 1px solid var(--border); padding-top: 10px; }
+
+.mm-campo { display: flex; align-items: center; gap: 8px; }
+.mm-campo .input-cotas { padding: 10px 12px; font-size: 16px; font-variant-numeric: tabular-nums; }
+.mm-form .input-cotas { padding: 10px 12px; font-size: 16px; }
+
+/* Caminho do salário: uma barra que se divide na ordem em que o dinheiro sai. */
+.mm-barra {
+  display: flex;
+  height: 14px;
+  border-radius: 7px;
+  overflow: hidden;
+  background: var(--surface2);
+  gap: 2px;
+}
+.mm-barra > div { height: 100%; transition: width 0.25s ease; }
+.mm-bolinha { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+.mm-total { border-top: 1px solid var(--border); padding-top: 8px; font-size: 15px; }
+.mm-negativo { color: var(--danger); }
+.mm-situacao { border-left: 4px solid var(--z1); padding: 2px 0 2px 10px; line-height: 1.5; }
+.mm-situacao-apertado { border-left-color: var(--warning); }
+.mm-situacao-negativo { border-left-color: var(--danger); }
+
+.mm-sugestoes { display: flex; flex-wrap: wrap; gap: 6px; }
+.mm-sugestao {
+  padding: 7px 11px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.mm-sugestao:hover { background: var(--highlight); }
+.mm-sugestao:focus-visible,
+.mm-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.mm-conta { display: flex; align-items: center; gap: 12px; padding: 8px 0; }
+.mm-conta .mm-link { flex: none; }
+.mm-perigo { color: var(--danger); }
+
+@media (prefers-reduced-motion: reduce) {
+  .mm-check, .mm-check::after, .mm-progresso > div, .mm-barra > div { transition: none; }
+}
+
+/* D21 · Etapa 2: cartão de crédito. A fatura é mais uma saída antes dos potes (laranja);
+   o semáforo usa as cores de estado já existentes. */
+.seg-cartao { background: var(--z5); }
+.mm-semaforo { height: 10px; border-radius: 5px; background: var(--surface2); overflow: hidden; }
+.mm-semaforo > div { height: 100%; transition: width 0.25s ease; }
+.mm-semaforo-verde > div { background: var(--success); }
+.mm-semaforo-amarelo > div { background: var(--warning); }
+.mm-semaforo-vermelho > div { background: var(--danger); }
+.mm-cartao-sem-teto { border-left-color: var(--text-muted); }
+.mm-cartao-verde { border-left-color: var(--success); }
+.mm-cartao-amarelo { border-left-color: var(--warning); }
+.mm-cartao-vermelho { border-left-color: var(--danger); }
+.mm-alerta-parcela { border-left: 4px solid var(--warning); padding: 2px 0 2px 10px; line-height: 1.5; }
+@media (prefers-reduced-motion: reduce) { .mm-semaforo > div { transition: none; } }
+
+/* D21 · Etapa 3: Modo Recuperação. O pote Quitar é vermelho (a cor de "dívida" que a pessoa
+   quer ver sumir); as parcelas mínimas saem em violeta, antes dos potes, como as contas. */
+.pote-quitar { background: var(--danger); }
+.seg-dividas { background: var(--z4); }
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.mm-recuperacao { border-left: 4px solid var(--danger); }
+
+/* Fases: marcador redondo como o tique das contas; a fase atual em destaque. */
+.mm-fases { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.mm-fase { display: flex; align-items: flex-start; gap: 10px; }
+.mm-fase-marca {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  margin-top: 1px;
+  border-radius: 50%;
+  border: 2px solid var(--stroke);
+  display: grid;
+  place-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent-text);
+}
+.mm-fase-feito .mm-fase-marca { background: var(--z1); border-color: var(--z1); }
+.mm-fase-atual .mm-fase-marca { border-color: var(--danger); box-shadow: inset 0 0 0 4px color-mix(in oklch, var(--danger) 55%, transparent); }
+.mm-fase-proximo { opacity: 0.75; }
+
+.mm-divida-progresso { height: 6px; border-radius: 3px; background: var(--surface2); overflow: hidden; }
+.mm-divida-progresso > div { height: 100%; background: var(--z1); transition: width 0.25s ease; }
+.mm-aviso-divida { color: var(--danger); font-weight: 600; }
+.mm-celebra { border-left-color: var(--success); }
+.mm-pausado { border-left: 4px solid var(--z2); padding: 2px 0 2px 10px; line-height: 1.5; }
+
+/* Avalanche x bola de neve lado a lado; em telas muito estreitas, um embaixo do outro. */
+.mm-metodos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+@media (max-width: 340px) { .mm-metodos { grid-template-columns: 1fr; } }
+.mm-metodo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.mm-metodo:hover { background: var(--highlight); }
+.mm-metodo.selected { border: 2px solid var(--accent); padding: 9px 11px; }
+.mm-metodo:focus-visible,
+.mm-externo:focus-visible,
+.mm-roteiro summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.mm-ordem { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; }
+
+.mm-pacto { border-left: 4px solid var(--warning); }
+.mm-pacto-feito { border-left-color: var(--success); }
+
+.mm-roteiro ol { margin: 0; padding-left: 20px; }
+.mm-externo { color: inherit; text-decoration: underline; text-underline-offset: 2px; font-weight: 600; }
+
+@media (prefers-reduced-motion: reduce) { .mm-divida-progresso > div { transition: none; } }
+.mm-lista > li.mm-divida { padding: 10px 0; }
+
+/* D21 · Etapa 4: ponte com o questionário e com o resultado.
+   A sugestão do Meu Mês usa o amarelo da marca só na borda, para não competir com a opção
+   marcada (fundo amarelo cheio). A opção sugerida ganha só uma etiqueta: nada é marcado
+   sozinho. */
+.ponte-sugestao {
+  gap: 6px;
+  border: 1px dashed var(--accent);
+}
+.quiz-option.sugerida:not(.selected) { border-style: dashed; border-color: var(--accent); }
+.quiz-option-tag {
+  align-self: flex-start;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 700;
+  background: var(--surface2);
+  color: var(--text);
+}
+.quiz-option.selected .quiz-option-tag { background: var(--accent-text); color: var(--accent); }
+
+.ponte-meu-mes { gap: 8px; }
+.ponte-meu-mes .btn { align-self: flex-start; }
+
+/* Aula em texto (trilha "Sair das dívidas"): leitura confortável no celular. */
+.aula-texto { gap: 12px; line-height: 1.6; }
+.aula-texto p { margin: 0; }
+.aula-links { gap: 6px; }
+.aula-links a { color: var(--text); font-weight: 600; text-underline-offset: 3px; }
+.mm-trilha { gap: 4px; text-align: left; width: 100%; cursor: pointer; color: var(--text); }
+.mm-trilha:hover { background: var(--highlight); }

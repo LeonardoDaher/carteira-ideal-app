@@ -37,12 +37,16 @@ O navegador conhece as **perguntas** (precisa exibi-las) e recebe o **resultado*
 │       │   ├── questions.ts           7 perguntas de suitability
 │       │   ├── perguntasArquitetura.ts 7 perguntas de Arquitetura Patrimonial
 │       │   ├── assets.ts              As 11 classes de ativos
-│       │   ├── trilhas.ts             Trilhas, tópicos, aulas e IDs de vídeo do YouTube
+│       │   ├── trilhas.ts             Trilhas, tópicos, aulas (vídeo do YouTube e/ou texto)
+│       │   ├── linksOficiais.ts       Links oficiais do roteiro de negociação e da trilha "Sair das dívidas"
 │       │   ├── analises/, recomendacoes.ts, carteiraVisual.ts  Textos e agrupamentos de exibição
-│       │   ├── storage.ts             Leitura/gravação no localStorage
+│       │   ├── storage.ts             Leitura/gravação no localStorage (questionário e Meu Mês)
 │       │   └── apiRecomendacao.ts     Cliente HTTP da API
 │       └── domain/
 │           ├── engine.ts              O MOTOR (só é empacotado pela API, nunca pelo app)
+│           ├── orcamento.ts           Meu Mês (D21): contas, cofrinhos, cartão e potes; roda no navegador, dados só no aparelho
+│           ├── recuperacao.ts         Meu Mês, Etapa 3: dívidas, dívida cara e plano de quitação (avalanche x bola de neve)
+│           ├── ponteQuestionario.ts   Meu Mês, Etapa 4: sugestão dos Pilares 1 e 2 a partir do orçamento
 │           └── types.ts               Tipos compartilhados entre app e API
 ├── scripts/build-site.mjs             Monta dist-site/ = landing + app compilado em /app
 ├── vercel.json                        buildCommand e outputDirectory
@@ -93,6 +97,9 @@ O navegador do cliente nunca chama a CVM nem a brapi, e a chave da brapi fica s�
 
 - **Por que o motor ficou em `webapp-src/src/domain/` e não dentro de `api/`?** Para os testes automatizados do motor (`engine.test.ts`, 26 testes) continuarem funcionando sem alteração. O app não importa mais esse arquivo; só a API importa. O build do app foi verificado: nenhum trecho do motor aparece em `dist-site/app/index.html`.
 - **Cálculo assíncrono.** `useAppState.ts` dispara a chamada quando as respostas ficam completas e descarta respostas antigas se o usuário mudar algo no meio (proteção contra *race condition*). A tela "Processando" espera a resposta real (mínimo de 1,9 s de animação) e mostra "Tentar novamente" se a rede falhar.
+- **Meu Mês (D21).** Estado próprio em `state/useOrcamento.ts`, chave `carteiraideal.orcamento` (versão 1), separada do questionário. Salário, contas e dívidas nunca vão para a API. Tela em `screens/MeuMes.tsx`; os blocos do Modo Recuperação (Etapa 3) ficam em `screens/MeuMesRecuperacao.tsx`, e o campo de valor em reais, usado pelos dois, em `ui/CampoReais.tsx`. `recuperacao.ts` não importa nada de `orcamento.ts` (só o contrário), para não haver ciclo de imports.
+- **Ponte Meu Mês ↔ questionário (D21, Etapa 4).** `domain/ponteQuestionario.ts` transforma o orçamento em sugestões dos Pilares 1 e 2 (letra + motivo), usando `sugestaoPilar1` e `sugestaoPilar2`. `state/useSugestoesMeuMes.ts` lê a chave `carteiraideal.orcamento` uma vez, só leitura, pela mesma função `orcamentoSalvo` do `useOrcamento.ts`, e a tela `QuestionarioArquitetura.tsx` mostra a sugestão sem marcar nada. O orçamento continua fora da API: só vai a letra que a pessoa escolher. No resultado, `ui/PonteMeuMes.tsx` aparece só com [A] no Pilar 2 ou no Pilar 1.
+- **Aulas em texto.** `AulaTrilha` ganhou `texto`, `links` e `acao` (opcionais). Aula com texto conta como disponível (`aulaDisponivel`) mesmo sem `youtubeId`; com os dois, o vídeo vem primeiro e o texto abaixo.
 - **Estado no aparelho.** Respostas e progresso ficam no `localStorage` do navegador (chave `carteiraideal.estado`, versão 2). A landing lê essa chave para trocar o botão para "Ver minha carteira de referência". A API **não grava nada**.
 - **App em arquivo único.** Mantido o `vite-plugin-singlefile` para preservar a estrutura já usada pela landing (`./app/`).
 

@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { Aprender } from '../screens/Aprender'
 import { SimuleFii } from '../screens/SimuleFii'
 import { TabBar } from './TabBar'
-import { CHAVE_LIVRO_LIBERADO, URL_CURSO_CANDLESTICKS, URL_LIVRO_PDF } from './MateriaisExtras'
+import { CHAVE_LIVRO_LIBERADO, URL_LIVRO_PDF } from './MateriaisExtras'
 import type { AppCtx } from '../state/useAppState'
 
 const ctx = { screen: 'aprender', setScreen: vi.fn(), abrirTrilha: vi.fn() } as unknown as AppCtx
@@ -13,12 +13,11 @@ beforeEach(() => {
 })
 
 describe('Aprender — botões que vieram da landing', () => {
-  it('mostra o curso de Candlesticks com o link de afiliado, abrindo em outra aba', () => {
-    render(<Aprender ctx={ctx} />)
-    const curso = screen.getByRole('link', { name: 'Curso de Candlesticks' })
-    expect(curso.getAttribute('href')).toBe(URL_CURSO_CANDLESTICKS)
-    expect(curso.getAttribute('target')).toBe('_blank')
-    expect(curso.getAttribute('rel')).toContain('sponsored')
+  it('D22: sem link para o curso da Udemy nem link patrocinado', () => {
+    const { container } = render(<Aprender ctx={ctx} />)
+    expect(screen.queryByText(/Candlesticks/)).toBeNull()
+    expect(container.querySelector('a[href*="udemy"]')).toBeNull()
+    expect(container.querySelector('a[rel~="sponsored"]')).toBeNull()
   })
 
   it('livro bloqueado: abre o diálogo e só libera o download depois de "Já sigo o perfil"', async () => {

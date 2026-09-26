@@ -31,7 +31,7 @@ Todo o conteúdo é apresentado como **exemplo educacional, não recomendação 
 
 ## Estágio atual (setembro/2026)
 
-- App completo e funcional: 14 perguntas, 9 Perfis-Mãe, 11 classes, simulador, aba **Simule FII** (renda estimada a partir do último rendimento; lista por setor dos FIIs com liquidez acima de R$ 1 milhão por dia e busca para os demais) e 2 trilhas com 15 aulas em vídeo.
+- App completo e funcional: 14 perguntas, 9 Perfis-Mãe, 11 classes, simulador, aba **Simule FII** (renda estimada a partir do último rendimento; lista por setor dos FIIs com liquidez acima de R$ 1 milhão por dia e busca para os demais) 3 trilhas (15 aulas em vídeo e 9 em texto na trilha "Sair das dívidas") e o **Meu Mês** (D21), controle do orçamento com Modo Recuperação, aberto pela landing.
 - Motor migrado para o servidor (API protegida). 97 testes automatizados do app e 42 do script mensal de FIIs passando.
 - Dados da aba Simule FII atualizados automaticamente todo mês, sem custo (CVM + brapi gratuito), no ar desde 24/09/2026 com os 10 fundos.
 - **No ar em produção**, em `https://carteiraideal.app.br/`, repositório privado `carteira-ideal-app` no GitHub conectado à Vercel com deploy automático.

@@ -17,6 +17,7 @@ export function AprenderVideo({ ctx }: { ctx: AppCtx }) {
   }
 
   const { trilha, aula } = achado
+  const temTexto = Boolean(aula.texto?.length)
   const cor = aula.ativo ? ATIVOS[aula.ativo].cor : 'var(--accent)'
 
   const ordem = aulasEmOrdem(trilha)
@@ -34,7 +35,7 @@ export function AprenderVideo({ ctx }: { ctx: AppCtx }) {
         <h1 style={{ fontSize: 20 }}>{aula.titulo}</h1>
       </div>
 
-      {aula.youtubeId ? (
+      {aula.youtubeId && (
         <div
           style={
             aula.formato === 'vertical'
@@ -59,7 +60,9 @@ export function AprenderVideo({ ctx }: { ctx: AppCtx }) {
             allowFullScreen
           />
         </div>
-      ) : (
+      )}
+
+      {!aula.youtubeId && !temTexto && (
         <div
           className="card col"
           style={{ gap: 6, alignItems: 'center', textAlign: 'center', aspectRatio: '16 / 9', justifyContent: 'center' }}
@@ -69,10 +72,46 @@ export function AprenderVideo({ ctx }: { ctx: AppCtx }) {
         </div>
       )}
 
-      <div className="card-outline col" style={{ gap: 6 }}>
-        <div className="row" style={{ fontWeight: 700, fontSize: 13.5 }}>Sobre esta aula</div>
-        <div className="muted small justify" style={{ lineHeight: 1.5 }}>{aula.resumo}</div>
-      </div>
+      {temTexto ? (
+        // Aula em texto (D21, Etapa 4). Com vídeo publicado, o texto fica abaixo dele.
+        <article className="card-outline col aula-texto small justify">
+          <span className="muted">{aula.resumo}</span>
+          {aula.texto!.map((paragrafo, i) => (
+            <p key={i}>{paragrafo}</p>
+          ))}
+          {aula.links && aula.links.length > 0 && (
+            <div className="col aula-links">
+              <span className="tiny muted" style={{ fontWeight: 700 }}>Fontes oficiais</span>
+              {aula.links.map((link) => (
+                <a key={link.href} href={link.href} target="_blank" rel="noopener noreferrer">
+                  {link.rotulo} ↗
+                </a>
+              ))}
+            </div>
+          )}
+        </article>
+      ) : (
+        <div className="card-outline col" style={{ gap: 6 }}>
+          <div className="row" style={{ fontWeight: 700, fontSize: 13.5 }}>Sobre esta aula</div>
+          <div className="muted small justify" style={{ lineHeight: 1.5 }}>{aula.resumo}</div>
+        </div>
+      )}
+
+      {aula.acao === 'meuMes' && (
+        <button className="btn btn-outline" onClick={() => ctx.setScreen('meuMes')}>
+          Abrir o Meu Mês
+        </button>
+      )}
+      {aula.acao === 'questionario' &&
+        (ctx.resultado ? (
+          <button className="btn btn-outline" onClick={ctx.limparDados}>
+            Refazer o questionário da Carteira Ideal
+          </button>
+        ) : (
+          <button className="btn btn-outline" onClick={ctx.iniciarQuestionario}>
+            Fazer o questionário da Carteira Ideal
+          </button>
+        ))}
 
       {proxima ? (
         <button
@@ -88,7 +127,9 @@ export function AprenderVideo({ ctx }: { ctx: AppCtx }) {
       )}
 
       <div className="tiny muted justify" style={{ lineHeight: 1.5 }}>
-        Conteúdo educativo com fins ilustrativos, sem caráter de recomendação de compra ou venda.
+        {trilha.id === 'sair-das-dividas'
+          ? 'Conteúdo educativo. Não é assessoria jurídica e não indica banco nem produto de crédito.'
+          : 'Conteúdo educativo com fins ilustrativos, sem caráter de recomendação de compra ou venda.'}
       </div>
 
       <button className="btn btn-outline" onClick={ctx.voltarDaAula}>

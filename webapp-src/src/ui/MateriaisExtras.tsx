@@ -2,9 +2,9 @@ import { useEffect, useRef, useState } from 'react'
 import { storage } from '../data/storage'
 import { LockIcon, XIcon } from './Icon'
 
-/* Os dois botões que ficavam na landing ("Curso de Candlesticks" e "Educação Financeira
-   Infantil") agora moram no fim da tela Aprender. Visual e comportamento são os mesmos
-   de antes, inclusive a liberação do livro por confiança (honor system):
+/* O botão "Educação Financeira Infantil", que ficava na landing, mora no fim da tela Aprender.
+   O link do curso de Candlesticks (Udemy) foi retirado do site na D22: o projeto é gratuito e
+   não divulga produto pago. A liberação do livro é por confiança (honor system):
 
    - Ao tocar no livro, abre um diálogo pedindo para seguir o Instagram. Quem toca em
      "Seguir" ou em "Já sigo o perfil" libera o download. NÃO há verificação (o Instagram
@@ -12,7 +12,6 @@ import { LockIcon, XIcon } from './Icon'
    - A liberação fica salva neste navegador com a MESMA chave usada pela landing
      (carteiraideal.livroLiberado), então quem já tinha liberado antes não precisa de novo. */
 
-export const URL_CURSO_CANDLESTICKS = 'https://www.udemy.com/course/padroes-de-candlestick/?referralCode=50F1DF78FA45A4B65E49'
 export const URL_INSTAGRAM = 'https://www.instagram.com/acarteiraideal/'
 /** O app é publicado em /app/; o PDF fica em /assets/ da landing. */
 export const URL_LIVRO_PDF = '../assets/livro-os-tres-potes-de-duda.pdf'
@@ -58,10 +57,6 @@ export function MateriaisExtras() {
 
   return (
     <div className="col" style={{ gap: 12 }}>
-      <a className="link-extra" href={URL_CURSO_CANDLESTICKS} target="_blank" rel="noopener noreferrer sponsored">
-        Curso de Candlesticks
-      </a>
-
       {liberado ? (
         <a className="link-extra link-extra-2" href={URL_LIVRO_PDF} download={NOME_ARQUIVO_LIVRO}>
           <span className="link-extra-titulo">Educação Financeira Infantil</span>

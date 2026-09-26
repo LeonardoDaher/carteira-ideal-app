@@ -22,7 +22,7 @@ Tudo abaixo pode ser feito **pelo navegador**, sem terminal.
 
 ### Passo C · Testar antes de divulgar
 
-No celular, pelo endereço da Vercel: landing → botão amarelo → 14 perguntas → resultado → abas Carteira e Simular; depois, de volta à landing, botões Simule FII e Aprender → abrir uma aula e ver o vídeo tocar → no fim do Aprender, conferir o curso de Candlesticks e liberar/baixar o livro.
+No celular, pelo endereço da Vercel: landing → botão amarelo → 14 perguntas → resultado → abas Carteira e Simular; depois, de volta à landing, botões Simule FII e Aprender → abrir uma aula e ver o vídeo tocar → no fim do Aprender, liberar/baixar o livro.
 
 ### Passo D · Ajustar o endereço de compartilhamento
 

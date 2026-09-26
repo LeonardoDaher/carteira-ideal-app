@@ -2,6 +2,7 @@ import { carteiraParaExibicao } from '../data/carteiraVisual'
 import { AllocLegend, PieChart } from '../ui/AllocBar'
 import { TabBar } from '../ui/TabBar'
 import { AvisoEducacional } from '../ui/AvisoEducacional'
+import { PonteMeuMes } from '../ui/PonteMeuMes'
 import type { AppCtx } from '../state/useAppState'
 
 const DESCRICAO_PERFIL: Record<string, string> = {
@@ -111,6 +112,8 @@ export function Resultado({ ctx }: { ctx: AppCtx }) {
           ))}
         </div>
       )}
+
+      <PonteMeuMes ctx={ctx} />
 
       <button className="btn btn-primary area-acao" onClick={ctx.limparDados}>
         Refazer o questionário

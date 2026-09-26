@@ -1,5 +1,5 @@
 import { ATIVOS } from '../data/assets'
-import { encontrarTrilha } from '../data/trilhas'
+import { aulaDisponivel, encontrarTrilha } from '../data/trilhas'
 import { PlayIcon } from '../ui/Icon'
 import { TabBar } from '../ui/TabBar'
 import type { AppCtx } from '../state/useAppState'
@@ -47,7 +47,9 @@ export function Trilha({ ctx }: { ctx: AppCtx }) {
           <div className="col" style={{ gap: 8, paddingLeft: 34 }}>
             {topico.aulas.map((aula) => {
               contador += 1
-              const disponivel = Boolean(aula.youtubeId)
+              const disponivel = aulaDisponivel(aula)
+              // Aula só em texto (trilha "Sair das dívidas", D21 Etapa 4) aparece como leitura.
+              const selo = aula.youtubeId ? aula.duracao : disponivel ? `Leitura · ${aula.duracao}` : 'Em breve'
               const cor = aula.ativo ? ATIVOS[aula.ativo].cor : 'var(--accent)'
               return (
                 <button
@@ -78,7 +80,7 @@ export function Trilha({ ctx }: { ctx: AppCtx }) {
                       border: disponivel ? 'none' : '1px solid var(--border)',
                     }}
                   >
-                    {disponivel ? aula.duracao : 'Em breve'}
+                    {selo}
                   </span>
                 </button>
               )

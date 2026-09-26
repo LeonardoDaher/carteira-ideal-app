@@ -13,6 +13,20 @@ Organizados por prioridade. Os itens do bloco 1 são necessários para lançar; 
 - [x] Colocar o link na bio do Instagram — testado tocando dentro do próprio app do Instagram.
 - [ ] Decidir o destino do repositório antigo `Carteira-Ideal` (já privado): manter como arquivo histórico ou apagar.
 
+## 1A. Meu Mês (D21), uma etapa por conversa
+
+- [x] **Etapa 1:** motor do orçamento com testes e tela Meu Mês (contas, cofrinhos das contas anuais, os três potes, cópia de segurança). Aberta por `./app/?tela=meuMes` (botão na landing desde a Etapa 4).
+- [x] **Etapa 2:** cartão de crédito com teto mensal próprio, semáforo, compras à vista e parceladas, e fatura entrando no mês seguinte.
+- [x] **Etapa 3:** Modo Recuperação completo (plano de quitação avalanche x bola de neve, pote Quitar, mini-reserva, pacto de não parcelar, roteiro de negociação).
+- [ ] **Taxas de referência das dívidas** (`TIPOS_DE_DIVIDA` em `domain/recuperacao.ts`: rotativo 14%, fatura parcelada 9%, cheque especial 8%, empréstimo pessoal 6% ao mês): revisar a cada seis meses com as médias do Banco Central, registrando no docs/07. Alternativa futura: trazer as séries de taxa média do SGS pelo job semanal de mercado.
+- [ ] **Links do roteiro de negociação** (Registrato, Serasa Limpa Nome, consumidor.gov.br, Lei 14.181/2021): conferir no ar depois da publicação e a cada revisão semestral.
+- [x] **Parecer jurídico:** análise interna do responsável, sem objeção (D22), incluindo o roteiro de negociação, o plano de quitação, a trilha "Sair das dívidas" e a sugestão dos Pilares 1 e 2.
+- [x] **Etapa 4:** sugestão das respostas dos Pilares 1 e 2 no questionário, cartão "Antes de investir" no resultado, botão na landing, trilha "Sair das dívidas" (9 aulas em texto) no Aprender e briefing do Instagram.
+- [ ] **Publicações do Instagram:** levar `briefing-instagram-meu-mes.md` (fora do repositório, no pacote) para o projeto "Publicações do Carteira Ideal", que aplica a identidade visual.
+- [ ] **Vídeos da trilha "Sair das dívidas"** (em produção desde 26/09/2026): gravar os 9 Shorts a partir dos roteiros do briefing e preencher `youtubeId` em `data/trilhas.ts` (o texto continua abaixo do vídeo).
+- [ ] **Revisão semestral do conteúdo da trilha:** limite de juros do rotativo (Lei 14.690/2023), portabilidade de crédito, exemplo de 8% ao mês e a comparação com a Selic citada na aula 1.
+- [ ] **Nova captura** `docs/jornada/20-meu-mes.jpg` e da sugestão no Pilar 1.
+
 ## 2. Proteção da metodologia
 
 A mudança para a API tirou a metodologia do código visível. Ainda assim, vale conhecer os limites:
@@ -24,19 +38,20 @@ A mudança para a API tirou a metodologia do código visível. Ainda assim, vale
 
 ## 3. Regulatório e privacidade
 
-- [ ] **Revisão jurídica do enquadramento.** A ferramenta gera uma carteira a partir de dados pessoais do investidor. Mesmo com todos os avisos de "exemplo educacional", vale um parecer de advogado especializado em mercado de capitais sobre a fronteira com a atividade de consultoria de valores mobiliários (Resolução CVM 19/2021) e a relação com as regras de suitability (Resolução CVM 30/2021), antes de escalar a divulgação ou monetizar.
-- [ ] **LGPD.** Hoje as respostas ficam só no aparelho do usuário e a API não grava nada, o que simplifica muito. Se entrar captação de e-mail, analytics ou histórico em servidor, será preciso política de privacidade, consentimento e definição de tempo de guarda.
-- [ ] **Plano da Vercel.** O plano gratuito (Hobby) é para uso não comercial. Se o projeto passar a gerar receita diretamente (assinatura, venda de relatório), migrar para o plano Pro.
+- [x] **Revisão jurídica do enquadramento.** Análise jurídica interna, feita pelo responsável (advogado), sobre a fronteira com a consultoria de valores mobiliários (Resolução CVM 19/2021) e a relação com as regras de suitability (Resolução CVM 30/2021): **sem objeção** (D22).
+- [ ] **Parecer independente** de especialista em mercado de capitais: não é bloqueio hoje, mas fazer antes de monetizar, de divulgação paga em escala ou de telas que mudem a natureza do conteúdo (ranking de ativos, recomendação individual).
+- [x] **LGPD: não se aplica no modelo atual** (D22). As respostas e o Meu Mês ficam só no aparelho, a API não grava nada, não há captação de e-mail, e o pedido para seguir no Instagram não coleta dado (liberação do livro por confiança). **Reabrir** se entrar captação de contato, histórico em servidor ou analytics.
+- [x] **Plano da Vercel: Hobby mantido** (D22). O projeto é gratuito e, sem o link do curso da Udemy, o site não divulga produto pago nem tem link de afiliado. **Migrar para o Pro** se entrar anúncio, link de afiliado, venda, doação com contrapartida ou pagamento a quem produz o site.
 
 ## 4. Governança da metodologia (visão de consultoria)
 
 - [ ] **Revisão periódica das carteiras-modelo.** As 9 carteiras são fixas e não reagem ao cenário (nível da Selic, curva de juros, câmbio). Desde a D15, o job semanal traz Selic, IPCA, juro real, dólar e Focus para `mercadoOficial.json`: os números da revisão já estão à mão. Sugestão: revisão semestral documentada, com data e justificativa no [Registro de decisões](07-registro-de-decisoes.md), e o número da versão da metodologia exibido na tela de resultado.
-- [ ] **Graduar o veto.** Hoje um, dois ou três pilares duros em [A] têm o mesmo efeito. Avaliar se três vetos simultâneos deveriam gerar uma orientação mais forte (por exemplo, priorizar quitar dívidas e montar reserva antes de investir).
+- [ ] **Graduar o veto.** Hoje um, dois ou três pilares duros em [A] têm o mesmo efeito. Avaliar se três vetos simultâneos deveriam gerar uma orientação mais forte (por exemplo, priorizar quitar dívidas e montar reserva antes de investir). Com a Etapa 3 da D21, essa orientação já existe no Meu Mês (Modo Recuperação), e desde a Etapa 4 o resultado aponta para ele quando o Pilar 2 (ou o Pilar 1) vem como [A]. O motor continua igual; graduar o veto no `engine.ts` segue em aberto.
 - [ ] **Coerência com o enquadramento educacional.** Revisar textos como "Como um consultor CEA/CNPI analisa" para garantir que continuem soando educativos e não como recomendação individual.
 
 ## 5. Produto
 
-- [ ] **Captação de contatos** no resultado (ex.: "receba sua carteira por e-mail"), depois de resolver o item de LGPD.
+- [x] ~~**Captação de contatos** no resultado~~: descartada (D22). O projeto pede só para seguir o @acarteiraideal.
 - [ ] **Métricas de uso** (Vercel Web Analytics, que não usa cookies): quantos começam, quantos terminam, onde desistem.
 - [ ] **Resultado compartilhável** (imagem para stories do Instagram com o nome do Perfil-Mãe, sem percentuais), como motor de divulgação orgânica.
 - [ ] **Exportar o resultado em PDF.**

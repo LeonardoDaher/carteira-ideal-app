@@ -8,8 +8,10 @@ Instagram (bio) → Landing → Onboarding → Idade → 7 perguntas de Suitabil
 → abas: Perfil · Carteira (→ Detalhe do ativo) · Simular
 
 Landing → Simule FII           (./app/?tela=simuleFii, sem questionário)
-Landing → Aprender (→ Trilha → Aula; curso de Candlesticks e livro no fim da tela)
+Landing → Aprender (→ Trilha → Aula; livro infantil no fim da tela)
                                (./app/?tela=aprender, sem questionário)
+Landing → Meu Mês              (./app/?tela=meuMes, sem questionário; D21)
+Resultado (Pilar 1 ou 2 em [A]) → Meu Mês;  Meu Mês (com dívida) → trilha "Sair das dívidas"
 ```
 
 ---
@@ -23,7 +25,8 @@ Primeira tela para quem toca no link da bio do Instagram.
 
 - **Botão amarelo**: "Descobrir meu perfil e carteira de referência" → abre o app. Para quem já respondeu neste aparelho, vira "Ver minha carteira de referência" e abre direto no resultado.
 - **🏢 Simule FII**: abre direto a tela Simule FII do app, sem questionário.
-- **🎓 Aprender**: abre direto a tela Aprender do app, sem questionário. O **Curso de Candlesticks** e o livro **Educação Financeira Infantil**, que antes ficavam aqui, estão no fim dessa tela (decisão D11).
+- **🎓 Aprender**: abre direto a tela Aprender do app, sem questionário. O livro **Educação Financeira Infantil**, que antes ficava aqui, está no fim dessa tela (decisão D11). O link do curso de Candlesticks foi retirado do site (D22).
+- **🗓️ Meu Mês**: abre direto o controle do mês (contas, cofrinhos das contas anuais, cartão, os três potes e o Modo Recuperação), sem questionário. Fica depois do Aprender, de propósito: é complemento da Carteira Ideal (D21, Etapa 4).
 - **Falar comigo por e-mail**, ícones de Instagram e YouTube, alternância de tema claro/escuro.
 
 <br clear="all">
@@ -110,9 +113,9 @@ Abaixo ficam três avisos: **atraso e estimativa da CVM** (informa o mês do ren
 ### 4.5 Aprender, Trilha e Aula, abertas pela landing
 <img src="jornada/14-aprender-trilhas.jpg" width="170" align="right"><img src="jornada/15-trilha.jpg" width="170" align="right"><img src="jornada/16-aula.jpg" width="170" align="right">
 
-Duas trilhas: **Conhecendo os ativos** (5 tópicos, 11 aulas) e **O poder da diversificação** (4 tópicos, 4 aulas). Cada aula tem vídeo do YouTube incorporado, descrição e botão "Próxima aula".
+Três trilhas: **Conhecendo os ativos** (5 tópicos, 11 aulas), **O poder da diversificação** (4 tópicos, 4 aulas) e **Sair das dívidas** (3 tópicos, 9 aulas, D21 Etapa 4). Nas duas primeiras, cada aula tem vídeo do YouTube incorporado, descrição e botão "Próxima aula". As aulas de **Sair das dívidas** são em texto por enquanto ("Leitura · 2 min"), com fontes oficiais e botões para o Meu Mês ou para o questionário; quando os vídeos forem gravados, eles entram acima do texto.
 
-No fim da lista de trilhas, em **Mais conteúdo**, ficam os dois botões que vieram da landing: **Curso de Candlesticks** (Udemy, link de afiliado) e **Educação Financeira Infantil** (livro em PDF liberado por confiança para quem segue o Instagram, com o mesmo diálogo de antes). Como o Simule FII, a tela abre sem questionário e tem "← Início" para voltar à landing.
+No fim da lista de trilhas, em **Mais conteúdo**, fica o botão que veio da landing: **Educação Financeira Infantil** (livro em PDF liberado por confiança para quem segue o Instagram). O link do curso de Candlesticks (Udemy) foi retirado na D22. Como o Simule FII, a tela abre sem questionário e tem "← Início" para voltar à landing.
 
 > Na captura da aula, o quadro do vídeo aparece com a mensagem "Host not in allowlist". Isso é uma limitação do ambiente onde as capturas foram feitas, que bloqueia o YouTube. No site publicado o vídeo carrega normalmente.
 
@@ -125,3 +128,4 @@ No fim da lista de trilhas, em **Mais conteúdo**, ficam os dois botões que vie
 - **Retomada:** o progresso fica salvo no aparelho. Quem fecha no meio volta de onde parou.
 - **Sem a Arquitetura Patrimonial:** o motor aceita só as 7 respostas de suitability e usa a matriz de fallback (seção 5.4 da metodologia). O fluxo atual sempre coleta as 14.
 - **Refazer o questionário** apaga os dados do aparelho e volta ao onboarding.
+- **Ponte com o Meu Mês (D21, Etapa 4):** nas perguntas 8 e 9 (Pilares 1 e 2), quem já usa o Meu Mês neste aparelho vê qual opção combina com o que anotou lá, com o motivo em números. É só sugestão: nada é marcado sozinho, e o orçamento não sai do aparelho. No resultado, quem respondeu [A] no Pilar 2 (ou, sem isso, [A] no Pilar 1) vê o cartão "Antes de investir" com o botão para o Meu Mês; os demais não veem nada de dívida.

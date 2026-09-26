@@ -110,7 +110,7 @@ O botão "Educação Financeira Infantil" abre um diálogo pedindo para seguir o
 
 - **Não há verificação:** o Instagram não permite checar quem segue. É um convite, não uma proteção.
 - **O PDF continua público** em `assets/livro-os-tres-potes-de-duda.pdf`: quem souber o endereço baixa direto.
-- **Textos, endereços e lógica:** ficam em `webapp-src/src/ui/MateriaisExtras.tsx` (junto com o botão do
-  curso de Candlesticks); os estilos, no fim de `webapp-src/src/index.css`.
+- **Textos, endereços e lógica:** ficam em `webapp-src/src/ui/MateriaisExtras.tsx`; os estilos, no fim de
+  `webapp-src/src/index.css`. O link do curso de Candlesticks foi retirado do site na D22.
 - **Quem já tinha liberado na landing** continua liberado: a chave salva no navegador é a mesma.
 - **Para liberar o livro para todos** de novo, troque o botão por um link direto para o PDF em `MateriaisExtras.tsx`.
