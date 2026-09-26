@@ -473,6 +473,14 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 - **Subtítulo do botão da landing** agora é "Contas do mês e planejamento financeiro" (substitui o texto registrado na Etapa 4). Continua sem a palavra dívida.
 - **Conferido.** 314 testes do app (7 novos) e 106 dos scripts; typecheck e lint sem erros; build de produção. Formato dos dados sem mudança (chave na versão 1).
 
+**Terceira rodada (26/09/2026): a mesma parcela não conta duas vezes.** Pergunta do responsável: o atalho "Aluguel ou financiamento" em Minhas contas e o financiamento em Minhas dívidas não somam duas vezes? Somavam: a parcela de cada dívida já entra na lista do mês junto com as contas (`itensDoMes`), no custo de vida e na régua da reserva.
+- **Atalho** passou a ser só "Aluguel". Financiamento, empréstimo e consignado vão em Minhas dívidas, onde entram saldo, juros e parcela, e onde o plano de quitação consegue enxergá-los.
+- **Aviso no cadastro da conta:** nome que parece parcela de dívida (`pareceDivida`: financiamento, empréstimo, consignado, prestação, consórcio, crédito pessoal) mostra que o lugar certo é Minhas dívidas; se já há dívida desse tipo, avisa que a parcela contaria duas vezes.
+- **Aviso na lista de Minhas contas:** conta mensal com esse nome, havendo dívida em aberto de parcela fixa (financiamento, consignado, empréstimo pessoal ou outra), aparece numa faixa amarela pedindo para remover se for a mesma (`contasEmDobroComDividas`). Cobre quem cadastrou pelo atalho antigo.
+- **Aviso no cadastro da dívida:** ao cadastrar dívida desses tipos com uma conta parecida em Minhas contas, a tela aponta a conta pelo nome.
+- Nada é removido sozinho: o app só avisa (mesma regra da Etapa 4, de não marcar nada pela pessoa). Formato dos dados sem mudança.
+- **Conferido.** 318 testes do app (4 novos) e 106 dos scripts; typecheck, lint e build sem erros.
+
 ### D22 · Análise jurídica sem objeção; site 100% gratuito, sem link de curso pago (26/09/2026)
 
 **Parecer.** A análise jurídica foi feita pelo próprio responsável pelo projeto, que é advogado, em 26/09/2026: sem objeção à fronteira com a consultoria de valores mobiliários (Resolução CVM 19/2021) e à relação com o suitability (Resolução CVM 30/2021), abrangendo também o Meu Mês (plano de quitação, roteiro de negociação), a trilha "Sair das dívidas" e a sugestão dos Pilares 1 e 2. Por ser do próprio autor, é uma análise interna, e não um parecer independente. Recomendação registrada: buscar um parecer independente de especialista em mercado de capitais antes de monetizar, de uma divulgação paga em escala ou de qualquer mudança na natureza do conteúdo (ranking de ativos, recomendação individual, cobrança).

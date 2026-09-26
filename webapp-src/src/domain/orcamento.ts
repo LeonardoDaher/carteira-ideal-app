@@ -704,7 +704,8 @@ export function validarOrcamento(bruto: unknown): Orcamento | null {
 
 /** Atalhos da tela de cadastro: as contas que mais esquecem na hora de planejar o mês. */
 export const CONTAS_SUGERIDAS: { nome: string; tipo: TipoConta; mesVencimento?: number }[] = [
-  { nome: 'Aluguel ou financiamento', tipo: 'mensal' },
+  // Só aluguel (ajuste de 26/09/2026): financiamento vai em Minhas dívidas, com saldo e juros.
+  { nome: 'Aluguel', tipo: 'mensal' },
   { nome: 'Condomínio', tipo: 'mensal' },
   { nome: 'Luz', tipo: 'mensal' },
   { nome: 'Água', tipo: 'mensal' },
@@ -850,4 +851,32 @@ export function quandoApareceNoCartao(mesVencimento: number, parcelas: number, m
   return vencimento === mesDeHoje
     ? `A 1ª parcela entra no gasto do cartão deste mês e já conta para o seu teto. Ela é paga na fatura de ${nome(somarMeses(mesDeHoje, 1))}; a última cai em ${ultima}.`
     : `A 1ª parcela entra no gasto do cartão em ${nome(vencimento)} e conta para o teto desse mês; até lá, nada muda. A última cai em ${ultima}.`
+}
+
+// ---------------------------------------------------------------- conta x dívida (evitar contar 2x)
+
+/**
+ * Nome de conta que parece parcela de dívida (financiamento, empréstimo, consignado, prestação).
+ * A parcela de uma dívida cadastrada em Minhas dívidas já sai junto com as contas do mês; se ela
+ * também estiver em Minhas contas, sai do salário duas vezes (ajuste de 26/09/2026).
+ */
+export function pareceDivida(nome: string): boolean {
+  return /financiamento|empr[eé]stimo|consignado|presta[cç][aã]o|cons[oó]rcio|cr[eé]dito pessoal/i.test(nome)
+}
+
+/** Tipos de dívida que costumam ter parcela fixa e podem ter sido cadastrados também como conta. */
+const TIPOS_COM_PARCELA_FIXA = new Set(['financiamento', 'consignado', 'emprestimo-pessoal', 'outra'])
+
+/** Há dívida em aberto de um tipo que costuma virar conta mensal por engano. */
+export function temDividaComParcelaFixa(orc: Orcamento): boolean {
+  return recuperacaoDe(orc).dividas.some((d) => d.saldo > 0 && TIPOS_COM_PARCELA_FIXA.has(d.tipo))
+}
+
+/**
+ * Contas mensais que podem estar em dobro com Minhas dívidas: o nome parece dívida e há dívida
+ * em aberto de tipo com parcela fixa. Só avisa; quem decide remover é a pessoa.
+ */
+export function contasEmDobroComDividas(orc: Orcamento): Conta[] {
+  if (!temDividaComParcelaFixa(orc)) return []
+  return orc.contas.filter((c) => c.tipo === 'mensal' && pareceDivida(c.nome))
 }

@@ -305,6 +305,24 @@ describe('MeuMes', () => {
       expect(txt(cartao)).toContain('parcela 2 de 10')
     })
 
+    it('financiamento em Minhas contas e em Minhas dívidas: avisa que conta duas vezes', async () => {
+      salvar({
+        ...exemplo,
+        contas: [{ id: 'fin', nome: 'Aluguel ou financiamento', valor: 900, tipo: 'mensal' }],
+        recuperacao: {
+          ligadoManual: false,
+          dividas: [{ id: 'd', nome: 'Carro', tipo: 'financiamento', saldo: 30000, saldoInicial: 30000, jurosMensal: 1.5, parcelaMinima: 900 }],
+          metodo: 'avalanche',
+          pactoDesde: null,
+        },
+      })
+      render(<MeuMes ctx={ctx} hoje={hoje} />)
+      expect(await screen.findByText(/"Aluguel ou financiamento" parece a parcela de uma dívida/)).toBeTruthy()
+      fireEvent.change(screen.getByLabelText('Nome da conta'), { target: { value: 'Empréstimo do banco' } })
+      expect(screen.getByText(/Você já tem financiamento ou empréstimo em Minhas dívidas/)).toBeTruthy()
+      expect(screen.queryByRole('button', { name: 'Aluguel ou financiamento' })).toBeNull()
+    })
+
     it('"Apagar tudo e começar de novo" fica numa caixa amarela e pede confirmação', async () => {
       const confirmar = vi.spyOn(window, 'confirm').mockReturnValue(false)
       salvar(exemplo)

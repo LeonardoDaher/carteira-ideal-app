@@ -1,6 +1,7 @@
 import { useId, useState } from 'react'
 import {
   dividasDoPlano,
+  pareceDivida,
   faseRecuperacao,
   lerReais,
   mesPorExtenso,
@@ -144,6 +145,7 @@ export function MinhasDividas({
   onLigar: () => void
 }) {
   const { dividas } = recuperacaoDe(orcamento)
+  const contasParecidas = orcamento.contas.filter((c) => c.tipo === 'mensal' && pareceDivida(c.nome))
   const ativo = modoRecuperacaoAtivo(orcamento)
   const [aberto, setAberto] = useState(false)
   const [rascunho, setRascunho] = useState<Rascunho>(RASCUNHO_VAZIO)
@@ -306,6 +308,13 @@ export function MinhasDividas({
               ))}
             </select>
           </label>
+          {/* Ajuste de 26/09/2026: a mesma parcela em Minhas contas e aqui sai do salário duas vezes. */}
+          {!editandoId && contasParecidas.length > 0 && ['financiamento', 'consignado', 'emprestimo-pessoal', 'outra'].includes(rascunho.tipo) && (
+            <span className="small justify mm-alerta-parcela" role="note">
+              Em Minhas contas já existe {contasParecidas.map((c) => `"${c.nome}"`).join(', ')}. A parcela desta dívida vai entrar
+              nas contas do mês: se for a mesma, remova a conta de lá, senão ela conta duas vezes.
+            </span>
+          )}
 
           <CampoReais
             key={`saldo-${versaoForm}`}

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import type { Divida } from './recuperacao'
 import {
   ID_FATURA,
   ORCAMENTO_VAZIO,
@@ -9,6 +10,9 @@ import {
   gastoNoTeto,
   inicioDaAnualNoCartao,
   quandoApareceNoCartao,
+  pareceDivida,
+  contasEmDobroComDividas,
+  CONTAS_SUGERIDAS,
   parcelamentoPodeTerComecado,
   jurosDoParcelamento,
   parcelaAnualNoMes,
@@ -490,5 +494,38 @@ describe('conta anual paga no cartão (ajuste após a Etapa 4)', () => {
   it('validação: aceita o campo, rejeita parcelas fora de 1 a 12', () => {
     expect(validarOrcamento(base(ipva({ parcelas: 3, total: 1250, desde: '2026-10' })))?.contas[0].cartaoAnual).toEqual({ parcelas: 3, total: 1250, desde: '2026-10' })
     expect(validarOrcamento(base(ipva({ parcelas: 13, total: 1250, desde: '2026-10' })))).toBeNull()
+  })
+})
+
+describe('conta x dívida: a mesma parcela não pode contar duas vezes (ajuste de 26/09/2026)', () => {
+  const financiamento: Divida = { id: 'f', nome: 'Carro', tipo: 'financiamento', saldo: 30000, saldoInicial: 30000, jurosMensal: 1.5, parcelaMinima: 900 }
+  const base = (contas: Conta[], dividas = [financiamento]): Orcamento => ({
+    ...ORCAMENTO_VAZIO,
+    salario: 5000,
+    contas,
+    recuperacao: { ligadoManual: false, dividas, metodo: 'avalanche', pactoDesde: null },
+  })
+
+  it('reconhece nomes de parcela de dívida', () => {
+    for (const n of ['Financiamento do carro', 'Aluguel ou financiamento', 'Empréstimo', 'emprestimo banco', 'Consignado', 'Prestação da casa', 'Consórcio']) {
+      expect(pareceDivida(n)).toBe(true)
+    }
+    for (const n of ['Aluguel', 'Luz', 'Plano de saúde', 'Mercado']) expect(pareceDivida(n)).toBe(false)
+  })
+
+  it('o atalho agora é só "Aluguel"', () => {
+    expect(CONTAS_SUGERIDAS.map((c) => c.nome)).toContain('Aluguel')
+    expect(CONTAS_SUGERIDAS.some((c) => pareceDivida(c.nome))).toBe(false)
+  })
+
+  it('aponta a conta em dobro só quando há dívida de parcela fixa em aberto', () => {
+    const contas: Conta[] = [
+      { id: 'a', nome: 'Aluguel ou financiamento', valor: 900, tipo: 'mensal' },
+      { id: 'l', nome: 'Luz', valor: 200, tipo: 'mensal' },
+    ]
+    expect(contasEmDobroComDividas(base(contas)).map((c) => c.id)).toEqual(['a'])
+    expect(contasEmDobroComDividas(base(contas, []))).toEqual([])
+    expect(contasEmDobroComDividas(base(contas, [{ ...financiamento, saldo: 0 }]))).toEqual([])
+    expect(contasEmDobroComDividas(base(contas, [{ ...financiamento, tipo: 'cartao-rotativo' }]))).toEqual([])
   })
 })

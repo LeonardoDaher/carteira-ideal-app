@@ -5,6 +5,9 @@ import {
   NOMES_DOS_MESES,
   centavos,
   chaveMes,
+  contasEmDobroComDividas,
+  pareceDivida,
+  temDividaComParcelaFixa,
   inicioDaAnualNoCartao,
   quandoApareceNoCartao,
   parcelamentoPodeTerComecado,
@@ -100,6 +103,8 @@ export function MeuMes({
             {/* Cadastro das contas logo abaixo da lista do mês, antes do cartão (ajuste após a Etapa 4). */}
             <MinhasContas
               contas={orcamento.contas}
+              emDobro={contasEmDobroComDividas(orcamento).map((c) => c.id)}
+              temDividaParcelada={temDividaComParcelaFixa(orcamento)}
               mesDeHoje={mesDeHoje}
               pactoAtivo={!!recuperacaoDe(orcamento).pactoDesde}
               pedidoEdicao={pedidoEdicao}
@@ -822,6 +827,8 @@ const SUGESTOES_VISIVEIS = 6
 
 function MinhasContas({
   contas,
+  emDobro,
+  temDividaParcelada,
   mesDeHoje,
   pactoAtivo,
   pedidoEdicao,
@@ -830,6 +837,10 @@ function MinhasContas({
   onRemover,
 }: {
   contas: Conta[]
+  /** Contas mensais que parecem a mesma parcela de uma dívida de Minhas dívidas (ajuste de 26/09/2026). */
+  emDobro: string[]
+  /** Há financiamento, empréstimo, consignado ou outra dívida de parcela fixa em Minhas dívidas. */
+  temDividaParcelada: boolean
   mesDeHoje: string
   /** Pacto de não parcelar (Modo Recuperação): parcelar conta do ano pede confirmação. */
   pactoAtivo: boolean
@@ -948,6 +959,16 @@ function MinhasContas({
           ))}
         </ul>
       )}
+      {emDobro.length > 0 && (
+        <div className="small justify mm-situacao mm-cartao-amarelo" role="status">
+          {contas
+            .filter((c) => emDobro.includes(c.id))
+            .map((c) => `"${c.nome}"`)
+            .join(', ')}{' '}
+          {emDobro.length > 1 ? 'parecem' : 'parece'} a parcela de uma dívida que já está em Minhas dívidas. A parcela da dívida já
+          sai junto com as contas do mês: se for a mesma, toque em Editar e remova daqui, senão ela conta duas vezes.
+        </div>
+      )}
 
       <div className="col mm-form" style={{ gap: 10 }} ref={formRef}>
         <span className="small" style={{ fontWeight: 700 }}>{editandoId ? `Editar conta: ${contaEditada?.nome ?? ''}` : 'Adicionar conta'}</span>
@@ -966,6 +987,13 @@ function MinhasContas({
             onChange={(e) => setRascunho({ ...rascunho, nome: e.target.value })}
           />
         </label>
+        {rascunho.tipo === 'mensal' && pareceDivida(rascunho.nome) && (
+          <span className="small justify mm-alerta-parcela" role="note">
+            {temDividaParcelada
+              ? 'Você já tem financiamento ou empréstimo em Minhas dívidas, logo abaixo. A parcela de lá já sai junto com as contas do mês: se for a mesma, não cadastre aqui, senão ela conta duas vezes.'
+              : 'Financiamento, empréstimo e consignado ficam melhor em Minhas dívidas, logo abaixo: lá entram o saldo, os juros e a parcela, que sai junto com as contas do mês. Cadastre num lugar só, para não contar duas vezes.'}
+          </span>
+        )}
 
         {!editandoId && sugestoes.length > 0 && (
           <div className="col" style={{ gap: 6 }}>
