@@ -1573,9 +1573,11 @@ select option:disabled { color: #6b7280 !important; -webkit-text-fill-color: #6b
 /* Títulos em caixinha na cor da bolinha de "Para onde vai o salário" (ajuste de 26/09/2026), no
    mesmo esquema de "Minhas dívidas": "Minhas contas" e os grupos de Contas do mês. O fundo vem da
    classe seg-* (a mesma da bolinha e da barra); a cor do texto garante contraste nos dois temas. */
+/* Faixa na largura toda do card, como .mm-titulo-dividas (ajuste de 26/09/2026: a primeira
+   versão era uma caixinha só do tamanho do texto). A fonte dos grupos de Contas do mês continua
+   menor, como era. */
 .mm-titulo-cor {
-  display: inline-block;
-  align-self: flex-start;
+  display: block;
   font-weight: 700;
   padding: 4px 12px;
   border-radius: 999px;

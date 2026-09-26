@@ -576,7 +576,7 @@ function CartaoDoMes({
 
   return (
     <div className="card col" style={{ gap: 12 }}>
-      <span style={{ fontWeight: 700 }}>Cartão de crédito</span>
+      <span className="mm-titulo-cor seg-cartao">Cartão de crédito</span>
 
       {teto > 0 && (
         <div className="col" style={{ gap: 6 }}>

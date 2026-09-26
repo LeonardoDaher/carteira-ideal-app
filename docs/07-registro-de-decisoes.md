@@ -514,6 +514,7 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 
 **Nona rodada (26/09/2026): títulos em caixinha na cor da bolinha.** Pedido do responsável: "Minhas contas" e o grupo dos cofrinhos das contas do ano no mesmo esquema do título "Minhas dívidas", uma caixinha arredondada na cor da bolinha correspondente em "Para onde vai o salário".
 - "Minhas contas" em cinza (bolinha "Contas do mês", `seg-contas`). Em Contas do mês, os títulos dos grupos viram caixinhas menores: "Todo mês" em cinza, "Cofrinhos das contas do ano" no cinza mais claro (`seg-cofrinhos`), e, para a lista não ficar metade colorida, "Cartão de crédito" em laranja (`seg-cartao`) e "Dívidas" em roxo (`seg-dividas`). O fundo vem da mesma classe da bolinha e da barra; a cor do texto foi escolhida para ter contraste nos dois temas (`.mm-titulo-cor`). Conferido em captura de tela, tema escuro e claro.
+- **Acerto na mesma rodada:** as caixinhas ficaram do tamanho do texto, e o pedido era igual a "Minhas dívidas". Agora são faixas na largura toda do card (os grupos de Contas do mês mantêm o texto menor, como o responsável preferiu). O título do card "Cartão de crédito" também ganhou a faixa laranja da bolinha da fatura.
 - **Conferido.** 335 testes do app e 106 dos scripts; typecheck, lint e build sem erros.
 
 ### D22 · Análise jurídica sem objeção; site 100% gratuito, sem link de curso pago (26/09/2026)
