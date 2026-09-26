@@ -1539,3 +1539,33 @@ select option:disabled { color: #6b7280 !important; -webkit-text-fill-color: #6b
 }
 .mm-apagar-tudo:hover { filter: brightness(1.05); }
 .mm-apagar-tudo:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+
+/* Caixas simples do cartão (ajuste de 26/09/2026): "Compras à vista do mês, de uma vez" e
+   "Começando agora no app?" ficam cada uma numa caixa com borda, para não se perderem no bloco. */
+.mm-caixa {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--stroke);
+  border-radius: 10px;
+  background: var(--surface2);
+}
+.mm-caixa-titulo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+.mm-caixa-titulo:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+.mm-caixa-secao { display: flex; flex-direction: column; gap: 8px; padding-top: 10px; border-top: 1px solid var(--stroke); }

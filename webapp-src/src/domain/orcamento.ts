@@ -926,3 +926,22 @@ export function acertarPeloTotal(orc: Orcamento, mes: string, total: number): Or
   const compras = total > 0 && diferenca > 0 ? [...outras, { id, descricao: DESCRICAO_AVISTA_DO_MES, valor: diferenca, mes, parcelas: 1 }] : outras
   return { ...orc, cartao: { ...orc.cartao, compras } }
 }
+
+// ---------------------------------------------------------------- parcelamento que já estava em andamento
+
+/**
+ * Compra parcelada que a pessoa já estava pagando ao chegar no app (ajuste de 26/09/2026). Ela
+ * informa o que vê no extrato: "parcela 4 de 10" na fatura deste mês. A fatura de `mesDeHoje` traz
+ * o que passou no cartão no mês anterior; se ali veio a parcela `atual`, a compra foi feita
+ * `atual` meses antes de `mesDeHoje`. Assim as parcelas que faltam caem nos meses certos, sem
+ * precisar voltar mês a mês para lançar a compra no mês original.
+ */
+export function compraEmAndamento(
+  descricao: string,
+  valorDaParcela: number,
+  parcelas: number,
+  atual: number,
+  mesDeHoje: string,
+): Omit<Compra, 'id'> {
+  return { descricao, valor: centavos(valorDaParcela * parcelas), mes: somarMeses(mesDeHoje, -atual), parcelas }
+}

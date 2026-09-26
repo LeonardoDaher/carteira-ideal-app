@@ -5,6 +5,7 @@ import {
   NOMES_DOS_MESES,
   centavos,
   chaveMes,
+  compraEmAndamento,
   ehTotalDoMes,
   aVistaLancadasNoMes,
   totalInformado,
@@ -525,7 +526,7 @@ function CartaoDoMes({
   const [totalAberto, setTotalAberto] = useState(false)
   const mesPassado = somarMeses(mes, -1)
   const totalMesPassado = totalInformado(orcamento, mesPassado)
-  const [totalPassadoAberto, setTotalPassadoAberto] = useState(false)
+  const [comecandoAberto, setComecandoAberto] = useState(false)
   const totalRef = useRef<HTMLDivElement>(null)
 
   function lancar() {
@@ -683,40 +684,66 @@ function CartaoDoMes({
       )}
 
       <div ref={totalRef}>
-        <TotalDoMes
-          key={`${mes}-${totalDoMes ?? 'sem'}`}
-          mes={mes}
-          aberto={totalAberto || totalDoMes != null}
+        <Caixa
+          titulo={`Compras à vista de ${nomeDoMes(mes)}, de uma vez`}
+          resumo={totalDoMes != null ? `${reais(totalDoMes)} lançados à vista neste mês.` : 'Para não anotar uma por uma.'}
+          aberto={totalAberto}
           onAbrir={setTotalAberto}
-          totalAtual={totalDoMes}
-          jaLancado={aVistaLancadasNoMes(orcamento, mes)}
-          recuperacao={recuperacao}
-          onAcertar={(t) => onAcertarTotal(mes, t)}
-        />
+        >
+          <TotalDoMes
+            key={`${mes}-${totalDoMes ?? 'sem'}`}
+            mes={mes}
+            totalAtual={totalDoMes}
+            jaLancado={aVistaLancadasNoMes(orcamento, mes)}
+            recuperacao={recuperacao}
+            onAcertar={(t) => {
+              onAcertarTotal(mes, t)
+              setTotalAberto(false)
+            }}
+            onFechar={() => setTotalAberto(false)}
+          />
+        </Caixa>
       </div>
 
-      {/* Primeiro mês no app (ajuste de 26/09/2026): a fatura que se paga agora traz as compras à
-          vista do mês passado, que ainda não estão no app. Atalho para lançá-las sem voltar o mês. */}
-      {mes === mesDeHoje && (totalMesPassado != null || aVistaLancadasNoMes(orcamento, mesPassado) === 0) && (
-        <TotalDoMes
-          key={`${mesPassado}-${totalMesPassado ?? 'sem'}`}
-          mes={mesPassado}
-          aberto={totalPassadoAberto}
-          onAbrir={setTotalPassadoAberto}
-          totalAtual={totalMesPassado}
-          jaLancado={aVistaLancadasNoMes(orcamento, mesPassado)}
-          recuperacao={false}
-          onAcertar={(t) => {
-            onAcertarTotal(mesPassado, t)
-            setTotalPassadoAberto(false)
-          }}
-          rotuloAbrir={
-            totalMesPassado != null
-              ? `Compras à vista de ${nomeDoMes(mesPassado)} (fatura de ${nomeDoMes(mes)}): ${reais(totalMesPassado)}. Corrigir`
-              : `Primeiro mês no app? Lance as compras à vista de ${nomeDoMes(mesPassado)}, que você paga na fatura de ${nomeDoMes(mes)}`
-          }
-          contexto={`Elas entram na fatura de ${nomeDoMes(mes)}, que você paga agora, e aparecem em Contas do mês.`}
-        />
+      {/* Começando agora no app (ajuste de 26/09/2026): a fatura que se paga agora traz o que
+          passou no cartão no mês passado, que ainda não está no app. Fica sempre no mês atual,
+          fechada, com uma linha dizendo para que serve. */}
+      {mes === mesDeHoje && (
+        <Caixa
+          titulo="Começando agora no app?"
+          resumo={`Traga o que vem na fatura de ${nomeDoMes(mes)}: compras à vista de ${nomeDoMes(mesPassado)} e parcelamentos que você já estava pagando.`}
+          aberto={comecandoAberto}
+          onAbrir={setComecandoAberto}
+        >
+          <span className="small muted justify">
+            A fatura de {nomeDoMes(mes)} traz o que passou no cartão em {nomeDoMes(mesPassado)}. Parcelas de contas do ano (IPVA,
+            seguro) vêm de Minhas contas: lá, marque "Sim, já estou pagando". Contas de todo mês no cartão entram a partir do mês
+            do cadastro: some a de {nomeDoMes(mesPassado)} no total à vista abaixo.
+          </span>
+          <div className="mm-caixa-secao">
+            <span className="small" style={{ fontWeight: 700 }}>
+              1. Compras à vista de {nomeDoMes(mesPassado)}
+              {totalMesPassado != null && <span className="muted" style={{ fontWeight: 400 }}> · {reais(totalMesPassado)} lançados</span>}
+            </span>
+            <TotalDoMes
+              key={`${mesPassado}-${totalMesPassado ?? 'sem'}`}
+              mes={mesPassado}
+              totalAtual={totalMesPassado}
+              jaLancado={aVistaLancadasNoMes(orcamento, mesPassado)}
+              recuperacao={false}
+              contexto={`Elas entram na fatura de ${nomeDoMes(mes)}, que você paga agora, e aparecem em Contas do mês.`}
+              onAcertar={(t) => onAcertarTotal(mesPassado, t)}
+              onFechar={() => setComecandoAberto(false)}
+            />
+          </div>
+          <div className="mm-caixa-secao">
+            <span className="small" style={{ fontWeight: 700 }}>2. Parcelamentos que você já estava pagando</span>
+            <ParcelamentoEmAndamento
+              mesDeHoje={mes}
+              onLancar={onAdicionar}
+            />
+          </div>
+        </Caixa>
       )}
 
       <div className="col mm-form" style={{ gap: 10 }} ref={formRef}>
@@ -816,62 +843,76 @@ function CartaoDoMes({
   )
 }
 
+/** Caixa simples que abre e fecha (ajuste de 26/09/2026). */
+function Caixa({
+  titulo,
+  resumo,
+  aberto,
+  onAbrir,
+  children,
+}: {
+  titulo: string
+  /** Linha curta mostrada com a caixa fechada (ex.: o total já lançado). */
+  resumo?: string
+  aberto: boolean
+  onAbrir: (v: boolean) => void
+  children: React.ReactNode
+}) {
+  return (
+    <div className="mm-caixa">
+      <button className="mm-caixa-titulo" aria-expanded={aberto} onClick={() => onAbrir(!aberto)}>
+        <span>{titulo}</span>
+        <span aria-hidden="true">{aberto ? '−' : '+'}</span>
+      </button>
+      {!aberto && resumo && <span className="small muted">{resumo}</span>}
+      {aberto && children}
+    </div>
+  )
+}
+
 /**
- * Compras à vista do mês lançadas de uma vez (ajuste de 26/09/2026). Parceladas e contas no cartão
- * não entram aqui: são lançadas em separado. As compras à vista já anotadas uma a uma fazem parte
- * do total e são descontadas.
+ * Compras à vista de um mês lançadas de uma vez (ajuste de 26/09/2026). Parceladas e contas no
+ * cartão não entram aqui: são lançadas em separado. As compras à vista já anotadas uma a uma fazem
+ * parte do total e são descontadas.
  */
 function TotalDoMes({
   mes,
-  aberto,
-  onAbrir,
   totalAtual,
   jaLancado,
   recuperacao,
-  onAcertar,
-  rotuloAbrir,
   contexto,
+  onAcertar,
+  onFechar,
 }: {
   mes: string
-  /** Texto do link que abre o bloco (padrão: compras à vista do mês). */
-  rotuloAbrir?: string
-  /** Frase extra no topo do bloco (ex.: em que fatura essas compras entram). */
-  contexto?: string
-  aberto: boolean
-  onAbrir: (v: boolean) => void
   totalAtual: number | null
   /** Compras à vista do mês já lançadas uma a uma. */
   jaLancado: number
   recuperacao: boolean
+  /** Frase extra no topo (ex.: em que fatura essas compras entram). */
+  contexto?: string
   onAcertar: (total: number) => void
+  onFechar: () => void
 }) {
   const [total, setTotal] = useState(totalAtual ?? 0)
   const diferenca = centavos(total - jaLancado)
   const abaixo = total > 0 && diferenca < 0
-  if (!aberto) {
-    return (
-      <button className="mm-link small" style={{ alignSelf: 'flex-start' }} onClick={() => onAbrir(true)}>
-        {rotuloAbrir ?? 'Lançar as compras à vista do mês de uma vez'}
-      </button>
-    )
-  }
   return (
-    <div className="col mm-form" style={{ gap: 10 }}>
-      <span className="small" style={{ fontWeight: 700 }}>Compras à vista de {nomeDoMes(mes)}, de uma vez</span>
+    <div className="col" style={{ gap: 10 }}>
       <span className="small muted justify">
         {contexto && `${contexto} `}Some tudo o que você comprou à vista no cartão em {nomeDoMes(mes)} e digite aqui, sem anotar
         uma por uma.
         {jaLancado > 0 && ` As compras à vista que você já anotou (${reais(jaLancado)}) fazem parte desse total e são descontadas.`}
       </span>
       <span className="small justify mm-alerta-parcela" role="note">
-        Parcelado fica de fora: compra parcelada, lance abaixo em "Lançar compra", com o número de vezes; conta do ano ou de
-        todo mês no cartão, em Minhas contas. Assim os próximos meses já contam as parcelas.
+        Parcelado fica de fora: compra parcelada, lance em "Lançar compra", com o número de vezes; conta do ano ou de todo mês no
+        cartão, em Minhas contas. Assim os próximos meses já contam as parcelas.
       </span>
       <CampoReais rotulo={`Total à vista no cartão em ${nomeDoMes(mes)}`} valor={total} onMudar={setTotal} />
       {abaixo ? (
         <div className="small justify mm-situacao mm-cartao-vermelho" role="alert">
-          {reais(total)} é menos do que as compras à vista que você já anotou neste mês ({reais(jaLancado)}). Confira o total, ou
-          edite as compras anotadas.
+          {reais(total)} é menos do que as compras à vista que você já anotou em {nomeDoMes(mes)} ({reais(jaLancado)}). Confira o
+          total, ou edite as compras anotadas.
         </div>
       ) : (
         total > 0 &&
@@ -887,25 +928,120 @@ function TotalDoMes({
       <button className="btn btn-primary" disabled={total <= 0 || abaixo} onClick={() => onAcertar(total)}>
         {totalAtual != null ? 'Atualizar total à vista' : 'Lançar total à vista'}
       </button>
+      {totalAtual != null ? (
+        <button
+          className="btn btn-outline"
+          onClick={() => {
+            if (window.confirm(`Tirar o total à vista de ${nomeDoMes(mes)} e voltar a anotar compra por compra? As compras anotadas continuam.`)) {
+              onAcertar(0)
+              onFechar()
+            }
+          }}
+        >
+          Voltar a anotar uma por uma
+        </button>
+      ) : (
+        <button className="btn btn-outline" onClick={onFechar}>
+          Cancelar
+        </button>
+      )}
+    </div>
+  )
+}
+
+/**
+ * Parcelamento no cartão que a pessoa já estava pagando ao chegar no app (ajuste de 26/09/2026).
+ * Ela informa o que vê na fatura deste mês ("parcela 4 de 10"), e o app calcula sozinho o mês da
+ * compra: as parcelas que faltam caem nos meses certos.
+ */
+function ParcelamentoEmAndamento({
+  mesDeHoje,
+  onLancar,
+}: {
+  mesDeHoje: string
+  onLancar: (c: Omit<Compra, 'id'>) => void
+}) {
+  const [descricao, setDescricao] = useState('')
+  const [valorParcela, setValorParcela] = useState(0)
+  const [parcelas, setParcelas] = useState(10)
+  const [atual, setAtual] = useState(1)
+  const [versao, setVersao] = useState(0)
+  const [ultimo, setUltimo] = useState<string | null>(null)
+  const idDescricao = useId()
+  const idParcelas = useId()
+  const idAtual = useId()
+  const atualValida = Math.min(atual, parcelas)
+  const valido = descricao.trim().length > 0 && valorParcela > 0
+  const compra = compraEmAndamento(descricao.trim(), valorParcela, parcelas, atualValida, mesDeHoje)
+  const fatura = nomeDoMes(mesDeHoje)
+  const ultimaFatura = mesPorExtenso(somarMeses(mesDeHoje, parcelas - atualValida))
+
+  function lancar() {
+    if (!valido) return
+    onLancar(compra)
+    setUltimo(`"${compra.descricao}" lançado: parcela ${atualValida} de ${parcelas} na fatura de ${fatura}.`)
+    setDescricao('')
+    setValorParcela(0)
+    setParcelas(10)
+    setAtual(1)
+    setVersao((v) => v + 1)
+  }
+
+  return (
+    <div className="col" style={{ gap: 10 }}>
+      <span className="small muted justify">
+        Olhe a fatura de {fatura}: cada compra parcelada aparece como "04/10", por exemplo. Lance uma por vez, e as parcelas que
+        faltam entram sozinhas nos próximos meses.
+      </span>
+      <label htmlFor={idDescricao} className="small" style={{ fontWeight: 600 }}>
+        Compra parcelada
+      </label>
+      <input
+        id={idDescricao}
+        className="input-cotas"
+        value={descricao}
+        maxLength={40}
+        placeholder="Ex.: Geladeira"
+        onChange={(e) => setDescricao(e.target.value)}
+      />
+      <CampoReais key={`parcela-andamento-${versao}`} rotulo="Valor de cada parcela" valor={valorParcela} onMudar={setValorParcela} />
       <div className="row" style={{ gap: 8 }}>
-        {totalAtual != null ? (
-          <button
-            className="btn btn-outline"
-            onClick={() => {
-              if (window.confirm('Tirar o total à vista deste mês e voltar a anotar compra por compra? As compras anotadas continuam.')) {
-                onAcertar(0)
-                onAbrir(false)
-              }
-            }}
-          >
-            Voltar a anotar uma por uma
-          </button>
-        ) : (
-          <button className="btn btn-outline" onClick={() => onAbrir(false)}>
-            Cancelar
-          </button>
-        )}
+        <label htmlFor={idAtual} className="col grow" style={{ gap: 4 }}>
+          <span className="small" style={{ fontWeight: 600 }}>Parcela na fatura de {fatura}</span>
+          <select id={idAtual} className="input-cotas" value={atualValida} onChange={(e) => setAtual(Number(e.target.value))}>
+            {Array.from({ length: parcelas }, (_, i) => i + 1).map((n) => (
+              <option key={n} value={n}>
+                {n}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label htmlFor={idParcelas} className="col grow" style={{ gap: 4 }}>
+          <span className="small" style={{ fontWeight: 600 }}>De quantas</span>
+          <select id={idParcelas} className="input-cotas" value={parcelas} onChange={(e) => setParcelas(Number(e.target.value))}>
+            {Array.from({ length: 23 }, (_, i) => i + 2).map((n) => (
+              <option key={n} value={n}>
+                {n}
+              </option>
+            ))}
+          </select>
+        </label>
       </div>
+      {valorParcela > 0 && (
+        <div className="small justify mm-situacao" role="note">
+          Parcela {atualValida} de {parcelas} na fatura de {fatura}
+          {atualValida < parcelas ? `; a última vem na fatura de ${ultimaFatura}` : ', a última'}. Compra de{' '}
+          {mesPorExtenso(compra.mes)}, total de {reais(compra.valor)}.
+        </div>
+      )}
+      <button className="btn btn-primary" disabled={!valido} onClick={lancar}>
+        Lançar parcelamento
+      </button>
+      {ultimo && (
+        <span className="small" role="status" style={{ fontWeight: 600 }}>
+          {ultimo} Pode lançar o próximo.
+        </span>
+      )}
     </div>
   )
 }

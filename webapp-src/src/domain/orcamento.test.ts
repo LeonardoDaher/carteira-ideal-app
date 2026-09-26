@@ -13,6 +13,7 @@ import {
   pareceDivida,
   acertarPeloTotal,
   aVistaLancadasNoMes,
+  compraEmAndamento,
   totalInformado,
   gastoNoCartao,
   contasEmDobroComDividas,
@@ -577,5 +578,21 @@ describe('compras à vista do mês de uma vez (ajuste de 26/09/2026)', () => {
     orc = acertarPeloTotal(orc, '2026-09', 1000)
     expect(orc.cartao.compras.find((c) => c.id === 'total-2026-09')!.valor).toBe(600)
     expect(gastoNoCartao(orc, '2026-09')).toBe(1400) // 1.000 à vista + 400 da 1ª parcela da TV
+  })
+})
+
+describe('parcelamento que já estava em andamento (ajuste de 26/09/2026)', () => {
+  it('parcela 4 de 10 na fatura de setembro: compra de maio, e as parcelas caem nos meses certos', () => {
+    const c = compraEmAndamento('Geladeira', 300, 10, 4, '2026-09')
+    expect(c).toEqual({ descricao: 'Geladeira', valor: 3000, mes: '2026-05', parcelas: 10 })
+    const orc: Orcamento = { ...ORCAMENTO_VAZIO, salario: 5000, cartao: { teto: 0, compras: [{ ...c, id: 'g' }] } }
+    expect(faturaDoMes(orc, '2026-09')).toBe(300) // a parcela 4, paga agora
+    expect(comprasDoMes(orc, '2026-09')[0].parcela).toBe(5) // gasto de setembro = parcela 5
+    expect(faturaDoMes(orc, '2027-03')).toBe(300) // a 10ª
+    expect(faturaDoMes(orc, '2027-04')).toBe(0)
+  })
+
+  it('parcela 1 na fatura deste mês: compra do mês passado', () => {
+    expect(compraEmAndamento('TV', 199.9, 12, 1, '2026-09').mes).toBe('2026-08')
   })
 })
