@@ -1,14 +1,13 @@
 # Carga inicial do histórico de ETFs (decisão D23). Rodar UMA VEZ, à mão, antes do job diário
 # "Atualizar ETFs" (e de novo só se o arquivo historico/etfs.json se perder).
 #
-# Baixa os boletins de preços da B3 dos últimos pregões (padrão: 260, o suficiente para a faixa
-# de 52 semanas), um por vez, com 1 segundo de pausa: cerca de 12,7 MB por pregão, perto de
-# 3,3 GB no total, e de 20 a 60 minutos. Pregão que a B3 não entregar fica de fora, com aviso no
-# log; a carga segue. O histórico é gravado mesmo se ainda não der para publicar a lista.
-# Pode ser rodada de novo: só baixa o que falta.
+# Baixa os boletins de preços da B3 dos pregões mais recentes (padrão: 260, o suficiente para a
+# faixa de 52 semanas), um por vez. Na primeira execução real (27/09/2026), 260 pregões levaram
+# 28 minutos (cerca de 6 segundos cada).
 #
-# Com menos pregões (ex.: 70), a lista, a média de 21 pregões e a variação de 3 meses já
-# funcionam; a faixa de 52 semanas só aparece quando o histórico passar de 240 pregões.
+# O histórico é publicado MESMO se a execução falhar ou for interrompida (passo final com
+# "if: always()"): nada do que já foi baixado se perde, e rodar de novo só baixa o que falta.
+# O arquivo do app (etfs.json) só é publicado se o site compilar.
 
 name: Carga inicial de ETFs
 
@@ -41,15 +40,24 @@ jobs:
         run: node scripts/atualizar-etfs.mjs --carga-inicial=${{ github.event.inputs.pregoes }}
 
       - name: Conferir se o site compila com os dados novos
+        id: build
         run: |
           npm ci
           npm run build
 
-      - name: Publicar (commit)
+      - name: Publicar (commit) o que foi carregado
+        if: always()
         run: |
+          if [ "${{ steps.build.outcome }}" != "success" ]; then
+            git checkout -- webapp-src/src/data/etfs.json 2>/dev/null || true
+          fi
+          if [ ! -f historico/etfs.json ]; then
+            echo "Nenhum histórico gravado."
+            exit 0
+          fi
           git config user.name "${{ vars.COMMIT_AUTOR_NOME || 'github-actions[bot]' }}"
           git config user.email "${{ vars.COMMIT_AUTOR_EMAIL || '41898283+github-actions[bot]@users.noreply.github.com' }}"
           git add historico/etfs.json webapp-src/src/data/etfs.json
-          git commit -m "dados: carga inicial de ETFs ($(date -u +%Y-%m-%d))" || echo "Nada a publicar."
+          git commit -m "dados: carga inicial de ETFs ($(date -u +%Y-%m-%d))" || { echo "Nada a publicar."; exit 0; }
           git pull --rebase
           git push
