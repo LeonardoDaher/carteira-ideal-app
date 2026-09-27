@@ -1,6 +1,6 @@
 {
   "_leia": "Configuração do job diário de ETFs da B3 (decisão D23). O job só publica com 'conferidoPeloResponsavel': true. Preço e volume vêm do Boletim de Preços oficial da B3 (BVBG.086), guardados em historico/etfs.json; a brapi (/api/v2/tickers?subType=etf, 3 requisições) só informa quais códigos são ETF e o nome oficial, e se falhar o job usa o universo guardado. A lista exibida são os 'maxEtfs' ETFs com maior volume financeiro médio nos últimos 21 pregões, acima de 'pisoVolume'. Tickers em 'excluir' nunca entram. ETF sem categoria aparece em 'Outros' e gera [categoria] no log; ETF novo com nome que contenha uma das 'palavrasRevisar' gera [revisar] no log, sem exclusão automática. BDRs de ETF (final 39) ficam na aba de BDR (D19).",
-  "conferidoPeloResponsavel": false,
+  "conferidoPeloResponsavel": true,
   "maxEtfs": 40,
   "pisoVolume": 500000,
   "minimoEtfsParaPublicar": 25,
