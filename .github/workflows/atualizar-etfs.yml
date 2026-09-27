@@ -1,0 +1,62 @@
+# Atualiza nos dias úteis os dados da aba de ETFs (decisão D23): os 40 ETFs da B3 com maior
+# volume médio em reais nos últimos 21 pregões, com fechamento, variação de 3 meses e faixa
+# de 52 semanas.
+#
+# Fonte do preço e do volume: Boletim de Preços oficial da B3 (BVBG.086), sem cota e sem
+# secret. A brapi (BRAPI_TOKEN) só informa quais códigos são ETF e o nome oficial, em 3
+# requisições por execução (~66 por mês); se falhar, o job usa o universo guardado.
+#
+# Segunda a sexta às 22h de Brasília (01h UTC do dia seguinte): a última versão do boletim do
+# dia sai por volta das 20h30. Não coincide com os outros jobs (BDRs 19h, FIIs dia 20, mercado
+# terça).
+#
+# Antes da primeira execução diária, rode UMA VEZ o workflow "Carga inicial de ETFs".
+#
+# Se o script encontrar algo errado, o job falha SEM alterar os arquivos: o app continua com os
+# dados do último dia bom e o GitHub envia um e-mail avisando da falha. Feriado da B3 (zip
+# vazio) ou pregão já processado: nada muda, sem commit e sem deploy.
+
+name: Atualizar ETFs
+
+on:
+  schedule:
+    - cron: '0 1 * * 2-6' # terça a sábado, 01h UTC = segunda a sexta, 22h de Brasília
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  atualizar:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Buscar o boletim da B3 e gerar etfs.json
+        env:
+          BRAPI_TOKEN: ${{ secrets.BRAPI_TOKEN }}
+        run: node scripts/atualizar-etfs.mjs
+
+      - name: Conferir se o site compila com os dados novos
+        run: |
+          npm ci
+          npm run build
+
+      - name: Publicar (commit) se houver mudança
+        run: |
+          if [ -z "$(git status --porcelain webapp-src/src/data/etfs.json historico)" ]; then
+            echo "Sem mudanças nos dados."
+            exit 0
+          fi
+          git config user.name "${{ vars.COMMIT_AUTOR_NOME || 'github-actions[bot]' }}"
+          git config user.email "${{ vars.COMMIT_AUTOR_EMAIL || '41898283+github-actions[bot]@users.noreply.github.com' }}"
+          git add webapp-src/src/data/etfs.json historico/etfs.json
+          git commit -m "dados: ETFs ($(date -u +%Y-%m-%d))"
+          git pull --rebase
+          git push
