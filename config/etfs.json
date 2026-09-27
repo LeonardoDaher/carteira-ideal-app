@@ -228,7 +228,7 @@
     "XBCI11": "Neos Boosted Bitcoin High Income"
   },
   "cambio": {
-    "_leia": "Só para 'Bolsa exterior'. true = o preço em reais sobe e desce também com o dólar; false = acompanha o índice sem a variação do dólar (estrutura 'Quanto'/hedge). ETF de bolsa exterior sem esta informação gera [cambio] no log e o cartão não mostra a linha. CONFERIR cada um na lâmina antes de ligar 'conferidoPeloResponsavel'.",
+    "_leia": "Só para 'Bolsa exterior'. true = o preço em reais sobe e desce também com o dólar; false = acompanha o índice sem a variação do dólar (estrutura 'Quanto'/hedge). Conferido em 27/09/2026 nas páginas das gestoras e da B3 (D23). ETF de bolsa exterior sem esta informação gera [cambio] no log e o cartão não mostra a linha.",
     "IVVB11": true,
     "SPXI11": true,
     "SPXU11": true,
@@ -241,7 +241,12 @@
     "XINA11": true,
     "SPXH11": false,
     "SPXR11": false,
-    "SPBZ11": false
+    "SPBZ11": false,
+    "SPXB11": true,
+    "GPUS11": true,
+    "RARA11": true,
+    "SPYI11": true,
+    "QQQI11": true
   },
   "nomes": {
     "_leia": "Correção manual do nome exibido, quando o 'longName' da brapi vier estranho. Formato: \"TICKER\": \"Nome\".",
