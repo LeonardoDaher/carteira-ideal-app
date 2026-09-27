@@ -182,6 +182,39 @@ describe('Meu Mês, Modo Recuperação', () => {
     expect(formas()).toEqual(['À vista'])
   })
 
+  it('reserva acima da mini-reserva: sugere quitar com o excedente e registra o pagamento (ajuste de 26/09/2026)', async () => {
+    // Custo de vida: R$ 1.600 de contas + R$ 300 de mínimas → mini-reserva R$ 1.000.
+    // Reserva de R$ 3.200 → R$ 2.200 além dela.
+    salvar(comDividas([loja, cheque], { reserva: 3200 }))
+    const confirmar = vi.spyOn(window, 'confirm').mockReturnValue(true)
+    render(<MeuMes ctx={ctx} hoje={hoje} />)
+    const aviso = (await screen.findByText(/de reserva além da mini-reserva de/)).closest('[role=status]') as HTMLElement
+    expect(txt(aviso)).toMatch(/Você tem R\$ 2\.200,00 de reserva além da mini-reserva de R\$ 1\.000,00/)
+    // Avalanche: cheque (8%) primeiro, quitado; o resto no carnê (4%). Juros evitados: 160 + 8.
+    expect(txt(aviso)).toMatch(/Cheque do banco: R\$ 2\.000,00 \(quita a dívida\)/)
+    expect(txt(aviso)).toMatch(/Carnê da loja: R\$ 200,00/)
+    expect(txt(aviso)).toMatch(/economiza cerca de R\$ 168,00 de juros por mês/)
+
+    fireEvent.click(within(aviso).getByRole('button', { name: 'Já paguei: atualizar reserva e dívidas' }))
+    expect(confirmar).toHaveBeenCalledOnce()
+    const salvo = lerSalvo()
+    expect(salvo.reserva).toBe(1000)
+    expect(salvo.recuperacao!.dividas.find((d) => d.id === 'cheque')!.saldo).toBe(0)
+    expect(salvo.recuperacao!.dividas.find((d) => d.id === 'loja')!.saldo).toBe(400)
+    // Quitado o cheque, a mínima dele sai do custo de vida: a mini-reserva cai para R$ 900 e
+    // sobram R$ 100, que o app sugere para o carnê.
+    expect(txt(screen.getByText(/de reserva além da mini-reserva de/).closest('[role=status]') as HTMLElement)).toMatch(
+      /Você tem R\$ 100,00 de reserva além da mini-reserva de R\$ 900,00/,
+    )
+  })
+
+  it('reserva só do tamanho da mini-reserva: nada a sugerir', async () => {
+    salvar(comDividas([cheque], { reserva: 900 })) // mini-reserva: (1.600 + 200) / 2 → R$ 900
+    render(<MeuMes ctx={ctx} hoje={hoje} />)
+    await screen.findByText('Modo Recuperação ligado')
+    expect(screen.queryByText(/de reserva além da mini-reserva de/)).toBeNull()
+  })
+
   it('ticar o pagamento da dívida guarda o valor do mês', async () => {
     salvar(comDividas([cheque], { potes: { guardar: 500, crescer: 300, quitar: 400 } }))
     render(<MeuMes ctx={ctx} hoje={hoje} />)

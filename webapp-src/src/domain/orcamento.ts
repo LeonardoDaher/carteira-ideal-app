@@ -1028,3 +1028,50 @@ export function parcelamentoComJuros(
   const aoMes = semJuros || abaixo ? null : jurosDoParcelamento(precoAVista, total, parcelas)
   return { total, aMais, percentual, aoMes, abaixo, semJuros }
 }
+
+// ---------------------------------------------------------------- reserva acima da mini-reserva
+
+/**
+ * Reserva além da mini-reserva, com dívida cara em aberto (ajuste de 26/09/2026). Dinheiro parado
+ * rende perto de 1% ao mês, enquanto a dívida cara cobra 3%, 8%, 15%: o excedente vai para as
+ * dívidas caras, na ordem dos juros mais altos (avalanche), e a mini-reserva fica guardada para
+ * imprevistos. `economiaMensal` é quanto de juros deixa de ser cobrado por mês.
+ */
+export function excedenteDaReserva(orc: Orcamento): {
+  excedente: number
+  usar: number
+  pagamentos: { divida: Divida; valor: number; quita: boolean }[]
+  economiaMensal: number
+} | null {
+  if (!temDividaCara(orc)) return null
+  const excedente = centavos(orc.reserva - metaMiniReserva(orc))
+  if (excedente <= 0) return null
+  const caras = recuperacaoDe(orc).dividas.filter(ehDividaCara).sort((a, b) => b.jurosMensal - a.jurosMensal || a.saldo - b.saldo)
+  let resto = excedente
+  const pagamentos: { divida: Divida; valor: number; quita: boolean }[] = []
+  for (const divida of caras) {
+    if (resto <= 0) break
+    const valor = centavos(Math.min(resto, divida.saldo))
+    pagamentos.push({ divida, valor, quita: valor >= divida.saldo })
+    resto = centavos(resto - valor)
+  }
+  const usar = centavos(excedente - resto)
+  const economiaMensal = centavos(pagamentos.reduce((t, p) => t + (p.valor * p.divida.jurosMensal) / 100, 0))
+  return { excedente, usar, pagamentos, economiaMensal }
+}
+
+/** Registra o uso do excedente: a reserva cai e o saldo de cada dívida paga diminui. */
+export function usarExcedenteDaReserva(orc: Orcamento): Orcamento {
+  const plano = excedenteDaReserva(orc)
+  if (!plano) return orc
+  const pagos = new Map(plano.pagamentos.map((p) => [p.divida.id, p.valor]))
+  const rec = recuperacaoDe(orc)
+  return {
+    ...orc,
+    reserva: centavos(orc.reserva - plano.usar),
+    recuperacao: {
+      ...rec,
+      dividas: rec.dividas.map((d) => (pagos.has(d.id) ? { ...d, saldo: centavos(d.saldo - pagos.get(d.id)!) } : d)),
+    },
+  }
+}

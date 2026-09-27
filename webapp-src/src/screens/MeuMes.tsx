@@ -105,7 +105,7 @@ export function MeuMes({
         <div className="desk-split">
           <div className="desk-main">
             <NavegarMes mes={mes} onMudar={setMes} mesDeHoje={mesDeHoje} />
-            {recuperacao && <PainelRecuperacao orcamento={orcamento} onDesligar={() => est.setLigadoManual(false)} />}
+            {recuperacao && <PainelRecuperacao orcamento={orcamento} onDesligar={() => est.setLigadoManual(false)} onAtualizar={est.substituir} />}
             <ContasDoMes orcamento={orcamento} mes={mes} onTicar={est.ticar} onEditar={editarConta} />
             {/* Cadastro das contas logo abaixo da lista do mês, antes do cartão (ajuste após a Etapa 4). */}
             <MinhasContas

@@ -1,5 +1,7 @@
 import { useId, useState } from 'react'
 import {
+  excedenteDaReserva,
+  usarExcedenteDaReserva,
   dividasDoPlano,
   pareceDivida,
   faseRecuperacao,
@@ -46,7 +48,17 @@ const mesDoPlano = (mesDeHoje: string, n: number) => mesPorExtenso(somarMeses(me
 
 // ---------------------------------------------------------------- painel das fases
 
-export function PainelRecuperacao({ orcamento, onDesligar }: { orcamento: Orcamento; onDesligar: () => void }) {
+export function PainelRecuperacao({
+  orcamento,
+  onDesligar,
+  onAtualizar,
+}: {
+  orcamento: Orcamento
+  onDesligar: () => void
+  /** Grava o orçamento depois de usar o excedente da reserva (ajuste de 26/09/2026). */
+  onAtualizar: (novo: Orcamento) => void
+}) {
+  const excedente = excedenteDaReserva(orcamento)
   const cara = temDividaCara(orcamento)
   const fase = faseRecuperacao(orcamento)
   const meta = metaMiniReserva(orcamento)
@@ -103,6 +115,40 @@ export function PainelRecuperacao({ orcamento, onDesligar }: { orcamento: Orcame
           </li>
         ))}
       </ol>
+      {excedente && (
+        <div className="col small mm-situacao mm-cartao-amarelo" style={{ gap: 6 }} role="status">
+          <span>
+            Você tem <strong>{reais(excedente.excedente)}</strong> de reserva além da mini-reserva de {reais(meta)}. Parado, esse
+            dinheiro rende perto de 1% ao mês, enquanto a dívida cara cobra bem mais. Usado para quitar, ele economiza cerca de{' '}
+            <strong>{reais(excedente.economiaMensal)} de juros por mês</strong>.
+          </span>
+          <span style={{ fontWeight: 600 }}>Sugestão, dos juros mais altos para os mais baixos:</span>
+          <ul className="mm-lista-simples">
+            {excedente.pagamentos.map((p) => (
+              <li key={p.divida.id}>
+                {p.divida.nome}: {reais(p.valor)}
+                {p.quita ? ' (quita a dívida)' : ''}
+              </li>
+            ))}
+          </ul>
+          <span>
+            A mini-reserva de {reais(meta)} continua guardada para imprevistos. Pague pelo canal oficial do credor e peça desconto
+            para quitar à vista, que costuma existir.
+          </span>
+          <button
+            className="btn btn-outline"
+            onClick={() => {
+              const aviso =
+                `Registrar que você usou ${reais(excedente.usar)} da reserva para pagar as dívidas? ` +
+                `A reserva fica em ${reais(orcamento.reserva - excedente.usar)} e os saldos das dívidas diminuem. ` +
+                'Se pagou outro valor, ajuste depois em Minhas dívidas e na reserva.'
+              if (window.confirm(aviso)) onAtualizar(usarExcedenteDaReserva(orcamento))
+            }}
+          >
+            Já paguei: atualizar reserva e dívidas
+          </button>
+        </div>
+      )}
       {cara ? (
         <span className="tiny muted">Desliga sozinho quando a última dívida cara for quitada.</span>
       ) : (

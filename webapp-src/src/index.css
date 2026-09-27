@@ -1587,3 +1587,6 @@ select option:disabled { color: #6b7280 !important; -webkit-text-fill-color: #6b
 .mm-titulo-cor.seg-cofrinhos { color: var(--text); }
 .mm-titulo-cor.seg-cartao { color: #2a1400; }
 .mm-titulo-cor.seg-dividas { color: #1a1025; }
+
+/* Lista curta dentro de um aviso (ex.: onde usar a reserva acima da mini-reserva). */
+.mm-lista-simples { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 2px; }

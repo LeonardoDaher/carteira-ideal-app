@@ -16,6 +16,9 @@ import {
   compraEmAndamento,
   compraParecidaComConta,
   parcelamentoComJuros,
+  excedenteDaReserva,
+  temDividaCara,
+  usarExcedenteDaReserva,
   contasEmDobroComCompras,
   totalInformado,
   gastoNoCartao,
@@ -644,5 +647,38 @@ describe('compra parcelada com juros (ajuste de 26/09/2026)', () => {
     expect(validarOrcamento(base.orcamento)?.cartao.compras[0].valorAVista).toBe(1200)
     const ruim = { ...base.orcamento, cartao: { teto: 0, compras: [{ ...base.orcamento.cartao.compras[0], valorAVista: -5 }] } }
     expect(validarOrcamento(ruim)).toBeNull()
+  })
+})
+
+describe('reserva acima da mini-reserva, com dívida cara (ajuste de 26/09/2026)', () => {
+  const cartao: Divida = { id: 'c', nome: 'Cartão', tipo: 'cartao-rotativo', saldo: 1000, saldoInicial: 1000, jurosMensal: 14, parcelaMinima: 150 }
+  const consignado: Divida = { id: 'k', nome: 'Consignado', tipo: 'consignado', saldo: 9000, saldoInicial: 9000, jurosMensal: 1.8, parcelaMinima: 400 }
+  const base = (reserva: number, dividas: Divida[]): Orcamento => ({
+    ...ORCAMENTO_VAZIO,
+    salario: 5000,
+    reserva,
+    contas: [{ id: 'a', nome: 'Aluguel', valor: 2000, tipo: 'mensal' }],
+    recuperacao: { ligadoManual: false, dividas, metodo: 'avalanche', pactoDesde: null },
+  })
+
+  it('usa só o que passa da mini-reserva, e só nas dívidas caras', () => {
+    // Custo de vida: R$ 2.000 de aluguel + R$ 550 de mínimas = R$ 2.550; mini-reserva R$ 1.300.
+    // Reserva R$ 5.000 → R$ 3.700 além; só R$ 1.000 vão para o cartão, o consignado é barato.
+    const r = excedenteDaReserva(base(5000, [cartao, consignado]))!
+    expect(r).toMatchObject({ excedente: 3700, usar: 1000, economiaMensal: 140 })
+    expect(r.pagamentos.map((p) => [p.divida.id, p.valor, p.quita])).toEqual([['c', 1000, true]])
+  })
+
+  it('sem dívida cara, ou sem excedente: nada', () => {
+    expect(excedenteDaReserva(base(5000, [consignado]))).toBeNull()
+    expect(excedenteDaReserva(base(1100, [cartao]))).toBeNull() // mini-reserva: (2.000 + 150) / 2 → R$ 1.100
+    expect(excedenteDaReserva(base(500, [cartao]))).toBeNull()
+  })
+
+  it('registrar o uso baixa a reserva e os saldos, e desliga o modo quando a última cara acaba', () => {
+    const depois = usarExcedenteDaReserva(base(5000, [cartao, consignado]))
+    expect(depois.reserva).toBe(4000)
+    expect(depois.recuperacao!.dividas.map((d) => d.saldo)).toEqual([0, 9000])
+    expect(temDividaCara(depois)).toBe(false)
   })
 })
