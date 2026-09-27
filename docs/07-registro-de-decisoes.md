@@ -156,6 +156,14 @@ Com isso, a média de 3 meses exibida na tela chegava a superestimar a renda em 
 
 **Enquadramento.** A busca exibe qualquer fundo encontrado, sem ordenar por rendimento nem sugerir compra. O aviso de rentabilidade passada ganhou a frase "Encontrar um fundo na busca não é uma indicação de compra."
 
+**Mecanismo (Etapa 2, 27/09/2026).**
+- `scripts/b3-boletim.mjs`: leitor do boletim, compartilhável com o futuro job de BDRs. Baixa `PRAAMMDD.zip` (zip dentro de zip), extrai só o XML da última versão do dia e o lê em fluxo, bloco a bloco. No boletim real de 25/09: 59.380 instrumentos em 2,5 s, 89 MB de memória. Zip menor que 1 KB = dia sem pregão.
+- `scripts/atualizar-etfs.mjs`: universo pela brapi (com o histórico como reserva), boletins que faltam (até 5 dias úteis para trás no dia a dia), histórico próprio em `historico/etfs.json` (até 260 pregões; por ETF e por pregão, [fechamento, mínima, máxima, volume em reais] ou null), métricas, travas e gravação. Dia sem negócio conta como volume zero na média de 21 pregões. Variação de 3 meses só com 64 pregões ou mais; faixa de 52 semanas só com 240 ou mais. Antes das 21h de Brasília, o boletim do dia não é usado (a última versão sai por volta das 20h30).
+- `--carga-inicial=N`: baixa até N pregões (máximo 260), com 1 s de pausa, e grava o histórico **sempre**, mesmo sem pregões suficientes para publicar, para uma carga interrompida continuar de onde parou.
+- Workflows: `.github/workflows/atualizar-etfs.yml` (segunda a sexta, 22h de Brasília) e `.github/workflows/carga-inicial-etfs.yml` (manual, uma vez). Operação em `docs/05`, seção 5.9.
+- Saída `webapp-src/src/data/etfs.json`: data do pregão, fonte, pregões no histórico, critério, ordem das categorias, os 40 da lista (ticker, nome, categoria, índice, câmbio, cotação e data, volume médio, variação de 3 meses, mínima e máxima de 52 semanas) e a busca com todos os ETFs (campos resumidos).
+- **Conferido.** 26 testes novos (132 dos scripts no total). Simulação ponta a ponta com o zip real da B3 de 25/09 e a rede simulada: feriado (zip vazio), boletim com data trocada (ignorado na carga), carga incompleta (histórico gravado, lista não), pregão novo (40 ETFs: 16 de renda fixa, 8 de bolsa brasileira, 8 de bolsa exterior, 4 de ouro, dólar e commodities e 4 de cripto), execução repetida (arquivos idênticos) e brapi fora do ar (universo guardado). Na simulação, o mínimo de ETFs no boletim, fixado antes em 150, barrava até o pregão verdadeiro; ficou em 60 (só a primeira página da listagem soma 86 no boletim de 25/09).
+
 **Pendências.**
 - Conferir a cota mensal vigente do plano gratuito no painel da brapi e ajustar `maxRequisicoesBrapi` se necessário. O job leva alguns minutos por causa da pausa entre chamadas; o workflow tem teto de 45 minutos.
 - Na primeira execução, ler no log a linha `[info] brapi: … requisições, … não listados, … sem cotação` e a contagem de baixa confiança, e conferir por amostragem 2 fundos pequenos, além dos 2 destaques de sempre.
@@ -547,3 +555,28 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 - **Gatilho para migrar ao Pro:** anúncio, link de afiliado, venda de produto ou serviço, pagamento a quem produz o site. Enquanto nada disso existir, o plano Hobby segue adequado.
 
 **Não mudou.** Motor, API, jobs, Meu Mês, questionário e formato dos dados salvos.
+
+### D23 · ETFs da B3: 40 mais negociados, dados oficiais da B3 (27/09/2026, em andamento)
+
+**Contexto.** Segunda frente de renda variável (D19), com as mesmas regras: telas estritamente descritivas, dado bruto, ordem por liquidez, agrupamento por categoria, sem ranking nem múltiplos. BDRs de ETF (final 39) continuam na aba de BDR; aqui ficam os ETFs brasileiros (BOVA11, IVVB11, HASH11 e afins).
+
+**Mudança de fonte: brapi → B3.** Em 27/09/2026 o painel da brapi avisou que o plano gratuito cairá "em breve" de 15.000 para **1.000 requisições/mês**, sem data. Só o job de BDRs gasta cerca de 2.900. O plano Startup (R$ 119,99/mês) foi descartado pelo responsável: o preço e o volume passam a vir de arquivos públicos da B3, sem cota, e a brapi fica só para o que a B3 não traz (nome longo dos ETFs, setor dos BDRs), com poucas requisições por mês. A migração começa pelos ETFs; o job de BDRs migra em seguida.
+
+**Testes (27/09/2026, com os arquivos do pregão de 25/09).**
+- **brapi, plano gratuito:** `/api/v2/tickers?subType=etf` funciona (257 ETFs em 3 páginas de 100, com `longName`); só 1 ativo por requisição; o `volume` é quantidade e às vezes vem errado de escala (FNAM11: 79,5 milhões na brapi, contra 79,6 mil cotas e R$ 28,7 mil na B3).
+- **COTAHIST diário da B3** (`https://bvmf.bmfbovespa.com.br/InstDados/SerHist/COTAHIST_DDDMMAAAA.ZIP`, 0,6 MB): traz fechamento, mínima, máxima e **volume em reais** dos ETFs de bolsa, exterior, cripto e ouro e dos BDRs, idênticos à brapi no preço. **Não traz nenhum ETF de renda fixa** (0 de 27), que a B3 trata como instrumento de renda fixa.
+- **Boletim de Preços da B3** (BVBG.086.01, `https://www.b3.com.br/pesquisapregao/download?filelist=PRAAMMDD.zip,`, 12,7 MB compactado, 4 versões de ~136 MB no dia): traz **todos** os instrumentos, inclusive os ETFs de renda fixa (LFTS11: R$ 160,46 e R$ 18,1 mi), com `LastPric`, `MinPric`, `MaxPric` e `NtlFinVol` (volume em reais, lote padrão mais fracionário). Os 86 ETFs do config estão no arquivo. Versões do dia às 18h39, 19h06, 19h24 e 20h33 de Brasília; 69 dos 1.643 códigos de fundos e BDRs mudam de volume entre a primeira e a última (ajustes pequenos), o preço de fechamento não. Usar sempre a última versão.
+- **Acesso pelo GitHub Actions:** um repositório público (cvscarlos/b3-api-dados-historicos) baixa esses arquivos todo dia às 22h18 de Brasília; o último commit automático (26/09) já tinha o pregão de 25/09. Lições registradas por ele: dia sem pregão devolve HTTP 200 com zip vazio de 22 bytes; a página de séries históricas passou a ter captcha, a URL direta continua funcionando.
+- **Liquidez em reais no dia 25/09 (boletim):** o 40º ETF negociou R$ 3,3 mi; 71 dos 86 classificados passaram de R$ 500 mil.
+
+**Decisão.**
+- **Fonte diária:** Boletim de Preços (última versão do dia), lido em fluxo, sem carregar o XML inteiro na memória. Um arquivo só para ETFs (inclusive renda fixa), BDRs e, no futuro, ações e FIIs.
+- **Histórico próprio:** o job guarda fechamento, mínima, máxima e volume em reais de cada pregão, e calcula dele a média de 21 pregões, a variação de 3 meses e a faixa de 52 semanas. Carga inicial feita uma vez, por execução manual.
+- **Horário:** dias úteis às 22h de Brasília (depois da última versão do boletim).
+- **Universo:** os 40 ETFs de maior volume financeiro médio nos últimos 21 pregões completos, acima de R$ 500 mil/dia. Os demais ficam na busca.
+- **Fora da lista (`excluir`):** FNAM11 e FNOR11 (cotas dos antigos FINAM e FINOR; especificação "CI *" na B3) e 12 FICs de debêntures de infraestrutura (BODB11, BODI11, CDII11, CPDI11, BDIF11, DIVS11, IFRA11, ISEN11, BINC11, SNID11, CPTI11, IFRI11), classificados como ETF pela brapi, com tributação própria (isenção de IR para PF, Lei 12.431/2011). Nome novo com "Infra", "Incentivad", "Direitos Creditórios", "FINAM" ou "FINOR" gera `[revisar]` no log.
+- **Categorias, índice acompanhado e câmbio:** manuais no config (a B3 e a brapi não classificam). Sem categoria: "Outros" e `[categoria]` no log; sem índice ou câmbio, o cartão omite a linha e o log mostra `[indice]` ou `[cambio]`.
+- **ETFs de controle:** BOVA11, SMAL11, IVVB11, HASH11, LFTS11 e GOLD11; menos de 5 válidos, o job falha sem gravar.
+- **Sem taxa de administração** na primeira versão.
+
+**Pendências.** Termos de uso da B3 para exibir preços de fechamento em site público (leitura do responsável, na linha do parecer da D22). Conferência de índices e câmbio no config antes de ligar `conferidoPeloResponsavel`. Avisos fixos de IR depois de conferir a legislação vigente.

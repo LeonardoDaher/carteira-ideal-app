@@ -173,3 +173,38 @@ npm run build        # build de produção em dist-site/
 **Parâmetros** em `config/bdrs.json`: `maxAcoes` (35), `maxEtfs` (5), `pisoVolumeAcoes` e `pisoVolumeEtfs` (em reais por dia), `candidatosAcoes` e `candidatosEtfs` (quantos são consultados por dia), `maxRequisicoesBrapi` (teto por execução) e `horarioCorteFechamento`.
 
 **Rodar fora do horário:** Actions > **Atualizar BDRs** > **Run workflow**. Antes das 18h30, o pregão do dia é ignorado e a lista sai com o fechamento do dia anterior.
+
+## 5.9 Operação diária dos ETFs (decisão D23)
+
+**Fonte.** Preço e volume vêm do Boletim de Preços oficial da B3 (BVBG.086), sem cota e sem
+secret. A brapi (`BRAPI_TOKEN`) só informa quais códigos são ETF e o nome oficial, em 3
+requisições por execução; se ela falhar, o job usa o universo guardado em `historico/etfs.json`
+e avisa no log.
+
+**Antes de ligar.**
+1. Conferir em `config/etfs.json` as categorias, os índices e o câmbio (lâmina ou regulamento
+   de cada ETF) e marcar `"conferidoPeloResponsavel": true`. Sem isso, os dois workflows falham
+   de propósito.
+2. Rodar **uma vez** Actions > "Carga inicial de ETFs" > Run workflow (padrão: 260 pregões,
+   de 20 a 60 minutos). Ela grava `historico/etfs.json` e, com 21 pregões ou mais, já publica
+   `webapp-src/src/data/etfs.json`. Se parar no meio (a B3 negou dias antigos, tempo esgotado),
+   rodar de novo: ela só baixa o que falta.
+3. A partir daí, "Atualizar ETFs" roda sozinho de segunda a sexta, às 22h de Brasília.
+
+**Linhas do log.**
+
+| Linha | O que fazer |
+|---|---|
+| `[revisar] XXXX11` | ETF novo com "Infra", "Incentivad", "Direitos Creditórios", "FINAM" ou "FINOR" no nome. Se não for fundo de índice, incluir em `excluir`; se for, em `revisados`. |
+| `[categoria] XXXX11` | ETF da lista sem categoria: aparece em "Outros". Incluir em `categorias`. |
+| `[indice] XXXX11` | ETF da lista sem índice: o cartão omite a linha. Incluir em `indices`, se quiser. |
+| `[cambio] XXXX11` | ETF de bolsa exterior sem a informação de dólar. Incluir em `cambio` (true ou false). |
+| `[aviso] Listagem da brapi indisponível` | O job seguiu com o universo guardado. Se repetir por dias, conferir a chave e a cota no painel da brapi. |
+| `[info] AAAA-MM-DD: sem pregão na B3 (zip vazio)` | Feriado ou fim de semana. Normal. |
+| `Sem pregão novo desde …` | Nada mudou; sem commit. Normal em feriado e em execução repetida. |
+
+**Erros que param o job sem gravar nada.** Boletim do dia com data diferente da pedida ou com
+menos de 60 ETFs do universo; menos de 5 dos 6 ETFs de controle (BOVA11, SMAL11, IVVB11, HASH11,
+LFTS11, GOLD11) negociados no pregão; histórico com menos de 21 pregões (rodar a carga
+inicial); pregão mais recente com mais de 7 dias; menos de 25 ETFs acima do piso de
+R$ 500 mil/dia. O app continua com os dados do último dia bom.

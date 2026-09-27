@@ -12,7 +12,8 @@
     "typecheck": "tsc -b",
     "atualizar-fii": "node scripts/atualizar-rendimentos-fii.mjs",
     "atualizar-mercado": "node scripts/atualizar-mercado-oficial.mjs",
-    "atualizar-bdrs": "node scripts/atualizar-bdrs.mjs"
+    "atualizar-bdrs": "node scripts/atualizar-bdrs.mjs",
+    "atualizar-etfs": "node scripts/atualizar-etfs.mjs"
   },
   "dependencies": {
     "react": "^19.2.8",
