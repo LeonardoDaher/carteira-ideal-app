@@ -5,6 +5,8 @@ import {
   NOMES_DOS_MESES,
   centavos,
   chaveMes,
+  compraParecidaComConta,
+  contasEmDobroComCompras,
   compraEmAndamento,
   ehTotalDoMes,
   aVistaLancadasNoMes,
@@ -108,6 +110,8 @@ export function MeuMes({
             <MinhasContas
               contas={orcamento.contas}
               emDobro={contasEmDobroComDividas(orcamento).map((c) => c.id)}
+              emDobroCompras={contasEmDobroComCompras(orcamento, mesDeHoje)}
+              compraParecida={(nome, valor) => compraParecidaComConta(orcamento, nome, valor, mesDeHoje)}
               temDividaParcelada={temDividaComParcelaFixa(orcamento)}
               mesDeHoje={mesDeHoje}
               pactoAtivo={!!recuperacaoDe(orcamento).pactoDesde}
@@ -833,6 +837,8 @@ function CartaoDoMes({
         )}
       </div>
 
+      <AvisoContaEmDobroComCompra pares={contasEmDobroComCompras(orcamento, mesDeHoje)} />
+
       {futuras.length > 0 && (
         <div className="col" style={{ gap: 6 }}>
           <span className="tiny muted" style={{ fontWeight: 600 }}>
@@ -1053,6 +1059,28 @@ function ParcelamentoEmAndamento({
   )
 }
 
+/**
+ * Aviso de conta em dobro com uma compra parcelada no cartão (ajuste de 26/09/2026). Aparece em
+ * Minhas contas e no cartão, para ser visto de qualquer um dos lados.
+ */
+function AvisoContaEmDobroComCompra({ pares }: { pares: { conta: Conta; compra: Compra }[] }) {
+  if (pares.length === 0) return null
+  return (
+    <div className="small justify mm-situacao mm-cartao-amarelo" role="status">
+      {pares.map(({ conta, compra }) => (
+        <p key={conta.id} style={{ margin: 0 }}>
+          "{conta.nome}" ({reais(conta.valor)} todo mês no cartão, em Minhas contas) parece a parcela da compra "{compra.descricao}"
+          ({compra.parcelas}x de {reais(parcelaNoMes(compra, compra.mes))}) lançada no cartão.
+        </p>
+      ))}
+      <p style={{ margin: '6px 0 0' }}>
+        A parcela já entra na fatura. Se for a mesma coisa, remova de Minhas contas (Editar e depois Remover): senão ela conta duas
+        vezes e continua sendo cobrada depois da última parcela.
+      </p>
+    </div>
+  )
+}
+
 // ---------------------------------------------------------------- potes e reserva
 
 function Potes({
@@ -1193,6 +1221,8 @@ const SUGESTOES_VISIVEIS = 6
 function MinhasContas({
   contas,
   emDobro,
+  emDobroCompras,
+  compraParecida,
   temDividaParcelada,
   mesDeHoje,
   pactoAtivo,
@@ -1204,6 +1234,10 @@ function MinhasContas({
   contas: Conta[]
   /** Contas mensais que parecem a mesma parcela de uma dívida de Minhas dívidas (ajuste de 26/09/2026). */
   emDobro: string[]
+  /** Contas de todo mês no cartão que parecem a parcela de uma compra parcelada (ajuste de 26/09/2026). */
+  emDobroCompras: { conta: Conta; compra: Compra }[]
+  /** Compra parcelada em andamento parecida com a conta do formulário (mesmo valor ou nome). */
+  compraParecida: (nome: string, valor: number) => Compra | null
   /** Há financiamento, empréstimo, consignado ou outra dívida de parcela fixa em Minhas dívidas. */
   temDividaParcelada: boolean
   mesDeHoje: string
@@ -1343,6 +1377,7 @@ function MinhasContas({
           sai junto com as contas do mês: se for a mesma, toque em Editar e remova daqui, senão ela conta duas vezes.
         </div>
       )}
+      <AvisoContaEmDobroComCompra pares={emDobroCompras} />
 
       <div className="col mm-form" style={{ gap: 10 }} ref={formRef}>
         <span className="small" style={{ fontWeight: 700 }}>{editandoId ? `Editar conta: ${contaEditada?.nome ?? ''}` : 'Adicionar conta'}</span>
@@ -1432,9 +1467,23 @@ function MinhasContas({
             {rascunho.noCartao && (
               <span className="tiny muted justify">
                 A conta sai da lista do mês e entra no gasto do cartão, contando para o seu teto. Ela é paga na fatura do mês
-                seguinte, junto com as compras.
+                seguinte, junto com as compras. Compra parcelada (geladeira, TV) não vai aqui: lance no cartão, com o número de
+                vezes, para o app saber quando ela acaba.
               </span>
             )}
+            {rascunho.noCartao &&
+              (() => {
+                const compra = compraParecida(rascunho.nome, rascunho.valor)
+                return (
+                  compra && (
+                    <span className="small justify mm-alerta-parcela" role="note">
+                      Parece a compra "{compra.descricao}" ({compra.parcelas}x de {reais(parcelaNoMes(compra, compra.mes))}), que já
+                      está parcelada no cartão e entra na fatura todo mês. Se for a mesma, não cadastre aqui, senão ela conta duas
+                      vezes.
+                    </span>
+                  )
+                )
+              })()}
           </div>
         )}
 

@@ -14,6 +14,8 @@ import {
   acertarPeloTotal,
   aVistaLancadasNoMes,
   compraEmAndamento,
+  compraParecidaComConta,
+  contasEmDobroComCompras,
   totalInformado,
   gastoNoCartao,
   contasEmDobroComDividas,
@@ -594,5 +596,30 @@ describe('parcelamento que já estava em andamento (ajuste de 26/09/2026)', () =
 
   it('parcela 1 na fatura deste mês: compra do mês passado', () => {
     expect(compraEmAndamento('TV', 199.9, 12, 1, '2026-09').mes).toBe('2026-08')
+  })
+})
+
+describe('conta de todo mês no cartão x compra parcelada (ajuste de 26/09/2026)', () => {
+  const geladeira = { id: 'g', descricao: 'Geladeira Brastemp', valor: 1200, mes: '2026-06', parcelas: 10 }
+  const base = (contas: Conta[], compras = [geladeira]): Orcamento => ({ ...ORCAMENTO_VAZIO, salario: 5000, contas, cartao: { teto: 0, compras } })
+
+  it('acha pelo nome (sem acento e maiúscula) ou pelo valor da parcela', () => {
+    expect(compraParecidaComConta(base([]), 'geladeira', 0, '2026-09')?.id).toBe('g')
+    expect(compraParecidaComConta(base([]), 'Prestação', 120, '2026-09')?.id).toBe('g')
+    expect(compraParecidaComConta(base([]), 'Prestação', 120.9, '2026-09')?.id).toBe('g') // arredondamento
+    expect(compraParecidaComConta(base([]), 'Academia', 99, '2026-09')).toBeNull()
+    expect(compraParecidaComConta(base([], [{ ...geladeira, descricao: 'Fogão' }]), 'Lava louça', 0, '2026-09')).toBeNull()
+  })
+
+  it('ignora compra à vista, lançamento de uma vez e parcelamento que já acabou', () => {
+    expect(compraParecidaComConta(base([], [{ ...geladeira, parcelas: 1 }]), 'Geladeira', 1200, '2026-09')).toBeNull()
+    expect(compraParecidaComConta(base([], [{ ...geladeira, id: 'total-2026-09', parcelas: 1 }]), 'Compras', 1200, '2026-09')).toBeNull()
+    expect(compraParecidaComConta(base([]), 'Geladeira', 120, '2027-04')).toBeNull() // última parcela: março de 2027
+  })
+
+  it('só conta de todo mês paga no cartão entra no aviso', () => {
+    const noCartao: Conta = { id: 'c', nome: 'Geladeira', valor: 120, tipo: 'mensal', cartaoDesde: '2026-09' }
+    const noBoleto: Conta = { id: 'b', nome: 'Geladeira', valor: 120, tipo: 'mensal' }
+    expect(contasEmDobroComCompras(base([noCartao, noBoleto]), '2026-09').map((p) => [p.conta.id, p.compra.id])).toEqual([['c', 'g']])
   })
 })

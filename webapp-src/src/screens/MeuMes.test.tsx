@@ -264,6 +264,28 @@ describe('MeuMes', () => {
     expect(screen.queryByText('Celular')).toBeNull() // nada no gasto de outubro: a última foi na fatura deste mês
   })
 
+  it('geladeira em Minhas contas (todo mês no cartão) e parcelada no cartão: avisa dos dois lados', async () => {
+    salvar({
+      ...exemplo,
+      contas: [...exemplo.contas, { id: 'gel', nome: 'Geladeira', valor: 120, tipo: 'mensal', cartaoDesde: '2026-09' }],
+      cartao: { teto: 3000, compras: [{ id: 'g', descricao: 'Geladeira', valor: 1200, mes: '2026-07', parcelas: 10 }] },
+    })
+    render(<MeuMes ctx={ctx} hoje={hoje} />)
+    const avisos = await screen.findAllByText(/"Geladeira" \(R\$\s120,00 todo mês no cartão, em Minhas contas\) parece a parcela da compra "Geladeira"/)
+    expect(avisos).toHaveLength(2) // em Minhas contas e no cartão
+    expect(avisos[0].closest('[role=status]')!.textContent).toMatch(/continua sendo cobrada depois da última parcela/)
+  })
+
+  it('ao cadastrar conta de todo mês no cartão parecida com uma compra parcelada, o formulário avisa', async () => {
+    salvar({ ...exemplo, cartao: { teto: 3000, compras: [{ id: 'g', descricao: 'Geladeira', valor: 1200, mes: '2026-07', parcelas: 10 }] } })
+    render(<MeuMes ctx={ctx} hoje={hoje} />)
+    fireEvent.change(await screen.findByLabelText('Nome da conta'), { target: { value: 'Parcela geladeira' } })
+    expect(screen.queryByText(/Parece a compra "Geladeira"/)).toBeNull() // no boleto, nada
+    fireEvent.click(screen.getByRole('button', { name: 'Cartão de crédito' }))
+    expect(screen.getByText(/Compra parcelada \(geladeira, TV\) não vai aqui/)).toBeTruthy()
+    expect(screen.getByText(/Parece a compra "Geladeira" \(10x de R\$\s120,00\)/)).toBeTruthy()
+  })
+
   it('restaurar um arquivo que não é cópia não altera nada', async () => {
     salvar(exemplo)
     render(<MeuMes ctx={ctx} hoje={hoje} />)

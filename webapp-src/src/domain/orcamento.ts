@@ -945,3 +945,51 @@ export function compraEmAndamento(
 ): Omit<Compra, 'id'> {
   return { descricao, valor: centavos(valorDaParcela * parcelas), mes: somarMeses(mesDeHoje, -atual), parcelas }
 }
+
+// ---------------------------------------------------------------- conta no cartão x compra parcelada
+
+/**
+ * Palavras que identificam um nome, sem acento e sem palavras curtas ("de", "da", "do"...):
+ * "Geladeira Brastemp" → ["geladeira", "brastemp"].
+ */
+function palavrasDoNome(nome: string): string[] {
+  return nome
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter((p) => p.length >= 4)
+}
+
+/** Última parcela de uma compra (mês do gasto). */
+function fimDaCompra(compra: Compra): string {
+  return somarMeses(compra.mes, Math.max(1, compra.parcelas) - 1)
+}
+
+/**
+ * Compra parcelada em andamento que parece a mesma coisa que uma conta de todo mês no cartão
+ * (ajuste de 26/09/2026): mesmo valor da parcela (até 1 real de diferença, por arredondamento) ou
+ * uma palavra do nome em comum. A parcela já entra na fatura; se a conta também estiver em Minhas
+ * contas, ela conta duas vezes, e ainda continua cobrando depois da última parcela.
+ */
+export function compraParecidaComConta(orc: Orcamento, nome: string, valor: number, mesDeHoje: string): Compra | null {
+  const palavras = palavrasDoNome(nome)
+  return (
+    orc.cartao.compras.find((compra) => {
+      if (ehTotalDoMes(compra) || compra.parcelas <= 1 || fimDaCompra(compra) < mesDeHoje) return false
+      const parcela = parcelaNoMes(compra, compra.mes)
+      const mesmoValor = valor > 0 && Math.abs(parcela - valor) <= 1
+      const mesmoNome = palavrasDoNome(compra.descricao).some((p) => palavras.includes(p))
+      return mesmoValor || mesmoNome
+    }) ?? null
+  )
+}
+
+/** Contas de todo mês no cartão que parecem a parcela de uma compra parcelada em andamento. */
+export function contasEmDobroComCompras(orc: Orcamento, mesDeHoje: string): { conta: Conta; compra: Compra }[] {
+  return orc.contas.flatMap((conta) => {
+    if (conta.tipo !== 'mensal' || !conta.cartaoDesde) return []
+    const compra = compraParecidaComConta(orc, conta.nome, conta.valor, mesDeHoje)
+    return compra ? [{ conta, compra }] : []
+  })
+}
