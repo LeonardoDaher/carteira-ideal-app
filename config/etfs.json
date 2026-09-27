@@ -39,7 +39,8 @@
       "BINC11",
       "SNID11",
       "CPTI11",
-      "IFRI11"
+      "IFRI11",
+      "ISNT11"
     ]
   },
   "palavrasRevisar": {
@@ -143,7 +144,11 @@
     "SLVR11": "Ouro, dólar e commodities",
     "DOLA11": "Ouro, dólar e commodities",
     "DOLX11": "Ouro, dólar e commodities",
-    "CORN11": "Ouro, dólar e commodities"
+    "CORN11": "Ouro, dólar e commodities",
+    "B5MB11": "Renda fixa",
+    "LFTI11": "Renda fixa",
+    "IBOB11": "Bolsa brasileira",
+    "BZEQ11": "Bolsa brasileira"
   },
   "ordemCategorias": [
     "Bolsa brasileira",
@@ -225,7 +230,11 @@
     "CDIB11": "Teva ITBR Selic IPCA Target 800",
     "GPCA11": "Teva ITBR Tesouro IPCA 2 Anos",
     "LFIX11": "Letras financeiras (V8 Letra Financeira B3)",
-    "XBCI11": "Neos Boosted Bitcoin High Income"
+    "XBCI11": "Neos Boosted Bitcoin High Income",
+    "B5MB11": "IMA-B 5+ (Tesouro IPCA+ acima de 5 anos)",
+    "LFTI11": "Teva Tesouro Selic",
+    "IBOB11": "Ibovespa",
+    "BZEQ11": "MSCI Brazil 25/50"
   },
   "cambio": {
     "_leia": "Só para 'Bolsa exterior'. true = o preço em reais sobe e desce também com o dólar; false = acompanha o índice sem a variação do dólar (estrutura 'Quanto'/hedge). Conferido em 27/09/2026 nas páginas das gestoras e da B3 (D23). ETF de bolsa exterior sem esta informação gera [cambio] no log e o cartão não mostra a linha.",
@@ -252,6 +261,7 @@
     "_leia": "Correção manual do nome exibido, quando o 'longName' da brapi vier estranho. Formato: \"TICKER\": \"Nome\".",
     "GPOS11": "Grão Teva ITBR Selic Inteligente",
     "IMBB11": "ETF Bradesco IMA-B",
-    "BBOV11": "BB ETF Ibovespa"
+    "BBOV11": "BB ETF Ibovespa",
+    "B5MB11": "ETF Bradesco IMA-B5+"
   }
 }
