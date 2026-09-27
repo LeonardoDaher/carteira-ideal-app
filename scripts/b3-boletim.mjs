@@ -146,11 +146,27 @@ function descompactar(zip, pasta, apenas = null) {
  * devolver o zip vazio (dia sem pregão). Extrai só o XML necessário, para não ocupar ~540 MB
  * em disco por dia.
  */
-export async function baixarBoletim(data, pastaTemp, { fetchImpl = fetch } = {}) {
+export async function baixarBoletim(data, pastaTemp, { fetchImpl = fetch, limiteMs = 90_000, tentativas = 2 } = {}) {
   const codigo = codigoBoletim(data)
-  const resposta = await fetchImpl(URL_BOLETIM(codigo), { headers: { 'User-Agent': 'carteira-ideal (github actions)' } })
-  if (!resposta.ok) throw new Error(`B3 respondeu ${resposta.status} para o boletim ${codigo}.`)
-  const conteudo = Buffer.from(await resposta.arrayBuffer())
+  let conteudo
+  for (let tentativa = 1; ; tentativa++) {
+    try {
+      // Limite de tempo por arquivo: sem ele, uma resposta presa da B3 segura o job até o
+      // tempo máximo do workflow.
+      const resposta = await fetchImpl(URL_BOLETIM(codigo), {
+        headers: { 'User-Agent': 'carteira-ideal (github actions)' },
+        signal: AbortSignal.timeout(limiteMs),
+      })
+      if (!resposta.ok) throw new Error(`B3 respondeu ${resposta.status} para o boletim ${codigo}.`)
+      conteudo = Buffer.from(await resposta.arrayBuffer())
+      break
+    } catch (erro) {
+      const motivo = erro?.name === 'TimeoutError' ? `sem resposta da B3 em ${limiteMs / 1000} s para o boletim ${codigo}.` : erro.message
+      if (tentativa >= tentativas) throw new Error(motivo)
+      console.warn(`[aviso] ${motivo} Nova tentativa.`)
+      await new Promise((r) => setTimeout(r, 5000))
+    }
+  }
   if (conteudo.length < TAMANHO_MINIMO_ZIP) return null
   const pasta = path.join(pastaTemp, codigo)
   const externo = path.join(pastaTemp, `${codigo}-download.zip`)

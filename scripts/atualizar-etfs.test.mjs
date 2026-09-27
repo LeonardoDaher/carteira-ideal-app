@@ -206,7 +206,13 @@ describe('atualizar-etfs: histórico', () => {
     const candidatas = ['2026-09-25', '2026-09-24', '2026-09-23', '2026-09-22']
     assert.deepEqual(datasAProcessar(candidatas, ['2026-09-23']), ['2026-09-24', '2026-09-25'])
     assert.deepEqual(datasAProcessar(candidatas, ['2026-09-25']), [])
-    assert.deepEqual(datasAProcessar(candidatas, ['2026-09-24'], true), ['2026-09-22', '2026-09-23', '2026-09-25'])
+    assert.deepEqual(datasAProcessar(candidatas, ['2026-09-24'], true), ['2026-09-25', '2026-09-23', '2026-09-22'])
+  })
+
+  it('carga inicial começa pelos pregões mais recentes (erro da 1ª carga, 27/09/2026)', () => {
+    const candidatas = ['2026-09-25', '2026-09-24', '2026-09-23', '2026-09-22', '2026-09-21']
+    // Parando em 3 pregões, ficam os 3 mais novos, não os 3 mais antigos.
+    assert.deepEqual(datasAProcessar(candidatas, [], true).slice(0, 3), ['2026-09-25', '2026-09-24', '2026-09-23'])
   })
 
   it('o arquivo formatado volta idêntico ao ser lido', () => {

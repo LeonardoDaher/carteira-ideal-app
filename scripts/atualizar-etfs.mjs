@@ -233,8 +233,12 @@ export function montarBusca(itens) {
 }
 
 /**
- * Datas que faltam processar: as candidatas mais recentes que ainda não estão no histórico,
- * da mais antiga para a mais nova. Para na primeira que já está no histórico (dia a dia).
+ * Datas que faltam processar, entre as candidatas (que vêm da mais recente para a mais antiga).
+ * Dia a dia: para na primeira que já está no histórico e devolve da mais antiga para a mais nova.
+ * Carga inicial: pula as que já estão no histórico e devolve da MAIS NOVA para a mais antiga,
+ * para que, ao atingir a quantidade pedida, fiquem os pregões mais recentes. (Na primeira carga,
+ * em 27/09/2026, a ordem inversa guardou os 260 pregões mais antigos e deixou de fora o último
+ * mês: a trava de dado velho barrou a publicação.)
  */
 export function datasAProcessar(candidatas, pregoesNoHistorico, cargaInicial = false) {
   const ja = new Set(pregoesNoHistorico)
@@ -246,7 +250,7 @@ export function datasAProcessar(candidatas, pregoesNoHistorico, cargaInicial = f
     }
     faltam.push(data)
   }
-  return faltam.reverse()
+  return cargaInicial ? faltam : faltam.reverse()
 }
 
 /** Histórico em texto: um ETF por linha, para o arquivo ficar legível no GitHub. */
@@ -349,6 +353,7 @@ async function main() {
   try {
     for (const data of faltam) {
       if (carga > 0 && historico.pregoes.length >= carga) break
+      const inicioDia = Date.now()
       let xml
       try {
         xml = await baixarBoletim(data, pastaTemp)
@@ -384,8 +389,16 @@ async function main() {
       }
       historico = incorporarPregao(historico, data, lido.instrumentos, universo)
       novos++
-      console.log(`[info] ${data}: ${lido.instrumentos.size} ETFs lidos (${lido.blocos} instrumentos no boletim).`)
-      if (carga > 0) await esperar(config.pausaEntreDownloadsMs ?? 1000)
+      console.log(`[info] ${data}: ${lido.instrumentos.size} ETFs lidos (${lido.blocos} instrumentos no boletim, ${((Date.now() - inicioDia) / 1000).toFixed(1)} s).`)
+      if (carga > 0) {
+        // Grava a cada 20 pregões: se a execução for interrompida, o workflow publica o que já veio.
+        if (novos % 20 === 0) {
+          fs.mkdirSync(path.dirname(ARQUIVO_HISTORICO), { recursive: true })
+          fs.writeFileSync(ARQUIVO_HISTORICO, formatarHistorico(historico))
+          console.log(`[info] Histórico parcial gravado: ${historico.pregoes.length} pregões.`)
+        }
+        await esperar(config.pausaEntreDownloadsMs ?? 1000)
+      }
     }
   } finally {
     fs.rmSync(pastaTemp, { recursive: true, force: true })
