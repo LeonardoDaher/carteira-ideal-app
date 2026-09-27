@@ -61,6 +61,12 @@ export type Compra = {
   mes: string
   /** 1 = à vista. */
   parcelas: number
+  /**
+   * Preço à vista, só em compra parcelada com juros (ajuste de 26/09/2026): aí `valor` é o total
+   * com juros (parcela × vezes) e este campo guarda o preço, para mostrar o custo dos juros e
+   * reabrir a compra certa ao editar. Opcional: compras antigas e sem juros não têm.
+   */
+  valorAVista?: number
 }
 
 export type Cartao = {
@@ -680,7 +686,10 @@ export function validarOrcamento(bruto: unknown): Orcamento | null {
         (x.parcelas as number) > 24
       )
         return null
-      compras.push({ id: x.id, descricao: x.descricao, valor: x.valor, mes: x.mes, parcelas: x.parcelas as number })
+      if (x.valorAVista !== undefined && (!numeroValido(x.valorAVista) || (x.valorAVista as number) <= 0)) return null
+      const compra: Compra = { id: x.id, descricao: x.descricao, valor: x.valor, mes: x.mes, parcelas: x.parcelas as number }
+      if (x.valorAVista !== undefined) compra.valorAVista = x.valorAVista as number
+      compras.push(compra)
     }
     cartao = { teto: k.teto, compras }
   }
@@ -992,4 +1001,30 @@ export function contasEmDobroComCompras(orc: Orcamento, mesDeHoje: string): { co
     const compra = compraParecidaComConta(orc, conta.nome, conta.valor, mesDeHoje)
     return compra ? [{ conta, compra }] : []
   })
+}
+
+
+// ---------------------------------------------------------------- compra parcelada com juros
+
+/**
+ * Parcelado com juros (ajuste de 26/09/2026): a pessoa informa o preço à vista e o valor de cada
+ * parcela, que é o que aparece na maquininha ou na simulação. A taxa não é pedida (ao mês ou ao
+ * ano? com IOF?); o app calcula a taxa ao mês a partir da parcela.
+ * - `abaixo`: parcela × vezes ficou menor que o preço (menos 1 centavo por parcela, pelo
+ *   arredondamento), quase sempre digitação errada; não deixa salvar.
+ * - `semJuros`: o total bate com o preço; a tela sugere "Parcelado sem juros".
+ */
+export function parcelamentoComJuros(
+  precoAVista: number,
+  valorDaParcela: number,
+  parcelas: number,
+): { total: number; aMais: number; percentual: number; aoMes: number | null; abaixo: boolean; semJuros: boolean } {
+  const total = centavos(valorDaParcela * parcelas)
+  const folga = parcelas * 0.01
+  const abaixo = precoAVista > 0 && valorDaParcela > 0 && total < precoAVista - folga
+  const semJuros = precoAVista > 0 && valorDaParcela > 0 && !abaixo && total <= precoAVista + folga
+  const aMais = centavos(Math.max(0, total - precoAVista))
+  const percentual = precoAVista > 0 ? Math.round((aMais / precoAVista) * 1000) / 10 : 0
+  const aoMes = semJuros || abaixo ? null : jurosDoParcelamento(precoAVista, total, parcelas)
+  return { total, aMais, percentual, aoMes, abaixo, semJuros }
 }

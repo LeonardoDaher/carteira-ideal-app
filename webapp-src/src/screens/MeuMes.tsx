@@ -5,6 +5,7 @@ import {
   NOMES_DOS_MESES,
   centavos,
   chaveMes,
+  parcelamentoComJuros,
   compraParecidaComConta,
   contasEmDobroComCompras,
   compraEmAndamento,
@@ -503,7 +504,11 @@ function CartaoDoMes({
 
   const [descricao, setDescricao] = useState('')
   const [valor, setValor] = useState(0)
-  const [parcelas, setParcelas] = useState(1)
+  // Forma de pagamento (ajuste de 26/09/2026): à vista, parcelado sem juros (o app divide o valor)
+  // ou parcelado com juros (a pessoa informa o valor de cada parcela).
+  const [forma, setForma] = useState<FormaDaCompra>('avista')
+  const [nParcelas, setNParcelas] = useState(2)
+  const [valorParcela, setValorParcela] = useState(0)
   const [versaoForm, setVersaoForm] = useState(0)
   // Pacto de não parcelar (Etapa 3): parcelar exige um passo a mais, confirmado na hora.
   const [quebrandoPacto, setQuebrandoPacto] = useState(false)
@@ -520,13 +525,23 @@ function CartaoDoMes({
   const parcelamentoLiberado = !pactoDesde || quebrandoPacto || (compraEditada?.parcelas ?? 1) > 1
   // A compra editada continua no mês em que foi feita; as parcelas seguem a partir dele.
   const mesDaCompra = compraEditada?.mes ?? mes
-  const valido = descricao.trim().length > 0 && valor > 0
-  const parcelaPrevista = parcelas > 1 ? parcelaNoMes({ id: '', descricao, valor, mes: mesDaCompra, parcelas }, mesDaCompra) : 0
+  const formaEfetiva: FormaDaCompra = parcelamentoLiberado ? forma : 'avista'
+  const parcelas = formaEfetiva === 'avista' ? 1 : nParcelas
+  const juros = parcelamentoComJuros(valor, valorParcela, nParcelas)
+  const comJuros = formaEfetiva === 'comJuros'
+  const valido =
+    descricao.trim().length > 0 && valor > 0 && (!comJuros || (valorParcela > 0 && !juros.abaixo))
+  // Total que vai para o cartão: com juros, parcela × vezes; senão, o valor da compra.
+  const totalDaCompra = comJuros ? Math.max(juros.total, valor) : valor
+  const parcelaPrevista =
+    parcelas > 1 ? parcelaNoMes({ id: '', descricao, valor: totalDaCompra, mes: mesDaCompra, parcelas }, mesDaCompra) : 0
 
   function limpar() {
     setDescricao('')
     setValor(0)
-    setParcelas(1)
+    setForma('avista')
+    setNParcelas(2)
+    setValorParcela(0)
     setQuebrandoPacto(false)
     setEditandoId(null)
     setVersaoForm((v) => v + 1)
@@ -542,7 +557,8 @@ function CartaoDoMes({
 
   function lancar() {
     if (!valido) return
-    const dados = { descricao: descricao.trim(), valor, mes: mesDaCompra, parcelas: parcelamentoLiberado ? parcelas : 1 }
+    const dados: Omit<Compra, 'id'> = { descricao: descricao.trim(), valor: totalDaCompra, mes: mesDaCompra, parcelas }
+    if (comJuros && totalDaCompra > valor) dados.valorAVista = valor
     if (compraEditada) onEditar(compraEditada.id, dados)
     else onAdicionar(dados)
     // Com as compras à vista lançadas de uma vez, uma compra à vista anotada depois já faz parte
@@ -560,8 +576,11 @@ function CartaoDoMes({
   /** Abre a compra no formulário e leva a pessoa até ele (o formulário fica abaixo da lista). */
   function abrirParaEditar(compra: Compra) {
     setDescricao(compra.descricao)
-    setValor(compra.valor)
-    setParcelas(compra.parcelas)
+    const comJurosGravado = compra.parcelas > 1 && compra.valorAVista != null && compra.valorAVista < compra.valor
+    setValor(comJurosGravado ? compra.valorAVista! : compra.valor)
+    setForma(compra.parcelas <= 1 ? 'avista' : comJurosGravado ? 'comJuros' : 'semJuros')
+    setNParcelas(compra.parcelas > 1 ? compra.parcelas : 2)
+    setValorParcela(comJurosGravado ? centavos(compra.valor / compra.parcelas) : 0)
     setQuebrandoPacto(false)
     setEditandoId(compra.id)
     setVersaoForm((v) => v + 1)
@@ -663,7 +682,7 @@ function CartaoDoMes({
                         ? `À vista, lançadas de uma vez (total à vista do mês: ${reais(totalDoMes)})`
                         : 'À vista, lançadas de uma vez'
                       : compra.parcelas > 1
-                        ? `Parcela ${parcela} de ${compra.parcelas} (total ${reais(compra.valor)})`
+                        ? `Parcela ${parcela} de ${compra.parcelas} (total ${reais(compra.valor)}${compra.valorAVista != null ? ', com juros' : ''})`
                         : 'À vista'}
                   </span>
                 </span>
@@ -688,7 +707,7 @@ function CartaoDoMes({
           mesDeHoje={mesDeHoje}
           onPacto={(m) => {
             setQuebrandoPacto(false)
-            setParcelas(1)
+            setForma('avista')
             onPacto(m)
           }}
         />
@@ -777,24 +796,28 @@ function CartaoDoMes({
           maxLength={40}
           onChange={(e) => setDescricao(e.target.value)}
         />
-        <CampoReais key={versaoForm} rotulo="Valor da compra" valor={valor} onMudar={setValor} />
-        <label htmlFor={idParcelas} className="small" style={{ fontWeight: 600 }}>
-          Forma de pagamento
-        </label>
-        <select
-          id={idParcelas}
-          className="input-cotas"
-          value={parcelamentoLiberado ? parcelas : 1}
-          onChange={(e) => setParcelas(Number(e.target.value))}
-        >
-          <option value={1}>À vista</option>
-          {parcelamentoLiberado &&
-            Array.from({ length: 11 }, (_, i) => i + 2).map((n) => (
-              <option key={n} value={n}>
-                {n}x
-              </option>
+        <CampoReais
+          key={versaoForm}
+          rotulo="Valor da compra"
+          valor={valor}
+          onMudar={setValor}
+          dica={comJuros ? 'O preço à vista, sem os juros.' : undefined}
+        />
+        <div className="col" style={{ gap: 6 }}>
+          <span className="small" style={{ fontWeight: 600 }}>Forma de pagamento</span>
+          <div className="row" style={{ gap: 6, flexWrap: 'wrap' }} role="group" aria-label="Forma de pagamento">
+            {FORMAS_DA_COMPRA.filter((f) => parcelamentoLiberado || f.id === 'avista').map((f) => (
+              <button
+                key={f.id}
+                className={`chip ${formaEfetiva === f.id ? 'selected' : ''}`}
+                aria-pressed={formaEfetiva === f.id}
+                onClick={() => setForma(f.id)}
+              >
+                {f.rotulo}
+              </button>
             ))}
-        </select>
+          </div>
+        </div>
         {!parcelamentoLiberado && (
           <div className="tiny muted justify">
             Pelo seu pacto, só à vista.{' '}
@@ -803,9 +826,55 @@ function CartaoDoMes({
             </button>
           </div>
         )}
-        {parcelamentoLiberado && parcelas > 1 && valor > 0 && (
+        {formaEfetiva !== 'avista' && (
+          <label htmlFor={idParcelas} className="col" style={{ gap: 4 }}>
+            <span className="small" style={{ fontWeight: 600 }}>Número de parcelas</span>
+            <select id={idParcelas} className="input-cotas" value={nParcelas} onChange={(e) => setNParcelas(Number(e.target.value))}>
+              {Array.from({ length: 23 }, (_, i) => i + 2).map((n) => (
+                <option key={n} value={n}>
+                  {n}x
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+        {comJuros && (
+          <>
+            <CampoReais
+              key={`parcela-${versaoForm}`}
+              rotulo="Valor de cada parcela"
+              valor={valorParcela}
+              onMudar={setValorParcela}
+              dica="Está na maquininha, no site ou na simulação do cartão, já com os juros."
+            />
+            {valorParcela > 0 && (
+              <div className="small" role="status" style={{ fontWeight: 600 }}>
+                {nParcelas}x de {reais(valorParcela)} = {reais(juros.total)} no total
+              </div>
+            )}
+            {valor > 0 && valorParcela > 0 &&
+              (juros.abaixo ? (
+                <div className="small justify mm-situacao mm-cartao-vermelho" role="alert">
+                  {reais(juros.total)} no total é menos que o preço da compra ({reais(valor)}). Confira: aqui vai o valor de cada
+                  parcela, e em "Valor da compra", o preço à vista.
+                </div>
+              ) : juros.semJuros ? (
+                <div className="small justify mm-situacao mm-cartao-amarelo" role="status">
+                  O total é igual ao preço: é parcelado sem juros. Pode escolher "Parcelado sem juros" acima.
+                </div>
+              ) : (
+                <div className="small justify mm-situacao mm-cartao-amarelo" role="status">
+                  Você paga {reais(juros.aMais)} a mais ({juros.percentual.toLocaleString('pt-BR')}% sobre o preço)
+                  {juros.aoMes != null ? `, cerca de ${juros.aoMes.toLocaleString('pt-BR')}% ao mês` : ''}.
+                  {juros.aoMes != null && juros.aoMes >= 3 && ' É juro de dívida cara, acima de 3% ao mês.'}
+                  {recuperacao && ' No Modo Recuperação, é dívida nova com juros enquanto você ainda paga as caras: se der, junte e compre à vista.'}
+                </div>
+              ))}
+          </>
+        )}
+        {formaEfetiva !== 'avista' && valor > 0 && (!comJuros || valorParcela > 0) && (
           <span className="small justify mm-alerta-parcela" role="note">
-            {quebrandoPacto ? 'Esta compra quebra o seu pacto. ' : recuperacao ? 'No Modo Recuperação, parcelar é fazer dívida nova. ' : ''}
+            {quebrandoPacto ? 'Esta compra quebra o seu pacto. ' : recuperacao && !comJuros ? 'No Modo Recuperação, parcelar é fazer dívida nova. ' : ''}
             Parcelar compromete os próximos {parcelas - 1} {parcelas === 2 ? 'mês' : 'meses'}: cerca de {reais(parcelaPrevista)} por
             mês até {mesPorExtenso(somarMeses(mesDaCompra, parcelas - 1))}, somados a tudo o que você comprar depois.
           </span>
@@ -1214,6 +1283,14 @@ function custoDoParcelamento(valor: number, total: number, parcelas: number): st
   )
 }
 const menorMes = (a: string, b: string) => (a < b ? a : b)
+
+/** Formas de pagamento de uma compra no cartão (ajuste de 26/09/2026). */
+type FormaDaCompra = 'avista' | 'semJuros' | 'comJuros'
+const FORMAS_DA_COMPRA: { id: FormaDaCompra; rotulo: string }[] = [
+  { id: 'avista', rotulo: 'À vista' },
+  { id: 'semJuros', rotulo: 'Parcelado sem juros' },
+  { id: 'comJuros', rotulo: 'Parcelado com juros' },
+]
 
 /** Quantas sugestões aparecem antes de "Ver mais sugestões". */
 const SUGESTOES_VISIVEIS = 6

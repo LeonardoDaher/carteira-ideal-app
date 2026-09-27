@@ -23,7 +23,7 @@ Organizados por prioridade. Os itens do bloco 1 são necessários para lançar; 
 - [x] **Parecer jurídico:** análise interna do responsável, sem objeção (D22), incluindo o roteiro de negociação, o plano de quitação, a trilha "Sair das dívidas" e a sugestão dos Pilares 1 e 2.
 - [x] **Etapa 4:** sugestão das respostas dos Pilares 1 e 2 no questionário, cartão "Antes de investir" no resultado, botão na landing, trilha "Sair das dívidas" (9 aulas em texto) no Aprender e briefing do Instagram.
 - [ ] **Publicações do Instagram:** levar `briefing-instagram-meu-mes.md` (fora do repositório, no pacote) para o projeto "Publicações do Carteira Ideal", que aplica a identidade visual.
-- [ ] **Vídeos da trilha "Sair das dívidas"** (em produção desde 26/09/2026): gravar os 9 Shorts a partir dos roteiros do briefing e preencher `youtubeId` em `data/trilhas.ts` (o texto continua abaixo do vídeo).
+- [ ] **Vídeos da trilha "Sair das dívidas"** (em produção desde 26/09/2026): gravar os 9 Shorts a partir de `3-material-de-apoio/Roteiro-aulas-Sair-das-dividas.docx` (fora do repositório, no pacote; mesmo conteúdo da seção 4 do briefing, uma aula por página) e preencher `youtubeId` em `data/trilhas.ts` (o texto continua abaixo do vídeo).
 - [ ] **Revisão semestral do conteúdo da trilha:** limite de juros do rotativo (Lei 14.690/2023), portabilidade de crédito, exemplo de 8% ao mês e a comparação com a Selic citada na aula 1.
 - [ ] **Nova captura** `docs/jornada/20-meu-mes.jpg` e da sugestão no Pilar 1.
 

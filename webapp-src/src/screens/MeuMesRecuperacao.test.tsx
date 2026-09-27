@@ -159,25 +159,27 @@ describe('Meu Mês, Modo Recuperação', () => {
     expect(lerSalvo().recuperacao!.pactoDesde).toBe('2026-10')
     expect(screen.getByText('Pacto de não parcelar desde outubro de 2026')).toBeTruthy()
 
-    const forma = screen.getByLabelText('Forma de pagamento') as HTMLSelectElement
-    expect(forma.options).toHaveLength(1)
+    // Com o pacto, só "À vista" aparece na forma de pagamento.
+    const formas = () => within(screen.getByRole('group', { name: 'Forma de pagamento' })).getAllByRole('button').map((b) => b.textContent)
+    expect(formas()).toEqual(['À vista'])
     fireEvent.click(screen.getByRole('button', { name: 'Quebrar o pacto nesta compra' }))
     expect(confirmar).toHaveBeenCalledOnce()
-    expect(forma.options).toHaveLength(1)
+    expect(formas()).toEqual(['À vista'])
 
     confirmar.mockReturnValue(true)
     fireEvent.click(screen.getByRole('button', { name: 'Quebrar o pacto nesta compra' }))
-    expect(forma.options).toHaveLength(12)
+    expect(formas()).toEqual(['À vista', 'Parcelado sem juros', 'Parcelado com juros'])
     fireEvent.change(screen.getByLabelText('O que foi'), { target: { value: 'Celular' } })
     fireEvent.change(screen.getByLabelText('Valor da compra'), { target: { value: '1.200' } })
-    fireEvent.change(forma, { target: { value: '6' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Parcelado sem juros' }))
+    fireEvent.change(screen.getByLabelText('Número de parcelas'), { target: { value: '6' } })
     expect(screen.getByText(/Esta compra quebra o seu pacto/)).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: 'Lançar compra' }))
 
     expect(lerSalvo().cartao.compras).toMatchObject([{ descricao: 'Celular', parcelas: 6 }])
     expect(screen.getByText(/1 compra parcelada desde o pacto/)).toBeTruthy()
     // Depois de lançar, o parcelamento volta a ficar travado
-    expect((screen.getByLabelText('Forma de pagamento') as HTMLSelectElement).options).toHaveLength(1)
+    expect(formas()).toEqual(['À vista'])
   })
 
   it('ticar o pagamento da dívida guarda o valor do mês', async () => {

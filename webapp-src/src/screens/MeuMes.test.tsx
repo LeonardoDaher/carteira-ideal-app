@@ -143,7 +143,8 @@ describe('MeuMes', () => {
     expect((screen.getByLabelText('O que foi') as HTMLInputElement).value).toBe('Mercado')
     fireEvent.change(screen.getByLabelText('O que foi'), { target: { value: 'Mercado do mês' } })
     fireEvent.change(screen.getByLabelText('Valor da compra'), { target: { value: '500' } })
-    fireEvent.change(screen.getByLabelText('Forma de pagamento'), { target: { value: '2' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Parcelado sem juros' }))
+    fireEvent.change(screen.getByLabelText('Número de parcelas'), { target: { value: '2' } })
     fireEvent.click(screen.getByRole('button', { name: 'Salvar alterações' }))
     expect(lerSalvo().cartao.compras).toEqual([{ id: 'k1', descricao: 'Mercado do mês', valor: 500, mes: '2026-10', parcelas: 2 }])
     expect(screen.getByRole('button', { name: 'Lançar compra' })).toBeTruthy()
@@ -206,7 +207,8 @@ describe('MeuMes', () => {
     // Compra parcelada depois não mexe no total à vista.
     fireEvent.change(screen.getByLabelText('O que foi'), { target: { value: 'TV' } })
     fireEvent.change(screen.getByLabelText('Valor da compra'), { target: { value: '2.000' } })
-    fireEvent.change(screen.getByLabelText('Forma de pagamento'), { target: { value: '5' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Parcelado sem juros' }))
+    fireEvent.change(screen.getByLabelText('Número de parcelas'), { target: { value: '5' } })
     fireEvent.click(screen.getByRole('button', { name: 'Lançar compra' }))
     expect(lerSalvo().cartao.compras.find((c) => c.id === 'total-2026-10')!.valor).toBe(900)
 
@@ -286,6 +288,52 @@ describe('MeuMes', () => {
     expect(screen.getByText(/Parece a compra "Geladeira" \(10x de R\$\s120,00\)/)).toBeTruthy()
   })
 
+  it('parcelado com juros: pede a parcela, mostra o custo e grava o total com juros (ajuste de 26/09/2026)', async () => {
+    salvar({ ...exemplo, cartao: { teto: 3000, compras: [] } })
+    render(<MeuMes ctx={ctx} hoje={hoje} />)
+    fireEvent.change(await screen.findByLabelText('O que foi'), { target: { value: 'TV' } })
+    fireEvent.change(screen.getByLabelText('Valor da compra'), { target: { value: '1.200' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Parcelado com juros' }))
+    fireEvent.change(screen.getByLabelText('Número de parcelas'), { target: { value: '12' } })
+    const lancar = screen.getByRole('button', { name: 'Lançar compra' }) as HTMLButtonElement
+    expect(lancar.disabled).toBe(true) // falta a parcela
+
+    fireEvent.change(screen.getByLabelText('Valor de cada parcela'), { target: { value: '10' } })
+    expect(screen.getByRole('alert').textContent).toMatch(/é menos que o preço da compra/)
+    expect(lancar.disabled).toBe(true)
+
+    fireEvent.change(screen.getByLabelText('Valor de cada parcela'), { target: { value: '100' } })
+    expect(screen.getByText(/O total é igual ao preço: é parcelado sem juros/)).toBeTruthy()
+
+    fireEvent.change(screen.getByLabelText('Valor de cada parcela'), { target: { value: '115' } })
+    expect(screen.getByText(/12x de R\$\s115,00 = R\$\s1\.380,00 no total/)).toBeTruthy()
+    expect(screen.getByText(/Você paga R\$\s180,00 a mais \(15% sobre o preço\), cerca de 2,22% ao mês/)).toBeTruthy()
+    fireEvent.click(lancar)
+    expect(lerSalvo().cartao.compras[0]).toMatchObject({ descricao: 'TV', valor: 1380, parcelas: 12, valorAVista: 1200 })
+    expect(screen.getByText(/Parcela 1 de 12 \(total R\$\s1\.380,00, com juros\)/)).toBeTruthy()
+    expect(screen.getByText(/Gasto em outubro/).parentElement!.textContent).toMatch(/R\$\s115,00/)
+
+    // Editar reabre como "com juros", com o preço e a parcela.
+    fireEvent.click(screen.getByRole('button', { name: 'Editar TV' }))
+    expect(screen.getByRole('button', { name: 'Parcelado com juros' }).getAttribute('aria-pressed')).toBe('true')
+    expect((screen.getByLabelText('Valor da compra') as HTMLInputElement).value).toBe('1.200,00')
+    expect((screen.getByLabelText('Valor de cada parcela') as HTMLInputElement).value).toBe('115,00')
+  })
+
+  it('parcelado sem juros continua dividindo o valor, sem pedir parcela', async () => {
+    salvar({ ...exemplo, cartao: { teto: 3000, compras: [] } })
+    render(<MeuMes ctx={ctx} hoje={hoje} />)
+    fireEvent.change(await screen.findByLabelText('O que foi'), { target: { value: 'Sofá' } })
+    fireEvent.change(screen.getByLabelText('Valor da compra'), { target: { value: '1.000' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Parcelado sem juros' }))
+    expect(screen.queryByLabelText('Valor de cada parcela')).toBeNull()
+    fireEvent.change(screen.getByLabelText('Número de parcelas'), { target: { value: '4' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Lançar compra' }))
+    const [c] = lerSalvo().cartao.compras
+    expect(c).toMatchObject({ valor: 1000, parcelas: 4 })
+    expect(c.valorAVista).toBeUndefined()
+  })
+
   it('restaurar um arquivo que não é cópia não altera nada', async () => {
     salvar(exemplo)
     render(<MeuMes ctx={ctx} hoje={hoje} />)
@@ -324,7 +372,8 @@ describe('MeuMes', () => {
     render(<MeuMes ctx={ctx} hoje={hoje} />)
     fireEvent.change(await screen.findByLabelText('O que foi'), { target: { value: 'Geladeira' } })
     fireEvent.change(screen.getByLabelText('Valor da compra'), { target: { value: '900' } })
-    fireEvent.change(screen.getByLabelText('Forma de pagamento'), { target: { value: '3' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Parcelado sem juros' }))
+    fireEvent.change(screen.getByLabelText('Número de parcelas'), { target: { value: '3' } })
     expect(txt(screen.getByRole('note', { name: '' }) as HTMLElement)).toContain('compromete os próximos 2 meses')
     fireEvent.click(screen.getByRole('button', { name: 'Lançar compra' }))
 

@@ -15,6 +15,7 @@ import {
   aVistaLancadasNoMes,
   compraEmAndamento,
   compraParecidaComConta,
+  parcelamentoComJuros,
   contasEmDobroComCompras,
   totalInformado,
   gastoNoCartao,
@@ -621,5 +622,27 @@ describe('conta de todo mês no cartão x compra parcelada (ajuste de 26/09/2026
     const noCartao: Conta = { id: 'c', nome: 'Geladeira', valor: 120, tipo: 'mensal', cartaoDesde: '2026-09' }
     const noBoleto: Conta = { id: 'b', nome: 'Geladeira', valor: 120, tipo: 'mensal' }
     expect(contasEmDobroComCompras(base([noCartao, noBoleto]), '2026-09').map((p) => [p.conta.id, p.compra.id])).toEqual([['c', 'g']])
+  })
+})
+
+describe('compra parcelada com juros (ajuste de 26/09/2026)', () => {
+  it('12x de 115 numa compra de 1.200: total, custo e taxa ao mês', () => {
+    expect(parcelamentoComJuros(1200, 115, 12)).toEqual({ total: 1380, aMais: 180, percentual: 15, aoMes: 2.22, abaixo: false, semJuros: false })
+  })
+
+  it('juro de dívida cara aparece na taxa ao mês', () => {
+    expect(parcelamentoComJuros(1000, 140, 10).aoMes).toBe(6.64)
+  })
+
+  it('total igual ao preço é sem juros (com folga de arredondamento); abaixo do preço é erro', () => {
+    expect(parcelamentoComJuros(1000, 333.33, 3)).toMatchObject({ semJuros: true, abaixo: false, aoMes: null })
+    expect(parcelamentoComJuros(1200, 10, 12)).toMatchObject({ abaixo: true, total: 120 })
+  })
+
+  it('o backup aceita o preço à vista na compra e recusa valor inválido', () => {
+    const base = { versao: 1, orcamento: { ...ORCAMENTO_VAZIO, cartao: { teto: 0, compras: [{ id: 'c', descricao: 'TV', valor: 1380, mes: '2026-09', parcelas: 12, valorAVista: 1200 }] } } }
+    expect(validarOrcamento(base.orcamento)?.cartao.compras[0].valorAVista).toBe(1200)
+    const ruim = { ...base.orcamento, cartao: { teto: 0, compras: [{ ...base.orcamento.cartao.compras[0], valorAVista: -5 }] } }
+    expect(validarOrcamento(ruim)).toBeNull()
   })
 })
