@@ -1,23 +1,27 @@
-# Atualiza nos dias úteis os dados da aba de BDRs (decisão D19): os 35 BDRs de ações e os
-# 5 BDRs de ETF com maior volume médio em reais nos últimos 21 pregões, com cotação de
-# fechamento. Fonte: brapi no plano gratuito (mesmo secret BRAPI_TOKEN do job de FIIs).
+# Atualiza nos dias úteis os dados da aba de BDRs (decisões D19 e D24): os 35 BDRs de ações e
+# os 5 BDRs de ETF com maior volume médio em reais nos últimos 21 pregões, com fechamento,
+# variação de 3 meses e faixa de 52 semanas.
 #
-# Segunda a sexta, 22h UTC (19h de Brasília): depois do fechamento da B3, para gravar o
-# preço de fechamento e não um preço no meio do pregão. Não coincide com os jobs de FIIs
-# (dia 20, 12h UTC) e de mercado (terça, 13h UTC).
+# Fonte do preço e do volume (D24): Boletim de Preços oficial da B3 (BVBG.086), sem cota, o
+# mesmo arquivo do job de ETFs (D23). A brapi (BRAPI_TOKEN) só informa nome, setor e proporção
+# BDR/ação: listagem uma vez por semana e poucas consultas por dia, com teto mensal em
+# config/bdrs.json (bloco "brapi", padrão 80 por mês). Se ela falhar, o job publica com o
+# cadastro guardado em historico/bdrs.json.
 #
-# Consumo da brapi: cerca de 130 requisições por execução (1 listagem + candidatos), perto de
-# 2.900 por mês. Somado às ~550 do job de FIIs, fica bem abaixo das 15.000 do plano gratuito.
+# Segunda a sexta às 22h30 de Brasília (01h30 UTC do dia seguinte): depois da última versão do
+# boletim (~20h30) e meia hora depois do job de ETFs, para os dois não disputarem o commit.
 #
-# Se o script encontrar algo errado, o job falha SEM alterar o arquivo: o app continua
-# mostrando os dados do último dia bom e o GitHub envia um e-mail avisando da falha.
-# Em feriado da B3 a brapi devolve o pregão anterior: o arquivo não muda e nada é publicado.
+# Antes da primeira execução diária, rode UMA VEZ o workflow "Carga inicial de BDRs".
+#
+# Se o script encontrar algo errado, o job falha SEM alterar os arquivos: o app continua com os
+# dados do último dia bom e o GitHub envia um e-mail avisando da falha. Feriado da B3 (zip
+# vazio) ou pregão já processado: nada muda, sem commit e sem deploy.
 
 name: Atualizar BDRs
 
 on:
   schedule:
-    - cron: '0 22 * * 1-5' # segunda a sexta, 22h UTC (19h de Brasília)
+    - cron: '30 1 * * 2-6' # terça a sábado, 01h30 UTC = segunda a sexta, 22h30 de Brasília
   workflow_dispatch: {} # botão "Run workflow" para rodar manualmente
 
 permissions:
@@ -35,7 +39,7 @@ jobs:
           node-version: 22
           cache: npm
 
-      - name: Buscar dados e gerar bdrs.json
+      - name: Buscar o boletim da B3 e gerar bdrs.json
         env:
           BRAPI_TOKEN: ${{ secrets.BRAPI_TOKEN }}
         run: node scripts/atualizar-bdrs.mjs
@@ -48,13 +52,13 @@ jobs:
 
       - name: Publicar (commit) se houver mudança
         run: |
-          if git diff --quiet webapp-src/src/data/bdrs.json; then
+          if [ -z "$(git status --porcelain webapp-src/src/data/bdrs.json historico)" ]; then
             echo "Sem mudanças nos dados."
             exit 0
           fi
           git config user.name "${{ vars.COMMIT_AUTOR_NOME || 'github-actions[bot]' }}"
           git config user.email "${{ vars.COMMIT_AUTOR_EMAIL || '41898283+github-actions[bot]@users.noreply.github.com' }}"
-          git add webapp-src/src/data/bdrs.json
+          git add webapp-src/src/data/bdrs.json historico/bdrs.json
           git commit -m "dados: BDRs ($(date -u +%Y-%m-%d))"
           git pull --rebase
           git push
