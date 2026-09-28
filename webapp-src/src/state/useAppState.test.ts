@@ -266,6 +266,7 @@ describe('useAppState — Aprender e Simule FII abertos pela landing (sem questi
     ['simuleFii', 'simuleFii'],
     ['simuleTesouro', 'simuleTesouro'],
     ['simuleBdr', 'simuleBdr'],
+    ['simuleEtf', 'simuleEtf'],
   ] as const)('?tela=%s abre a tela sem nenhuma resposta salva', async (parametro, tela) => {
     window.history.replaceState(null, '', `/app/?tela=${parametro}`)
 

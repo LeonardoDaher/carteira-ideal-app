@@ -22,6 +22,7 @@ export type Screen =
   | 'simuleFii'
   | 'simuleTesouro'
   | 'simuleBdr'
+  | 'simuleEtf'
   | 'meuMes'
 
 export type Tema = 'dark' | 'light'
@@ -33,11 +34,11 @@ export type Tema = 'dark' | 'light'
  */
 export const CHAVE_TEMA_COMPARTILHADA = 'theme'
 
-/** Telas abertas direto pela landing (./app/?tela=aprender, simuleFii, simuleTesouro, simuleBdr e meuMes), sem
+/** Telas abertas direto pela landing (./app/?tela=aprender, simuleFii, simuleTesouro, simuleBdr, simuleEtf e meuMes), sem
  * depender do questionário. Ficam fora da barra de abas e nunca são salvas como "última
  * tela": assim o botão amarelo da landing (./app/) continua devolvendo a pessoa ao ponto
  * em que parou no fluxo do questionário/resultado, e não à aula que ela viu por último. */
-export const TELAS_AVULSAS: readonly Screen[] = ['aprender', 'trilha', 'aprenderVideo', 'simuleFii', 'simuleTesouro', 'simuleBdr', 'meuMes']
+export const TELAS_AVULSAS: readonly Screen[] = ['aprender', 'trilha', 'aprenderVideo', 'simuleFii', 'simuleTesouro', 'simuleBdr', 'simuleEtf', 'meuMes']
 
 export function ehTelaAvulsa(tela: Screen) {
   return TELAS_AVULSAS.includes(tela)
@@ -50,6 +51,8 @@ const TELAS_PELA_URL: Record<string, Screen> = {
   simuleFii: 'simuleFii',
   simuleTesouro: 'simuleTesouro',
   simuleBdr: 'simuleBdr',
+  // Simule ETF (D23): dados oficiais da B3, no molde do Simule BDR.
+  simuleEtf: 'simuleEtf',
   // Meu Mês (D21): botão na landing desde a Etapa 4; também aberto pelo resultado e pela
   // trilha "Sair das dívidas".
   meuMes: 'meuMes',
@@ -146,7 +149,7 @@ export function useAppState() {
       // - ?tela=resultado: botão "Ver minha carteira de referência", para quem já tem carteira
       //   salva. Sem isso, o app abriria na última tela em que o usuário esteve. Se ainda não
       //   houver resultado, a própria tela de Resultado mostra o convite para começar.
-      // - ?tela=aprender, ?tela=simuleFii, ?tela=simuleTesouro, ?tela=simuleBdr e ?tela=meuMes: botões da landing que abrem essas telas direto,
+      // - ?tela=aprender, ?tela=simuleFii, ?tela=simuleTesouro, ?tela=simuleBdr, ?tela=simuleEtf e ?tela=meuMes: botões da landing que abrem essas telas direto,
       //   sem exigir o questionário.
       try {
         const parametros = new URLSearchParams(window.location.search)
