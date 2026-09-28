@@ -13,6 +13,7 @@
 import { cp, mkdir, rm, access, writeFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
+import { gerarPaginas } from './gerar-paginas.mjs'
 
 const raiz = path.dirname(path.dirname(fileURLToPath(import.meta.url)))
 const saida = path.join(raiz, 'dist-site')
@@ -29,14 +30,13 @@ async function existe(caminho) {
 
 const DOMINIO = 'https://carteiraideal.app.br'
 
-/** Páginas do sitemap, relativas ao domínio (D26). */
-export const PAGINAS_SITEMAP = ['/', '/app/']
-
-/** Monta o sitemap.xml. lastmod = data do build (a Vercel publica a cada commit dos jobs). */
-export function montarSitemap(paginas, data) {
-  const dia = data.toISOString().slice(0, 10)
-  const urls = paginas
-    .map((p) => `  <url>\n    <loc>${DOMINIO}${p}</loc>\n    <lastmod>${dia}</lastmod>\n  </url>`)
+/**
+ * Monta o sitemap.xml a partir de [{ caminho, lastmod }] (D26).
+ * Os endereços com ?tela= ficam de fora de propósito: para o Google, são a mesma página do app.
+ */
+export function montarSitemap(entradas) {
+  const urls = entradas
+    .map((e) => `  <url>\n    <loc>${DOMINIO}${e.caminho}</loc>\n    <lastmod>${e.lastmod}</lastmod>\n  </url>`)
     .join('\n')
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`
 }
@@ -56,7 +56,8 @@ async function main() {
   // robots.txt entrou na D26 (SEO).
   // google5f0b815b0517184a.html: arquivo de verificação do Google Search Console (D26). Precisa ficar
   // na raiz do site publicado e nunca pode ser apagado, senão a propriedade perde a verificação.
-  const arquivosLanding = ['index.html', 'style.css', 'script.js', 'assets', 'robots.txt', 'google5f0b815b0517184a.html']
+  // paginas.css é o estilo das páginas geradas (Etapa 3).
+  const arquivosLanding = ['index.html', 'style.css', 'paginas.css', 'script.js', 'assets', 'robots.txt', 'google5f0b815b0517184a.html']
   for (const nome of arquivosLanding) {
     const origem = path.join(raiz, nome)
     if (await existe(origem)) {
@@ -72,13 +73,32 @@ async function main() {
   await mkdir(path.join(saida, 'app'), { recursive: true })
   await cp(path.dirname(appCompilado), path.join(saida, 'app'), { recursive: true })
 
-  // 3) sitemap.xml (D26): lista as páginas que o Google deve conhecer. Os endereços com
-  // ?tela= ficam de fora de propósito: para o Google, hoje, são a mesma página do app.
-  // Quando as páginas próprias das ferramentas e das aulas existirem (Etapa 3 da D26),
-  // basta acrescentá-las em PAGINAS_SITEMAP.
-  await writeFile(path.join(saida, 'sitemap.xml'), montarSitemap(PAGINAS_SITEMAP, new Date()))
+  // 3) Páginas estáticas para o Google (D26, Etapa 3): ferramentas, aulas, guias de ativos e taxas
+  // do Tesouro. Se o gerador falhar, o site sai do mesmo jeito (só sem as páginas novas) e o erro
+  // aparece bem visível no log: um problema de SEO não pode impedir a publicação dos dados semanais.
+  const hoje = new Date().toISOString().slice(0, 10)
+  const entradasSitemap = [
+    { caminho: '/', lastmod: hoje },
+    { caminho: '/app/', lastmod: hoje },
+  ]
+  let geradas = 0
+  try {
+    const paginas = await gerarPaginas({ raiz })
+    for (const pg of paginas) {
+      const pasta = path.join(saida, ...pg.caminho.split('/').filter(Boolean))
+      await mkdir(pasta, { recursive: true })
+      await writeFile(path.join(pasta, 'index.html'), pg.html)
+      entradasSitemap.push({ caminho: pg.caminho, lastmod: pg.lastmod })
+    }
+    geradas = paginas.length
+  } catch (erro) {
+    console.error('[build-site] ATENÇÃO: as páginas estáticas de SEO NÃO foram geradas:', erro)
+  }
 
-  console.log(`[build-site] Site montado em ${path.relative(raiz, saida)}/ (landing + app/)`)
+  // 4) sitemap.xml (D26)
+  await writeFile(path.join(saida, 'sitemap.xml'), montarSitemap(entradasSitemap))
+
+  console.log(`[build-site] Site montado em ${path.relative(raiz, saida)}/ (landing + app/ + ${geradas} páginas estáticas)`)
 }
 
 // Só roda o build quando chamado direto (node scripts/build-site.mjs); importado pelos

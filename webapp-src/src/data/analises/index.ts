@@ -13,7 +13,8 @@ import { fundosInternacionais } from './fundosInternacionais'
 import { cripto } from './cripto'
 
 /**
- * Conteúdo educativo no estilo de uma análise de consultor CEA/CNPI: explica os
+ * Conteúdo educativo sobre como analisar cada classe de ativo (D26: sem citar certificação
+ * profissional que o responsável não tem): explica os
  * CRITÉRIOS usados (o "como escolher") e traz nomes ilustrativos de mercado como
  * exemplo de aplicação desses critérios — não é uma recomendação de compra formal.
  * Dados de mercado mudam o tempo todo; sempre confira números atualizados antes de decidir.

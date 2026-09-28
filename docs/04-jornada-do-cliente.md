@@ -7,10 +7,10 @@ Instagram (bio) → Landing → Onboarding → Idade → 7 perguntas de Suitabil
 → 7 perguntas de Arquitetura Patrimonial → Processando (chamada à API) → Resultado
 → abas: Perfil · Carteira (→ Detalhe do ativo) · Simular
 
-Landing → Simule FII           (./app/?tela=simuleFii, sem questionário)
+Landing → Meu Mês              (./app/?tela=meuMes, sem questionário; D21, 2º botão desde a D25)
 Landing → Aprender (→ Trilha → Aula; livro infantil no fim da tela)
                                (./app/?tela=aprender, sem questionário)
-Landing → Meu Mês              (./app/?tela=meuMes, sem questionário; D21)
+Landing → Simule FII           (./app/?tela=simuleFii, sem questionário)
 Resultado (Pilar 1 ou 2 em [A]) → Meu Mês;  Meu Mês (com dívida) → trilha "Sair das dívidas"
 ```
 
@@ -24,9 +24,10 @@ Resultado (Pilar 1 ou 2 em [A]) → Meu Mês;  Meu Mês (com dívida) → trilha
 Primeira tela para quem toca no link da bio do Instagram.
 
 - **Botão amarelo**: "Descobrir meu perfil e carteira de referência" → abre o app. Para quem já respondeu neste aparelho, vira "Ver minha carteira de referência" e abre direto no resultado.
-- **🏢 Simule FII**: abre direto a tela Simule FII do app, sem questionário.
+- **🗓️ Meu Mês**: abre direto o controle do mês (contas, cofrinhos das contas anuais, cartão, os três potes e o Modo Recuperação), sem questionário. Fica logo abaixo do botão amarelo, antes do Aprender e dos simuladores: organizar o mês vem antes de simular investimentos (D25; antes, na D21, ficava por último).
 - **🎓 Aprender**: abre direto a tela Aprender do app, sem questionário. O livro **Educação Financeira Infantil**, que antes ficava aqui, está no fim dessa tela (decisão D11). O link do curso de Candlesticks foi retirado do site (D22).
-- **🗓️ Meu Mês**: abre direto o controle do mês (contas, cofrinhos das contas anuais, cartão, os três potes e o Modo Recuperação), sem questionário. Fica depois do Aprender, de propósito: é complemento da Carteira Ideal (D21, Etapa 4).
+- **🏢 Simule FII**: abre direto a tela Simule FII do app, sem questionário.
+- **🏛️ Simule Tesouro Direto**, **🌎 Simule BDR** e **🧺 Simule ETF**: abrem direto as respectivas telas, sem questionário.
 - **Falar comigo por e-mail**, ícones de Instagram e YouTube, alternância de tema claro/escuro.
 
 <br clear="all">
@@ -88,7 +89,7 @@ Mostra o **Perfil-Mãe de Carteira**, a linha "Suitability · Capacidade real ·
 ### 4.2 Aba Carteira e Detalhe do ativo
 <img src="jornada/11-carteira-explicada.jpg" width="200" align="right"><img src="jornada/12-detalhe-do-ativo.jpg" width="200" align="right">
 
-"Carteira de referência, explicada": cada classe com percentual e descrição. Tocar numa classe abre o **detalhe**: peso na carteira, contexto, divisão interna (ex.: Tesouro IPCA+ / Prefixado / Selic), exemplo por objetivo, diversificação por segmento e a seção "Como um consultor CEA/CNPI analisa".
+"Carteira de referência, explicada": cada classe com percentual e descrição. Tocar numa classe abre o **detalhe**: peso na carteira, contexto, divisão interna (ex.: Tesouro IPCA+ / Prefixado / Selic), exemplo por objetivo, diversificação por segmento e a seção "Como analisar este ativo".
 
 <br clear="all">
 

@@ -258,3 +258,22 @@ Ferramenta gratuita do Google que mostra quais páginas estão indexadas, por qu
 Rotina: uma olhada por semana no relatório **Páginas** (erros de indexação) e, depois de um mês, no relatório **Desempenho** (buscas que trazem visitas).
 
 **Como foi feito de fato (D26).** Como a zona DNS do Registro.br ficou "em transição", a propriedade foi criada por **Prefixo do URL** (`https://carteiraideal.app.br/`) e verificada pelo **arquivo HTML** `google5f0b815b0517184a.html`, que fica na raiz do repositório e é copiado para o site pelo `scripts/build-site.mjs`. A tag `<meta name="google-site-verification">` no `<head>` do `index.html` da raiz fica como reserva. Não apagar nenhum dos dois. Se a zona DNS liberar, dá para adicionar também a propriedade de Domínio pelo TXT, sem desfazer esta.
+
+## 5.11 Páginas para o Google (decisão D26, Etapa 3)
+
+A cada `npm run build`, o `scripts/build-site.mjs` chama o `scripts/gerar-paginas.mjs`, que cria em `dist-site/` as páginas de cada ferramenta, dos guias de ativos, das aulas de "Sair das dívidas" e, se o `mercadoOficial.json` tiver dados, de "Taxas do Tesouro Direto hoje". Elas entram no `sitemap.xml` sozinhas. Não há nada para rodar à mão.
+
+**Depois de publicar, conferir:**
+1. `carteiraideal.app.br/aprender/` abre e lista os guias.
+2. `carteiraideal.app.br/simulador-tesouro-direto/` mostra o botão "Abrir o simulador".
+3. `carteiraideal.app.br/sitemap.xml` lista cerca de 30 endereços. Se o job de mercado já rodou, inclui `/taxas-tesouro-direto-hoje/`.
+4. No Search Console, menu **Sitemaps**: o `sitemap.xml` passa a mostrar as páginas encontradas (pode levar de horas a dias).
+
+**No log da Vercel,** procure a linha `[build-site] Site montado em dist-site/ (landing + app/ + N páginas estáticas)`. Se aparecer `ATENÇÃO: as páginas estáticas de SEO NÃO foram geradas`, o site foi publicado sem elas: copiar o erro que vem logo em seguida e avisar quem desenvolve. O `npm test` cobre o gerador.
+
+**Atualizar textos:** guias e aulas vêm de `data/analises/*.ts` e `data/trilhas.ts` (os mesmos do app); os textos das ferramentas ficam no `scripts/gerar-paginas.mjs`. Ao revisar os textos escritos à mão, atualizar `REVISADO_EM` nesse arquivo.
+
+**O que nunca vai para as páginas públicas:** produtos (códigos como IVVB11), percentuais de alocação e a lógica do motor. Há filtros e testes para isso (D26).
+
+**Autor e páginas Sobre (Etapa 4).** O nome e a formação do autor ficam na constante `AUTOR` do `scripts/gerar-paginas.mjs` e no JSON-LD (`founder`) do `index.html` da raiz. Se mudar, mude nos dois. As páginas `/sobre/` e `/metodologia-e-fontes/` também são geradas no build. Nunca acrescentar certificação ou registro que o autor não tenha: o `npm test` barra as siglas (CNPI, CEA, CFP, CPA, ANBIMA, OAB).
+

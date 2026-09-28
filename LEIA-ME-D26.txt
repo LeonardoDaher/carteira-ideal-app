@@ -1,0 +1,37 @@
+ARQUIVOS DA D26 (28/09/2026) - caminhos a partir de 1-projeto-para-o-github/
+SEO, Etapas 0 a 4 + troca do título "Como analisar este ativo". ZIP ÚNICO: sobe tudo de uma vez.
+Novos (N) e alterados (A). Feito em cima do pacote D25.
+
+N  google5f0b815b0517184a.html         verificação do Search Console (NÃO apagar)
+N  robots.txt                          libera o site para buscadores, menos /api/
+N  paginas.css                         estilo das páginas geradas
+N  scripts/ts-loader.mjs               lê os arquivos .ts do app dentro do build
+N  scripts/gerar-paginas.mjs           gera as 30 páginas estáticas (ferramentas, guias, aulas, taxas, Sobre, Metodologia)
+N  scripts/gerar-paginas.test.mjs      15 testes do gerador
+N  scripts/build-site.test.mjs         teste do sitemap
+A  scripts/build-site.mjs              copia arquivos, chama o gerador e monta o sitemap
+A  index.html                          (RAIZ, landing) SEO, cartões para as páginas, rodapé com Sobre e Metodologia
+A  style.css                           estilos da landing
+A  webapp-src/index.html               (app) título, descrição, canonical e fontes locais
+A  webapp-src/src/screens/DetalheAtivo.tsx   título "Como analisar este ativo"
+A  webapp-src/src/data/analises/index.ts     só o comentário do cabeçalho
+A  vercel.json                         redireciona carteira-ideal-app.vercel.app para o domínio
+A  README.md
+A  docs/04-jornada-do-cliente.md       título novo
+A  docs/05-publicacao-e-operacao.md    seções 5.10 e 5.11
+A  docs/06-proximos-passos.md          bloco 1B
+A  docs/07-registro-de-decisoes.md     D26
+
+ATENÇÃO
+- Há dois index.html: o da raiz é a landing; o de webapp-src é o do app. Cada um na sua pasta.
+- CONFIRA O NOME: "Leonardo Daher" foi deduzido da conta do GitHub. Se estiver diferente, mude em
+  scripts/gerar-paginas.mjs (constante AUTOR) e no index.html da raiz (founder, no JSON-LD).
+- Leia a página /sobre/ antes de publicar: a redação sobre a CVM é uma proposta para o seu ajuste.
+- Nenhuma dependência nova.
+
+DEPOIS DE PUBLICAR (1 a 2 minutos)
+1. carteiraideal.app.br/sobre/, /aprender/ e /simulador-tesouro-direto/ abrem.
+2. carteiraideal.app.br/sitemap.xml lista cerca de 32 endereços.
+3. Log da Vercel: "Site montado ... (landing + app/ + 30 páginas estáticas)". Se aparecer
+   "ATENÇÃO: as páginas estáticas de SEO NÃO foram geradas", copiar o erro e avisar.
+4. No app, abrir o detalhe de um ativo e conferir o título "Como analisar este ativo".

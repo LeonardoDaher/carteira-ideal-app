@@ -306,7 +306,7 @@ export function DetalheAtivo({ ctx }: { ctx: AppCtx }) {
       {mostraCenario && <CenarioJuros />}
 
       <div className="col" style={{ gap: 8 }}>
-        <div className="row" style={{ gap: 6, fontWeight: 700, fontSize: 13.5 }}><BrainIcon size={15} /> Como um consultor CEA/CNPI analisa</div>
+        <div className="row" style={{ gap: 6, fontWeight: 700, fontSize: 13.5 }}><BrainIcon size={15} /> Como analisar este ativo</div>
         <div className="card col" style={{ gap: 8 }}>
           {analise.criterios.map((criterio, i) => (
             <div key={i} className="row" style={{ gap: 8, alignItems: 'flex-start' }}>

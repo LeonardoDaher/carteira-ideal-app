@@ -106,7 +106,7 @@ button:focus-visible,
   box-shadow: var(--shadow);
 }
 
-/* D24: h1 da página (SEO), discreto, entre a logo e o @ do perfil */
+/* D26: h1 da página (SEO), discreto, entre a logo e o @ do perfil */
 #profile h1 {
   font-family: "Sora", "IBM Plex Sans", system-ui, sans-serif;
   font-weight: 700;
@@ -314,7 +314,7 @@ footer .disclaimer {
   opacity: 0.8;
 }
 
-/* ===== D24: seção "Como funciona / Ferramentas / Perguntas frequentes" (SEO) ===== */
+/* ===== D26: seção "Como funciona / Ferramentas / Perguntas frequentes" (SEO) ===== */
 .sobre {
   padding: 8px 0 24px;
 }

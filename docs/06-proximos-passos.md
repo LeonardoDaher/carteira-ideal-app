@@ -11,16 +11,21 @@ Organizados por prioridade. Os itens do bloco 1 são necessários para lançar; 
 - [x] Atualizar `og:image` e `og:url` no `index.html` para o endereço definitivo (`https://carteiraideal.app.br/`).
 - [x] Testar a prévia do link colando o endereço numa conversa do WhatsApp.
 - [x] Colocar o link na bio do Instagram — testado tocando dentro do próprio app do Instagram.
-- [x] Repositório antigo `Carteira-Ideal`: tornado privado e GitHub Pages desligado em 28/09/2026 (D24). Apagar depois é opcional.
+- [x] Repositório antigo `Carteira-Ideal`: tornado privado e GitHub Pages desligado em 28/09/2026 (D26). Apagar depois é opcional.
 
-## 1B. SEO (D24)
+## 1B. SEO (D26)
 
 - [x] **Etapa 0:** repositório antigo privado, Pages desligado.
-- [ ] **Etapa 0:** verificar o domínio no Google Search Console e enviar o sitemap (docs/05, seção 5.10).
-- [x] **Etapas 1 e 2:** robots.txt, sitemap.xml, canonical, metadados do app, fontes locais, redirecionamento do `.vercel.app`, página inicial com h1, conteúdo e dados estruturados.
-- [ ] **Etapa 3:** páginas estáticas por ferramenta e por aula, geradas no build, e "Taxas do Tesouro Direto hoje".
-- [ ] **Etapa 4:** páginas Sobre, Metodologia e Autor.
+- [ ] **Etapa 0:** verificar o domínio no Google Search Console e enviar o sitemap (docs/05, seção 5.10). Se a zona DNS do Registro.br ainda estiver "em transição", esperar; alternativa: verificação por tag HTML.
+- [x] **Etapas 1 e 2:** robots.txt, sitemap.xml, canonical, metadados do app, fontes locais, redirecionamento do `.vercel.app`, página inicial com h1 ("Seu perfil de investidor vai além do teste da corretora"), conteúdo e dados estruturados.
+- [x] **Etapa 3:** 28 páginas estáticas geradas no build (ferramentas, guias de ativos, aulas de "Sair das dívidas" e, com dados, "Taxas do Tesouro Direto hoje"), com o sitemap atualizado (docs/05, seção 5.11).
+- [ ] Depois da publicação: conferir no Search Console se as páginas novas foram descobertas e, em 2 a 4 semanas, quais são indexadas. As 9 aulas têm 160 a 215 palavras; se ficarem de fora, ampliar ou juntar numa página longa.
+- [ ] **Conferir com o responsável:** o texto dos guias e da aula "Dívida cara x dívida barata" (a frase do Pilar 2 fica só no app) e a regra da taxa de custódia (texto do guia do Tesouro Selic diz que a isenção de R$ 10 mil soma todos os títulos; o simulador aplica só ao Tesouro Selic).
+- [x] **Etapa 4:** páginas `/sobre/` e `/metodologia-e-fontes/`, autor com nome e formação (Administração e Direito) em todas as páginas, título "Como analisar este ativo" no app (D26).
+- [ ] **Conferir com o responsável:** nome (`AUTOR` em `scripts/gerar-paginas.mjs` e `founder` no `index.html`), redação sobre a CVM na página Sobre e se quer incluir registro na OAB.
+- [ ] **Opcional:** profissional certificado (CFP, CEA ou CNPI) revisar os guias e assinar "revisado por".
 - [ ] **Etapa 5:** páginas por código de negociação (depois dos termos de uso da B3).
+- [ ] Avaliar, antes das Etapas 3 a 5, se indexar as análises publicamente entra no gatilho de parecer independente da D22.
 
 ## 1A. Meu Mês (D21), uma etapa por conversa
 
@@ -56,7 +61,7 @@ A mudança para a API tirou a metodologia do código visível. Ainda assim, vale
 
 - [ ] **Revisão periódica das carteiras-modelo.** As 9 carteiras são fixas e não reagem ao cenário (nível da Selic, curva de juros, câmbio). Desde a D15, o job semanal traz Selic, IPCA, juro real, dólar e Focus para `mercadoOficial.json`: os números da revisão já estão à mão. Sugestão: revisão semestral documentada, com data e justificativa no [Registro de decisões](07-registro-de-decisoes.md), e o número da versão da metodologia exibido na tela de resultado.
 - [ ] **Graduar o veto.** Hoje um, dois ou três pilares duros em [A] têm o mesmo efeito. Avaliar se três vetos simultâneos deveriam gerar uma orientação mais forte (por exemplo, priorizar quitar dívidas e montar reserva antes de investir). Com a Etapa 3 da D21, essa orientação já existe no Meu Mês (Modo Recuperação), e desde a Etapa 4 o resultado aponta para ele quando o Pilar 2 (ou o Pilar 1) vem como [A]. O motor continua igual; graduar o veto no `engine.ts` segue em aberto.
-- [ ] **Coerência com o enquadramento educacional.** Revisar textos como "Como um consultor CEA/CNPI analisa" para garantir que continuem soando educativos e não como recomendação individual.
+- [ ] **Coerência com o enquadramento educacional.** Revisar textos como "Como analisar este ativo" (título trocado na D26; antes citava CEA/CNPI) para garantir que continuem soando educativos e não como recomendação individual.
 
 ## 5. Produto
 
@@ -105,7 +110,10 @@ A mudança para a API tirou a metodologia do código visível. Ainda assim, vale
 
 ## 9. Aba "Simule BDR" (decisão D19)
 
-- [x] **Job diário** (dias úteis, 19h de Brasília), 35 BDRs de ações e 5 de ETF por volume médio de 21 pregões, busca com todos os demais.
+- [x] **Job diário** (dias úteis, 22h30 de Brasília desde a D24), 35 BDRs de ações e 5 de ETF por volume médio de 21 pregões, busca com todos os demais.
+- [x] **Migração para o Boletim de Preços da B3 (D24)**, com a brapi só para nome, setor e proporção, teto de 80 requisições por mês.
+- [ ] **Carga inicial de BDRs** (Actions > "Carga inicial de BDRs", 260 pregões) logo depois de subir os arquivos da D24; ler as linhas `[desdobramento]` e ajustar `minimoBdrsNegociadosNoBoletim` pelo número típico do log.
+- [ ] **Próxima economia de cota:** migrar a cotação e o volume do job de FIIs para o boletim (o teto dele, 800, é o que mais pesa no plano de 1.000).
 - [x] **Tela** com lista por setor, busca, simulação de compra e avisos de IR e câmbio.
 - [ ] **Primeira execução:** ler no log as linhas `[revisar]`, `[setor]` e `[categoria]` e ajustar `config/bdrs.json`; conferir o volume médio de 2 ou 3 BDRs num site de cotações.
 - [ ] **Grupos dos BDRs de ETF:** completar `gruposEtf` conforme os ETFs que entrarem na lista.

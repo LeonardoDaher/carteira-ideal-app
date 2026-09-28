@@ -50,6 +50,12 @@
             "url": "https://carteiraideal.app.br/",
             "logo": "https://carteiraideal.app.br/assets/apple-touch-icon.png",
             "email": "acarteiraideal@gmail.com",
+            "founder": {
+              "@type": "Person",
+              "@id": "https://carteiraideal.app.br/sobre/#autor",
+              "name": "Leonardo Daher",
+              "url": "https://carteiraideal.app.br/sobre/"
+            },
             "sameAs": [
               "https://www.instagram.com/acarteiraideal/",
               "https://www.youtube.com/@acarteiraideal"
@@ -219,34 +225,36 @@
       <section class="sobre" aria-labelledby="sobre-titulo">
         <h2 id="sobre-titulo">Como funciona</h2>
         <ol class="passos">
-          <li><strong>Responda 14 perguntas.</strong> Sete medem o seu perfil de investidor, como no teste da corretora. As outras sete olham a sua vida real: reserva, dívidas, gastos previstos e estabilidade da renda.</li>
+          <li><strong>Responda 14 perguntas.</strong> <a href="/teste-perfil-de-investidor/">Saiba como funciona o teste.</a> Sete medem o seu perfil de investidor, como no teste da corretora. As outras sete olham a sua vida real: reserva, dívidas, gastos previstos e estabilidade da renda.</li>
           <li><strong>Veja o seu perfil de carteira.</strong> O cruzamento das duas partes leva a um de 9 perfis. Quem se declara arrojado mas tem pouca reserva ou dívida cara, por exemplo, recebe uma carteira mais protegida.</li>
           <li><strong>Entenda cada fatia.</strong> A carteira de referência se distribui em 11 classes de ativos, do Tesouro Selic às criptomoedas, com a explicação do papel de cada uma.</li>
         </ol>
 
         <h2>Ferramentas gratuitas</h2>
+        <!-- D26 (Etapa 3): os cartões levam às páginas de cada ferramenta (com texto para o Google),
+             e cada página tem o botão que abre a ferramenta no app. Os botões do topo seguem abrindo o app direto. -->
         <div class="ferramentas">
-          <a class="ferramenta" href="./app/?tela=meuMes">
+          <a class="ferramenta" href="/meu-mes/">
             <h3>Meu Mês: controle financeiro</h3>
             <p>Contas do mês, cofrinhos para as contas do ano, cartão de crédito com teto e um plano para sair das dívidas caras.</p>
           </a>
-          <a class="ferramenta" href="./app/?tela=aprender">
+          <a class="ferramenta" href="/aprender/">
             <h3>Aprender</h3>
             <p>Aulas curtas sobre os principais investimentos, diversificação e como sair das dívidas, e um livro infantil grátis de educação financeira.</p>
           </a>
-          <a class="ferramenta" href="./app/?tela=simuleTesouro">
+          <a class="ferramenta" href="/simulador-tesouro-direto/">
             <h3>Simulador de Tesouro Direto</h3>
             <p>Quanto cada título Selic, Prefixado ou IPCA+ rende até o vencimento, já com Imposto de Renda e taxa de custódia da B3, e quanto isso vale em dinheiro de hoje.</p>
           </a>
-          <a class="ferramenta" href="./app/?tela=simuleFii">
+          <a class="ferramenta" href="/simulador-fii/">
             <h3>Simulador de FII</h3>
             <p>Os fundos imobiliários mais negociados, separados por setor, com o rendimento estimado a partir do informe mensal da CVM e busca para os demais fundos.</p>
           </a>
-          <a class="ferramenta" href="./app/?tela=simuleBdr">
+          <a class="ferramenta" href="/simulador-bdr/">
             <h3>Simulador de BDR</h3>
             <p>Os BDRs mais negociados na B3, por setor, e quantas cotas o valor que você tem hoje consegue comprar.</p>
           </a>
-          <a class="ferramenta" href="./app/?tela=simuleEtf">
+          <a class="ferramenta" href="/simulador-etf/">
             <h3>Simulador de ETF</h3>
             <p>Os ETFs mais negociados na B3, por categoria (bolsa brasileira, exterior, renda fixa, ouro e cripto), e quantas cotas o valor que você tem hoje consegue comprar.</p>
           </a>
@@ -280,6 +288,7 @@
       <footer>
         <!-- D22: sem link para o curso da Udemy (o site fica 100% gratuito e sem divulgação de
              produto pago, dentro do plano Hobby da Vercel). -->
+        <p><a href="/sobre/">Sobre o projeto</a> · <a href="/metodologia-e-fontes/">Metodologia e fontes</a></p>
         <p>O estudo é sua maior riqueza</p>
         <p class="disclaimer">Conteúdo educacional. Não é recomendação de investimento.</p>
       </footer>
