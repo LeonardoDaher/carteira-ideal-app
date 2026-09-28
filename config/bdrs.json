@@ -1,5 +1,5 @@
 {
-  "_leia": "Configuração do job diário de BDRs (decisão D19). O job só publica com 'conferidoPeloResponsavel': true. A lista exibida é: os 'maxAcoes' BDRs de ações (códigos terminados em 31 a 35) e os 'maxEtfs' BDRs de ETF (terminados em 39) com maior volume financeiro médio nos últimos 21 pregões completos, acima do piso de cada grupo. Tickers em 'excluir' nunca entram (empresas de origem ou operação brasileira listadas no exterior). Tickers terminados em 31, 32 ou 33 que não estejam em 'excluir' nem em 'revisados' geram uma linha [revisar] no log, para decisão manual.",
+  "_leia": "Configuração do job diário de BDRs (decisões D19 e D24). O job só publica com 'conferidoPeloResponsavel': true. Desde a D24, preço e volume vêm do Boletim de Preços oficial da B3 (BVBG.086), guardados em historico/bdrs.json; a brapi só informa nome, setor e proporção BDR/ação, dentro do teto mensal do bloco 'brapi'. A lista exibida é: os 'maxAcoes' BDRs de ações (códigos terminados em 31 a 35) e os 'maxEtfs' BDRs de ETF (terminados em 39) com maior volume financeiro médio nos últimos 21 pregões, acima do piso de cada grupo. Tickers em 'excluir' nunca entram (empresas de origem ou operação brasileira listadas no exterior). Tickers terminados em 31, 32 ou 33 que não estejam em 'excluir' nem em 'revisados' geram uma linha [revisar] no log, para decisão manual.",
   "conferidoPeloResponsavel": true,
   "maxAcoes": 35,
   "maxEtfs": 5,
@@ -7,25 +7,54 @@
   "pisoVolumeEtfs": 100000,
   "minimoAcoesParaPublicar": 25,
   "minimoEtfsParaPublicar": 3,
-  "minimoBdrsNaLista": 300,
-  "candidatosAcoes": 100,
-  "candidatosEtfs": 30,
-  "maxRequisicoesBrapi": 250,
-  "pausaEntreRequisicoesMs": 300,
-  "pausaAposLimiteMs": 60000,
-  "horarioCorteFechamento": "18:30",
+  "minimoBdrsNegociadosNoBoletim": 150,
+  "minimoPregoesHistorico": 21,
+  "horarioCorteBoletim": "21:00",
+  "diasProcuraBoletim": 5,
+  "pausaEntreDownloadsMs": 1000,
+  "acompanharAcoes": 150,
+  "acompanharEtfs": 40,
+  "pregoesBusca": 63,
+  "brapi": {
+    "_leia": "Uso da brapi (D24): só nome, setor e proporção. 'tetoMensal': requisições por mês só deste job (o plano gratuito vai cair para 1.000 no total, somando FIIs e ETFs). Listagem de todos os BDRs (1 requisição) a cada 'diasEntreListagens' dias; consulta individual (1 requisição) de cada BDR da lista sem proporção, com proporção mais velha que 'diasValidadeProporcao' dias ou com salto de preço, até 'maxConsultasPorExecucao' por dia ('maxConsultasCargaInicial' na carga inicial). Se a brapi falhar ou o teto acabar, o job publica com o cadastro guardado.",
+    "tetoMensal": 80,
+    "diasEntreListagens": 7,
+    "diasValidadeProporcao": 60,
+    "maxConsultasPorExecucao": 6,
+    "maxConsultasCargaInicial": 45,
+    "minimoNaListagem": 300,
+    "pausaEntreRequisicoesMs": 300
+  },
   "controle": {
-    "_leia": "BDRs de controle: se menos de 'minimo' deles vierem com cotação e histórico válidos, o problema é geral (brapi fora do ar, plano mudou) e o arquivo NÃO é atualizado.",
+    "_leia": "BDRs de controle: se menos de 'minimo' deles negociarem no pregão mais recente com dado válido, o problema é geral (boletim incompleto, B3 mudou o arquivo) e o arquivo NÃO é atualizado.",
     "minimo": 4,
-    "tickers": ["AAPL34", "MSFT34", "NVDC34", "AMZO34", "GOGL34"]
+    "tickers": [
+      "AAPL34",
+      "MSFT34",
+      "NVDC34",
+      "AMZO34",
+      "GOGL34"
+    ]
   },
   "excluir": {
     "_leia": "Empresas de origem ou operação brasileira listadas no exterior (decisão D19). Não entram na lista mesmo com volume alto.",
-    "tickers": ["ROXO34", "XPBR31", "INBR32", "JBSS32", "STOC34", "PAGS34"]
+    "tickers": [
+      "ROXO34",
+      "XPBR31",
+      "INBR32",
+      "JBSS32",
+      "STOC34",
+      "PAGS34"
+    ]
   },
   "revisados": {
     "_leia": "Códigos terminados em 31, 32 ou 33 que o responsável já decidiu manter. Não geram a linha [revisar] no log.",
-    "tickers": ["AURA33"]
+    "tickers": [
+      "AURA33"
+    ]
+  },
+  "desdobramentos": {
+    "_leia": "Desdobramentos e grupamentos confirmados pelo responsável (D24). O boletim da B3 traz preço bruto; um salto de preço entre dois pregões gera a linha [desdobramento] no log e o BDR sai sem variação de 3 meses e sem faixa de 52 semanas até a confirmação aqui. Formato: \"TICKER\": [{ \"data\": \"AAAA-MM-DD\" (primeiro pregão com o preço novo), \"fator\": BDRs novos por BDR antigo }]. Desdobramento 1 para 10: fator 10. Grupamento 10 para 1: fator 0.1. Conferir no aviso de eventos corporativos da B3 antes de incluir."
   },
   "setores": {
     "_leia": "Tradução da classificação da brapi (em inglês) para o setor exibido. Setor sem tradução aparece em inglês e gera uma linha [setor] no log.",

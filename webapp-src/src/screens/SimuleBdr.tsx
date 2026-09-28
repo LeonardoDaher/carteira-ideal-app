@@ -161,7 +161,11 @@ export function SimuleBdr({
         <strong>Rentabilidade obtida no passado não representa garantia de rentabilidade futura.</strong> O preço de um BDR
         muda com a ação lá fora e com o dólar: mesmo que a empresa não se mova, a alta ou a queda do dólar muda o valor em
         reais. Estar na lista ou na busca não é uma indicação de compra: o critério da lista é só o volume negociado.
-        {snapshot.geradoEm ? ` Dados da brapi, atualizados em ${formatarData(snapshot.geradoEm)}.` : ''}
+        {snapshot.geradoEm
+          ? snapshot.fonte
+            ? ` Preços e volumes oficiais da B3 (Boletim de Preços); nome, setor e proporção da brapi. Atualizados em ${formatarData(snapshot.geradoEm)}.`
+            : ` Dados da brapi, atualizados em ${formatarData(snapshot.geradoEm)}.`
+          : ''}
       </div>
 
       <AvisoEducacional />
@@ -254,7 +258,8 @@ function CartaoBdr({
   const resumo = selecao.origem === 'busca' ? selecao.bdr : null
   const tipo = selecao.origem === 'lista' ? selecao.tipo : selecao.bdr.tipo
   const bdr = selecao.bdr
-  const dataFechamento = completo?.dataCotacao ?? dataPregao
+  // Na busca, o preço é o do último negócio, que pode ser anterior ao último pregão (D24).
+  const dataFechamento = completo?.dataCotacao ?? resumo?.dataCotacao ?? dataPregao
   const acoesPorBdr = completo?.acoesPorBdr ?? null
   const proporcao = textoProporcao(acoesPorBdr, tipo)
 
@@ -333,7 +338,9 @@ function CartaoBdr({
             <span className="muted">
               {resumo.volumeDia > 0
                 ? `No último pregão, este BDR negociou ${formatarVolume(resumo.volumeDia)}. `
-                : 'Este BDR não teve negócios no último pregão, e o preço exibido pode ser de um dia anterior. '}
+                : resumo.dataCotacao
+                  ? `Este BDR não teve negócios no último pregão: o preço exibido é o do último negócio, em ${formatarData(resumo.dataCotacao)}. `
+                  : 'Este BDR não teve negócios no último pregão, e o preço exibido pode ser de um dia anterior. '}
               Para BDRs fora da lista, a tela mostra só o preço e o setor. Com pouca negociação, comprar ou vender pode levar
               tempo ou exigir aceitar um preço pior.
             </span>

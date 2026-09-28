@@ -96,7 +96,10 @@ A mudança para a API tirou a metodologia do código visível. Ainda assim, vale
 
 ## 9. Aba "Simule BDR" (decisão D19)
 
-- [x] **Job diário** (dias úteis, 19h de Brasília), 35 BDRs de ações e 5 de ETF por volume médio de 21 pregões, busca com todos os demais.
+- [x] **Job diário** (dias úteis, 22h30 de Brasília desde a D24), 35 BDRs de ações e 5 de ETF por volume médio de 21 pregões, busca com todos os demais.
+- [x] **Migração para o Boletim de Preços da B3 (D24)**, com a brapi só para nome, setor e proporção, teto de 80 requisições por mês.
+- [ ] **Carga inicial de BDRs** (Actions > "Carga inicial de BDRs", 260 pregões) logo depois de subir os arquivos da D24; ler as linhas `[desdobramento]` e ajustar `minimoBdrsNegociadosNoBoletim` pelo número típico do log.
+- [ ] **Próxima economia de cota:** migrar a cotação e o volume do job de FIIs para o boletim (o teto dele, 800, é o que mais pesa no plano de 1.000).
 - [x] **Tela** com lista por setor, busca, simulação de compra e avisos de IR e câmbio.
 - [ ] **Primeira execução:** ler no log as linhas `[revisar]`, `[setor]` e `[categoria]` e ajustar `config/bdrs.json`; conferir o volume médio de 2 ou 3 BDRs num site de cotações.
 - [ ] **Grupos dos BDRs de ETF:** completar `gruposEtf` conforme os ETFs que entrarem na lista.

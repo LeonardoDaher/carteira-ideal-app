@@ -86,4 +86,19 @@ describe('SimuleBdr', () => {
     render(<SimuleBdr ctx={ctx} snapshot={{ geradoEm: null, dataPregao: null, acoes: [], etfs: [], busca: [] }} />)
     expect(screen.getByText(/ainda não foram carregados/)).toBeDefined()
   })
+  it('com dados da B3 (D24): data do último negócio na busca e a fonte no rodapé', () => {
+    const daB3: SnapshotBdrs = {
+      ...snapshot,
+      fonte: 'B3 - Boletim de Preços (BVBG.086)',
+      pregoesNoHistorico: 260,
+      busca: [{ ticker: 'KOCH34', tipo: 'acao', nome: null, setor: 'Consumo não durável', cotacao: 25.5, dataCotacao: '2026-09-18', volumeDia: 0 }],
+    }
+    render(<SimuleBdr ctx={ctx} snapshot={daB3} />)
+    expect(screen.getByText(/Preços e volumes oficiais da B3 \(Boletim de Preços\)/)).toBeDefined()
+    expect(screen.queryByText(/Dados da brapi/)).toBeNull()
+    fireEvent.change(screen.getByLabelText('Buscar BDR por código ou nome'), { target: { value: 'KOCH' } })
+    fireEvent.click(screen.getByRole('button', { name: /KOCH34/ }))
+    expect(screen.getByText('fechamento de 18/09/2026')).toBeDefined()
+    expect(screen.getByText(/o preço exibido é o do último negócio, em 18\/09\/2026/)).toBeDefined()
+  })
 })

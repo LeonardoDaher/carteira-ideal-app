@@ -1,51 +1,68 @@
-// Atualização diária dos dados da aba de BDRs (decisão D19).
+// Atualização diária dos dados da aba de BDRs (decisões D19 e D24).
 //
-// Roda nos dias úteis pelo GitHub Actions (.github/workflows/atualizar-bdrs.yml), depois do
-// fechamento da B3, ou manualmente com:  BRAPI_TOKEN=... node scripts/atualizar-bdrs.mjs
+// Roda nos dias úteis pelo GitHub Actions (.github/workflows/atualizar-bdrs.yml), às 22h30 de
+// Brasília, ou manualmente:
+//   BRAPI_TOKEN=... node scripts/atualizar-bdrs.mjs                     (dia a dia)
+//   BRAPI_TOKEN=... node scripts/atualizar-bdrs.mjs --carga-inicial=260 (uma vez, histórico)
 //
-// O que faz:
-//   1. Uma chamada à listagem da brapi traz todos os BDRs (fechamento, volume do dia, setor).
-//   2. Separa BDRs de ações (códigos 31 a 35) e BDRs de ETF (39), tira os da lista de
-//      exclusão e escolhe os candidatos pelo volume financeiro do dia (papéis × fechamento:
-//      o campo volume da brapi é quantidade de papéis, não reais).
-//   3. Para cada candidato, uma chamada com histórico de 3 meses: volume financeiro médio dos
-//      21 últimos pregões COMPLETOS (o pregão em andamento é descartado), variação no período,
-//      nome da empresa e proporção BDR/ação.
-//   4. Publica os 35 BDRs de ações e os 5 de ETF com maior volume médio, acima do piso de cada
-//      grupo, em webapp-src/src/data/bdrs.json, junto com a lista de busca: todos os demais
-//      BDRs com o dado resumido da própria listagem (fechamento, setor, volume do dia).
+// D24 (27/09/2026): preço e volume saem da brapi e passam a vir do Boletim de Preços oficial
+// da B3 (scripts/b3-boletim.mjs, o mesmo leitor dos ETFs, D23), sem cota. A brapi fica só para
+// o que a B3 não traz, com teto mensal próprio e cache no histórico:
+//   - nome e setor: listagem de BDRs (1 requisição), no máximo uma vez por semana;
+//   - proporção BDR/ação e nome longo: 1 requisição por BDR da lista, a cada 60 dias, ou antes
+//     se o preço der um salto de desdobramento.
+// Sem token, com a cota esgotada ou com a brapi fora do ar, o job publica do mesmo jeito,
+// com o cadastro guardado.
 //
-// Regras de segurança: listagem pequena demais, BDRs de controle sem dado ou lista final
-// abaixo do mínimo = o script termina com erro SEM gravar o arquivo. O app continua com os
-// dados do último dia bom, e o GitHub avisa da falha.
+// Histórico próprio (historico/bdrs.json):
+//   - série longa (até 260 pregões) só dos BDRs "acompanhados": os mais negociados de cada
+//     tipo, com folga sobre a lista publicada. Deles saem a variação de 3 meses e a faixa de
+//     52 semanas;
+//   - série curta (21 pregões) dos demais, o suficiente para o volume médio e a busca;
+//   - séries alinhadas pela DIREITA: o último valor de cada série é o último pregão; o que
+//     falta no começo é "sem dado". Assim uma série curta não ocupa 260 posições.
 //
-// Telas estritamente descritivas (D19): o arquivo não traz múltiplos de avaliação (P/L, LPA)
-// nem nada que ordene por "melhor"; a ordem é sempre por volume.
+// Desdobramentos: o boletim traz preço bruto, sem ajuste. Um salto de preço de um pregão para
+// o outro (queda de 45% ou mais, ou alta de 80% ou mais) é tratado como possível desdobramento
+// ou grupamento: o BDR sai publicado sem variação de 3 meses e sem faixa de 52 semanas até o
+// responsável confirmar o evento em "desdobramentos" (config/bdrs.json), e o log mostra a
+// linha [desdobramento]. Confirmado, os preços anteriores são ajustados no cálculo (o histórico
+// guardado continua bruto).
+//
+// Telas estritamente descritivas (D19): sem múltiplos de avaliação, sem ranking de "melhor";
+// a ordem é sempre por volume.
 
 import fs from 'node:fs'
+import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
-import { formatarSnapshot, volumeMedioDiario } from './atualizar-rendimentos-fii.mjs'
+import { baixarBoletim, dataEmBrasilia, datasCandidatas, lerBoletim } from './b3-boletim.mjs'
+import { datasAProcessar } from './atualizar-etfs.mjs'
+import { formatarSnapshot } from './atualizar-rendimentos-fii.mjs'
 
-const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
-const ARQUIVO_CONFIG = path.join(RAIZ, 'config', 'bdrs.json')
-const ARQUIVO_SAIDA = path.join(RAIZ, 'webapp-src', 'src', 'data', 'bdrs.json')
-// limit=1000 cobre todos os BDRs listados (879 em 25/09/2026) numa única requisição.
+const RAIZ_PADRAO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const URL_LISTA = 'https://brapi.dev/api/quote/list?type=bdr&limit=1000&sortBy=volume&sortOrder=desc'
-const URL_COTACAO = (ticker) => `https://brapi.dev/api/quote/${encodeURIComponent(ticker)}?range=3mo&interval=1d`
-// Mesma régua dos FIIs (D13): média de cerca de um mês de pregões.
-const SESSOES_LIQUIDEZ = 21
-// Fuso da B3, sem horário de verão desde 2019.
-const OFFSET_BRASILIA_MS = -3 * 3_600_000
+const URL_COTACAO = (ticker) => `https://brapi.dev/api/quote/${encodeURIComponent(ticker)}`
 
-// Faixas plausíveis. Fora delas, o dado provavelmente está errado e o BDR não é publicado.
+export const SESSOES_LIQUIDEZ = 21 // mesma régua dos FIIs (D13) e dos ETFs (D23)
+export const SESSOES_3_MESES = 63
+export const SESSOES_52_SEMANAS = 252
+export const MINIMO_PARA_52_SEMANAS = 240
+export const MAXIMO_PREGOES_GUARDADOS = 260
+export const FONTE = 'B3 - Boletim de Preços (BVBG.086)'
+
 const PRECO_MIN = 0.1
 const PRECO_MAX = 10_000
 const VARIACAO_MIN_PCT = -90
 const VARIACAO_MAX_PCT = 500
+// Salto entre dois fechamentos seguidos que pede confirmação de desdobramento/grupamento.
+const SALTO_QUEDA = 0.55 // preço novo até 55% do anterior (queda de 45% ou mais)
+const SALTO_ALTA = 1.8 // preço novo 80% ou mais acima do anterior
+
+const arredondar = (valor, casas = 2) => (valor === null || valor === undefined ? null : Math.round(valor * 10 ** casas) / 10 ** casas)
 
 // ---------------------------------------------------------------------------------------
-// Funções puras (exportadas para os testes em atualizar-bdrs.test.mjs)
+// Classificação, nome e setor (regras da D19, mantidas)
 // ---------------------------------------------------------------------------------------
 
 /** 'acao' para códigos terminados em 31 a 35, 'etf' para 39, null para o resto. */
@@ -59,84 +76,6 @@ export function tipoPorCodigo(ticker) {
 /** Códigos 31, 32 e 33 costumam ser de empresas com vínculo brasileiro: pedem decisão manual. */
 export function precisaRevisar(ticker, excluir = [], revisados = []) {
   return /3[123]$/.test(ticker) && !excluir.includes(ticker) && !revisados.includes(ticker)
-}
-
-/** Volume financeiro do dia na listagem: o campo volume é quantidade de papéis. */
-export function volumeFinanceiroDoDia(item) {
-  const papeis = Number(item?.volume)
-  const preco = Number(item?.close)
-  return papeis > 0 && preco > 0 ? papeis * preco : 0
-}
-
-/**
- * Separa a listagem em candidatos a ações e a ETFs, pelo volume financeiro do dia.
- * `obrigatorios` (controle e lista publicada no dia anterior) entram sempre, para a lista
- * não oscilar só porque um BDR teve um dia fraco.
- */
-export function escolherCandidatos(lista, config, obrigatorios = []) {
-  const excluir = config.excluir?.tickers ?? []
-  const revisados = config.revisados?.tickers ?? []
-  const porTipo = { acao: [], etf: [] }
-  const revisar = []
-  let ignorados = 0
-  for (const item of lista) {
-    const ticker = String(item?.stock ?? '').toUpperCase()
-    const tipo = tipoPorCodigo(ticker)
-    if (!tipo) {
-      ignorados++
-      continue
-    }
-    if (excluir.includes(ticker)) continue
-    if (precisaRevisar(ticker, excluir, revisados)) revisar.push(ticker)
-    porTipo[tipo].push({ ticker, volumeDia: volumeFinanceiroDoDia(item), item })
-  }
-  const topo = (itens, n) => itens.sort((a, b) => b.volumeDia - a.volumeDia).slice(0, n).map((x) => x.ticker)
-  const acoes = new Set(topo(porTipo.acao, config.candidatosAcoes ?? 100))
-  const etfs = new Set(topo(porTipo.etf, config.candidatosEtfs ?? 30))
-  for (const ticker of obrigatorios) {
-    if (excluir.includes(ticker)) continue
-    const tipo = tipoPorCodigo(ticker)
-    if (tipo === 'acao') acoes.add(ticker)
-    if (tipo === 'etf') etfs.add(ticker)
-  }
-  const itemPorTicker = new Map([...porTipo.acao, ...porTipo.etf].map((x) => [x.ticker, x.item]))
-  return { acoes: [...acoes], etfs: [...etfs], revisar, ignorados, itemPorTicker }
-}
-
-/** Data (AAAA-MM-DD) em Brasília de um instante. */
-export function dataEmBrasilia(instante) {
-  return new Date(instante.getTime() + OFFSET_BRASILIA_MS).toISOString().slice(0, 10)
-}
-
-/** Data (AAAA-MM-DD) de um ponto do histórico da brapi (segundos Unix, meia-noite de Brasília). */
-export function dataDoPonto(ponto) {
-  return dataEmBrasilia(new Date(Number(ponto.date) * 1000))
-}
-
-/**
- * Pregões completos: descarta o do dia se o script rodar antes do horário de corte (ex.:
- * execução manual com a bolsa aberta). Em 25/09/2026, com o pregão aberto, o AAPL34 aparecia
- * com 42.540 papéis no dia, contra 200 a 500 mil num dia normal.
- */
-export function pregoesCompletos(historico, agora = new Date(), horarioCorte = '18:30') {
-  if (!Array.isArray(historico)) return []
-  const pontos = historico
-    .filter((p) => p && typeof p.close === 'number' && p.close > 0 && Number.isFinite(Number(p.date)))
-    .sort((a, b) => a.date - b.date)
-  const [hora, minuto] = horarioCorte.split(':').map(Number)
-  const local = new Date(agora.getTime() + OFFSET_BRASILIA_MS)
-  const antesDoCorte = local.getUTCHours() * 60 + local.getUTCMinutes() < hora * 60 + minuto
-  const hoje = dataEmBrasilia(agora)
-  return antesDoCorte ? pontos.filter((p) => dataDoPonto(p) !== hoje) : pontos
-}
-
-/** Variação (%) entre o primeiro e o último fechamento do período. */
-export function variacaoPeriodo(pregoes) {
-  if (!Array.isArray(pregoes) || pregoes.length < 2) return null
-  const inicio = pregoes[0].close
-  const fim = pregoes[pregoes.length - 1].close
-  if (!(inicio > 0) || !(fim > 0)) return null
-  return Math.round(((fim / inicio - 1) * 100) * 10) / 10
 }
 
 /**
@@ -175,44 +114,223 @@ export function setorDe(ticker, tipo, setorBrapi, config) {
   return { setor: setorBrapi || 'Outros', semMapa: true }
 }
 
+/** Nome exibido: correção manual, nome longo da brapi, nome da listagem ou nada. */
+export function nomeDe(ticker, cadastro, config) {
+  return config.nomes?.[ticker] ?? cadastro?.nome ?? cadastro?.nomeLista ?? null
+}
+
+// ---------------------------------------------------------------------------------------
+// Histórico próprio (séries alinhadas pela direita)
+// ---------------------------------------------------------------------------------------
+
+/** Histórico vazio no formato do arquivo historico/bdrs.json. */
+export function historicoVazio() {
+  return { pregoes: [], acompanhados: [], ativos: {}, ultimoNegocio: {}, cadastro: {}, brapi: { mes: null, requisicoes: 0, ultimaListagem: null } }
+}
+
+/** Completa campos que faltem (arquivo antigo, parcial ou ausente). */
+export function normalizarHistorico(bruto) {
+  const vazio = historicoVazio()
+  if (!bruto || typeof bruto !== 'object') return vazio
+  return {
+    pregoes: Array.isArray(bruto.pregoes) ? bruto.pregoes : [],
+    acompanhados: Array.isArray(bruto.acompanhados) ? bruto.acompanhados : [],
+    ativos: bruto.ativos ?? {},
+    ultimoNegocio: bruto.ultimoNegocio ?? {},
+    cadastro: bruto.cadastro ?? {},
+    brapi: { ...vazio.brapi, ...(bruto.brapi ?? {}) },
+  }
+}
+
+/** Valor guardado de um instrumento do boletim: [fechamento, mínima, máxima, volume] ou null. */
+function valorDoPregao(item) {
+  if (!item || !(item.fechamento > 0)) return null
+  return [item.fechamento, item.minima ?? item.fechamento, item.maxima ?? item.fechamento, Math.round(item.volume ?? 0)]
+}
+
+/**
+ * Inclui (ou substitui) o pregão `data` no histórico. `instrumentos` é o Map do boletim (só
+ * BDRs). Funciona para o pregão novo do dia (fim da série), para a carga inicial (pregões mais
+ * antigos, no começo) e para um buraco no meio. Mantém só os `maximo` pregões mais recentes.
+ */
+export function incorporarPregao(historico, data, instrumentos, maximo = MAXIMO_PREGOES_GUARDADOS) {
+  const pregoes = [...historico.pregoes]
+  const ativos = Object.fromEntries(Object.entries(historico.ativos).map(([t, s]) => [t, [...s]]))
+  const ultimoNegocio = { ...historico.ultimoNegocio }
+  const n = pregoes.length
+  let indice = pregoes.indexOf(data)
+  const novo = indice === -1
+  if (novo) {
+    indice = pregoes.findIndex((p) => p > data)
+    if (indice === -1) indice = n
+  }
+  // Posição a partir da direita: quantos pregões ficam depois do ponto de inserção.
+  const daDireita = novo ? n - indice : n - 1 - indice
+  const tickers = new Set([...Object.keys(ativos), ...instrumentos.keys()])
+  for (const ticker of tickers) {
+    const valor = valorDoPregao(instrumentos.get(ticker))
+    const serie = ativos[ticker] ?? []
+    if (!serie.length && !valor) continue // sem série e sem negócio: nada a guardar
+    if (!novo) {
+      // Pregão já guardado: substitui, se a série alcança esse pregão.
+      if (serie.length > daDireita) serie[serie.length - 1 - daDireita] = valor
+      else if (valor) serie.unshift(valor, ...Array(daDireita - serie.length).fill(null))
+    } else if (serie.length >= daDireita) {
+      serie.splice(serie.length - daDireita, 0, valor)
+    } else if (valor) {
+      // A série começa depois deste pregão: só estende se houve negócio.
+      serie.unshift(valor, ...Array(daDireita - serie.length).fill(null))
+    }
+    if (serie.length) ativos[ticker] = serie
+    if (valor && (!ultimoNegocio[ticker] || data >= ultimoNegocio[ticker][0])) ultimoNegocio[ticker] = [data, arredondar(valor[0])]
+  }
+  if (novo) pregoes.splice(indice, 0, data)
+  const corte = Math.max(0, pregoes.length - maximo)
+  const restantes = pregoes.slice(corte)
+  for (const [ticker, serie] of Object.entries(ativos)) {
+    if (serie.length > restantes.length) ativos[ticker] = serie.slice(-restantes.length)
+  }
+  return { ...historico, pregoes: restantes, ativos, ultimoNegocio }
+}
+
+/** Datas dos pregões cobertos por uma série alinhada pela direita. */
+function datasDaSerie(pregoes, serie) {
+  return pregoes.slice(pregoes.length - serie.length)
+}
+
+/**
+ * Aplica os desdobramentos confirmados: `eventos` = [{ data, fator }], com `fator` = BDRs novos
+ * para cada BDR antigo (desdobramento 1:10 → 10; grupamento 10:1 → 0.1). Os preços ANTES da
+ * data são divididos pelo fator; o volume em reais não muda.
+ */
+export function aplicarDesdobramentos(serie, datas, eventos = []) {
+  const validos = eventos.filter((e) => e && typeof e.data === 'string' && e.fator > 0)
+  if (!validos.length) return serie
+  return serie.map((v, i) => {
+    if (!v) return v
+    const fator = validos.filter((e) => datas[i] < e.data).reduce((f, e) => f * e.fator, 1)
+    return fator === 1 ? v : [v[0] / fator, v[1] / fator, v[2] / fator, v[3]]
+  })
+}
+
+/** Fator sugerido para um salto (preço anterior / preço novo), arredondado ao inteiro mais próximo. */
+export function fatorSugerido(anterior, atual) {
+  const razao = anterior / atual
+  return razao >= 1 ? Math.round(razao) : arredondar(1 / Math.round(1 / razao), 4)
+}
+
+/**
+ * Saltos de preço entre dois fechamentos seguidos (pulando dias sem negócio) nos últimos
+ * `janela` pregões: possíveis desdobramentos ou grupamentos ainda não confirmados.
+ */
+export function detectarSaltos(serie, datas, janela = SESSOES_52_SEMANAS) {
+  const saltos = []
+  let anterior = null
+  const inicio = Math.max(0, serie.length - janela - 1)
+  for (let i = inicio; i < serie.length; i++) {
+    const v = serie[i]
+    if (!v) continue
+    if (anterior && i >= serie.length - janela) {
+      const razao = v[0] / anterior[0]
+      if (razao <= SALTO_QUEDA || razao >= SALTO_ALTA) {
+        saltos.push({ data: datas[i], de: arredondar(anterior[0]), para: arredondar(v[0]), fator: fatorSugerido(anterior[0], v[0]), indiceDaDireita: serie.length - 1 - i })
+      }
+    }
+    anterior = v
+  }
+  return saltos
+}
+
+/** Volume médio (R$) dos últimos 21 pregões; dia sem negócio conta como zero (régua da D23). */
+export function volumeMedio(serie, totalPregoes) {
+  const janela = Math.min(SESSOES_LIQUIDEZ, totalPregoes)
+  if (!serie || janela === 0) return 0
+  return Math.round(serie.slice(-janela).reduce((soma, v) => soma + (v ? v[3] : 0), 0) / janela)
+}
+
+/**
+ * Números de um BDR a partir do histórico, já com os desdobramentos confirmados. Salto não
+ * confirmado dentro da janela apaga a variação de 3 meses e/ou a faixa de 52 semanas.
+ */
+export function metricas(historico, ticker, config = {}) {
+  const bruta = historico.ativos[ticker]
+  const pregoes = historico.pregoes
+  if (!bruta || !bruta.length || pregoes.length === 0) return null
+  const datas = datasDaSerie(pregoes, bruta)
+  const serie = aplicarDesdobramentos(bruta, datas, config.desdobramentos?.[ticker])
+  let ultimo = -1
+  for (let i = serie.length - 1; i >= 0; i--) {
+    if (serie[i]) {
+      ultimo = i
+      break
+    }
+  }
+  if (ultimo === -1) return null
+
+  const saltos = detectarSaltos(serie, datas)
+  const saltoEm = (pregoesAtras) => saltos.some((s) => s.indiceDaDireita < pregoesAtras)
+
+  let variacao3m = null
+  const alvo = serie.length - 1 - SESSOES_3_MESES
+  if (alvo >= 0 && !saltoEm(SESSOES_3_MESES + 1)) {
+    let base = null
+    for (let i = alvo; i >= 0 && base === null; i--) if (serie[i]) base = serie[i][0]
+    if (base > 0) variacao3m = arredondar((serie[ultimo][0] / base - 1) * 100, 1)
+  }
+
+  let minima52 = null
+  let maxima52 = null
+  if (pregoes.length >= MINIMO_PARA_52_SEMANAS && serie.length >= MINIMO_PARA_52_SEMANAS && !saltoEm(SESSOES_52_SEMANAS)) {
+    const ano = serie.slice(-SESSOES_52_SEMANAS).filter(Boolean)
+    minima52 = arredondar(Math.min(...ano.map((v) => v[1])))
+    maxima52 = arredondar(Math.max(...ano.map((v) => v[2])))
+  }
+
+  return {
+    cotacao: arredondar(serie[ultimo][0]),
+    dataCotacao: datas[ultimo],
+    variacao3m,
+    volumeMedio: volumeMedio(serie, pregoes.length),
+    minima52,
+    maxima52,
+    saltos,
+  }
+}
+
+/** Item publicado e o que faltou (para o log). */
+export function montarItem(ticker, tipo, historico, config) {
+  const numeros = metricas(historico, ticker, config)
+  if (!numeros) return null
+  const cadastro = historico.cadastro[ticker]
+  const { setor, semMapa } = setorDe(ticker, tipo, cadastro?.setorBrapi ?? null, config)
+  const { saltos, ...resto } = numeros
+  return {
+    item: {
+      ticker,
+      nome: nomeDe(ticker, cadastro, config) ?? ticker,
+      setor,
+      cotacao: resto.cotacao,
+      dataCotacao: resto.dataCotacao,
+      variacao3m: resto.variacao3m,
+      volumeMedio: resto.volumeMedio,
+      minima52: resto.minima52,
+      maxima52: resto.maxima52,
+      acoesPorBdr: cadastro?.acoesPorBdr ?? null,
+    },
+    semMapa,
+    semNome: nomeDe(ticker, cadastro, config) === null,
+    saltos,
+  }
+}
+
 /** Motivo para não publicar um BDR, ou null se o dado for plausível. */
 export function motivoInvalido(item) {
   if (!(item.cotacao >= PRECO_MIN && item.cotacao <= PRECO_MAX)) return `cotação fora da faixa plausível (${item.cotacao})`
-  if (!(item.volumeMedio > 0)) return 'sem histórico de volume'
+  if (!(item.volumeMedio > 0)) return 'sem volume nos últimos 21 pregões'
   if (item.variacao3m !== null && (item.variacao3m < VARIACAO_MIN_PCT || item.variacao3m > VARIACAO_MAX_PCT)) {
     return `variação de 3 meses fora da faixa plausível (${item.variacao3m}%)`
   }
   return null
-}
-
-/**
- * Lista de busca: todos os BDRs da listagem (menos os excluídos), com o dado que a própria
- * listagem traz, sem requisição extra. Não tem média de 21 pregões nem variação de 3 meses:
- * o volume é só o do último pregão. O nome vem dos BDRs publicados (nome longo limpo) ou da
- * listagem, quando ela traz um nome diferente do código; senão fica null e a busca é só pelo
- * código.
- */
-export function montarBusca(lista, config, publicados = []) {
-  const excluir = config.excluir?.tickers ?? []
-  const nomePublicado = new Map(publicados.map((i) => [i.ticker, i.nome]))
-  const busca = []
-  for (const item of lista) {
-    const ticker = String(item?.stock ?? '').toUpperCase()
-    const tipo = tipoPorCodigo(ticker)
-    const cotacao = Number(item?.close)
-    if (!tipo || excluir.includes(ticker) || !(cotacao >= PRECO_MIN && cotacao <= PRECO_MAX)) continue
-    const nomeLista = String(item?.name ?? '').trim()
-    const nome = config.nomes?.[ticker] ?? nomePublicado.get(ticker) ?? (nomeLista && nomeLista.toUpperCase() !== ticker ? nomeLista : null)
-    busca.push({
-      ticker,
-      tipo,
-      nome,
-      setor: setorDe(ticker, tipo, item?.sector ?? null, config).setor,
-      cotacao: Math.round(cotacao * 100) / 100,
-      volumeDia: Math.round(volumeFinanceiroDoDia(item)),
-    })
-  }
-  return busca.sort((a, b) => a.ticker.localeCompare(b.ticker))
 }
 
 /** Os `maximo` com maior volume médio, acima do piso, em ordem de volume. */
@@ -223,27 +341,164 @@ export function selecionar(itens, maximo, piso) {
     .slice(0, maximo)
 }
 
-/** Monta o item publicado a partir da resposta individual da brapi. */
-export function montarItem(ticker, tipo, resultado, itemLista, config, agora = new Date()) {
-  const pregoes = pregoesCompletos(resultado?.historicalDataPrice, agora, config.horarioCorteFechamento)
-  const ultimo = pregoes[pregoes.length - 1]
-  const { setor, semMapa } = setorDe(ticker, tipo, itemLista?.sector ?? null, config)
-  const preco = ultimo?.close ?? resultado?.regularMarketPrice
-  return {
-    item: {
-      ticker,
-      nome: extrairNome(resultado?.longName || itemLista?.name, ticker, config.nomes),
-      setor,
-      cotacao: typeof preco === 'number' ? Math.round(preco * 100) / 100 : null,
-      dataCotacao: ultimo ? dataDoPonto(ultimo) : null,
-      variacao3m: variacaoPeriodo(pregoes),
-      volumeMedio: Math.round(volumeMedioDiario(pregoes, SESSOES_LIQUIDEZ) ?? 0),
-      minima52: typeof resultado?.fiftyTwoWeekLow === 'number' ? resultado.fiftyTwoWeekLow : null,
-      maxima52: typeof resultado?.fiftyTwoWeekHigh === 'number' ? resultado.fiftyTwoWeekHigh : null,
-      acoesPorBdr: extrairProporcao(resultado?.longName),
-    },
-    semMapa,
+/**
+ * BDRs com série longa: os `acompanharAcoes`/`acompanharEtfs` de maior volume médio, mais os
+ * de controle e os publicados. Quem já era acompanhado só sai se cair abaixo do dobro do
+ * limite (folga, para a série não ser cortada por uma semana fraca).
+ */
+export function atualizarAcompanhados(historico, config, obrigatorios = []) {
+  const excluir = new Set(config.excluir?.tickers ?? [])
+  const limites = { acao: config.acompanharAcoes ?? 150, etf: config.acompanharEtfs ?? 40 }
+  const porTipo = { acao: [], etf: [] }
+  for (const [ticker, serie] of Object.entries(historico.ativos)) {
+    const tipo = tipoPorCodigo(ticker)
+    if (!tipo || excluir.has(ticker)) continue
+    porTipo[tipo].push({ ticker, volume: volumeMedio(serie, historico.pregoes.length) })
   }
+  const anteriores = new Set(historico.acompanhados)
+  const escolhidos = new Set(obrigatorios.filter((t) => !excluir.has(t)))
+  for (const tipo of ['acao', 'etf']) {
+    const ordem = porTipo[tipo].filter((x) => x.volume > 0).sort((a, b) => b.volume - a.volume || a.ticker.localeCompare(b.ticker))
+    ordem.forEach((x, posicao) => {
+      if (posicao < limites[tipo] || (anteriores.has(x.ticker) && posicao < 2 * limites[tipo])) escolhidos.add(x.ticker)
+    })
+  }
+  return [...escolhidos].sort()
+}
+
+/**
+ * Corta as séries dos BDRs não acompanhados para os últimos `janelaCurta` pregões e apaga o
+ * que ficou sem nenhum negócio. O último negócio de cada BDR fica em `ultimoNegocio` enquanto
+ * estiver dentro do histórico; o cadastro, enquanto o BDR tiver algum dado guardado.
+ */
+export function compactar(historico, acompanhados, janelaCurta = SESSOES_LIQUIDEZ) {
+  const longos = new Set(acompanhados)
+  const ativos = {}
+  for (const [ticker, serie] of Object.entries(historico.ativos)) {
+    const guardada = longos.has(ticker) ? serie : serie.slice(-janelaCurta)
+    if (guardada.some(Boolean)) ativos[ticker] = guardada
+  }
+  const primeiro = historico.pregoes[0] ?? ''
+  const ultimoNegocio = Object.fromEntries(Object.entries(historico.ultimoNegocio).filter(([, [data]]) => data >= primeiro))
+  const cadastro = Object.fromEntries(Object.entries(historico.cadastro).filter(([t]) => ativos[t] || ultimoNegocio[t]))
+  return { ...historico, acompanhados: [...longos].filter((t) => ativos[t]).sort(), ativos, ultimoNegocio, cadastro }
+}
+
+/**
+ * Lista de busca: todos os BDRs (menos os excluídos) com negócio nos últimos `pregoesBusca`
+ * pregões, com o preço e a data do último negócio e o volume do último pregão.
+ */
+export function montarBusca(historico, config) {
+  const excluir = new Set(config.excluir?.tickers ?? [])
+  const pregoes = historico.pregoes
+  const limite = pregoes[Math.max(0, pregoes.length - (config.pregoesBusca ?? 63))] ?? ''
+  const busca = []
+  for (const [ticker, [data, cotacao]] of Object.entries(historico.ultimoNegocio)) {
+    const tipo = tipoPorCodigo(ticker)
+    if (!tipo || excluir.has(ticker) || data < limite || !(cotacao >= PRECO_MIN && cotacao <= PRECO_MAX)) continue
+    const serie = historico.ativos[ticker]
+    const ultimoPregao = serie && serie.length ? serie[serie.length - 1] : null
+    busca.push({
+      ticker,
+      tipo,
+      nome: nomeDe(ticker, historico.cadastro[ticker], config),
+      setor: setorDe(ticker, tipo, historico.cadastro[ticker]?.setorBrapi ?? null, config).setor,
+      cotacao,
+      dataCotacao: data,
+      volumeDia: ultimoPregao ? ultimoPregao[3] : 0,
+    })
+  }
+  return busca.sort((a, b) => a.ticker.localeCompare(b.ticker))
+}
+
+// ---------------------------------------------------------------------------------------
+// Cadastro pela brapi (nome, setor, proporção), com teto mensal
+// ---------------------------------------------------------------------------------------
+
+/** Consumo do mês corrente (zera na virada do mês). */
+export function consumoDoMes(brapi, hoje) {
+  const mes = hoje.slice(0, 7)
+  return brapi?.mes === mes ? { ...brapi } : { ...brapi, mes, requisicoes: 0 }
+}
+
+/** Dias corridos entre duas datas AAAA-MM-DD. */
+export function diasEntre(de, ate) {
+  if (!de || !ate) return Infinity
+  return Math.round((Date.parse(`${ate}T12:00:00Z`) - Date.parse(`${de}T12:00:00Z`)) / 86_400_000)
+}
+
+/** Atualiza nome da listagem e setor de todos os BDRs a partir da listagem da brapi. */
+export function aplicarListagem(cadastro, lista) {
+  const novo = { ...cadastro }
+  for (const item of lista) {
+    const ticker = String(item?.stock ?? '').toUpperCase()
+    if (!tipoPorCodigo(ticker)) continue
+    const nomeLista = String(item?.name ?? '').trim()
+    novo[ticker] = {
+      ...novo[ticker],
+      nomeLista: nomeLista && nomeLista.toUpperCase() !== ticker ? nomeLista : novo[ticker]?.nomeLista ?? null,
+      setorBrapi: item?.sector ?? novo[ticker]?.setorBrapi ?? null,
+    }
+  }
+  return novo
+}
+
+/**
+ * BDRs publicados que precisam de consulta individual (nome longo e proporção), em ordem de
+ * prioridade: salto de preço depois da última consulta, nunca consultados, consulta mais
+ * antiga que `diasValidade`. `suspeitos` = { ticker: data do salto mais recente }.
+ */
+export function filaDeConsultas(publicados, cadastro, suspeitos, hoje, diasValidade, maximo) {
+  const itens = publicados.map((ticker) => {
+    const quando = cadastro[ticker]?.proporcaoEm ?? null
+    const idade = diasEntre(quando, hoje)
+    const salto = suspeitos[ticker]
+    const prioridade = salto && (!quando || quando < salto) ? 0 : !quando ? 1 : idade >= diasValidade ? 2 : null
+    return { ticker, prioridade, idade }
+  })
+  return itens
+    .filter((x) => x.prioridade !== null)
+    .sort((a, b) => a.prioridade - b.prioridade || b.idade - a.idade || a.ticker.localeCompare(b.ticker))
+    .slice(0, Math.max(0, maximo))
+    .map((x) => x.ticker)
+}
+
+/** Grava o resultado da consulta individual. Devolve o cadastro novo e a mudança de proporção. */
+export function aplicarConsulta(cadastro, ticker, resultado, hoje) {
+  const anterior = cadastro[ticker] ?? {}
+  const nomeLongo = resultado?.longName ?? null
+  const acoesPorBdr = extrairProporcao(nomeLongo) ?? anterior.acoesPorBdr ?? null
+  const nome = nomeLongo ? extrairNome(nomeLongo, ticker) : anterior.nome ?? null
+  const mudou = anterior.acoesPorBdr != null && acoesPorBdr != null && anterior.acoesPorBdr !== acoesPorBdr ? { de: anterior.acoesPorBdr, para: acoesPorBdr } : null
+  return {
+    cadastro: { ...cadastro, [ticker]: { ...anterior, nome: nome && nome !== ticker ? nome : anterior.nome ?? null, acoesPorBdr, proporcaoEm: hoje } },
+    mudou,
+  }
+}
+
+// ---------------------------------------------------------------------------------------
+// Arquivo do histórico
+// ---------------------------------------------------------------------------------------
+
+/** Histórico em texto: um BDR por linha, para o arquivo ficar legível no GitHub. */
+export function formatarHistorico(historico) {
+  const bloco = (objeto) =>
+    Object.keys(objeto)
+      .sort()
+      .map((t) => `    ${JSON.stringify(t)}: ${JSON.stringify(objeto[t])}`)
+      .join(',\n')
+  return [
+    '{',
+    '  "_leia": "Histórico próprio dos BDRs (decisão D24), gerado por scripts/atualizar-bdrs.mjs a partir do Boletim de Preços da B3. Séries alinhadas pela DIREITA: o último valor de cada série é o último pregão de \\"pregoes\\"; o que falta no começo é sem dado. Cada valor: [fechamento, mínima, máxima, volume em reais] ou null (não negociou). Série longa (até 260 pregões) só dos \\"acompanhados\\"; os demais guardam 21. Preços brutos, sem ajuste de desdobramento (os ajustes ficam em config/bdrs.json). \\"cadastro\\": nome, setor e proporção vindos da brapi; \\"brapi\\": consumo do mês. Não editar à mão.",',
+    `  "pregoes": ${JSON.stringify(historico.pregoes)},`,
+    `  "acompanhados": ${JSON.stringify(historico.acompanhados)},`,
+    `  "brapi": ${JSON.stringify(historico.brapi)},`,
+    `  "cadastro": {\n${bloco(historico.cadastro)}\n  },`,
+    `  "ultimoNegocio": {\n${bloco(historico.ultimoNegocio)}\n  },`,
+    `  "ativos": {\n${bloco(historico.ativos)}\n  }`,
+    '}',
+    '',
+  ].join('\n')
 }
 
 // ---------------------------------------------------------------------------------------
@@ -257,104 +512,244 @@ class ErroBrapi extends Error {
   }
 }
 
-const esperar = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
-
-async function chamarBrapi(url, token) {
-  const resposta = await fetch(url, { headers: { Authorization: `Bearer ${token}` } })
-  if (!resposta.ok) throw new ErroBrapi(`brapi respondeu ${resposta.status} (${url.split('?')[0]}).`, resposta.status)
+async function chamarBrapiReal(url, token) {
+  const resposta = await fetch(url, { headers: { Authorization: `Bearer ${token}` }, signal: AbortSignal.timeout(30_000) })
+  if (!resposta.ok) throw new ErroBrapi(`brapi respondeu ${resposta.status}`, resposta.status)
   return resposta.json()
 }
 
-function lerPublicacaoAnterior() {
+function lerJson(arquivo, padrao) {
   try {
-    const anterior = JSON.parse(fs.readFileSync(ARQUIVO_SAIDA, 'utf8'))
-    return [...(anterior.acoes ?? []), ...(anterior.etfs ?? [])].map((i) => i.ticker)
+    return JSON.parse(fs.readFileSync(arquivo, 'utf8'))
   } catch {
-    return []
+    return padrao
   }
 }
 
-async function main() {
-  const config = JSON.parse(fs.readFileSync(ARQUIVO_CONFIG, 'utf8'))
+function argumentoCarga(argv) {
+  const achado = argv.find((a) => a.startsWith('--carga-inicial'))
+  if (!achado) return 0
+  const n = Number(achado.split('=')[1] ?? MAXIMO_PREGOES_GUARDADOS)
+  return Number.isInteger(n) && n > 0 ? Math.min(n, MAXIMO_PREGOES_GUARDADOS) : MAXIMO_PREGOES_GUARDADOS
+}
+
+/**
+ * Fase da brapi: nunca derruba o job. Atualiza o cadastro (listagem semanal e consultas dos
+ * publicados) dentro do teto mensal e devolve o histórico com o cadastro e o consumo novos.
+ */
+async function atualizarCadastro(historico, publicados, suspeitos, { token, hoje, config, carga, chamar, esperar, log }) {
+  const regras = config.brapi ?? {}
+  const teto = regras.tetoMensal ?? 80
+  let consumo = consumoDoMes(historico.brapi, hoje)
+  let cadastro = historico.cadastro
+  const resumo = () => ({ ...historico, cadastro, brapi: consumo })
+  if (!token) {
+    log.warn('[aviso] BRAPI_TOKEN não definido: nomes, setores e proporções seguem os guardados no histórico.')
+    return resumo()
+  }
+  const podeGastar = () => consumo.requisicoes < teto
+  const tratarErro = (erro, onde) => {
+    if (erro instanceof ErroBrapi && (erro.status === 401 || erro.status === 403)) {
+      log.warn(`[aviso] brapi respondeu ${erro.status} (${onde}): chave inválida ou plano sem acesso. Nomes e setores seguem os guardados.`)
+      return 'parar'
+    }
+    if (erro instanceof ErroBrapi && erro.status === 429) {
+      log.warn(`[aviso] brapi respondeu 429 (${onde}): limite atingido. O resto fica para a próxima execução.`)
+      return 'parar'
+    }
+    log.warn(`[aviso] brapi indisponível (${onde}): ${erro.message}.`)
+    return 'seguir'
+  }
+
+  const listagemVencida = diasEntre(consumo.ultimaListagem, hoje) >= (regras.diasEntreListagens ?? 7) || Object.keys(cadastro).length === 0
+  if (listagemVencida) {
+    if (!podeGastar()) {
+      log.warn(`[aviso] Teto mensal da brapi para BDRs atingido (${consumo.requisicoes}/${teto}): listagem adiada.`)
+      return resumo()
+    }
+    try {
+      consumo.requisicoes++
+      const corpo = await chamar(URL_LISTA, token)
+      const lista = (corpo?.stocks ?? []).filter((s) => s?.type === 'bdr')
+      if (lista.length >= (regras.minimoNaListagem ?? 300)) {
+        cadastro = aplicarListagem(cadastro, lista)
+        consumo.ultimaListagem = hoje
+        log.info(`[info] Listagem da brapi: ${lista.length} BDRs (nome e setor atualizados).`)
+      } else {
+        log.warn(`[aviso] Listagem da brapi com só ${lista.length} BDRs: cadastro mantido.`)
+      }
+    } catch (erro) {
+      if (tratarErro(erro, 'listagem') === 'parar') return resumo()
+    }
+  }
+
+  const maximo = Math.min(carga > 0 ? regras.maxConsultasCargaInicial ?? 45 : regras.maxConsultasPorExecucao ?? 6, teto - consumo.requisicoes)
+  const fila = filaDeConsultas(publicados, cadastro, suspeitos, hoje, regras.diasValidadeProporcao ?? 60, maximo)
+  let feitas = 0
+  for (const ticker of fila) {
+    if (!podeGastar()) break
+    try {
+      consumo.requisicoes++
+      const resultado = (await chamar(URL_COTACAO(ticker), token))?.results?.[0]
+      const aplicado = aplicarConsulta(cadastro, ticker, resultado, hoje)
+      cadastro = aplicado.cadastro
+      feitas++
+      if (aplicado.mudou) {
+        log.info(`[proporcao] ${ticker}: a brapi passou de ${aplicado.mudou.de} para ${aplicado.mudou.para} ação por BDR. Se houve desdobramento ou grupamento, confira a linha [desdobramento] e confirme em "desdobramentos" (config/bdrs.json).`)
+      }
+    } catch (erro) {
+      if (tratarErro(erro, ticker) === 'parar') break
+    }
+    await esperar(regras.pausaEntreRequisicoesMs ?? 300)
+  }
+  const pendentes = filaDeConsultas(publicados, cadastro, {}, hoje, regras.diasValidadeProporcao ?? 60, Infinity).length
+  log.info(`[info] brapi: ${consumo.requisicoes} de ${teto} requisições no mês (${feitas} consultas nesta execução${pendentes ? `, ${pendentes} BDRs da lista ainda sem proporção atualizada` : ''}).`)
+  return resumo()
+}
+
+/**
+ * Execução completa. As dependências de rede entram por parâmetro para o teste de ponta a
+ * ponta (atualizar-bdrs.test.mjs) rodar sem internet.
+ */
+export async function executar({
+  raiz = RAIZ_PADRAO,
+  agora = new Date(),
+  argv = process.argv,
+  token = process.env.BRAPI_TOKEN,
+  baixar = baixarBoletim,
+  ler = lerBoletim,
+  chamar = chamarBrapiReal,
+  esperar = (ms) => new Promise((r) => setTimeout(r, ms)),
+  log = { info: console.log, warn: console.warn },
+} = {}) {
+  const arquivoConfig = path.join(raiz, 'config', 'bdrs.json')
+  const arquivoHistorico = path.join(raiz, 'historico', 'bdrs.json')
+  const arquivoSaida = path.join(raiz, 'webapp-src', 'src', 'data', 'bdrs.json')
+  const gravarHistorico = (h) => {
+    fs.mkdirSync(path.dirname(arquivoHistorico), { recursive: true })
+    fs.writeFileSync(arquivoHistorico, formatarHistorico(h))
+  }
+
+  const config = JSON.parse(fs.readFileSync(arquivoConfig, 'utf8'))
   if (config.conferidoPeloResponsavel !== true) {
     throw new Error('config/bdrs.json ainda não foi conferido. Revise as listas de exclusão e marque "conferidoPeloResponsavel": true.')
   }
-  const token = process.env.BRAPI_TOKEN
-  if (!token) throw new Error('Variável BRAPI_TOKEN não definida (GitHub: Settings > Secrets and variables > Actions).')
-  const agora = new Date()
+  const carga = argumentoCarga(argv)
+  const hoje = dataEmBrasilia(agora)
+  let historico = normalizarHistorico(lerJson(arquivoHistorico, null))
 
-  // 1. Listagem (1 requisição)
-  const listagem = await chamarBrapi(URL_LISTA, token)
-  const lista = (listagem?.stocks ?? []).filter((s) => s?.type === 'bdr')
-  if (lista.length < config.minimoBdrsNaLista) {
-    throw new Error(`A listagem da brapi trouxe só ${lista.length} BDRs (mínimo ${config.minimoBdrsNaLista}). Arquivo NÃO atualizado.`)
-  }
-
-  const controle = config.controle?.tickers ?? []
-  const obrigatorios = [...new Set([...controle, ...lerPublicacaoAnterior()])]
-  const candidatos = escolherCandidatos(lista, config, obrigatorios)
-  for (const ticker of candidatos.revisar) {
-    console.log(`[revisar] ${ticker}: código de BDR patrocinado (31 a 33). Se for empresa de origem ou operação brasileira, inclua em "excluir"; se não, em "revisados" (config/bdrs.json).`)
-  }
-  console.log(`[info] Listagem: ${lista.length} BDRs, ${candidatos.acoes.length} candidatos de ações e ${candidatos.etfs.length} de ETF (${candidatos.ignorados} códigos fora de 31-35 e 39 ignorados).`)
-
-  // 2. Consulta individual dos candidatos (1 requisição cada)
-  const fila = [...candidatos.acoes.map((t) => [t, 'acao']), ...candidatos.etfs.map((t) => [t, 'etf'])]
-  const itens = { acao: [], etf: [] }
-  const semMapa = { acao: new Set(), etf: new Set() }
-  const indisponiveis = []
-  let requisicoes = 1
-  let limiteAtingido = false
-  for (const [ticker, tipo] of fila) {
-    if (requisicoes >= config.maxRequisicoesBrapi) {
-      limiteAtingido = true
-      break
+  // 1. Boletins da B3 que faltam no histórico
+  const quantidade = carga > 0 ? Math.ceil(carga * 1.1) + 10 : config.diasProcuraBoletim ?? 5
+  const candidatas = datasCandidatas(agora, quantidade, config.horarioCorteBoletim)
+  const faltam = datasAProcessar(candidatas, historico.pregoes, carga > 0)
+  const pastaTemp = fs.mkdtempSync(path.join(os.tmpdir(), 'bdrs-b3-'))
+  let novos = 0
+  let semPregao = 0
+  const falhar = (mensagem) => {
+    if (carga > 0) {
+      log.warn(`[aviso] ${mensagem} Ignorado (carga inicial segue).`)
+      return false
     }
-    let resultado
-    try {
-      requisicoes++
-      resultado = (await chamarBrapi(URL_COTACAO(ticker), token))?.results?.[0]
-    } catch (erro) {
-      if (erro instanceof ErroBrapi && erro.status === 429) {
-        console.warn(`[aviso] brapi pediu para desacelerar (429) em ${ticker}; nova tentativa em ${Math.round(config.pausaAposLimiteMs / 1000)} s.`)
-        await esperar(config.pausaAposLimiteMs)
-        try {
-          requisicoes++
-          resultado = (await chamarBrapi(URL_COTACAO(ticker), token))?.results?.[0]
-        } catch (segundo) {
-          indisponiveis.push(`${ticker}: ${segundo.message}`)
-          continue
-        }
-      } else if (erro instanceof ErroBrapi && (erro.status === 401 || erro.status === 403)) {
-        throw new Error(`brapi respondeu ${erro.status}: chave inválida ou plano sem acesso. Arquivo NÃO atualizado.`)
-      } else {
-        indisponiveis.push(`${ticker}: ${erro.message}`)
+    throw new Error(`${mensagem} Arquivo NÃO atualizado.`)
+  }
+  try {
+    for (const data of faltam) {
+      if (carga > 0 && historico.pregoes.length >= carga) break
+      const inicio = Date.now()
+      let xml
+      try {
+        xml = await baixar(data, pastaTemp)
+      } catch (erro) {
+        falhar(`${data}: ${erro.message}`)
         continue
       }
-    } finally {
-      await esperar(config.pausaEntreRequisicoesMs)
+      if (!xml) {
+        semPregao++
+        log.info(`[info] ${data}: sem pregão na B3 (zip vazio).`)
+        continue
+      }
+      const lido = await ler(xml, (t) => tipoPorCodigo(t) !== null)
+      fs.rmSync(path.dirname(xml), { recursive: true, force: true })
+      if (lido.datas.length !== 1 || lido.datas[0] !== data) {
+        falhar(`${data}: o boletim trouxe a(s) data(s) ${lido.datas.join(', ') || 'nenhuma'}.`)
+        continue
+      }
+      const negociados = [...lido.instrumentos.values()].filter((i) => i.fechamento > 0).length
+      if (negociados < config.minimoBdrsNegociadosNoBoletim) {
+        falhar(`${data}: só ${negociados} BDRs negociados no boletim (mínimo ${config.minimoBdrsNegociadosNoBoletim}).`)
+        continue
+      }
+      historico = incorporarPregao(historico, data, lido.instrumentos)
+      novos++
+      log.info(`[info] ${data}: ${negociados} BDRs negociados de ${lido.instrumentos.size} no boletim (${((Date.now() - inicio) / 1000).toFixed(1)} s).`)
+      if (carga > 0) {
+        // Grava a cada 20 pregões: se a execução for interrompida, o workflow publica o que já veio.
+        if (novos % 20 === 0) {
+          gravarHistorico(historico)
+          log.info(`[info] Histórico parcial gravado: ${historico.pregoes.length} pregões.`)
+        }
+        await esperar(config.pausaEntreDownloadsMs ?? 1000)
+      }
     }
-    const { item, semMapa: faltouSetor } = montarItem(ticker, tipo, resultado, candidatos.itemPorTicker.get(ticker), config, agora)
-    const motivo = motivoInvalido(item)
+  } finally {
+    fs.rmSync(pastaTemp, { recursive: true, force: true })
+  }
+
+  if (carga > 0 && novos > 0) {
+    gravarHistorico(historico)
+    log.info(`[info] Histórico gravado: ${historico.pregoes.length} pregões (${novos} novos nesta carga).`)
+    if (historico.pregoes.length < config.minimoPregoesHistorico) {
+      log.warn(`[aviso] Ainda são só ${historico.pregoes.length} pregões (mínimo ${config.minimoPregoesHistorico} para publicar). Rode a carga inicial de novo: ela continua de onde parou. bdrs.json NÃO atualizado.`)
+      return { publicado: false, motivo: 'carga incompleta' }
+    }
+  }
+
+  // O arquivo antigo, da brapi, não tem "fonte": é trocado já na primeira execução possível.
+  const saidaAtual = lerJson(arquivoSaida, null)
+  if (novos === 0 && saidaAtual?.dataPregao && saidaAtual?.fonte === FONTE) {
+    log.info(`Sem pregão novo desde ${historico.pregoes[historico.pregoes.length - 1] ?? 'nenhum'}${semPregao ? ' (feriado ou fim de semana)' : ''}: arquivos mantidos.`)
+    return { publicado: false, motivo: 'sem pregão novo' }
+  }
+
+  // 2. Travas sobre o histórico
+  if (historico.pregoes.length < config.minimoPregoesHistorico) {
+    throw new Error(`O histórico tem só ${historico.pregoes.length} pregões (mínimo ${config.minimoPregoesHistorico}). Rode a carga inicial (workflow "Carga inicial de BDRs"). Arquivo NÃO atualizado.`)
+  }
+  const dataPregao = historico.pregoes[historico.pregoes.length - 1]
+  const diasDesdePregao = (agora.getTime() - Date.parse(`${dataPregao}T21:00:00Z`)) / 86_400_000
+  if (diasDesdePregao > 7) {
+    throw new Error(`O pregão mais recente do histórico é de ${dataPregao}, mais de 7 dias atrás. Arquivo NÃO atualizado.`)
+  }
+
+  // 3. Números de todos os BDRs, validação e seleção (só volume: não depende da brapi)
+  const excluir = new Set(config.excluir?.tickers ?? [])
+  const itens = { acao: [], etf: [] }
+  const saltosPorTicker = new Map()
+  const invalidos = []
+  for (const ticker of Object.keys(historico.ativos)) {
+    const tipo = tipoPorCodigo(ticker)
+    if (!tipo || excluir.has(ticker)) continue
+    const montado = montarItem(ticker, tipo, historico, config)
+    if (!montado) continue
+    const motivo = motivoInvalido(montado.item)
     if (motivo) {
-      indisponiveis.push(`${ticker}: ${motivo}`)
+      if (montado.item.volumeMedio >= Math.min(config.pisoVolumeAcoes, config.pisoVolumeEtfs)) invalidos.push(`${ticker}: ${motivo}`)
       continue
     }
-    if (faltouSetor) semMapa[tipo].add(`${ticker} (${candidatos.itemPorTicker.get(ticker)?.sector ?? 'sem setor'})`)
-    itens[tipo].push(item)
+    if (montado.saltos.length) saltosPorTicker.set(ticker, montado.saltos)
+    itens[tipo].push(montado.item)
   }
-  console.log(`[info] brapi: ${requisicoes} requisições${limiteAtingido ? ' (limite maxRequisicoesBrapi atingido)' : ''}, ${indisponiveis.length} BDRs sem dado válido.`)
-  for (const linha of indisponiveis) console.log(`[info] ${linha}`)
+  for (const linha of invalidos) log.info(`[info] ${linha}`)
 
-  // 3. Travas
-  const validos = new Set([...itens.acao, ...itens.etf].map((i) => i.ticker))
-  const controleOk = controle.filter((t) => validos.has(t))
+  const controle = config.controle?.tickers ?? []
+  const todos = [...itens.acao, ...itens.etf]
+  const controleOk = controle.filter((t) => todos.some((i) => i.ticker === t && i.dataCotacao === dataPregao))
   const minimoControle = config.controle?.minimo ?? controle.length
   if (controleOk.length < minimoControle) {
-    throw new Error(`Só ${controleOk.length} de ${controle.length} BDRs de controle ficaram válidos (mínimo ${minimoControle}). Arquivo NÃO atualizado.`)
+    throw new Error(`Só ${controleOk.length} de ${controle.length} BDRs de controle negociaram em ${dataPregao} com dado válido (mínimo ${minimoControle}). Arquivo NÃO atualizado.`)
   }
-  const acoes = selecionar(itens.acao, config.maxAcoes, config.pisoVolumeAcoes)
-  const etfs = selecionar(itens.etf, config.maxEtfs, config.pisoVolumeEtfs)
+  let acoes = selecionar(itens.acao, config.maxAcoes, config.pisoVolumeAcoes)
+  let etfs = selecionar(itens.etf, config.maxEtfs, config.pisoVolumeEtfs)
   if (acoes.length < config.minimoAcoesParaPublicar) {
     throw new Error(`Só ${acoes.length} BDRs de ações passaram no piso de liquidez (mínimo ${config.minimoAcoesParaPublicar}). Arquivo NÃO atualizado.`)
   }
@@ -362,50 +757,60 @@ async function main() {
     throw new Error(`Só ${etfs.length} BDRs de ETF passaram no piso de liquidez (mínimo ${config.minimoEtfsParaPublicar}). Arquivo NÃO atualizado.`)
   }
 
-  // 4. Logs de conferência
-  const publicados = new Set([...acoes, ...etfs].map((i) => i.ticker))
-  for (const t of semMapa.acao) if (publicados.has(t.split(' ')[0])) console.log(`[setor] ${t}: setor sem tradução em "setores" (config/bdrs.json).`)
-  for (const t of semMapa.etf) if (publicados.has(t.split(' ')[0])) console.log(`[categoria] ${t.split(' ')[0]}: BDR de ETF sem grupo em "gruposEtf" (config/bdrs.json); aparece em "Outros".`)
+  // 4. Cadastro pela brapi (nunca derruba o job) e itens completados com ele
+  const publicados = [...acoes, ...etfs].map((i) => i.ticker)
+  const suspeitos = Object.fromEntries(publicados.filter((t) => saltosPorTicker.has(t)).map((t) => [t, saltosPorTicker.get(t).at(-1).data]))
+  historico = await atualizarCadastro(historico, publicados, suspeitos, { token, hoje, config, carga, chamar, esperar, log })
+  const completar = (lista, tipo) => lista.map((i) => montarItem(i.ticker, tipo, historico, config))
+  const acoesMontadas = completar(acoes, 'acao')
+  const etfsMontados = completar(etfs, 'etf')
+  acoes = acoesMontadas.map((m) => m.item)
+  etfs = etfsMontados.map((m) => m.item)
+
+  // 5. Logs de conferência (só dos publicados)
+  const revisados = config.revisados?.tickers ?? []
+  for (const t of historico.acompanhados.length ? historico.acompanhados : publicados) {
+    if (tipoPorCodigo(t) === 'acao' && precisaRevisar(t, [...excluir], revisados)) {
+      log.info(`[revisar] ${t}: código de BDR patrocinado (31 a 33). Se for empresa de origem ou operação brasileira, inclua em "excluir"; se não, em "revisados" (config/bdrs.json).`)
+    }
+  }
+  for (const m of acoesMontadas) if (m.semMapa) log.info(`[setor] ${m.item.ticker} (${historico.cadastro[m.item.ticker]?.setorBrapi ?? 'sem setor'}): setor sem tradução em "setores" (config/bdrs.json).`)
+  for (const m of etfsMontados) if (m.semMapa) log.info(`[categoria] ${m.item.ticker}: BDR de ETF sem grupo em "gruposEtf" (config/bdrs.json); aparece em "Outros".`)
+  for (const m of [...acoesMontadas, ...etfsMontados]) if (m.semNome) log.info(`[nome] ${m.item.ticker}: ainda sem nome da brapi; a tela mostra só o código.`)
+  for (const t of publicados) {
+    for (const s of saltosPorTicker.get(t) ?? []) {
+      log.info(`[desdobramento] ${t}: fechamento foi de R$ ${s.de} para R$ ${s.para} em ${s.data} (fator ≈ ${s.fator}). Se foi desdobramento ou grupamento, inclua em "desdobramentos" (config/bdrs.json): "${t}": [{ "data": "${s.data}", "fator": ${s.fator} }]. Até lá, o BDR sai sem variação de 3 meses e/ou faixa de 52 semanas.`)
+    }
+  }
   const porSetor = {}
   for (const i of acoes) porSetor[i.setor] = (porSetor[i.setor] ?? 0) + 1
-  console.log(`[info] Setores: ${Object.entries(porSetor).sort((a, b) => b[1] - a[1]).map(([s, n]) => `${s} ${n}`).join(', ')}.`)
+  log.info(`[info] Setores: ${Object.entries(porSetor).sort((a, b) => b[1] - a[1]).map(([s, n]) => `${s} ${n}`).join(', ')}.`)
   const reais = (v) => `R$ ${(v / 1e6).toFixed(1)} mi/dia`
-  console.log(`[info] Mais negociados: ${acoes.slice(0, 3).map((i) => `${i.ticker} ${reais(i.volumeMedio)}`).join(', ')}. Menos negociados da lista: ${acoes.slice(-2).map((i) => `${i.ticker} ${reais(i.volumeMedio)}`).join(', ')}.`)
-  console.log(`[info] ETFs: ${etfs.map((i) => `${i.ticker} ${reais(i.volumeMedio)}`).join(', ')}.`)
+  log.info(`[info] Mais negociados: ${acoes.slice(0, 3).map((i) => `${i.ticker} ${reais(i.volumeMedio)}`).join(', ')}. Menos negociados da lista: ${acoes.slice(-2).map((i) => `${i.ticker} ${reais(i.volumeMedio)}`).join(', ')}.`)
+  log.info(`[info] ETFs: ${etfs.map((i) => `${i.ticker} ${reais(i.volumeMedio)}`).join(', ')}.`)
 
-  const datas = [...acoes, ...etfs].map((i) => i.dataCotacao).filter(Boolean).sort()
-  // Trava de dado velho: feriados emendados cabem em 7 dias; mais que isso é histórico parado.
-  const diasDesdePregao = datas.length ? (agora.getTime() - Date.parse(`${datas[datas.length - 1]}T21:00:00Z`)) / 86_400_000 : Infinity
-  if (diasDesdePregao > 7) {
-    throw new Error(`O pregão mais recente no histórico é de ${datas[datas.length - 1] ?? 'data nenhuma'}, mais de 7 dias atrás. Arquivo NÃO atualizado.`)
-  }
+  // 6. Séries longas só dos acompanhados, e gravação (histórico e arquivo do app juntos)
+  const acompanhados = atualizarAcompanhados(historico, config, [...controle, ...publicados])
+  historico = compactar(historico, acompanhados)
   const snapshot = {
     geradoEm: agora.toISOString(),
-    dataPregao: datas[datas.length - 1] ?? null,
+    dataPregao,
+    fonte: FONTE,
+    pregoesNoHistorico: historico.pregoes.length,
     sessoesLiquidez: SESSOES_LIQUIDEZ,
     criterio: { maxAcoes: config.maxAcoes, maxEtfs: config.maxEtfs, pisoVolumeAcoes: config.pisoVolumeAcoes, pisoVolumeEtfs: config.pisoVolumeEtfs },
     acoes,
     etfs,
-    busca: montarBusca(lista, config, [...acoes, ...etfs]),
+    busca: montarBusca(historico, config),
   }
-  // Feriado da B3 ou execução repetida no mesmo dia: dados iguais, só o horário mudaria.
-  // Não regrava, para não gerar commit e deploy sem novidade.
-  try {
-    const anterior = JSON.parse(fs.readFileSync(ARQUIVO_SAIDA, 'utf8'))
-    const semHorario = (s) => JSON.stringify({ ...s, geradoEm: null })
-    if (semHorario(anterior) === semHorario(snapshot)) {
-      console.log(`Sem pregão novo desde ${snapshot.dataPregao}: arquivo mantido.`)
-      return
-    }
-  } catch {
-    // arquivo ausente ou ilegível: grava normalmente
-  }
-  fs.writeFileSync(ARQUIVO_SAIDA, formatarSnapshot(snapshot))
-  console.log(`bdrs.json atualizado: ${acoes.length} BDRs de ações e ${etfs.length} de ETF na lista, ${snapshot.busca.length} na busca, pregão de ${snapshot.dataPregao}.`)
+  gravarHistorico(historico)
+  fs.writeFileSync(arquivoSaida, formatarSnapshot(snapshot))
+  log.info(`bdrs.json atualizado: ${acoes.length} BDRs de ações e ${etfs.length} de ETF na lista, ${snapshot.busca.length} na busca, pregão de ${dataPregao}, ${historico.pregoes.length} pregões no histórico (${novos} novos, ${historico.acompanhados.length} com série longa).`)
+  return { publicado: true, snapshot, historico }
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  main().catch((erro) => {
+  executar().catch((erro) => {
     console.error(`[erro] ${erro.message}`)
     process.exit(1)
   })

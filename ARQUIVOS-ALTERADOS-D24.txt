@@ -1,0 +1,30 @@
+ARQUIVOS DA D24 (27/09/2026) - caminhos a partir de 1-projeto-para-o-github/
+Novos (N) e alterados (A). BDRs migrados da brapi para o Boletim de Preços da B3.
+
+A  scripts/atualizar-bdrs.mjs                  job reescrito (boletim da B3, histórico próprio, brapi com teto)
+A  scripts/atualizar-bdrs.test.mjs             27 testes, inclusive ponta a ponta com boletins sintéticos
+A  scripts/b3-boletim.mjs                      só o comentário do cabeçalho
+A  config/bdrs.json                            parâmetros novos, blocos "brapi" e "desdobramentos"
+A  .github/workflows/atualizar-bdrs.yml        22h30 de Brasília, publica também historico/bdrs.json
+N  .github/workflows/carga-inicial-bdrs.yml    manual, uma vez; publica o histórico mesmo com falha
+A  .github/workflows/atualizar-etfs.yml        só o comentário do horário dos BDRs
+A  webapp-src/src/domain/bdrs.ts               campos opcionais fonte, pregoesNoHistorico e dataCotacao (busca)
+A  webapp-src/src/screens/SimuleBdr.tsx        rodapé com a fonte B3; data do último negócio na busca
+A  webapp-src/src/screens/SimuleBdr.test.tsx   +1 teste
+A  docs/05-publicacao-e-operacao.md            seção 5.8 reescrita
+A  docs/06-proximos-passos.md                  seção 9
+A  docs/07-registro-de-decisoes.md             D24
+
+NÃO subir: webapp-src/src/data/bdrs.json (o do pacote está vazio; o do GitHub tem os dados do último dia).
+Não existe no pacote (gerado pela carga no GitHub): historico/bdrs.json.
+
+ORDEM PARA LIGAR
+1. Subir os arquivos acima (a pasta .github: criar/editar os .yml à mão no GitHub).
+   Conferir que o arquivo antigo do workflow foi SUBSTITUÍDO (mesmo nome, atualizar-bdrs.yml).
+2. Actions > "Carga inicial de BDRs" > Run workflow (260). Cerca de 30 minutos.
+   Até ela rodar, o job diário falha com "Rode a carga inicial" e a aba mostra o último arquivo da brapi.
+3. No log da carga: anotar o "N BDRs negociados de M no boletim" típico e ajustar
+   minimoBdrsNegociadosNoBoletim (config/bdrs.json) para cerca de metade; conferir as linhas
+   [desdobramento] e confirmar em "desdobramentos" os que forem eventos corporativos de fato.
+4. Conferir a aba no ar e comparar o volume médio de 2 ou 3 BDRs com um site de cotações.
+5. A partir daí, "Atualizar BDRs" roda sozinho de segunda a sexta, 22h30.

@@ -1,6 +1,6 @@
 // Leitura do Boletim de Preços da B3 (BVBG.086.01, decisão D23).
 //
-// Fonte oficial e gratuita, sem cota, usada pelo job de ETFs e, depois, pelo de BDRs.
+// Fonte oficial e gratuita, sem cota, usada pelos jobs de ETFs (D23) e de BDRs (D24).
 // Um arquivo por pregão, com TODOS os instrumentos da B3, inclusive os ETFs de renda fixa
 // (que não estão no COTAHIST). Conferido em 27/09/2026 com o pregão de 25/09:
 //   - download: https://www.b3.com.br/pesquisapregao/download?filelist=PRAAMMDD.zip,

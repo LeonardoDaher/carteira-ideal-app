@@ -1,6 +1,6 @@
 import { normalizarBusca } from './rendaFii'
 
-/** BDR da lista (os 35 de ações e os 5 de ETF), gerado por scripts/atualizar-bdrs.mjs (D19). */
+/** BDR da lista (os 35 de ações e os 5 de ETF), gerado por scripts/atualizar-bdrs.mjs (D19, fonte B3 desde a D24). */
 export interface BdrLista {
   ticker: string
   nome: string
@@ -17,13 +17,16 @@ export interface BdrLista {
   acoesPorBdr: number | null
 }
 
-/** BDR da busca: dado resumido da listagem da brapi, sem requisição extra. */
+/** BDR da busca: dado resumido do histórico próprio (D24), sem média nem variação. */
 export interface BdrBusca {
   ticker: string
   tipo: 'acao' | 'etf'
   nome: string | null
   setor: string
+  /** Fechamento do último negócio. */
   cotacao: number
+  /** Data do último negócio (D24). Ausente nos arquivos gerados pela brapi. */
+  dataCotacao?: string
   /** Volume financeiro (R$) só do último pregão. */
   volumeDia: number
 }
@@ -31,6 +34,9 @@ export interface BdrBusca {
 export interface SnapshotBdrs {
   geradoEm: string | null
   dataPregao: string | null
+  /** Fonte do preço e do volume (D24): "B3 - Boletim de Preços (BVBG.086)". Ausente na versão da brapi. */
+  fonte?: string
+  pregoesNoHistorico?: number
   sessoesLiquidez?: number
   criterio?: { maxAcoes: number; maxEtfs: number; pisoVolumeAcoes: number; pisoVolumeEtfs: number }
   acoes: BdrLista[]
