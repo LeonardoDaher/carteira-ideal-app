@@ -1,4 +1,12 @@
 {
   "buildCommand": "npm run build",
-  "outputDirectory": "dist-site"
+  "outputDirectory": "dist-site",
+  "redirects": [
+    {
+      "source": "/:caminho*",
+      "has": [{ "type": "host", "value": "carteira-ideal-app.vercel.app" }],
+      "destination": "https://carteiraideal.app.br/:caminho*",
+      "permanent": true
+    }
+  ]
 }

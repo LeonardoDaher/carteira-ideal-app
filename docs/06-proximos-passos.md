@@ -11,7 +11,16 @@ Organizados por prioridade. Os itens do bloco 1 são necessários para lançar; 
 - [x] Atualizar `og:image` e `og:url` no `index.html` para o endereço definitivo (`https://carteiraideal.app.br/`).
 - [x] Testar a prévia do link colando o endereço numa conversa do WhatsApp.
 - [x] Colocar o link na bio do Instagram — testado tocando dentro do próprio app do Instagram.
-- [ ] Decidir o destino do repositório antigo `Carteira-Ideal` (já privado): manter como arquivo histórico ou apagar.
+- [x] Repositório antigo `Carteira-Ideal`: tornado privado e GitHub Pages desligado em 28/09/2026 (D24). Apagar depois é opcional.
+
+## 1B. SEO (D24)
+
+- [x] **Etapa 0:** repositório antigo privado, Pages desligado.
+- [ ] **Etapa 0:** verificar o domínio no Google Search Console e enviar o sitemap (docs/05, seção 5.10).
+- [x] **Etapas 1 e 2:** robots.txt, sitemap.xml, canonical, metadados do app, fontes locais, redirecionamento do `.vercel.app`, página inicial com h1, conteúdo e dados estruturados.
+- [ ] **Etapa 3:** páginas estáticas por ferramenta e por aula, geradas no build, e "Taxas do Tesouro Direto hoje".
+- [ ] **Etapa 4:** páginas Sobre, Metodologia e Autor.
+- [ ] **Etapa 5:** páginas por código de negociação (depois dos termos de uso da B3).
 
 ## 1A. Meu Mês (D21), uma etapa por conversa
 
@@ -96,10 +105,7 @@ A mudança para a API tirou a metodologia do código visível. Ainda assim, vale
 
 ## 9. Aba "Simule BDR" (decisão D19)
 
-- [x] **Job diário** (dias úteis, 22h30 de Brasília desde a D24), 35 BDRs de ações e 5 de ETF por volume médio de 21 pregões, busca com todos os demais.
-- [x] **Migração para o Boletim de Preços da B3 (D24)**, com a brapi só para nome, setor e proporção, teto de 80 requisições por mês.
-- [ ] **Carga inicial de BDRs** (Actions > "Carga inicial de BDRs", 260 pregões) logo depois de subir os arquivos da D24; ler as linhas `[desdobramento]` e ajustar `minimoBdrsNegociadosNoBoletim` pelo número típico do log.
-- [ ] **Próxima economia de cota:** migrar a cotação e o volume do job de FIIs para o boletim (o teto dele, 800, é o que mais pesa no plano de 1.000).
+- [x] **Job diário** (dias úteis, 19h de Brasília), 35 BDRs de ações e 5 de ETF por volume médio de 21 pregões, busca com todos os demais.
 - [x] **Tela** com lista por setor, busca, simulação de compra e avisos de IR e câmbio.
 - [ ] **Primeira execução:** ler no log as linhas `[revisar]`, `[setor]` e `[categoria]` e ajustar `config/bdrs.json`; conferir o volume médio de 2 ou 3 BDRs num site de cotações.
 - [ ] **Grupos dos BDRs de ETF:** completar `gruposEtf` conforme os ETFs que entrarem na lista.

@@ -3,11 +3,32 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+    <!-- D24: fontes servidas pelo próprio site (as mesmas da landing, em /assets/fonts), no lugar
+         do Google Fonts: uma conexão externa a menos no carregamento. No "npm run dev" (só o app,
+         sem a landing) elas não existem e o navegador usa as fontes do sistema, sem erro. -->
+    <link rel="preload" href="/assets/fonts/ibm-plex-sans-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/assets/fonts/sora-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <style>
+      @font-face { font-family: 'Sora'; font-weight: 600; font-style: normal; font-display: swap; src: url('/assets/fonts/sora-latin-600-normal.woff2') format('woff2'); }
+      @font-face { font-family: 'Sora'; font-weight: 700; font-style: normal; font-display: swap; src: url('/assets/fonts/sora-latin-700-normal.woff2') format('woff2'); }
+      @font-face { font-family: 'IBM Plex Sans'; font-weight: 400; font-style: normal; font-display: swap; src: url('/assets/fonts/ibm-plex-sans-latin-400-normal.woff2') format('woff2'); }
+      @font-face { font-family: 'IBM Plex Sans'; font-weight: 500; font-style: normal; font-display: swap; src: url('/assets/fonts/ibm-plex-sans-latin-500-normal.woff2') format('woff2'); }
+      @font-face { font-family: 'IBM Plex Sans'; font-weight: 600; font-style: normal; font-display: swap; src: url('/assets/fonts/ibm-plex-sans-latin-600-normal.woff2') format('woff2'); }
+    </style>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2096%2096%22%20width=%2296%22%20height=%2296%22%3E%0A%20%20%3Ccircle%20cx=%2248%22%20cy=%2248%22%20r=%2244.6%22%20fill=%22%230a0a0a%22%20stroke=%22%23efb70a%22%20stroke-width=%226.8%22/%3E%0A%20%20%3Cpath%20d=%22M17%2067%2036%2048%2048%2060%2075%2033%22%20fill=%22none%22%20stroke=%22%23efb70a%22%20stroke-width=%226.6%22%20stroke-linecap=%22butt%22%20stroke-linejoin=%22miter%22/%3E%0A%20%20%3Cpath%20d=%22M61%2027H80V46Z%22%20fill=%22%23efb70a%22/%3E%0A%3C/svg%3E%0A" />
-    <title>Carteira Ideal</title>
+    <!-- D24 (SEO): título, descrição, canonical e prévia de link. O canonical aponta para /app/
+         mesmo quando a pessoa abre ?tela=simuleFii etc.: para o Google é a mesma página. -->
+    <title>App Carteira Ideal | Perfil de investidor e simuladores grátis</title>
+    <meta name="description" content="Teste de perfil de investidor com carteira de referência, simuladores de Tesouro Direto, FII e BDR e controle do orçamento do mês. Grátis e sem cadastro." />
+    <link rel="canonical" href="https://carteiraideal.app.br/app/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Carteira Ideal" />
+    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:title" content="App Carteira Ideal: perfil de investidor e simuladores grátis" />
+    <meta property="og:description" content="Perfil de investidor, carteira de referência e simuladores de Tesouro Direto, FII e BDR. Conteúdo educacional." />
+    <meta property="og:image" content="https://carteiraideal.app.br/assets/og-image.png?v=2" />
+    <meta property="og:url" content="https://carteiraideal.app.br/app/" />
+    <meta name="twitter:card" content="summary_large_image" />
     <!-- D20: permite instalar o app no computador (Chrome/Edge: ícone "Instalar" na barra de
          endereço) e no celular (Adicionar à tela inicial). Caminhos relativos a /app/. -->
     <link rel="manifest" href="./manifest.webmanifest" />

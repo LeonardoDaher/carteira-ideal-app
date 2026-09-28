@@ -106,6 +106,16 @@ button:focus-visible,
   box-shadow: var(--shadow);
 }
 
+/* D24: h1 da página (SEO), discreto, entre a logo e o @ do perfil */
+#profile h1 {
+  font-family: "Sora", "IBM Plex Sans", system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 1.3;
+  margin-top: 16px;
+  text-wrap: balance;
+}
+
 #profile p {
   font-weight: 500;
   line-height: 24px;
@@ -302,6 +312,111 @@ footer .disclaimer {
   margin-top: 12px;
   font-size: 12px;
   opacity: 0.8;
+}
+
+/* ===== D24: seção "Como funciona / Ferramentas / Perguntas frequentes" (SEO) ===== */
+.sobre {
+  padding: 8px 0 24px;
+}
+
+.sobre h2 {
+  font-family: "Sora", "IBM Plex Sans", system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 19px;
+  line-height: 1.3;
+  margin: 32px 0 14px;
+  text-align: center;
+}
+
+.sobre p,
+.sobre li {
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.sobre strong {
+  font-weight: 600;
+}
+
+.passos {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-left: 22px;
+}
+
+.passos li::marker {
+  font-weight: 600;
+}
+
+.ferramentas {
+  display: grid;
+  gap: 12px;
+}
+
+.ferramenta,
+.faq details {
+  display: block;
+  padding: 16px 18px;
+  background: var(--surface-color);
+  border: 1px solid var(--stroke-color);
+  border-radius: 8px;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.ferramenta {
+  text-decoration: none;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.ferramenta:hover {
+  background: var(--highlight-color);
+  border-color: var(--text-color);
+}
+
+.ferramenta h3 {
+  font-family: "Sora", "IBM Plex Sans", system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  margin-bottom: 6px;
+}
+
+.ferramenta p {
+  font-size: 14px;
+  opacity: 0.85;
+}
+
+.faq {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.faq summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.faq summary:focus-visible {
+  outline: 2px solid var(--text-color);
+  outline-offset: 3px;
+}
+
+.faq details p {
+  margin-top: 10px;
+  opacity: 0.9;
+}
+
+@media (min-width: 700px) {
+  .ferramentas {
+    grid-template-columns: 1fr 1fr;
+  }
+  .ferramenta:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
 }
 
 /* ===== Responsivo ===== */

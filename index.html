@@ -4,22 +4,102 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>Carteira Ideal — Links</title>
+    <!-- D24 (SEO): título, descrição e canonical pensados para a busca do Google. A página
+         continua sendo o "link na bio" (botões no topo); o conteúdo abaixo dos botões existe
+         para o Google entender o site. -->
+    <title>Carteira Ideal | Perfil de investidor, carteira e simuladores grátis</title>
     <meta
       name="description"
-      content="Todos os links do Carteira Ideal em um só lugar: descubra seu perfil de investidor e uma carteira de referência. Conteúdo educacional."
+      content="Descubra seu perfil de investidor em 14 perguntas e veja uma carteira de referência. Simuladores grátis de Tesouro Direto, FII e BDR. Sem cadastro."
     />
+    <link rel="canonical" href="https://carteiraideal.app.br/" />
     <meta name="theme-color" content="#0a0d13" />
-    <!-- Open Graph (WhatsApp, Instagram, LinkedIn): endereços absolutos do GitHub Pages -->
+    <!-- Open Graph (WhatsApp, Instagram, LinkedIn): endereços absolutos do domínio próprio -->
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="Carteira Ideal — Links" />
+    <meta property="og:site_name" content="Carteira Ideal" />
+    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:title" content="Carteira Ideal: perfil de investidor e simuladores grátis" />
     <meta
       property="og:description"
-      content="Descubra seu perfil de investidor e uma carteira de referência. Conteúdo educacional."
+      content="Descubra seu perfil de investidor e uma carteira de referência. Simuladores de Tesouro Direto, FII e BDR. Conteúdo educacional."
     />
     <meta property="og:image" content="https://carteiraideal.app.br/assets/og-image.png?v=2" />
     <meta property="og:url" content="https://carteiraideal.app.br/" />
     <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- D24: dados estruturados (schema.org). As perguntas do FAQPage precisam ser idênticas às
+         da seção "Perguntas frequentes" do corpo da página: se mudar uma, mude a outra. -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://carteiraideal.app.br/#site",
+            "url": "https://carteiraideal.app.br/",
+            "name": "Carteira Ideal",
+            "inLanguage": "pt-BR",
+            "publisher": { "@id": "https://carteiraideal.app.br/#org" }
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://carteiraideal.app.br/#org",
+            "name": "Carteira Ideal",
+            "url": "https://carteiraideal.app.br/",
+            "logo": "https://carteiraideal.app.br/assets/apple-touch-icon.png",
+            "email": "acarteiraideal@gmail.com",
+            "sameAs": [
+              "https://www.instagram.com/acarteiraideal/",
+              "https://www.youtube.com/@acarteiraideal"
+            ]
+          },
+          {
+            "@type": "WebApplication",
+            "@id": "https://carteiraideal.app.br/app/#app",
+            "name": "Carteira Ideal",
+            "url": "https://carteiraideal.app.br/app/",
+            "applicationCategory": "FinanceApplication",
+            "operatingSystem": "Web",
+            "inLanguage": "pt-BR",
+            "isAccessibleForFree": true,
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "BRL" },
+            "description": "Questionário de perfil de investidor com carteira de referência educacional e simuladores de Tesouro Direto, FII e BDR.",
+            "publisher": { "@id": "https://carteiraideal.app.br/#org" }
+          },
+          {
+            "@type": "FAQPage",
+            "@id": "https://carteiraideal.app.br/#faq",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "O Carteira Ideal é gratuito?",
+                "acceptedAnswer": { "@type": "Answer", "text": "Sim. Todas as ferramentas são gratuitas e não pedem cadastro, e-mail nem telefone." }
+              },
+              {
+                "@type": "Question",
+                "name": "Como funciona o teste de perfil de investidor?",
+                "acceptedAnswer": { "@type": "Answer", "text": "São 14 perguntas. As 7 primeiras medem o seu perfil de investidor, como no teste da corretora. As outras 7 olham a sua vida real: reserva de emergência, dívidas, gastos previstos, reação a quedas, necessidade de renda, estabilidade do trabalho e Imposto de Renda. O cruzamento das duas partes leva a um de 9 perfis de carteira, distribuída em 11 classes de ativos." }
+              },
+              {
+                "@type": "Question",
+                "name": "A carteira de referência é uma recomendação de investimento?",
+                "acceptedAnswer": { "@type": "Answer", "text": "Não. É um conteúdo educacional, para você entender como a sua situação de vida muda a forma de investir. Antes de investir, confira as condições de cada produto com a sua corretora ou com um profissional certificado." }
+              },
+              {
+                "@type": "Question",
+                "name": "Minhas respostas ficam guardadas em algum lugar?",
+                "acceptedAnswer": { "@type": "Answer", "text": "Ficam salvas só no seu aparelho. Para calcular a carteira, as respostas são enviadas ao servidor, que devolve o resultado sem guardar nada. O Meu Mês também fica só no aparelho." }
+              },
+              {
+                "@type": "Question",
+                "name": "De onde vêm os dados dos simuladores?",
+                "acceptedAnswer": { "@type": "Answer", "text": "De fontes oficiais e de mercado: Banco Central (Selic, IPCA e Boletim Focus) e Tesouro Transparente no Simule Tesouro Direto, atualizados toda semana; informe mensal da CVM e cotações de mercado no Simule FII; cotações de mercado, atualizadas nos dias úteis, no Simule BDR." }
+              }
+            ]
+          }
+        ]
+      }
+    </script>
 
     <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png" />
@@ -46,6 +126,8 @@
     <main id="container">
       <section id="profile">
         <img src="./assets/logo-mark.svg" alt="Logo do Carteira Ideal" width="112" height="112" />
+        <!-- D24: título principal da página para o Google (antes a página não tinha h1). -->
+        <h1>Descubra seu perfil de investidor e sua carteira de referência</h1>
         <p>@acarteiraideal</p>
       </section>
 
@@ -66,23 +148,6 @@
             <a class="cta" href="./app/">
               <span class="cta-title">Descobrir meu perfil e carteira de referência</span>
               <span class="cta-sub">14 perguntas, menos de 3 minutos</span>
-            </a>
-          </li>
-          <li>
-            <!-- Abre o Meu Mês (D21): controle do mês no molde dos Três Potes de Duda, com o Modo
-                 Recuperação para quem tem dívida cara. D25: logo abaixo do botão principal, junto
-                 com o Aprender, antes das ferramentas de simulação (organizar o mês e aprender vêm
-                 antes de simular investimentos). -->
-            <a class="link-2" href="./app/?tela=meuMes">
-              <span class="link-title"><span class="link-emoji" aria-hidden="true">🗓️</span>Meu Mês</span>
-              <span class="link-sub">Contas do mês e planejamento financeiro</span>
-            </a>
-          </li>
-          <li>
-            <!-- Abre a aba Aprender do app direto. O livro infantil fica lá dentro, no fim da tela. -->
-            <a class="link-2" href="./app/?tela=aprender">
-              <span class="link-title"><span class="link-emoji" aria-hidden="true">🎓</span>Aprender</span>
-              <span class="link-sub">Aulas curtas e livro infantil grátis</span>
             </a>
           </li>
           <li>
@@ -107,10 +172,19 @@
             </a>
           </li>
           <li>
-            <!-- Abre a aba Simule ETF do app direto, sem passar pelo questionário (D23) -->
-            <a class="link-2" href="./app/?tela=simuleEtf">
-              <span class="link-title"><span class="link-emoji" aria-hidden="true">🧺</span>Simule ETF</span>
-              <span class="link-sub">Os ETFs mais negociados na B3, por categoria</span>
+            <!-- Abre a aba Aprender do app direto. O livro infantil fica lá dentro, no fim da tela. -->
+            <a class="link-2" href="./app/?tela=aprender">
+              <span class="link-title"><span class="link-emoji" aria-hidden="true">🎓</span>Aprender</span>
+              <span class="link-sub">Aulas curtas e livro infantil grátis</span>
+            </a>
+          </li>
+          <li>
+            <!-- Abre o Meu Mês (D21): controle do mês no molde dos Três Potes de Duda, com o Modo
+                 Recuperação para quem tem dívida cara. Fica depois das ferramentas de investimento,
+                 de propósito: é complemento, e não a porta principal. -->
+            <a class="link-2" href="./app/?tela=meuMes">
+              <span class="link-title"><span class="link-emoji" aria-hidden="true">🗓️</span>Meu Mês</span>
+              <span class="link-sub">Contas do mês e planejamento financeiro</span>
             </a>
           </li>
           <li>
@@ -127,6 +201,67 @@
           <svg class="icon" viewBox="0 0 512 512" width="24" height="24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M508.64 148.79c0-45-33.1-81.2-74-81.2C379.24 65 322.74 64 265 64h-18c-57.6 0-114.2 1-169.6 3.6C36.6 67.6 3.5 104 3.5 149 1 184.59-.06 220.19 0 255.79q-.15 53.4 3.4 106.9c0 45 33.1 81.5 73.9 81.5 58.2 2.7 117.9 3.9 178.6 3.8q91.2.3 178.6-3.8c40.9 0 74-36.5 74-81.5 2.4-35.7 3.5-71.3 3.4-107q.34-53.4-3.26-106.9zM207 353.89v-196.5l145 98.2z"/></svg>
         </a>
       </div>
+
+
+      <!-- D24 (SEO): conteúdo abaixo dos botões. Quem chega pelo Instagram usa os botões de
+           cima, como sempre; quem chega pelo Google encontra aqui a explicação do site.
+           Sem <ul> nesta seção: o style.css estiliza "ul li a" como os botões da bio. -->
+      <section class="sobre" aria-labelledby="sobre-titulo">
+        <h2 id="sobre-titulo">Como funciona</h2>
+        <ol class="passos">
+          <li><strong>Responda 14 perguntas.</strong> Sete medem o seu perfil de investidor, como no teste da corretora. As outras sete olham a sua vida real: reserva, dívidas, gastos previstos e estabilidade da renda.</li>
+          <li><strong>Veja o seu perfil de carteira.</strong> O cruzamento das duas partes leva a um de 9 perfis. Quem se declara arrojado mas tem pouca reserva ou dívida cara, por exemplo, recebe uma carteira mais protegida.</li>
+          <li><strong>Entenda cada fatia.</strong> A carteira de referência se distribui em 11 classes de ativos, do Tesouro Selic às criptomoedas, com a explicação do papel de cada uma.</li>
+        </ol>
+
+        <h2>Ferramentas gratuitas</h2>
+        <div class="ferramentas">
+          <a class="ferramenta" href="./app/?tela=simuleTesouro">
+            <h3>Simulador de Tesouro Direto</h3>
+            <p>Quanto cada título Selic, Prefixado ou IPCA+ rende até o vencimento, já com Imposto de Renda e taxa de custódia da B3, e quanto isso vale em dinheiro de hoje.</p>
+          </a>
+          <a class="ferramenta" href="./app/?tela=simuleFii">
+            <h3>Simulador de FII</h3>
+            <p>Os fundos imobiliários mais negociados, separados por setor, com o rendimento estimado a partir do informe mensal da CVM e busca para os demais fundos.</p>
+          </a>
+          <a class="ferramenta" href="./app/?tela=simuleBdr">
+            <h3>Simulador de BDR</h3>
+            <p>Os BDRs mais negociados na B3, por setor, e quantas cotas o valor que você tem hoje consegue comprar.</p>
+          </a>
+          <a class="ferramenta" href="./app/?tela=meuMes">
+            <h3>Meu Mês: controle financeiro</h3>
+            <p>Contas do mês, cofrinhos para as contas do ano, cartão de crédito com teto e um plano para sair das dívidas caras.</p>
+          </a>
+          <a class="ferramenta" href="./app/?tela=aprender">
+            <h3>Aprender</h3>
+            <p>Aulas curtas sobre os principais investimentos, diversificação e como sair das dívidas, e um livro infantil grátis de educação financeira.</p>
+          </a>
+        </div>
+
+        <h2>Perguntas frequentes</h2>
+        <div class="faq">
+          <details>
+            <summary>O Carteira Ideal é gratuito?</summary>
+            <p>Sim. Todas as ferramentas são gratuitas e não pedem cadastro, e-mail nem telefone.</p>
+          </details>
+          <details>
+            <summary>Como funciona o teste de perfil de investidor?</summary>
+            <p>São 14 perguntas. As 7 primeiras medem o seu perfil de investidor, como no teste da corretora. As outras 7 olham a sua vida real: reserva de emergência, dívidas, gastos previstos, reação a quedas, necessidade de renda, estabilidade do trabalho e Imposto de Renda. O cruzamento das duas partes leva a um de 9 perfis de carteira, distribuída em 11 classes de ativos.</p>
+          </details>
+          <details>
+            <summary>A carteira de referência é uma recomendação de investimento?</summary>
+            <p>Não. É um conteúdo educacional, para você entender como a sua situação de vida muda a forma de investir. Antes de investir, confira as condições de cada produto com a sua corretora ou com um profissional certificado.</p>
+          </details>
+          <details>
+            <summary>Minhas respostas ficam guardadas em algum lugar?</summary>
+            <p>Ficam salvas só no seu aparelho. Para calcular a carteira, as respostas são enviadas ao servidor, que devolve o resultado sem guardar nada. O Meu Mês também fica só no aparelho.</p>
+          </details>
+          <details>
+            <summary>De onde vêm os dados dos simuladores?</summary>
+            <p>De fontes oficiais e de mercado: Banco Central (Selic, IPCA e Boletim Focus) e Tesouro Transparente no Simule Tesouro Direto, atualizados toda semana; informe mensal da CVM e cotações de mercado no Simule FII; cotações de mercado, atualizadas nos dias úteis, no Simule BDR.</p>
+          </details>
+        </div>
+      </section>
 
       <footer>
         <!-- D22: sem link para o curso da Udemy (o site fica 100% gratuito e sem divulgação de

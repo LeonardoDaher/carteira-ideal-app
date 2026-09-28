@@ -77,8 +77,11 @@ vercel dev
 
 ## Depois de publicar
 
-- **Imagem de compartilhamento (WhatsApp/LinkedIn):** hoje aponta para o endereço do GitHub Pages
-  em `index.html` (`og:image`, `og:url`). Depois do deploy na Vercel, troque para o domínio novo.
+- **Imagem de compartilhamento (WhatsApp/LinkedIn):** `og:image` e `og:url` apontam para
+  `https://carteiraideal.app.br/`, na landing (`index.html`) e no app (`webapp-src/index.html`, D24).
+- **SEO (D24):** `robots.txt` na raiz, `sitemap.xml` gerado pelo `scripts/build-site.mjs` e dados
+  estruturados no `<head>` do `index.html`. As perguntas frequentes aparecem duas vezes nesse
+  arquivo (corpo e JSON-LD): mudou uma, mude a outra.
 - **Links:** todos configurados em `index.html`. Para trocar um, procure o texto do botão.
   O livro em PDF fica em `assets/livro-os-tres-potes-de-duda.pdf`: para atualizá-lo, envie um
   arquivo com **o mesmo nome** para a pasta `assets`.

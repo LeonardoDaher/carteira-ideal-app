@@ -10,7 +10,7 @@
 //
 // A pasta api/ NÃO entra aqui: ela fica na raiz do repositório e a Vercel a detecta e
 // publica como funções serverless automaticamente, à parte deste build estático.
-import { cp, mkdir, rm, access } from 'node:fs/promises'
+import { cp, mkdir, rm, access, writeFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 
@@ -27,6 +27,20 @@ async function existe(caminho) {
   }
 }
 
+const DOMINIO = 'https://carteiraideal.app.br'
+
+/** Páginas do sitemap, relativas ao domínio (D24). */
+export const PAGINAS_SITEMAP = ['/', '/app/']
+
+/** Monta o sitemap.xml. lastmod = data do build (a Vercel publica a cada commit dos jobs). */
+export function montarSitemap(paginas, data) {
+  const dia = data.toISOString().slice(0, 10)
+  const urls = paginas
+    .map((p) => `  <url>\n    <loc>${DOMINIO}${p}</loc>\n    <lastmod>${dia}</lastmod>\n  </url>`)
+    .join('\n')
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`
+}
+
 async function main() {
   if (!(await existe(appCompilado))) {
     console.error(
@@ -39,7 +53,8 @@ async function main() {
   await mkdir(saida, { recursive: true })
 
   // 1) Landing page (arquivos estáticos da raiz do projeto)
-  const arquivosLanding = ['index.html', 'style.css', 'script.js', 'assets']
+  // robots.txt entrou na D24 (SEO).
+  const arquivosLanding = ['index.html', 'style.css', 'script.js', 'assets', 'robots.txt']
   for (const nome of arquivosLanding) {
     const origem = path.join(raiz, nome)
     if (await existe(origem)) {
@@ -55,7 +70,17 @@ async function main() {
   await mkdir(path.join(saida, 'app'), { recursive: true })
   await cp(path.dirname(appCompilado), path.join(saida, 'app'), { recursive: true })
 
+  // 3) sitemap.xml (D24): lista as páginas que o Google deve conhecer. Os endereços com
+  // ?tela= ficam de fora de propósito: para o Google, hoje, são a mesma página do app.
+  // Quando as páginas próprias das ferramentas e das aulas existirem (Etapa 3 da D24),
+  // basta acrescentá-las em PAGINAS_SITEMAP.
+  await writeFile(path.join(saida, 'sitemap.xml'), montarSitemap(PAGINAS_SITEMAP, new Date()))
+
   console.log(`[build-site] Site montado em ${path.relative(raiz, saida)}/ (landing + app/)`)
 }
 
-main()
+// Só roda o build quando chamado direto (node scripts/build-site.mjs); importado pelos
+// testes, apenas expõe montarSitemap.
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  main()
+}
