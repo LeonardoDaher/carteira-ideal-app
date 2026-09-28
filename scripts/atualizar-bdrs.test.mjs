@@ -15,6 +15,8 @@ import {
   atualizarAcompanhados,
   compactar,
   consumoDoMes,
+  criarFiltroBdr,
+  ehDerivativo,
   detectarSaltos,
   executar,
   extrairNome,
@@ -90,6 +92,29 @@ describe('regras mantidas da D19', () => {
       { ticker: 'C', volumeMedio: 1e5 },
     ]
     assert.deepEqual(selecionar(itens, 5, 3e5).map((i) => i.ticker), ['B', 'A'])
+  })
+})
+
+describe('filtro de BDR (correção da primeira carga, 27/09/2026)', () => {
+  it('recusa futuros de juros e FRAs com vencimento em 2031 a 2035, que têm o formato de BDR', () => {
+    for (const t of ['DI1F31', 'DI1F32', 'DI1N31', 'FRCF31', 'FRCV31', 'DAPK35', 'DDIF33']) {
+      assert.equal(tipoPorCodigo(t), t.endsWith('39') ? 'etf' : 'acao', `${t} tem formato de BDR`)
+      assert.equal(ehDerivativo(t), true, t)
+    }
+    for (const t of ['AAPL34', 'CHVX34', 'BKNG34', 'D1DG34', 'BSIL39']) assert.equal(ehDerivativo(t), false, t)
+    assert.equal(ehDerivativo('XYZF31', { derivativos: { prefixos: ['XYZ'] } }), true)
+  })
+  it('com a listagem da brapi no cadastro, só passa o que está nela', () => {
+    const filtro = criarFiltroBdr({ AAPL34: { setorBrapi: 'Electronic Technology' }, BSIL39: { listado: true }, ZZZZ34: { nome: 'Só consulta' } })
+    assert.equal(filtro('AAPL34'), 'acao')
+    assert.equal(filtro('BSIL39'), 'etf')
+    assert.equal(filtro('ZZZZ34'), null)
+    assert.equal(filtro('DI1F31'), null)
+  })
+  it('sem listagem nenhuma, vale o formato menos os derivativos', () => {
+    const filtro = criarFiltroBdr({})
+    assert.equal(filtro('KOCH34'), 'acao')
+    assert.equal(filtro('FRCF31'), null)
   })
 })
 
@@ -203,7 +228,7 @@ describe('acompanhados, compactação e busca', () => {
   h.ativos = { AAPL34: cheia(9e6), MSFT34: cheia(8e6), NVDC34: cheia(7e6), ROXO34: cheia(99e6), BSLV39: cheia(1e6), IBIT39: cheia(2e6) }
   h.ativos.RARO34 = [[5, 5, 5, 100], ...Array(29).fill(null)]
   h.ultimoNegocio = { AAPL34: ['2026-08-30', 10], ROXO34: ['2026-08-30', 10], RARO34: ['2026-08-01', 5], VELHO34: ['2026-05-01', 3] }
-  h.cadastro = { AAPL34: { nome: 'Apple Inc.', setorBrapi: 'Electronic Technology' }, VELHO34: { nome: 'Velho' } }
+  h.cadastro = { AAPL34: { nome: 'Apple Inc.', setorBrapi: 'Electronic Technology' }, ...Object.fromEntries(['MSFT34', 'NVDC34', 'ROXO34', 'BSLV39', 'IBIT39', 'RARO34'].map((t) => [t, { listado: true }])), VELHO34: { nome: 'Velho', listado: true } }
   it('escolhe os mais negociados de cada tipo, sem os excluídos, mais os obrigatórios', () => {
     assert.deepEqual(atualizarAcompanhados(h, CONFIG, ['NVDC34']), ['AAPL34', 'IBIT39', 'MSFT34', 'NVDC34'])
   })
@@ -239,7 +264,7 @@ describe('cadastro pela brapi', () => {
       { stock: 'KOCH34', name: 'KOCH34', sector: 'Consumer Non-Durables' },
       { stock: 'PETR4', name: 'PETROBRAS', sector: 'Energy Minerals' },
     ])
-    assert.deepEqual(c.AAPL34, { nome: 'Apple Inc.', acoesPorBdr: 0.05, nomeLista: 'APPLE', setorBrapi: 'Electronic Technology' })
+    assert.deepEqual(c.AAPL34, { nome: 'Apple Inc.', acoesPorBdr: 0.05, listado: true, nomeLista: 'APPLE', setorBrapi: 'Electronic Technology' })
     assert.equal(c.KOCH34.nomeLista, null)
     assert.equal(c.PETR4, undefined)
   })
@@ -311,6 +336,9 @@ const MERCADO = {
   BURA39: { preco: 35, volume: 1e6 },
   RARO34: { preco: 8, volume: 2000, soSegunda: true }, // só negocia às segundas
   KOCH34: { preco: 25, volume: 0, nunca: true }, // listado, sem negócio
+  DI1F31: { preco: 86000, volume: 18e9, futuro: true }, // futuro de DI: formato de BDR, não é BDR
+  FRCV31: { preco: 4.2, volume: 9e6, futuro: true }, // FRA de cupom
+  NOVA34: { preco: 30, volume: 5e6, foraDaBrapi: true }, // formato de BDR, fora da listagem da brapi
 }
 const FERIADOS = new Set(['2026-09-07'])
 
@@ -354,7 +382,7 @@ function dependencias() {
     chamadas.push(url)
     if (url.includes('/quote/list')) {
       return {
-        stocks: Object.keys(MERCADO).map((t) => ({ stock: t, name: t === 'KOCH34' ? 'KOCH34' : `${t.slice(0, 4)} INC`, sector: t.endsWith('39') ? 'Miscellaneous' : 'Electronic Technology', type: 'bdr' })),
+        stocks: Object.keys(MERCADO).filter((t) => !MERCADO[t].futuro && !MERCADO[t].foraDaBrapi).map((t) => ({ stock: t, name: t === 'KOCH34' ? 'KOCH34' : `${t.slice(0, 4)} INC`, sector: t.endsWith('39') ? 'Miscellaneous' : 'Electronic Technology', type: 'bdr' })),
       }
     }
     const ticker = decodeURIComponent(url.split('/').pop())
@@ -382,6 +410,8 @@ describe('ponta a ponta com boletins sintéticos', () => {
     assert.deepEqual(saida.acoes.map((i) => i.ticker), ['AAPL34', 'NVDC34', 'MSFT34', 'AMZO34', 'GOGL34', 'NOVO32'])
     assert.deepEqual(saida.etfs.map((i) => i.ticker), ['IBIT39', 'BSLV39', 'BURA39'])
     assert.ok(!JSON.stringify(saida).includes('ROXO34'), 'excluído não aparece nem na busca')
+    for (const t of ['DI1F31', 'FRCV31', 'NOVA34']) assert.ok(!JSON.stringify(saida).includes(t), `${t} não é publicado`)
+    assert.ok(!JSON.stringify(lerHistorico()).includes('DI1F31'), 'futuro nem entra no histórico')
     const aapl = saida.acoes[0]
     assert.equal(aapl.variacao3m, null, 'desdobramento sem confirmação apaga a variação')
     assert.equal(aapl.acoesPorBdr, 0.005)
@@ -430,6 +460,23 @@ describe('ponta a ponta com boletins sintéticos', () => {
     const aapl = lerSaida().acoes.find((i) => i.ticker === 'AAPL34')
     assert.ok(aapl.variacao3m > 0 && aapl.variacao3m < 10, `variação ajustada: ${aapl.variacao3m}`)
     assert.equal(aapl.nome, 'AAPL Corp')
+  })
+
+  it('arquivo publicado com futuros é regravado mesmo sem pregão novo (autocorreção)', async () => {
+    const arquivo = path.join(raiz, 'webapp-src', 'src', 'data', 'bdrs.json')
+    const saida = lerSaida()
+    saida.acoes.unshift({ ...saida.acoes[0], ticker: 'DI1F31' })
+    fs.writeFileSync(arquivo, JSON.stringify(saida))
+    const h = lerHistorico()
+    h.ativos.DI1F31 = h.ativos.AAPL34
+    h.ultimoNegocio.DI1F31 = h.ultimoNegocio.AAPL34
+    fs.writeFileSync(path.join(raiz, 'historico', 'bdrs.json'), JSON.stringify(h))
+    const r = await executar({ raiz, agora: new Date('2026-09-30T01:30:00Z'), argv: [], token: undefined, ...dep })
+    assert.equal(r.publicado, true)
+    assert.ok(!JSON.stringify(lerSaida()).includes('DI1F31'))
+    assert.ok(!JSON.stringify(lerHistorico()).includes('DI1F31'), 'limpo também do histórico')
+    const denovo = await executar({ raiz, agora: new Date('2026-09-30T01:30:00Z'), argv: [], token: undefined, ...dep })
+    assert.equal(denovo.motivo, 'sem pregão novo')
   })
 
   it('para sem gravar se o histórico for curto demais', async () => {

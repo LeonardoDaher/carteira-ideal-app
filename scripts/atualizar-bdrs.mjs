@@ -73,6 +73,41 @@ export function tipoPorCodigo(ticker) {
   return null
 }
 
+/**
+ * Raízes de contratos futuros e FRAs da B3 cujo código termina no ano de vencimento: DI1F31
+ * (DI janeiro de 2031), FRCF31 (FRA de cupom), DAPK35 (cupom de IPCA). Com vencimento em 2031
+ * a 2035 ou 2039, o código tem o mesmo formato de um BDR (4 caracteres + 31 a 35 ou 39) e o
+ * boletim traz todos eles. Na primeira carga (27/09/2026) 18 futuros entraram na lista de BDRs.
+ */
+export const PREFIXOS_DERIVATIVOS = ['DI1', 'DAP', 'DDI', 'DCO', 'FRC', 'FRO', 'FRP', 'IAP', 'IDI', 'DOL', 'WDO', 'IND', 'WIN', 'ISP', 'WSP', 'CCM', 'BGI', 'ICF', 'SJC', 'ETH', 'BIT', 'SOL']
+
+/** Código de derivativo pela raiz (lista fixa + a do config). */
+export function ehDerivativo(ticker, config = {}) {
+  const prefixos = [...PREFIXOS_DERIVATIVOS, ...(config.derivativos?.prefixos ?? [])]
+  return prefixos.some((p) => ticker.startsWith(p))
+}
+
+/** BDR que apareceu na listagem de BDRs da brapi (marca nova ou setor gravado pela listagem). */
+export function naListagem(entrada) {
+  return Boolean(entrada && (entrada.listado === true || 'setorBrapi' in entrada))
+}
+
+/**
+ * Filtro de BDR: formato do código, fora das raízes de derivativos e, quando o cadastro já tem
+ * a listagem da brapi, presente nela (segunda barreira contra qualquer outro instrumento com o
+ * mesmo formato). Sem listagem nenhuma (nunca houve brapi), vale só o formato e as raízes.
+ * Devolve 'acao', 'etf' ou null.
+ */
+export function criarFiltroBdr(cadastro, config = {}) {
+  const exigirListagem = Object.values(cadastro ?? {}).some(naListagem)
+  return (ticker) => {
+    const tipo = tipoPorCodigo(ticker)
+    if (!tipo || ehDerivativo(ticker, config)) return null
+    if (exigirListagem && !naListagem(cadastro[ticker])) return null
+    return tipo
+  }
+}
+
 /** Códigos 31, 32 e 33 costumam ser de empresas com vínculo brasileiro: pedem decisão manual. */
 export function precisaRevisar(ticker, excluir = [], revisados = []) {
   return /3[123]$/.test(ticker) && !excluir.includes(ticker) && !revisados.includes(ticker)
@@ -350,13 +385,14 @@ export function atualizarAcompanhados(historico, config, obrigatorios = []) {
   const excluir = new Set(config.excluir?.tickers ?? [])
   const limites = { acao: config.acompanharAcoes ?? 150, etf: config.acompanharEtfs ?? 40 }
   const porTipo = { acao: [], etf: [] }
+  const filtro = criarFiltroBdr(historico.cadastro, config)
   for (const [ticker, serie] of Object.entries(historico.ativos)) {
-    const tipo = tipoPorCodigo(ticker)
+    const tipo = filtro(ticker)
     if (!tipo || excluir.has(ticker)) continue
     porTipo[tipo].push({ ticker, volume: volumeMedio(serie, historico.pregoes.length) })
   }
   const anteriores = new Set(historico.acompanhados)
-  const escolhidos = new Set(obrigatorios.filter((t) => !excluir.has(t)))
+  const escolhidos = new Set(obrigatorios.filter((t) => !excluir.has(t) && filtro(t)))
   for (const tipo of ['acao', 'etf']) {
     const ordem = porTipo[tipo].filter((x) => x.volume > 0).sort((a, b) => b.volume - a.volume || a.ticker.localeCompare(b.ticker))
     ordem.forEach((x, posicao) => {
@@ -371,15 +407,16 @@ export function atualizarAcompanhados(historico, config, obrigatorios = []) {
  * que ficou sem nenhum negócio. O último negócio de cada BDR fica em `ultimoNegocio` enquanto
  * estiver dentro do histórico; o cadastro, enquanto o BDR tiver algum dado guardado.
  */
-export function compactar(historico, acompanhados, janelaCurta = SESSOES_LIQUIDEZ) {
+export function compactar(historico, acompanhados, janelaCurta = SESSOES_LIQUIDEZ, config = {}) {
   const longos = new Set(acompanhados)
   const ativos = {}
   for (const [ticker, serie] of Object.entries(historico.ativos)) {
+    if (ehDerivativo(ticker, config)) continue
     const guardada = longos.has(ticker) ? serie : serie.slice(-janelaCurta)
     if (guardada.some(Boolean)) ativos[ticker] = guardada
   }
   const primeiro = historico.pregoes[0] ?? ''
-  const ultimoNegocio = Object.fromEntries(Object.entries(historico.ultimoNegocio).filter(([, [data]]) => data >= primeiro))
+  const ultimoNegocio = Object.fromEntries(Object.entries(historico.ultimoNegocio).filter(([t, [data]]) => data >= primeiro && !ehDerivativo(t, config)))
   const cadastro = Object.fromEntries(Object.entries(historico.cadastro).filter(([t]) => ativos[t] || ultimoNegocio[t]))
   return { ...historico, acompanhados: [...longos].filter((t) => ativos[t]).sort(), ativos, ultimoNegocio, cadastro }
 }
@@ -392,9 +429,10 @@ export function montarBusca(historico, config) {
   const excluir = new Set(config.excluir?.tickers ?? [])
   const pregoes = historico.pregoes
   const limite = pregoes[Math.max(0, pregoes.length - (config.pregoesBusca ?? 63))] ?? ''
+  const filtro = criarFiltroBdr(historico.cadastro, config)
   const busca = []
   for (const [ticker, [data, cotacao]] of Object.entries(historico.ultimoNegocio)) {
-    const tipo = tipoPorCodigo(ticker)
+    const tipo = filtro(ticker)
     if (!tipo || excluir.has(ticker) || data < limite || !(cotacao >= PRECO_MIN && cotacao <= PRECO_MAX)) continue
     const serie = historico.ativos[ticker]
     const ultimoPregao = serie && serie.length ? serie[serie.length - 1] : null
@@ -436,6 +474,7 @@ export function aplicarListagem(cadastro, lista) {
     const nomeLista = String(item?.name ?? '').trim()
     novo[ticker] = {
       ...novo[ticker],
+      listado: true,
       nomeLista: nomeLista && nomeLista.toUpperCase() !== ticker ? nomeLista : novo[ticker]?.nomeLista ?? null,
       setorBrapi: item?.sector ?? novo[ticker]?.setorBrapi ?? null,
     }
@@ -668,7 +707,7 @@ export async function executar({
         log.info(`[info] ${data}: sem pregão na B3 (zip vazio).`)
         continue
       }
-      const lido = await ler(xml, (t) => tipoPorCodigo(t) !== null)
+      const lido = await ler(xml, (t) => tipoPorCodigo(t) !== null && !ehDerivativo(t, config))
       fs.rmSync(path.dirname(xml), { recursive: true, force: true })
       if (lido.datas.length !== 1 || lido.datas[0] !== data) {
         falhar(`${data}: o boletim trouxe a(s) data(s) ${lido.datas.join(', ') || 'nenhuma'}.`)
@@ -706,7 +745,13 @@ export async function executar({
 
   // O arquivo antigo, da brapi, não tem "fonte": é trocado já na primeira execução possível.
   const saidaAtual = lerJson(arquivoSaida, null)
-  if (novos === 0 && saidaAtual?.dataPregao && saidaAtual?.fonte === FONTE) {
+  const filtroSaida = criarFiltroBdr(historico.cadastro, config)
+  const publicadosAntes = [...(saidaAtual?.acoes ?? []), ...(saidaAtual?.etfs ?? []), ...(saidaAtual?.busca ?? [])]
+  const recusados = publicadosAntes.filter((i) => !filtroSaida(i.ticker) || (config.excluir?.tickers ?? []).includes(i.ticker))
+  if (recusados.length) {
+    log.info(`[info] O arquivo publicado tem ${recusados.length} códigos que não passam no filtro atual (ex.: ${recusados.slice(0, 3).map((i) => i.ticker).join(', ')}): será regravado.`)
+  }
+  if (novos === 0 && saidaAtual?.dataPregao && saidaAtual?.fonte === FONTE && recusados.length === 0) {
     log.info(`Sem pregão novo desde ${historico.pregoes[historico.pregoes.length - 1] ?? 'nenhum'}${semPregao ? ' (feriado ou fim de semana)' : ''}: arquivos mantidos.`)
     return { publicado: false, motivo: 'sem pregão novo' }
   }
@@ -726,8 +771,9 @@ export async function executar({
   const itens = { acao: [], etf: [] }
   const saltosPorTicker = new Map()
   const invalidos = []
+  const filtroBdr = criarFiltroBdr(historico.cadastro, config)
   for (const ticker of Object.keys(historico.ativos)) {
-    const tipo = tipoPorCodigo(ticker)
+    const tipo = filtroBdr(ticker)
     if (!tipo || excluir.has(ticker)) continue
     const montado = montarItem(ticker, tipo, historico, config)
     if (!montado) continue
@@ -761,6 +807,17 @@ export async function executar({
   const publicados = [...acoes, ...etfs].map((i) => i.ticker)
   const suspeitos = Object.fromEntries(publicados.filter((t) => saltosPorTicker.has(t)).map((t) => [t, saltosPorTicker.get(t).at(-1).data]))
   historico = await atualizarCadastro(historico, publicados, suspeitos, { token, hoje, config, carga, chamar, esperar, log })
+  // A listagem pode ter chegado agora (primeira execução): refaz a lista só com o que ela
+  // confirma como BDR. Foi assim que 18 futuros entraram na primeira carga real.
+  const filtroFinal = criarFiltroBdr(historico.cadastro, config)
+  const antes = publicados.length
+  acoes = selecionar(itens.acao.filter((i) => filtroFinal(i.ticker)), config.maxAcoes, config.pisoVolumeAcoes)
+  etfs = selecionar(itens.etf.filter((i) => filtroFinal(i.ticker)), config.maxEtfs, config.pisoVolumeEtfs)
+  const fora = publicados.filter((t) => !filtroFinal(t))
+  if (fora.length) log.info(`[info] ${fora.length} de ${antes} códigos saíram da lista por não estarem na listagem de BDRs da brapi: ${fora.join(', ')}.`)
+  if (acoes.length < config.minimoAcoesParaPublicar || etfs.length < config.minimoEtfsParaPublicar) {
+    throw new Error(`Depois do filtro da listagem, sobraram ${acoes.length} BDRs de ações e ${etfs.length} de ETF (mínimos ${config.minimoAcoesParaPublicar} e ${config.minimoEtfsParaPublicar}). Arquivo NÃO atualizado.`)
+  }
   const completar = (lista, tipo) => lista.map((i) => montarItem(i.ticker, tipo, historico, config))
   const acoesMontadas = completar(acoes, 'acao')
   const etfsMontados = completar(etfs, 'etf')
@@ -791,7 +848,7 @@ export async function executar({
 
   // 6. Séries longas só dos acompanhados, e gravação (histórico e arquivo do app juntos)
   const acompanhados = atualizarAcompanhados(historico, config, [...controle, ...publicados])
-  historico = compactar(historico, acompanhados)
+  historico = compactar(historico, acompanhados, SESSOES_LIQUIDEZ, config)
   const snapshot = {
     geradoEm: agora.toISOString(),
     dataPregao,

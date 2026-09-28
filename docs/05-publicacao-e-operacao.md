@@ -197,6 +197,9 @@ gerar bdrs.json"**.
 | `[info] brapi: N de 80 requisições no mês (…)` | Acompanhar de vez em quando. Esperado: cerca de 30 por mês |
 | `[info] AAAA-MM-DD: N BDRs negociados de M no boletim` | Na primeira carga, anotar o N típico e ajustar `minimoBdrsNegociadosNoBoletim` para cerca de metade dele |
 | `[info] Mais negociados: …` | Conferir 2 ou 3 volumes num site de cotações de vez em quando |
+| `[info] O arquivo publicado tem … códigos que não passam no filtro atual` | Nada: o job está regravando o arquivo sem eles (autocorreção) |
+| `[info] … códigos saíram da lista por não estarem na listagem de BDRs da brapi` | Normal na primeira execução. Se um BDR de verdade sair assim com frequência, avisar quem desenvolve |
+| Código estranho na aba (futuro, opção, FRA) | Incluir a raiz de 3 letras em `derivativos.prefixos` (`config/bdrs.json`) e rodar "Atualizar BDRs" à mão |
 | `Sem pregão novo desde …: arquivos mantidos.` | Nada: feriado ou execução repetida no mesmo dia |
 
 **Parâmetros** em `config/bdrs.json`: `maxAcoes` (35), `maxEtfs` (5), `pisoVolumeAcoes` e

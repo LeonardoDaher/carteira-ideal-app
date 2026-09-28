@@ -47,6 +47,10 @@
       "PAGS34"
     ]
   },
+  "derivativos": {
+    "_leia": "Raízes de códigos que têm o formato de BDR mas são contratos futuros ou FRAs da B3 (ex.: DI1F31 = futuro de DI com vencimento em janeiro de 2031). O script já recusa DI1, DAP, DDI, DCO, FRC, FRO, FRP, IAP, IDI, DOL, WDO, IND, WIN, ISP, WSP, CCM, BGI, ICF, SJC, ETH, BIT e SOL. Se aparecer outro derivativo na aba, inclua a raiz (3 letras) aqui.",
+    "prefixos": []
+  },
   "revisados": {
     "_leia": "Códigos terminados em 31, 32 ou 33 que o responsável já decidiu manter. Não geram a linha [revisar] no log.",
     "tickers": [
