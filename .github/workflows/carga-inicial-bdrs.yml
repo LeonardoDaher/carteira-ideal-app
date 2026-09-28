@@ -1,0 +1,69 @@
+# Carga inicial do histórico de BDRs (decisão D24). Rodar UMA VEZ, à mão, antes do job diário
+# "Atualizar BDRs" (e de novo só se o arquivo historico/bdrs.json se perder).
+#
+# Baixa os boletins de preços da B3 dos pregões mais recentes (padrão: 260, o suficiente para a
+# faixa de 52 semanas), um por vez, do mais novo para o mais antigo. Referência: a carga dos
+# ETFs (D23) levou 28 minutos para 260 pregões.
+#
+# Na carga, a brapi consulta até 45 BDRs da lista (nome longo e proporção), dentro do teto
+# mensal de config/bdrs.json. O resto das proporções vem aos poucos, nos dias seguintes.
+#
+# O histórico é publicado MESMO se a execução falhar ou for interrompida (passo final com
+# "if: always()"): nada do que já foi baixado se perde, e rodar de novo só baixa o que falta.
+# O arquivo do app (bdrs.json) só é publicado se o site compilar.
+#
+# Depois da carga, ler no log as linhas [desdobramento]: o boletim traz preço bruto, e um
+# desdobramento de BDR no último ano precisa ser confirmado em config/bdrs.json.
+
+name: Carga inicial de BDRs
+
+on:
+  workflow_dispatch:
+    inputs:
+      pregoes:
+        description: 'Quantos pregões carregar (máximo 260)'
+        required: true
+        default: '260'
+
+permissions:
+  contents: write
+
+jobs:
+  carga:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Baixar os boletins e montar o histórico
+        env:
+          BRAPI_TOKEN: ${{ secrets.BRAPI_TOKEN }}
+        run: node scripts/atualizar-bdrs.mjs --carga-inicial=${{ github.event.inputs.pregoes }}
+
+      - name: Conferir se o site compila com os dados novos
+        id: build
+        run: |
+          npm ci
+          npm run build
+
+      - name: Publicar (commit) o que foi carregado
+        if: always()
+        run: |
+          if [ "${{ steps.build.outcome }}" != "success" ]; then
+            git checkout -- webapp-src/src/data/bdrs.json 2>/dev/null || true
+          fi
+          if [ ! -f historico/bdrs.json ]; then
+            echo "Nenhum histórico gravado."
+            exit 0
+          fi
+          git config user.name "${{ vars.COMMIT_AUTOR_NOME || 'github-actions[bot]' }}"
+          git config user.email "${{ vars.COMMIT_AUTOR_EMAIL || '41898283+github-actions[bot]@users.noreply.github.com' }}"
+          git add historico/bdrs.json webapp-src/src/data/bdrs.json
+          git commit -m "dados: carga inicial de BDRs ($(date -u +%Y-%m-%d))" || { echo "Nada a publicar."; exit 0; }
+          git pull --rebase
+          git push
