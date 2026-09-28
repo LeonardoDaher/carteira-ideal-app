@@ -29,7 +29,7 @@ async function existe(caminho) {
 
 const DOMINIO = 'https://carteiraideal.app.br'
 
-/** Páginas do sitemap, relativas ao domínio (D24). */
+/** Páginas do sitemap, relativas ao domínio (D26). */
 export const PAGINAS_SITEMAP = ['/', '/app/']
 
 /** Monta o sitemap.xml. lastmod = data do build (a Vercel publica a cada commit dos jobs). */
@@ -53,8 +53,10 @@ async function main() {
   await mkdir(saida, { recursive: true })
 
   // 1) Landing page (arquivos estáticos da raiz do projeto)
-  // robots.txt entrou na D24 (SEO).
-  const arquivosLanding = ['index.html', 'style.css', 'script.js', 'assets', 'robots.txt']
+  // robots.txt entrou na D26 (SEO).
+  // google5f0b815b0517184a.html: arquivo de verificação do Google Search Console (D26). Precisa ficar
+  // na raiz do site publicado e nunca pode ser apagado, senão a propriedade perde a verificação.
+  const arquivosLanding = ['index.html', 'style.css', 'script.js', 'assets', 'robots.txt', 'google5f0b815b0517184a.html']
   for (const nome of arquivosLanding) {
     const origem = path.join(raiz, nome)
     if (await existe(origem)) {
@@ -70,9 +72,9 @@ async function main() {
   await mkdir(path.join(saida, 'app'), { recursive: true })
   await cp(path.dirname(appCompilado), path.join(saida, 'app'), { recursive: true })
 
-  // 3) sitemap.xml (D24): lista as páginas que o Google deve conhecer. Os endereços com
+  // 3) sitemap.xml (D26): lista as páginas que o Google deve conhecer. Os endereços com
   // ?tela= ficam de fora de propósito: para o Google, hoje, são a mesma página do app.
-  // Quando as páginas próprias das ferramentas e das aulas existirem (Etapa 3 da D24),
+  // Quando as páginas próprias das ferramentas e das aulas existirem (Etapa 3 da D26),
   // basta acrescentá-las em PAGINAS_SITEMAP.
   await writeFile(path.join(saida, 'sitemap.xml'), montarSitemap(PAGINAS_SITEMAP, new Date()))
 

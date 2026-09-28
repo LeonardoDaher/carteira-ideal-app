@@ -147,32 +147,65 @@ npm run build        # build de produção em dist-site/
 
 **Rodar fora de terça:** Actions > **Atualizar dados oficiais de mercado** > **Run workflow**. Nunca "Re-run all jobs" numa execução antiga.
 
-## 5.8 Operação diária dos BDRs (decisão D19)
+## 5.8 Operação diária dos BDRs (decisões D19 e D24)
 
-**Rotina automática.** De segunda a sexta, às 19h de Brasília, o GitHub roda o job "Atualizar BDRs". Ele busca na brapi a listagem de BDRs e o histórico de 3 meses dos candidatos, grava `webapp-src/src/data/bdrs.json` (a lista de 40 e a lista de busca com os demais BDRs), confere se o site compila e faz um commit "dados: BDRs (AAAA-MM-DD)". Em feriado da B3 nada muda e nada é publicado. Usa o mesmo secret `BRAPI_TOKEN` do job de FIIs.
+**Fonte (D24).** Preço e volume vêm do Boletim de Preços oficial da B3 (BVBG.086), o mesmo
+arquivo dos ETFs, sem cota. A brapi (`BRAPI_TOKEN`) só informa nome, setor e proporção BDR/ação,
+com teto mensal próprio (`brapi.tetoMensal` em `config/bdrs.json`, padrão 80). Se a brapi falhar,
+o job publica com o cadastro guardado em `historico/bdrs.json` e avisa no log.
 
-**Se o job falhar**, o GitHub manda um e-mail e o app continua com os dados do último dia bom. Para ver o motivo: Actions > execução com ✗ > **atualizar** > passo **"Buscar dados e gerar bdrs.json"**.
+**Antes de ligar (uma vez).**
+1. Subir `scripts/atualizar-bdrs.mjs`, `config/bdrs.json` e os workflows `atualizar-bdrs.yml` e
+   `carga-inicial-bdrs.yml` (a pasta `.github` costuma ficar de fora ao arrastar: criar ou editar
+   os `.yml` à mão no GitHub).
+2. Rodar Actions > **"Carga inicial de BDRs"** > Run workflow (padrão: 260 pregões, cerca de
+   30 minutos). Ela grava `historico/bdrs.json` e publica `webapp-src/src/data/bdrs.json`. O
+   histórico é publicado mesmo se a execução falhar; rodar de novo só baixa o que falta.
+3. Ler no log da carga as linhas `[desdobramento]` e `N BDRs negociados de M no boletim`
+   (tabela abaixo). A partir daí, "Atualizar BDRs" roda sozinho de segunda a sexta, às 22h30.
+
+Até a carga rodar, o job diário falha com "Rode a carga inicial" e a aba continua com o último
+arquivo gerado pela brapi.
+
+**Rotina automática.** De segunda a sexta, às 22h30 de Brasília, o GitHub roda "Atualizar BDRs":
+baixa o boletim do dia, acrescenta o pregão ao histórico, grava `bdrs.json` (os 40 da lista e a
+busca), confere se o site compila e faz um commit "dados: BDRs (AAAA-MM-DD)". Em feriado da B3
+nada muda e nada é publicado.
+
+**Se o job falhar**, o GitHub manda um e-mail e o app continua com os dados do último dia bom.
+Para ver o motivo: Actions > execução com ✗ > **atualizar** > passo **"Buscar o boletim da B3 e
+gerar bdrs.json"**.
 
 | Mensagem no log | O que fazer |
 |---|---|
 | `config/bdrs.json ainda não foi conferido…` | Revisar as listas `excluir` e `revisados` e marcar `"conferidoPeloResponsavel": true` |
-| `Variável BRAPI_TOKEN não definida` | Cadastrar (ou recadastrar) o secret `BRAPI_TOKEN` |
-| `brapi respondeu 401/403…` | Chave expirada, revogada ou plano sem acesso: gerar outra em brapi.dev e atualizar o secret |
-| `A listagem da brapi trouxe só … BDRs` | A brapi mudou ou estava fora do ar. Rodar de novo no dia seguinte; se repetir, enviar o log para quem desenvolve |
-| `Só … de 5 BDRs de controle ficaram válidos` | Problema geral na brapi. Rodar de novo mais tarde |
-| `Só … BDRs de ações/ETF passaram no piso de liquidez` | A lista encolheu de repente (cota esgotada, brapi instável). Rodar de novo no dia seguinte |
-| `O pregão mais recente no histórico é de …, mais de 7 dias atrás` | O histórico da brapi parou de atualizar. Enviar o log para quem desenvolve |
-| `[revisar] XXXX32: código de BDR patrocinado…` | Decidir: empresa de origem ou operação brasileira vai para `excluir`; as demais vão para `revisados` (ambos em `config/bdrs.json`). O BDR continua publicado até a decisão |
-| `[setor] XXXX34 (…)` | Setor da brapi sem tradução. Incluir a tradução no bloco `setores`, ou o setor do BDR em `setorPorTicker` |
-| `[categoria] XXXX39` | BDR de ETF sem grupo: incluir em `gruposEtf` (ex.: `"XXXX39": "Metais preciosos"`). Enquanto isso, aparece em "Outros" |
-| `[info] XXXX34: …` | BDR com dado inválido ou sem resposta: fica de fora só naquele dia |
-| `[info] Mais negociados: …` / `Menos negociados da lista: …` | Conferir 2 ou 3 volumes num site de cotações de vez em quando |
-| `brapi pediu para desacelerar (429)` | Nada, se for pontual. Se virar rotina, aumentar `pausaEntreRequisicoesMs` em `config/bdrs.json` |
-| `Sem pregão novo desde …: arquivo mantido.` | Nada: feriado ou execução repetida no mesmo dia |
+| `O histórico tem só … pregões … Rode a carga inicial` | Rodar o workflow "Carga inicial de BDRs" |
+| `…: só N BDRs negociados no boletim (mínimo …)` | Boletim incompleto ou mudança da B3. Rodar de novo mais tarde; se repetir por dias, enviar o log para quem desenvolve |
+| `…: o boletim trouxe a(s) data(s) …` | A B3 devolveu o arquivo de outro dia. Rodar de novo mais tarde |
+| `sem resposta da B3 em 90 s` / `B3 respondeu …` | Site da B3 lento ou fora do ar. Rodar de novo mais tarde |
+| `Só … de 5 BDRs de controle negociaram em …` | Problema geral no boletim. Rodar de novo mais tarde |
+| `Só … BDRs de ações/ETF passaram no piso de liquidez` | A lista encolheu de repente. Enviar o log para quem desenvolve |
+| `O pregão mais recente do histórico é de …, mais de 7 dias atrás` | O job está parado há dias. Rodar à mão e, se falhar, enviar o log |
+| `[desdobramento] XXXX34: fechamento foi de R$ … para R$ … em AAAA-MM-DD (fator ≈ N)` | Conferir no aviso de eventos corporativos da B3 se houve desdobramento ou grupamento do BDR. Se houve, copiar para `desdobramentos` o trecho que a própria linha sugere. Se foi queda ou alta real, não fazer nada: a linha some quando o salto sair da janela de 52 semanas. Enquanto isso, o BDR aparece sem variação de 3 meses e/ou sem faixa de 52 semanas |
+| `[proporcao] XXXX34: a brapi passou de … para …` | Sinal de desdobramento: conferir junto com a linha `[desdobramento]` |
+| `[revisar] XXXX32: código de BDR patrocinado…` | Decidir: empresa de origem ou operação brasileira vai para `excluir`; as demais vão para `revisados`. O BDR continua publicado até a decisão |
+| `[setor] XXXX34 (…)` | Setor da brapi sem tradução. Incluir a tradução em `setores`, ou o setor do BDR em `setorPorTicker` |
+| `[categoria] XXXX39` | BDR de ETF sem grupo: incluir em `gruposEtf`. Enquanto isso, aparece em "Outros" |
+| `[nome] XXXX34: ainda sem nome da brapi` | Normal nos primeiros dias ou sem token: o nome chega com a próxima listagem. Se persistir, incluir em `nomes` |
+| `[aviso] BRAPI_TOKEN não definido` / `brapi respondeu 401/403` | Cadastrar ou trocar o secret `BRAPI_TOKEN`. A aba segue funcionando com nomes e setores guardados |
+| `[aviso] Teto mensal da brapi para BDRs atingido` | Nada: o resto fica para o mês seguinte. Se acontecer todo mês, conferir o consumo dos três jobs no painel da brapi |
+| `[info] brapi: N de 80 requisições no mês (…)` | Acompanhar de vez em quando. Esperado: cerca de 30 por mês |
+| `[info] AAAA-MM-DD: N BDRs negociados de M no boletim` | Na primeira carga, anotar o N típico e ajustar `minimoBdrsNegociadosNoBoletim` para cerca de metade dele |
+| `[info] Mais negociados: …` | Conferir 2 ou 3 volumes num site de cotações de vez em quando |
+| `Sem pregão novo desde …: arquivos mantidos.` | Nada: feriado ou execução repetida no mesmo dia |
 
-**Parâmetros** em `config/bdrs.json`: `maxAcoes` (35), `maxEtfs` (5), `pisoVolumeAcoes` e `pisoVolumeEtfs` (em reais por dia), `candidatosAcoes` e `candidatosEtfs` (quantos são consultados por dia), `maxRequisicoesBrapi` (teto por execução) e `horarioCorteFechamento`.
+**Parâmetros** em `config/bdrs.json`: `maxAcoes` (35), `maxEtfs` (5), `pisoVolumeAcoes` e
+`pisoVolumeEtfs` (reais por dia), `acompanharAcoes` e `acompanharEtfs` (quantos guardam série
+longa), `pregoesBusca` (negócio mais antigo aceito na busca), `minimoBdrsNegociadosNoBoletim`,
+bloco `brapi` (teto mensal e frequência das consultas) e bloco `desdobramentos`.
 
-**Rodar fora do horário:** Actions > **Atualizar BDRs** > **Run workflow**. Antes das 18h30, o pregão do dia é ignorado e a lista sai com o fechamento do dia anterior.
+**Rodar fora do horário:** Actions > **Atualizar BDRs** > **Run workflow**. Antes das 21h, o
+pregão do dia é ignorado (o boletim ainda pode estar incompleto).
 
 ## 5.9 Operação diária dos ETFs (decisão D23)
 
@@ -210,7 +243,7 @@ LFTS11, GOLD11) negociados no pregão; histórico com menos de 21 pregões (roda
 inicial); pregão mais recente com mais de 7 dias; menos de 25 ETFs acima do piso de
 R$ 500 mil/dia. O app continua com os dados do último dia bom.
 
-## 5.10 Google Search Console (decisão D24)
+## 5.10 Google Search Console (decisão D26)
 
 Ferramenta gratuita do Google que mostra quais páginas estão indexadas, por quais buscas o site aparece e se há erros. Não coloca nenhum script no site.
 
@@ -223,3 +256,5 @@ Ferramenta gratuita do Google que mostra quais páginas estão indexadas, por qu
 7. Menu **Inspeção de URL** → cole `https://carteiraideal.app.br/` → **Solicitar indexação**. Repita com `https://carteiraideal.app.br/app/`.
 
 Rotina: uma olhada por semana no relatório **Páginas** (erros de indexação) e, depois de um mês, no relatório **Desempenho** (buscas que trazem visitas).
+
+**Como foi feito de fato (D26).** Como a zona DNS do Registro.br ficou "em transição", a propriedade foi criada por **Prefixo do URL** (`https://carteiraideal.app.br/`) e verificada pelo **arquivo HTML** `google5f0b815b0517184a.html`, que fica na raiz do repositório e é copiado para o site pelo `scripts/build-site.mjs`. A tag `<meta name="google-site-verification">` no `<head>` do `index.html` da raiz fica como reserva. Não apagar nenhum dos dois. Se a zona DNS liberar, dá para adicionar também a propriedade de Domínio pelo TXT, sem desfazer esta.

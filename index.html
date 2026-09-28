@@ -4,15 +4,17 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- D24 (SEO): título, descrição e canonical pensados para a busca do Google. A página
+    <!-- D26 (SEO): título, descrição e canonical pensados para a busca do Google. A página
          continua sendo o "link na bio" (botões no topo); o conteúdo abaixo dos botões existe
          para o Google entender o site. -->
     <title>Carteira Ideal | Perfil de investidor, carteira e simuladores grátis</title>
     <meta
       name="description"
-      content="Descubra seu perfil de investidor em 14 perguntas e veja uma carteira de referência. Simuladores grátis de Tesouro Direto, FII e BDR. Sem cadastro."
+      content="Descubra seu perfil de investidor em 14 perguntas e veja uma carteira de referência. Simuladores grátis de Tesouro Direto, FII, BDR e ETF. Sem cadastro."
     />
     <link rel="canonical" href="https://carteiraideal.app.br/" />
+    <!-- Verificação do Google Search Console (D26). Não apagar: sem ela a propriedade perde a verificação. -->
+    <meta name="google-site-verification" content="Q7aCLDBgG-XWMnz5OG6J91gCzxqjYtquaiLJARobL7Y" />
     <meta name="theme-color" content="#0a0d13" />
     <!-- Open Graph (WhatsApp, Instagram, LinkedIn): endereços absolutos do domínio próprio -->
     <meta property="og:type" content="website" />
@@ -21,13 +23,13 @@
     <meta property="og:title" content="Carteira Ideal: perfil de investidor e simuladores grátis" />
     <meta
       property="og:description"
-      content="Descubra seu perfil de investidor e uma carteira de referência. Simuladores de Tesouro Direto, FII e BDR. Conteúdo educacional."
+      content="Descubra seu perfil de investidor e uma carteira de referência. Simuladores de Tesouro Direto, FII, BDR e ETF. Conteúdo educacional."
     />
     <meta property="og:image" content="https://carteiraideal.app.br/assets/og-image.png?v=2" />
     <meta property="og:url" content="https://carteiraideal.app.br/" />
     <meta name="twitter:card" content="summary_large_image" />
 
-    <!-- D24: dados estruturados (schema.org). As perguntas do FAQPage precisam ser idênticas às
+    <!-- D26: dados estruturados (schema.org). As perguntas do FAQPage precisam ser idênticas às
          da seção "Perguntas frequentes" do corpo da página: se mudar uma, mude a outra. -->
     <script type="application/ld+json">
       {
@@ -63,7 +65,7 @@
             "inLanguage": "pt-BR",
             "isAccessibleForFree": true,
             "offers": { "@type": "Offer", "price": "0", "priceCurrency": "BRL" },
-            "description": "Questionário de perfil de investidor com carteira de referência educacional e simuladores de Tesouro Direto, FII e BDR.",
+            "description": "Questionário de perfil de investidor com carteira de referência educacional e simuladores de Tesouro Direto, FII, BDR e ETF.",
             "publisher": { "@id": "https://carteiraideal.app.br/#org" }
           },
           {
@@ -93,7 +95,7 @@
               {
                 "@type": "Question",
                 "name": "De onde vêm os dados dos simuladores?",
-                "acceptedAnswer": { "@type": "Answer", "text": "De fontes oficiais e de mercado: Banco Central (Selic, IPCA e Boletim Focus) e Tesouro Transparente no Simule Tesouro Direto, atualizados toda semana; informe mensal da CVM e cotações de mercado no Simule FII; cotações de mercado, atualizadas nos dias úteis, no Simule BDR." }
+                "acceptedAnswer": { "@type": "Answer", "text": "De fontes oficiais e de mercado: Banco Central (Selic, IPCA e Boletim Focus) e Tesouro Transparente no Simule Tesouro Direto, atualizados toda semana; informe mensal da CVM e cotações de mercado no Simule FII; Boletim de Preços da B3, atualizado nos dias úteis, no Simule BDR e no Simule ETF." }
               }
             ]
           }
@@ -126,8 +128,8 @@
     <main id="container">
       <section id="profile">
         <img src="./assets/logo-mark.svg" alt="Logo do Carteira Ideal" width="112" height="112" />
-        <!-- D24: título principal da página para o Google (antes a página não tinha h1). -->
-        <h1>Descubra seu perfil de investidor e sua carteira de referência</h1>
+        <!-- D26: título principal da página para o Google (antes a página não tinha h1). -->
+        <h1>Seu perfil de investidor vai além do teste da corretora</h1>
         <p>@acarteiraideal</p>
       </section>
 
@@ -148,6 +150,23 @@
             <a class="cta" href="./app/">
               <span class="cta-title">Descobrir meu perfil e carteira de referência</span>
               <span class="cta-sub">14 perguntas, menos de 3 minutos</span>
+            </a>
+          </li>
+          <li>
+            <!-- Abre o Meu Mês (D21): controle do mês no molde dos Três Potes de Duda, com o Modo
+                 Recuperação para quem tem dívida cara. D25: logo abaixo do botão principal, junto
+                 com o Aprender, antes das ferramentas de simulação (organizar o mês e aprender vêm
+                 antes de simular investimentos). -->
+            <a class="link-2" href="./app/?tela=meuMes">
+              <span class="link-title"><span class="link-emoji" aria-hidden="true">🗓️</span>Meu Mês</span>
+              <span class="link-sub">Contas do mês e planejamento financeiro</span>
+            </a>
+          </li>
+          <li>
+            <!-- Abre a aba Aprender do app direto. O livro infantil fica lá dentro, no fim da tela. -->
+            <a class="link-2" href="./app/?tela=aprender">
+              <span class="link-title"><span class="link-emoji" aria-hidden="true">🎓</span>Aprender</span>
+              <span class="link-sub">Aulas curtas e livro infantil grátis</span>
             </a>
           </li>
           <li>
@@ -172,19 +191,10 @@
             </a>
           </li>
           <li>
-            <!-- Abre a aba Aprender do app direto. O livro infantil fica lá dentro, no fim da tela. -->
-            <a class="link-2" href="./app/?tela=aprender">
-              <span class="link-title"><span class="link-emoji" aria-hidden="true">🎓</span>Aprender</span>
-              <span class="link-sub">Aulas curtas e livro infantil grátis</span>
-            </a>
-          </li>
-          <li>
-            <!-- Abre o Meu Mês (D21): controle do mês no molde dos Três Potes de Duda, com o Modo
-                 Recuperação para quem tem dívida cara. Fica depois das ferramentas de investimento,
-                 de propósito: é complemento, e não a porta principal. -->
-            <a class="link-2" href="./app/?tela=meuMes">
-              <span class="link-title"><span class="link-emoji" aria-hidden="true">🗓️</span>Meu Mês</span>
-              <span class="link-sub">Contas do mês e planejamento financeiro</span>
+            <!-- Abre a aba Simule ETF do app direto, sem passar pelo questionário (D23) -->
+            <a class="link-2" href="./app/?tela=simuleEtf">
+              <span class="link-title"><span class="link-emoji" aria-hidden="true">🧺</span>Simule ETF</span>
+              <span class="link-sub">Os ETFs mais negociados na B3, por categoria</span>
             </a>
           </li>
           <li>
@@ -203,7 +213,7 @@
       </div>
 
 
-      <!-- D24 (SEO): conteúdo abaixo dos botões. Quem chega pelo Instagram usa os botões de
+      <!-- D26 (SEO): conteúdo abaixo dos botões. Quem chega pelo Instagram usa os botões de
            cima, como sempre; quem chega pelo Google encontra aqui a explicação do site.
            Sem <ul> nesta seção: o style.css estiliza "ul li a" como os botões da bio. -->
       <section class="sobre" aria-labelledby="sobre-titulo">
@@ -216,6 +226,14 @@
 
         <h2>Ferramentas gratuitas</h2>
         <div class="ferramentas">
+          <a class="ferramenta" href="./app/?tela=meuMes">
+            <h3>Meu Mês: controle financeiro</h3>
+            <p>Contas do mês, cofrinhos para as contas do ano, cartão de crédito com teto e um plano para sair das dívidas caras.</p>
+          </a>
+          <a class="ferramenta" href="./app/?tela=aprender">
+            <h3>Aprender</h3>
+            <p>Aulas curtas sobre os principais investimentos, diversificação e como sair das dívidas, e um livro infantil grátis de educação financeira.</p>
+          </a>
           <a class="ferramenta" href="./app/?tela=simuleTesouro">
             <h3>Simulador de Tesouro Direto</h3>
             <p>Quanto cada título Selic, Prefixado ou IPCA+ rende até o vencimento, já com Imposto de Renda e taxa de custódia da B3, e quanto isso vale em dinheiro de hoje.</p>
@@ -228,13 +246,9 @@
             <h3>Simulador de BDR</h3>
             <p>Os BDRs mais negociados na B3, por setor, e quantas cotas o valor que você tem hoje consegue comprar.</p>
           </a>
-          <a class="ferramenta" href="./app/?tela=meuMes">
-            <h3>Meu Mês: controle financeiro</h3>
-            <p>Contas do mês, cofrinhos para as contas do ano, cartão de crédito com teto e um plano para sair das dívidas caras.</p>
-          </a>
-          <a class="ferramenta" href="./app/?tela=aprender">
-            <h3>Aprender</h3>
-            <p>Aulas curtas sobre os principais investimentos, diversificação e como sair das dívidas, e um livro infantil grátis de educação financeira.</p>
+          <a class="ferramenta" href="./app/?tela=simuleEtf">
+            <h3>Simulador de ETF</h3>
+            <p>Os ETFs mais negociados na B3, por categoria (bolsa brasileira, exterior, renda fixa, ouro e cripto), e quantas cotas o valor que você tem hoje consegue comprar.</p>
           </a>
         </div>
 
@@ -258,7 +272,7 @@
           </details>
           <details>
             <summary>De onde vêm os dados dos simuladores?</summary>
-            <p>De fontes oficiais e de mercado: Banco Central (Selic, IPCA e Boletim Focus) e Tesouro Transparente no Simule Tesouro Direto, atualizados toda semana; informe mensal da CVM e cotações de mercado no Simule FII; cotações de mercado, atualizadas nos dias úteis, no Simule BDR.</p>
+            <p>De fontes oficiais e de mercado: Banco Central (Selic, IPCA e Boletim Focus) e Tesouro Transparente no Simule Tesouro Direto, atualizados toda semana; informe mensal da CVM e cotações de mercado no Simule FII; Boletim de Preços da B3, atualizado nos dias úteis, no Simule BDR e no Simule ETF.</p>
           </details>
         </div>
       </section>
