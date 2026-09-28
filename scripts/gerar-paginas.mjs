@@ -617,7 +617,7 @@ function paginaSobre() {
       secao(
         'Por que o projeto existe',
         `<p>O teste de perfil de investidor que as corretoras aplicam mede a intenção: quanto risco você diz aceitar. A vida real também conta: a reserva que você tem, as dívidas, os gastos previstos, a estabilidade da renda. O Carteira Ideal cruza as duas coisas e mostra uma carteira de referência.</p>
-<p>Junto com o teste, o projeto traz ferramentas para organizar o mês (<a href="/meu-mes/">Meu Mês</a>), um caminho para <a href="/aprender/sair-das-dividas/">sair das dívidas</a> antes de investir, <a href="/aprender/">guias sobre cada classe de ativo</a>, simuladores com dados oficiais e o livro infantil <strong>Os Três Potes de Duda</strong>.</p>`,
+<p>Junto com o teste, o projeto traz ferramentas para organizar o mês (<a href="/meu-mes/">Meu Mês</a>), um caminho para <a href="/aprender/sair-das-dividas/">sair das dívidas</a> antes de investir, <a href="/aprender/">guias sobre cada classe de ativo</a>, simuladores com dados oficiais e o livro infantil <strong>Os Três Potes de Clara</strong>.</p>`,
       ),
       secao(
         'Como o projeto se mantém',
@@ -883,7 +883,7 @@ function paginaAprender(dividasDisponivel) {
 <li><a href="/simulador-etf/">Simulador de ETF</a></li>
 </ul>`,
       ),
-      secao('Livro infantil grátis', `<p>O livro <strong>Os Três Potes de Duda</strong>, de educação financeira infantil, está disponível de graça na tela Aprender do app.</p>`),
+      secao('Livro infantil grátis', `<p>O livro <strong>Os Três Potes de Clara</strong>, de educação financeira infantil, está disponível de graça na tela Aprender do app.</p>`),
     ].join('\n'),
     relacionados: [],
   }

@@ -16,7 +16,7 @@ export const URL_INSTAGRAM = 'https://www.instagram.com/acarteiraideal/'
 /** O app é publicado em /app/; o PDF fica em /assets/ da landing. */
 export const URL_LIVRO_PDF = '../assets/livro-os-tres-potes-de-duda.pdf'
 export const CHAVE_LIVRO_LIBERADO = 'carteiraideal.livroLiberado'
-const NOME_ARQUIVO_LIVRO = 'Os-Tres-Potes-de-Duda.pdf'
+const NOME_ARQUIVO_LIVRO = 'Os-Tres-Potes-de-Clara.pdf'
 
 export function MateriaisExtras() {
   const [liberado, setLiberado] = useState(false)
@@ -90,9 +90,9 @@ export function MateriaisExtras() {
               <XIcon size={20} />
             </span>
           </button>
-          <h2 id="livro-titulo" className="livro-dialog-titulo">Livro grátis: Os Três Potes de Duda</h2>
+          <h2 id="livro-titulo" className="livro-dialog-titulo">Livro grátis: Os Três Potes de Clara</h2>
           <p id="livro-desc" className="livro-dialog-desc">
-            Educação financeira para crianças, em PDF com 54 páginas. É um presente para quem acompanha o Carteira
+            Educação financeira para crianças, em PDF com 55 páginas. É um presente para quem acompanha o Carteira
             Ideal: siga o perfil no Instagram para liberar o download.
           </p>
           <div className="col" style={{ gap: 12, marginTop: 20 }}>
