@@ -57,7 +57,7 @@ const AULAS_SAIR_DAS_DIVIDAS = TRILHA_SAIR_DAS_DIVIDAS ? totalDeAulas(TRILHA_SAI
 /**
  * Meu Mês (D21, Etapa 1): o papel das contas do mês, no celular. A pessoa cadastra as contas
  * uma vez e, a cada salário, vai ticando. As contas anuais (IPVA, IPTU, seguro) viram
- * cofrinhos mensais. O que sobra vai para os Três Potes de Duda: Guardar, Fazer Crescer e
+ * cofrinhos mensais. O que sobra vai para os Três Potes de Clara: Guardar, Fazer Crescer e
  * Gastar. Tudo fica no aparelho; nada vai para a API.
  *
  * Etapa 2: cartão de crédito. Etapa 3: Modo Recuperação (dívidas, plano de quitação, pote

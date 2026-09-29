@@ -71,6 +71,6 @@ applyTheme(document.documentElement.classList.contains("light"));
   }
 })();
 
-/* O botão do livro "Os Três Potes de Duda" (com a liberação por confiança) saiu daqui: agora
+/* O botão do livro "Os Três Potes de Clara" (com a liberação por confiança) saiu daqui: agora
    fica no fim da tela Aprender do app (webapp-src/src/ui/MateriaisExtras.tsx), que usa a mesma
    chave carteiraideal.livroLiberado. O link do curso de Candlesticks foi retirado do site (D22). */

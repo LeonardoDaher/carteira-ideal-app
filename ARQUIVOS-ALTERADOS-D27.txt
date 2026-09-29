@@ -1,0 +1,46 @@
+ARQUIVOS DA D27 (28/09/2026) - caminhos a partir de 1-projeto-para-o-github/
+Livro infantil "Os Três Potes de Clara" (Duda virou Clara e Gui virou Pedro), com o nome do
+arquivo do PDF também trocado e os comentários residuais limpos. Feito em cima do pacote D26.
+Alterados (A), novos (N) e removidos (X). Nenhum arquivo novo de código. Não precisa rodar job.
+
+PDF (o nome do ARQUIVO mudou desta vez)
+X  assets/livro-os-tres-potes-de-duda.pdf    removido
+N  assets/livro-os-tres-potes-de-clara.pdf   PDF novo, 55 páginas, nome do arquivo atualizado
+
+Código e conteúdo visível ao usuário
+A  webapp-src/src/ui/MateriaisExtras.tsx     URL_LIVRO_PDF aponta pro novo nome do arquivo;
+                                              título do diálogo, nome do download e "55 páginas"
+A  scripts/gerar-paginas.mjs                 título do livro nas páginas Sobre e Aprender
+
+Comentários (invisíveis para quem usa o site) e documentação
+A  index.html                                comentário do Meu Mês
+A  script.js                                 comentário do botão do livro
+A  webapp-src/src/index.css                   comentário do D21
+A  webapp-src/src/domain/orcamento.ts          comentário do D21
+A  webapp-src/src/screens/MeuMes.tsx           comentário do D21
+A  README.md                                  nome do arquivo do PDF (2 trechos)
+A  docs/05-publicacao-e-operacao.md            nome do arquivo do PDF (seção 5.3)
+A  docs/07-registro-de-decisoes.md             D21 (linha da metáfora) e D27 (opcional)
+
+FORA DO GITHUB (material de apoio)
+   3-material-de-apoio/Os_Tres_Potes_de_Clara_6x9_CORRIGIDO.docx  substitui o Word antigo (Duda)
+
+PARA SUBIR
+Envie os arquivos da lista "Código e conteúdo visível" (2) e o PDF (troca de nome: exclua o
+antigo em assets e suba o novo). Os comentários (5) e a documentação (3) são opcionais, mas
+como o nome do arquivo mudou, sem eles README e docs/05 ficam desatualizados.
+Depois do deploy da Vercel (1 a 2 minutos), abra o livro pelo botão da tela Aprender e confira
+a capa e o nome do arquivo baixado. Se ainda aparecer o antigo, Ctrl+F5 ou aba anônima.
+
+ATENÇÃO - o link antigo do PDF para de funcionar
+Como o NOME do arquivo mudou (e não só o conteúdo), o endereço antigo
+(carteiraideal.app.br/assets/livro-os-tres-potes-de-duda.pdf), se já foi compartilhado em algum
+lugar (posts antigos do Instagram, por exemplo), passa a dar erro 404. O link novo é
+carteiraideal.app.br/assets/livro-os-tres-potes-de-clara.pdf. O botão dentro do app sempre usa
+o link certo, então quem baixa pelo app nunca é afetado - só links soltos por fora.
+
+VERIFICAÇÃO
+368 testes do app e 150 dos scripts passando (MateriaisExtras.test.tsx usa a constante
+URL_LIVRO_PDF, não o valor fixo, então a troca de nome não quebrou o teste); typecheck e build
+de produção sem erro; nenhuma menção a "Duda" restante em código, comentários ou páginas
+publicadas (dist-site), fora do próprio texto do registro D27 que explica a mudança.

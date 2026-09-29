@@ -57,7 +57,7 @@ O endereço antigo (`carteira-ideal-app.vercel.app`) continua funcionando — a 
 |---|---|
 | Botões, textos e links da landing | `index.html` (raiz) |
 | Cores e visual da landing | `style.css` (raiz) |
-| Livro infantil em PDF | Substituir `assets/livro-os-tres-potes-de-duda.pdf` por um arquivo **com o mesmo nome** |
+| Livro infantil em PDF | Substituir `assets/livro-os-tres-potes-de-clara.pdf` por um arquivo **com o mesmo nome** |
 | Texto das 7 perguntas de suitability | `webapp-src/src/data/questions.ts` |
 | Texto das 7 perguntas de Arquitetura Patrimonial | `webapp-src/src/data/perguntasArquitetura.ts` |
 | Descrição das 11 classes de ativos | `webapp-src/src/data/assets.ts` |

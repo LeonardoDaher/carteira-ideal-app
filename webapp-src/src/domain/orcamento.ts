@@ -1,5 +1,5 @@
 /**
- * Meu Mês (D21) — controle do orçamento mensal no molde dos Três Potes de Duda.
+ * Meu Mês (D21) — controle do orçamento mensal no molde dos Três Potes de Clara.
  *
  * Funções puras, sem tela e sem armazenamento. Diferente do engine.ts, este arquivo roda no
  * navegador: aqui não há regra a proteger, e o dado sensível (salário, contas) é da pessoa,

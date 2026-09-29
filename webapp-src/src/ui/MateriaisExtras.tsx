@@ -14,7 +14,7 @@ import { LockIcon, XIcon } from './Icon'
 
 export const URL_INSTAGRAM = 'https://www.instagram.com/acarteiraideal/'
 /** O app é publicado em /app/; o PDF fica em /assets/ da landing. */
-export const URL_LIVRO_PDF = '../assets/livro-os-tres-potes-de-duda.pdf'
+export const URL_LIVRO_PDF = '../assets/livro-os-tres-potes-de-clara.pdf'
 export const CHAVE_LIVRO_LIBERADO = 'carteiraideal.livroLiberado'
 const NOME_ARQUIVO_LIVRO = 'Os-Tres-Potes-de-Clara.pdf'
 

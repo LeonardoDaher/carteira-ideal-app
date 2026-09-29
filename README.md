@@ -84,7 +84,7 @@ vercel dev
   geradas no build por `scripts/gerar-paginas.mjs` (estilo em `paginas.css`); ver docs/05, seção 5.11. As perguntas frequentes aparecem duas vezes nesse
   arquivo (corpo e JSON-LD): mudou uma, mude a outra.
 - **Links:** todos configurados em `index.html`. Para trocar um, procure o texto do botão.
-  O livro em PDF fica em `assets/livro-os-tres-potes-de-duda.pdf`: para atualizá-lo, envie um
+  O livro em PDF fica em `assets/livro-os-tres-potes-de-clara.pdf`: para atualizá-lo, envie um
   arquivo com **o mesmo nome** para a pasta `assets`.
 - **Atualizar o app:** edite dentro de `webapp-src/src/`. O deploy (`npm run build`, ou
   automaticamente a cada push se a Vercel estiver conectada ao repositório) já monta a versão
@@ -113,7 +113,7 @@ O botão "Educação Financeira Infantil" abre um diálogo pedindo para seguir o
 (`carteiraideal.livroLiberado`). Depois disso, o botão da lista baixa o PDF direto.
 
 - **Não há verificação:** o Instagram não permite checar quem segue. É um convite, não uma proteção.
-- **O PDF continua público** em `assets/livro-os-tres-potes-de-duda.pdf`: quem souber o endereço baixa direto.
+- **O PDF continua público** em `assets/livro-os-tres-potes-de-clara.pdf`: quem souber o endereço baixa direto.
 - **Textos, endereços e lógica:** ficam em `webapp-src/src/ui/MateriaisExtras.tsx`; os estilos, no fim de
   `webapp-src/src/index.css`. O link do curso de Candlesticks foi retirado do site na D22.
 - **Quem já tinha liberado na landing** continua liberado: a chave salva no navegador é a mesma.
