@@ -1,0 +1,30 @@
+ARQUIVOS DA D28 (29/09/2026) - caminhos a partir de 1-projeto-para-o-github/
+Trilha 4 "Tutorial Meu Mês" na aba Aprender: 17 aulas em texto, nos títulos da série de vídeos.
+Feito em cima do pacote D27. Não precisa rodar job.
+
+Código e conteúdo visível ao usuário
+A  webapp-src/src/data/trilhas.ts              campo novo aviso?: 'dividas' e a trilha 4 (17 aulas, 6 tópicos)
+A  webapp-src/src/screens/AprenderVideo.tsx    aviso do rodapé por aula (dívida / tutorial / investimento)
+N  webapp-src/src/screens/TutorialMeuMes.test.tsx   6 testes novos
+
+Documentação (opcional, mas recomendada)
+A  docs/07-registro-de-decisoes.md             D28 no fim do arquivo
+
+FORA DO GITHUB
+N  3-material-de-apoio/manual-meu-mes/         manual em PDF e Word, 80 telas, roteiro JSON, cópias de demonstração
+A  briefing-instagram-meu-mes.md               "Três Potes de Duda" -> "Três Potes de Clara" (D27)
+A  RESUMO-PARA-NOVA-CONVERSA.md, LEIA-ME-PRIMEIRO.txt   atualizados para a D28
+
+PARA SUBIR
+Envie os 3 arquivos da lista "Código e conteúdo visível" (o teste é novo; os outros dois substituem os atuais)
+e, se quiser, o docs/07. Depois do deploy da Vercel (1 a 2 minutos), abra Aprender pelo botão da página
+inicial e confira o cartão "Trilha 4 · Tutorial Meu Mês" (17 de 17 aulas disponíveis).
+
+QUANDO OS VÍDEOS SAÍREM
+Em webapp-src/src/data/trilhas.ts, na aula correspondente da trilha 'tutorial-meu-mes', acrescente
+youtubeId: 'ID_DO_VIDEO' e formato: 'vertical'. O texto continua abaixo do vídeo. O selo da aula
+passa de "Leitura · 2 min" para "2 min". Ajuste a duração se o vídeo for de 1 min.
+
+VERIFICAÇÃO
+374 testes do app (6 novos) e 150 dos scripts passando; typecheck e lint sem erros; build de produção
+OK (30 páginas estáticas, como antes); telas conferidas em 390x844.

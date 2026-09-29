@@ -127,9 +127,11 @@ export function AprenderVideo({ ctx }: { ctx: AppCtx }) {
       )}
 
       <div className="tiny muted justify" style={{ lineHeight: 1.5 }}>
-        {trilha.id === 'sair-das-dividas'
+        {trilha.id === 'sair-das-dividas' || aula.aviso === 'dividas'
           ? 'Conteúdo educativo. Não é assessoria jurídica e não indica banco nem produto de crédito.'
-          : 'Conteúdo educativo com fins ilustrativos, sem caráter de recomendação de compra ou venda.'}
+          : trilha.id === 'tutorial-meu-mes'
+            ? 'Tutorial de uso do Meu Mês. Conteúdo educativo: os valores dos exemplos são fictícios.'
+            : 'Conteúdo educativo com fins ilustrativos, sem caráter de recomendação de compra ou venda.'}
       </div>
 
       <button className="btn btn-outline" onClick={ctx.voltarDaAula}>
