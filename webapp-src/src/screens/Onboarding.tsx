@@ -58,6 +58,10 @@ export function Onboarding({ ctx }: { ctx: AppCtx }) {
         Descobrir meu perfil e carteira de referência
       </button>
 
+            <a className="muted tiny" href="/privacidade/" style={{ textAlign: 'center' }}>
+        Política de Privacidade
+      </a>
+
       <div className="grow" />
 
       <AvisoEducacional variante="completo" />
