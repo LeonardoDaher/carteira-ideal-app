@@ -678,6 +678,8 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 
 **Mecanismo.** `manifest.webmanifest` novo na raiz (ícones em `/app/icon-*.png`); `scripts/build-site.mjs` copia o arquivo para o site; `index.html` da raiz e `webapp-src/index.html` com o link; `webapp-src/public/manifest.webmanifest` **removido** (fonte única); teste novo `scripts/manifest.test.mjs` (4 testes).
 
+**Título e descrição da home (mesma D29).** A mensagem passou a abranger o app inteiro: `<title>` "Carteira Ideal | Perfil de investidor, planejamento financeiro e simuladores" (76 caracteres; o Google pode cortar o final), meta description, `og:title`, `og:description` e a descrição do `WebApplication` no JSON-LD alinhados. A palavra "personalizada" ficou de fora de propósito: o site descreve uma carteira de **referência**, educacional, e o aviso diz que ela não considera toda a situação do usuário. O texto do FAQPage não mudou (continua idêntico ao do corpo da página).
+
 **Para quem já instalou.** O Chrome atualiza sozinho em poucos dias; para ver na hora, desinstalar e instalar de novo pelo `carteiraideal.app.br`.
 
 **Verificação.** 158 testes dos scripts passando (4 novos); build de produção OK (31 páginas estáticas); no site montado, `manifest.webmanifest` na raiz e o link presente na landing e no app.

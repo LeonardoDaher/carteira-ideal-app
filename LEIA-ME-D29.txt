@@ -2,7 +2,7 @@ D29 (29/09/2026) - App instalado passa a abrir na PÁGINA INICIAL (a da foto 2),
 
 ARQUIVOS (caminhos a partir da raiz do repositório)
 N  manifest.webmanifest                  NOVO, na raiz (start_url "/", scope "/", atalhos)
-A  index.html                            link do manifesto + novo <title> da home (D29)
+A  index.html                            link do manifesto + título, descrição e Open Graph novos da home (D29)
 A  webapp-src/index.html                 o link do manifesto agora aponta para /manifest.webmanifest
 A  scripts/build-site.mjs                'manifest.webmanifest' entra na lista de arquivos da landing
 N  scripts/manifest.test.mjs             4 testes novos
