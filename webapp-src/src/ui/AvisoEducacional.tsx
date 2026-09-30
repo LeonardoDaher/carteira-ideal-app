@@ -11,10 +11,9 @@ export function AvisoEducacional({ variante = 'curto' }: { variante?: 'completo'
     return (
       <div className="card small muted justify" style={{ lineHeight: 1.5 }} role="note">
         <strong>Conteúdo educacional.</strong> Este app não é recomendação de investimento nem
-        consultoria e não substitui a orientação de um profissional certificado (CEA/CFP). As
-        carteiras mostradas são exemplos de referência, geradas por regras automáticas a partir das
-        suas respostas, sem considerar toda a sua situação. Rentabilidade passada não garante
-        rentabilidade futura.
+        consultoria. As carteiras mostradas são exemplos de referência, geradas por regras
+        automáticas a partir das suas respostas. Rentabilidade passada não garante rentabilidade
+        futura.
       </div>
     )
   }

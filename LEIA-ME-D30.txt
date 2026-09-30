@@ -1,0 +1,16 @@
+D30 (29/09/2026) - Tela inicial do app (/app/):
+  1) o botão "Descobrir meu perfil e carteira de referência" fica ACIMA da caixa "Conteúdo educacional";
+  2) frase curta acima do botão: "Conteúdo educacional, não é recomendação de investimento.";
+  3) novo texto da caixa "Conteúdo educacional" (sem a citação CEA/CFP e sem "sem considerar toda a sua situação").
+
+ARQUIVOS (caminhos a partir da raiz do repositório)
+A  webapp-src/src/screens/Onboarding.tsx     ordem (botão antes do aviso) + frase curta
+A  webapp-src/src/ui/AvisoEducacional.tsx    novo texto do aviso completo
+A  docs/07-registro-de-decisoes.md           D30 no fim (opcional; já inclui a D29)
+
+Feito em cima da D29. Não precisa rodar job.
+
+DEPOIS DO DEPLOY (1 a 2 min na Vercel)
+Abra carteiraideal.app.br/app/ no celular: frase, botão amarelo e caixa do aviso aparecem juntos, sem rolar.
+
+VERIFICAÇÃO: 374 testes do app passando; typecheck e lint sem erros; build OK; conferido em 390x844.

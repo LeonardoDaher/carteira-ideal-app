@@ -683,3 +683,15 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 **Para quem já instalou.** O Chrome atualiza sozinho em poucos dias; para ver na hora, desinstalar e instalar de novo pelo `carteiraideal.app.br`.
 
 **Verificação.** 158 testes dos scripts passando (4 novos); build de produção OK (31 páginas estáticas); no site montado, `manifest.webmanifest` na raiz e o link presente na landing e no app.
+
+### D30 · Tela inicial do app: botão acima do aviso e novo texto do aviso educacional (29/09/2026)
+
+**Contexto.** No celular, com a barra do Chrome, o botão principal da tela inicial do app (`/app/`) ficava abaixo do aviso "Conteúdo educacional" e saía da parte visível, exigindo rolagem para achar o caminho até o questionário.
+
+**Decisão.** (1) O botão "Descobrir meu perfil e carteira de referência" passa para cima do aviso completo. (2) Logo acima do botão entra uma frase curta e fixa: "Conteúdo educacional, não é recomendação de investimento." (3) O texto do aviso completo (`AvisoEducacional`, variante `completo`, só usada nesta tela) foi reescrito pelo responsável: "Conteúdo educacional. Este app não é recomendação de investimento nem consultoria. As carteiras mostradas são exemplos de referência, geradas por regras automáticas a partir das suas respostas. Rentabilidade passada não garante rentabilidade futura."
+
+**O que saiu do aviso completo.** A referência a "profissional certificado (CEA/CFP)" e a expressão "sem considerar toda a sua situação". A variante curta (telas de resultado, carteira e simulador) e o aviso da tela de detalhe do ativo não mudaram e ainda recomendam procurar um profissional certificado. Se o texto voltar a citar que a carteira não considera toda a situação do usuário, é aqui que se restaura.
+
+**Mecanismo.** `webapp-src/src/screens/Onboarding.tsx` (ordem dos elementos e a frase curta) e `webapp-src/src/ui/AvisoEducacional.tsx` (texto da variante `completo`). Nenhum teste dependia do texto antigo.
+
+**Verificação.** 374 testes do app passando; typecheck e lint sem erros; build de produção OK. Em 390×844 a frase, o botão e o aviso aparecem juntos, sem rolagem.
