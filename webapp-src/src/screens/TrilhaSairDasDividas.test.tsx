@@ -21,7 +21,7 @@ describe('Trilha "Sair das dívidas" (D21, Etapa 4)', () => {
     expect(aulaDisponivel({ id: 'x', titulo: 'X', duracao: '2 min', resumo: '', texto: ['a'] })).toBe(true)
   })
 
-  it('aparece no Aprender e mostra as aulas como leitura', () => {
+  it('aparece no Aprender e mostra as 9 aulas com vídeo', () => {
     const ctx = { abrirTrilha: vi.fn(), trilhaSelecionadaId: 'sair-das-dividas', screen: 'trilha', setScreen: vi.fn() } as unknown as AppCtx
     const { unmount } = render(<Aprender ctx={ctx} />)
     fireEvent.click(screen.getByText('Sair das dívidas').closest('button')!)
@@ -29,8 +29,24 @@ describe('Trilha "Sair das dívidas" (D21, Etapa 4)', () => {
     unmount()
 
     render(<Trilha ctx={ctx} />)
-    expect(screen.getAllByText('Leitura · 2 min')).toHaveLength(9)
+    expect(screen.getAllByText('2 min')).toHaveLength(9)
+    expect(screen.queryAllByText(/^Leitura/)).toHaveLength(0)
     expect(screen.queryByText('Em breve')).toBeNull()
+  })
+
+  it('aula com vídeo: player do Short em formato vertical e o texto segue abaixo', () => {
+    const ctx = {
+      aulaAtualRef: { trilhaId: 'sair-das-dividas', topicoId: 'entender-a-divida', aulaId: 'registrato' },
+      setScreen: vi.fn(),
+      abrirAula: vi.fn(),
+      voltarDaAula: vi.fn(),
+      screen: 'aprenderVideo',
+    } as unknown as AppCtx
+    const { container } = render(<AprenderVideo ctx={ctx} />)
+    const iframe = container.querySelector('iframe') as HTMLIFrameElement
+    expect(iframe.src).toBe('https://www.youtube.com/embed/JLuz-UN9tqo')
+    expect(screen.queryByText('Vídeo em breve')).toBeNull()
+    expect(screen.getByText(/conta gov.br, nível prata ou ouro/)).toBeTruthy()
   })
 
   it('aula em texto: parágrafos, fontes oficiais e botão para o Meu Mês', () => {
