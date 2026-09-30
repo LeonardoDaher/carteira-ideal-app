@@ -265,6 +265,8 @@ export const TRILHAS: Trilha[] = [
             titulo: 'Por que a dívida cara cresce tão rápido',
             duracao: '2 min',
             resumo: 'Juros sobre juros: o que 8% ao mês fazem com R$ 1.000 em um ano.',
+            youtubeId: '3HNVl98ZWB0',
+            formato: 'vertical',
             texto: [
               'Juros de dívida são cobrados sobre o saldo, e o saldo inclui os juros do mês anterior. É o mesmo juro composto que faz um investimento crescer, só que jogando contra você.',
               'Um exemplo: R$ 1.000 no cheque especial, a 8% ao mês, viram cerca de R$ 2.518 em 12 meses sem nenhum pagamento. Os mesmos R$ 1.000 num investimento seguro que rendesse perto de 14% ao ano, como a Selic de 2026, chegariam a uns R$ 1.137 antes do imposto.',
@@ -277,6 +279,8 @@ export const TRILHAS: Trilha[] = [
             titulo: 'Dívida cara x dívida barata',
             duracao: '2 min',
             resumo: 'Qual atacar primeiro e qual pode seguir com a parcela em dia.',
+            youtubeId: 'qh4uGreXGJQ',
+            formato: 'vertical',
             texto: [
               'Nem toda dívida é inimiga do mesmo tamanho. Rotativo e fatura parcelada do cartão, cheque especial, empréstimo pessoal e dívida em dólar são caras. Qualquer outra dívida também é cara a partir de 3% ao mês, o que dá mais de 42% ao ano.',
               'Consignado e financiamento de carro ou imóvel costumam ficar na casa de 1% a 2% ao mês. São dívidas longas e mais baratas: o combinado é manter a parcela em dia, sem atrasar.',
@@ -289,6 +293,8 @@ export const TRILHAS: Trilha[] = [
             titulo: 'Descubra tudo o que você deve',
             duracao: '2 min',
             resumo: 'O Registrato, do Banco Central, mostra de graça as dívidas no seu CPF.',
+            youtubeId: 'JLuz-UN9tqo',
+            formato: 'vertical',
             texto: [
               'Ninguém quita o que não enxerga. O primeiro passo é pôr no papel todas as dívidas: quanto deve hoje, quanto é a parcela mínima e quanto de juros cobra por mês.',
               'O Registrato, do Banco Central, mostra de graça os empréstimos, financiamentos e cartões no seu CPF, em todas as instituições. Entre com a conta gov.br, nível prata ou ouro.',
@@ -309,6 +315,8 @@ export const TRILHAS: Trilha[] = [
             titulo: 'Mini-reserva antes de atacar',
             duracao: '2 min',
             resumo: 'Por que guardar um pouco antes de quitar evita dívida nova.',
+            youtubeId: 'lVaMEtKBWvM',
+            formato: 'vertical',
             texto: [
               'Parece contraditório guardar dinheiro com dívida cara em aberto. Mas sem nenhuma reserva, o primeiro remédio, conserto ou pneu furado volta para o cartão, e o plano recomeça do zero.',
               'Por isso o plano começa com uma mini-reserva: metade de um mês de custo de vida, e nunca menos de R$ 500. É pouco para adiar muito o ataque às dívidas, e o bastante para um imprevisto pequeno não virar dívida nova.',
@@ -321,6 +329,8 @@ export const TRILHAS: Trilha[] = [
             titulo: 'Avalanche ou bola de neve',
             duracao: '2 min',
             resumo: 'Os dois jeitos de ordenar as dívidas, e como escolher o seu.',
+            youtubeId: 'rTdgzNv3KbA',
+            formato: 'vertical',
             texto: [
               'Nos dois métodos, você paga a mínima de todas as dívidas e põe o dinheiro extra numa só. Quando ela acaba, a parcela dela reforça a próxima da fila. A diferença é a ordem da fila.',
               'Avalanche: primeiro a dívida com os juros mais altos. É o caminho que paga menos juros no total, pela matemática.',
@@ -334,6 +344,8 @@ export const TRILHAS: Trilha[] = [
             titulo: 'O pacto de não parcelar',
             duracao: '2 min',
             resumo: 'Cada parcela é um pedaço do salário dos próximos meses já gasto.',
+            youtubeId: 'e1hYeAuU0Ko',
+            formato: 'vertical',
             texto: [
               'Parcelar sem juros parece não custar nada, mas cada parcela é um pedaço do salário dos próximos meses que já tem dono. Somadas, as parcelas pequenas viram a fatura que não fecha.',
               'O pacto é um combinado com você mesmo: enquanto houver dívida cara, compras só à vista. No Meu Mês, com o pacto feito, parcelar exige um passo a mais e uma confirmação. É de propósito: a pausa ajuda a decidir com calma.',
@@ -352,6 +364,8 @@ export const TRILHAS: Trilha[] = [
             titulo: 'Como negociar com o credor',
             duracao: '2 min',
             resumo: 'Proposta por escrito, CET na mão e parcela que cabe no mês.',
+            youtubeId: 'bgh55c9Ywqc',
+            formato: 'vertical',
             texto: [
               'Antes de ligar para o credor, saiba quanto cabe no seu mês: é o valor do seu pote Quitar. Acordo com parcela que não cabe quebra, e acordo quebrado costuma voltar pior.',
               'Peça a proposta por escrito, com o CET e o total a pagar, e compare com a dívida de hoje. Desconto grande à vista pode valer a pena; parcelamento longo pode sair mais caro que a dívida original.',
@@ -369,6 +383,8 @@ export const TRILHAS: Trilha[] = [
             titulo: 'Quando as dívidas não cabem no salário',
             duracao: '2 min',
             resumo: 'O que a Lei do Superendividamento permite e onde pedir ajuda de graça.',
+            youtubeId: 'Yu92Nim3HhA',
+            formato: 'vertical',
             texto: [
               'Às vezes, mesmo cortando tudo, as parcelas passam do que entra. Isso tem nome: superendividamento. E tem saída prevista em lei.',
               'A Lei 14.181/2021 permite renegociar as dívidas de consumo todas juntas, com todos os credores, num plano de até 5 anos que preserve um mínimo para você viver.',
@@ -382,6 +398,8 @@ export const TRILHAS: Trilha[] = [
             titulo: 'Depois da última parcela',
             duracao: '2 min',
             resumo: 'Reserva completa e a volta aos investimentos, sem pular etapas.',
+            youtubeId: 'IV3cRf9c9RU',
+            formato: 'vertical',
             texto: [
               'Quando a última dívida cara acaba, o dinheiro que ia para o pote Quitar não volta para o consumo: ele passa a construir o seu futuro.',
               'Primeiro, complete a reserva de emergência até 3 meses de contas. Ela fica num lugar seguro e de resgate rápido, e é o que impede a próxima emergência de virar dívida.',
@@ -410,6 +428,8 @@ export const TRILHAS: Trilha[] = [
             titulo: 'Abrindo o Meu Mês e começando pelo salário',
             duracao: '1 min',
             resumo: 'Onde fica o Meu Mês, a ideia geral e o primeiro passo: o salário líquido.',
+            youtubeId: 'WTPpQCtbkg8',
+            formato: 'vertical',
             texto: [
               'O Meu Mês é o controle do seu mês, grátis e sem cadastro. A ideia é simples: do salário saem as contas do mês, os cofrinhos das contas do ano, a fatura do cartão e as parcelas das dívidas. O que sobra vai para três potes: Guardar, Fazer Crescer e Gastar.',
               'Para abrir, toque em Meu Mês na página inicial da Carteira Ideal, logo abaixo do botão principal. Na primeira vez, o app mostra só o cartão "Comece pelo salário".',
@@ -431,6 +451,8 @@ export const TRILHAS: Trilha[] = [
             titulo: 'Cadastrando as contas de todo mês',
             duracao: '2 min',
             resumo: 'Aluguel, luz, água, internet, mercado: anote uma vez e corrija quando precisar.',
+            youtubeId: 'Q9MbIXYzGCY',
+            formato: 'vertical',
             texto: [
               'Você só precisa anotar as suas contas uma vez. Depois, todo mês é só ir ticando. O cadastro fica no cartão Minhas contas, logo abaixo da lista Contas do mês.',
               'Passo 1: em "Nome da conta", digite o nome (Academia, Diarista, Pensão) ou toque num atalho: Aluguel, Condomínio, Luz, Água, Internet e celular, Plano de saúde, Escola ou creche, Mercado, Transporte e combustível. Os atalhos só preenchem o nome: qualquer conta pode ser cadastrada.',
@@ -448,6 +470,8 @@ export const TRILHAS: Trilha[] = [
             titulo: 'Contas do ano viram cofrinhos (IPVA, IPTU, seguro)',
             duracao: '2 min',
             resumo: 'Como o app divide as contas do ano pelos meses que faltam.',
+            youtubeId: 'Xcy2lKgvW-g',
+            formato: 'vertical',
             texto: [
               'Janeiro chega e o IPVA pega você de surpresa? No Meu Mês, cada conta do ano vira um cofrinho mensal.',
               'Passo 1: em Minhas contas, toque num atalho (IPVA, IPTU, Licenciamento, Seguro do carro, Seguro da moto, Material escolar e matrícula) ou digite o nome.',
@@ -466,6 +490,8 @@ export const TRILHAS: Trilha[] = [
             titulo: 'Conta de todo mês paga no cartão de crédito',
             duracao: '1 min',
             resumo: 'Streaming, celular, academia: a conta sai da lista e entra no gasto do cartão.',
+            youtubeId: 'W7MILirh7XQ',
+            formato: 'vertical',
             texto: [
               'Paga streaming, celular ou academia no cartão de crédito? Cadastre normalmente, e em "Como você paga" toque em Cartão de crédito.',
               'Passo 1: em Minhas contas, digite o nome e o valor por mês, com "Todo mês" marcado.',
@@ -481,6 +507,8 @@ export const TRILHAS: Trilha[] = [
             titulo: 'Conta do ano no cartão: à vista ou parcelada',
             duracao: '2 min',
             resumo: 'O que muda quando o IPVA ou o seguro vai no cartão, à vista ou em parcelas.',
+            youtubeId: 'C4bYMX_V_rQ',
+            formato: 'vertical',
             texto: [
               'Cadastre a conta como "Uma vez por ano", com valor total e mês do vencimento. Em "Como você paga", escolha o cartão à vista ou o cartão parcelado.',
               'Cartão à vista: o cofrinho continua todo mês. No vencimento a conta vai para o cartão e, no mês seguinte, o dinheiro do cofrinho paga essa parte da fatura. Ele não sai do salário duas vezes.',
@@ -501,6 +529,8 @@ export const TRILHAS: Trilha[] = [
             titulo: 'Minhas dívidas: cadastrando cada dívida',
             duracao: '2 min',
             resumo: 'Saldo, juros e parcela mínima de cada dívida, e como atualizar todo mês.',
+            youtubeId: '3C_-QVF2Ub8',
+            formato: 'vertical',
             texto: [
               'Antes de cadastrar, levante tudo o que você deve. O Registrato, do Banco Central, mostra de graça as dívidas no seu CPF. Entre com a conta gov.br, nível prata ou ouro.',
               'Passo 1: no cartão Minhas dívidas, toque em "Cadastrar uma dívida".',
@@ -520,6 +550,8 @@ export const TRILHAS: Trilha[] = [
             titulo: 'Cartão de crédito: o seu teto e o semáforo',
             duracao: '1 min',
             resumo: 'Um teto que é seu, e não do banco, e o que cada cor do semáforo quer dizer.',
+            youtubeId: '3PipSl8j9ZI',
+            formato: 'vertical',
             texto: [
               'O limite do banco não é o seu limite. No cartão Cartão de crédito, você define um teto que é seu: quanto decide gastar por mês. O cartão é pago com o salário do mês seguinte, então passar do teto aperta o próximo mês.',
               'Passo 1: em "Seu teto por mês", digite o valor.',
@@ -534,6 +566,8 @@ export const TRILHAS: Trilha[] = [
             titulo: 'Primeiro mês no app: trazendo a fatura do mês passado',
             duracao: '2 min',
             resumo: 'Como lançar o que já vem na fatura: compras à vista e parcelamentos em andamento.',
+            youtubeId: 'H6jTZHOpu5Q',
+            formato: 'vertical',
             texto: [
               'Quem começa a usar o Meu Mês já chega com uma fatura para pagar, que traz o que passou no cartão no mês passado. Tenha essa fatura em mãos, no app do banco.',
               'Passo 1: no cartão Cartão de crédito, toque em "Começando agora no app?". A caixa só aparece no mês atual.',
@@ -555,6 +589,8 @@ export const TRILHAS: Trilha[] = [
             titulo: 'Os três potes: Guardar, Fazer Crescer e Gastar',
             duracao: '2 min',
             resumo: 'Separar primeiro, gastar depois, e o que cada mensagem do app quer dizer.',
+            youtubeId: 'GuCXOgvXN0M',
+            formato: 'vertical',
             texto: [
               'O caminho do salário mostra para onde vai cada real. Do salário saem as contas, os cofrinhos, a fatura e as parcelas das dívidas. O que sobra vai para os potes, com uma regra de ouro: separe primeiro, gaste depois.',
               'Passo 1: no cartão "Os potes do mês", digite quanto vai para Guardar, a reserva de emergência.',
@@ -570,6 +606,8 @@ export const TRILHAS: Trilha[] = [
             titulo: 'Dia do salário: ticando as contas',
             duracao: '1 min',
             resumo: 'A rotina do mês: ticar o que foi pago e acompanhar o que ainda falta.',
+            youtubeId: '764S6MBiNgY',
+            formato: 'vertical',
             texto: [
               'No dia do salário, abra o Meu Mês. A lista Contas do mês mostra tudo o que sai do salário: as contas de todo mês, os cofrinhos das contas do ano, a fatura do cartão e as dívidas.',
               'Pagou uma conta ou separou o cofrinho? Toque na bolinha para ticar. O item fica riscado e a barra de progresso avança. No rodapé, "Ainda falta pagar" mostra o que ainda vai sair; quando tudo estiver ticado, o app confirma: "Tudo pago neste mês."',
@@ -583,6 +621,8 @@ export const TRILHAS: Trilha[] = [
             titulo: 'Lançando compras no cartão: à vista, sem juros e com juros',
             duracao: '2 min',
             resumo: 'Como lançar cada compra, e ver o peso das parcelas nos próximos meses.',
+            youtubeId: 'hUxIbkuR3bM',
+            formato: 'vertical',
             texto: [
               'Passou o cartão? Lance na hora, no cartão Cartão de crédito, em "Lançar compra". O semáforo e o "quanto ainda cabe" se atualizam a cada compra: é a melhor hora de frear.',
               'Passo 1: em "O que foi", escreva a compra.',
@@ -599,6 +639,8 @@ export const TRILHAS: Trilha[] = [
             titulo: 'Compras à vista do mês de uma vez (sem anotar uma por uma)',
             duracao: '1 min',
             resumo: 'O atalho para quem não quer anotar cada compra: só o total do mês.',
+            youtubeId: 'kkB2O_GyOxU',
+            formato: 'vertical',
             texto: [
               'Não quer anotar cada cafezinho? Lance só o total das compras à vista do mês, de uma vez.',
               'Passo 1: no cartão Cartão de crédito, toque em "Compras à vista de [mês], de uma vez".',
@@ -620,6 +662,8 @@ export const TRILHAS: Trilha[] = [
             titulo: 'Modo Recuperação: as regras para sair da dívida cara',
             duracao: '2 min',
             resumo: 'Quando liga, as três fases e o pote Quitar no lugar do Fazer Crescer.',
+            youtubeId: 'rAzjSRJ4J7M',
+            formato: 'vertical',
             texto: [
               'O Modo Recuperação liga sozinho quando há dívida cara em Minhas dívidas. Também dá para ligar à mão, em "Ligar o Modo Recuperação sem cadastrar dívida". No topo aparece "Modo Recuperação ligado", com as três fases e a fase atual marcada.',
               'Fase 1, mini-reserva: junte no pote Guardar a mini-reserva, que é metade de um mês de custo de vida, arredondada para cima em R$ 100 e nunca menos de R$ 500, pagando as parcelas mínimas em dia. Sem ela, o primeiro remédio ou conserto volta para o cartão e o plano recomeça do zero.',
@@ -634,6 +678,8 @@ export const TRILHAS: Trilha[] = [
             titulo: 'Plano de quitação: avalanche ou bola de neve',
             duracao: '2 min',
             resumo: 'Como o app compara os dois métodos com os seus números.',
+            youtubeId: 'AACIhe3Tjc8',
+            formato: 'vertical',
             texto: [
               'No cartão "Plano de quitação", o primeiro passo é dizer quanto a mais por mês você consegue pôr no pote Quitar, além das parcelas mínimas. O app mostra o total por mês para as dívidas caras.',
               'Nos dois métodos, você paga a mínima de todas e põe o extra numa só. Avalanche: primeiro os juros mais altos, que paga menos juros no total. Bola de neve: primeiro a menor dívida, que dá uma vitória mais cedo e ajuda a não desistir.',
@@ -648,6 +694,8 @@ export const TRILHAS: Trilha[] = [
             titulo: 'Pacto de não parcelar e como negociar as dívidas',
             duracao: '2 min',
             resumo: 'O pacto no cartão, o roteiro de negociação e onde ficam as aulas de Sair das dívidas.',
+            youtubeId: 'KcTMhFj7q4Q',
+            formato: 'vertical',
             texto: [
               'Com o Modo Recuperação ligado, o cartão mostra o "Pacto de não parcelar". A regra é simples: se não cabe à vista, não cabe no mês. Toque em "Fazer o pacto". Depois disso, o formulário de compra só oferece "À vista"; para parcelar, você precisa tocar em "Quebrar o pacto nesta compra" e confirmar. O pacto mostra desde quando vale e quantas compras parceladas houve depois dele, e dá para desfazê-lo.',
               'Na hora de negociar, abra "Como negociar suas dívidas", no resumo do mês. São seis passos com fontes oficiais: descubra tudo o que você deve no Registrato, pare de alimentar a dívida, negocie sabendo quanto cabe, confira ofertas de acordo com cuidado, registre reclamação no consumidor.gov.br e conheça a Lei do Superendividamento.',
@@ -667,6 +715,8 @@ export const TRILHAS: Trilha[] = [
             titulo: 'Reserva parada com dívida cara, e a vitória',
             duracao: '1 min',
             resumo: 'Usar o que passa da mini-reserva para quitar, e o que muda quando as dívidas caras acabam.',
+            youtubeId: '9cnMjFmnhfQ',
+            formato: 'vertical',
             texto: [
               'Tem dinheiro guardado além da mini-reserva e dívida cara ao mesmo tempo? O painel do Modo Recuperação mostra quanto passa da mini-reserva, quanto de juros você economiza por mês usando esse valor e a sugestão de pagamento, das dívidas de juros mais altos para as de juros mais baixos. Dinheiro parado rende perto de 1% ao mês; a dívida cara cobra bem mais.',
               'Pague pelo canal oficial do credor e peça desconto para quitar à vista. Depois, toque em "Já paguei: atualizar reserva e dívidas" e confirme: a reserva e os saldos são atualizados. Se você pagou outro valor, ajuste em Minhas dívidas e na reserva. A mini-reserva continua guardada para imprevistos.',
@@ -686,6 +736,8 @@ export const TRILHAS: Trilha[] = [
             titulo: 'Cópia de segurança: salvar, restaurar e começar de novo',
             duracao: '1 min',
             resumo: 'Seus dados ficam só no aparelho: como não perdê-los ao trocar de celular.',
+            youtubeId: 'oicVFuKhH7Q',
+            formato: 'vertical',
             texto: [
               'No Meu Mês, nada vai para a internet. Isso protege você, mas significa que, se trocar de celular ou limpar o navegador, os dados ficam para trás. Por isso, de vez em quando, salve uma cópia.',
               'Passo 1: role até o fim da tela, no cartão "Seus dados ficam só neste aparelho".',
