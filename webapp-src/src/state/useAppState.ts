@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { buscarRecomendacao, ErroRecomendacao } from '../data/apiRecomendacao'
+import { registrarEvento } from '../data/analytics'
 import { PERGUNTAS } from '../data/questions'
 import { PERGUNTAS_ARQUITETURA } from '../data/perguntasArquitetura'
 import { storage } from '../data/storage'
@@ -89,6 +90,7 @@ export function useAppState() {
   // outro é só a navegação entre telas, feita aqui via onCompletar/onVoltarAntesDoInicio.
   const questionario = useQuestionario(PERGUNTAS, {
     onCompletar: () => {
+      registrarEvento('suitability_concluido')
       arquitetura.setPasso(0)
       setScreen('questionarioArquitetura')
     },
@@ -96,7 +98,10 @@ export function useAppState() {
   })
 
   const arquitetura = useQuestionario(PERGUNTAS_ARQUITETURA, {
-    onCompletar: () => setScreen('processando'),
+    onCompletar: () => {
+      registrarEvento('arquitetura_concluida')
+      setScreen('processando')
+    },
     onVoltarAntesDoInicio: () => {
       // Depois das 7 perguntas de suitability, segue direto para as 7 novas perguntas da
       // Arquitetura Patrimonial — voltar da primeira delas devolve à última do suitability.
@@ -205,6 +210,19 @@ export function useAppState() {
     storage.setItem(CHAVE_ARMAZENAMENTO, JSON.stringify(estado))
   }, [hidratado, screen, idade, questionario.respostas, arquitetura.respostas, tema])
 
+  // Métricas anônimas: 1 visita por sessão e as telas de conteúdo/ferramentas mais abertas.
+  useEffect(() => {
+    if (!hidratado) return
+    registrarEvento('visita', undefined, { unicoPorSessao: true })
+  }, [hidratado])
+
+  useEffect(() => {
+    if (!hidratado) return
+    if (ehTelaAvulsa(screen) || screen === 'carteira' || screen === 'simulador') {
+      registrarEvento('tela_vista', { tela: screen }, { unicoPorSessao: true })
+    }
+  }, [hidratado, screen])
+
   async function limparDados() {
     await storage.removeItem(CHAVE_ARMAZENAMENTO)
     questionario.reiniciar()
@@ -221,12 +239,26 @@ export function useAppState() {
   }
 
   function confirmarIdade(valor: number) {
+    registrarEvento('questionario_iniciado', undefined, { unicoPorSessao: true })
     setIdade(valor)
     questionario.setPasso(0)
     setScreen('questionario')
   }
 
   function finalizarProcessamento() {
+    // Conta a recomendação só quando a pessoa realmente chega ao resultado, e só com rótulos
+    // agregados (nada das respostas individuais).
+    if (resultado) {
+      registrarEvento(
+        'recomendacao_gerada',
+        {
+          perfil: resultado.perfilFinalCarteira ?? resultado.perfilFinal,
+          prazo: resultado.prazo,
+          capacidade: resultado.capacidadeReal,
+          veto: resultado.vetoAplicado,
+        },
+      )
+    }
     setScreen('resultado')
   }
 
@@ -287,6 +319,7 @@ export function useAppState() {
       })
       .catch((err: unknown) => {
         if (idRequisicaoRef.current !== idDestaRequisicao) return
+        registrarEvento('recomendacao_erro')
         const mensagem = err instanceof ErroRecomendacao ? err.message : 'Erro inesperado ao calcular sua recomendação.'
         setErroResultado(mensagem)
         setResultado(null)
