@@ -1,0 +1,43 @@
+D31 (30/09/2026) - Conserto do index.html + painel de métricas + link de privacidade nas páginas geradas.
+Feito em cima do zip atual do repositório (baixado do GitHub em 30/09), não do zip antigo.
+
+ARQUIVOS (7) - caminhos a partir da raiz do repositório
+A  index.html                        (RAIZ, landing) volta o link do manifesto e o título novo da D29
+A  webapp-src/index.html             (app) link do manifesto volta a /manifest.webmanifest (D29)
+A  scripts/build-site.mjs            'painel.html' entra na lista de arquivos da landing
+A  scripts/gerar-paginas.mjs         "Privacidade" no rodapé das 30 páginas geradas
+A  scripts/gerar-paginas.test.mjs    o teste de links aceita /privacidade/
+N  painel.html                       NOVO, na raiz: painel de métricas (pede a senha do METRICAS_TOKEN)
+N  LEIA-ME-D31.txt                   este arquivo (pode subir ou não)
+
+COMO SUBIR (uma vez só) - no GitHub: Add file > Upload files
+1. Extraia o zip. Arraste o CONTEÚDO da pasta: as pastas "scripts" e "webapp-src" (como pastas)
+   e os arquivos soltos index.html, painel.html e LEIA-ME-D31.txt.
+2. ANTES de confirmar, confira a lista: deve ter exatamente estes caminhos:
+     index.html
+     painel.html
+     LEIA-ME-D31.txt
+     scripts/build-site.mjs
+     scripts/gerar-paginas.mjs
+     scripts/gerar-paginas.test.mjs
+     webapp-src/index.html
+   Se "build-site.mjs" ou "gerar-paginas.mjs" aparecerem SEM "scripts/" na frente, ou
+   "index.html" sem "webapp-src/" duas vezes, pare e refaça arrastando as pastas.
+3. Mensagem do commit: "D31: conserta index.html, painel de métricas, link de privacidade".
+
+O QUE ESTE PACOTE NÃO DESFAZ (fica como está, sem prejuízo)
+- A meta description, o og:title, o og:description e a descrição do JSON-LD da home continuam no texto
+  anterior à D29. Só o <title> e o manifesto foram restaurados (o docs/07 traz o título da D29).
+  Para restaurar os textos exatos, use o index.html do pacote D29 ou o histórico do arquivo no GitHub.
+
+LIMPEZA OPCIONAL (2 minutos, no GitHub, com a lixeira): 4 arquivos soltos na RAIZ, sobras de um upload
+que "achatou" as pastas. Não afetam o site. Apague SÓ os que estão na raiz:
+  Onboarding.tsx, build-site.mjs, gerar-paginas.mjs, gerar-paginas.test.mjs
+
+DEPOIS DO DEPLOY (1 a 2 minutos na Vercel)
+1. https://carteiraideal.app.br/painel.html -> digite a senha do METRICAS_TOKEN -> "Ver números".
+2. https://carteiraideal.app.br/manifest.webmanifest deve abrir o JSON.
+3. Rodapé de qualquer página (ex.: /sobre/) deve mostrar "Privacidade".
+
+VERIFICAÇÃO: 379 testes do app e 158 dos scripts passando (o teste de manifest volta a passar);
+typecheck e lint sem erros; build de produção OK (31 páginas + privacidade + painel.html no site montado).

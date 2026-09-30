@@ -81,7 +81,7 @@ test('toda página tem um h1, canonical certo, título e descrição de bom tama
 test('todo link interno aponta para uma página que existe', async () => {
   for (const snapshot of [SNAPSHOT, SNAPSHOT_VAZIO]) {
     const paginas = await gerarPaginas({ raiz, snapshot })
-    const existentes = new Set([...paginas.map((p) => p.caminho), '/', '/app/'])
+    const existentes = new Set([...paginas.map((p) => p.caminho), '/', '/app/', '/privacidade/'])
     for (const p of paginas) {
       const html = p.html.replace(/<script[\s\S]*?<\/script>/g, '')
       for (const m of html.matchAll(/href="(\/[^"]*)"/g)) {

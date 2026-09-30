@@ -199,6 +199,7 @@ const LINKS_RODAPE = [
   ['Meu Mês', '/meu-mes/'],
   ['Aprender', '/aprender/'],
   ['Sobre', '/sobre/'],
+  ['Privacidade', '/privacidade/'],
   ['Metodologia e fontes', '/metodologia-e-fontes/'],
 ]
 
