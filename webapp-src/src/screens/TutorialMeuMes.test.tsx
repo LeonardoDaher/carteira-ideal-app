@@ -45,7 +45,9 @@ describe('Trilha "Tutorial Meu Mês" (D28)', () => {
       expect(a.texto && a.texto.length >= 3).toBe(true)
       expect(a.resumo.length).toBeGreaterThan(20)
       expect(a.acao).toBe('meuMes')
-      expect(a.youtubeId).toBeUndefined()
+      // Vídeo (YouTube Shorts) publicado em todas as aulas; o texto continua abaixo do player.
+      expect(a.youtubeId).toMatch(/^[A-Za-z0-9_-]{11}$/)
+      expect(a.formato).toBe('vertical')
     }
   })
 
@@ -55,7 +57,7 @@ describe('Trilha "Tutorial Meu Mês" (D28)', () => {
     expect(tudo).not.toMatch(/Nubank|Itaú|Bradesco|Santander|Inter\b|C6/i)
   })
 
-  it('aparece no Aprender e, na trilha, mostra as 17 aulas como leitura', () => {
+  it('aparece no Aprender e, na trilha, mostra as 17 aulas com vídeo', () => {
     const ctx = { abrirTrilha: vi.fn(), trilhaSelecionadaId: 'tutorial-meu-mes', screen: 'trilha', setScreen: vi.fn() } as unknown as AppCtx
     const { unmount } = render(<Aprender ctx={ctx} />)
     expect(screen.getByText('Trilha 4')).toBeTruthy()
@@ -65,7 +67,8 @@ describe('Trilha "Tutorial Meu Mês" (D28)', () => {
     unmount()
 
     render(<Trilha ctx={ctx} />)
-    expect(screen.getAllByText(/^Leitura · [12] min$/)).toHaveLength(17)
+    expect(screen.getAllByText(/^[12] min$/)).toHaveLength(17)
+    expect(screen.queryAllByText(/^Leitura/)).toHaveLength(0)
     expect(screen.getByText('17. Cópia de segurança: salvar, restaurar e começar de novo')).toBeTruthy()
     expect(screen.queryByText('Em breve')).toBeNull()
   })
