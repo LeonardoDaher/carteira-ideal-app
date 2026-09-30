@@ -51,14 +51,14 @@ export function Onboarding({ ctx }: { ctx: AppCtx }) {
 
       <div className="grow" />
 
-      {/* D30: o botão fica acima do aviso completo (no celular ele sumia abaixo da dobra), com uma
-          frase curta de aviso logo acima dele; o aviso completo continua na mesma tela, abaixo. */}
-      <div className="small muted" style={{ textAlign: 'center' }} role="note">
-        Conteúdo educacional, não é recomendação de investimento.
-      </div>
+      {/* D30: o botão fica acima do aviso completo (no celular ele sumia abaixo da dobra) e
+          centralizado no espaço livre entre o cartão de cima e a caixa do aviso (dois "grow"
+          iguais). O aviso completo continua na mesma tela, logo abaixo. */}
       <button className="btn btn-primary" onClick={ctx.iniciarQuestionario}>
         Descobrir meu perfil e carteira de referência
       </button>
+
+      <div className="grow" />
 
       <AvisoEducacional variante="completo" />
     </div>
