@@ -57,7 +57,7 @@ async function main() {
   // google5f0b815b0517184a.html: arquivo de verificação do Google Search Console (D26). Precisa ficar
   // na raiz do site publicado e nunca pode ser apagado, senão a propriedade perde a verificação.
   // paginas.css é o estilo das páginas geradas (Etapa 3).
-  const arquivosLanding = ['index.html', 'style.css', 'paginas.css', 'script.js', 'assets', 'robots.txt', 'google5f0b815b0517184a.html']
+  const arquivosLanding = ['index.html', 'style.css', 'paginas.css', 'script.js', 'assets', 'robots.txt', 'google5f0b815b0517184a.html', 'manifest.webmanifest']
   for (const nome of arquivosLanding) {
     const origem = path.join(raiz, nome)
     if (await existe(origem)) {

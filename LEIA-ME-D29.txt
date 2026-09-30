@@ -1,0 +1,21 @@
+D29 (29/09/2026) - App instalado passa a abrir na PÁGINA INICIAL (a da foto 2), não no questionário.
+
+ARQUIVOS (caminhos a partir da raiz do repositório)
+N  manifest.webmanifest                  NOVO, na raiz (start_url "/", scope "/", atalhos)
+A  index.html                            link do manifesto + novo <title> da home (D29)
+A  webapp-src/index.html                 o link do manifesto agora aponta para /manifest.webmanifest
+A  scripts/build-site.mjs                'manifest.webmanifest' entra na lista de arquivos da landing
+N  scripts/manifest.test.mjs             4 testes novos
+A  docs/07-registro-de-decisoes.md       D29 no fim (opcional)
+
+APAGAR NO GITHUB
+X  webapp-src/public/manifest.webmanifest   (o antigo; agora existe um só, na raiz)
+
+DEPOIS DO DEPLOY (1 a 2 min na Vercel)
+1. Abra https://carteiraideal.app.br/manifest.webmanifest no Chrome: deve mostrar o JSON com "start_url": "/".
+2. Desinstale o app do celular e instale de novo pelo Chrome (menu ⋮ > Instalar app).
+3. O ícone deve abrir a página inicial, sem barra de endereço. Segurando o ícone, aparecem os 4 atalhos.
+
+NÃO MUDAR: o "id" ("/app/") do manifesto. Ele é a identidade do app instalado.
+
+VERIFICAÇÃO: 158 testes dos scripts passando; build de produção OK (31 páginas); manifest e links conferidos no site montado.

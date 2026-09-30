@@ -669,3 +669,15 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 **Fora do escopo, de propósito.** (1) **Sem páginas estáticas para o Google:** o `gerar-paginas.mjs` só lê a trilha `sair-das-dividas`, então o tutorial existe só dentro do app; se quiserem SEO para ele, o molde é `paginasTrilhaDividas`, e antes vale confirmar que nenhuma aula explica o motor (as aulas do tutorial falam da ferramenta Meu Mês, não do motor de alocação). (2) **Sem atalho no Meu Mês:** o Meu Mês só oferece a trilha 3, e só com dívida cadastrada; um cartão "Tutorial Meu Mês" na própria tela seria o próximo passo natural.
 
 **Verificação.** 374 testes do app (6 novos: existência e ordem dos 17 títulos, ids únicos e texto mínimo, ausência de promessa, de banco e de certificação, cartão no Aprender e 17 "Leitura" na trilha, aula com botão e próxima aula, aulas de dívida com aviso e fontes) e 150 dos scripts passando; typecheck e lint sem erros; build de produção OK (30 páginas estáticas, como antes). Telas conferidas em 390×844: cartão "Trilha 4" no Aprender, lista com os 6 tópicos e aulas de texto e de dívida.
+
+### D29 · App instalado abre na página inicial: manifesto único na raiz (29/09/2026)
+
+**Contexto.** Depois de instalar o app pelo domínio próprio, o ícone abria direto o `/app/` (o questionário) e não a página inicial, que reúne todas as ferramentas (Meu Mês, Aprender, simuladores). Causa: o manifesto ficava em `webapp-src/public/` (publicado em `/app/manifest.webmanifest`) com `start_url` e `scope` em `./`, ou seja, `/app/`. A página inicial ficava fora do escopo (o Chrome mostrava a barra de endereço nela) e não tinha `<link rel="manifest">`.
+
+**Decisão.** Um só manifesto, na raiz do repositório (`manifest.webmanifest`), com `start_url: "/"` e `scope: "/"`. A landing e o `/app/` apontam para ele (`/manifest.webmanifest`). O `id` continua `/app/`: é a identidade do app instalado e não deve mudar, para quem já instalou receber a atualização sem reinstalar. Descrição ampliada (investimentos, planejamento do mês e dívidas) e 4 atalhos ao segurar o ícone (Meu Mês, Aprender, Descobrir meu perfil, Simule FII).
+
+**Mecanismo.** `manifest.webmanifest` novo na raiz (ícones em `/app/icon-*.png`); `scripts/build-site.mjs` copia o arquivo para o site; `index.html` da raiz e `webapp-src/index.html` com o link; `webapp-src/public/manifest.webmanifest` **removido** (fonte única); teste novo `scripts/manifest.test.mjs` (4 testes).
+
+**Para quem já instalou.** O Chrome atualiza sozinho em poucos dias; para ver na hora, desinstalar e instalar de novo pelo `carteiraideal.app.br`.
+
+**Verificação.** 158 testes dos scripts passando (4 novos); build de produção OK (31 páginas estáticas); no site montado, `manifest.webmanifest` na raiz e o link presente na landing e no app.
