@@ -11,7 +11,7 @@ const pos = (ativo = 'VALE3'): ItemPosicaoB3 => ({ ativo, categoria: 'acoes', qu
 
 describe('serializar e ler: ida e volta', () => {
   it('uma carteira completa sobrevive à gravação', () => {
-    const c = { ...carteiraVazia(), lancamentos: mesclarLancamentos([], [L(), L({ tipo: 'provento', valor: 5, quantidade: 0, preco: 0, subtipo: 'jcp' })]).lancamentos, excluidas: ['x#1'], posicao: [pos()], dataPosicao: '2026-09-30' }
+    const c = { ...carteiraVazia(), classes: { XXXX11: 'fiis' as const }, lancamentos: mesclarLancamentos([], [L(), L({ tipo: 'provento', valor: 5, quantidade: 0, preco: 0, subtipo: 'jcp' })]).lancamentos, excluidas: ['x#1'], posicao: [pos()], dataPosicao: '2026-09-30' }
     expect(lerCarteiraSalva(serializarCarteira(c))).toEqual(c)
   })
 })
@@ -42,6 +42,26 @@ describe('lerCarteiraSalva: dado ruim nunca trava o app', () => {
     const c = lerCarteiraSalva(JSON.stringify({ versao: VERSAO_CARTEIRA, carteira: { lancamentos: [], excluidas: [], posicao: [], dataPosicao: 'amanhã', eventosFuturos: [] } }))!
     expect(c.dataPosicao).toBeNull()
     expect(c.posicao).toBeNull()
+  })
+})
+
+describe('classes escolhidas pela pessoa', () => {
+  const bruto = (classes: unknown) => JSON.stringify({ versao: VERSAO_CARTEIRA, carteira: { lancamentos: [], excluidas: [], posicao: null, dataPosicao: null, eventosFuturos: [], classes } })
+  it('guarda as válidas e descarta as inventadas', () => {
+    expect(lerCarteiraSalva(bruto({ A: 'fiis', B: 'inventada', C: 42, D: 'foraDaRegua' }))!.classes).toEqual({ A: 'fiis', D: 'foraDaRegua' })
+  })
+  it('carteira gravada antes deste recurso (sem o campo) abre normalmente, com classes vazias', () => {
+    const antiga = JSON.stringify({ versao: VERSAO_CARTEIRA, carteira: { lancamentos: [], excluidas: [], posicao: null, dataPosicao: null, eventosFuturos: [] } })
+    expect(lerCarteiraSalva(antiga)!.classes).toEqual({})
+  })
+  it('valor que não é objeto vira vazio', () => {
+    expect(lerCarteiraSalva(bruto('texto'))!.classes).toEqual({})
+    expect(lerCarteiraSalva(bruto(['fiis']))!.classes).toEqual({})
+  })
+  it('importar arquivos não apaga as escolhas já feitas', () => {
+    const c = { ...carteiraVazia(), classes: { X: 'fiis' as const } }
+    const r = aplicarImportacao(c, [{ nome: 'n.xlsx', resultado: { perfil: 'b3-negociacao', lancamentos: [], avisos: [], erros: [], linhasLidas: 0 } }], '2026-10-01')
+    expect(r.carteira.classes).toEqual({ X: 'fiis' })
   })
 })
 

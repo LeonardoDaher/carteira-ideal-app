@@ -39,6 +39,7 @@ test('gera as páginas esperadas, sem repetir endereço', async () => {
     '/simulador-fii/',
     '/simulador-bdr/',
     '/simulador-etf/',
+    '/minha-carteira/',
     '/meu-mes/',
     '/aprender/',
     '/aprender/sair-das-dividas/',
@@ -51,8 +52,8 @@ test('gera as páginas esperadas, sem repetir endereço', async () => {
   ]) {
     assert.ok(caminhos.includes(c), `faltou ${c}`)
   }
-  // 6 ferramentas + hub Aprender + Sobre e Metodologia + 11 ativos + hub e 9 aulas das dívidas + taxas
-  assert.equal(paginas.length, 6 + 1 + 2 + 11 + 1 + 9 + 1)
+  // 7 ferramentas (com a Minha Carteira) + hub Aprender + Sobre e Metodologia + 11 ativos + hub e 9 aulas das dívidas + taxas
+  assert.equal(paginas.length, 7 + 1 + 2 + 11 + 1 + 9 + 1)
 })
 
 test('sem dados do Tesouro, a página de taxas não é gerada e ninguém aponta para ela', async () => {

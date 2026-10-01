@@ -1,3 +1,4 @@
+import { SemResultado } from '../ui/SemResultado'
 import { carteiraParaExibicao } from '../data/carteiraVisual'
 import { AllocLegend, PieChart } from '../ui/AllocBar'
 import { TabBar } from '../ui/TabBar'
@@ -8,11 +9,7 @@ export function Carteira({ ctx }: { ctx: AppCtx }) {
   const resultado = ctx.resultado
 
   if (!resultado) {
-    return (
-      <div className="screen" style={{ justifyContent: 'center', alignItems: 'center' }}>
-        <div className="muted small">Responda o questionário para ver a carteira de referência.</div>
-      </div>
-    )
+    return <SemResultado ctx={ctx} convite="Responda o questionário para ver a carteira de referência." />
   }
 
   return (

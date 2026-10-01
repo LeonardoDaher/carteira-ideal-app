@@ -139,7 +139,9 @@ export function useAppState() {
             // avulsa. Antes, essas telas só existiam depois do resultado, então o lugar
             // certo para retomar é o resultado.
             const telaSalva = salvo.screen ?? 'onboarding'
-            const telaCandidata = ehTelaAvulsa(telaSalva) ? 'resultado' : telaSalva
+            // O detalhe de um ativo também não é ponto de retomada: o ativo escolhido não é gravado,
+            // então reabrir nele mostrava "Nenhum ativo selecionado". Volta para o resultado.
+            const telaCandidata = ehTelaAvulsa(telaSalva) || telaSalva === 'detalheAtivo' ? 'resultado' : telaSalva
             // Estado salvo apontando para uma tela que depende do resultado, mas sem as respostas:
             // foi gravado por engano (ver TELAS_QUE_EXIGEM_RESPOSTAS). Abre o onboarding, que é o
             // que a pessoa esperava ao tocar no botão da landing. Cura também quem já ficou assim.
@@ -220,7 +222,7 @@ export function useAppState() {
 
   useEffect(() => {
     if (!hidratado) return
-    if (!ehTelaAvulsa(screen)) telaDoFluxoRef.current = screen
+    if (!ehTelaAvulsa(screen) && screen !== 'detalheAtivo') telaDoFluxoRef.current = screen
     // Sem as 7 respostas, uma tela que depende do resultado não é um ponto de retomada válido.
     const telaParaSalvar =
       TELAS_QUE_EXIGEM_RESPOSTAS.includes(telaDoFluxoRef.current) && !questionario.completas
@@ -365,6 +367,11 @@ export function useAppState() {
     calcularResultado()
   }, [calcularResultado])
 
+  // A pessoa já respondeu o questionário e a carteira sugerida está a caminho: ainda não há `resultado`,
+  // nem erro. As telas usam isto para mostrar "montando…" em vez do convite para responder (que seria
+  // falso). Vale desde a PRIMEIRA renderização depois de ler o aparelho, sem esperar o pedido começar.
+  const resultadoPendente = !!questionario.completas && !resultado && !erroResultado
+
   return {
     hidratado,
     limparDados,
@@ -377,6 +384,7 @@ export function useAppState() {
     setValorSimulacao,
     resultado,
     carregandoResultado,
+    resultadoPendente,
     erroResultado,
     tentarCalcularNovamente: calcularResultado,
     perguntaAtual: questionario.atual,

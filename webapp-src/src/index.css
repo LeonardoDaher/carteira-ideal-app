@@ -1750,3 +1750,30 @@ select option:disabled { color: #6b7280 !important; -webkit-text-fill-color: #6b
   .mc-pos-ativo { grid-column: auto; }
   .mc-form-grade { grid-template-columns: repeat(4, 1fr); }
 }
+
+/* Minha Carteira: comparação com a carteira sugerida ("você x sugerida"). Barra preenchida = o que a
+   pessoa tem; marca vertical = o alvo da carteira sugerida. */
+.mc-aderencia { display: flex; flex-direction: column; gap: 4px; margin: 2px 0 4px; }
+.mc-comp-lista { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-direction: column; }
+.mc-comp-linha { padding: 11px 0; border-top: 1px solid var(--mc-card-borda); display: flex; flex-direction: column; gap: 6px; font-size: 13px; }
+.mc-comp-linha:first-child { border-top: 0; }
+.mc-comp-topo { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.mc-comp-numeros { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-variant-numeric: tabular-nums; }
+.mc-trilha { position: relative; height: 10px; border-radius: 99px; background: var(--mc-barra); overflow: visible; }
+.mc-preench { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 99px; min-width: 3px; }
+.mc-marca { position: absolute; top: -4px; bottom: -4px; width: 3px; margin-left: -1.5px; border-radius: 2px; background: var(--text); box-shadow: 0 0 0 2px var(--mc-card); }
+.mc-chip-situacao { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 99px; border: 1px solid var(--mc-card-borda); white-space: nowrap; }
+.mc-chip-situacao.dentro { color: var(--mc-pos); border-color: var(--mc-pos); }
+.mc-chip-situacao.abaixo { color: var(--warning); border-color: var(--warning); }
+.mc-chip-situacao.acima { color: var(--mc-neg); border-color: var(--mc-neg); }
+.mc-aviso-caixa { border: 1px solid var(--warning); border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; font-size: 13px; }
+.mc-pendentes-classe, .mc-classif { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.mc-pendentes-classe li, .mc-classif li { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 13px; }
+.mc-classif-acao { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.mc-seletor { width: auto; min-width: 180px; max-width: 100%; }
+.mc-campo-curto { max-width: 190px; }
+.mc-detalhes { border-top: 1px solid var(--mc-card-borda); padding-top: 8px; font-size: 13px; }
+.mc-detalhes summary { cursor: pointer; color: var(--mc-ouro); font-weight: 600; }
+.mc-aporte { border-top: 1px solid var(--mc-card-borda); padding-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+.mc-aporte-lista { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 13px; }
+.mc-aporte-lista li { display: flex; justify-content: space-between; gap: 10px; font-variant-numeric: tabular-nums; }

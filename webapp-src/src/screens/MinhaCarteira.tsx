@@ -3,6 +3,7 @@ import { capitalAplicadoPorMes, composicaoPorCategoria, montarPainel, proventosP
 import type { AppCtx } from '../state/useAppState'
 import { useCarteiraReal } from '../state/useCarteiraReal'
 import { AvisoEducacional } from '../ui/AvisoEducacional'
+import { CartaoComparacao } from '../ui/painel/CartaoComparacao'
 import { CartaoComposicao, CartaoCarteira, CartaoProventos } from '../ui/painel/CartoesPainel'
 import { CartaoConferencia } from '../ui/painel/CartaoConferencia'
 import { CartaoLancamentos } from '../ui/painel/CartaoLancamentos'
@@ -39,7 +40,6 @@ function lerTextoDoArquivo(arquivo: File): Promise<string> {
  * `?tela=minhaCarteira`, não depende do questionário e guarda tudo só no aparelho.
  */
 export function MinhaCarteira({ ctx, hoje }: { ctx: AppCtx; hoje?: Date }) {
-  void ctx
   const agora = useRef(hoje ?? new Date()).current
   const hojeISO = isoDe(agora)
   const mesAtual = hojeISO.slice(0, 7)
@@ -83,6 +83,18 @@ export function MinhaCarteira({ ctx, hoje }: { ctx: AppCtx; hoje?: Date }) {
         <div className="mc-grade">
           <CartaoCarteira painel={painel} serie={serieCapital} />
           <CartaoProventos serie={serieProventos} proximos={proximos} />
+          <div className="mc-largo">
+            <CartaoComparacao
+              resultado={ctx.resultado}
+              pendente={!!ctx.resultadoPendente}
+              erro={ctx.erroResultado}
+              onTentarNovamente={ctx.tentarCalcularNovamente}
+              onResponderQuestionario={ctx.iniciarQuestionario}
+              painel={painel}
+              classes={c.classes}
+              onEscolherClasse={h.definirClasse}
+            />
+          </div>
           <CartaoComposicao fatias={fatias} />
           <CartaoConferencia carteira={c} onSaldoInicial={h.adicionar} onDataPosicao={h.definirDataPosicao} />
           <div className="mc-largo">

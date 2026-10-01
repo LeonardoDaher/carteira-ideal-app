@@ -1,6 +1,13 @@
-import { act, fireEvent, render, screen, within } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { MinhaCarteira } from './MinhaCarteira'
+import { ATIVOS } from '../data/assets'
+import { carteiraParaExibicao } from '../data/carteiraVisual'
+import { PERGUNTAS } from '../data/questions'
+import { PERGUNTAS_ARQUITETURA } from '../data/perguntasArquitetura'
+import { compararComReferencia } from '../domain/carteiraAtual'
+import { gerarRecomendacao } from '../domain/engine'
+import { pct } from '../ui/painel/formatar'
 import { CHAVE_CARTEIRA, carteiraVazia, serializarCarteira } from '../domain/carteiraSalva'
 import type { CarteiraSalva } from '../domain/carteiraSalva'
 import type { ItemPosicaoB3 } from '../domain/importacao/planilha'
@@ -296,5 +303,144 @@ describe('MinhaCarteira: seus dados', () => {
     localStorage.setItem(CHAVE_CARTEIRA, '{isto está quebrado')
     render(<MinhaCarteira ctx={ctx} hoje={hoje} />)
     expect(await screen.findByText('Comece pelo extrato de Posição')).toBeTruthy()
+  })
+})
+
+describe('MinhaCarteira: comparação com a carteira sugerida', () => {
+  // Uma carteira sugerida de verdade, gerada pelo motor do app a partir das respostas "b".
+  const resposta = (lista: { id: string }[]) => Object.fromEntries(lista.map((p) => [p.id, 'b']))
+  const resultado = gerarRecomendacao(resposta(PERGUNTAS) as never, { idade: 35 }, resposta(PERGUNTAS_ARQUITETURA) as never)
+  const referencia = carteiraParaExibicao(resultado.carteira)
+  const fn = () => vi.fn()
+  const ctxCom = (extra: Record<string, unknown> = {}) =>
+    ({ resultado, resultadoPendente: false, erroResultado: null, iniciarQuestionario: fn(), tentarCalcularNovamente: fn(), ...extra }) as unknown as AppCtx
+  const cartao = async () => (await screen.findByRole('heading', { name: 'Comparar com a carteira sugerida' })).closest('section')!
+  const lista = (c: HTMLElement) => within(c).getByRole('list', { name: 'Comparação por classe' })
+  const somaReais = (itens: HTMLElement[]) => itens.reduce((t, li) => t + Number(within(li).getByText(/R\$/).textContent!.replace(/[^\d,]/g, '').replace(',', '.')), 0)
+
+  const base = () =>
+    semear({ lancs: [L({ ativo: 'VALE3', quantidade: 100, valor: 1000 })], posicao: [pos('VALE3', 100, 600), pos('MXRF11', 40, 400, 'fundos')], dataPosicao: '2026-09-30' })
+
+  it('sem questionário: convida (é opcional) e o botão abre o questionário', async () => {
+    base()
+    const ctx = ctxCom({ resultado: null })
+    render(<MinhaCarteira ctx={ctx} hoje={hoje} />)
+    const c = await cartao()
+    expect(txt(c)).toContain('É opcional')
+    expect(txt(c)).toContain('funciona sem ele')
+    fireEvent.click(within(c).getByRole('button', { name: 'Responder o questionário' }))
+    expect(ctx.iniciarQuestionario).toHaveBeenCalledTimes(1)
+  })
+  it('a carteira sugerida está sendo calculada: avisa, sem convidar a responder de novo', async () => {
+    base()
+    render(<MinhaCarteira ctx={ctxCom({ resultado: null, resultadoPendente: true })} hoje={hoje} />)
+    const c = await cartao()
+    expect(within(c).getByRole('status').textContent).toContain('Montando a sua carteira sugerida')
+    expect(within(c).queryByRole('button', { name: 'Responder o questionário' })).toBeNull()
+  })
+  it('falha ao calcular: mostra o erro e deixa tentar de novo', async () => {
+    base()
+    const ctx = ctxCom({ resultado: null, erroResultado: 'sem internet' })
+    render(<MinhaCarteira ctx={ctx} hoje={hoje} />)
+    const c = await cartao()
+    expect(within(c).getByRole('alert').textContent).toContain('sem internet')
+    fireEvent.click(within(c).getByRole('button', { name: 'Tentar novamente' }))
+    expect(ctx.tentarCalcularNovamente).toHaveBeenCalledTimes(1)
+  })
+
+  it('com a carteira sugerida: mostra o perfil, a aderência e, por classe, o que você tem x o sugerido', async () => {
+    base()
+    render(<MinhaCarteira ctx={ctxCom()} hoje={hoje} />)
+    const c = await cartao()
+    const esperado = compararComReferencia({ acoesETFs: 600, fiis: 400 }, referencia)
+    expect(txt(c)).toContain(`${Math.round(esperado.aderencia!)}%`)
+    expect(txt(c)).toContain('Valores de 30/09/2026 (Posição da B3)')
+    expect(txt(c)).toContain(String(resultado.perfilFinalCarteira ?? resultado.perfilPatrimonial ?? resultado.perfilFinal))
+
+    const acoes = esperado.linhas.find((l) => l.classe === 'acoesETFs')!
+    const linhaAcoes = within(lista(c)).getByText(ATIVOS.acoesETFs.label).closest('li')!
+    expect(txt(linhaAcoes)).toContain(`Você: ${pct(60, false)}`)
+    expect(txt(linhaAcoes)).toContain(`Sugerida: ${pct(acoes.pctReferencia, false)}`)
+    const chip = acoes.situacao === 'dentro' ? 'Dentro do alvo' : acoes.difPp < 0 ? 'Abaixo' : 'Acima'
+    expect(txt(linhaAcoes)).toContain(chip)
+  })
+  it('classes sugeridas que a pessoa não tem aparecem como "abaixo", com o quanto falta em reais', async () => {
+    base()
+    render(<MinhaCarteira ctx={ctxCom()} hoje={hoje} />)
+    const c = await cartao()
+    const esperado = compararComReferencia({ acoesETFs: 600, fiis: 400 }, referencia)
+    const faltando = esperado.linhas.find((l) => l.valor === 0 && l.pctReferencia > 5)!
+    const linha = within(lista(c)).getByText(ATIVOS[faltando.classe as keyof typeof ATIVOS].label).closest('li')!
+    expect(txt(linha)).toContain('Abaixo')
+    expect(txt(linha)).toMatch(/Faltam R\$/)
+  })
+  it('os três Tesouros viram uma fatia só ("Tesouro Direto"), como na tela Carteira', async () => {
+    semear({ posicao: [pos('VALE3', 10, 500), { ...pos('TESOURO SELIC 2031', 1, 300, 'tesouro') }, { ...pos('TESOURO IPCA+ 2029', 1, 200, 'tesouro') }], dataPosicao: '2026-09-30' })
+    render(<MinhaCarteira ctx={ctxCom()} hoje={hoje} />)
+    const c = await cartao()
+    const linha = within(lista(c)).getByText(ATIVOS.tesouroIPCA.label).closest('li')!
+    expect(txt(linha)).toContain(`Você: ${pct(50, false)}`)
+    expect(within(lista(c)).queryByText('Tesouro Selic')).toBeNull()
+  })
+  it('sem a Posição, avisa que a conta usa o preço de custo', async () => {
+    semear({ lancs: [L({ ativo: 'VALE3', quantidade: 100, valor: 1000 })] })
+    render(<MinhaCarteira ctx={ctxCom()} hoje={hoje} />)
+    expect(txt(await cartao())).toContain('Calculado a preço de custo')
+  })
+
+  it('ativo que o app não sabe classificar fica de fora, avisa quanto, e a escolha da pessoa o inclui e fica gravada', async () => {
+    semear({ posicao: [pos('VALE3', 10, 400), pos('XXXX11', 10, 100, 'fundos')], dataPosicao: '2026-09-30' })
+    render(<MinhaCarteira ctx={ctxCom()} hoje={hoje} />)
+    const c = await cartao()
+    const caixa = within(c).getByRole('group', { name: 'Ativos sem classe' })
+    expect(txt(caixa)).toContain('1 ativo(s), somando R$ 100,00, ficaram de fora')
+    // a carteira sugerida tem FIIs, então a linha existe, mas a pessoa ainda aparece com 0% (o ativo ficou de fora)
+    expect(txt(within(lista(c)).getByText(ATIVOS.fiis.label).closest('li')!)).toContain(`Você: ${pct(0, false)}`)
+    expect(txt(lista(c))).toContain(`Você: ${pct(100, false)}`) // os 400 de VALE3 são 100% do que foi classificado
+
+    fireEvent.change(within(caixa).getByLabelText('Classe de XXXX11'), { target: { value: 'fiis' } })
+    await waitFor(() => expect(within(c).queryByRole('group', { name: 'Ativos sem classe' })).toBeNull())
+    expect(within(c).queryByRole('group', { name: 'Ativos sem classe' })).toBeNull()
+    expect(txt(within(lista(c)).getByText(ATIVOS.fiis.label).closest('li')!)).toContain(`Você: ${pct(20, false)}`)
+    expect(lerSalvo().classes).toEqual({ XXXX11: 'fiis' })
+  })
+  it('a escolha da pessoa continua valendo ao reabrir', async () => {
+    semear({ posicao: [pos('VALE3', 10, 400), pos('XXXX11', 10, 100, 'fundos')], dataPosicao: '2026-09-30', classes: { XXXX11: 'fiis' } })
+    render(<MinhaCarteira ctx={ctxCom()} hoje={hoje} />)
+    const c = await cartao()
+    expect(within(c).queryByRole('group', { name: 'Ativos sem classe' })).toBeNull()
+    expect(within(lista(c)).getByText(ATIVOS.fiis.label)).toBeTruthy()
+  })
+  it('classe provável mas incerta (ETF de ações) entra na conta e pede confirmação; confirmar grava a escolha', async () => {
+    semear({ posicao: [pos('BOVA11', 10, 500, 'etf')], dataPosicao: '2026-09-30' })
+    render(<MinhaCarteira ctx={ctxCom()} hoje={hoje} />)
+    const c = await cartao()
+    expect(txt(c)).toMatch(/1 para confirmar/)
+    fireEvent.click(within(c).getByRole('button', { name: /Confirmar .* para BOVA11/ }))
+    await waitFor(() => expect(lerSalvo().classes).toEqual({ BOVA11: 'acoesETFs' }))
+    expect(txt(c)).not.toMatch(/para confirmar/)
+  })
+
+  it('aporte guiado: distribui o valor entre as classes abaixo do alvo, sem perder nem criar centavo', async () => {
+    base()
+    render(<MinhaCarteira ctx={ctxCom()} hoje={hoje} />)
+    const c = await cartao()
+    fireEvent.change(within(c).getByLabelText(/Quanto você vai aportar/), { target: { value: '1.000,00' } })
+    const itens = within(within(c).getByRole('list', { name: 'Distribuição do aporte' })).getAllByRole('listitem')
+    expect(itens.length).toBeGreaterThan(0)
+    expect(Math.round(somaReais(itens) * 100)).toBe(100000)
+    expect(txt(c)).toContain('Não manda vender nada')
+  })
+  it('aviso educacional e de privacidade no cartão', async () => {
+    base()
+    render(<MinhaCarteira ctx={ctxCom()} hoje={hoje} />)
+    const nota = within(await cartao()).getByRole('note')
+    expect(nota.textContent).toContain('não é recomendação de investimento')
+    expect(nota.textContent).toContain('os seus ativos nunca saem daqui')
+  })
+  it('sem nenhum ativo importado, não mostra comparação vazia', async () => {
+    semear({ lancs: [L({ tipo: 'provento', valor: 10, quantidade: 1, preco: 0, subtipo: 'jcp' })] })
+    render(<MinhaCarteira ctx={ctxCom()} hoje={hoje} />)
+    expect(txt(await cartao())).toContain('Importe os seus ativos')
   })
 })

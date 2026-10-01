@@ -10,14 +10,49 @@
   "background_color": "#0a0d13",
   "theme_color": "#0a0d13",
   "icons": [
-    { "src": "/app/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "/app/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "/app/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "/app/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/app/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/app/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ],
   "shortcuts": [
-    { "name": "Meu Mês", "short_name": "Meu Mês", "description": "Contas do mês e planejamento financeiro", "url": "/app/?tela=meuMes" },
-    { "name": "Aprender", "short_name": "Aprender", "description": "Aulas curtas e livro infantil grátis", "url": "/app/?tela=aprender" },
-    { "name": "Descobrir meu perfil", "short_name": "Meu perfil", "description": "14 perguntas e carteira de referência", "url": "/app/" },
-    { "name": "Simule FII", "short_name": "Simule FII", "description": "Quanto rendem as cotas dos maiores FIIs", "url": "/app/?tela=simuleFii" }
+    {
+      "name": "Descobrir meu perfil",
+      "short_name": "Meu perfil",
+      "description": "14 perguntas e carteira de referência",
+      "url": "/app/"
+    },
+    {
+      "name": "Minha Carteira",
+      "short_name": "Minha Carteira",
+      "description": "Seus ativos da B3, preço médio e proventos",
+      "url": "/app/?tela=minhaCarteira"
+    },
+    {
+      "name": "Meu Mês",
+      "short_name": "Meu Mês",
+      "description": "Contas do mês e planejamento financeiro",
+      "url": "/app/?tela=meuMes"
+    },
+    {
+      "name": "Aprender",
+      "short_name": "Aprender",
+      "description": "Aulas curtas e livro infantil grátis",
+      "url": "/app/?tela=aprender"
+    }
   ]
 }

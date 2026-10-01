@@ -1,5 +1,7 @@
 // Minha Carteira (D36): o que fica gravado no aparelho e como uma importação o altera. Tudo puro
 // (sem React nem localStorage): o hook só chama estas funções. Nada daqui vai para a API.
+import { ehClasseValida } from './classesDaCarteira'
+import type { ClasseCarteira } from './classificadorAtivo'
 import type { EventoFuturo, ItemPosicaoB3, ResultadoImportacao } from './importacao/planilha'
 import { mesclarLancamentos, somarDiasUteis, validarLancamento, type Lancamento, type OrigemLancamento, type TipoLancamento } from './lancamentos'
 
@@ -14,12 +16,14 @@ export interface CarteiraSalva {
   /** Data a que a Posição se refere (AAAA-MM-DD). */
   dataPosicao: string | null
   eventosFuturos: EventoFuturo[]
+  /** Classe que a pessoa escolheu para um ativo na comparação com a carteira sugerida (vence a dedução automática). */
+  classes: Record<string, ClasseCarteira>
 }
 
-export const CARTEIRA_VAZIA: CarteiraSalva = { lancamentos: [], excluidas: [], posicao: null, dataPosicao: null, eventosFuturos: [] }
+export const CARTEIRA_VAZIA: CarteiraSalva = { lancamentos: [], excluidas: [], posicao: null, dataPosicao: null, eventosFuturos: [], classes: {} }
 
 export function carteiraVazia(): CarteiraSalva {
-  return { lancamentos: [], excluidas: [], posicao: null, dataPosicao: null, eventosFuturos: [] }
+  return { lancamentos: [], excluidas: [], posicao: null, dataPosicao: null, eventosFuturos: [], classes: {} }
 }
 
 const TIPOS = new Set<TipoLancamento>(['saldoInicial', 'compra', 'venda', 'bonificacao', 'ajusteQuantidade', 'provento'])
@@ -86,6 +90,13 @@ function eventoValido(x: unknown): EventoFuturo | null {
   }
 }
 
+function lerClasses(x: unknown): Record<string, ClasseCarteira> {
+  const saida: Record<string, ClasseCarteira> = {}
+  if (!x || typeof x !== 'object' || Array.isArray(x)) return saida
+  for (const [ativo, classe] of Object.entries(x)) if (txt(ativo) && ehClasseValida(classe)) saida[ativo] = classe
+  return saida
+}
+
 const lista = <T,>(x: unknown, valida: (v: unknown) => T | null): T[] => (Array.isArray(x) ? x.map(valida).filter((v): v is T => v !== null) : [])
 
 /** Lê o que está gravado. Devolve null sem dado, com versão diferente ou JSON quebrado; descarta só os itens inválidos. */
@@ -102,6 +113,7 @@ export function lerCarteiraSalva(bruto: string | null): CarteiraSalva | null {
       posicao: posicao && posicao.length ? posicao : null,
       dataPosicao: txt(c.dataPosicao) && ISO.test(c.dataPosicao) ? c.dataPosicao : null,
       eventosFuturos: lista(c.eventosFuturos, eventoValido),
+      classes: lerClasses(c.classes),
     }
   } catch {
     return null

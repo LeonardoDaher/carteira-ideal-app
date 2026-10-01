@@ -1,3 +1,4 @@
+import { SemResultado } from '../ui/SemResultado'
 import { carteiraParaExibicao } from '../data/carteiraVisual'
 import { AllocLegend, PieChart } from '../ui/AllocBar'
 import { TabBar } from '../ui/TabBar'
@@ -39,12 +40,7 @@ export function Resultado({ ctx }: { ctx: AppCtx }) {
   const resultado = ctx.resultado
 
   if (!resultado) {
-    return (
-      <div className="screen" style={{ justifyContent: 'center', alignItems: 'center' }}>
-        <div className="muted small">Responda o questionário para ver seu resultado.</div>
-        <button className="btn btn-primary" onClick={ctx.iniciarQuestionario}>Começar</button>
-      </div>
-    )
+    return <SemResultado ctx={ctx} convite="Responda o questionário para ver seu resultado." comBotaoComecar />
   }
 
   const foiAjustado = resultado.perfilBase !== resultado.perfilFinal

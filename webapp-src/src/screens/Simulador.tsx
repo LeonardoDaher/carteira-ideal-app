@@ -1,3 +1,4 @@
+import { SemResultado } from '../ui/SemResultado'
 import { ATIVOS } from '../data/assets'
 import { carteiraParaExibicao } from '../data/carteiraVisual'
 import { TabBar } from '../ui/TabBar'
@@ -13,11 +14,7 @@ export function Simulador({ ctx }: { ctx: AppCtx }) {
   const resultado = ctx.resultado
 
   if (!resultado) {
-    return (
-      <div className="screen" style={{ justifyContent: 'center', alignItems: 'center' }}>
-        <div className="muted small">Responda o questionário para simular valores.</div>
-      </div>
-    )
+    return <SemResultado ctx={ctx} convite="Responda o questionário para simular valores." />
   }
 
   const entradas = Object.entries(carteiraParaExibicao(resultado.carteira)) as [AtivoKey, number][]

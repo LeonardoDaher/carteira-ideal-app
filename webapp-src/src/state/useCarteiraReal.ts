@@ -3,6 +3,7 @@ import { storage } from '../data/storage'
 import { CHAVE_CARTEIRA, aplicarImportacao, carteiraVazia, lerCarteiraSalva, serializarCarteira } from '../domain/carteiraSalva'
 import type { ArquivoImportado, CarteiraSalva, ResumoArquivo } from '../domain/carteiraSalva'
 import { adicionarLancamento, corrigirLancamento, excluirLancamento } from '../domain/lancamentos'
+import type { ClasseCarteira } from '../domain/classificadorAtivo'
 import type { LancamentoNovo, ProblemaLancamento } from '../domain/lancamentos'
 
 /**
@@ -74,6 +75,17 @@ export function useCarteiraReal(hoje: string) {
     [aplicar],
   )
 
+  /** Guarda (ou, com null, apaga) a classe que a pessoa escolheu para um ativo. */
+  const definirClasse = useCallback(
+    (ativo: string, classe: ClasseCarteira | null) => {
+      const classes = { ...ref.current.classes }
+      if (classe) classes[ativo] = classe
+      else delete classes[ativo]
+      aplicar({ ...ref.current, classes })
+    },
+    [aplicar],
+  )
+
   const definirDataPosicao = useCallback((dataPosicao: string) => aplicar({ ...ref.current, dataPosicao }), [aplicar])
   const limpar = useCallback(() => aplicar(carteiraVazia()), [aplicar])
   const exportarBackup = useCallback(() => serializarCarteira(ref.current), [])
@@ -89,7 +101,7 @@ export function useCarteiraReal(hoje: string) {
     [aplicar],
   )
 
-  return { carteira, hidratado, importarArquivos, adicionar, corrigir, excluir, definirDataPosicao, limpar, exportarBackup, restaurarBackup }
+  return { carteira, hidratado, importarArquivos, adicionar, corrigir, excluir, definirClasse, definirDataPosicao, limpar, exportarBackup, restaurarBackup }
 }
 
 export type CarteiraReal = ReturnType<typeof useCarteiraReal>

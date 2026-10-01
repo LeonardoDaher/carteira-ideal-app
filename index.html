@@ -98,7 +98,7 @@
               {
                 "@type": "Question",
                 "name": "Minhas respostas ficam guardadas em algum lugar?",
-                "acceptedAnswer": { "@type": "Answer", "text": "Ficam salvas só no seu aparelho. Para calcular a carteira, as respostas são enviadas ao servidor, que devolve o resultado sem guardar nada. O Meu Mês também fica só no aparelho." }
+                "acceptedAnswer": { "@type": "Answer", "text": "Ficam salvas só no seu aparelho. Para calcular a carteira, as respostas são enviadas ao servidor, que devolve o resultado sem guardar nada. O Meu Mês e a Minha Carteira também ficam só no aparelho." }
               },
               {
                 "@type": "Question",
@@ -160,6 +160,17 @@
             <a class="cta" href="./app/">
               <span class="cta-title">Descobrir meu perfil e carteira de referência</span>
               <span class="cta-sub">14 perguntas, menos de 3 minutos</span>
+            </a>
+          </li>
+          <li>
+            <!-- Abre a Minha Carteira (D36): painel da carteira REAL (preço médio, proventos, conferência
+                 com a posição na B3). É uma das três funcionalidades principais do Carteira Ideal, junto
+                 com o questionário e o Meu Mês, por isso fica logo abaixo do botão principal e acima do
+                 Meu Mês. Funciona sem o questionário; quem o responde ganha a comparação com a carteira
+                 de referência dentro da própria tela. -->
+            <a class="link-2" href="./app/?tela=minhaCarteira">
+              <span class="link-title"><span class="link-emoji" aria-hidden="true">💼</span>Minha Carteira</span>
+              <span class="link-sub">Seus ativos da B3, preço médio e proventos</span>
             </a>
           </li>
           <li>
@@ -238,6 +249,10 @@
         <!-- D26 (Etapa 3): os cartões levam às páginas de cada ferramenta (com texto para o Google),
              e cada página tem o botão que abre a ferramenta no app. Os botões do topo seguem abrindo o app direto. -->
         <div class="ferramentas">
+          <a class="ferramenta" href="/minha-carteira/">
+            <h3>Minha Carteira: preço médio dos seus ativos</h3>
+            <p>Importe os extratos da B3 e veja o preço médio de cada ativo, os proventos recebidos e se o histórico confere com a sua custódia. Funciona com ou sem o questionário.</p>
+          </a>
           <a class="ferramenta" href="/meu-mes/">
             <h3>Meu Mês: controle financeiro</h3>
             <p>Contas do mês, cofrinhos para as contas do ano, cartão de crédito com teto e um plano para sair das dívidas caras.</p>
@@ -280,7 +295,7 @@
           </details>
           <details>
             <summary>Minhas respostas ficam guardadas em algum lugar?</summary>
-            <p>Ficam salvas só no seu aparelho. Para calcular a carteira, as respostas são enviadas ao servidor, que devolve o resultado sem guardar nada. O Meu Mês também fica só no aparelho.</p>
+            <p>Ficam salvas só no seu aparelho. Para calcular a carteira, as respostas são enviadas ao servidor, que devolve o resultado sem guardar nada. O Meu Mês e a Minha Carteira também ficam só no aparelho.</p>
           </details>
           <details>
             <summary>De onde vêm os dados dos simuladores?</summary>
