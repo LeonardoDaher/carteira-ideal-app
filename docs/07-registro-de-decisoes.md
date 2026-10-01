@@ -697,3 +697,48 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 **Mecanismo.** `webapp-src/src/screens/Onboarding.tsx`: dois `<div className="grow" />` iguais, um antes e outro depois do botão, dividem o espaço livre em partes iguais (o botão fica no meio; se a tela for baixa e não sobrar espaço, os dois encolhem juntos e o botão continua entre as duas caixas). `webapp-src/src/ui/AvisoEducacional.tsx`: texto da variante `completo`. Nenhum teste dependia do texto antigo.
 
 **Verificação.** 374 testes do app passando; typecheck e lint sem erros; build de produção OK. Espaço acima e abaixo do botão medido igual (83/83 px em 390×844, 55/55 em 393×780, 28/28 em 360×640).
+
+## D31 e D32 (30/09/2026): métricas de uso, política de privacidade, painel e conserto da home
+
+**Métricas anônimas.** Eventos do funil enviados a `/api/evento` (Redis REST), sem IP, sem respostas individuais, com id aleatório do navegador contado por HyperLogLog. Respeita Do Not Track e Global Privacy Control. Detalhes em `docs/08-metricas-de-uso.md`.
+
+**Política de privacidade** em `/privacidade/`, com link no rodapé da landing, no rodapé das 30 páginas geradas (`LINKS_RODAPE`) e na tela inicial do app (`Onboarding.tsx`). Não é aconselhamento jurídico; revisar antes de divulgar a parceiros.
+
+**Painel** em `/painel.html` (raiz, noindex), lê `/api/metricas` com o `METRICAS_TOKEN`.
+
+**Incidente e lição.** Um pacote montado sobre um zip antigo sobrescreveu os dois `index.html` e apagou as mudanças da D29 (manifesto, título, descrição, Open Graph); o teste `manifest.test.mjs` acusou. A D31/D32 restauraram tudo. Regra daqui para frente: todo pacote parte do zip atual do repositório (Code, Download ZIP), leva só os arquivos alterados nas pastas certas e nunca sobrescreve arquivos de dados dos jobs (`historico/`, `config/`, JSONs de mercado).
+
+
+## D33 (30/09/2026): vídeos das Trilhas 3 e 4
+
+**O que entrou.** As 26 aulas das trilhas "Sair das dívidas" (9) e "Tutorial Meu Mês" (17) ganharam vídeo (YouTube Shorts): `youtubeId` e `formato: 'vertical'` em `webapp-src/src/data/trilhas.ts`. Os títulos da planilha de links bateram 1 a 1 com os títulos das aulas. O texto das aulas continua abaixo do player (comportamento já existente de `AprenderVideo`). Com as Trilhas 1 e 2, as 4 trilhas agora têm vídeo (41 vídeos no total).
+
+**Mudança visível.** Na lista da trilha, aula com vídeo mostra só a duração ("2 min"); o selo "Leitura · 2 min" fica só para aula sem vídeo.
+
+**Testes.** `TutorialMeuMes.test.tsx` e `TrilhaSairDasDividas.test.tsx` deixaram de afirmar "aula só em texto" e passaram a exigir `youtubeId` válido (11 caracteres) e `formato: 'vertical'`. Novo teste: o player da aula "Descubra tudo o que você deve" carrega `youtube.com/embed/JLuz-UN9tqo`. Total: 380 testes.
+
+**Lições do processo.**
+- Abrir `youtube.com/embed/ID` direto na barra de endereço dá Erro 153 (sem origem/referrer). Não serve como teste de incorporação; testar sempre dentro do app.
+- O upload do zip por "Add file > Upload files" não substituiu `trilhas.ts` (a aula seguiu sem vídeo). O que funcionou: abrir o arquivo no GitHub, lápis (Edit), Ctrl+A, colar o arquivo inteiro e Commit. Para arquivos únicos, preferir esse caminho.
+- Ao buscar um ID no editor do GitHub, copiar e colar: na fonte do editor, "l" minúsculo e "I" maiúsculo são quase idênticos.
+- Arquivo `.test.tsx` anexado no chat tenta abrir como artefato e dá "Falha ao carregar artefato"; entregar como `.txt`.
+
+**Verificação.** 380 testes, typecheck, lint e build de produção OK; deploys na Vercel (`03695d8`, `fc3561d`, `47c4e51`) em Ready; vídeos funcionando no app publicado.
+
+
+## D34 (01/10/2026): Meu Mês, dívida quitada por fora e restaurar cópia na primeira tela
+
+**Origem.** Ao escrever o Manual de Utilização do Meu Mês (telas reais, passo a passo), dois comportamentos ficaram difíceis de explicar e foram corrigidos no app.
+
+**1. Dívida paga por fora do app.** Antes, em Editar, o botão "Salvar alterações" ficava desabilitado com saldo zero (a regra `saldo > 0` valia para cadastro e edição). Quem quitava uma dívida pelo canal do credor só conseguia "Remover", e perdia o histórico e a comemoração. Agora:
+- Ao **editar**, saldo zero é aceito. Dívida **nova** continua exigindo saldo maior que zero (`MeuMesRecuperacao.tsx`, `valido`).
+- Novo botão **"Quitei esta dívida"** em Editar (aparece com saldo maior que zero): pede confirmação, zera o saldo e mantém `saldoInicial` (a barra de progresso e o "Quitada 🎉" continuam). Se era a última dívida cara, o Modo Recuperação desliga e aparece a comemoração.
+- A dica do campo "Quanto deve hoje", ao editar, passou a dizer "Pagou tudo? Digite 0 e salve, ou toque em 'Quitei esta dívida'".
+
+**2. Restaurar cópia na primeira tela.** Antes, o botão só existia no cartão "Seus dados ficam só neste aparelho", que só aparece depois de informar o salário: quem trocava de celular precisava digitar um salário qualquer para chegar nele. Agora a primeira tela ("Comece pelo salário") traz o cartão **"Já usa o Meu Mês em outro aparelho?"** com o botão "Restaurar cópia" (`RestaurarCopiaInicial`, em `MeuMes.tsx`). Mesma validação da cópia, mesma confirmação ("Restaurar a cópia substitui tudo...") e mesmo aviso para arquivo inválido. O `data-testid="arquivo-copia"` é o mesmo; nunca há dois ao mesmo tempo (a primeira tela e o cartão do fim da página são excludentes).
+
+**Trilha 4 e Trilha 3.** Textos das aulas "Minhas dívidas" e "Cópia de segurança" (`trilhas.ts`) atualizados para os dois fluxos.
+
+**Testes.** 7 novos (4 em `MeuMesRecuperacao.test.tsx`: salvar saldo zero ao editar, dívida nova exige saldo, "Quitei esta dívida" com e sem confirmação; 3 em `MeuMes.test.tsx`: restaurar na primeira tela, arquivo inválido, desistir na confirmação). Total: 387 testes no app; typecheck, lint e build OK.
+
+**Arquivos alterados.** `webapp-src/src/screens/MeuMes.tsx`, `webapp-src/src/screens/MeuMesRecuperacao.tsx`, `webapp-src/src/screens/MeuMes.test.tsx`, `webapp-src/src/screens/MeuMesRecuperacao.test.tsx`, `webapp-src/src/data/trilhas.ts`, `docs/07-registro-de-decisoes.md`.

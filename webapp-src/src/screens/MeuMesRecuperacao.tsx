@@ -202,7 +202,9 @@ export function MinhasDividas({
   const idJuros = useId()
   const idDicaJuros = useId()
 
-  const valido = rascunho.nome.trim().length > 0 && rascunho.saldo > 0
+  // Ao editar, saldo zero é permitido: é como a pessoa registra uma dívida paga por fora (D34).
+  // Dívida nova precisa de saldo maior que zero.
+  const valido = rascunho.nome.trim().length > 0 && (rascunho.saldo > 0 || editandoId != null)
   const previa = { ...comoDivida(rascunho), id: '', saldoInicial: rascunho.saldo }
   const referencia = TIPOS_DE_DIVIDA[rascunho.tipo].jurosReferencia
   // Mostra a taxa equivalente no outro período, por juros compostos (12% ao ano ≈ 0,95% ao mês, e não 1%).
@@ -237,6 +239,16 @@ export function MinhasDividas({
     if (!valido) return
     if (editandoId) onEditar(editandoId, comoDivida(rascunho))
     else onAdicionar(comoDivida(rascunho))
+    carregar(RASCUNHO_VAZIO, null)
+    setAberto(false)
+  }
+
+  /** Dívida paga por fora do app: zera o saldo e mantém o histórico (a barra e o "Quitada 🎉"). */
+  function marcarQuitada() {
+    if (!editandoId) return
+    const aviso = `Marcar "${rascunho.nome}" como quitada? O saldo vai para R$ 0,00 e ela sai do plano de quitação.`
+    if (!window.confirm(aviso)) return
+    onEditar(editandoId, { ...comoDivida(rascunho), saldo: 0 })
     carregar(RASCUNHO_VAZIO, null)
     setAberto(false)
   }
@@ -367,7 +379,11 @@ export function MinhasDividas({
             rotulo="Quanto deve hoje"
             valor={rascunho.saldo}
             onMudar={(v) => setRascunho((r) => ({ ...r, saldo: v }))}
-            dica="Está no extrato ou no app do credor como saldo devedor ou valor para quitação."
+            dica={
+              editandoId
+                ? 'Atualize pelo extrato. Pagou tudo? Digite 0 e salve, ou toque em "Quitei esta dívida".'
+                : 'Está no extrato ou no app do credor como saldo devedor ou valor para quitação.'
+            }
           />
 
           <div className="col" style={{ gap: 4 }}>
@@ -432,6 +448,11 @@ export function MinhasDividas({
           <button className="btn btn-primary" disabled={!valido} onClick={salvar}>
             {editandoId ? 'Salvar alterações' : 'Adicionar dívida'}
           </button>
+          {editandoId && rascunho.saldo > 0 && (
+            <button className="btn btn-outline" onClick={marcarQuitada}>
+              Quitei esta dívida
+            </button>
+          )}
           {(editandoId || (aberto && dividas.length === 0)) && (
             <div className="row" style={{ gap: 8 }}>
               <button

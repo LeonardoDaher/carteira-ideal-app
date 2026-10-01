@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { MeuMes } from './MeuMes'
 import { CHAVE_ORCAMENTO } from '../state/useOrcamento'
 import type { AppCtx } from '../state/useAppState'
+import { gerarCopia } from '../domain/orcamento'
 import type { Orcamento } from '../domain/orcamento'
 
 const ctx = {} as AppCtx
@@ -332,6 +333,43 @@ describe('MeuMes', () => {
     const [c] = lerSalvo().cartao.compras
     expect(c).toMatchObject({ valor: 1000, parcelas: 4 })
     expect(c.valorAVista).toBeUndefined()
+  })
+
+  it('primeira tela: restaurar uma cópia sem precisar digitar o salário (D34)', async () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(true)
+    render(<MeuMes ctx={ctx} hoje={hoje} />)
+    expect(await screen.findByText('Comece pelo salário')).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Restaurar cópia' })).toBeTruthy()
+    const input = await screen.findByTestId('arquivo-copia')
+    const copia = new File([gerarCopia(exemplo, new Date(2026, 9, 5))], 'meu-mes-2026-10.json', { type: 'application/json' })
+    await act(async () => {
+      fireEvent.change(input, { target: { files: [copia] } })
+    })
+    expect((await screen.findAllByRole('button', { name: 'Editar Aluguel' })).length).toBeGreaterThan(0)
+    expect(lerSalvo()).toEqual(exemplo)
+    expect(screen.queryByText('Comece pelo salário')).toBeNull()
+  })
+
+  it('primeira tela: arquivo que não é cópia não altera nada e avisa (D34)', async () => {
+    render(<MeuMes ctx={ctx} hoje={hoje} />)
+    const input = await screen.findByTestId('arquivo-copia')
+    const ruim = new File(['isto não é uma cópia'], 'x.json', { type: 'application/json' })
+    await act(async () => {
+      fireEvent.change(input, { target: { files: [ruim] } })
+    })
+    expect(await screen.findByText(/não é uma cópia do Meu Mês/)).toBeTruthy()
+    expect(screen.getByText('Comece pelo salário')).toBeTruthy()
+  })
+
+  it('primeira tela: desistir na confirmação mantém o app vazio (D34)', async () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(false)
+    render(<MeuMes ctx={ctx} hoje={hoje} />)
+    const input = await screen.findByTestId('arquivo-copia')
+    const copia = new File([gerarCopia(exemplo, new Date(2026, 9, 5))], 'c.json', { type: 'application/json' })
+    await act(async () => {
+      fireEvent.change(input, { target: { files: [copia] } })
+    })
+    expect(screen.getByText('Comece pelo salário')).toBeTruthy()
   })
 
   it('restaurar um arquivo que não é cópia não altera nada', async () => {

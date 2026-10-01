@@ -233,6 +233,50 @@ describe('Meu Mês, Modo Recuperação', () => {
     expect(screen.getByText(/R\$\s500,00 já abatidos de R\$\s2\.000,00/)).toBeTruthy()
   })
 
+  it('editar permite saldo zero: a dívida paga por fora fica quitada e o modo desliga (D34)', async () => {
+    salvar(comDividas([cheque]))
+    render(<MeuMes ctx={ctx} hoje={hoje} />)
+    fireEvent.click(await screen.findByRole('button', { name: 'Editar Cheque do banco' }))
+    fireEvent.change(screen.getByLabelText('Quanto deve hoje'), { target: { value: '0' } })
+    const salvarBtn = screen.getByRole('button', { name: 'Salvar alterações' }) as HTMLButtonElement
+    expect(salvarBtn.disabled).toBe(false)
+    fireEvent.click(salvarBtn)
+    expect(lerSalvo().recuperacao!.dividas[0]).toMatchObject({ saldo: 0, saldoInicial: 2000 })
+    expect(await screen.findByText(/Você quitou as dívidas caras!/)).toBeTruthy()
+    expect(screen.queryByText('Modo Recuperação ligado')).toBeNull()
+  })
+
+  it('dívida nova continua exigindo saldo maior que zero (D34)', async () => {
+    salvar(exemplo)
+    render(<MeuMes ctx={ctx} hoje={hoje} />)
+    fireEvent.click(await screen.findByRole('button', { name: 'Cadastrar uma dívida' }))
+    fireEvent.change(screen.getByLabelText('Nome da dívida'), { target: { value: 'Cartão roxo' } })
+    fireEvent.change(screen.getByLabelText('Quanto deve hoje'), { target: { value: '0' } })
+    expect((screen.getByRole('button', { name: 'Adicionar dívida' }) as HTMLButtonElement).disabled).toBe(true)
+  })
+
+  it('"Quitei esta dívida" zera o saldo depois da confirmação (D34)', async () => {
+    salvar(comDividas([cheque, loja]))
+    const confirmar = vi.spyOn(window, 'confirm').mockReturnValue(true)
+    render(<MeuMes ctx={ctx} hoje={hoje} />)
+    fireEvent.click(await screen.findByRole('button', { name: 'Editar Cheque do banco' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Quitei esta dívida' }))
+    expect(confirmar).toHaveBeenCalledOnce()
+    const dividas = lerSalvo().recuperacao!.dividas
+    expect(dividas.find((d) => d.id === 'cheque')).toMatchObject({ saldo: 0, saldoInicial: 2000 })
+    expect(dividas.find((d) => d.id === 'loja')!.saldo).toBe(600)
+    expect(screen.getByText('Quitada 🎉')).toBeTruthy()
+  })
+
+  it('"Quitei esta dívida" não faz nada se a pessoa desistir na confirmação (D34)', async () => {
+    salvar(comDividas([cheque]))
+    vi.spyOn(window, 'confirm').mockReturnValue(false)
+    render(<MeuMes ctx={ctx} hoje={hoje} />)
+    fireEvent.click(await screen.findByRole('button', { name: 'Editar Cheque do banco' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Quitei esta dívida' }))
+    expect(lerSalvo().recuperacao!.dividas[0].saldo).toBe(2000)
+  })
+
   it('quitar a última dívida cara desliga o modo e comemora', async () => {
     salvar(comDividas([{ ...cheque, saldo: 0 }]))
     render(<MeuMes ctx={ctx} hoje={hoje} />)

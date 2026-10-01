@@ -100,7 +100,7 @@ export function MeuMes({
       </div>
 
       {primeiraVez ? (
-        <Comecar onSalario={est.setSalario} />
+        <Comecar onSalario={est.setSalario} onRestaurar={est.substituir} />
       ) : (
         <div className="desk-split">
           <div className="desk-main">
@@ -171,9 +171,10 @@ export function MeuMes({
 
 // ---------------------------------------------------------------- primeira vez
 
-function Comecar({ onSalario }: { onSalario: (v: number) => void }) {
+function Comecar({ onSalario, onRestaurar }: { onSalario: (v: number) => void; onRestaurar: (o: Orcamento) => void }) {
   const [valor, setValor] = useState(0)
   return (
+    <>
     <div className="card col" style={{ gap: 12 }}>
       <span style={{ fontWeight: 700 }}>Comece pelo salário</span>
       <span className="muted small justify">
@@ -185,6 +186,54 @@ function Comecar({ onSalario }: { onSalario: (v: number) => void }) {
         Continuar
       </button>
       <span className="tiny muted justify">Seus dados ficam só neste aparelho. Nada é enviado para a internet.</span>
+    </div>
+    <RestaurarCopiaInicial onRestaurar={onRestaurar} />
+    </>
+  )
+}
+
+/**
+ * Primeira tela (D34): quem trocou de celular ou limpou o navegador já tem uma cópia salva e não
+ * precisa digitar um salário de mentira só para chegar ao botão "Restaurar cópia".
+ */
+function RestaurarCopiaInicial({ onRestaurar }: { onRestaurar: (o: Orcamento) => void }) {
+  const [aviso, setAviso] = useState<string | null>(null)
+  const arquivoRef = useRef<HTMLInputElement>(null)
+
+  async function restaurar(arquivo: File | undefined) {
+    if (!arquivo) return
+    const lido = lerCopia(await arquivo.text())
+    if (arquivoRef.current) arquivoRef.current.value = ''
+    if (!lido) {
+      setAviso('Este arquivo não é uma cópia do Meu Mês. Nada foi alterado.')
+      return
+    }
+    if (!window.confirm('Restaurar a cópia substitui tudo o que está neste aparelho. Continuar?')) return
+    onRestaurar(lido)
+  }
+
+  return (
+    <div className="card-outline col small" style={{ gap: 10 }}>
+      <span style={{ fontWeight: 700 }}>Já usa o Meu Mês em outro aparelho?</span>
+      <span className="muted justify">
+        Se você salvou uma cópia de segurança, restaure aqui: suas contas, cofrinhos, cartão e dívidas voltam de uma vez.
+      </span>
+      <button className="btn btn-outline" onClick={() => arquivoRef.current?.click()}>
+        Restaurar cópia
+      </button>
+      <input
+        ref={arquivoRef}
+        type="file"
+        accept="application/json,.json"
+        hidden
+        data-testid="arquivo-copia"
+        onChange={(e) => restaurar(e.target.files?.[0])}
+      />
+      {aviso && (
+        <span role="status" className="justify">
+          {aviso}
+        </span>
+      )}
     </div>
   )
 }
