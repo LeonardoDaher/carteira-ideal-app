@@ -11,7 +11,7 @@ export function CartaoPosicoes({ linhas }: { linhas: LinhaPosicao[] }) {
   return (
     <section className="mc-card" aria-labelledby={idTitulo}>
       <h2 id={idTitulo} className="mc-titulo">Posições</h2>
-      <div className="mc-rotulo">{linhas.length} ativo(s) · preço médio calculado pelos seus lançamentos</div>
+      <div className="mc-rotulo">{linhas.length} ativo(s)</div>
       <ul className="mc-posicoes">
         {visiveis.map((l) => (
           <li key={l.ativo} className="mc-posicao">

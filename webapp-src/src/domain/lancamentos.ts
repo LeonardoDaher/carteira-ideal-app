@@ -41,9 +41,18 @@ export type LancamentoNovo = Omit<Lancamento, 'id'>
 
 const EPS = 1e-9
 
-/** Ticker de renda variável da B3 (ação, FII, ETF, BDR): 4 letras + 1 ou 2 dígitos. */
+/**
+ * Formato do ticker de renda variável da B3 (ação, FII, ETF, BDR): 4 caracteres, o 1º letra e os 3
+ * seguintes letras OU DÍGITOS, mais 1 ou 2 dígitos. Os dígitos no meio existem: B3SA3 (a própria B3),
+ * BDRs como A1MD34 e ETFs como B5P211. Exigir "4 letras" separava B3SA3 em dois ativos diferentes
+ * (o ticker e o nome inteiro do produto) e quebrava a conciliação entre os extratos.
+ * Fonte única da regra: todos os reconhecedores de ticker usam este padrão.
+ */
+export const PADRAO_TICKER = '[A-Z][A-Z0-9]{3}\\d{1,2}'
+const RE_TICKER = new RegExp(`^${PADRAO_TICKER}$`)
+
 export function ehTickerDeBolsa(ativo: string): boolean {
-  return /^[A-Z]{4}\d{1,2}$/.test(ativo)
+  return RE_TICKER.test(ativo)
 }
 
 /** Soma dias úteis (só fins de semana; feriados não entram). n pode ser negativo. */

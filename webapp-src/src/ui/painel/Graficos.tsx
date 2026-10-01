@@ -20,13 +20,13 @@ function RotulosDeMes({ pontos }: { pontos: PontoMensal[] }) {
   )
 }
 
-export function GraficoArea({ pontos, ariaLabel, altura = 120 }: { pontos: PontoMensal[]; ariaLabel: string; altura?: number }) {
+export function GraficoArea({ pontos, ariaLabel, altura = 120, decorativo = false }: { pontos: PontoMensal[]; ariaLabel: string; altura?: number; decorativo?: boolean }) {
   const id = useId().replace(/:/g, '')
   const g = geometriaArea(pontos.map((p) => p.valor), LARGURA, altura)
   const ultimo = g.pontos[g.pontos.length - 1]
   return (
     <div className="mc-grafico">
-      <svg viewBox={`0 0 ${LARGURA} ${altura}`} role="img" aria-label={ariaLabel} preserveAspectRatio="none" className="mc-svg" style={{ height: altura }}>
+      <svg viewBox={`0 0 ${LARGURA} ${altura}`} {...(decorativo ? { 'aria-hidden': true } : { role: 'img', 'aria-label': ariaLabel })} preserveAspectRatio="none" className="mc-svg" style={{ height: altura }}>
         <defs>
           <linearGradient id={`${id}-fill`} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="var(--mc-ouro)" stopOpacity="0.38" />
@@ -45,12 +45,12 @@ export function GraficoArea({ pontos, ariaLabel, altura = 120 }: { pontos: Ponto
   )
 }
 
-export function GraficoBarras({ pontos, ariaLabel, altura = 110, destaques = 2 }: { pontos: PontoMensal[]; ariaLabel: string; altura?: number; destaques?: number }) {
+export function GraficoBarras({ pontos, ariaLabel, altura = 110, destaques = 2, decorativo = false }: { pontos: PontoMensal[]; ariaLabel: string; altura?: number; destaques?: number; decorativo?: boolean }) {
   const id = useId().replace(/:/g, '')
   const barras = geometriaBarras(pontos.map((p) => p.valor), LARGURA, altura, destaques)
   return (
     <div className="mc-grafico">
-      <svg viewBox={`0 0 ${LARGURA} ${altura}`} role="img" aria-label={ariaLabel} preserveAspectRatio="none" className="mc-svg" style={{ height: altura }}>
+      <svg viewBox={`0 0 ${LARGURA} ${altura}`} {...(decorativo ? { 'aria-hidden': true } : { role: 'img', 'aria-label': ariaLabel })} preserveAspectRatio="none" className="mc-svg" style={{ height: altura }}>
         <defs>
           <linearGradient id={`${id}-ouro`} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="var(--mc-ouro)" />
@@ -67,7 +67,7 @@ export function GraficoBarras({ pontos, ariaLabel, altura = 110, destaques = 2 }
             rx="2.5"
             fill={b.destaque ? `url(#${id}-ouro)` : 'var(--mc-barra)'}
           >
-            <title>{`${pontos[i].rotulo}: ${reais(pontos[i].valor)}`}</title>
+            {!decorativo && <title>{`${pontos[i].rotulo}: ${reais(pontos[i].valor)}`}</title>}
           </rect>
         ))}
       </svg>
@@ -90,11 +90,11 @@ export function corDaCategoria(categoria: string): string {
 }
 
 /** Barra horizontal empilhada: cada fatia com a cor da sua categoria. A legenda fica em HTML ao lado. */
-export function BarraComposicao({ fatias, ariaLabel }: { fatias: { categoria: string; rotulo: string; pct: number }[]; ariaLabel: string }) {
+export function BarraComposicao({ fatias, ariaLabel, decorativo = false }: { fatias: { categoria: string; rotulo: string; pct: number }[]; ariaLabel: string; decorativo?: boolean }) {
   return (
-    <div className="mc-composicao" role="img" aria-label={ariaLabel}>
+    <div className="mc-composicao" {...(decorativo ? { 'aria-hidden': true } : { role: 'img', 'aria-label': ariaLabel })}>
       {fatias.map((f) => (
-        <span key={f.categoria} className="mc-fatia" style={{ width: `${f.pct}%`, background: corDaCategoria(f.categoria) }} title={`${f.rotulo}: ${f.pct.toFixed(1)}%`} />
+        <span key={f.categoria} className="mc-fatia" style={{ width: `${f.pct}%`, background: corDaCategoria(f.categoria) }} title={decorativo ? undefined : `${f.rotulo}: ${f.pct.toFixed(1)}%`} />
       ))}
     </div>
   )

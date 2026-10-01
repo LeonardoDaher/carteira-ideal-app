@@ -21,7 +21,7 @@
 // número da linha. Tipos de movimentação que ignoramos de propósito viram um aviso agregado.
 import { normalizarBusca } from '../rendaFii'
 import type { LancamentoNovo, OrigemLancamento, SubtipoProvento, TipoLancamento } from '../lancamentos'
-import { ehTickerDeBolsa, validarLancamento } from '../lancamentos'
+import { PADRAO_TICKER, ehTickerDeBolsa, validarLancamento } from '../lancamentos'
 import { lerData, lerNumero, lerTexto, linhaVazia, normalizarCabecalho, type Celula, type Matriz } from './celulas'
 
 export type PerfilArquivo =
@@ -179,7 +179,7 @@ function acharCabecalho(matriz: Matriz): { indice: number; mapa: Mapa; perfil: P
 export function ativoDoTexto(texto: string): string {
   const t = lerTexto(texto)
   const antes = normalizarBusca(t.split(' - ')[0]).replace(/\s/g, '')
-  const semF = /^[A-Z]{4}\d{1,2}F$/.test(antes) ? antes.slice(0, -1) : antes
+  const semF = new RegExp(`^${PADRAO_TICKER}F$`).test(antes) ? antes.slice(0, -1) : antes
   if (ehTickerDeBolsa(semF)) return semF
   return normalizarBusca(t)
 }

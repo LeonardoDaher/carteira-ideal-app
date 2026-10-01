@@ -8,6 +8,7 @@
 // Módulo puro (sem rede, sem React). Os catálogos (FIIs, ETFs, BDRs) vêm de fora, dos
 // mesmos JSONs que já alimentam as abas Simule FII/ETF/BDR.
 import type { AtivoKey } from './types'
+import { PADRAO_TICKER } from './lancamentos'
 import { normalizarBusca } from './rendaFii'
 
 /** 'foraDaRegua' = ativo que existe na carteira da pessoa mas não tem classe na régua de 11
@@ -139,7 +140,7 @@ function classificarTicker(ticker: string, cat: CatalogoAtivos): Classificacao |
   }
   if (cat.fiis.has(ticker)) return r('fiis', 'alta', 'Está na lista de fundos imobiliários.')
 
-  const m = ticker.match(/^[A-Z]{4}(\d{1,2})$/)
+  const m = ticker.match(/^[A-Z][A-Z0-9]{3}(\d{1,2})$/)
   if (!m) return null
   const sufixo = Number(m[1])
   if (sufixo >= 3 && sufixo <= 8) return r('acoesETFs', 'alta', 'Terminação de ação (3 a 8).')
@@ -170,7 +171,7 @@ export function classificarAtivo(entrada: string, catalogo: CatalogoAtivos = CAT
 
   // 2) Ticker de bolsa em qualquer ponto do texto ("BBSE3 - BB Seguridade"); aceita o
   // mercado fracionário (PETR4F).
-  const achado = t.match(/\b([A-Z]{4}\d{1,2})F?\b/)
+  const achado = t.match(new RegExp(`\\b(${PADRAO_TICKER})F?\\b`))
   let doTicker: Classificacao | null = null
   if (achado) {
     doTicker = classificarTicker(achado[1], catalogo)

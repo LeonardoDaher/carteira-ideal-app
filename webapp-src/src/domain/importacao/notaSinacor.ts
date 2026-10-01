@@ -22,7 +22,7 @@
 // (há teste que garante isso).
 //
 // Módulo puro: recebe LinhaPdf[], não abre PDF nem lê arquivo.
-import { somarDiasUteis, type LancamentoNovo } from '../lancamentos'
+import { ehTickerDeBolsa, somarDiasUteis, type LancamentoNovo } from '../lancamentos'
 import { lerData, normalizarCabecalho } from './celulas'
 import type { CelulaPdf, LinhaPdf } from './pdf'
 
@@ -158,7 +158,7 @@ const DIREITOS = new Set(['DO', 'DP', 'DPA', 'DPB'])
 /** Separa nome de pregão de espécie/nível: "CSNMINERACAO ON N2" -> ["CSNMINERACAO", "ON N2"]. */
 export function separarEspecificacao(spec: string): { nome: string; especie: string; ticker: string | null } {
   const tokens = spec.trim().split(/\s+/).filter(Boolean)
-  const ticker = tokens.map((t) => t.toUpperCase()).find((t) => /^[A-Z]{4}\d{1,2}$/.test(t) && !ESPECIES.has(t)) ?? null
+  const ticker = tokens.map((t) => t.toUpperCase()).find((t) => ehTickerDeBolsa(t) && !ESPECIES.has(t)) ?? null
   let fim = tokens.length
   for (;;) {
     const t = tokens[fim - 1]?.toUpperCase()

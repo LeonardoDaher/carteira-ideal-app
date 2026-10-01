@@ -70,6 +70,43 @@ describe('montarPainel: com Posição da B3', () => {
   })
 })
 
+describe('montarPainel: ativo que a Posição não tem (já zerado) não aparece em lugar nenhum', () => {
+  // histórico: VALE3 (está na Posição) e BRML3/BEEF11, que a pessoa já não tem (vendidos ou convertidos fora do histórico)
+  const lancs = livro(
+    L({}),
+    L({ ativo: 'BRML3', quantidade: 300, preco: 10, valor: 3000 }),
+    L({ ativo: 'BEEF11', quantidade: 100, preco: 20, valor: 2000 }),
+  )
+  const p = montarPainel(lancs, [P('VALE3', 100, 1500)], DATA_POS)
+
+  it('não entra na lista de posições', () => {
+    expect(p.linhas.map((l) => l.ativo)).toEqual(['VALE3'])
+    expect(p.ativosAtuais).toEqual(['VALE3'])
+  })
+  it('não infla o total investido: só o custo do que a pessoa tem hoje', () => {
+    expect(p.resumo.capitalAplicado).toBe(1000)
+    expect(p.resumo.patrimonio).toBe(1500)
+  })
+  it('não distorce o resultado nem a cobertura', () => {
+    expect(p.resumo.resultado).toEqual({ valor: 500, pct: 50, cobertura: 1 })
+  })
+  it('a compra recente ainda não liquidada de um ativo fora da Posição aparece, e o ativo antigo zerado continua de fora', () => {
+    const l2 = livro(L({}), L({ ativo: 'BRML3', quantidade: 300, valor: 3000 }), L({ ativo: 'CMIN3', data: '2026-09-30', quantidade: 100, preco: 5, valor: 500 }))
+    const q = montarPainel(l2, [P('VALE3', 100, 1500)], DATA_POS)
+    expect(q.linhas.map((l) => l.ativo).sort()).toEqual(['CMIN3', 'VALE3'])
+    expect(q.linhas.find((l) => l.ativo === 'CMIN3')).toMatchObject({ aguardandoLiquidacao: true, quantidade: 100, precoMedio: 5 })
+  })
+  it('a série do gráfico, quando restrita aos ativos atuais, ignora o histórico dos zerados', () => {
+    const todos = capitalAplicadoPorMes(lancs, '2026-10', 3)
+    const soAtuais = capitalAplicadoPorMes(lancs, '2026-10', 3, new Set(p.ativosAtuais))
+    expect(todos[2].valor).toBe(6000) // 1000 + 3000 + 2000, com os zerados inflando
+    expect(soAtuais[2].valor).toBe(1000) // só VALE3
+  })
+  it('sem restrição, a série continua mostrando todo o histórico (comportamento sem Posição)', () => {
+    expect(capitalAplicadoPorMes(lancs, '2026-10', 1)[0].valor).toBe(6000)
+  })
+})
+
 describe('composicaoPorCategoria', () => {
   it('agrupa pelas categorias da B3, em ordem decrescente, somando 100%', () => {
     const c = composicaoPorCategoria([P('VALE3', 10, 600), P('HGBS11', 10, 300, 'fundos'), P('AAPL34', 10, 100, 'bdr'), P('PETR4', 10, 200)])

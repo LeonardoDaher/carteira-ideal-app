@@ -134,3 +134,13 @@ describe('Cripto, ouro e desconhecidos', () => {
     expect(classificarAtivo('VALE3').classe).toBe('acoesETFs')
   })
 })
+
+describe('Ticker com dígito no meio', () => {
+  it('B3SA3 é ação; A1MD34 é BDR', () => {
+    expect(classe('B3SA3')).toMatchObject({ classe: 'acoesETFs', confianca: 'alta' })
+    expect(classe('A1MD34')).toMatchObject({ classe: 'bdrs', confianca: 'alta' })
+  })
+  it('reconhece o ticker no meio de um texto com o nome do produto', () => {
+    expect(classe('B3SA3 - B3 S.A. - BRASIL, BOLSA, BALCAO').classe).toBe('acoesETFs')
+  })
+})

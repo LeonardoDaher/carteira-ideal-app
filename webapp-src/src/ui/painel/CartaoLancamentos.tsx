@@ -174,9 +174,14 @@ export function CartaoLancamentos({
   onAdicionar,
   onCorrigir,
   onExcluir,
+  filtro,
+  onFiltro,
 }: {
   lancamentos: Lancamento[]
   hoje: string
+  /** Texto digitado no filtro por ativo (vazio = todos). */
+  filtro: string
+  onFiltro: (texto: string) => void
   onAdicionar: (novo: Omit<LancamentoNovo, 'origem'>) => ProblemaLancamento | null
   onCorrigir: (id: string, correcao: Partial<Omit<LancamentoNovo, 'origem'>>) => ProblemaLancamento | null
   onExcluir: (id: string) => void
@@ -185,12 +190,14 @@ export function CartaoLancamentos({
   const [modo, setModo] = useState<{ tipo: 'fechado' } | { tipo: 'novo' } | { tipo: 'editar'; id: string }>({ tipo: 'fechado' })
   const [excluindo, setExcluindo] = useState<string | null>(null)
   const [todos, setTodos] = useState(false)
-  const recentes = [...lancamentos].sort((a, b) => b.data.localeCompare(a.data))
+  const termo = filtro.trim().toUpperCase()
+  const filtrados = termo ? lancamentos.filter((l) => l.ativo.includes(termo)) : lancamentos
+  const recentes = [...filtrados].sort((a, b) => b.data.localeCompare(a.data))
   const visiveis = todos ? recentes : recentes.slice(0, 15)
   const editando = modo.tipo === 'editar' ? lancamentos.find((l) => l.id === modo.id) : undefined
 
   return (
-    <section className="mc-card" aria-labelledby={idTitulo}>
+    <section className="mc-card" aria-labelledby={idTitulo} id="mc-lancamentos">
       <div className="mc-topo-linha">
         <h2 id={idTitulo} className="mc-titulo">Lançamentos</h2>
         {modo.tipo === 'fechado' && (
@@ -199,7 +206,21 @@ export function CartaoLancamentos({
           </button>
         )}
       </div>
-      <div className="mc-rotulo">{lancamentos.length} lançamento(s) · a base de todo cálculo de preço médio</div>
+      <div className="mc-rotulo">{termo ? `${filtrados.length} de ${lancamentos.length} lançamento(s)` : `${lancamentos.length} lançamento(s)`}</div>
+      <div className="mc-filtro">
+        <input
+          className="mc-campo mc-campo-curto"
+          aria-label="Filtrar lançamentos por ativo"
+          placeholder="Filtrar por ativo (ex.: PETR4)"
+          value={filtro}
+          onChange={(e) => onFiltro(e.target.value)}
+        />
+        {termo && (
+          <button type="button" className="btn btn-ghost mc-btn" onClick={() => onFiltro('')}>
+            Limpar filtro
+          </button>
+        )}
+      </div>
 
       {modo.tipo === 'novo' && (
         <Formulario
@@ -229,7 +250,7 @@ export function CartaoLancamentos({
       )}
 
       {recentes.length === 0 ? (
-        <p className="mc-texto">Nenhum lançamento ainda. Importe um extrato ou adicione o primeiro à mão.</p>
+        <p className="mc-texto">{termo ? `Nenhum lançamento de ${termo}.` : 'Nenhum lançamento ainda. Importe um extrato ou adicione o primeiro à mão.'}</p>
       ) : (
         <ul className="mc-lancamentos">
           {visiveis.map((l) => (

@@ -4,7 +4,7 @@ import type { AppCtx } from '../state/useAppState'
 import { useCarteiraReal } from '../state/useCarteiraReal'
 import { AvisoEducacional } from '../ui/AvisoEducacional'
 import { CartaoComparacao } from '../ui/painel/CartaoComparacao'
-import { CartaoComposicao, CartaoCarteira, CartaoProventos } from '../ui/painel/CartoesPainel'
+import { CartaoCarteira, CartaoComposicao, CartaoProventos, CartaoVazio } from '../ui/painel/CartoesPainel'
 import { CartaoConferencia } from '../ui/painel/CartaoConferencia'
 import { CartaoLancamentos } from '../ui/painel/CartaoLancamentos'
 import { CartaoPosicoes } from '../ui/painel/CartaoPosicoes'
@@ -48,35 +48,42 @@ export function MinhaCarteira({ ctx, hoje }: { ctx: AppCtx; hoje?: Date }) {
   const c = h.carteira
   const [aviso, setAviso] = useState<{ tipo: 'ok' | 'erro'; texto: string } | null>(null)
   const [apagando, setApagando] = useState(false)
+  const [filtroAtivo, setFiltroAtivo] = useState('')
 
   const painel = useMemo(() => montarPainel(c.lancamentos, c.posicao, c.dataPosicao), [c.lancamentos, c.posicao, c.dataPosicao])
-  const serieCapital = useMemo(() => capitalAplicadoPorMes(c.lancamentos, mesAtual, 12), [c.lancamentos, mesAtual])
+  // Com a Posição, o gráfico mostra só o que a pessoa tem hoje; sem ela, todo o histórico.
+  const atuais = useMemo(() => (painel.resumo.patrimonio !== null ? new Set(painel.ativosAtuais) : null), [painel])
+  const serieCapital = useMemo(() => capitalAplicadoPorMes(c.lancamentos, mesAtual, 12, atuais), [c.lancamentos, mesAtual, atuais])
   const serieProventos = useMemo(() => proventosPorMes(c.lancamentos, mesAtual, 12), [c.lancamentos, mesAtual])
   const fatias = useMemo(() => composicaoPorCategoria(c.posicao), [c.posicao])
   const proximos = useMemo(() => proximosProventos(c.eventosFuturos, hojeISO), [c.eventosFuturos, hojeISO])
   const temDados = c.lancamentos.length > 0 || !!c.posicao
 
+  /** Do cartão de conferência para a lista de lançamentos, já filtrada pelo ativo que a pessoa quer corrigir. */
+  function verLancamentosDe(ativo: string) {
+    setFiltroAtivo(ativo)
+    document.getElementById('mc-lancamentos')?.scrollIntoView?.({ behavior: 'smooth', block: 'start' })
+  }
+
   return (
     <div className="screen mc-tela">
       <VoltarInicio />
-      <div className="col" style={{ gap: 4 }}>
-        <h1 style={{ fontSize: 22 }}>Minha carteira</h1>
-        <div className="muted small justify">
-          Acompanhe a carteira que você realmente tem. Importe os extratos da B3 e o app calcula o preço médio, mostra a evolução e confere se o histórico
-          bate com a sua custódia. Seus dados ficam só neste aparelho.
-        </div>
+      <div className="col" style={{ gap: 6 }}>
+        <h1 style={{ fontSize: 26 }}>Minha Carteira</h1>
+        <p className="mc-sub">Veja a sua carteira real em 3 passos.</p>
       </div>
 
       <ImportarArquivos onImportar={h.importarArquivos} />
 
       {h.hidratado && !temDados && (
-        <section className="mc-card mc-vazio">
-          <h2 className="mc-titulo">Comece pelo extrato de Posição</h2>
-          <p className="mc-texto">
-            Com a <strong>Posição</strong> o app já mostra o seu patrimônio e a composição. Com a <strong>Negociação</strong> e a <strong>Movimentação</strong>{' '}
-            ele calcula o preço médio e os proventos. Se preferir, adicione um lançamento à mão logo abaixo.
-          </p>
-        </section>
+        <>
+          <p className="mc-chamada-vazia">Seus gráficos vão aparecer aqui</p>
+          <div className="mc-grade">
+            <CartaoVazio titulo="Carteira" rotulo="Seu patrimônio e a evolução" tipo="area" />
+            <CartaoVazio titulo="Proventos" rotulo="O que você recebeu em 12 meses" tipo="barras" />
+            <CartaoVazio titulo="Composição" rotulo="Como a sua carteira está dividida" tipo="composicao" />
+          </div>
+        </>
       )}
 
       {h.hidratado && temDados && (
@@ -96,7 +103,7 @@ export function MinhaCarteira({ ctx, hoje }: { ctx: AppCtx; hoje?: Date }) {
             />
           </div>
           <CartaoComposicao fatias={fatias} />
-          <CartaoConferencia carteira={c} onSaldoInicial={h.adicionar} onDataPosicao={h.definirDataPosicao} />
+          <CartaoConferencia carteira={c} onAdicionar={h.adicionar} onDataPosicao={h.definirDataPosicao} onVerLancamentos={verLancamentosDe} />
           <div className="mc-largo">
             <CartaoPosicoes linhas={painel.linhas} />
           </div>
@@ -104,14 +111,14 @@ export function MinhaCarteira({ ctx, hoje }: { ctx: AppCtx; hoje?: Date }) {
       )}
 
       {h.hidratado && (
-        <CartaoLancamentos lancamentos={c.lancamentos} hoje={hojeISO} onAdicionar={h.adicionar} onCorrigir={h.corrigir} onExcluir={h.excluir} />
+        <CartaoLancamentos lancamentos={c.lancamentos} hoje={hojeISO} onAdicionar={h.adicionar} onCorrigir={h.corrigir} onExcluir={h.excluir} filtro={filtroAtivo} onFiltro={setFiltroAtivo} />
       )}
 
       {h.hidratado && (
         <section className="mc-card" aria-labelledby={`${idSeus}-t`}>
           <h2 id={`${idSeus}-t`} className="mc-titulo">Seus dados</h2>
           <p className="mc-texto">
-            Tudo fica guardado neste aparelho. Se trocar de aparelho ou limpar o navegador, baixe um backup antes e restaure depois.
+            Faça um backup antes de trocar de aparelho ou limpar o navegador.
           </p>
           <div className="mc-acoes">
             <button type="button" className="btn btn-secondary mc-btn" onClick={() => baixarTexto('minha-carteira-backup.json', h.exportarBackup(), 'application/json')}>

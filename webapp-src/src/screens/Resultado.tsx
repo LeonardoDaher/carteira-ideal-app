@@ -1,3 +1,4 @@
+import { semNumero } from '../ui/nomePerfil'
 import { SemResultado } from '../ui/SemResultado'
 import { carteiraParaExibicao } from '../data/carteiraVisual'
 import { AllocLegend, PieChart } from '../ui/AllocBar'
@@ -27,13 +28,6 @@ const DESCRICAO_PATRIMONIAL: Record<string, string> = {
 /** Remove espaços do nome do perfil para usar como classe CSS (ex: "Crescimento Pleno" → "CrescimentoPleno"). */
 function classePerfil(perfil: string) {
   return perfil.replace(/\s+/g, '')
-}
-
-/** Remove o número de ordem na frente do nome do Perfil Final da Carteira para exibição
- * (ex: "9. Arrojado Pleno / Global" → "Arrojado Pleno / Global"). O número continua
- * existindo no dado interno (PerfilFinalCarteira), só não aparece na tela. */
-function semNumero(nomePerfil: string) {
-  return nomePerfil.replace(/^\d+\.\s*/, '')
 }
 
 export function Resultado({ ctx }: { ctx: AppCtx }) {

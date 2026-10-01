@@ -48,10 +48,50 @@ afterEach(() => vi.restoreAllMocks())
 describe('MinhaCarteira: primeira vez', () => {
   it('convida a importar, explica a privacidade e não mostra gráficos vazios', async () => {
     render(<MinhaCarteira ctx={ctx} hoje={hoje} />)
-    expect(await screen.findByText('Comece pelo extrato de Posição')).toBeTruthy()
-    expect(screen.getByText(/nada é enviado para a internet/i)).toBeTruthy()
+    expect(await screen.findByText('Seus gráficos vão aparecer aqui')).toBeTruthy()
+    expect(screen.getByText(/Seus dados ficam só neste aparelho/)).toBeTruthy()
     expect(screen.getByRole('button', { name: 'Adicionar lançamento' })).toBeTruthy()
     expect(screen.queryByRole('img', { name: /capital aplicado/i })).toBeNull()
+  })
+})
+
+describe('MinhaCarteira: simples e didática', () => {
+  it('mostra 3 passos, com link para a B3 abrindo em outra aba, e o botão de enviar no passo 2', async () => {
+    render(<MinhaCarteira ctx={ctx} hoje={hoje} />)
+    await screen.findByText('Seus gráficos vão aparecer aqui')
+    const passos = within(screen.getByRole('list', { name: '' } as never) ?? document.body)
+    void passos
+    const itens = Array.from(document.querySelectorAll('.mc-passo'))
+    expect(itens).toHaveLength(3)
+    expect(itens.map((li) => li.querySelector('.mc-passo-titulo')!.textContent)).toEqual(['Baixe na B3', 'Envie aqui', 'Pronto!'])
+    const link = screen.getByRole('link', { name: /Abrir a Área do Investidor da B3/ }) as HTMLAnchorElement
+    expect(link.href).toBe('https://www.investidor.b3.com.br/')
+    expect(link.target).toBe('_blank')
+    expect(link.rel).toContain('noopener')
+    expect(within(itens[1] as HTMLElement).getByText('Escolher arquivos')).toBeTruthy()
+  })
+  it('antes de importar, mostra os gráficos como EXEMPLO: etiqueta, valor em "R$ —", nenhum número inventado', async () => {
+    render(<MinhaCarteira ctx={ctx} hoje={hoje} />)
+    await screen.findByText('Seus gráficos vão aparecer aqui')
+    const cartoes = Array.from(document.querySelectorAll('.mc-cartao-vazio'))
+    expect(cartoes).toHaveLength(3)
+    for (const c of cartoes) {
+      expect(txt(c as HTMLElement)).toContain('Exemplo')
+      expect(txt(c as HTMLElement)).toContain('R$ —')
+      expect(txt(c as HTMLElement)).not.toMatch(/R\$\s?\d/) // nenhum valor em reais
+      expect((c as HTMLElement).querySelector('[aria-hidden="true"] svg, [aria-hidden="true"] .mc-composicao')).toBeTruthy()
+    }
+    // e os gráficos de exemplo não se passam por dado real para leitores de tela
+    expect(screen.queryByRole('img')).toBeNull()
+  })
+  it('depois de importar, os cartões de exemplo somem e entram os reais', async () => {
+    render(<MinhaCarteira ctx={ctx} hoje={hoje} />)
+    await screen.findByText('Seus gráficos vão aparecer aqui')
+    await enviarArquivo('a.csv', 'Data;Tipo;Ativo;Quantidade;Preço\n05/03/2026;Compra;MXRF11;100;10,00\n')
+    await screen.findByRole('list', { name: 'Resultado da importação' })
+    expect(document.querySelectorAll('.mc-cartao-vazio')).toHaveLength(0)
+    expect(screen.queryByText('Seus gráficos vão aparecer aqui')).toBeNull()
+    expect(screen.getByRole('heading', { name: 'Carteira' })).toBeTruthy()
   })
 })
 
@@ -60,7 +100,7 @@ describe('MinhaCarteira: importar um arquivo', () => {
 
   it('lê o CSV, resume o que entrou, calcula o preço médio e grava no aparelho', async () => {
     render(<MinhaCarteira ctx={ctx} hoje={hoje} />)
-    await screen.findByText('Comece pelo extrato de Posição')
+    await screen.findByText('Seus gráficos vão aparecer aqui')
     await enviarArquivo('minha-carteira.csv', csv)
 
     const resultado = await screen.findByRole('list', { name: 'Resultado da importação' })
@@ -74,7 +114,7 @@ describe('MinhaCarteira: importar um arquivo', () => {
 
   it('reimportar o mesmo arquivo não duplica nada', async () => {
     render(<MinhaCarteira ctx={ctx} hoje={hoje} />)
-    await screen.findByText('Comece pelo extrato de Posição')
+    await screen.findByText('Seus gráficos vão aparecer aqui')
     await enviarArquivo('a.csv', csv)
     await screen.findByRole('list', { name: 'Resultado da importação' })
     await enviarArquivo('a.csv', csv)
@@ -84,15 +124,15 @@ describe('MinhaCarteira: importar um arquivo', () => {
 
   it('arquivo irreconhecível: explica o problema e não altera a carteira', async () => {
     render(<MinhaCarteira ctx={ctx} hoje={hoje} />)
-    await screen.findByText('Comece pelo extrato de Posição')
+    await screen.findByText('Seus gráficos vão aparecer aqui')
     await enviarArquivo('qualquer.csv', 'Nome;Idade\nAna;30\n')
     expect(txt(await screen.findByRole('list', { name: 'Resultado da importação' }))).toContain('colunas mínimas')
-    expect(screen.getByText('Comece pelo extrato de Posição')).toBeTruthy()
+    expect(screen.getByText('Seus gráficos vão aparecer aqui')).toBeTruthy()
   })
 
   it('nota de corretagem em PDF: avisa que ainda não é lida aqui', async () => {
     render(<MinhaCarteira ctx={ctx} hoje={hoje} />)
-    await screen.findByText('Comece pelo extrato de Posição')
+    await screen.findByText('Seus gráficos vão aparecer aqui')
     const entrada = document.querySelector('input[type=file][multiple]') as HTMLInputElement
     await act(async () => {
       fireEvent.change(entrada, { target: { files: [new File(['%PDF'], 'nota.pdf', { type: 'application/pdf' })] } })
@@ -119,7 +159,7 @@ describe('MinhaCarteira: painel com dados', () => {
     semear({ lancs: [L()] })
     render(<MinhaCarteira ctx={ctx} hoje={hoje} />)
     const carteira = (await screen.findByRole('heading', { name: 'Carteira' })).closest('section')!
-    expect(txt(carteira)).toContain('Capital aplicado (a preço de custo)')
+    expect(txt(carteira)).toContain('Total investido')
     expect(txt(carteira)).toContain('R$ 1.000,00')
     expect(txt(carteira)).not.toContain('Patrimônio em')
   })
@@ -128,7 +168,7 @@ describe('MinhaCarteira: painel com dados', () => {
     semear({ lancs: [L(), L({ tipo: 'provento', data: '2026-09-10', valor: 25, quantidade: 100, preco: 0.25, subtipo: 'rendimento' })] })
     render(<MinhaCarteira ctx={ctx} hoje={hoje} />)
     await screen.findByRole('heading', { name: 'Carteira' })
-    expect(screen.getByRole('img', { name: /Capital aplicado a preço de custo: de R\$/ })).toBeTruthy()
+    expect(screen.getByRole('img', { name: /Total investido, pelo preço pago: de R\$/ })).toBeTruthy()
     expect(screen.getByRole('img', { name: /Proventos recebidos por mês nos últimos 12 meses, total de R\$\s25,00/ })).toBeTruthy()
   })
 
@@ -238,7 +278,7 @@ describe('MinhaCarteira: corrigir e excluir', () => {
   it('corrigir um lançamento importado: o erro some e a reimportação não o traz de volta', async () => {
     const csv = 'Data;Tipo;Ativo;Quantidade;Preço\n05/03/2026;Compra;VALE3;100;99,00\n'
     render(<MinhaCarteira ctx={ctx} hoje={hoje} />)
-    await screen.findByText('Comece pelo extrato de Posição')
+    await screen.findByText('Seus gráficos vão aparecer aqui')
     await enviarArquivo('a.csv', csv)
     await screen.findByRole('list', { name: 'Resultado da importação' })
 
@@ -257,7 +297,7 @@ describe('MinhaCarteira: corrigir e excluir', () => {
   it('excluir pede confirmação e não volta ao reimportar', async () => {
     const csv = 'Data;Tipo;Ativo;Quantidade;Preço\n05/03/2026;Compra;VALE3;100;10,00\n'
     render(<MinhaCarteira ctx={ctx} hoje={hoje} />)
-    await screen.findByText('Comece pelo extrato de Posição')
+    await screen.findByText('Seus gráficos vão aparecer aqui')
     await enviarArquivo('a.csv', csv)
     await screen.findByRole('list', { name: 'Resultado da importação' })
     fireEvent.click(screen.getByRole('button', { name: /Excluir lançamento de VALE3/ }))
@@ -297,12 +337,12 @@ describe('MinhaCarteira: seus dados', () => {
     expect(lerSalvo().lancamentos).toHaveLength(1)
     fireEvent.click(screen.getByRole('button', { name: 'Sim, apagar tudo' }))
     expect(lerSalvo().lancamentos).toHaveLength(0)
-    expect(await screen.findByText('Comece pelo extrato de Posição')).toBeTruthy()
+    expect(await screen.findByText('Seus gráficos vão aparecer aqui')).toBeTruthy()
   })
   it('dado corrompido no aparelho não trava a tela: começa vazio', async () => {
     localStorage.setItem(CHAVE_CARTEIRA, '{isto está quebrado')
     render(<MinhaCarteira ctx={ctx} hoje={hoje} />)
-    expect(await screen.findByText('Comece pelo extrato de Posição')).toBeTruthy()
+    expect(await screen.findByText('Seus gráficos vão aparecer aqui')).toBeTruthy()
   })
 })
 
@@ -327,7 +367,6 @@ describe('MinhaCarteira: comparação com a carteira sugerida', () => {
     render(<MinhaCarteira ctx={ctx} hoje={hoje} />)
     const c = await cartao()
     expect(txt(c)).toContain('É opcional')
-    expect(txt(c)).toContain('funciona sem ele')
     fireEvent.click(within(c).getByRole('button', { name: 'Responder o questionário' }))
     expect(ctx.iniciarQuestionario).toHaveBeenCalledTimes(1)
   })
@@ -355,7 +394,9 @@ describe('MinhaCarteira: comparação com a carteira sugerida', () => {
     const esperado = compararComReferencia({ acoesETFs: 600, fiis: 400 }, referencia)
     expect(txt(c)).toContain(`${Math.round(esperado.aderencia!)}%`)
     expect(txt(c)).toContain('Valores de 30/09/2026 (Posição da B3)')
-    expect(txt(c)).toContain(String(resultado.perfilFinalCarteira ?? resultado.perfilPatrimonial ?? resultado.perfilFinal))
+    const perfil = String(resultado.perfilFinalCarteira ?? resultado.perfilPatrimonial ?? resultado.perfilFinal)
+    expect(txt(c)).toContain(perfil.replace(/^\d+\.\s*/, '')) // sem o "5." na frente, como na tela Resultado
+    expect(txt(c)).not.toMatch(/perfil\s+\d+\./)
 
     const acoes = esperado.linhas.find((l) => l.classe === 'acoesETFs')!
     const linhaAcoes = within(lista(c)).getByText(ATIVOS.acoesETFs.label).closest('li')!
@@ -363,6 +404,20 @@ describe('MinhaCarteira: comparação com a carteira sugerida', () => {
     expect(txt(linhaAcoes)).toContain(`Sugerida: ${pct(acoes.pctReferencia, false)}`)
     const chip = acoes.situacao === 'dentro' ? 'Dentro do alvo' : acoes.difPp < 0 ? 'Abaixo' : 'Acima'
     expect(txt(linhaAcoes)).toContain(chip)
+  })
+  it('classe em 0% não desenha nenhuma fatia na barra (só a marca do alvo)', async () => {
+    base()
+    render(<MinhaCarteira ctx={ctxCom()} hoje={hoje} />)
+    const c = await cartao()
+    const esperado = compararComReferencia({ acoesETFs: 600, fiis: 400 }, referencia)
+    const zerada = esperado.linhas.find((l) => l.valor === 0 && l.pctReferencia > 5)!
+    const linha = within(lista(c)).getByText(ATIVOS[zerada.classe as keyof typeof ATIVOS].label).closest('li')!
+    const fatia = linha.querySelector('.mc-preench') as HTMLElement
+    expect(fatia.style.width).toBe('0%')
+    expect(fatia.style.minWidth).toBe('0px')
+    // e a classe que a pessoa tem continua com a fatia visível
+    const comValor = within(lista(c)).getByText(ATIVOS.acoesETFs.label).closest('li')!.querySelector('.mc-preench') as HTMLElement
+    expect(comValor.style.minWidth).toBe('3px')
   })
   it('classes sugeridas que a pessoa não tem aparecem como "abaixo", com o quanto falta em reais', async () => {
     base()
@@ -385,7 +440,7 @@ describe('MinhaCarteira: comparação com a carteira sugerida', () => {
   it('sem a Posição, avisa que a conta usa o preço de custo', async () => {
     semear({ lancs: [L({ ativo: 'VALE3', quantidade: 100, valor: 1000 })] })
     render(<MinhaCarteira ctx={ctxCom()} hoje={hoje} />)
-    expect(txt(await cartao())).toContain('Calculado a preço de custo')
+    expect(txt(await cartao())).toContain('Valores a preço de custo')
   })
 
   it('ativo que o app não sabe classificar fica de fora, avisa quanto, e a escolha da pessoa o inclui e fica gravada', async () => {
@@ -436,11 +491,119 @@ describe('MinhaCarteira: comparação com a carteira sugerida', () => {
     render(<MinhaCarteira ctx={ctxCom()} hoje={hoje} />)
     const nota = within(await cartao()).getByRole('note')
     expect(nota.textContent).toContain('não é recomendação de investimento')
-    expect(nota.textContent).toContain('os seus ativos nunca saem daqui')
+    expect(nota.textContent).toContain('ativos nunca saem deste aparelho')
   })
   it('sem nenhum ativo importado, não mostra comparação vazia', async () => {
     semear({ lancs: [L({ tipo: 'provento', valor: 10, quantidade: 1, preco: 0, subtipo: 'jcp' })] })
     render(<MinhaCarteira ctx={ctxCom()} hoje={hoje} />)
     expect(txt(await cartao())).toContain('Importe os seus ativos')
+  })
+})
+
+describe('MinhaCarteira: só vale o que está na Posição (ativo zerado é zero)', () => {
+  const ctxVazio = {} as AppCtx
+  const conf = async () => (await screen.findByRole('heading', { name: 'Conferência com a Posição' })).closest('section')!
+  const posicoes = async () => (await screen.findByRole('heading', { name: 'Posições' })).closest('section')!
+
+  it('ativo que a Posição não tem NÃO vira pendência: só uma nota diz que ele ficou de fora', async () => {
+    // BRML3 e BEEF11 aparecem no histórico, mas a Posição não os tem: foram vendidos ou convertidos. É zero.
+    semear({ lancs: [L(), L({ ativo: 'BRML3', quantidade: 300, valor: 3000 }), L({ ativo: 'BEEF11', quantidade: 100, valor: 2000 })], posicao: [pos('VALE3', 100, 1500)], dataPosicao: '2026-09-30' })
+    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    const c = await conf()
+    expect(txt(c)).toContain('1 de 1 ativos conferem')
+    expect(txt(c)).toContain('2 ativo(s) que você já zerou ficam de fora')
+    expect(txt(c)).not.toContain('BRML3')
+    expect(txt(c)).not.toContain('BEEF11')
+    expect(txt(c)).not.toContain('Inconsistente')
+    expect(txt(await posicoes())).not.toContain('BRML3')
+  })
+  it('o total investido e o resultado não são inflados pelos ativos zerados', async () => {
+    semear({ lancs: [L(), L({ ativo: 'BRML3', quantidade: 300, valor: 3000 })], posicao: [pos('VALE3', 100, 1500)], dataPosicao: '2026-09-30' })
+    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    const carteira = (await screen.findByRole('heading', { name: 'Carteira' })).closest('section')!
+    expect(txt(carteira)).toContain('R$ 1.500,00') // patrimônio
+    expect(txt(carteira)).toMatch(/Investido nos ativos com preço médio conhecido: R\$\s1\.000,00/) // sem os 3.000 de BRML3
+  })
+
+  it('ativo da Posição com lançamentos a MAIS: dá baixa como VENDA, já com o preço médio, e passa a conferir', async () => {
+    semear({ lancs: [L({ quantidade: 115, valor: 1150 })], posicao: [pos('VALE3', 100, 1500)], dataPosicao: '2026-09-30' })
+    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    const c = await conf()
+    expect(txt(c)).toContain('Inconsistente')
+    fireEvent.click(within(c).getByRole('button', { name: 'Dar baixa em 15' }))
+    const form = within(c).getByRole('group', { name: 'Dar baixa em VALE3' })
+    expect((within(form).getByLabelText('Quantidade') as HTMLInputElement).value).toBe('15')
+    expect((within(form).getByLabelText('Preço de venda (R$)') as HTMLInputElement).value).toBe('10') // o preço médio: resultado zero
+    expect((within(form).getByLabelText('Data') as HTMLInputElement).value).toBe('2026-09-28') // antes do prazo D+2, para valer
+    fireEvent.click(within(form).getByRole('button', { name: 'Lançar baixa' }))
+    await waitFor(() => expect(txt(c)).toContain('1 de 1 ativos conferem'))
+    expect(lerSalvo().lancamentos.find((l) => l.origem === 'manual')).toMatchObject({ tipo: 'venda', ativo: 'VALE3', quantidade: 15, preco: 10, valor: 150, data: '2026-09-28' })
+  })
+  it('dar baixa como EVENTO DA EMPRESA só ajusta a quantidade (sem preço, sem resultado)', async () => {
+    semear({ lancs: [L({ quantidade: 115, valor: 1150 })], posicao: [pos('VALE3', 100, 1500)], dataPosicao: '2026-09-30' })
+    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    const c = await conf()
+    fireEvent.click(within(c).getByRole('button', { name: 'Dar baixa em 15' }))
+    const form = within(c).getByRole('group', { name: 'Dar baixa em VALE3' })
+    fireEvent.change(within(form).getByLabelText('Motivo'), { target: { value: 'ajuste' } })
+    expect(within(form).queryByLabelText('Preço de venda (R$)')).toBeNull()
+    expect((within(form).getByLabelText('Data') as HTMLInputElement).value).toBe('2026-09-30')
+    fireEvent.click(within(form).getByRole('button', { name: 'Lançar baixa' }))
+    await waitFor(() => expect(txt(c)).toContain('1 de 1 ativos conferem'))
+    expect(lerSalvo().lancamentos.find((l) => l.origem === 'manual')).toMatchObject({ tipo: 'ajusteQuantidade', quantidade: -15, preco: 0, valor: 0 })
+  })
+  it('baixa com dado inválido: explica e não lança', async () => {
+    semear({ lancs: [L({ quantidade: 115, valor: 1150 })], posicao: [pos('VALE3', 100, 1500)], dataPosicao: '2026-09-30' })
+    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    const c = await conf()
+    fireEvent.click(within(c).getByRole('button', { name: 'Dar baixa em 15' }))
+    const form = within(c).getByRole('group', { name: 'Dar baixa em VALE3' })
+    fireEvent.change(within(form).getByLabelText('Preço de venda (R$)'), { target: { value: '' } })
+    fireEvent.click(within(form).getByRole('button', { name: 'Lançar baixa' }))
+    expect((await within(form).findByRole('alert')).textContent).toContain('Informe o preço de venda')
+    expect(lerSalvo().lancamentos).toHaveLength(1)
+  })
+  it('cancelar a baixa fecha o formulário sem lançar nada', async () => {
+    semear({ lancs: [L({ quantidade: 115, valor: 1150 })], posicao: [pos('VALE3', 100, 1500)], dataPosicao: '2026-09-30' })
+    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    const c = await conf()
+    fireEvent.click(within(c).getByRole('button', { name: 'Dar baixa em 15' }))
+    fireEvent.click(within(within(c).getByRole('group', { name: 'Dar baixa em VALE3' })).getByRole('button', { name: 'Cancelar' }))
+    expect(within(c).queryByRole('group', { name: 'Dar baixa em VALE3' })).toBeNull()
+    expect(lerSalvo().lancamentos).toHaveLength(1)
+  })
+
+  it('inconsistente porque as vendas superam o histórico: pede o preço médio do saldo anterior', async () => {
+    semear({ lancs: [L({ data: '2026-09-01', tipo: 'venda', valor: 1000 }), L({ data: '2026-09-02', quantidade: 100 })], posicao: [pos('VALE3', 50, 750)], dataPosicao: '2026-09-30' })
+    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    const c = await conf()
+    expect(txt(c)).toContain('Inconsistente')
+    fireEvent.change(within(c).getByLabelText(/Preço médio dos 100 anteriores/), { target: { value: '8' } })
+    fireEvent.click(within(c).getByRole('button', { name: 'Lançar saldo inicial' }))
+    await waitFor(() => expect(lerSalvo().lancamentos.some((l) => l.tipo === 'saldoInicial' && l.quantidade === 100 && l.preco === 8)).toBe(true))
+  })
+
+  it('"Ver e corrigir lançamentos" leva à lista já filtrada pelo ativo, e dá para limpar o filtro', async () => {
+    semear({ lancs: [L({ quantidade: 115, valor: 1150 }), L({ ativo: 'BBAS3', quantidade: 10, valor: 100 })], posicao: [pos('VALE3', 100, 1500), pos('BBAS3', 10, 100)], dataPosicao: '2026-09-30' })
+    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    const c = await conf()
+    fireEvent.click(within(c).getByRole('button', { name: 'Ver e corrigir os lançamentos de VALE3' }))
+    const lista = screen.getByRole('heading', { name: 'Lançamentos' }).closest('section')!
+    expect((within(lista).getByLabelText('Filtrar lançamentos por ativo') as HTMLInputElement).value).toBe('VALE3')
+    expect(txt(lista)).toContain('1 de 2 lançamento(s)')
+    expect(within(lista).getAllByRole('button', { name: /Corrigir lançamento de/ })).toHaveLength(1)
+    expect(within(lista).getByRole('button', { name: /Corrigir lançamento de VALE3/ })).toBeTruthy()
+    fireEvent.click(within(lista).getByRole('button', { name: 'Limpar filtro' }))
+    expect(txt(lista)).toContain('2 lançamento(s)')
+    expect(within(lista).getAllByRole('button', { name: /Corrigir lançamento de/ })).toHaveLength(2)
+  })
+  it('o filtro também funciona digitando, e avisa quando nada combina', async () => {
+    semear({ lancs: [L(), L({ ativo: 'BBAS3', quantidade: 10, valor: 100 })] })
+    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    const lista = (await screen.findByRole('heading', { name: 'Lançamentos' })).closest('section')!
+    fireEvent.change(within(lista).getByLabelText('Filtrar lançamentos por ativo'), { target: { value: 'bbas' } })
+    expect(txt(lista)).toContain('1 de 2 lançamento(s)')
+    fireEvent.change(within(lista).getByLabelText('Filtrar lançamentos por ativo'), { target: { value: 'XXXX' } })
+    expect(txt(lista)).toContain('Nenhum lançamento de XXXX')
   })
 })

@@ -10,6 +10,7 @@ import type { ClasseCarteira } from '../../domain/classificadorAtivo'
 import { lerNumero } from '../../domain/importacao/celulas'
 import type { Painel } from '../../domain/painelCarteira'
 import type { AtivoKey, ResultadoRecomendacao } from '../../domain/types'
+import { semNumero } from '../nomePerfil'
 import { dataCurta, pct, reais } from './formatar'
 
 interface Props {
@@ -57,7 +58,7 @@ function Linha({ l }: { l: LinhaClasse }) {
         </span>
       </div>
       <div className="mc-trilha" aria-hidden="true">
-        <span className="mc-preench" style={{ width: `${Math.min(100, l.pctAtual)}%`, background: corDaClasse(l.classe) }} />
+        <span className="mc-preench" style={{ width: `${Math.min(100, l.pctAtual)}%`, minWidth: l.pctAtual > 0 ? 3 : 0, background: corDaClasse(l.classe) }} />
         {l.pctReferencia > 0 && <span className="mc-marca" style={{ left: `${Math.min(100, l.pctReferencia)}%` }} />}
       </div>
       <div className="mc-comp-numeros">
@@ -97,7 +98,7 @@ function Aporte({ valores, referencia }: { valores: Partial<Record<ClasseCarteir
               </li>
             ))}
           </ul>
-          <div className="mc-nota">Distribui só o dinheiro novo entre as classes que ficariam abaixo da sugerida. Não manda vender nada.</div>
+          <div className="mc-nota">Distribui só o dinheiro novo entre as classes abaixo do alvo. Não manda vender nada.</div>
         </>
       )}
     </div>
@@ -138,8 +139,7 @@ export function CartaoComparacao({ resultado, pendente, erro, onTentarNovamente,
       <section className="mc-card" aria-labelledby={idTitulo}>
         {titulo}
         <p className="mc-texto">
-          Responda o questionário (14 perguntas, menos de 3 minutos) para ver como a sua carteira de hoje se compara com uma carteira de referência para o seu perfil e quais
-          classes estão acima ou abaixo. <strong>É opcional</strong>: a Minha Carteira funciona sem ele.
+          Responda o questionário (menos de 3 minutos) para ver o que está acima ou abaixo da carteira de referência do seu perfil. <strong>É opcional.</strong>
         </p>
         <div className="mc-acoes">
           <button type="button" className="btn btn-primary mc-btn" onClick={onResponderQuestionario}>Responder o questionário</button>
@@ -165,12 +165,12 @@ export function CartaoComparacao({ resultado, pendente, erro, onTentarNovamente,
   return (
     <section className="mc-card mc-comparacao" aria-labelledby={idTitulo}>
       {titulo}
-      <div className="mc-rotulo">Carteira sugerida para o perfil <strong>{perfil}</strong></div>
+      <div className="mc-rotulo">Carteira sugerida para o perfil <strong>{semNumero(perfil)}</strong></div>
 
       {aderencia !== null && (
         <div className="mc-aderencia">
           <div className="mc-valor">{Math.round(aderencia)}%</div>
-          <div className="mc-nota">de aderência: quanto da sua carteira já está onde a sugerida indica</div>
+          <div className="mc-nota">de aderência à carteira sugerida</div>
           <div className="mc-barra-progresso" role="img" aria-label={`Aderência de ${Math.round(aderencia)}% à carteira sugerida`}>
             <span style={{ width: `${Math.max(0, Math.min(100, aderencia))}%`, background: 'var(--mc-ouro)' }} />
           </div>
@@ -179,13 +179,13 @@ export function CartaoComparacao({ resultado, pendente, erro, onTentarNovamente,
       <div className="mc-nota">
         {painel.resumo.patrimonio !== null && painel.resumo.dataPosicao
           ? `Valores de ${dataCurta(painel.resumo.dataPosicao)} (Posição da B3).`
-          : 'Calculado a preço de custo. Importe a Posição da B3 para usar os valores atuais.'}
+          : 'Valores a preço de custo. Importe a Posição para usar valores atuais.'}
       </div>
 
       {pendentes.length > 0 && (
         <div className="mc-aviso-caixa" role="group" aria-label="Ativos sem classe">
           <strong>{pendentes.length} ativo(s), somando {reais(valorPendente)}, ficaram de fora</strong>
-          <div className="mc-nota">Não conseguimos identificar a classe com segurança. Escolha abaixo para incluí-los na comparação.</div>
+          <div className="mc-nota">Não deu para identificar a classe. Escolha abaixo para incluí-los.</div>
           <ul className="mc-pendentes-classe">
             {pendentes.map((p) => (
               <li key={p.ativo}>
@@ -228,12 +228,11 @@ export function CartaoComparacao({ resultado, pendente, erro, onTentarNovamente,
             </li>
           ))}
         </ul>
-        <div className="mc-nota">CDB, LCI e outros títulos de banco ainda não vêm dos extratos da B3: lance-os à mão e escolha a classe aqui.</div>
+        <div className="mc-nota">CDB e LCI: lance à mão e escolha a classe aqui.</div>
       </details>
 
       <div className="mc-nota" role="note">
-        A carteira sugerida é um exemplo educacional, gerado pelas suas respostas; não é recomendação de investimento. A comparação é feita no seu aparelho: só as respostas do questionário são
-        enviadas ao servidor, como já acontecia, e os seus ativos nunca saem daqui.
+        Exemplo educacional, não é recomendação de investimento. Seus ativos nunca saem deste aparelho.
       </div>
     </section>
   )

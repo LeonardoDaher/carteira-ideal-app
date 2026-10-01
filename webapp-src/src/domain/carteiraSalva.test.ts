@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { CARTEIRA_VAZIA, VERSAO_CARTEIRA, aplicarImportacao, carteiraVazia, dataDaPosicaoPeloNome, lerCarteiraSalva, serializarCarteira } from './carteiraSalva'
+import { CARTEIRA_VAZIA, VERSAO_CARTEIRA, aplicarImportacao, canonizarAtivos, carteiraVazia, dataDaPosicaoPeloNome, lerCarteiraSalva, serializarCarteira } from './carteiraSalva'
 import type { ItemPosicaoB3, ResultadoImportacao } from './importacao/planilha'
 import { mesclarLancamentos, type LancamentoNovo } from './lancamentos'
 
@@ -124,5 +124,52 @@ describe('aplicarImportacao', () => {
     const a = aplicarImportacao(carteiraVazia(), [{ nome: 'a.xlsx', resultado: resultado({ perfil: 'b3-proventos-a-receber', eventosFuturos: [ev('A'), ev('B')] }) }], hoje)
     const b = aplicarImportacao(a.carteira, [{ nome: 'b.xlsx', resultado: resultado({ perfil: 'b3-proventos-a-receber', eventosFuturos: [ev('C')] }) }], hoje)
     expect(b.carteira.eventosFuturos.map((e) => e.ativo)).toEqual(['C'])
+  })
+})
+
+describe('migração: ativos gravados com o nome inteiro do produto', () => {
+  const NOME_LONGO = 'B3SA3 - B3 S.A. - BRASIL, BOLSA, BALCAO'
+  // como o aparelho de quem usou a versão anterior está: a MESMA compra sob dois nomes (Negociação com o
+  // ticker, Movimentação com o nome inteiro), sem a conciliação ter conseguido juntá-las
+  const antigo = () => {
+    const neg = L({ ativo: 'B3SA3', origem: 'b3-negociacao', data: '2026-08-31' })
+    const mov = L({ ativo: NOME_LONGO, origem: 'b3-movimentacao', data: '2026-09-02' })
+    const outro = L({ ativo: 'VALE3', origem: 'b3-negociacao', data: '2026-08-20', quantidade: 5, valor: 50 })
+    return { ...carteiraVazia(), lancamentos: mesclarLancamentos([], [neg, mov, outro]).lancamentos }
+  }
+  it('ao abrir, junta os dois nomes num ativo só e a conciliação descarta a repetição', () => {
+    const c = lerCarteiraSalva(serializarCarteira(antigo()))!
+    expect(c.lancamentos.map((l) => l.ativo).sort()).toEqual(['B3SA3', 'VALE3'])
+    expect(c.lancamentos.filter((l) => l.ativo === 'B3SA3')).toHaveLength(1)
+    expect(c.lancamentos.find((l) => l.ativo === 'B3SA3')!.origem).toBe('b3-negociacao')
+  })
+  it('a Posição, a agenda de proventos e as classes escolhidas também são normalizadas', () => {
+    const base = antigo()
+    const c = canonizarAtivos({
+      ...base,
+      posicao: [{ ativo: NOME_LONGO, categoria: 'acoes', quantidade: 100, precoFechamento: 12, valorAtualizado: 1200, valorAplicado: null }],
+      eventosFuturos: [{ ativo: NOME_LONGO, tipoEvento: 'jcp', previsao: '2026-10-05', quantidade: 100, precoUnitario: 0.1, valorLiquido: 10 }],
+      classes: { [NOME_LONGO]: 'acoesETFs' },
+    })
+    expect(c.posicao![0].ativo).toBe('B3SA3')
+    expect(c.eventosFuturos[0].ativo).toBe('B3SA3')
+    expect(c.classes).toEqual({ B3SA3: 'acoesETFs' })
+  })
+  it('um lançamento descartado continua descartado depois da migração (o id é remapeado)', () => {
+    const base = antigo()
+    const apagado = base.lancamentos.find((l) => l.ativo === NOME_LONGO)!
+    const c = canonizarAtivos({ ...base, lancamentos: base.lancamentos.filter((l) => l.id !== apagado.id), excluidas: [apagado.id] })
+    expect(c.excluidas[0]).toContain('|B3SA3|')
+    // reimportar a Movimentação não o traz de volta
+    const r = mesclarLancamentos(c.lancamentos, [L({ ativo: 'B3SA3', origem: 'b3-movimentacao', data: '2026-09-02' })], c.excluidas)
+    expect(r.adicionados).toBe(0)
+  })
+  it('carteira sem o problema volta INTACTA (mesmo objeto e mesmos ids): só quem tinha o defeito é afetado', () => {
+    const limpa = { ...carteiraVazia(), lancamentos: mesclarLancamentos([], [L({ ativo: 'VALE3' }), L({ ativo: 'VALE3' }), L({ ativo: 'PETR4' })]).lancamentos }
+    expect(canonizarAtivos(limpa)).toBe(limpa)
+  })
+  it('é idempotente: migrar duas vezes dá o mesmo resultado', () => {
+    const uma = canonizarAtivos(antigo())
+    expect(canonizarAtivos(uma)).toBe(uma)
   })
 })

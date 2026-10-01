@@ -71,48 +71,77 @@ export function ImportarArquivos({ onImportar }: { onImportar: (arquivos: Arquiv
 
   return (
     <section className="mc-card mc-importar" aria-labelledby={`${idEntrada}-t`}>
-      <h2 id={`${idEntrada}-t`} className="mc-titulo">Importar extratos</h2>
-      <p className="mc-texto">
-        Na Área do Investidor da B3, em <strong>Extratos</strong>, baixe em Excel: <strong>Negociação</strong> (datas reais das compras),{' '}
-        <strong>Movimentação</strong> (Tesouro e proventos) e <strong>Posição</strong> (o que você tem hoje). Pode escolher o período que quiser e
-        enviar vários arquivos de uma vez. Eles são lidos aqui no seu aparelho e <strong>nada é enviado para a internet</strong>.
-      </p>
+      <h2 id={`${idEntrada}-t`} className="mc-titulo-grande">Traga os seus dados da B3</h2>
 
-      <div
-        className={`mc-soltar ${arrastando ? 'ativo' : ''}`}
-        onDragOver={(e) => {
-          e.preventDefault()
-          setArrastando(true)
-        }}
-        onDragLeave={() => setArrastando(false)}
-        onDrop={(e) => {
-          e.preventDefault()
-          setArrastando(false)
-          void processar(e.dataTransfer.files)
-        }}
-      >
-        <label htmlFor={idEntrada} className="btn btn-primary mc-btn">
-          {lendo ? 'Lendo…' : 'Escolher arquivos'}
-        </label>
-        <input
-          id={idEntrada}
-          ref={entrada}
-          type="file"
-          multiple
-          accept=".xlsx,.csv,.txt,.tsv"
-          className="mc-arquivo"
-          disabled={lendo}
-          onChange={(e) => void processar(e.target.files)}
-        />
-        <span className="mc-dica">ou arraste para cá · Excel (.xlsx) ou CSV</span>
-      </div>
+      <ol className="mc-passos">
+        <li className="mc-passo">
+          <span className="mc-num" aria-hidden="true">1</span>
+          <div className="mc-passo-corpo">
+            <div className="mc-passo-titulo">Baixe na B3</div>
+            <p className="mc-passo-texto">
+              Na Área do Investidor, em <strong>Extratos</strong>, baixe <strong>Posição</strong> (o que você tem hoje) e <strong>Negociação</strong> (suas compras e vendas), em Excel.
+            </p>
+            <a className="mc-link" href="https://www.investidor.b3.com.br" target="_blank" rel="noopener noreferrer">
+              Abrir a Área do Investidor da B3 ↗
+            </a>
+          </div>
+        </li>
 
-      <div className="mc-links">
+        <li className="mc-passo">
+          <span className="mc-num" aria-hidden="true">2</span>
+          <div className="mc-passo-corpo">
+            <div className="mc-passo-titulo">Envie aqui</div>
+            <div
+              className={`mc-soltar ${arrastando ? 'ativo' : ''}`}
+              onDragOver={(e) => {
+                e.preventDefault()
+                setArrastando(true)
+              }}
+              onDragLeave={() => setArrastando(false)}
+              onDrop={(e) => {
+                e.preventDefault()
+                setArrastando(false)
+                void processar(e.dataTransfer.files)
+              }}
+            >
+              <label htmlFor={idEntrada} className="btn btn-primary mc-btn">
+                {lendo ? 'Lendo…' : 'Escolher arquivos'}
+              </label>
+              <input
+                id={idEntrada}
+                ref={entrada}
+                type="file"
+                multiple
+                accept=".xlsx,.csv,.txt,.tsv"
+                className="mc-arquivo"
+                disabled={lendo}
+                onChange={(e) => void processar(e.target.files)}
+              />
+              <span className="mc-dica">ou arraste para cá</span>
+            </div>
+          </div>
+        </li>
+
+        <li className="mc-passo">
+          <span className="mc-num" aria-hidden="true">3</span>
+          <div className="mc-passo-corpo">
+            <div className="mc-passo-titulo">Pronto!</div>
+            <p className="mc-passo-texto">Seu preço médio e seus gráficos aparecem logo abaixo.</p>
+          </div>
+        </li>
+      </ol>
+
+      <div className="mc-privacidade"><span aria-hidden="true">🔒</span> Seus dados ficam só neste aparelho.</div>
+
+      <details className="mc-detalhes">
+        <summary>Prefere usar a sua própria planilha?</summary>
+        <p className="mc-passo-texto" style={{ marginTop: 8 }}>
+          Baixe a planilha-modelo, preencha e envie no passo 2. Você também pode enviar vários arquivos de uma vez e escolher o período que quiser.
+        </p>
         <a className="mc-link" href={MODELO_CSV_URL} download="modelo-minha-carteira.csv">
           Baixar planilha-modelo
         </a>
-        <span className="mc-dica">Para quem controla a carteira numa planilha própria.</span>
-      </div>
+      </details>
 
       {resumos.length > 0 && (
         <ul className="mc-resumos" aria-label="Resultado da importação">

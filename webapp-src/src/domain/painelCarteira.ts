@@ -6,6 +6,9 @@
 //    patrimônio de mercado: o app não tem a série de preços para marcar a carteira a mercado em
 //    datas passadas. Por isso o gráfico de evolução se chama assim, e não "patrimônio".
 //  - "Patrimônio" só existe quando há uma Posição da B3 (quantidade e valor atualizado).
+//  - Com a Posição da B3, SÓ ENTRA O QUE ESTÁ NELA: ativo que a pessoa já zerou (vendido, convertido,
+//    transferido) não aparece em lugar nenhum, nem nos totais nem no gráfico. A Posição é a verdade
+//    sobre o que ela tem hoje; o histórico serve para dar o preço médio de quem está lá.
 //  - Resultado (lucro/prejuízo) só é calculado para ativos cujo histórico CONFERE com a Posição;
 //    a tela mostra qual parte da carteira essa conta cobre.
 import { conferirComPosicao, type StatusConferencia } from './conferencia'
@@ -55,6 +58,8 @@ export interface ResumoPainel {
 export interface Painel {
   linhas: LinhaPosicao[]
   resumo: ResumoPainel
+  /** Ativos que a pessoa tem hoje (os da Posição, mais compras recentes ainda não liquidadas). */
+  ativosAtuais: string[]
 }
 
 const EPS = 1e-9
@@ -79,7 +84,7 @@ export function montarPainel(lancamentos: Lancamento[], posicao: ItemPosicaoB3[]
         aguardandoLiquidacao: false,
       }))
       .sort((a, b) => (b.custoTotal ?? 0) - (a.custoTotal ?? 0))
-    return { linhas, resumo: { capitalAplicado, patrimonio: null, dataPosicao: null, resultado: null } }
+    return { linhas, ativosAtuais: linhas.map((l) => l.ativo), resumo: { capitalAplicado, patrimonio: null, dataPosicao: null, resultado: null } }
   }
 
   const conferencia = conferirComPosicao(lancamentos, posicao, dataPosicao)
@@ -118,15 +123,18 @@ export function montarPainel(lancamentos: Lancamento[], posicao: ItemPosicaoB3[]
       aguardandoLiquidacao: aguardando,
     })
   }
-  // Comprado há pouco e ainda fora da custódia: aparece, sem valor de mercado.
-  for (const d of derivadas) {
-    if (agregada.has(d.ativo)) continue
+  // Comprado há pouco e ainda fora da custódia (liquida em D+2): aparece, sem valor de mercado. Só entra
+  // quem tem negócio recente a caminho; ativo zerado, ou com lançamentos antigos que a Posição não
+  // confirma, NÃO aparece (a Posição manda no que a pessoa tem).
+  for (const f of conferencia.foraDaPosicao) {
+    if (f.naoLiquidado <= EPS) continue
+    const d = derivadaPorAtivo.get(f.ativo)
     linhas.push({
-      ativo: d.ativo,
+      ativo: f.ativo,
       categoria: null,
-      quantidade: d.quantidade,
-      precoMedio: d.precoMedio,
-      custoTotal: d.custoTotal,
+      quantidade: f.naoLiquidado,
+      precoMedio: d ? d.precoMedio : null,
+      custoTotal: d ? d.precoMedio * f.naoLiquidado : null,
       valorAtual: null,
       resultado: null,
       resultadoPct: null,
@@ -144,7 +152,9 @@ export function montarPainel(lancamentos: Lancamento[], posicao: ItemPosicaoB3[]
   const resultado: ResultadoCarteira | null =
     comRes.length && custoBase > EPS ? { valor: resultadoTotal, pct: (resultadoTotal / custoBase) * 100, cobertura: patrimonio > EPS ? valorCoberto / patrimonio : 0 } : null
 
-  return { linhas, resumo: { capitalAplicado, patrimonio, dataPosicao, resultado } }
+  // Com Posição, o capital aplicado é o custo dos ativos que a pessoa TEM e cujo preço médio é conhecido.
+  const capitalDosAtuais = linhas.reduce((s, l) => s + (l.custoTotal ?? 0), 0)
+  return { linhas, ativosAtuais: linhas.map((l) => l.ativo), resumo: { capitalAplicado: capitalDosAtuais, patrimonio, dataPosicao, resultado } }
 }
 
 export interface FatiaComposicao {
@@ -195,9 +205,10 @@ const rotuloDoMes = (mes: string) => MESES_CURTOS[Number(mes.slice(5, 7)) - 1]
  * Capital aplicado ao fim de cada mês: o custo do que a pessoa tinha naquele dia, refazendo o
  * histórico até lá. Não é valor de mercado (ver o topo do arquivo).
  */
-export function capitalAplicadoPorMes(lancamentos: Lancamento[], ateMes: string, meses = 12): PontoMensal[] {
+export function capitalAplicadoPorMes(lancamentos: Lancamento[], ateMes: string, meses = 12, ativos: ReadonlySet<string> | null = null): PontoMensal[] {
+  const base = ativos ? lancamentos.filter((l) => ativos.has(l.ativo)) : lancamentos
   return mesesAte(ateMes, meses).map((mes) => {
-    const ate = lancamentos.filter((l) => l.data <= `${mes}-31`)
+    const ate = base.filter((l) => l.data <= `${mes}-31`)
     const valor = ate.length ? derivarPosicoes(ate).posicoes.reduce((s, p) => s + p.custoTotal, 0) : 0
     return { mes, rotulo: rotuloDoMes(mes), valor }
   })

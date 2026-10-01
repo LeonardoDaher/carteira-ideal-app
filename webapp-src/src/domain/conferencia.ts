@@ -11,6 +11,11 @@
 //   1) negócios ainda NÃO LIQUIDADOS: a custódia só reflete o negócio em D+2 dias úteis;
 //   2) posse ANTERIOR ao período exportado: falta um saldo inicial.
 //
+// REGRA: a Posição manda no que a pessoa tem. Só entram na conferência os ativos que ESTÃO na Posição.
+// Ativo que não está nela tem quantidade zero em custódia (vendido, convertido, transferido): não há o que
+// conferir nem corrigir, e ele não polui a lista. O que fica de fora é devolvido em `foraDaPosicao`, só
+// para o painel reconhecer compras muito recentes que a custódia ainda não mostra (D+2).
+//
 // Módulo puro: sem rede, sem React.
 import type { ItemPosicaoB3 } from './importacao/planilha'
 import { ordenarLancamentos, somarDiasUteis, type Lancamento, type LancamentoNovo } from './lancamentos'
@@ -35,15 +40,30 @@ export interface ItemConferencia {
   naoLiquidado: number
   /** Quantidade que falta (só em faltaSaldoAnterior). */
   faltante: number
+  /** Quanto os lançamentos liquidados somam A MAIS do que a Posição mostra (0 se não há excesso). Pede uma baixa. */
+  excesso: number
+  /** Saldo que a pessoa precisaria ter antes do primeiro lançamento para o histórico nunca ficar negativo (0 se nenhum). */
+  saldoNecessario: number
   /** Dia útil anterior ao primeiro lançamento do ativo (ou do livro), para o saldo inicial entrar antes de tudo. A pessoa pode trocar. */
   dataSugeridaSaldo: string
   explicacao: string
 }
 
+/** Ativo com lançamentos que NÃO está na Posição: já foi zerado. Fica de fora da conferência. */
+export interface ForaDaPosicao {
+  ativo: string
+  /** Soma líquida dos lançamentos já liquidados (informativa: pode estar errada se faltam vendas no histórico). */
+  quantidadeLancamentos: number
+  /** Compras (ou vendas) recentes que a custódia ainda não mostra. Se for > 0, é uma compra a caminho da custódia. */
+  naoLiquidado: number
+}
+
 export interface Conferencia {
   dataPosicao: string
+  /** Só ativos que estão na Posição. */
   itens: ItemConferencia[]
   resumo: Record<StatusConferencia, number>
+  foraDaPosicao: ForaDaPosicao[]
 }
 
 type Evento = { data: string; tipo: Lancamento['tipo']; q: number; liquidado: boolean }
@@ -86,7 +106,8 @@ export function conferirComPosicao(lancamentos: Lancamento[], posicao: ItemPosic
   // Ativo que está só na Posição não tem lançamento: o saldo anterior entra antes do início do livro.
   const inicioDoLivro = lancamentos.length ? [...lancamentos].map((l) => l.data).sort()[0] : null
 
-  const ativos = new Set([...naPosicao.keys(), ...porAtivo.keys()])
+  // Só o que está na Posição (com quantidade) entra: o resto já foi zerado e não interessa.
+  const ativos = new Set([...naPosicao.entries()].filter(([, q]) => q > EPS).map(([a]) => a))
   const itens: ItemConferencia[] = []
 
   for (const ativo of ativos) {
@@ -139,6 +160,8 @@ export function conferirComPosicao(lancamentos: Lancamento[], posicao: ItemPosic
       quantidadeLancamentos: liquido,
       naoLiquidado,
       faltante: status === 'faltaSaldoAnterior' ? faltante : 0,
+      excesso: faltante < -EPS ? -faltante : 0,
+      saldoNecessario: exigidoPeloHistorico > EPS ? exigidoPeloHistorico : 0,
       dataSugeridaSaldo,
       explicacao,
     })
@@ -149,19 +172,35 @@ export function conferirComPosicao(lancamentos: Lancamento[], posicao: ItemPosic
 
   const resumo: Conferencia['resumo'] = { confere: 0, faltaSaldoAnterior: 0, inconsistente: 0 }
   for (const i of itens) resumo[i.status]++
-  return { dataPosicao, itens, resumo }
+  const foraDaPosicao: ForaDaPosicao[] = []
+  for (const [ativo, ls] of porAtivo) {
+    if (ativos.has(ativo)) continue
+    const eventos = ls.map((l) => eventoDe(l, limiteLiquidacao, dataPosicao)).filter((e): e is Evento => e !== null)
+    foraDaPosicao.push({
+      ativo,
+      quantidadeLancamentos: eventos.filter((e) => e.liquidado).reduce((s, e) => s + e.q, 0),
+      naoLiquidado: eventos.filter((e) => !e.liquidado).reduce((s, e) => s + e.q, 0),
+    })
+  }
+  foraDaPosicao.sort((a, b) => a.ativo.localeCompare(b.ativo))
+  return { dataPosicao, itens, resumo, foraDaPosicao }
 }
 
-/** Transforma uma sugestão da conferência em lançamento de saldo inicial, com o preço médio informado. */
+/**
+ * Transforma uma pendência da conferência em lançamento de saldo inicial, com o preço médio informado.
+ * A quantidade é a que falta (faltaSaldoAnterior) ou, numa pendência inconsistente porque as vendas
+ * superam o histórico, o saldo que o histórico exige ter tido antes. Sem nenhuma das duas, devolve null.
+ */
 export function criarSaldoInicial(item: ItemConferencia, precoMedio: number): LancamentoNovo | null {
-  if (item.status !== 'faltaSaldoAnterior' || !(precoMedio > 0)) return null
+  const quantidade = item.status === 'faltaSaldoAnterior' ? item.faltante : item.saldoNecessario
+  if (!(quantidade > EPS) || !(precoMedio > 0)) return null
   return {
     data: item.dataSugeridaSaldo,
     tipo: 'saldoInicial',
     ativo: item.ativo,
-    quantidade: item.faltante,
+    quantidade,
     preco: precoMedio,
-    valor: item.faltante * precoMedio,
+    valor: quantidade * precoMedio,
     taxas: 0,
     origem: 'manual',
   }

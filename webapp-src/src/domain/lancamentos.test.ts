@@ -299,3 +299,19 @@ describe('conciliação com a nota de negociação (nota > Negociação > Movime
     expect(b.lancamentos).toHaveLength(2)
   })
 })
+
+describe('ehTickerDeBolsa: dígitos no meio do código (B3SA3, BDRs, ETFs)', () => {
+  it.each(['B3SA3', 'A1MD34', 'M1RN34', 'D1IS34', 'B5P211', 'IB5M11', 'PETR4', 'MXRF11', 'KLBN11'])('%s é ticker', (t) => {
+    expect(ehTickerDeBolsa(t)).toBe(true)
+  })
+  it.each(['PETRS300', 'MGLUT430', 'TESOURO SELIC 2031', 'LFT2029', 'IPCA2035', 'B3SA3 - B3 S.A. - BRASIL, BOLSA, BALCAO', 'ABC', '1ABC4', '', 'petr4'])('%j não é ticker', (t) => {
+    expect(ehTickerDeBolsa(t)).toBe(false)
+  })
+  it('a Movimentação de B3SA3 é coberta pela Negociação (antes não era, por B3SA3 não parecer ticker)', () => {
+    const neg = L({ ativo: 'B3SA3', origem: 'b3-negociacao', data: '2026-08-31' })
+    const mov = L({ ativo: 'B3SA3', origem: 'b3-movimentacao', data: '2026-09-02' })
+    const r = mesclarLancamentos(mesclarLancamentos([], [neg]).lancamentos, [mov])
+    expect(r.lancamentos).toHaveLength(1)
+    expect(r.cobertos).toBe(1)
+  })
+})

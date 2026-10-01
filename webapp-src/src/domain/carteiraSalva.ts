@@ -2,6 +2,7 @@
 // (sem React nem localStorage): o hook só chama estas funções. Nada daqui vai para a API.
 import { ehClasseValida } from './classesDaCarteira'
 import type { ClasseCarteira } from './classificadorAtivo'
+import { ativoDoTexto } from './importacao/planilha'
 import type { EventoFuturo, ItemPosicaoB3, ResultadoImportacao } from './importacao/planilha'
 import { mesclarLancamentos, somarDiasUteis, validarLancamento, type Lancamento, type OrigemLancamento, type TipoLancamento } from './lancamentos'
 
@@ -99,6 +100,49 @@ function lerClasses(x: unknown): Record<string, ClasseCarteira> {
 
 const lista = <T,>(x: unknown, valida: (v: unknown) => T | null): T[] => (Array.isArray(x) ? x.map(valida).filter((v): v is T => v !== null) : [])
 
+/**
+ * MIGRAÇÃO (D38): versões anteriores não reconheciam tickers com dígito no meio (B3SA3, A1MD34) e
+ * gravaram o NOME INTEIRO do produto como se fosse o ativo ("B3SA3 - B3 S.A. - BRASIL, BOLSA, BALCAO").
+ * Isso partia o mesmo ativo em dois e impedia a conciliação entre os extratos. Ao abrir, os ativos
+ * gravados são normalizados pela mesma regra de hoje; se algo mudou, os lançamentos são reconciliados
+ * de novo (a Movimentação que a Negociação já cobre sai, e as repetições se juntam). Se nada mudou,
+ * devolve a carteira intacta (mesmos ids), então só quem tinha o problema é afetado.
+ */
+export function canonizarAtivos(c: CarteiraSalva): CarteiraSalva {
+  const canon = (a: string) => ativoDoTexto(a)
+  // O id é "<chave>#<n>" e o ativo é o 3º campo da chave: troca nele também nos ids descartados.
+  const idCanonico = (id: string) => {
+    const partes = id.split('|')
+    if (partes.length > 3) partes[2] = canon(partes[2])
+    return partes.join('|')
+  }
+  const mudou =
+    c.lancamentos.some((l) => canon(l.ativo) !== l.ativo) ||
+    c.excluidas.some((id) => idCanonico(id) !== id) || // descartados com o nome antigo voltariam ao reimportar
+    (c.posicao ?? []).some((p) => canon(p.ativo) !== p.ativo) ||
+    c.eventosFuturos.some((e) => canon(e.ativo) !== e.ativo) ||
+    Object.keys(c.classes).some((a) => canon(a) !== a)
+  if (!mudou) return c
+
+  const excluidas = [...new Set(c.excluidas.map(idCanonico))]
+  const semId = c.lancamentos.map(({ id: _id, ...resto }) => {
+    void _id
+    return { ...resto, ativo: canon(resto.ativo) }
+  })
+  const m = mesclarLancamentos([], semId, excluidas)
+
+  const classes: Record<string, ClasseCarteira> = {}
+  for (const [ativo, classe] of Object.entries(c.classes)) classes[canon(ativo)] = classe
+  return {
+    ...c,
+    lancamentos: m.lancamentos,
+    excluidas,
+    posicao: c.posicao ? c.posicao.map((p) => ({ ...p, ativo: canon(p.ativo) })) : null,
+    eventosFuturos: c.eventosFuturos.map((e) => ({ ...e, ativo: canon(e.ativo) })),
+    classes,
+  }
+}
+
 /** Lê o que está gravado. Devolve null sem dado, com versão diferente ou JSON quebrado; descarta só os itens inválidos. */
 export function lerCarteiraSalva(bruto: string | null): CarteiraSalva | null {
   if (!bruto) return null
@@ -107,14 +151,14 @@ export function lerCarteiraSalva(bruto: string | null): CarteiraSalva | null {
     if (o?.versao !== VERSAO_CARTEIRA || !o.carteira || typeof o.carteira !== 'object') return null
     const c = o.carteira
     const posicao = Array.isArray(c.posicao) ? lista(c.posicao, itemPosicaoValido) : null
-    return {
+    return canonizarAtivos({
       lancamentos: lista(c.lancamentos, lancamentoValido),
       excluidas: Array.isArray(c.excluidas) ? c.excluidas.filter(txt) : [],
       posicao: posicao && posicao.length ? posicao : null,
       dataPosicao: txt(c.dataPosicao) && ISO.test(c.dataPosicao) ? c.dataPosicao : null,
       eventosFuturos: lista(c.eventosFuturos, eventoValido),
       classes: lerClasses(c.classes),
-    }
+    })
   } catch {
     return null
   }

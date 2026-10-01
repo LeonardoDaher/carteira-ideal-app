@@ -9,6 +9,9 @@ describe('ativoDoTexto', () => {
     ['PETR4F', 'PETR4'],
     ['Tesouro Selic 2029', 'TESOURO SELIC 2029'],
     ['CDB - BANCO ÁGIL', 'CDB - BANCO AGIL'],
+    ['B3SA3 - B3 S.A. - BRASIL, BOLSA, BALCAO', 'B3SA3'], // dígito no meio do código
+    ['A1MD34 - ADVANCED MICRO DEVICES', 'A1MD34'],
+    ['B3SA3F', 'B3SA3'], // fracionário
   ])('%s -> %s', (a, b) => expect(ativoDoTexto(a)).toBe(b))
 })
 
@@ -264,5 +267,16 @@ describe('instituicaoDe', () => {
     const a = importarMatriz([cab, linha('XP INVESTIMENTOS CCTVM S/A')]).lancamentos[0]
     const b = importarMatriz([cab, linha('XP INVESTIMENTOS CCTVM S/A.')]).lancamentos[0]
     expect(a.instituicao).toBe(b.instituicao)
+  })
+})
+
+describe('Movimentação com produto de código com dígito no meio', () => {
+  it('B3SA3 vira o ticker, e não o nome inteiro do produto', () => {
+    const x = importarMatriz([
+      ['Entrada/Saída', 'Data', 'Movimentação', 'Produto', 'Instituição', 'Quantidade', 'Preço unitário', 'Valor da Operação'],
+      ['Credito', '02/09/2026', 'Transferência - Liquidação', 'B3SA3 - B3 S.A. - BRASIL, BOLSA, BALCAO', 'XP', 100, 12.5, 1250],
+      ['Credito', '10/09/2026', 'Rendimento', 'A1MD34 - ADVANCED MICRO DEVICES', 'XP', 10, 0.2, 2],
+    ])
+    expect(x.lancamentos.map((l) => l.ativo)).toEqual(['B3SA3', 'A1MD34'])
   })
 })
