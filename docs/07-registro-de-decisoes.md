@@ -742,3 +742,16 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 **Testes.** 7 novos (4 em `MeuMesRecuperacao.test.tsx`: salvar saldo zero ao editar, dívida nova exige saldo, "Quitei esta dívida" com e sem confirmação; 3 em `MeuMes.test.tsx`: restaurar na primeira tela, arquivo inválido, desistir na confirmação). Total: 387 testes no app; typecheck, lint e build OK.
 
 **Arquivos alterados.** `webapp-src/src/screens/MeuMes.tsx`, `webapp-src/src/screens/MeuMesRecuperacao.tsx`, `webapp-src/src/screens/MeuMes.test.tsx`, `webapp-src/src/screens/MeuMesRecuperacao.test.tsx`, `webapp-src/src/data/trilhas.ts`, `docs/07-registro-de-decisoes.md`.
+
+
+## D35 (01/10/2026): Manual de Utilização do Meu Mês dentro do app
+
+**O que entrou.** O Manual de Utilização do Meu Mês (PDF de 54 páginas, 6,7 MB, com as telas reais do app, o passo a passo de cada cadastro e quatro casos completos) passou a ser baixado de dentro do app. O arquivo fica em `assets/manual-meu-mes.pdf`, na mesma pasta do livro "Os Três Potes de Clara", e é servido na raiz do site (o `build-site.mjs` copia a pasta `assets` inteira). Caminho relativo a `/app/`: `../assets/manual-meu-mes.pdf`.
+
+**Onde aparece.** (1) Na primeira tela do Meu Mês, abaixo de "Já usa o Meu Mês em outro aparelho?". (2) Na tela completa, acima do cartão "Seus dados ficam só neste aparelho". (3) Na tela da Trilha 4 (Tutorial Meu Mês), no topo, antes da lista das 17 aulas. Por sugestão do responsável, o link ficou na trilha e **não** é repetido dentro de cada aula (`Trilha.tsx`; `AprenderVideo.tsx` voltou ao original). As outras trilhas não mostram o link. Download direto, sem liberar por rede social e sem coleta de dados.
+
+**Como atualizar o manual.** Enviar um PDF novo, com o mesmo nome (`manual-meu-mes.pdf`), para a pasta `assets/`. Nenhum código muda. As capturas de tela do manual saem do próprio app (script em Playwright), então regenerar depois de mudanças de tela é rápido. O manual retrata o app em 30/09/2026 e já inclui os comportamentos da D34.
+
+**Arquivos.** Novo: `webapp-src/src/data/manualMeuMes.ts` (URL, nome do arquivo e textos do link, num lugar só) e `assets/manual-meu-mes.pdf`. Alterados: `MeuMes.tsx` (componente `LinkManual`), `Trilha.tsx`, `MeuMes.test.tsx` e `TutorialMeuMes.test.tsx`.
+
+**Testes.** 2 novos: o link aparece na primeira tela e na tela completa, com o `href` e o nome do arquivo certos; a tela da Trilha 4 mostra o link no topo, e nem as aulas nem as outras trilhas o mostram. Total: 389 testes; typecheck, lint e build OK. O PDF é servido com status 200 no site de teste.
