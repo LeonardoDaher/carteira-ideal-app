@@ -1,5 +1,6 @@
 import { ATIVOS } from '../data/assets'
 import { aulaDisponivel, encontrarTrilha } from '../data/trilhas'
+import { NOME_ARQUIVO_MANUAL_MEU_MES, RESUMO_MANUAL_MEU_MES, TITULO_MANUAL_MEU_MES, URL_MANUAL_MEU_MES } from '../data/manualMeuMes'
 import { PlayIcon } from '../ui/Icon'
 import { TabBar } from '../ui/TabBar'
 import type { AppCtx } from '../state/useAppState'
@@ -31,6 +32,17 @@ export function Trilha({ ctx }: { ctx: AppCtx }) {
         <h1 style={{ fontSize: 20 }}>{trilha.titulo}</h1>
         <span className="muted small justify" style={{ lineHeight: 1.5 }}>{trilha.descricao}</span>
       </div>
+
+      {/* D35: o manual completo vale para a trilha toda, então fica aqui (e não repetido em cada aula). */}
+      {trilha.id === 'tutorial-meu-mes' && (
+        <a className="card-outline col mm-trilha" href={URL_MANUAL_MEU_MES} download={NOME_ARQUIVO_MANUAL_MEU_MES} style={{ textDecoration: 'none' }}>
+          <span style={{ fontWeight: 700, fontSize: 13.5 }}>
+            <span aria-hidden="true">📘 </span>
+            {TITULO_MANUAL_MEU_MES}
+          </span>
+          <span className="muted small">{RESUMO_MANUAL_MEU_MES}</span>
+        </a>
+      )}
 
       {trilha.topicos.map((topico, indiceTopico) => (
         <div key={topico.id} className="col" style={{ gap: 8 }}>

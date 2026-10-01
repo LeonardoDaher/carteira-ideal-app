@@ -95,17 +95,22 @@ describe('Trilha "Tutorial Meu Mês" (D28)', () => {
     expect(screen.getByText(/Você concluiu todas as aulas/)).toBeTruthy()
   })
 
-  it('toda aula do tutorial oferece o manual completo em PDF; as demais trilhas não (D35)', () => {
-    const base = { setScreen: vi.fn(), abrirAula: vi.fn(), voltarDaAula: vi.fn(), screen: 'aprenderVideo' }
-    const { unmount } = render(
-      <AprenderVideo ctx={{ ...base, aulaAtualRef: { trilhaId: 'tutorial-meu-mes', topicoId: 'cadastrar-contas', aulaId: 'contas-de-todo-mes' } } as unknown as AppCtx} />,
-    )
+  it('a trilha do tutorial oferece o manual em PDF no topo da lista; as aulas e as outras trilhas não (D35)', () => {
+    const ctx = { abrirTrilha: vi.fn(), trilhaSelecionadaId: 'tutorial-meu-mes', screen: 'trilha', setScreen: vi.fn() } as unknown as AppCtx
+    const { unmount } = render(<Trilha ctx={ctx} />)
     const link = screen.getByRole('link', { name: /Manual completo do Meu Mês/ })
     expect(link.getAttribute('href')).toBe('../assets/manual-meu-mes.pdf')
+    expect(link.getAttribute('download')).toBe('Manual-do-Meu-Mes-Carteira-Ideal.pdf')
     unmount()
 
+    const outra = { ...ctx, trilhaSelecionadaId: 'sair-das-dividas' } as unknown as AppCtx
+    const { unmount: unmount2 } = render(<Trilha ctx={outra} />)
+    expect(screen.queryByRole('link', { name: /Manual completo do Meu Mês/ })).toBeNull()
+    unmount2()
+
+    const base = { setScreen: vi.fn(), abrirAula: vi.fn(), voltarDaAula: vi.fn(), screen: 'aprenderVideo' }
     render(
-      <AprenderVideo ctx={{ ...base, aulaAtualRef: { trilhaId: 'sair-das-dividas', topicoId: 'entender-a-divida', aulaId: 'juros-sobre-juros' } } as unknown as AppCtx} />,
+      <AprenderVideo ctx={{ ...base, aulaAtualRef: { trilhaId: 'tutorial-meu-mes', topicoId: 'cadastrar-contas', aulaId: 'contas-de-todo-mes' } } as unknown as AppCtx} />,
     )
     expect(screen.queryByRole('link', { name: /Manual completo do Meu Mês/ })).toBeNull()
   })
