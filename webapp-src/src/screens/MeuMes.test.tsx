@@ -335,6 +335,19 @@ describe('MeuMes', () => {
     expect(c.valorAVista).toBeUndefined()
   })
 
+  it('primeira tela e tela completa trazem o link do manual em PDF (D35)', async () => {
+    const { unmount } = render(<MeuMes ctx={ctx} hoje={hoje} />)
+    const inicial = await screen.findByRole('link', { name: /Manual completo do Meu Mês/ })
+    expect(inicial.getAttribute('href')).toBe('../assets/manual-meu-mes.pdf')
+    expect(inicial.getAttribute('download')).toBe('Manual-do-Meu-Mes-Carteira-Ideal.pdf')
+    unmount()
+
+    salvar(exemplo)
+    render(<MeuMes ctx={ctx} hoje={hoje} />)
+    const completa = await screen.findByRole('link', { name: /Manual completo do Meu Mês/ })
+    expect(completa.getAttribute('href')).toBe('../assets/manual-meu-mes.pdf')
+  })
+
   it('primeira tela: restaurar uma cópia sem precisar digitar o salário (D34)', async () => {
     vi.spyOn(window, 'confirm').mockReturnValue(true)
     render(<MeuMes ctx={ctx} hoje={hoje} />)

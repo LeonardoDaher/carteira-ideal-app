@@ -48,6 +48,7 @@ import { reais } from '../domain/mercadoOficial'
 import { useOrcamento } from '../state/useOrcamento'
 import { VoltarInicio } from '../ui/VoltarInicio'
 import { encontrarTrilha, totalDeAulas } from '../data/trilhas'
+import { NOME_ARQUIVO_MANUAL_MEU_MES, RESUMO_MANUAL_MEU_MES, TITULO_MANUAL_MEU_MES, URL_MANUAL_MEU_MES } from '../data/manualMeuMes'
 import { MinhasDividas, PactoNaoParcelar, PainelRecuperacao, PlanoDeQuitacao, RoteiroNegociacao } from './MeuMesRecuperacao'
 import type { AppCtx } from '../state/useAppState'
 
@@ -161,6 +162,7 @@ export function MeuMes({
                 </button>
               </>
             )}
+            <LinkManual />
             <CopiaDeSeguranca orcamento={orcamento} hoje={hoje} onRestaurar={est.substituir} onApagar={est.apagarTudo} />
           </div>
         </div>
@@ -188,7 +190,26 @@ function Comecar({ onSalario, onRestaurar }: { onSalario: (v: number) => void; o
       <span className="tiny muted justify">Seus dados ficam só neste aparelho. Nada é enviado para a internet.</span>
     </div>
     <RestaurarCopiaInicial onRestaurar={onRestaurar} />
+    <LinkManual />
     </>
+  )
+}
+
+/** Link para baixar o Manual de Utilização do Meu Mês (D35). Aparece na primeira tela e na tela completa. */
+function LinkManual() {
+  return (
+    <a
+      className="card-outline col mm-trilha"
+      href={URL_MANUAL_MEU_MES}
+      download={NOME_ARQUIVO_MANUAL_MEU_MES}
+      style={{ textDecoration: 'none' }}
+    >
+      <span style={{ fontWeight: 700, fontSize: 13.5 }}>
+        <span aria-hidden="true">📘 </span>
+        {TITULO_MANUAL_MEU_MES}
+      </span>
+      <span className="muted small">{RESUMO_MANUAL_MEU_MES}</span>
+    </a>
   )
 }
 

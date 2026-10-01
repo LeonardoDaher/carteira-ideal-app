@@ -95,6 +95,21 @@ describe('Trilha "Tutorial Meu Mês" (D28)', () => {
     expect(screen.getByText(/Você concluiu todas as aulas/)).toBeTruthy()
   })
 
+  it('toda aula do tutorial oferece o manual completo em PDF; as demais trilhas não (D35)', () => {
+    const base = { setScreen: vi.fn(), abrirAula: vi.fn(), voltarDaAula: vi.fn(), screen: 'aprenderVideo' }
+    const { unmount } = render(
+      <AprenderVideo ctx={{ ...base, aulaAtualRef: { trilhaId: 'tutorial-meu-mes', topicoId: 'cadastrar-contas', aulaId: 'contas-de-todo-mes' } } as unknown as AppCtx} />,
+    )
+    const link = screen.getByRole('link', { name: /Manual completo do Meu Mês/ })
+    expect(link.getAttribute('href')).toBe('../assets/manual-meu-mes.pdf')
+    unmount()
+
+    render(
+      <AprenderVideo ctx={{ ...base, aulaAtualRef: { trilhaId: 'sair-das-dividas', topicoId: 'entender-a-divida', aulaId: 'juros-sobre-juros' } } as unknown as AppCtx} />,
+    )
+    expect(screen.queryByRole('link', { name: /Manual completo do Meu Mês/ })).toBeNull()
+  })
+
   it('aulas de dívida do tutorial levam o aviso de "não é assessoria jurídica" e as fontes oficiais', () => {
     const ctx = {
       aulaAtualRef: { trilhaId: 'tutorial-meu-mes', topicoId: 'modo-recuperacao', aulaId: 'pacto-e-negociar' },
