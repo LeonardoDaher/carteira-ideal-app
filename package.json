@@ -16,17 +16,19 @@
     "atualizar-etfs": "node scripts/atualizar-etfs.mjs"
   },
   "dependencies": {
+    "pdfjs-dist": "^6.3.289",
     "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "react-dom": "^19.2.8",
+    "read-excel-file": "^9.3.10"
   },
   "devDependencies": {
-    "@vercel/node": "^3.2.0",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
+    "@vercel/node": "^3.2.0",
     "@vitejs/plugin-react": "^6.1.0",
     "jsdom": "^30.0.1",
     "oxlint": "^1.79.0",

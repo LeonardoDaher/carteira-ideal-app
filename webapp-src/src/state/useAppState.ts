@@ -25,6 +25,7 @@ export type Screen =
   | 'simuleBdr'
   | 'simuleEtf'
   | 'meuMes'
+  | 'minhaCarteira'
 
 export type Tema = 'dark' | 'light'
 
@@ -39,7 +40,7 @@ export const CHAVE_TEMA_COMPARTILHADA = 'theme'
  * depender do questionário. Ficam fora da barra de abas e nunca são salvas como "última
  * tela": assim o botão amarelo da landing (./app/) continua devolvendo a pessoa ao ponto
  * em que parou no fluxo do questionário/resultado, e não à aula que ela viu por último. */
-export const TELAS_AVULSAS: readonly Screen[] = ['aprender', 'trilha', 'aprenderVideo', 'simuleFii', 'simuleTesouro', 'simuleBdr', 'simuleEtf', 'meuMes']
+export const TELAS_AVULSAS: readonly Screen[] = ['aprender', 'trilha', 'aprenderVideo', 'simuleFii', 'simuleTesouro', 'simuleBdr', 'simuleEtf', 'meuMes', 'minhaCarteira']
 
 export function ehTelaAvulsa(tela: Screen) {
   return TELAS_AVULSAS.includes(tela)
@@ -69,6 +70,8 @@ const TELAS_PELA_URL: Record<string, Screen> = {
   // Meu Mês (D21): botão na landing desde a Etapa 4; também aberto pelo resultado e pela
   // trilha "Sair das dívidas".
   meuMes: 'meuMes',
+  // Minha Carteira (D36): painel de gestão da carteira real, aberto por ?tela=minhaCarteira.
+  minhaCarteira: 'minhaCarteira',
 }
 
 const CHAVE_ARMAZENAMENTO = 'carteiraideal.estado'

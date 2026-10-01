@@ -37,6 +37,16 @@ export function Carteira({ ctx }: { ctx: AppCtx }) {
         </div>
       </div>
 
+      <div className="card-outline col" style={{ gap: 8 }}>
+        <div style={{ fontWeight: 700, fontSize: 13.5 }}>E a carteira que você realmente tem?</div>
+        <div className="muted small justify" style={{ lineHeight: 1.5 }}>
+          Importe os extratos da B3 e acompanhe o preço médio, os proventos e a evolução do que você já investiu. Grátis, sem cadastro; seus dados ficam só neste aparelho.
+        </div>
+        <button className="btn btn-outline" onClick={() => ctx.setScreen('minhaCarteira')}>
+          Abrir Minha carteira
+        </button>
+      </div>
+
       <div className="grow" />
       <TabBar ctx={ctx} />
     </div>

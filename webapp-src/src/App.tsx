@@ -17,10 +17,11 @@ import { SimuleTesouro } from './screens/SimuleTesouro'
 import { SimuleBdr } from './screens/SimuleBdr'
 import { SimuleEtf } from './screens/SimuleEtf'
 import { MeuMes } from './screens/MeuMes'
+import { MinhaCarteira } from './screens/MinhaCarteira'
 import { Marca } from './ui/Marca'
 import type { Screen } from './state/useAppState'
 
-const TELAS_COM_LOGO_PROPRIA: Screen[] = ['onboarding', 'aprender', 'simuleTesouro', 'simuleFii', 'simuleBdr', 'simuleEtf', 'meuMes']
+const TELAS_COM_LOGO_PROPRIA: Screen[] = ['onboarding', 'aprender', 'simuleTesouro', 'simuleFii', 'simuleBdr', 'simuleEtf', 'meuMes', 'minhaCarteira']
 
 function App() {
   const ctx = useAppState()
@@ -45,6 +46,7 @@ function App() {
     simuleBdr: () => <SimuleBdr ctx={ctx} />,
     simuleEtf: () => <SimuleEtf ctx={ctx} />,
     meuMes: () => <MeuMes ctx={ctx} />,
+    minhaCarteira: () => <MinhaCarteira ctx={ctx} />,
     trilha: () => <Trilha ctx={ctx} key={ctx.trilhaSelecionadaId} />,
     aprenderVideo: () => <AprenderVideo ctx={ctx} key={ctx.aulaAtualRef ? `${ctx.aulaAtualRef.trilhaId}:${ctx.aulaAtualRef.topicoId}:${ctx.aulaAtualRef.aulaId}` : 'nenhuma'} />,
   }

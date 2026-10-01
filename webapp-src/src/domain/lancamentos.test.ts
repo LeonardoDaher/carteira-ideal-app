@@ -1,0 +1,301 @@
+import { describe, expect, it } from 'vitest'
+import {
+  adicionarLancamento,
+  corrigirLancamento,
+  excluirLancamento,
+  type Livro,
+  ehTickerDeBolsa,
+  somarDiasUteis,
+  derivarPosicoes,
+  mesclarLancamentos,
+  validarLancamento,
+  type Lancamento,
+  type LancamentoNovo,
+} from './lancamentos'
+
+const L = (o: Partial<LancamentoNovo>): LancamentoNovo => ({
+  data: '2026-01-10', tipo: 'compra', ativo: 'VALE3', quantidade: 10, preco: 10, valor: 100, taxas: 0, origem: 'manual', ...o,
+})
+const comId = (ls: LancamentoNovo[]): Lancamento[] => mesclarLancamentos([], ls).lancamentos
+
+describe('derivarPosicoes', () => {
+  it('preço médio ponderado de duas compras, com taxas no custo', () => {
+    const { posicoes } = derivarPosicoes(comId([L({}), L({ data: '2026-02-10', quantidade: 30, preco: 14, valor: 420, taxas: 2 })]))
+    expect(posicoes[0].quantidade).toBe(40)
+    expect(posicoes[0].custoTotal).toBeCloseTo(522, 8)
+    expect(posicoes[0].precoMedio).toBeCloseTo(13.05, 8)
+  })
+  it('venda realiza resultado sobre o preço médio e mantém o preço médio da sobra', () => {
+    const { posicoes } = derivarPosicoes(
+      comId([L({ quantidade: 10, valor: 100 }), L({ data: '2026-03-01', tipo: 'venda', quantidade: 4, preco: 15, valor: 60, taxas: 1 })]),
+    )
+    expect(posicoes[0].quantidade).toBe(6)
+    expect(posicoes[0].precoMedio).toBeCloseTo(10, 8)
+    expect(posicoes[0].resultadoRealizado).toBeCloseTo(60 - 1 - 40, 8)
+  })
+  it('vender tudo zera custo e preço médio', () => {
+    const { posicoes } = derivarPosicoes(comId([L({}), L({ data: '2026-03-01', tipo: 'venda', quantidade: 10, preco: 12, valor: 120 })]))
+    expect(posicoes[0]).toMatchObject({ quantidade: 0, custoTotal: 0, precoMedio: 0 })
+  })
+  it('venda maior que o saldo: avisa (histórico incompleto) e não deixa quantidade negativa', () => {
+    const { posicoes, avisos } = derivarPosicoes(comId([L({ quantidade: 5, valor: 50 }), L({ data: '2026-03-01', tipo: 'venda', quantidade: 8, preco: 12, valor: 96 })]))
+    expect(avisos).toEqual([{ ativo: 'VALE3', data: '2026-03-01', tipo: 'vendaSemSaldo', faltou: 3 }])
+    expect(posicoes[0].quantidade).toBe(0)
+    expect(posicoes[0].resultadoRealizado).toBeCloseTo(96 * (5 / 8) - 50, 8)
+  })
+  it('na mesma data, a compra vale antes da venda mesmo listada depois', () => {
+    const { avisos } = derivarPosicoes(
+      comId([L({ data: '2026-03-01', tipo: 'venda', quantidade: 10, preco: 12, valor: 120 }), L({ data: '2026-03-01' })]),
+    )
+    expect(avisos).toEqual([])
+  })
+  it('desdobramento e grupamento mudam a quantidade sem mudar o custo total', () => {
+    const base = L({ quantidade: 10, valor: 100 })
+    const split = derivarPosicoes(comId([base, L({ data: '2026-02-01', tipo: 'ajusteQuantidade', quantidade: 10, preco: 0, valor: 0 })])).posicoes[0]
+    expect(split.quantidade).toBe(20)
+    expect(split.precoMedio).toBeCloseTo(5, 8)
+    const grup = derivarPosicoes(comId([base, L({ data: '2026-02-01', tipo: 'ajusteQuantidade', quantidade: -9, preco: 0, valor: 0 })])).posicoes[0]
+    expect(grup.quantidade).toBe(1)
+    expect(grup.precoMedio).toBeCloseTo(100, 8)
+  })
+  it('bonificação soma custo; provento soma só em proventos', () => {
+    const p = derivarPosicoes(
+      comId([L({}), L({ data: '2026-02-01', tipo: 'bonificacao', quantidade: 1, preco: 10, valor: 10 }), L({ data: '2026-02-02', tipo: 'provento', quantidade: 10, preco: 0, valor: 7, subtipo: 'dividendo' })]),
+    ).posicoes[0]
+    expect(p.quantidade).toBe(11)
+    expect(p.custoTotal).toBeCloseTo(110, 8)
+    expect(p.proventos).toBe(7)
+  })
+})
+
+describe('mesclarLancamentos', () => {
+  it('duas compras idênticas no mesmo dia valem as duas', () => {
+    const r = mesclarLancamentos([], [L({}), L({})])
+    expect(r.adicionados).toBe(2)
+    expect(new Set(r.lancamentos.map((l) => l.id)).size).toBe(2)
+  })
+  it('reimportar não duplica; período sobreposto só acrescenta o novo', () => {
+    const a = mesclarLancamentos([], [L({}), L({}), L({ data: '2026-02-01' })])
+    const b = mesclarLancamentos(a.lancamentos, [L({}), L({}), L({ data: '2026-02-01' }), L({ data: '2026-03-01' })])
+    expect(b.adicionados).toBe(1)
+    expect(b.repetidos).toBe(3)
+    expect(b.lancamentos).toHaveLength(4)
+  })
+  it('se o arquivo traz uma ocorrência a mais do que já existe, acrescenta só a diferença', () => {
+    const a = mesclarLancamentos([], [L({})])
+    const b = mesclarLancamentos(a.lancamentos, [L({}), L({})])
+    expect(b.adicionados).toBe(1)
+  })
+  it('devolve ordenado por data', () => {
+    const r = mesclarLancamentos([], [L({ data: '2026-03-01' }), L({ data: '2026-01-01' })])
+    expect(r.lancamentos.map((l) => l.data)).toEqual(['2026-01-01', '2026-03-01'])
+  })
+})
+
+describe('validarLancamento', () => {
+  it('aceita lançamentos coerentes', () => {
+    expect(validarLancamento(L({}))).toBeNull()
+    expect(validarLancamento(L({ tipo: 'provento', quantidade: 0, preco: 0, valor: 5 }))).toBeNull()
+    expect(validarLancamento(L({ tipo: 'ajusteQuantidade', quantidade: -3, preco: 0, valor: 0 }))).toBeNull()
+  })
+  it.each([
+    [{ data: '05/03/2026' }, 'data'],
+    [{ ativo: '  ' }, 'ativo'],
+    [{ quantidade: 0 }, 'quantidade'],
+    [{ preco: 0 }, 'preco'],
+    [{ tipo: 'provento' as const, valor: 0 }, 'valor'],
+  ])('rejeita %j', (parcial, campo) => {
+    expect(validarLancamento(L(parcial))?.campo).toBe(campo)
+  })
+})
+
+describe('somarDiasUteis e ehTickerDeBolsa', () => {
+  it('pula fins de semana, para trás e para frente', () => {
+    expect(somarDiasUteis('2026-09-02', -2)).toBe('2026-08-31') // quarta -> segunda
+    expect(somarDiasUteis('2026-09-01', -2)).toBe('2026-08-28') // terça -> sexta
+    expect(somarDiasUteis('2026-08-28', 2)).toBe('2026-09-01') // sexta -> terça
+    expect(somarDiasUteis('2026-09-02', 0)).toBe('2026-09-02')
+  })
+  it('reconhece ticker de bolsa e não confunde com Tesouro', () => {
+    expect(ehTickerDeBolsa('MXRF11')).toBe(true)
+    expect(ehTickerDeBolsa('PETR4')).toBe(true)
+    expect(ehTickerDeBolsa('TESOURO SELIC 2031')).toBe(false)
+    expect(ehTickerDeBolsa('PETRC300')).toBe(false)
+  })
+})
+
+describe('conciliação Movimentação x Negociação', () => {
+  // Negociação em 31/08 (seg); a mesma compra liquida na Movimentação em 02/09 (qua).
+  const neg = (o: Partial<LancamentoNovo>) => L({ origem: 'b3-negociacao', data: '2026-08-31', ...o })
+  const mov = (o: Partial<LancamentoNovo>) => L({ origem: 'b3-movimentacao', data: '2026-09-02', ...o })
+
+  it('a mesma compra nos dois extratos conta uma vez só, em qualquer ordem', () => {
+    const a = mesclarLancamentos(mesclarLancamentos([], [neg({})]).lancamentos, [mov({})])
+    const b = mesclarLancamentos(mesclarLancamentos([], [mov({})]).lancamentos, [neg({})])
+    expect(a.lancamentos.map((l) => l.origem)).toEqual(['b3-negociacao'])
+    expect(b.lancamentos.map((l) => l.origem)).toEqual(['b3-negociacao'])
+    expect(a.cobertos).toBe(1) // veio depois e já estava coberto
+    expect(b.substituidos).toBe(1) // já estava no livro e foi trocado pela Negociação
+    expect(derivarPosicoes(a.lancamentos).posicoes[0].quantidade).toBe(10)
+  })
+  it('a Negociação manda na data: fica a data do negócio, não a da liquidação', () => {
+    const r = mesclarLancamentos(mesclarLancamentos([], [mov({})]).lancamentos, [neg({})])
+    expect(r.lancamentos[0].data).toBe('2026-08-31')
+  })
+  it('liquidação cujo negócio é ANTERIOR ao período da Negociação fica (única fonte)', () => {
+    // liquida 01/09 (terça) -> negócio 28/08 (sexta), antes da janela que começa em 31/08
+    const r = mesclarLancamentos([], [neg({}), mov({ data: '2026-09-01', ativo: 'RBRX11' })])
+    expect(r.lancamentos.map((l) => l.ativo).sort()).toEqual(['RBRX11', 'VALE3'])
+    expect(r.cobertos).toBe(0)
+  })
+  it('Tesouro e renda fixa nunca são descartados, mesmo dentro do período', () => {
+    const r = mesclarLancamentos([], [neg({}), mov({ ativo: 'TESOURO SELIC 2031', quantidade: 0.08, preco: 19718.79, valor: 1577.5 })])
+    expect(r.lancamentos.some((l) => l.ativo === 'TESOURO SELIC 2031')).toBe(true)
+  })
+  it('proventos da Movimentação não são afetados pela conciliação', () => {
+    const r = mesclarLancamentos([], [neg({}), mov({ tipo: 'provento', valor: 5, quantidade: 10, preco: 0.5 })])
+    expect(r.lancamentos.filter((l) => l.tipo === 'provento')).toHaveLength(1)
+  })
+  it('sem Negociação no livro, a Movimentação é mantida inteira', () => {
+    const r = mesclarLancamentos([], [mov({}), mov({ ativo: 'BBAS3' })])
+    expect(r.lancamentos).toHaveLength(2)
+  })
+})
+
+describe('mesmo provento vindo de dois extratos', () => {
+  it('não duplica quando só o preço unitário (arredondado) difere', () => {
+    const base = { tipo: 'provento' as const, ativo: 'BBDC3', data: '2026-09-15', quantidade: 200, valor: 52.04, subtipo: 'jcp' as const }
+    const daMov = L({ ...base, preco: 0.315, origem: 'b3-movimentacao' })
+    const dosRecebidos = L({ ...base, preco: 0.32, origem: 'b3-proventos' })
+    const r = mesclarLancamentos(mesclarLancamentos([], [daMov]).lancamentos, [dosRecebidos])
+    expect(r.adicionados).toBe(0)
+    expect(r.repetidos).toBe(1)
+    expect(r.lancamentos).toHaveLength(1)
+  })
+  it('dois proventos diferentes no mesmo dia (valores distintos) continuam sendo dois', () => {
+    const base = { tipo: 'provento' as const, ativo: 'BBDC3', data: '2026-09-15', quantidade: 200, subtipo: 'jcp' as const, preco: 0.3 }
+    const r = mesclarLancamentos([], [L({ ...base, valor: 50 }), L({ ...base, valor: 60 })])
+    expect(r.lancamentos).toHaveLength(2)
+  })
+})
+
+describe('editar, excluir e lançar manualmente', () => {
+  const importado = (o: Partial<LancamentoNovo> = {}) => L({ origem: 'b3-negociacao', ...o })
+  const livroCom = (ls: LancamentoNovo[]): Livro => ({ lancamentos: mesclarLancamentos([], ls).lancamentos, excluidas: [] })
+
+  it('excluir um lançamento importado: reimportar o extrato NÃO o traz de volta', () => {
+    const livro = livroCom([importado(), importado({ ativo: 'BBAS3' })])
+    const apagado = excluirLancamento(livro, livro.lancamentos[0].id)
+    expect(apagado.lancamentos).toHaveLength(1)
+    expect(apagado.excluidas).toHaveLength(1)
+    const re = mesclarLancamentos(apagado.lancamentos, [importado(), importado({ ativo: 'BBAS3' })], apagado.excluidas)
+    expect(re.adicionados).toBe(0)
+    expect(re.lancamentos).toHaveLength(1)
+  })
+  it('de duas compras idênticas importadas, excluir uma e reimportar não recria nem duplica', () => {
+    const livro = livroCom([importado(), importado()])
+    const um = excluirLancamento(livro, livro.lancamentos[0].id)
+    const re = mesclarLancamentos(um.lancamentos, [importado(), importado()], um.excluidas)
+    expect(re.adicionados).toBe(0)
+    expect(re.lancamentos).toHaveLength(1)
+  })
+  it('um terceiro negócio idêntico, que o extrato passou a trazer, entra normalmente', () => {
+    const livro = livroCom([importado(), importado()])
+    const um = excluirLancamento(livro, livro.lancamentos[0].id)
+    const re = mesclarLancamentos(um.lancamentos, [importado(), importado(), importado()], um.excluidas)
+    expect(re.adicionados).toBe(1)
+    expect(new Set(re.lancamentos.map((l) => l.id)).size).toBe(re.lancamentos.length)
+  })
+  it('excluir um lançamento manual não deixa rastro; id inexistente não faz nada', () => {
+    const m = adicionarLancamento({ lancamentos: [], excluidas: [] }, L({}))
+    const r = excluirLancamento(m.livro, m.livro.lancamentos[0].id)
+    expect(r.lancamentos).toEqual([])
+    expect(r.excluidas).toEqual([])
+    expect(excluirLancamento(m.livro, 'nao-existe')).toBe(m.livro)
+  })
+
+  it('corrigir: o original sai, a versão corrigida entra como manual e a reimportação não traz o errado de volta', () => {
+    const livro = livroCom([importado({ preco: 99, valor: 990 })])
+    const { livro: novo, problema } = corrigirLancamento(livro, livro.lancamentos[0].id, { preco: 10, valor: 100 })
+    expect(problema).toBeNull()
+    expect(novo.lancamentos).toHaveLength(1)
+    expect(novo.lancamentos[0]).toMatchObject({ preco: 10, valor: 100, origem: 'manual' })
+    const re = mesclarLancamentos(novo.lancamentos, [importado({ preco: 99, valor: 990 })], novo.excluidas)
+    expect(re.adicionados).toBe(0)
+    expect(re.lancamentos).toHaveLength(1)
+  })
+  it('correção inválida devolve o problema e não altera o livro', () => {
+    const livro = livroCom([importado()])
+    const r = corrigirLancamento(livro, livro.lancamentos[0].id, { quantidade: 0 })
+    expect(r.problema?.campo).toBe('quantidade')
+    expect(r.livro).toBe(livro)
+  })
+  it('lançamento manual: duas compras iguais entram as duas (digitar não é reimportar)', () => {
+    let livro: Livro = { lancamentos: [], excluidas: [] }
+    livro = adicionarLancamento(livro, L({})).livro
+    livro = adicionarLancamento(livro, L({})).livro
+    expect(livro.lancamentos).toHaveLength(2)
+    expect(new Set(livro.lancamentos.map((l) => l.id)).size).toBe(2)
+    expect(derivarPosicoes(livro.lancamentos).posicoes[0].quantidade).toBe(20)
+  })
+  it('lançamento manual: ativo vira maiúsculo, valida e é a origem manual', () => {
+    const ok = adicionarLancamento({ lancamentos: [], excluidas: [] }, L({ ativo: ' vale3 ' }))
+    expect(ok.livro.lancamentos[0]).toMatchObject({ ativo: 'VALE3', origem: 'manual' })
+    const ruim = adicionarLancamento({ lancamentos: [], excluidas: [] }, L({ preco: 0 }))
+    expect(ruim.problema?.campo).toBe('preco')
+    expect(ruim.livro.lancamentos).toEqual([])
+  })
+  it('lançamento manual nunca é descartado pela conciliação Movimentação x Negociação', () => {
+    const base = livroCom([importado({ data: '2026-08-31' })])
+    const r = adicionarLancamento(base, L({ data: '2026-09-02', origem: 'b3-movimentacao' } as Partial<LancamentoNovo>))
+    const comNeg = mesclarLancamentos(r.livro.lancamentos, [importado({ data: '2026-08-31', ativo: 'BBAS3' })])
+    expect(comNeg.lancamentos.filter((l) => l.origem === 'manual')).toHaveLength(1)
+  })
+})
+
+describe('conciliação com a nota de negociação (nota > Negociação > Movimentação)', () => {
+  const dia = '2026-09-30'
+  const nota = (o: Partial<LancamentoNovo>) => L({ origem: 'b3-nota', data: dia, ativo: 'HGBS11', ...o })
+  const neg = (o: Partial<LancamentoNovo>) => L({ origem: 'b3-negociacao', data: dia, ativo: 'HGBS11', ...o })
+  const mov = (o: Partial<LancamentoNovo>) => L({ origem: 'b3-movimentacao', data: '2026-10-02', ativo: 'HGBS11', ...o })
+  // a B3 agrega as duas execuções da nota (10 + 5) num negócio só (15)
+  const duasExecucoes = [nota({ quantidade: 10, valor: 100 }), nota({ quantidade: 5, valor: 50 })]
+  const agregado = neg({ quantidade: 15, valor: 150 })
+
+  it('a nota substitui o negócio agregado da Negociação, em qualquer ordem, e fica cada execução', () => {
+    const a = mesclarLancamentos(mesclarLancamentos([], [agregado]).lancamentos, duasExecucoes)
+    const b = mesclarLancamentos(mesclarLancamentos([], duasExecucoes).lancamentos, [agregado])
+    for (const r of [a, b]) {
+      expect(r.lancamentos.map((l) => `${l.origem}:${l.quantidade}`).sort()).toEqual(['b3-nota:10', 'b3-nota:5'])
+      expect(derivarPosicoes(r.lancamentos).posicoes[0].quantidade).toBe(15)
+    }
+    expect(a.substituidos).toBe(1)
+    expect(b.cobertos).toBe(1)
+  })
+  it('a liquidação da Movimentação (data do negócio = liquidação − 2 dias úteis) também é coberta pela nota', () => {
+    const r = mesclarLancamentos([], [...duasExecucoes, mov({ quantidade: 15, valor: 150 })])
+    expect(r.lancamentos.every((l) => l.origem === 'b3-nota')).toBe(true)
+    expect(r.cobertos).toBe(1)
+  })
+  it('a nota cobre só (data, ativo): outros ativos do mesmo dia seguem vindo da Negociação', () => {
+    const r = mesclarLancamentos([], [...duasExecucoes, neg({ ativo: 'VALE3' }), neg({ data: '2026-09-29', quantidade: 3, valor: 30 })])
+    expect(r.lancamentos.map((l) => `${l.origem}:${l.ativo}:${l.data}`).sort()).toEqual([
+      'b3-negociacao:HGBS11:2026-09-29',
+      'b3-negociacao:VALE3:2026-09-30',
+      'b3-nota:HGBS11:2026-09-30',
+      'b3-nota:HGBS11:2026-09-30',
+    ])
+  })
+  it('as taxas da nota entram no custo e baixam o preço médio correto', () => {
+    const r = mesclarLancamentos([], [nota({ quantidade: 10, preco: 10, valor: 100, taxas: 0.5 })])
+    const p = derivarPosicoes(r.lancamentos).posicoes[0]
+    expect(p.custoTotal).toBeCloseTo(100.5, 8)
+    expect(p.precoMedio).toBeCloseTo(10.05, 8)
+  })
+  it('reimportar a mesma nota não duplica', () => {
+    const a = mesclarLancamentos([], duasExecucoes)
+    const b = mesclarLancamentos(a.lancamentos, duasExecucoes)
+    expect(b.adicionados).toBe(0)
+    expect(b.lancamentos).toHaveLength(2)
+  })
+})
