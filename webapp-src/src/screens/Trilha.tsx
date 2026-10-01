@@ -2,7 +2,6 @@ import { ATIVOS } from '../data/assets'
 import { aulaDisponivel, encontrarTrilha } from '../data/trilhas'
 import { NOME_ARQUIVO_MANUAL_MEU_MES, RESUMO_MANUAL_MEU_MES, TITULO_MANUAL_MEU_MES, URL_MANUAL_MEU_MES } from '../data/manualMeuMes'
 import { PlayIcon } from '../ui/Icon'
-import { TabBar } from '../ui/TabBar'
 import type { AppCtx } from '../state/useAppState'
 
 export function Trilha({ ctx }: { ctx: AppCtx }) {
@@ -100,9 +99,6 @@ export function Trilha({ ctx }: { ctx: AppCtx }) {
           </div>
         </div>
       ))}
-
-      <div className="grow" />
-      <TabBar ctx={ctx} />
     </div>
   )
 }

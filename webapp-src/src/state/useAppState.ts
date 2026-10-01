@@ -45,6 +45,18 @@ export function ehTelaAvulsa(tela: Screen) {
   return TELAS_AVULSAS.includes(tela)
 }
 
+/** Telas que só fazem sentido com o questionário respondido (dependem do resultado). Nunca devem
+ * ser gravadas como "onde a pessoa parou" enquanto as 7 perguntas de suitability não existirem:
+ * quem toca em Perfil/Carteira/Simular sem ter respondido vê o convite para começar, e gravar essa
+ * tela fazia o botão da landing abrir o convite vazio nas visitas seguintes, em vez do onboarding. */
+export const TELAS_QUE_EXIGEM_RESPOSTAS: readonly Screen[] = ['resultado', 'carteira', 'simulador', 'detalheAtivo']
+
+/** As 7 respostas de suitability estão todas presentes? (mesma regra de `questionario.completas`) */
+function suitabilityRespondido(respostas: Partial<RespostasQuestionario> | undefined) {
+  const salvas = respostas as Record<string, unknown> | undefined
+  return PERGUNTAS.every((p) => salvas?.[p.id] !== undefined)
+}
+
 /** Valores aceitos no parâmetro ?tela= vindo da landing. */
 const TELAS_PELA_URL: Record<string, Screen> = {
   resultado: 'resultado',
@@ -124,7 +136,14 @@ export function useAppState() {
             // avulsa. Antes, essas telas só existiam depois do resultado, então o lugar
             // certo para retomar é o resultado.
             const telaSalva = salvo.screen ?? 'onboarding'
-            const telaRestaurada = ehTelaAvulsa(telaSalva) ? 'resultado' : telaSalva
+            const telaCandidata = ehTelaAvulsa(telaSalva) ? 'resultado' : telaSalva
+            // Estado salvo apontando para uma tela que depende do resultado, mas sem as respostas:
+            // foi gravado por engano (ver TELAS_QUE_EXIGEM_RESPOSTAS). Abre o onboarding, que é o
+            // que a pessoa esperava ao tocar no botão da landing. Cura também quem já ficou assim.
+            const telaRestaurada =
+              TELAS_QUE_EXIGEM_RESPOSTAS.includes(telaCandidata) && !suitabilityRespondido(salvo.respostas)
+                ? 'onboarding'
+                : telaCandidata
             telaDoFluxoRef.current = telaRestaurada
             setScreen(telaRestaurada)
             setIdade(salvo.idade ?? 30)
@@ -199,16 +218,21 @@ export function useAppState() {
   useEffect(() => {
     if (!hidratado) return
     if (!ehTelaAvulsa(screen)) telaDoFluxoRef.current = screen
+    // Sem as 7 respostas, uma tela que depende do resultado não é um ponto de retomada válido.
+    const telaParaSalvar =
+      TELAS_QUE_EXIGEM_RESPOSTAS.includes(telaDoFluxoRef.current) && !questionario.completas
+        ? 'onboarding'
+        : telaDoFluxoRef.current
     const estado: EstadoPersistido = {
       versao: VERSAO_ARMAZENAMENTO,
-      screen: telaDoFluxoRef.current,
+      screen: telaParaSalvar,
       idade,
       respostas: questionario.respostas,
       respostasArquitetura: arquitetura.respostas,
       tema,
     }
     storage.setItem(CHAVE_ARMAZENAMENTO, JSON.stringify(estado))
-  }, [hidratado, screen, idade, questionario.respostas, arquitetura.respostas, tema])
+  }, [hidratado, screen, idade, questionario.respostas, questionario.completas, arquitetura.respostas, tema])
 
   // Métricas anônimas: 1 visita por sessão e as telas de conteúdo/ferramentas mais abertas.
   useEffect(() => {

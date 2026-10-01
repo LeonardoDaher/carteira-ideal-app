@@ -1,6 +1,5 @@
 import { ATIVOS } from '../data/assets'
 import { encontrarAula, aulasEmOrdem } from '../data/trilhas'
-import { TabBar } from '../ui/TabBar'
 import type { AppCtx } from '../state/useAppState'
 
 export function AprenderVideo({ ctx }: { ctx: AppCtx }) {
@@ -137,9 +136,6 @@ export function AprenderVideo({ ctx }: { ctx: AppCtx }) {
       <button className="btn btn-outline" onClick={ctx.voltarDaAula}>
         Voltar para a trilha
       </button>
-
-      <div className="grow" />
-      <TabBar ctx={ctx} />
     </div>
   )
 }

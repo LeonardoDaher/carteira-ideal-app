@@ -33,6 +33,11 @@ function responderArquitetura(result: { current: ReturnType<typeof useAppState> 
   }
 }
 
+/** Estado salvo com as 7 respostas de suitability completas (o que um resultado de verdade deixa gravado). */
+function respostasCompletasSalvas() {
+  return Object.fromEntries(PERGUNTAS.map((p) => [p.id, 'b']))
+}
+
 beforeEach(() => {
   localStorage.clear()
 })
@@ -230,7 +235,7 @@ describe('useAppState — link "Ver minha carteira de referência" (?tela=result
   it('sem o parâmetro, continua restaurando a última tela salva normalmente', async () => {
     localStorage.setItem(
       'carteiraideal.estado',
-      JSON.stringify({ versao: 2, screen: 'carteira', idade: 42, respostas: {}, respostasArquitetura: {}, tema: 'dark' }),
+      JSON.stringify({ versao: 2, screen: 'carteira', idade: 42, respostas: respostasCompletasSalvas(), respostasArquitetura: {}, tema: 'dark' }),
     )
     window.history.replaceState(null, '', '/app/')
 
@@ -240,10 +245,90 @@ describe('useAppState — link "Ver minha carteira de referência" (?tela=result
     expect(result.current.screen).toBe('carteira')
   })
 
+  it('estado salvo em resultado/carteira/simulador SEM respostas (gravado por engano) abre o onboarding', async () => {
+    for (const tela of ['resultado', 'carteira', 'simulador', 'detalheAtivo']) {
+      localStorage.setItem(
+        'carteiraideal.estado',
+        JSON.stringify({ versao: 2, screen: tela, idade: 30, respostas: {}, respostasArquitetura: {}, tema: 'dark' }),
+      )
+      window.history.replaceState(null, '', '/app/')
+
+      const { result, unmount } = renderHook(() => useAppState())
+      await waitFor(() => expect(result.current.hidratado).toBe(true))
+
+      expect(result.current.screen).toBe('onboarding')
+      unmount()
+    }
+  })
+
+  it('suitability incompleto (só algumas respostas) também não restaura o resultado', async () => {
+    localStorage.setItem(
+      'carteiraideal.estado',
+      JSON.stringify({ versao: 2, screen: 'resultado', idade: 30, respostas: { objetivo: 'b' }, respostasArquitetura: {}, tema: 'dark' }),
+    )
+    window.history.replaceState(null, '', '/app/')
+
+    const { result } = renderHook(() => useAppState())
+    await waitFor(() => expect(result.current.hidratado).toBe(true))
+
+    expect(result.current.screen).toBe('onboarding')
+  })
+
+  it('o fluxo no meio do questionário continua sendo restaurado (a correção não afeta quem está respondendo)', async () => {
+    localStorage.setItem(
+      'carteiraideal.estado',
+      JSON.stringify({ versao: 2, screen: 'questionario', idade: 42, respostas: { objetivo: 'b' }, respostasArquitetura: {}, tema: 'dark' }),
+    )
+    window.history.replaceState(null, '', '/app/')
+
+    const { result } = renderHook(() => useAppState())
+    await waitFor(() => expect(result.current.hidratado).toBe(true))
+
+    expect(result.current.screen).toBe('questionario')
+    expect(result.current.respostas.objetivo).toBe('b')
+  })
+
+  it('tocar em Perfil/Carteira sem ter respondido não grava essa tela como ponto de retomada', async () => {
+    const { result } = renderHook(() => useAppState())
+    await waitFor(() => expect(result.current.hidratado).toBe(true))
+
+    act(() => result.current.setScreen('resultado'))
+    expect(result.current.screen).toBe('resultado') // a pessoa vê o convite, como sempre
+    await waitFor(() => {
+      const salvo = JSON.parse(localStorage.getItem('carteiraideal.estado') ?? '{}')
+      expect(salvo.screen).toBe('onboarding')
+    })
+
+    act(() => result.current.setScreen('carteira'))
+    await waitFor(() => {
+      const salvo = JSON.parse(localStorage.getItem('carteiraideal.estado') ?? '{}')
+      expect(salvo.screen).toBe('onboarding')
+    })
+  })
+
+  it('com as respostas completas, o resultado continua sendo gravado e restaurado', async () => {
+    const primeira = renderHook(() => useAppState())
+    await waitFor(() => expect(primeira.result.current.hidratado).toBe(true))
+    act(() => primeira.result.current.iniciarQuestionario())
+    act(() => primeira.result.current.confirmarIdade(35))
+    responderSuitability(primeira.result)
+    responderArquitetura(primeira.result)
+    await waitFor(() => expect(primeira.result.current.resultado).not.toBeNull())
+    act(() => primeira.result.current.setScreen('resultado'))
+    await waitFor(() => {
+      const salvo = JSON.parse(localStorage.getItem('carteiraideal.estado') ?? '{}')
+      expect(salvo.screen).toBe('resultado')
+    })
+
+    const segunda = renderHook(() => useAppState())
+    await waitFor(() => expect(segunda.result.current.hidratado).toBe(true))
+    expect(segunda.result.current.screen).toBe('resultado')
+  })
+
   it('estado salvo por versão anterior numa tela hoje avulsa (ex: trilha) retoma no resultado', async () => {
     localStorage.setItem(
       'carteiraideal.estado',
-      JSON.stringify({ versao: 2, screen: 'trilha', idade: 42, respostas: {}, respostasArquitetura: {}, tema: 'dark' }),
+      JSON.stringify({ versao: 2, screen: 'trilha', idade: 42, respostas: respostasCompletasSalvas(), respostasArquitetura: {}, tema: 'dark' }),
     )
     window.history.replaceState(null, '', '/app/')
 

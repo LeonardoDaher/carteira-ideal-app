@@ -1,0 +1,38 @@
+D33 (01/10/2026) - Aprender fica fora da barra Perfil/Carteira/Simular + conserto do botão da landing (D32 incluído).
+Feito em cima do zip atual (carteira-ideal-app-main). Este pacote JÁ INCLUI o D32: se você ainda não subiu o D32, suba só este.
+Se já subiu, pode subir este também: os arquivos do D32 vão idênticos.
+
+O QUE MUDOU
+1) Trilha e Aula (Aprender) não mostram mais a barra Perfil / Carteira / Simular.
+   Essa barra é do fluxo do questionário e só existe agora em Perfil (resultado), Carteira e Simular.
+   Trilha e Aula já tinham o botão "← Voltar" e continuam com ele.
+   Era daí que nascia o bug: quem tocava em "Perfil" dentro de uma trilha, sem ter respondido nada, caía na tela vazia
+   e o app gravava "resultado" como ponto de retomada.
+2) (D32) O app não grava mais Perfil/Carteira/Simular como ponto de retomada sem as 7 respostas; ao abrir, um estado assim
+   já gravado abre o onboarding (cura quem já estava com o problema); a landing só diz "Ver minha carteira de referência"
+   com as respostas salvas.
+
+ARQUIVOS (6) - caminhos a partir da raiz do repositório
+A  webapp-src/src/screens/Trilha.tsx                       sem a barra de abas
+A  webapp-src/src/screens/AprenderVideo.tsx                sem a barra de abas
+N  webapp-src/src/screens/AprenderSemBarraDeAbas.test.tsx  NOVO: Aprender, cada trilha e cada aula sem barra
+A  webapp-src/src/state/useAppState.ts                     (D32)
+A  webapp-src/src/state/useAppState.test.ts                (D32)
+A  script.js                                               (RAIZ, landing) (D32)
+N  LEIA-ME-D33.txt                                         este arquivo (pode subir ou não)
+
+NÃO MUDOU: motor, vetos, perfis, carteiras, API, Meu Mês (e seus dados), Aprender em si, o livro, o fluxo do questionário.
+
+COMO SUBIR - no GitHub: Add file > Upload files
+1. Extraia o zip. Arraste o CONTEÚDO: a pasta "webapp-src" (como pasta) e o arquivo script.js (e o LEIA-ME, se quiser).
+2. Confira a lista: deve ter exatamente os 6 caminhos acima. Se algum arquivo .tsx/.ts aparecer sem "webapp-src/src/...",
+   pare e refaça arrastando a pasta.
+3. Mensagem do commit: "D33: Aprender sem a barra do questionário; conserta botão da landing".
+
+DEPOIS DO DEPLOY (1 a 2 minutos na Vercel)
+1. Aprender > qualquer trilha > qualquer aula: sem a barra Perfil/Carteira/Simular, só o "← Voltar".
+2. Resultado, Carteira e Simular (depois de responder o questionário): a barra continua lá.
+3. No navegador que tinha o problema, a landing > "Descobrir meu perfil..." abre o onboarding.
+
+VERIFICAÇÃO: 396 testes do app e 158 dos scripts passando; typecheck, lint e build de produção sem erros. Com a barra
+devolvida à Trilha de propósito, o teste novo falha (confirma que cobre a regra).

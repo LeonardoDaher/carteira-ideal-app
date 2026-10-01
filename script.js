@@ -57,6 +57,10 @@ applyTheme(document.documentElement.classList.contains("light"));
     if (!bruto) return;
     var salvo = JSON.parse(bruto);
     if (!salvo || salvo.versao !== VERSAO || TELAS_COM_RESULTADO.indexOf(salvo.screen) === -1) return;
+    // Só vale como "carteira pronta" se as 7 respostas de suitability estão salvas. Só a tela salva
+    // não basta: quem tocou numa aba sem ter respondido nada ficava com "resultado" gravado.
+    // 7 = PERGUNTAS.length em webapp-src/src/data/questions.ts.
+    if (!salvo.respostas || Object.keys(salvo.respostas).length < 7) return;
 
     var cta = document.querySelector("a.cta");
     var titulo = document.querySelector("a.cta .cta-title");
