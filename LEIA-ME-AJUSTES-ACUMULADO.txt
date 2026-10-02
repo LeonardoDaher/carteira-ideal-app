@@ -31,4 +31,9 @@ PACOTE ACUMULADO (tudo desde o D33). Aplique ESTE zip por cima do projeto; ele s
     - "E se eu investir um valor menor?": distribui o valor entre as classes abaixo do alvo e mostra a aderência antes e depois.
     - Fica de fora da conta (e é mostrado à parte): o que está fora da carteira sugerida e as classes sem alvo.
 
-VERIFICAÇÃO: tsc, lint, 1014 testes do app, 158 do gerador de páginas e build de produção OK.
+14) TESTE: caixas sólidas em TODAS as telas (Meu Mês, Simular, Aprender, Resultado...), com o mesmo visual de Meus Ativos: branco no
+    tema claro e preto no escuro, borda suave e sombra. Usa os mesmos tokens do cartão de Meus Ativos. Botões, abas, chips e o estado
+    "selecionado" não mudam. PARA DESFAZER: apague o bloco "CAIXAS SÓLIDAS EM TODAS AS TELAS" no fim de webapp-src/src/index.css
+    (e o teste ui/caixasSolidas.test.ts).
+
+VERIFICAÇÃO: tsc, lint, 1019 testes do app, 158 do gerador de páginas e build de produção OK.

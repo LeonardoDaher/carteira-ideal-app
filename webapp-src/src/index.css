@@ -1921,3 +1921,31 @@ select option:disabled { color: #6b7280 !important; -webkit-text-fill-color: #6b
 @media (min-width: 560px) { .mc-tipos { grid-template-columns: 1fr 1fr; } }
 .mc-grupo-rodape { padding: 4px 14px 12px; display: flex; }
 .mc-equiv { border-left: 3px solid var(--mc-ouro); padding-left: 8px; margin-top: 2px; }
+
+/* =====================================================================================
+   CAIXAS SÓLIDAS EM TODAS AS TELAS (teste de 02/10/2026)
+   O visual das caixas de Meus Ativos (branco no tema claro, preto no escuro, borda suave e sombra)
+   passa a valer em Meu Mês, Simular, Aprender, Resultado e demais telas. Usa os MESMOS tokens do
+   .mc-card (--mc-card, --mc-card-borda, --mc-card-sombra); então qualquer ajuste de cor feito lá vale aqui.
+   Fora do bloco, de propósito: botões, abas, chips e o estado "selecionado" (que segue em destaque).
+   PARA DESFAZER O TESTE: apague este bloco inteiro; as telas voltam ao vidro translúcido de antes.
+   ===================================================================================== */
+:root {
+  --caixa-fundo: var(--mc-card);
+  --caixa-borda: var(--mc-card-borda);
+  --caixa-sombra: var(--mc-card-sombra);
+}
+.card,
+.card-outline,
+.vehicle-card:not(.selected),
+.stat-tile,
+.quiz-option:not(.selected),
+.alloc-box,
+.resultados-busca,
+.link-extra,
+.titulo-opcao:not(.selecionado) {
+  background: var(--caixa-fundo);
+  border-color: var(--caixa-borda);
+  box-shadow: var(--caixa-sombra), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+.titulo-opcao.selecionado { background: color-mix(in oklch, var(--accent) 12%, var(--caixa-fundo)); }
