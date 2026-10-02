@@ -31,7 +31,7 @@ export function Simulador({ ctx }: { ctx: AppCtx }) {
         <div className="muted small justify">
           {aba === 'percentual'
             ? 'Quanto você pretende investir? A carteira de referência se ajusta automaticamente.'
-            : 'Com o que você já tem em Meus Ativos, veja quanto investir para chegar aos percentuais da carteira sugerida, sem vender nada.'}
+            : 'Com o que você já tem em Meus Ativos, veja o que atacar primeiro para chegar aos percentuais da carteira sugerida.'}
         </div>
       </div>
 

@@ -23,13 +23,20 @@ PACOTE ACUMULADO (tudo desde o D33). Aplique ESTE zip por cima do projeto; ele s
     textos e notas 12. Mantidos: números grandes (R$), botões e campos de digitação (16 px, por causa do zoom do iPhone).
     A trava de legibilidade passou de "13 px" para "12 px" (o piso do Meu Mês) e agora também exige só tamanhos dessa escala.
 
-13) SIMULAR VALORES ganhou duas abas: "Pelo percentual" (o simulador de sempre, intacto) e "Com os meus ativos" (novo).
-    A nova aba usa o que a pessoa tem em Meus Ativos e mostra QUANTO INVESTIR, SEM VENDER NADA, para chegar à carteira sugerida:
-    - "Percentual exato": cada classe termina no percentual da carteira sugerida. A classe mais acima do alvo define o total.
-    - "Dentro do alvo": cada classe termina dentro da tolerância da comparação (o maior entre 2 pp e 20% do alvo); pede bem menos.
-    - Por classe: hoje, alvo, quanto investir e como fica depois.
-    - "E se eu investir um valor menor?": distribui o valor entre as classes abaixo do alvo e mostra a aderência antes e depois.
+13) SIMULAR VALORES ganhou duas abas: "Pelo percentual" (o simulador de sempre, intacto) e "Com os meus ativos" (novo, refeito na
+    lógica de PRIORIZAÇÃO: o que o investidor precisa ATACAR primeiro). Quem já está muito posicionado em uma classe só recebe mais
+    dinheiro depois que as outras chegarem ao percentual delas.
+    - Resumo no topo: "Comece por ..." (as classes mais distantes do alvo) e "Segure o dinheiro em ..." (as que já passaram).
+    - Atacar primeiro: classes abaixo do alvo, numeradas (1 = a mais distante), com barra do quanto do alvo já está preenchido,
+      "Faltam X pp" e o valor aproximado que falta no patrimônio de hoje.
+    - Perto do alvo: dentro da tolerância da comparação (o maior entre 2 pp e 20% do alvo). Pode receber aporte depois das de cima.
+    - Segurar por enquanto: já passou do alvo; mostra "Não invista mais aqui por enquanto." (sem vender, ela só diminui de peso
+      quando as outras crescem).
+    - "Para onde vai o próximo aporte": o valor digitado é dividido só entre as classes abaixo do alvo, mais para as mais distantes,
+      na ordem de prioridade, com a aderência antes e depois. Usa a mesma base do ranking (classes da carteira sugerida).
     - Fica de fora da conta (e é mostrado à parte): o que está fora da carteira sugerida e as classes sem alvo.
+    - REMOVIDO: o cálculo "quanto investir para zerar tudo" (com os modos "Percentual exato" e "Dentro do alvo"), por não ser o
+      que se queria. Arquivos: domain/simulacaoComAtivos.ts (priorizarClasses) e ui/SimularComMeusAtivos.tsx.
 
 14) TESTE: caixas sólidas em TODAS as telas (Meu Mês, Simular, Aprender, Resultado...), com o mesmo visual de Meus Ativos: branco no
     tema claro e preto no escuro, borda suave e sombra. Usa os mesmos tokens do cartão de Meus Ativos. Botões, abas, chips e o estado
