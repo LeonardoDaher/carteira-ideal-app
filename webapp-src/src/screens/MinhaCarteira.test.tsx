@@ -1005,3 +1005,38 @@ describe('MinhaCarteira: proventos como na página Proventos da B3', () => {
     expect(c.querySelector('.mc-pb')).toBeNull()
   })
 })
+
+describe('MinhaCarteira: proventos repetidos em par (transferência de custódia) não inflam mais o gráfico', () => {
+  const ctxVazio = {} as AppCtx
+  const prov = (data: string, ativo: string, valor: number) => L({ tipo: 'provento', data, ativo, valor, quantidade: 100, preco: 0, subtipo: 'rendimento', origem: 'b3-movimentacao' })
+  const plano = (t: string | null | undefined) => (t ?? '').replace(/\u00a0/g, ' ')
+
+  // O mês real que originou a regra, com valores inventados: pagamentos únicos + pares idênticos nas datas das transferências.
+  const unicos = [prov('2026-08-14', 'BBB11', 100), prov('2026-08-13', 'CCC11', 300.5), prov('2026-08-07', 'DDD11', 412.49)]
+  const pares = [prov('2026-08-04', 'EEE11', 21.16), prov('2026-08-05', 'FFF3', 2.84), prov('2026-08-10', 'GGG3', 396.65)].flatMap((p) => [p, { ...p }])
+
+  it('abre dados já gravados com os pares e mostra o mês SEM eles, igual ao da B3', async () => {
+    semear({ lancs: [L(), ...unicos, ...pares] })
+    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    const c = (await screen.findByRole('heading', { name: 'Proventos' })).closest('section')!
+    const ago = c.querySelector('.mc-pb-col[title^="Ago/26:"]') as HTMLElement
+    expect(plano(ago.querySelector('.mc-pb-valor')!.textContent)).toBe('R$ 812,99') // 100 + 300,50 + 412,49, e não 1.634,29
+    expect(plano(c.querySelector('.mc-duplo')!.textContent)).toContain('R$ 812,99') // este ano
+  })
+  it('a lista "Valores de cada mês" de agosto não traz os pares', async () => {
+    semear({ lancs: [L(), ...unicos, ...pares] })
+    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    const c = (await screen.findByRole('heading', { name: 'Proventos' })).closest('section')!
+    const ago = [...c.querySelectorAll('.mc-meses > li')].find((m) => txt(m.querySelector('summary') as HTMLElement).includes('Ago/26'))!
+    const itens = [...ago.querySelectorAll('.mc-itens-mes li')].map((li) => txt(li as HTMLElement))
+    expect(itens).toHaveLength(3)
+    expect(itens.join(' ')).not.toMatch(/EEE11|FFF3|GGG3/)
+  })
+  it('o par some também da lista de lançamentos (e fica gravado limpo)', async () => {
+    semear({ lancs: [L(), ...unicos, ...pares] })
+    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    const lista = (await screen.findByRole('heading', { name: 'Lançamentos' })).closest('section')!
+    await waitFor(() => expect(txt(lista)).toContain('4 lançamento(s)')) // a compra + 3 pagamentos verdadeiros
+    expect(lerSalvo().lancamentos.filter((l) => l.tipo === 'provento')).toHaveLength(3)
+  })
+})

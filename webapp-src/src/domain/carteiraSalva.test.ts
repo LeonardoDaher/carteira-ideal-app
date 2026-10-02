@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { CARTEIRA_VAZIA, VERSAO_CARTEIRA, aplicarImportacao, canonizarAtivos, carteiraVazia, dataDaPosicaoPeloNome, lerCarteiraSalva, serializarCarteira } from './carteiraSalva'
+import { desfazerProventosEmPares } from './lancamentos'
+import { CARTEIRA_VAZIA, VERSAO_CARTEIRA, aplicarImportacao, canonizarAtivos, limparProventosEmPares, carteiraVazia, dataDaPosicaoPeloNome, lerCarteiraSalva, serializarCarteira } from './carteiraSalva'
 import type { ItemPosicaoB3, ResultadoImportacao } from './importacao/planilha'
 import { mesclarLancamentos, type LancamentoNovo } from './lancamentos'
 
@@ -200,5 +201,30 @@ describe('preços médios informados pela pessoa', () => {
     const c0 = { ...carteiraVazia(), precosMedios: { VALE3: 10 } }
     const r = aplicarImportacao(c0, [{ nome: 'n.xlsx', resultado: { perfil: 'b3-negociacao', lancamentos: [], avisos: [], erros: [], linhasLidas: 0 } }], '2026-10-01')
     expect(r.carteira.precosMedios).toEqual({ VALE3: 10 })
+  })
+})
+
+describe('migração: proventos repetidos em par, gravados por versões anteriores', () => {
+  const p = (o: Partial<LancamentoNovo> = {}): LancamentoNovo => ({
+    data: '2026-08-04', tipo: 'provento', subtipo: 'rendimento', ativo: 'FIIA11', quantidade: 100, preco: 0, valor: 21.16, taxas: 0, instituicao: 'XP', origem: 'b3-movimentacao', ...o,
+  })
+  const com = (...ls: LancamentoNovo[]) => ({ ...carteiraVazia(), lancamentos: mesclarLancamentos([], ls).lancamentos })
+
+  it('ao abrir, os pares somem e o pagamento verdadeiro fica', () => {
+    const c = lerCarteiraSalva(serializarCarteira(com(p(), p(), p({ data: '2026-08-07' }), L({ ativo: 'VALE3' }))))!
+    expect(c.lancamentos.map((l) => `${l.tipo}:${l.data}:${l.ativo}`).sort()).toEqual(['compra:2026-03-02:VALE3', 'provento:2026-08-07:FIIA11'])
+  })
+  it('carteira sem pares volta INTACTA (mesmo objeto)', () => {
+    const limpa = com(p(), p({ data: '2026-08-07' }))
+    expect(limparProventosEmPares(limpa)).toBe(limpa)
+  })
+  it('é idempotente', () => {
+    const uma = limparProventosEmPares(com(p(), p()))
+    expect(limparProventosEmPares(uma)).toBe(uma)
+  })
+  it('reimportar o mesmo extrato (agora com a regra) não traz o par de volta', () => {
+    const importado = desfazerProventosEmPares([p(), p(), p({ data: '2026-08-07' })]).mantidos
+    const r = mesclarLancamentos(limparProventosEmPares(com(p(), p(), p({ data: '2026-08-07' }))).lancamentos, importado)
+    expect(r.lancamentos).toHaveLength(1)
   })
 })

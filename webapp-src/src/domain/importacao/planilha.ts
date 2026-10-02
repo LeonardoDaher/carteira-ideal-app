@@ -21,7 +21,7 @@
 // número da linha. Tipos de movimentação que ignoramos de propósito viram um aviso agregado.
 import { normalizarBusca } from '../rendaFii'
 import type { LancamentoNovo, OrigemLancamento, SubtipoProvento, TipoLancamento } from '../lancamentos'
-import { PADRAO_TICKER, ehTickerDeBolsa, validarLancamento } from '../lancamentos'
+import { PADRAO_TICKER, desfazerProventosEmPares, ehTickerDeBolsa, validarLancamento } from '../lancamentos'
 import { lerData, lerNumero, lerTexto, linhaVazia, normalizarCabecalho, type Celula, type Matriz } from './celulas'
 
 export type PerfilArquivo =
@@ -501,6 +501,11 @@ export function importarMatriz(matriz: Matriz, nomeAba = ''): ResultadoImportaca
 
   const avisos: string[] = []
   if (perfil === 'b3-movimentacao') {
+    const limpo = desfazerProventosEmPares(ctx.lancamentos)
+    ctx.lancamentos = limpo.mantidos
+    if (limpo.descartados.length) {
+      avisos.push(`${limpo.descartados.length} provento(s) repetidos em par (mesmo ativo, data e valor) foram descartados: são transferências de custódia, e a B3 não os conta como dinheiro recebido.`)
+    }
     avisos.push(
       'Extrato de Movimentação da B3: a data é a da liquidação, não a da compra, e o preço é o médio consolidado. Para datas mais exatas, importe também o extrato de Negociação (sem sobrepor o mesmo período, para não contar a compra duas vezes).',
     )

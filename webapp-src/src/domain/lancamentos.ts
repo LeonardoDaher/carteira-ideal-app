@@ -159,6 +159,31 @@ function proventoDuplicadoEntreFontes(l: Conciliavel & { valor: number }, idx: M
   return (idx.get(`${l.ativo}|${l.valor.toFixed(2)}`) ?? []).some((d) => diasEntre(d, l.data) <= JANELA_PROVENTO_DIAS)
 }
 
+/**
+ * Proventos da MOVIMENTAÇÃO que vêm REPETIDOS EM PAR (mesma data, ativo, tipo e valor) não são dinheiro recebido:
+ * são o rastro de uma transferência de custódia entre corretoras (um lado crédito, o outro débito) e a B3 não os
+ * conta na página de Proventos. Caso real que originou a regra: em agosto, 10 grupos assim somavam R$ 1.084,62
+ * (2 x 542,31) e, ao tirá-los, o mês passou de R$ 1.897,61 para R$ 812,99, exatamente o valor da B3.
+ *
+ * Os lançamentos se cancelam de dois em dois: com 2 ou 4 cópias não sobra nenhuma; com 3, sobra 1 (o pagamento
+ * verdadeiro mais um par). Só vale para a Movimentação: nos Proventos recebidos não existe esse rastro.
+ * Ignora instituição e quantidade de propósito: a transferência tem a corretora de origem num lado e a de
+ * destino no outro.
+ */
+export function desfazerProventosEmPares<T extends { tipo: TipoLancamento; origem: OrigemLancamento; data: string; ativo: string; subtipo?: SubtipoProvento; valor: number }>(
+  ls: readonly T[],
+): { mantidos: T[]; descartados: T[] } {
+  const grupos = new Map<string, number[]>()
+  ls.forEach((l, i) => {
+    if (l.tipo !== 'provento' || l.origem !== 'b3-movimentacao') return
+    const k = `${l.data}|${l.ativo}|${l.subtipo ?? ''}|${l.valor.toFixed(2)}`
+    grupos.set(k, [...(grupos.get(k) ?? []), i])
+  })
+  const fora = new Set<number>()
+  for (const indices of grupos.values()) for (let j = 0; j < Math.floor(indices.length / 2) * 2; j++) fora.add(indices[j])
+  return { mantidos: ls.filter((_, i) => !fora.has(i)), descartados: ls.filter((_, i) => fora.has(i)) }
+}
+
 function janelaNegociacao(ls: { data: string; tipo: TipoLancamento; origem: OrigemLancamento }[]): { ini: string; fim: string } | null {
   const datas = ls.filter((l) => l.origem === 'b3-negociacao' && (l.tipo === 'compra' || l.tipo === 'venda')).map((l) => l.data).sort()
   return datas.length ? { ini: datas[0], fim: datas[datas.length - 1] } : null

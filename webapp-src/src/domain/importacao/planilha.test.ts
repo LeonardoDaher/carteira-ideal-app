@@ -312,3 +312,23 @@ describe('os tipos de provento que a B3 conta: amortização, reembolso e juros'
     for (const t of ['Cessão de Direitos', 'Direito de Subscrição', 'Atualização']) expect(mov(t).lancamentos).toEqual([])
   })
 })
+
+describe('Movimentação com proventos repetidos em par (transferência de custódia)', () => {
+  const cab = ['Entrada/Saída', 'Data', 'Movimentação', 'Produto', 'Instituição', 'Quantidade', 'Preço unitário', 'Valor da Operação']
+  const linha = (data: string, ativo: string, valor: number, es = 'Credito', inst = 'CORRETORA X') => [es, data, 'Rendimento', `${ativo} - FUNDO`, inst, 100, valor / 100, valor]
+
+  it('o par (crédito e débito, de corretoras diferentes) é descartado, com aviso; o pagamento verdadeiro fica', () => {
+    const x = importarMatriz([cab, linha('04/08/2026', 'HGLG11', 16.38), linha('04/08/2026', 'HGLG11', 16.38, 'Debito', 'OUTRA CORRETORA'), linha('14/08/2026', 'HGLG11', 16.38)])
+    expect(x.lancamentos.map((l) => l.data)).toEqual(['2026-08-14'])
+    expect(x.avisos.some((a) => a.includes('2 provento(s) repetidos em par'))).toBe(true)
+  })
+  it('sem pares, nada é descartado e não há aviso sobre isso', () => {
+    const x = importarMatriz([cab, linha('04/08/2026', 'HGLG11', 16.38), linha('14/08/2026', 'MXRF11', 25)])
+    expect(x.lancamentos).toHaveLength(2)
+    expect(x.avisos.some((a) => a.includes('repetidos em par'))).toBe(false)
+  })
+  it('compras e vendas na Movimentação nunca entram nessa regra', () => {
+    const compra = ['Credito', '04/08/2026', 'Transferência - Liquidação', 'VALE3 - VALE', 'CORRETORA X', 10, 5, 50]
+    expect(importarMatriz([cab, compra, compra]).lancamentos).toHaveLength(2)
+  })
+})

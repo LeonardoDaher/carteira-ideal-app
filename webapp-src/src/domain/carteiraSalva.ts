@@ -5,7 +5,7 @@ import { chaveDoAtivoManual, validarAtivoManual, type AtivoManual } from './ativ
 import type { ClasseCarteira } from './classificadorAtivo'
 import { ativoDoTexto } from './importacao/planilha'
 import type { EventoFuturo, ItemPosicaoB3, ResultadoImportacao } from './importacao/planilha'
-import { mesclarLancamentos, somarDiasUteis, validarLancamento, type Lancamento, type OrigemLancamento, type SubtipoProvento, type TipoLancamento } from './lancamentos'
+import { desfazerProventosEmPares, mesclarLancamentos, somarDiasUteis, validarLancamento, type Lancamento, type OrigemLancamento, type SubtipoProvento, type TipoLancamento } from './lancamentos'
 
 export const CHAVE_CARTEIRA = 'carteiraideal.carteira'
 export const VERSAO_CARTEIRA = 1
@@ -180,6 +180,16 @@ export function canonizarAtivos(c: CarteiraSalva): CarteiraSalva {
   }
 }
 
+/**
+ * MIGRAÇÃO (D41): versões anteriores gravaram proventos da Movimentação repetidos em par (transferências de custódia),
+ * que inflavam o gráfico de proventos. Ao abrir, esses pares são desfeitos (ver desfazerProventosEmPares). Carteira
+ * sem nenhum par volta intacta (mesmo objeto).
+ */
+export function limparProventosEmPares(c: CarteiraSalva): CarteiraSalva {
+  const r = desfazerProventosEmPares(c.lancamentos)
+  return r.descartados.length ? { ...c, lancamentos: r.mantidos } : c
+}
+
 /** Lê o que está gravado. Devolve null sem dado, com versão diferente ou JSON quebrado; descarta só os itens inválidos. */
 export function lerCarteiraSalva(bruto: string | null): CarteiraSalva | null {
   if (!bruto) return null
@@ -188,7 +198,7 @@ export function lerCarteiraSalva(bruto: string | null): CarteiraSalva | null {
     if (o?.versao !== VERSAO_CARTEIRA || !o.carteira || typeof o.carteira !== 'object') return null
     const c = o.carteira
     const posicao = Array.isArray(c.posicao) ? lista(c.posicao, itemPosicaoValido) : null
-    return canonizarAtivos({
+    return limparProventosEmPares(canonizarAtivos({
       lancamentos: lista(c.lancamentos, lancamentoValido),
       excluidas: Array.isArray(c.excluidas) ? c.excluidas.filter(txt) : [],
       posicao: posicao && posicao.length ? posicao : null,
@@ -197,7 +207,7 @@ export function lerCarteiraSalva(bruto: string | null): CarteiraSalva | null {
       classes: lerClasses(c.classes),
       precosMedios: lerPrecos(c.precosMedios),
       ativosManuais: lerAtivosManuais(c.ativosManuais),
-    })
+    }))
   } catch {
     return null
   }

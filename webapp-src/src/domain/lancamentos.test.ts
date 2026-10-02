@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   adicionarLancamento,
+  desfazerProventosEmPares,
   corrigirLancamento,
   excluirLancamento,
   type Livro,
@@ -359,5 +360,58 @@ describe('o MESMO provento em dois extratos (Movimentação x Proventos recebido
     const uma = mesclarLancamentos([], [mov({ data: '2026-08-15' }), rec()])
     const duas = mesclarLancamentos(uma.lancamentos, [mov({ data: '2026-08-15' }), rec()])
     expect(duas.lancamentos).toEqual(uma.lancamentos)
+  })
+})
+
+describe('desfazerProventosEmPares: transferência de custódia não é dinheiro recebido', () => {
+  const p = (o: Partial<LancamentoNovo> = {}): LancamentoNovo => ({
+    data: '2026-08-04', tipo: 'provento', subtipo: 'rendimento', ativo: 'FIIA11', quantidade: 100, preco: 0.1, valor: 21.16, taxas: 0, instituicao: 'XP INVESTIMENTOS', origem: 'b3-movimentacao', ...o,
+  })
+  const valores = (ls: LancamentoNovo[]) => ls.map((l) => `${l.data}:${l.ativo}:${l.valor}`)
+
+  it('o mesmo provento repetido duas vezes se cancela: não sobra nenhum', () => {
+    const r = desfazerProventosEmPares([p(), p()])
+    expect(r.mantidos).toEqual([])
+    expect(r.descartados).toHaveLength(2)
+  })
+  it('o pagamento verdadeiro (outra data) fica; só o par some', () => {
+    const r = desfazerProventosEmPares([p(), p(), p({ data: '2026-08-07' })])
+    expect(valores(r.mantidos)).toEqual(['2026-08-07:FIIA11:21.16'])
+  })
+  it('de três cópias sobra uma; de quatro, nenhuma', () => {
+    expect(desfazerProventosEmPares([p(), p(), p()]).mantidos).toHaveLength(1)
+    expect(desfazerProventosEmPares([p(), p(), p(), p()]).mantidos).toHaveLength(0)
+  })
+  it('a instituição e a quantidade não importam: a transferência tem a corretora de origem num lado e a de destino no outro', () => {
+    const r = desfazerProventosEmPares([p({ instituicao: 'CLEAR CORRETORA' }), p({ instituicao: 'XP INVESTIMENTOS', quantidade: 100.5 })])
+    expect(r.mantidos).toEqual([])
+  })
+  it('data, ativo, valor ou tipo de provento diferentes: não são o mesmo pagamento, ficam todos', () => {
+    expect(desfazerProventosEmPares([p(), p({ data: '2026-08-05' })]).mantidos).toHaveLength(2)
+    expect(desfazerProventosEmPares([p(), p({ ativo: 'FIIB11' })]).mantidos).toHaveLength(2)
+    expect(desfazerProventosEmPares([p(), p({ valor: 21.17 })]).mantidos).toHaveLength(2)
+    expect(desfazerProventosEmPares([p({ subtipo: 'dividendo' }), p({ subtipo: 'jcp' })]).mantidos).toHaveLength(2)
+  })
+  it('só vale para a Movimentação: Proventos recebidos, planilha e digitados à mão nunca são desfeitos', () => {
+    for (const origem of ['b3-proventos', 'arquivo', 'manual'] as const) expect(desfazerProventosEmPares([p({ origem }), p({ origem })]).mantidos).toHaveLength(2)
+  })
+  it('compras e vendas idênticas e repetidas (legítimas) nunca são tocadas', () => {
+    const c = (): LancamentoNovo => ({ data: '2026-08-04', tipo: 'compra', ativo: 'VALE3', quantidade: 10, preco: 5, valor: 50, taxas: 0, origem: 'b3-movimentacao' })
+    expect(desfazerProventosEmPares([c(), c()]).mantidos).toHaveLength(2)
+  })
+  it('é idempotente: aplicar de novo não muda nada', () => {
+    const uma = desfazerProventosEmPares([p(), p(), p({ data: '2026-08-07' })]).mantidos
+    expect(desfazerProventosEmPares(uma).mantidos).toEqual(uma)
+  })
+  it('caso do agosto real: os pares somavam 2 x 542,31 e, sem eles, o mês bate com a B3 (812,99)', () => {
+    // mesma estrutura do mês que originou a regra (valores e ativos inventados que reproduzem as somas)
+    const unicos: [string, string, number][] = [['2026-08-31', 'AAA3', 22.4], ['2026-08-14', 'BBB11', 100], ['2026-08-13', 'CCC11', 300.5], ['2026-08-07', 'DDD11', 390.09]]
+    const pares: [string, string, number][] = [['2026-08-04', 'EEE11', 21.16], ['2026-08-05', 'FFF3', 2.84], ['2026-08-10', 'GGG3', 396.65]]
+    const mov = [...unicos.map(([data, ativo, valor]) => p({ data, ativo, valor })), ...pares.flatMap(([data, ativo, valor]) => [p({ data, ativo, valor }), p({ data, ativo, valor })])]
+    const soma = (ls: LancamentoNovo[]) => ls.reduce((s, l) => s + l.valor, 0)
+    const sujo = soma(mov)
+    const limpo = soma(desfazerProventosEmPares(mov).mantidos)
+    expect(sujo - limpo).toBeCloseTo(2 * (21.16 + 2.84 + 396.65), 8) // o excesso é exatamente 2 x (uma cópia de cada par)
+    expect(limpo).toBeCloseTo(22.4 + 100 + 300.5 + 390.09, 8)
   })
 })
