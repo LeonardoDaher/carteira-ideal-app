@@ -621,7 +621,7 @@ function paginaMinhaCarteira() {
 <li><strong>Movimentação:</strong> o Tesouro Direto, os proventos e outros eventos.</li>
 <li><strong>Posição:</strong> o que você tem hoje, com quantidade e valor atualizado.</li>
 </ul>
-<p>Você escolhe o período que quiser e pode enviar vários arquivos de uma vez. Quem controla a carteira numa planilha própria também pode importá-la, ou lançar tudo à mão.</p>`,
+<p>Você escolhe o período que quiser e pode enviar vários arquivos de uma vez. Quem controla a carteira numa planilha própria também pode importá-la, ou cadastrar os ativos à mão (nome, quantidade, preço médio e classe).</p>`,
       ),
       secao(
         'Um preço médio que dá para confiar',
@@ -633,7 +633,7 @@ function paginaMinhaCarteira() {
         `<ul>
 <li><strong>Patrimônio e composição</strong>, quando você importa a posição.</li>
 <li><strong>Resultado</strong> dos ativos em que o preço médio é conhecido, dizendo que parte da carteira essa conta cobre.</li>
-<li><strong>Proventos</strong> dos últimos 12 meses e os próximos pagamentos anunciados.</li>
+<li><strong>Proventos</strong> mês a mês, como na página de Proventos da B3: o recebido este ano e nos últimos 12 meses, o que ainda será pago e o detalhe de cada mês.</li>
 <li><strong>Evolução do capital aplicado</strong>, a preço de custo. Não é o valor de mercado da carteira no passado.</li>
 <li><strong>Comparação com a carteira de referência</strong>, se você tiver respondido o questionário.</li>
 </ul>`,
@@ -651,7 +651,7 @@ function paginaMinhaCarteira() {
         'O que ela ainda não faz',
         `<ul>
 <li>Não lê notas de corretagem em PDF.</li>
-<li>Não importa automaticamente a renda fixa de bancos (CDB, LCI): dá para lançá-la à mão.</li>
+<li>Não importa automaticamente a renda fixa de bancos (CDB, LCI), a previdência nem investimentos fora da B3: dá para cadastrá-los à mão, informando quantidade, preço médio e a classe do ativo.</li>
 <li>Não calcula Imposto de Renda.</li>
 </ul>`,
       ),

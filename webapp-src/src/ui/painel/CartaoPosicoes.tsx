@@ -1,8 +1,11 @@
 import { useId, useState } from 'react'
-import { lerNumero } from '../../domain/importacao/celulas'
+import type { ClasseCarteira } from '../../domain/classificadorAtivo'
 import { agruparPosicoes } from '../../domain/painelCarteira'
 import type { LinhaPosicao, OrigemPrecoMedio } from '../../domain/painelCarteira'
-import { pct, quantidadeBR, reais } from './formatar'
+import { PencilIcon } from '../Icon'
+import { PainelEdicaoAtivo } from './PainelEdicaoAtivo'
+import type { AcoesPainel } from './PainelEdicaoAtivo'
+import { dataCurta, pct, quantidadeBR, reais } from './formatar'
 
 const ORIGEM: Record<OrigemPrecoMedio, string> = {
   calculado: 'Calculado pelos seus lançamentos',
@@ -10,133 +13,111 @@ const ORIGEM: Record<OrigemPrecoMedio, string> = {
   informado: 'Informado por você',
 }
 
-const numero = (n: number) => String(Math.round(n * 100) / 100).replace('.', ',')
-
-/** Editar o preço médio de um ativo. O que a pessoa informa vale mais que o calculado e que o da B3. */
-function EditorPreco({ linha, onSalvar, onFechar }: { linha: LinhaPosicao; onSalvar: (preco: number | null) => void; onFechar: () => void }) {
-  const id = useId()
-  const [texto, setTexto] = useState(linha.precoMedio !== null ? numero(linha.precoMedio) : '')
-  const [erro, setErro] = useState<string | null>(null)
-
-  function salvar() {
-    const v = lerNumero(texto)
-    if (v === null || v <= 0) return setErro('Informe um preço médio maior que zero.')
-    onSalvar(v)
-    onFechar()
-  }
-
-  return (
-    <div className="mc-form mc-pos-editor" role="group" aria-label={`Editar preço médio de ${linha.ativo}`}>
-      <label htmlFor={id} className="mc-rotulo-campo">Preço médio de {linha.ativo} (R$ por unidade)</label>
-      <input
-        id={id}
-        className="mc-campo mc-campo-curto"
-        inputMode="decimal"
-        placeholder="0,00"
-        value={texto}
-        onChange={(e) => setTexto(e.target.value)}
-        onKeyDown={(e) => e.key === 'Enter' && salvar()}
-      />
-      <div className="mc-nota">O app passa a usar este valor, em vez de calcular.</div>
-      {erro && <div className="mc-erro" role="alert">{erro}</div>}
-      <div className="mc-acoes">
-        <button type="button" className="btn btn-primary mc-btn" onClick={salvar}>Salvar</button>
-        <button type="button" className="btn btn-ghost mc-btn" onClick={onFechar}>Cancelar</button>
-        {linha.origemPrecoMedio === 'informado' && (
-          <button
-            type="button"
-            className="btn btn-ghost mc-btn"
-            onClick={() => {
-              onSalvar(null)
-              onFechar()
-            }}
-          >
-            Voltar ao calculado
-          </button>
-        )}
-      </div>
-    </div>
-  )
-}
-
-function LinhaDoAtivo({
-  l,
-  onDefinirPrecoMedio,
-  onVerLancamentos,
-}: {
-  l: LinhaPosicao
-  onDefinirPrecoMedio: (ativo: string, preco: number | null) => void
-  onVerLancamentos: (ativo: string) => void
-}) {
-  const [editando, setEditando] = useState(false)
+function LinhaDoAtivo({ l, onEditar, onVerLancamentos }: { l: LinhaPosicao; onEditar: () => void; onVerLancamentos: (ativo: string) => void }) {
   return (
     <li className="mc-posicao">
-      <div className="mc-pos-ativo">
+      <div className="mc-pos-topo">
+        <button type="button" className="mc-lapis" aria-label={`Editar ${l.ativo}`} title="Editar" onClick={onEditar}>
+          <PencilIcon size={16} />
+        </button>
         <strong>{l.ativo}</strong>
         <span className="mc-nota">{quantidadeBR(l.quantidade)} un.</span>
-        {l.status === 'faltaSaldoAnterior' && <span className="mc-selo faltaSaldoAnterior">Falta o preço de compra</span>}
+        {l.status === 'faltaSaldoAnterior' && <span className="mc-selo faltaSaldoAnterior">Sem preço médio</span>}
         {l.aguardandoLiquidacao && <span className="mc-selo info">Aguardando liquidação</span>}
-      </div>
-      <div className="mc-pos-num">
-        <span className="mc-nota">Preço médio</span>
-        <span>{l.precoMedio !== null ? reais(l.precoMedio) : '—'}</span>
-        {l.origemPrecoMedio && l.origemPrecoMedio !== 'calculado' && <span className="mc-nota">{ORIGEM[l.origemPrecoMedio]}</span>}
-      </div>
-      <div className="mc-pos-num">
-        <span className="mc-nota">{l.valorAtual !== null ? 'Valor atual' : 'Custo'}</span>
-        <span>{l.valorAtual !== null ? reais(l.valorAtual) : l.custoTotal !== null ? reais(l.custoTotal) : '—'}</span>
-      </div>
-      <div className="mc-pos-num">
-        <span className="mc-nota">Resultado</span>
-        {l.resultado !== null ? (
-          <span className={l.resultado >= 0 ? 'mc-pos' : 'mc-neg'}>
-            {reais(l.resultado)}
-            {l.resultadoPct !== null && <small> ({pct(l.resultadoPct)})</small>}
-          </span>
-        ) : (
-          <span>—</span>
+        {l.manual && <span className="mc-selo neutro">Digitado por você</span>}
+        {!l.manual && (
+          <button type="button" className="mc-link-linha" aria-label={`Ver lançamentos de ${l.ativo}`} onClick={() => onVerLancamentos(l.ativo)}>
+            Ver lançamentos ›
+          </button>
         )}
       </div>
-      {editando ? (
-        <EditorPreco linha={l} onSalvar={(p) => onDefinirPrecoMedio(l.ativo, p)} onFechar={() => setEditando(false)} />
-      ) : (
-        <div className="mc-pos-acoes">
-          <button type="button" className="btn btn-ghost mc-btn" aria-label={`Editar preço médio de ${l.ativo}`} onClick={() => setEditando(true)}>
-            Editar preço médio
-          </button>
-          <button type="button" className="btn btn-ghost mc-btn" aria-label={`Ver lançamentos de ${l.ativo}`} onClick={() => onVerLancamentos(l.ativo)}>
-            Ver lançamentos
-          </button>
+      <div className="mc-pos-numeros">
+        <div className="mc-pos-num">
+          <span className="mc-nota">Preço médio</span>
+          <span>{l.precoMedio !== null ? reais(l.precoMedio) : '—'}</span>
+          {l.origemPrecoMedio && l.origemPrecoMedio !== 'calculado' && !l.manual && <span className="mc-nota">{ORIGEM[l.origemPrecoMedio]}</span>}
         </div>
-      )}
+        <div className="mc-pos-num">
+          <span className="mc-nota">{l.valorAtual !== null ? 'Valor atual' : 'Custo'}</span>
+          <span>{l.valorAtual !== null ? reais(l.valorAtual) : l.custoTotal !== null ? reais(l.custoTotal) : '—'}</span>
+        </div>
+        <div className="mc-pos-num">
+          <span className="mc-nota">Resultado</span>
+          {l.resultado !== null ? (
+            <span className={l.resultado >= 0 ? 'mc-pos' : 'mc-neg'}>
+              {reais(l.resultado)}
+              {l.resultadoPct !== null && <small> ({pct(l.resultadoPct)})</small>}
+            </span>
+          ) : (
+            <span>—</span>
+          )}
+        </div>
+      </div>
     </li>
   )
 }
 
 /**
  * Posições agrupadas como na Área do Investidor da B3 ("Produtos da sua carteira"): um bloco por tipo de
- * ativo (Ações, Tesouro Direto, FIIs, BDRs, ETFs), com quantos ativos tem, a fatia da carteira e o valor.
- * Cada bloco abre para mostrar os ativos, onde dá para editar o preço médio.
+ * ativo, com quantos ativos tem, a fatia da carteira e o valor. Em cada ativo, o lápis abre o painel de
+ * edição (preço médio e classe; nos digitados à mão, tudo) e "Ver lançamentos" fica no fim da linha.
  */
 export function CartaoPosicoes({
   linhas,
-  onDefinirPrecoMedio,
+  dataPosicao,
+  onDataPosicao,
+  classeDe,
+  classes,
+  acoes,
   onVerLancamentos,
 }: {
   linhas: LinhaPosicao[]
-  onDefinirPrecoMedio: (ativo: string, preco: number | null) => void
+  /** Data da Posição da B3 (AAAA-MM-DD), quando há uma. */
+  dataPosicao: string | null
+  onDataPosicao: (d: string) => void
+  /** Classe em vigor de cada ativo (a escolhida ou a detectada). */
+  classeDe: (ativo: string) => ClasseCarteira | null
+  /** Classes que a pessoa escolheu. */
+  classes: Record<string, ClasseCarteira>
+  acoes: AcoesPainel
   onVerLancamentos: (ativo: string) => void
 }) {
   const idTitulo = useId()
-  if (!linhas.length) return null
+  const [editando, setEditando] = useState<{ ativo: string } | 'novo' | null>(null)
   const grupos = agruparPosicoes(linhas)
+  const semPreco = linhas.filter((l) => l.status === 'faltaSaldoAnterior').length
+  const linhaEditada = editando && editando !== 'novo' ? linhas.find((l) => l.ativo === editando.ativo) : undefined
 
   return (
     <section className="mc-card" aria-labelledby={idTitulo}>
-      <h2 id={idTitulo} className="mc-titulo">Posições</h2>
-      <div className="mc-rotulo">
-        {linhas.length} ativo(s) em {grupos.length} {grupos.length === 1 ? 'tipo' : 'tipos'}
+      <div className="mc-topo-linha">
+        <h2 id={idTitulo} className="mc-titulo">Posições</h2>
+        <button type="button" className="btn btn-secondary mc-btn" onClick={() => setEditando('novo')}>
+          Adicionar ativo
+        </button>
       </div>
+      {linhas.length > 0 && (
+        <div className="mc-rotulo">
+          {linhas.length} ativo(s) em {grupos.length} {grupos.length === 1 ? 'tipo' : 'tipos'}
+        </div>
+      )}
+      {dataPosicao && (
+        <div className="mc-form-linha">
+          <label htmlFor={`${idTitulo}-data`} className="mc-rotulo-campo">Posição da B3 de {dataCurta(dataPosicao)}</label>
+          <input
+            id={`${idTitulo}-data`}
+            type="date"
+            className="mc-campo mc-campo-data"
+            aria-label="Data da Posição"
+            value={dataPosicao}
+            onChange={(e) => e.target.value && onDataPosicao(e.target.value)}
+          />
+        </div>
+      )}
+      {semPreco > 0 && <div className="mc-nota">{semPreco} ativo(s) sem preço médio. Toque no lápis do ativo para informar.</div>}
+
+      {linhas.length === 0 && <p className="mc-texto">Nenhum ativo ainda. Importe os extratos da B3 ou adicione um ativo à mão.</p>}
+
       <div className="mc-grupos">
         {grupos.map((g) => (
           <details key={g.chave} className="mc-grupo" open={grupos.length === 1}>
@@ -153,12 +134,26 @@ export function CartaoPosicoes({
             </summary>
             <ul className="mc-posicoes">
               {g.linhas.map((l) => (
-                <LinhaDoAtivo key={l.ativo} l={l} onDefinirPrecoMedio={onDefinirPrecoMedio} onVerLancamentos={onVerLancamentos} />
+                <LinhaDoAtivo key={l.ativo} l={l} onEditar={() => setEditando({ ativo: l.ativo })} onVerLancamentos={onVerLancamentos} />
               ))}
             </ul>
           </details>
         ))}
       </div>
+
+      {editando === 'novo' && (
+        <PainelEdicaoAtivo classeAtual={null} classeEscolhida={undefined} acoes={acoes} onFechar={() => setEditando(null)} />
+      )}
+      {linhaEditada && (
+        <PainelEdicaoAtivo
+          key={linhaEditada.ativo}
+          linha={linhaEditada}
+          classeAtual={classeDe(linhaEditada.ativo)}
+          classeEscolhida={classes[linhaEditada.ativo]}
+          acoes={acoes}
+          onFechar={() => setEditando(null)}
+        />
+      )}
     </section>
   )
 }

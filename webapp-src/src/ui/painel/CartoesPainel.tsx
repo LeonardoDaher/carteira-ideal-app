@@ -1,7 +1,7 @@
 import { useId } from 'react'
-import { MESES_CURTOS, variacaoPct } from '../../domain/painelCarteira'
-import type { FatiaComposicao, Painel, PontoMensal, ProximosProventos } from '../../domain/painelCarteira'
-import { BarraComposicao, GraficoArea, GraficoBarras, corDaCategoria } from './Graficos'
+import { MESES_CURTOS } from '../../domain/painelCarteira'
+import type { FatiaComposicao, ItemProvento, Painel, PontoMensal, PontoProventos, ProximosProventos } from '../../domain/painelCarteira'
+import { BarraComposicao, GraficoArea, GraficoBarras, GraficoProventos, corDaCategoria } from './Graficos'
 import { dataCurta, pct, reais } from './formatar'
 
 function Delta({ valor, texto }: { valor: number; texto: string }) {
@@ -60,35 +60,89 @@ export function CartaoCarteira({ painel, serie }: { painel: Painel; serie: Ponto
   )
 }
 
-export function CartaoProventos({ serie, proximos }: { serie: PontoMensal[]; proximos: ProximosProventos | null }) {
+const ROTULO_SUBTIPO: Record<string, string> = {
+  dividendo: 'Dividendo', jcp: 'JCP', rendimento: 'Rendimento', amortizacao: 'Amortização', reembolso: 'Reembolso', juros: 'Juros',
+}
+const ROTULO_ORIGEM: Record<string, string> = {
+  manual: 'Digitado por você', 'b3-movimentacao': 'B3 Movimentação', 'b3-proventos': 'B3 Proventos', 'b3-negociacao': 'B3 Negociação', 'b3-nota': 'Nota de corretagem', arquivo: 'Planilha',
+}
+
+/**
+ * Proventos como na página Proventos da B3: o recebido este ano e nos últimos 12 meses, o gráfico mês a mês (15
+ * meses, com o valor sobre cada barra e o que ainda será pago) e, abaixo, o detalhe de cada mês, para a pessoa
+ * conferir número a número com a B3 e achar qualquer diferença.
+ */
+export function CartaoProventos({
+  pontos,
+  mesAtual,
+  resumo,
+  itensDoMes,
+  proximos,
+}: {
+  pontos: PontoProventos[]
+  mesAtual: string
+  resumo: { esteAno: number; ultimos12: number }
+  itensDoMes: (mes: string) => ItemProvento[]
+  proximos: ProximosProventos | null
+}) {
   const idTitulo = useId()
-  const total = serie.reduce((s, p) => s + p.valor, 0)
-  const n = serie.length
-  // O mês corrente ainda está em andamento: a comparação usa os dois meses fechados anteriores.
-  const fechado = serie[n - 2]
-  const anterior = serie[n - 3]
-  const delta = fechado && anterior ? variacaoPct(fechado.valor, anterior.valor) : null
-  const nomeMes = (m: PontoMensal) => MESES_CURTOS[Number(m.mes.slice(5, 7)) - 1]
+  const temAlgo = pontos.some((p) => p.recebido > 0 || p.aReceber > 0)
+  const comValor = [...pontos].filter((p) => p.recebido > 0 || p.aReceber > 0).reverse()
+  const nomeMes = (p: PontoProventos) => `${p.rotulo}/${p.mes.slice(2, 4)}`
 
   return (
     <section className="mc-card" aria-labelledby={idTitulo}>
       <h2 id={idTitulo} className="mc-titulo">Proventos</h2>
-      <div className="mc-rotulo">Recebido nos últimos 12 meses</div>
-      <div className="mc-valor">{reais(total)}</div>
-      {delta !== null && fechado && anterior && (
-        <div className="mc-linha-delta">
-          <Delta valor={delta} texto={pct(delta)} />
-          <span className="mc-nota">{nomeMes(fechado)} vs. {nomeMes(anterior)}</span>
+      <div className="mc-duplo">
+        <div>
+          <div className="mc-rotulo">Recebido este ano</div>
+          <div className="mc-valor">{reais(resumo.esteAno)}</div>
         </div>
-      )}
-      {total > 0 ? (
-        <GraficoBarras
-          pontos={serie}
-          destaques={2}
-          ariaLabel={`Proventos recebidos por mês nos últimos 12 meses, total de ${reais(total)}`}
-        />
+        <div>
+          <div className="mc-rotulo">Últimos 12 meses</div>
+          <div className="mc-valor">{reais(resumo.ultimos12)}</div>
+        </div>
+      </div>
+      {temAlgo ? (
+        <>
+          <GraficoProventos
+            pontos={pontos}
+            mesAtual={mesAtual}
+            ariaLabel={`Proventos por mês, de ${nomeMes(pontos[0])} a ${nomeMes(pontos[pontos.length - 1])}; recebido este ano ${reais(resumo.esteAno)}`}
+          />
+          <div className="mc-legenda-proventos">
+            <span><span className="mc-quadro recebido" aria-hidden="true" /> Recebido</span>
+            <span><span className="mc-quadro areceber" aria-hidden="true" /> A receber</span>
+          </div>
+          <details className="mc-detalhes">
+            <summary>Valores de cada mês</summary>
+            <ul className="mc-meses">
+              {comValor.map((p) => (
+                <li key={p.mes}>
+                  <details>
+                    <summary>
+                      <span>{nomeMes(p)}</span>
+                      <strong>{reais(p.recebido)}</strong>
+                      {p.aReceber > 0 && <span className="mc-nota">+ {reais(p.aReceber)} a receber</span>}
+                    </summary>
+                    <ul className="mc-itens-mes">
+                      {itensDoMes(p.mes).map((it, k) => (
+                        <li key={`${it.data}-${it.ativo}-${k}`}>
+                          <span>{dataCurta(it.data)}</span>
+                          <strong>{it.ativo}</strong>
+                          <span className="mc-nota">{it.subtipo ? ROTULO_SUBTIPO[it.subtipo] : 'Provento'}{it.previsto ? ' · a receber' : it.origem ? ` · ${ROTULO_ORIGEM[it.origem] ?? it.origem}` : ''}</span>
+                          <span className="mc-item-valor">{reais(it.valor)}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </details>
+                </li>
+              ))}
+            </ul>
+          </details>
+        </>
       ) : (
-        <div className="mc-vazio-mini">Ainda sem proventos. Envie o extrato de Movimentação.</div>
+        <div className="mc-vazio-mini">Ainda sem proventos. Envie o extrato de Movimentação ou o de Proventos recebidos.</div>
       )}
       {proximos && (
         <div className="mc-proximos">

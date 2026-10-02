@@ -1,10 +1,11 @@
 // Minha Carteira (D36): o que fica gravado no aparelho e como uma importação o altera. Tudo puro
 // (sem React nem localStorage): o hook só chama estas funções. Nada daqui vai para a API.
 import { ehClasseValida } from './classesDaCarteira'
+import { chaveDoAtivoManual, validarAtivoManual, type AtivoManual } from './ativosManuais'
 import type { ClasseCarteira } from './classificadorAtivo'
 import { ativoDoTexto } from './importacao/planilha'
 import type { EventoFuturo, ItemPosicaoB3, ResultadoImportacao } from './importacao/planilha'
-import { mesclarLancamentos, somarDiasUteis, validarLancamento, type Lancamento, type OrigemLancamento, type TipoLancamento } from './lancamentos'
+import { mesclarLancamentos, somarDiasUteis, validarLancamento, type Lancamento, type OrigemLancamento, type SubtipoProvento, type TipoLancamento } from './lancamentos'
 
 export const CHAVE_CARTEIRA = 'carteiraideal.carteira'
 export const VERSAO_CARTEIRA = 1
@@ -21,17 +22,20 @@ export interface CarteiraSalva {
   classes: Record<string, ClasseCarteira>
   /** Preço médio que a pessoa informou por ativo (vale mais que o calculado e que o valor aplicado da B3). */
   precosMedios: Record<string, number>
+  /** Ativos digitados à mão (posição, não compra). */
+  ativosManuais: AtivoManual[]
 }
 
-export const CARTEIRA_VAZIA: CarteiraSalva = { lancamentos: [], excluidas: [], posicao: null, dataPosicao: null, eventosFuturos: [], classes: {}, precosMedios: {} }
+export const CARTEIRA_VAZIA: CarteiraSalva = { lancamentos: [], excluidas: [], posicao: null, dataPosicao: null, eventosFuturos: [], classes: {}, precosMedios: {}, ativosManuais: [] }
 
 export function carteiraVazia(): CarteiraSalva {
-  return { lancamentos: [], excluidas: [], posicao: null, dataPosicao: null, eventosFuturos: [], classes: {}, precosMedios: {} }
+  return { lancamentos: [], excluidas: [], posicao: null, dataPosicao: null, eventosFuturos: [], classes: {}, precosMedios: {}, ativosManuais: [] }
 }
 
 const TIPOS = new Set<TipoLancamento>(['saldoInicial', 'compra', 'venda', 'bonificacao', 'ajusteQuantidade', 'provento'])
 const ORIGENS = new Set<OrigemLancamento>(['manual', 'b3-nota', 'b3-movimentacao', 'b3-negociacao', 'b3-proventos', 'arquivo'])
-const CATEGORIAS = new Set(['acoes', 'bdr', 'etf', 'fundos', 'tesouro', 'outra'])
+const SUBTIPOS = new Set(['dividendo', 'jcp', 'rendimento', 'amortizacao', 'reembolso', 'juros'])
+const CATEGORIAS = new Set(['acoes', 'bdr', 'etf', 'fundos', 'tesouro', 'rendaFixa', 'outra'])
 const num = (x: unknown): x is number => typeof x === 'number' && Number.isFinite(x)
 const txt = (x: unknown): x is string => typeof x === 'string' && x.trim() !== ''
 const ISO = /^\d{4}-\d{2}-\d{2}$/
@@ -53,7 +57,7 @@ function lancamentoValido(x: unknown): Lancamento | null {
     taxas: o.taxas,
     origem: o.origem as OrigemLancamento,
   }
-  if (o.subtipo === 'dividendo' || o.subtipo === 'jcp' || o.subtipo === 'rendimento') l.subtipo = o.subtipo
+  if (typeof o.subtipo === 'string' && SUBTIPOS.has(o.subtipo)) l.subtipo = o.subtipo as SubtipoProvento
   if (txt(o.instituicao)) l.instituicao = o.instituicao
   const { id: _id, ...sem } = l
   void _id
@@ -84,13 +88,32 @@ function eventoValido(x: unknown): EventoFuturo | null {
   const t = o.tipoEvento
   return {
     ativo: o.ativo,
-    tipoEvento: t === 'dividendo' || t === 'jcp' || t === 'rendimento' ? t : 'outro',
+    tipoEvento: typeof t === 'string' && SUBTIPOS.has(t) ? (t as SubtipoProvento) : 'outro',
     previsao: o.previsao,
     quantidade: o.quantidade,
     precoUnitario: o.precoUnitario,
     valorLiquido: o.valorLiquido,
     ...(txt(o.instituicao) ? { instituicao: o.instituicao } : {}),
   }
+}
+
+function lerAtivosManuais(x: unknown): AtivoManual[] {
+  if (!Array.isArray(x)) return []
+  const vistos = new Set<string>()
+  const saida: AtivoManual[] = []
+  for (const item of x) {
+    if (!item || typeof item !== 'object') continue
+    const o = item as Record<string, unknown>
+    if (!txt(o.nome) || !num(o.quantidade) || !num(o.precoMedio) || !ehClasseValida(o.classe)) continue
+    const valorAtual = num(o.valorAtual) ? o.valorAtual : null
+    const m = { nome: o.nome.trim(), quantidade: o.quantidade, precoMedio: o.precoMedio, valorAtual }
+    if (validarAtivoManual(m)) continue
+    const ativo = chaveDoAtivoManual(m.nome)
+    if (vistos.has(ativo)) continue
+    vistos.add(ativo)
+    saida.push({ ativo, ...m, classe: o.classe })
+  }
+  return saida
 }
 
 /** Preços médios gravados: só valores numéricos maiores que zero. */
@@ -173,6 +196,7 @@ export function lerCarteiraSalva(bruto: string | null): CarteiraSalva | null {
       eventosFuturos: lista(c.eventosFuturos, eventoValido),
       classes: lerClasses(c.classes),
       precosMedios: lerPrecos(c.precosMedios),
+      ativosManuais: lerAtivosManuais(c.ativosManuais),
     })
   } catch {
     return null

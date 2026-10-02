@@ -1,11 +1,14 @@
 import { useId, useMemo, useRef, useState } from 'react'
-import { capitalAplicadoPorMes, composicaoPorCategoria, montarPainel, proventosPorMes, proximosProventos } from '../domain/painelCarteira'
+import { CATALOGO_ATIVOS } from '../data/catalogoAtivos'
+import { classificarPosicoes } from '../domain/classesDaCarteira'
+import { classificarAtivo } from '../domain/classificadorAtivo'
+import type { ClasseCarteira } from '../domain/classificadorAtivo'
+import { capitalAplicadoPorMes, composicaoDasLinhas, montarPainel, proventosDoMes, proventosMensais, proximosProventos, resumoDeProventos } from '../domain/painelCarteira'
 import type { AppCtx } from '../state/useAppState'
 import { useCarteiraReal } from '../state/useCarteiraReal'
 import { AvisoEducacional } from '../ui/AvisoEducacional'
 import { CartaoComparacao } from '../ui/painel/CartaoComparacao'
 import { CartaoCarteira, CartaoComposicao, CartaoProventos, CartaoVazio } from '../ui/painel/CartoesPainel'
-import { CartaoConferencia } from '../ui/painel/CartaoConferencia'
 import { CartaoLancamentos } from '../ui/painel/CartaoLancamentos'
 import type { FiltroTipo } from '../ui/painel/CartaoLancamentos'
 import { CartaoPosicoes } from '../ui/painel/CartaoPosicoes'
@@ -52,14 +55,42 @@ export function MinhaCarteira({ ctx, hoje }: { ctx: AppCtx; hoje?: Date }) {
   const [filtroAtivo, setFiltroAtivo] = useState('')
   const [filtroTipo, setFiltroTipo] = useState<FiltroTipo>('todos')
 
-  const painel = useMemo(() => montarPainel(c.lancamentos, c.posicao, c.dataPosicao, c.precosMedios), [c.lancamentos, c.posicao, c.dataPosicao, c.precosMedios])
+  const painel = useMemo(
+    () => montarPainel(c.lancamentos, c.posicao, c.dataPosicao, c.precosMedios, c.ativosManuais),
+    [c.lancamentos, c.posicao, c.dataPosicao, c.precosMedios, c.ativosManuais],
+  )
+  // A classe de um ativo digitado à mão é a que a pessoa escolheu ao cadastrá-lo; vale mais que qualquer outra.
+  const classesEfetivas = useMemo(
+    () => ({ ...c.classes, ...Object.fromEntries(c.ativosManuais.map((m) => [m.ativo, m.classe])) }) as Record<string, ClasseCarteira>,
+    [c.classes, c.ativosManuais],
+  )
+  const classificados = useMemo(() => classificarPosicoes(painel.linhas, CATALOGO_ATIVOS, classesEfetivas), [painel.linhas, classesEfetivas])
+  const classeDe = (ativo: string): ClasseCarteira | null => classificados.find((x) => x.ativo === ativo)?.classe ?? null
+  /** Escolher a classe de um ativo: nos digitados à mão muda o próprio cadastro; nos da B3, guarda a escolha. */
+  function escolherClasse(ativo: string, classe: ClasseCarteira | null) {
+    const manual = c.ativosManuais.find((m) => m.ativo === ativo)
+    if (manual) {
+      if (classe) h.salvarAtivoManual({ nome: manual.nome, quantidade: manual.quantidade, precoMedio: manual.precoMedio, valorAtual: manual.valorAtual, classe }, ativo)
+    } else h.definirClasse(ativo, classe)
+  }
+  const acoesDoPainel = {
+    onPrecoMedio: h.definirPrecoMedio,
+    onClasse: escolherClasse,
+    onSalvarManual: h.salvarAtivoManual,
+    onRemoverManual: h.removerAtivoManual,
+    sugerirClasse: (nome: string): ClasseCarteira | null => {
+      const r = classificarAtivo(nome, CATALOGO_ATIVOS)
+      return r.classe && r.classe !== 'foraDaRegua' ? r.classe : null
+    },
+  }
   // Com a Posição, o gráfico mostra só o que a pessoa tem hoje; sem ela, todo o histórico.
   const atuais = useMemo(() => (painel.resumo.patrimonio !== null ? new Set(painel.ativosAtuais) : null), [painel])
   const serieCapital = useMemo(() => capitalAplicadoPorMes(c.lancamentos, mesAtual, 12, atuais), [c.lancamentos, mesAtual, atuais])
-  const serieProventos = useMemo(() => proventosPorMes(c.lancamentos, mesAtual, 12), [c.lancamentos, mesAtual])
-  const fatias = useMemo(() => composicaoPorCategoria(c.posicao), [c.posicao])
+  const pontosProventos = useMemo(() => proventosMensais(c.lancamentos, c.eventosFuturos, hojeISO), [c.lancamentos, c.eventosFuturos, hojeISO])
+  const resumoProventos = useMemo(() => resumoDeProventos(c.lancamentos, hojeISO), [c.lancamentos, hojeISO])
+  const fatias = useMemo(() => composicaoDasLinhas(painel.linhas), [painel.linhas])
   const proximos = useMemo(() => proximosProventos(c.eventosFuturos, hojeISO), [c.eventosFuturos, hojeISO])
-  const temDados = c.lancamentos.length > 0 || !!c.posicao
+  const temDados = c.lancamentos.length > 0 || !!c.posicao || c.ativosManuais.length > 0
 
   /** De um ativo (conferência ou posições) para a lista de lançamentos, já filtrada por ele e só com compras e vendas, que é o que forma o preço médio. */
   function verLancamentosDe(ativo: string) {
@@ -92,7 +123,13 @@ export function MinhaCarteira({ ctx, hoje }: { ctx: AppCtx; hoje?: Date }) {
       {h.hidratado && temDados && (
         <div className="mc-grade">
           <CartaoCarteira painel={painel} serie={serieCapital} />
-          <CartaoProventos serie={serieProventos} proximos={proximos} />
+          <CartaoProventos
+            pontos={pontosProventos}
+            mesAtual={mesAtual}
+            resumo={resumoProventos}
+            itensDoMes={(mes) => proventosDoMes(c.lancamentos, c.eventosFuturos, mes, hojeISO)}
+            proximos={proximos}
+          />
           <div className="mc-largo">
             <CartaoComparacao
               resultado={ctx.resultado}
@@ -101,16 +138,24 @@ export function MinhaCarteira({ ctx, hoje }: { ctx: AppCtx; hoje?: Date }) {
               onTentarNovamente={ctx.tentarCalcularNovamente}
               onResponderQuestionario={ctx.iniciarQuestionario}
               painel={painel}
-              classes={c.classes}
-              onEscolherClasse={h.definirClasse}
+              classes={classesEfetivas}
+              onEscolherClasse={escolherClasse}
             />
           </div>
           <CartaoComposicao fatias={fatias} />
-          <CartaoConferencia carteira={c} onAdicionar={h.adicionar} onDataPosicao={h.definirDataPosicao} onVerLancamentos={verLancamentosDe} />
-          <div className="mc-largo">
-            <CartaoPosicoes linhas={painel.linhas} onDefinirPrecoMedio={h.definirPrecoMedio} onVerLancamentos={verLancamentosDe} />
-          </div>
         </div>
+      )}
+
+      {h.hidratado && (
+        <CartaoPosicoes
+          linhas={painel.linhas}
+          dataPosicao={c.posicao ? c.dataPosicao : null}
+          onDataPosicao={h.definirDataPosicao}
+          classeDe={classeDe}
+          classes={classesEfetivas}
+          acoes={acoesDoPainel}
+          onVerLancamentos={verLancamentosDe}
+        />
       )}
 
       {h.hidratado && (

@@ -315,3 +315,49 @@ describe('ehTickerDeBolsa: dígitos no meio do código (B3SA3, BDRs, ETFs)', () 
     expect(r.cobertos).toBe(1)
   })
 })
+
+describe('o MESMO provento em dois extratos (Movimentação x Proventos recebidos), mesmo com data ou instituição diferentes', () => {
+  const prov = (o: Partial<LancamentoNovo>): LancamentoNovo => ({
+    data: '2026-08-14', tipo: 'provento', subtipo: 'rendimento', ativo: 'MXRF11', quantidade: 250, preco: 0.1, valor: 25, taxas: 0, instituicao: 'XP INVESTIMENTOS', origem: 'b3-movimentacao', ...o,
+  })
+  const mov = (o: Partial<LancamentoNovo> = {}) => prov({ origem: 'b3-movimentacao', ...o })
+  const rec = (o: Partial<LancamentoNovo> = {}) => prov({ origem: 'b3-proventos', ...o })
+  const ativos = (r: { lancamentos: { origem: string; data: string }[] }) => r.lancamentos.map((l) => `${l.origem}@${l.data}`)
+
+  it('um dia de diferença na data e outra instituição: é um pagamento só, e fica o dos Proventos recebidos', () => {
+    const r = mesclarLancamentos([], [mov({ data: '2026-08-15' }), rec({ data: '2026-08-14', instituicao: 'CLEAR CORRETORA', quantidade: 250.0001 })])
+    expect(ativos(r)).toEqual(['b3-proventos@2026-08-14'])
+  })
+  it('vale em qualquer ordem de importação', () => {
+    const a = mesclarLancamentos(mesclarLancamentos([], [mov({ data: '2026-08-15' })]).lancamentos, [rec()])
+    const b = mesclarLancamentos(mesclarLancamentos([], [rec()]).lancamentos, [mov({ data: '2026-08-15' })])
+    expect(ativos(a)).toEqual(['b3-proventos@2026-08-14'])
+    expect(ativos(b)).toEqual(['b3-proventos@2026-08-14'])
+    expect(a.substituidos).toBe(1) // o da Movimentação já estava guardado e foi substituído
+    expect(b.cobertos).toBe(1) // o da Movimentação nem chegou a entrar
+  })
+  it('com mais de 4 dias de diferença, são pagamentos diferentes e ficam os dois', () => {
+    const r = mesclarLancamentos([], [mov({ data: '2026-08-20' }), rec({ data: '2026-08-14' })])
+    expect(r.lancamentos).toHaveLength(2)
+  })
+  it('valores diferentes, ou ativos diferentes: ficam os dois', () => {
+    expect(mesclarLancamentos([], [mov({ valor: 25.5 }), rec()]).lancamentos).toHaveLength(2)
+    expect(mesclarLancamentos([], [mov({ ativo: 'HGLG11' }), rec()]).lancamentos).toHaveLength(2)
+  })
+  it('só na Movimentação (sem Proventos recebidos): ela fica, é a única fonte', () => {
+    expect(mesclarLancamentos([], [mov(), mov({ data: '2026-09-14' })]).lancamentos).toHaveLength(2)
+  })
+  it('dois pagamentos iguais da MESMA fonte nunca são fundidos (legítimos: dois lotes, duas contas)', () => {
+    expect(mesclarLancamentos([], [rec(), rec({ data: '2026-08-16' })]).lancamentos).toHaveLength(2)
+    expect(mesclarLancamentos([], [mov(), mov({ data: '2026-08-16' })]).lancamentos).toHaveLength(2)
+  })
+  it('não mexe em compras e vendas', () => {
+    const c = (o: Partial<LancamentoNovo>): LancamentoNovo => ({ data: '2026-08-14', tipo: 'compra', ativo: 'VALE3', quantidade: 10, preco: 5, valor: 50, taxas: 0, origem: 'b3-movimentacao', ...o })
+    expect(mesclarLancamentos([], [c({}), c({ origem: 'b3-proventos' })]).lancamentos).toHaveLength(2)
+  })
+  it('reimportar os mesmos arquivos não muda nada (idempotente)', () => {
+    const uma = mesclarLancamentos([], [mov({ data: '2026-08-15' }), rec()])
+    const duas = mesclarLancamentos(uma.lancamentos, [mov({ data: '2026-08-15' }), rec()])
+    expect(duas.lancamentos).toEqual(uma.lancamentos)
+  })
+})

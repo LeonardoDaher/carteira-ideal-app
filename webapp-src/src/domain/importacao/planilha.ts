@@ -33,7 +33,7 @@ export type PerfilArquivo =
   | 'b3-calendario'
   | 'generico'
 
-export type CategoriaPosicao = 'acoes' | 'bdr' | 'etf' | 'fundos' | 'tesouro' | 'outra'
+export type CategoriaPosicao = 'acoes' | 'bdr' | 'etf' | 'fundos' | 'tesouro' | 'rendaFixa' | 'outra'
 
 /** Uma linha da Posição da B3: foto do que a pessoa tem, sem custo (exceto Tesouro). */
 export interface ItemPosicaoB3 {
@@ -283,6 +283,10 @@ const PROVENTOS_B3: [RegExp, SubtipoProvento][] = [
   [/JUROS SOBRE CAPITAL|^JCP/, 'jcp'],
   [/DIVIDENDO/, 'dividendo'],
   [/RENDIMENTO/, 'rendimento'],
+  // A página Proventos da B3 também conta amortizações, reembolsos de empréstimo de ativos e juros (Tesouro e renda fixa).
+  [/AMORTIZACAO/, 'amortizacao'],
+  [/REEMBOLSO/, 'reembolso'],
+  [/^JUROS( |$)/, 'juros'],
 ]
 
 function linhaB3Movimentacao(ctx: Contexto, linha: Celula[], mapa: Mapa, n: number) {
@@ -380,7 +384,7 @@ function linhaProventoRecebido(ctx: Contexto, linha: Celula[], mapa: Mapa, n: nu
   const textoEvento = lerTexto(celula(linha, mapa, 'tipoEvento'))
   const subtipo = subtipoDoEvento(textoEvento)
   if (!subtipo) {
-    ignorar(ctx, `Evento "${textoEvento}" (não é dividendo, JCP nem rendimento)`)
+    ignorar(ctx, `Evento "${textoEvento}" (não é um provento)`)
     return
   }
   const valor = lerNumero(celula(linha, mapa, 'valorLiquido'))

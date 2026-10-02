@@ -1826,3 +1826,45 @@ select option:disabled { color: #6b7280 !important; -webkit-text-fill-color: #6b
 .mc-chip { padding: 8px 14px; border-radius: 99px; border: 1px solid var(--mc-campo-borda); background: transparent; color: var(--text); font: inherit; font-size: 13px; cursor: pointer; }
 .mc-chip[aria-pressed='true'] { background: var(--mc-ouro); border-color: var(--mc-ouro); color: #1a1400; font-weight: 700; }
 .mc-chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Minha Carteira: linha de posição com o lápis na frente e "Ver lançamentos" no fim da linha; painel de
+   edição do ativo numa janela por cima da tela (sobe de baixo no celular, centralizada no computador). */
+:root { --mc-modal-fundo: #12151c; }
+:root[data-theme='light'] { --mc-modal-fundo: #ffffff; }
+.mc-posicao { display: flex; flex-direction: column; gap: 8px; }
+.mc-pos-topo { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.mc-pos-numeros { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 12px; }
+.mc-lapis { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--mc-campo-borda); background: transparent; color: var(--text); cursor: pointer; }
+.mc-lapis:hover { background: var(--mc-ouro-fundo); border-color: var(--mc-ouro); }
+.mc-link-linha { margin-left: auto; background: none; border: 0; color: var(--mc-ouro); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; padding: 6px 4px; white-space: nowrap; }
+.mc-lapis:focus-visible, .mc-link-linha:focus-visible, .mc-fechar:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.mc-modal-fundo { position: fixed; inset: 0; z-index: 60; background: rgba(0, 0, 0, 0.6); display: flex; align-items: flex-end; justify-content: center; overflow-y: auto; }
+.mc-modal { width: 100%; max-width: 560px; max-height: 92vh; overflow-y: auto; background: var(--mc-modal-fundo); border: 1px solid var(--mc-card-borda); border-radius: 18px 18px 0 0; padding: 18px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.4); }
+.mc-fechar { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border: 0; border-radius: 50%; background: transparent; color: var(--text); cursor: pointer; }
+.mc-ocupa-linha { grid-column: 1 / -1; }
+@media (min-width: 700px) {
+  .mc-modal-fundo { align-items: center; padding: 24px; }
+  .mc-modal { border-radius: 18px; }
+}
+
+/* Minha Carteira: proventos como na página Proventos da B3 (valor sobre cada barra, 15 meses, a receber tracejado). */
+.mc-duplo { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.mc-pb { display: flex; align-items: flex-end; gap: 4px; overflow-x: auto; padding-top: 4px; }
+.mc-pb-col { flex: 1 0 28px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.mc-pb-barra { width: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; }
+.mc-pb-valor { font-size: 13px; writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin-bottom: 4px; font-variant-numeric: tabular-nums; }
+.mc-pb-recebido { display: block; width: 100%; max-width: 26px; border-radius: 3px 3px 0 0; background: var(--mc-barra); }
+.mc-pb-areceber { display: block; width: 100%; max-width: 26px; box-sizing: border-box; border: 1px dashed var(--mc-ouro); border-bottom: 0; border-radius: 3px 3px 0 0; }
+.mc-pb-col.destaque .mc-pb-recebido { background: linear-gradient(to bottom, var(--mc-ouro), var(--mc-ouro-fundo)); }
+.mc-pb-mes { font-size: 13px; color: var(--mc-suave); }
+.mc-pb-col.destaque .mc-pb-mes { color: var(--text); font-weight: 700; }
+.mc-legenda-proventos { display: flex; gap: 16px; font-size: 13px; color: var(--mc-suave); }
+.mc-quadro { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 4px; }
+.mc-quadro.recebido { background: var(--mc-barra); }
+.mc-quadro.areceber { border: 1px dashed var(--mc-ouro); }
+.mc-meses, .mc-itens-mes { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.mc-meses > li > details > summary { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; cursor: pointer; padding: 6px 0; }
+.mc-meses > li > details > summary > :first-child { min-width: 52px; }
+.mc-itens-mes { padding: 0 0 6px 8px; }
+.mc-itens-mes li { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; font-size: 13px; }
+.mc-item-valor { margin-left: auto; font-variant-numeric: tabular-nums; }

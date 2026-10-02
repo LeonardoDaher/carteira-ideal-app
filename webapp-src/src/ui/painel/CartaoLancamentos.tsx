@@ -19,10 +19,17 @@ const ROTULO_ORIGEM: Record<OrigemLancamento, string> = {
   'b3-proventos': 'B3 Proventos',
   arquivo: 'Planilha',
 }
-const ROTULO_SUBTIPO: Record<SubtipoProvento, string> = { dividendo: 'Dividendo', jcp: 'JCP', rendimento: 'Rendimento' }
+const ROTULO_SUBTIPO: Record<SubtipoProvento, string> = { dividendo: 'Dividendo', jcp: 'JCP', amortizacao: 'Amortização', reembolso: 'Reembolso', juros: 'Juros', rendimento: 'Rendimento' }
 
-export type FiltroTipo = 'todos' | 'negocios' | 'proventos'
-const ROTULO_FILTRO: Record<FiltroTipo, string> = { todos: 'Todos', negocios: 'Compras e vendas', proventos: 'Proventos' }
+export type FiltroTipo = 'todos' | 'negocios' | 'proventos' | 'manuais'
+const ROTULO_FILTRO: Record<FiltroTipo, string> = { todos: 'Todos', negocios: 'Compras e vendas', proventos: 'Proventos', manuais: 'Digitados por mim' }
+
+/** Que lançamentos cada filtro deixa passar. "Digitados por mim" são os que a pessoa lançou à mão (origem manual). */
+function passaNoTipo(l: Lancamento, tipo: FiltroTipo): boolean {
+  if (tipo === 'todos') return true
+  if (tipo === 'manuais') return l.origem === 'manual'
+  return (tipo === 'proventos') === (l.tipo === 'provento')
+}
 
 interface Campos {
   tipo: TipoLancamento
@@ -201,7 +208,7 @@ export function CartaoLancamentos({
   const termo = filtro.trim().toUpperCase()
   const filtrando = !!termo || filtroTipo !== 'todos'
   const filtrados = lancamentos.filter(
-    (l) => (!termo || l.ativo.includes(termo)) && (filtroTipo === 'todos' || (filtroTipo === 'proventos') === (l.tipo === 'provento')),
+    (l) => (!termo || l.ativo.includes(termo)) && passaNoTipo(l, filtroTipo),
   )
   const recentes = [...filtrados].sort((a, b) => b.data.localeCompare(a.data))
   const visiveis = todos ? recentes : recentes.slice(0, 15)
@@ -240,7 +247,7 @@ export function CartaoLancamentos({
         )}
       </div>
       <div className="mc-chips" role="group" aria-label="Tipo de lançamento">
-        {(['todos', 'negocios', 'proventos'] as FiltroTipo[]).map((t) => (
+        {(['todos', 'negocios', 'proventos', 'manuais'] as FiltroTipo[]).map((t) => (
           <button key={t} type="button" className="mc-chip" aria-pressed={filtroTipo === t} onClick={() => onFiltroTipo(t)}>
             {ROTULO_FILTRO[t]}
           </button>

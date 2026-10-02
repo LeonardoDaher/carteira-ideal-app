@@ -173,22 +173,28 @@ describe('perfil B3 Proventos Recebidos', () => {
     ['', '', '', '', '', 'Total', ''],
     ['', '', '', '', '', '', 517.2],
   ])
-  it('lê só proventos, com a data de pagamento e o valor líquido', () => {
+  it('lê os proventos como a B3 os conta (dividendo, JCP, rendimento e amortização), com a data de pagamento e o valor líquido', () => {
     expect(x.perfil).toBe('b3-proventos-recebidos')
     expect(x.erros).toEqual([])
     expect(x.lancamentos.map((l) => `${l.data}:${l.ativo}:${l.subtipo}:${l.valor}`)).toEqual([
       '2026-09-25:MXRF11:rendimento:25',
       '2026-09-19:BBAS3:jcp:45.55',
       '2026-09-15:BBSE3:dividendo:396.65',
+      '2026-09-10:XPTO11:amortizacao:50',
     ])
     expect(x.lancamentos.every((l) => l.origem === 'b3-proventos')).toBe(true)
   })
   it('quantidade "1.600" em texto é 1600 (o valor pago confirma), não 1,6', () => {
     expect(x.lancamentos[1].quantidade).toBe(1600)
   })
-  it('amortização não é provento: ignorada com aviso; linhas de Total não geram erro', () => {
-    expect(x.avisos.some((a) => a.includes('Amortização'))).toBe(true)
+  it('linhas de Total e em branco não geram erro nem lançamento', () => {
     expect(x.erros).toEqual([])
+    expect(x.lancamentos).toHaveLength(4)
+  })
+  it('um evento que não é provento (ex.: bonificação em ações) continua ignorado com aviso', () => {
+    const y = importarMatriz([cab, ['XPTO11 - FUNDO QUALQUER', '10/09/2026', 'Bonificação em Ativos', 'CORRETORA X', '10', 5, 50]])
+    expect(y.lancamentos).toEqual([])
+    expect(y.avisos.some((a) => a.includes('Bonificação'))).toBe(true)
   })
 })
 
@@ -278,5 +284,31 @@ describe('Movimentação com produto de código com dígito no meio', () => {
       ['Credito', '10/09/2026', 'Rendimento', 'A1MD34 - ADVANCED MICRO DEVICES', 'XP', 10, 0.2, 2],
     ])
     expect(x.lancamentos.map((l) => l.ativo)).toEqual(['B3SA3', 'A1MD34'])
+  })
+})
+
+describe('os tipos de provento que a B3 conta: amortização, reembolso e juros', () => {
+  const mov = (tipo: string) =>
+    importarMatriz([
+      ['Entrada/Saída', 'Data', 'Movimentação', 'Produto', 'Instituição', 'Quantidade', 'Preço unitário', 'Valor da Operação'],
+      ['Credito', '10/09/2026', tipo, 'XPTO11 - FUNDO QUALQUER', 'CORRETORA X', 10, 5, 50],
+    ])
+  it.each([
+    ['Amortização', 'amortizacao'],
+    ['Reembolso', 'reembolso'],
+    ['Juros', 'juros'],
+    ['Rendimento', 'rendimento'],
+    ['Dividendo', 'dividendo'],
+    ['Juros Sobre Capital Próprio', 'jcp'],
+  ])('Movimentação "%s" vira provento do tipo %s', (tipo, subtipo) => {
+    const x = mov(tipo)
+    expect(x.lancamentos).toHaveLength(1)
+    expect(x.lancamentos[0]).toMatchObject({ tipo: 'provento', subtipo, valor: 50 })
+  })
+  it('"Juros Sobre Capital Próprio" continua sendo JCP (não vira "juros")', () => {
+    expect(mov('Juros Sobre Capital Próprio').lancamentos[0].subtipo).toBe('jcp')
+  })
+  it('o que não é provento segue ignorado: cessão de direitos, direito de subscrição, atualização', () => {
+    for (const t of ['Cessão de Direitos', 'Direito de Subscrição', 'Atualização']) expect(mov(t).lancamentos).toEqual([])
   })
 })

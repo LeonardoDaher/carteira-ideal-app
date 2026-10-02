@@ -1,6 +1,6 @@
 import { useId } from 'react'
 import { geometriaArea, geometriaBarras } from '../../domain/graficosSvg'
-import type { PontoMensal } from '../../domain/painelCarteira'
+import type { PontoMensal, PontoProventos } from '../../domain/painelCarteira'
 import { reais } from './formatar'
 
 // Gráficos do painel em SVG próprio (o app não usa biblioteca de gráficos). O desenho segue a
@@ -76,12 +76,43 @@ export function GraficoBarras({ pontos, ariaLabel, altura = 110, destaques = 2, 
   )
 }
 
+/** Valor curto para escrever sobre a barra: "R$ 522,70", "R$ 1,1 mil". */
+const compacto = (n: number) => (n >= 1000 ? `R$ ${(n / 1000).toFixed(1).replace('.', ',')} mil` : reais(n))
+
+/**
+ * Proventos mês a mês como na página Proventos da B3: o valor escrito sobre cada barra, o mês atual em destaque
+ * e o que ainda será pago (a receber) numa barra tracejada. Os valores vão na vertical, para caberem 15 meses
+ * lado a lado até no celular; a lista "Valores de cada mês", abaixo do gráfico, traz os mesmos números por extenso.
+ */
+export function GraficoProventos({ pontos, mesAtual, ariaLabel, altura = 100 }: { pontos: PontoProventos[]; mesAtual: string; ariaLabel: string; altura?: number }) {
+  const maximo = Math.max(0, ...pontos.map((p) => p.recebido + p.aReceber))
+  const h = (v: number) => (maximo > 0 ? (v / maximo) * altura : 0)
+  return (
+    <div className="mc-pb" role="img" aria-label={ariaLabel}>
+      {pontos.map((p) => {
+        const total = p.recebido + p.aReceber
+        return (
+          <div key={p.mes} className={`mc-pb-col${p.mes === mesAtual ? ' destaque' : ''}`} title={`${p.rotulo}/${p.mes.slice(2, 4)}: ${reais(p.recebido)} recebidos${p.aReceber > 0 ? ` e ${reais(p.aReceber)} a receber` : ''}`}>
+            <div className="mc-pb-barra" style={{ height: altura + 62 }}>
+              {total > 0 && <span className="mc-pb-valor">{compacto(total)}</span>}
+              {p.aReceber > 0 && <span className="mc-pb-areceber" style={{ height: Math.max(3, h(p.aReceber)) }} />}
+              {p.recebido > 0 && <span className="mc-pb-recebido" style={{ height: Math.max(3, h(p.recebido)) }} />}
+            </div>
+            <span className="mc-pb-mes">{p.rotulo}</span>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 const COR_CATEGORIA: Record<string, string> = {
   acoes: 'var(--asset-acoes)',
   fundos: 'var(--asset-fiis)',
   bdr: 'var(--asset-bdrs)',
   etf: 'var(--asset-fundosinternacionais)',
   tesouro: 'var(--asset-tesouro)',
+  rendaFixa: 'var(--asset-cdb)',
   outra: 'var(--text-muted)',
 }
 

@@ -3,6 +3,8 @@ import { storage } from '../data/storage'
 import { CHAVE_CARTEIRA, aplicarImportacao, carteiraVazia, lerCarteiraSalva, serializarCarteira } from '../domain/carteiraSalva'
 import type { ArquivoImportado, CarteiraSalva, ResumoArquivo } from '../domain/carteiraSalva'
 import { adicionarLancamento, corrigirLancamento, excluirLancamento } from '../domain/lancamentos'
+import { chaveDoAtivoManual, validarAtivoManual } from '../domain/ativosManuais'
+import type { AtivoManual } from '../domain/ativosManuais'
 import type { ClasseCarteira } from '../domain/classificadorAtivo'
 import type { LancamentoNovo, ProblemaLancamento } from '../domain/lancamentos'
 
@@ -97,6 +99,29 @@ export function useCarteiraReal(hoje: string) {
     [aplicar],
   )
 
+  /**
+   * Guarda (ou atualiza) um ativo digitado à mão. Devolve a mensagem do que está errado, ou null se salvou.
+   * `ativoAntigo` é a chave de antes, quando a pessoa está editando; um nome que já existe em OUTRO ativo é recusado.
+   */
+  const salvarAtivoManual = useCallback(
+    (dados: Omit<AtivoManual, 'ativo'>, ativoAntigo?: string): string | null => {
+      const problema = validarAtivoManual(dados)
+      if (problema) return problema
+      const ativo = chaveDoAtivoManual(dados.nome)
+      const outros = ref.current.ativosManuais.filter((m) => m.ativo !== ativoAntigo)
+      if (outros.some((m) => m.ativo === ativo)) return 'Você já tem um ativo com este nome.'
+      const novo: AtivoManual = { ativo, ...dados, nome: dados.nome.trim() }
+      aplicar({ ...ref.current, ativosManuais: [...outros, novo] })
+      return null
+    },
+    [aplicar],
+  )
+
+  const removerAtivoManual = useCallback(
+    (ativo: string) => aplicar({ ...ref.current, ativosManuais: ref.current.ativosManuais.filter((m) => m.ativo !== ativo) }),
+    [aplicar],
+  )
+
   const definirDataPosicao = useCallback((dataPosicao: string) => aplicar({ ...ref.current, dataPosicao }), [aplicar])
   const limpar = useCallback(() => aplicar(carteiraVazia()), [aplicar])
   const exportarBackup = useCallback(() => serializarCarteira(ref.current), [])
@@ -112,7 +137,7 @@ export function useCarteiraReal(hoje: string) {
     [aplicar],
   )
 
-  return { carteira, hidratado, importarArquivos, adicionar, corrigir, excluir, definirClasse, definirPrecoMedio, definirDataPosicao, limpar, exportarBackup, restaurarBackup }
+  return { carteira, hidratado, importarArquivos, adicionar, corrigir, excluir, definirClasse, definirPrecoMedio, salvarAtivoManual, removerAtivoManual, definirDataPosicao, limpar, exportarBackup, restaurarBackup }
 }
 
 export type CarteiraReal = ReturnType<typeof useCarteiraReal>

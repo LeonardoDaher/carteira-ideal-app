@@ -13,7 +13,7 @@ export type TipoLancamento =
   | 'ajusteQuantidade' // desdobramento/grupamento: muda a quantidade (com sinal), custo total fica igual
   | 'provento'
 
-export type SubtipoProvento = 'dividendo' | 'jcp' | 'rendimento'
+export type SubtipoProvento = 'dividendo' | 'jcp' | 'rendimento' | 'amortizacao' | 'reembolso' | 'juros'
 
 export type OrigemLancamento = 'manual' | 'b3-nota' | 'b3-movimentacao' | 'b3-negociacao' | 'b3-proventos' | 'arquivo'
 
@@ -134,6 +134,31 @@ function coberto(l: Conciliavel, janela: { ini: string; fim: string } | null, no
   return !!janela && negocio >= janela.ini && negocio <= janela.fim
 }
 
+/**
+ * O MESMO provento vindo de dois extratos: a Movimentação traz a data do CRÉDITO e os Proventos Recebidos, a do
+ * PAGAMENTO, e as duas podem divergir em um dia (fim de semana, feriado); a instituição e a quantidade também
+ * podem ser escritas de outro jeito. Se vierem pagamentos do mesmo ativo, com o mesmo valor, em até 4 dias,
+ * de fontes diferentes, é um pagamento só. Fica o dos Proventos Recebidos, que é o que a B3 usa na página de
+ * Proventos; o da Movimentação é descartado. Dois pagamentos iguais da MESMA fonte nunca são fundidos.
+ */
+const JANELA_PROVENTO_DIAS = 4
+const diasEntre = (a: string, b: string) => Math.abs(Date.parse(`${a}T00:00:00Z`) - Date.parse(`${b}T00:00:00Z`)) / 86_400_000
+
+function indiceDeProventosRecebidos(ls: Conciliavel[] & { valor?: number }[]): Map<string, string[]> {
+  const idx = new Map<string, string[]>()
+  for (const l of ls as (Conciliavel & { valor: number })[]) {
+    if (l.tipo !== 'provento' || l.origem !== 'b3-proventos') continue
+    const k = `${l.ativo}|${l.valor.toFixed(2)}`
+    idx.set(k, [...(idx.get(k) ?? []), l.data])
+  }
+  return idx
+}
+
+function proventoDuplicadoEntreFontes(l: Conciliavel & { valor: number }, idx: Map<string, string[]>): boolean {
+  if (l.tipo !== 'provento' || l.origem !== 'b3-movimentacao') return false
+  return (idx.get(`${l.ativo}|${l.valor.toFixed(2)}`) ?? []).some((d) => diasEntre(d, l.data) <= JANELA_PROVENTO_DIAS)
+}
+
 function janelaNegociacao(ls: { data: string; tipo: TipoLancamento; origem: OrigemLancamento }[]): { ini: string; fim: string } | null {
   const datas = ls.filter((l) => l.origem === 'b3-negociacao' && (l.tipo === 'compra' || l.tipo === 'venda')).map((l) => l.data).sort()
   return datas.length ? { ini: datas[0], fim: datas[datas.length - 1] } : null
@@ -182,10 +207,11 @@ export function mesclarLancamentos(
   const todos = [...existentes, ...candidatos]
   const janela = janelaNegociacao(todos)
   const notas = datasDeNota(todos)
+  const proventosRecebidos = indiceDeProventosRecebidos(todos)
   let substituidos = 0
   let cobertos = 0
   const finais = todos.filter((l) => {
-    if (!coberto(l, janela, notas)) return true
+    if (!coberto(l, janela, notas) && !proventoDuplicadoEntreFontes(l, proventosRecebidos)) return true
     if (idsNovos.has(l.id)) cobertos++
     else substituidos++
     return false

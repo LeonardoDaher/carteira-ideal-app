@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { EventoFuturo, ItemPosicaoB3 } from './importacao/planilha'
 import { mesclarLancamentos, type LancamentoNovo } from './lancamentos'
-import { agruparPosicoes, capitalAplicadoPorMes, composicaoPorCategoria, mesesAte, montarPainel, proventosPorMes, proximosProventos, variacaoPct } from './painelCarteira'
+import { agruparPosicoes, capitalAplicadoPorMes, proventosDoMes, proventosMensais, resumoDeProventos, composicaoPorCategoria, mesesAte, montarPainel, proventosPorMes, proximosProventos, variacaoPct } from './painelCarteira'
 
 const L = (o: Partial<LancamentoNovo>): LancamentoNovo => ({
   data: '2026-03-02', tipo: 'compra', ativo: 'VALE3', quantidade: 100, preco: 10, valor: 1000, taxas: 0, origem: 'b3-negociacao', ...o,
@@ -239,5 +239,52 @@ describe('proximosProventos', () => {
   it('nada futuro ou sem eventos: null', () => {
     expect(proximosProventos([ev('A', '2026-09-20', 5)], '2026-10-01')).toBeNull()
     expect(proximosProventos(null, '2026-10-01')).toBeNull()
+  })
+})
+
+describe('proventos como na B3: proventosMensais, resumoDeProventos, proventosDoMes', () => {
+  const HOJE = '2026-10-01'
+  const prov = (data: string, ativo: string, valor: number) => L({ tipo: 'provento', data, ativo, valor, quantidade: 100, preco: 0, subtipo: 'rendimento' })
+  const lancs = (...ls: LancamentoNovo[]) => mesclarLancamentos([], ls).lancamentos
+  const evento = (ativo: string, previsao: string, valorLiquido: number): EventoFuturo => ({ ativo, tipoEvento: 'jcp', previsao, quantidade: 100, precoUnitario: 0.1, valorLiquido })
+
+  it('15 meses: 12 antes, o atual e 2 depois, atravessando o ano', () => {
+    const p = proventosMensais([], null, HOJE)
+    expect(p).toHaveLength(15)
+    expect(p[0].mes).toBe('2025-10')
+    expect(p[12].mes).toBe('2026-10')
+    expect(p[14].mes).toBe('2026-12')
+  })
+  it('soma o recebido por mês, em centavos', () => {
+    const p = proventosMensais(lancs(prov('2026-08-14', 'A', 25.005), prov('2026-08-20', 'B', 0.1), prov('2026-09-01', 'C', 10)), null, HOJE)
+    expect(p.find((x) => x.mes === '2026-08')!.recebido).toBe(25.11) // 25,005 + 0,1 arredondado a centavos
+    expect(p.find((x) => x.mes === '2026-09')!.recebido).toBe(10)
+  })
+  it('o a receber só conta de hoje em diante e dentro da janela', () => {
+    const p = proventosMensais([], [evento('A', '2026-10-15', 50), evento('B', '2026-09-20', 99), evento('C', '2027-03-01', 77), evento('D', '2026-11-03', 10)], HOJE)
+    expect(p.find((x) => x.mes === '2026-10')!.aReceber).toBe(50)
+    expect(p.find((x) => x.mes === '2026-09')!.aReceber).toBe(0) // já passou: não é "a receber"
+    expect(p.find((x) => x.mes === '2026-11')!.aReceber).toBe(10)
+    expect(p.reduce((s, x) => s + x.aReceber, 0)).toBe(60) // o de 2027 está fora dos 15 meses
+  })
+  it('evento a receber que já foi pago (virou lançamento do mesmo ativo e valor, em até 4 dias) não conta duas vezes', () => {
+    const p = proventosMensais(lancs(prov('2026-10-02', 'BBDC3', 2.84)), [evento('BBDC3', '2026-10-01', 2.84), evento('BBDC3', '2026-10-20', 2.84)], HOJE)
+    const out = p.find((x) => x.mes === '2026-10')!
+    expect(out.recebido).toBe(2.84)
+    expect(out.aReceber).toBe(2.84) // só o de 20/10 (o de 01/10 é o mesmo pagamento já recebido)
+  })
+  it('resumo: este ano e últimos 12 meses (a data de 12 meses atrás é exclusiva; o futuro não conta)', () => {
+    const r = resumoDeProventos(lancs(prov('2026-03-10', 'A', 100), prov('2026-09-15', 'A', 50), prov('2025-10-01', 'A', 1000), prov('2025-10-02', 'A', 30), prov('2025-06-01', 'A', 999), prov('2026-11-01', 'A', 500)), HOJE)
+    expect(r.esteAno).toBe(150)
+    expect(r.ultimos12).toBe(180) // 100 + 50 + 30
+  })
+  it('detalhe de um mês: do mais recente ao mais antigo, com o "a receber" marcado e sem repetir o que já foi pago', () => {
+    const itens = proventosDoMes(lancs(prov('2026-10-02', 'BBDC3', 2.84), prov('2026-10-10', 'MXRF11', 25)), [evento('BBDC3', '2026-10-01', 2.84), evento('PETR4', '2026-10-25', 80)], '2026-10', HOJE)
+    expect(itens.map((i) => [i.data, i.ativo, i.previsto])).toEqual([['2026-10-25', 'PETR4', true], ['2026-10-10', 'MXRF11', false], ['2026-10-02', 'BBDC3', false]])
+  })
+  it('o detalhe do mês bate com o total do mês no gráfico', () => {
+    const ls = lancs(prov('2026-08-14', 'A', 25), prov('2026-08-20', 'B', 788.99), prov('2026-09-01', 'C', 10))
+    const mes = proventosMensais(ls, null, HOJE).find((x) => x.mes === '2026-08')!
+    expect(proventosDoMes(ls, null, '2026-08', HOJE).reduce((s, i) => s + i.valor, 0)).toBeCloseTo(mes.recebido, 8)
   })
 })
