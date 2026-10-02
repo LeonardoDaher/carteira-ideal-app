@@ -68,7 +68,7 @@ const TELAS_PELA_URL: Record<string, Screen> = {
   simuleBdr: 'simuleBdr',
   // Simule ETF (D23): dados oficiais da B3, no molde do Simule BDR.
   simuleEtf: 'simuleEtf',
-  // Simule Ativos (D37): hub único que reúne FII, Tesouro, BDR e ETF; a landing só tem este botão.
+  // Simule Ativos (D42): hub único que reúne FII, Tesouro, BDR e ETF; a landing só tem este botão.
   simuleAtivos: 'simuleAtivos',
   // Meu Mês (D21): botão na landing desde a Etapa 4; também aberto pelo resultado e pela
   // trilha "Sair das dívidas".

@@ -712,7 +712,7 @@ button.alloc-box:active {
 }
 .voltar-inicio:hover { color: var(--text); }
 
-/* Simule Ativos (D37): hub com um cartão por simulador. Cada cartão é um link para o simulador. */
+/* Simule Ativos (D42): hub com um cartão por simulador. Cada cartão é um link para o simulador. */
 .simule-ativos-card {
   display: flex;
   align-items: center;

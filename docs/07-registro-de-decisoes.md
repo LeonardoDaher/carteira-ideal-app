@@ -834,3 +834,11 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 **Limite conhecido.** Se alguém tem o mesmo ativo em duas corretoras, com o mesmo valor de provento no mesmo dia, os dois pagamentos (legítimos) seriam cancelados. É raro, e na conta real que originou a regra todos os pares eram artefatos. Se aparecer um caso assim, o ajuste é incluir a instituição na chave só quando as duas linhas forem créditos.
 
 **Testes.** 951 no total (mais 158 dos scripts); typecheck e lint OK. Cobrem a regra e seus limites (2, 3 e 4 cópias, datas/valores/tipos diferentes, outras origens, compras), a importação com aviso, a migração dos dados gravados e a tela (agosto, "este ano" e a lista do mês saem corrigidos).
+
+## D42 (02/10/2026): landing com um único cartão "Simule Ativos"; simuladores numa página própria
+
+**Contexto.** A landing tinha quatro cartões de simulador (FII, Tesouro Direto, BDR, ETF) e ia ganhar um quinto (Ações). A página de bio ficaria longa demais.
+
+**Decisão.** A landing passa a ter só o cartão **Simule Ativos** (`?tela=simuleAtivos`). A nova tela `SimuleAtivos` reúne os simuladores; cada um mantém o endereço `?tela=` de antes, então as páginas de SEO (`/simule-fii/` etc.) e os links externos continuam funcionando. Nos simuladores, o link de topo passou de "← Início" para "← Simule Ativos"; no hub, "← Início" volta à landing. A tela é avulsa: não depende do questionário e não vira ponto de retomada.
+
+**Consequência.** Um novo simulador (o Simule Ações, a seguir) entra só como mais um cartão no hub, sem mexer na landing. Motor, dados e API não mudaram.

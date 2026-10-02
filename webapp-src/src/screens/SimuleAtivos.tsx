@@ -11,7 +11,7 @@ export const SIMULADORES: { tela: string; emoji: string; titulo: string; descric
 ]
 
 /**
- * Simule Ativos (D37): página única que reúne os simuladores. Na landing existe só um cartão,
+ * Simule Ativos (D42): página única que reúne os simuladores. Na landing existe só um cartão,
  * "Simule Ativos", que abre esta tela. Tela avulsa: não depende do questionário.
  */
 export function SimuleAtivos({ ctx }: { ctx: AppCtx }) {

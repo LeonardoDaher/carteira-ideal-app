@@ -57,7 +57,7 @@ describe('Aprender — botões que vieram da landing', () => {
 
 describe('Aprender e Simule FII fora da barra de abas', () => {
   it('as duas telas têm o link de volta (landing ou Simule Ativos) e não mostram a barra de abas', () => {
-    // Aprender volta para a landing; o Simule FII, aberto pelo hub Simule Ativos (D37), volta para o hub.
+    // Aprender volta para a landing; o Simule FII, aberto pelo hub Simule Ativos (D42), volta para o hub.
     const casos: [React.ReactElement, string, string][] = [
       [<Aprender ctx={ctx} />, '← Início', '../'],
       [<SimuleFii ctx={ctx} snapshot={{ geradoEm: null, vigenciaIfix: null, fundos: [] }} />, '← Simule Ativos', './?tela=simuleAtivos'],
