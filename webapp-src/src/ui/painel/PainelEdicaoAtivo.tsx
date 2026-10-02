@@ -16,6 +16,8 @@ export interface AcoesPainel {
   /** Salva um ativo digitado à mão. Devolve a mensagem de erro, ou null se salvou. */
   onSalvarManual: (dados: Omit<AtivoManual, 'ativo'>, ativoAntigo?: string) => string | null
   onRemoverManual: (ativo: string) => void
+  /** Tira da lista um ativo da B3 (o histórico de lançamentos e proventos continua). */
+  onExcluirAtivo: (ativo: string) => void
   /** Palpite de classe a partir do nome (ex.: "PETR4"). */
   sugerirClasse: (nome: string) => ClasseCarteira | null
 }
@@ -182,24 +184,27 @@ export function PainelEdicaoAtivo({
               Voltar ao calculado
             </button>
           )}
-          {!ehNovo && ehManual &&
+          {!ehNovo &&
             (removendo ? (
               <>
-                <span className="mc-nota">Remover este ativo?</span>
+                <span className="mc-nota">
+                  {ehManual ? 'Excluir este ativo?' : 'Tirar da sua carteira? Seus lançamentos e proventos continuam no histórico.'}
+                </span>
                 <button
                   type="button"
                   className="btn btn-secondary mc-btn mc-perigo"
                   onClick={() => {
-                    acoes.onRemoverManual(linha!.ativo)
+                    if (ehManual) acoes.onRemoverManual(linha!.ativo)
+                    else acoes.onExcluirAtivo(linha!.ativo)
                     onFechar()
                   }}
                 >
-                  Sim, remover
+                  Sim, excluir
                 </button>
                 <button type="button" className="btn btn-ghost mc-btn" onClick={() => setRemovendo(false)}>Não</button>
               </>
             ) : (
-              <button type="button" className="btn btn-ghost mc-btn mc-perigo" onClick={() => setRemovendo(true)}>Remover ativo</button>
+              <button type="button" className="btn btn-ghost mc-btn mc-perigo" onClick={() => setRemovendo(true)}>Excluir ativo</button>
             ))}
         </div>
       </form>

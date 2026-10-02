@@ -70,6 +70,8 @@ export function CartaoPosicoes({
   classes,
   acoes,
   onVerLancamentos,
+  excluidos = [],
+  onRestaurar,
 }: {
   linhas: LinhaPosicao[]
   /** Data da Posição da B3 (AAAA-MM-DD), quando há uma. */
@@ -81,6 +83,9 @@ export function CartaoPosicoes({
   classes: Record<string, ClasseCarteira>
   acoes: AcoesPainel
   onVerLancamentos: (ativo: string) => void
+  /** Ativos da B3 que a pessoa excluiu da lista. */
+  excluidos?: string[]
+  onRestaurar?: (ativo: string) => void
 }) {
   const idTitulo = useId()
   const [editando, setEditando] = useState<{ ativo: string } | 'novo' | null>(null)
@@ -117,6 +122,22 @@ export function CartaoPosicoes({
       {semPreco > 0 && <div className="mc-nota">{semPreco} ativo(s) sem preço médio. Toque no lápis do ativo para informar.</div>}
 
       {linhas.length === 0 && <p className="mc-texto">Nenhum ativo ainda. Importe os extratos da B3 ou adicione um ativo à mão.</p>}
+
+      {excluidos.length > 0 && onRestaurar && (
+        <details className="mc-detalhes">
+          <summary>{excluidos.length} ativo(s) excluído(s) da lista</summary>
+          <ul className="mc-resumos">
+            {excluidos.map((a) => (
+              <li key={a} className="mc-topo-linha">
+                <strong>{a}</strong>
+                <button type="button" className="btn btn-ghost mc-btn" aria-label={`Mostrar ${a} de novo`} onClick={() => onRestaurar(a)}>
+                  Mostrar de novo
+                </button>
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
 
       <div className="mc-grupos">
         {grupos.map((g) => (

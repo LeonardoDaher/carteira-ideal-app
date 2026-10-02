@@ -56,19 +56,29 @@ describe('MinhaCarteira: primeira vez', () => {
 })
 
 describe('MinhaCarteira: simples e didática', () => {
-  it('mostra 3 passos, com link para a B3 abrindo em outra aba, e o botão de enviar no passo 2', async () => {
+  it('apresenta 3 formas de trazer a carteira, todas com o mesmo peso (mesma estrutura e mesmo botão primário)', async () => {
     render(<MinhaCarteira ctx={ctx} hoje={hoje} />)
     await screen.findByText('Seus gráficos vão aparecer aqui')
-    const passos = within(screen.getByRole('list', { name: '' } as never) ?? document.body)
-    void passos
-    const itens = Array.from(document.querySelectorAll('.mc-passo'))
-    expect(itens).toHaveLength(3)
-    expect(itens.map((li) => li.querySelector('.mc-passo-titulo')!.textContent)).toEqual(['Baixe na B3', 'Envie aqui', 'Pronto!'])
+    expect(screen.getByRole('heading', { name: /3 formas de trazer a sua carteira/i })).toBeTruthy()
+    expect(screen.queryByText(/em 3 passos/i)).toBeNull()
+    const formas = Array.from(document.querySelectorAll('.mc-forma')) as HTMLElement[]
+    expect(formas).toHaveLength(3)
+    expect(formas.map((f) => f.querySelector('.mc-forma-titulo')!.textContent)).toEqual(['Dados da B3', 'Sua própria planilha', 'Lançamento direto'])
+    for (const f of formas) expect(f.querySelectorAll('.btn-primary')).toHaveLength(1)
     const link = screen.getByRole('link', { name: /Abrir a Área do Investidor da B3/ }) as HTMLAnchorElement
     expect(link.href).toBe('https://www.investidor.b3.com.br/')
     expect(link.target).toBe('_blank')
     expect(link.rel).toContain('noopener')
-    expect(within(itens[1] as HTMLElement).getByText('Escolher arquivos')).toBeTruthy()
+    expect(within(formas[0]).getByText('Enviar extratos da B3')).toBeTruthy()
+    expect(within(formas[1]).getByText('Enviar minha planilha')).toBeTruthy()
+    expect(within(formas[1]).getByRole('link', { name: /planilha-modelo/i })).toBeTruthy()
+  })
+  it('"Lançar um a um" abre o formulário de novo lançamento', async () => {
+    render(<MinhaCarteira ctx={ctx} hoje={hoje} />)
+    await screen.findByText('Seus gráficos vão aparecer aqui')
+    expect(screen.queryByText('Novo lançamento')).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Lançar um a um' }))
+    expect(await screen.findByText('Novo lançamento')).toBeTruthy()
   })
   it('antes de importar, mostra os gráficos como EXEMPLO: etiqueta, valor em "R$ —", nenhum número inventado', async () => {
     render(<MinhaCarteira ctx={ctx} hoje={hoje} />)
@@ -842,10 +852,28 @@ describe('MinhaCarteira: ativo digitado à mão (posição, com a classe escolhi
     const c = await posicoes()
     fireEvent.click(within(c).getByRole('button', { name: 'Editar CDB BANCO X' }))
     const painel = screen.getByRole('dialog')
-    fireEvent.click(within(painel).getByRole('button', { name: 'Remover ativo' }))
+    fireEvent.click(within(painel).getByRole('button', { name: 'Excluir ativo' }))
     expect(lerSalvo().ativosManuais).toHaveLength(1) // ainda não removeu
-    fireEvent.click(within(painel).getByRole('button', { name: 'Sim, remover' }))
+    fireEvent.click(within(painel).getByRole('button', { name: 'Sim, excluir' }))
     await waitFor(() => expect(lerSalvo().ativosManuais).toEqual([]))
+  })
+  it('EXCLUIR um ativo da B3 (ex.: direito de subscrição vencido): pede confirmação, some da lista e dá para mostrar de novo', async () => {
+    semear({ posicao: [pos('VALE3', 100, 1500), pos('XPML12', 4, 0)], dataPosicao: '2026-09-30' })
+    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    const c = await posicoes()
+    fireEvent.click(within(c).getByRole('button', { name: 'Editar XPML12' }))
+    const painel = screen.getByRole('dialog', { name: 'Editar XPML12' })
+    fireEvent.click(within(painel).getByRole('button', { name: 'Excluir ativo' }))
+    expect(within(painel).getByText(/lançamentos e proventos continuam no histórico/)).toBeTruthy()
+    expect(lerSalvo().ativosExcluidos).toEqual([]) // ainda não excluiu
+    fireEvent.click(within(painel).getByRole('button', { name: 'Sim, excluir' }))
+    await waitFor(() => expect(lerSalvo().ativosExcluidos).toEqual(['XPML12']))
+    expect(within(c).queryByRole('button', { name: 'Editar XPML12' })).toBeNull()
+    expect(within(c).getByRole('button', { name: 'Editar VALE3' })).toBeTruthy()
+    expect(lerSalvo().posicao).toHaveLength(2) // a Posição importada não é mexida
+    fireEvent.click(within(c).getByRole('button', { name: 'Mostrar XPML12 de novo' }))
+    await waitFor(() => expect(lerSalvo().ativosExcluidos).toEqual([]))
+    expect(within(c).getByRole('button', { name: 'Editar XPML12' })).toBeTruthy()
   })
   it('um ativo digitado não tem "Ver lançamentos" (não há lançamentos dele)', async () => {
     semear({ ativosManuais: [{ ativo: 'CDB BANCO X', nome: 'CDB Banco X', quantidade: 1, precoMedio: 100, valorAtual: null, classe: 'cdbLiquidez' }] })

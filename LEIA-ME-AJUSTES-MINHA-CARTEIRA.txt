@@ -1,0 +1,12 @@
+Ajustes na Minha Carteira (feitos em cima do D33)
+
+1) Entrada da carteira: "3 formas de trazer a sua carteira para o Carteira Ideal"
+   Três cartões de peso idêntico (mesmo tamanho, mesmo botão): Dados da B3 | Sua própria planilha (Excel/CSV) | Lançamento direto.
+   O botão "Lançar um a um" rola até Lançamentos e abre o formulário.
+2) Excluir ativo da B3: lápis > "Excluir ativo" (com confirmação). Some da lista, do patrimônio e dos gráficos;
+   lançamentos e proventos ficam no histórico. A escolha é gravada (reimportar não traz de volta).
+   "N ativo(s) excluído(s) da lista" > "Mostrar de novo" desfaz. Lançar uma compra do ativo também o traz de volta.
+   Ativos digitados à mão: "Remover ativo" virou "Excluir ativo".
+
+ARQUIVOS (11) - caminhos a partir da raiz do repositório: ver lista no zip.
+VERIFICAÇÃO: typecheck, lint e 957 testes do app passando.

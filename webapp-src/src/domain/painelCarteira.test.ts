@@ -107,6 +107,27 @@ describe('montarPainel: ativo que a Posição não tem (já zerado) não aparece
   })
 })
 
+describe('montarPainel: ativo da B3 que a pessoa excluiu', () => {
+  const pos = [P('VALE3', 100, 1500), P('XPML12', 4, 0, 'fundos')]
+  it('some das linhas, do patrimônio e dos ativos atuais, mesmo constando na Posição', () => {
+    const p = montarPainel(livro(L({})), pos, DATA_POS, {}, [], ['XPML12'])
+    expect(p.linhas.map((l) => l.ativo)).toEqual(['VALE3'])
+    expect(p.ativosAtuais).toEqual(['VALE3'])
+    expect(p.resumo.patrimonio).toBe(1500)
+  })
+  it('sem exclusão, continua aparecendo (a Posição manda no que a pessoa tem)', () => {
+    expect(montarPainel(livro(L({})), pos, DATA_POS).linhas.map((l) => l.ativo)).toContain('XPML12')
+  })
+  it('vale também sem Posição, para o que vem só dos lançamentos', () => {
+    const p = montarPainel(livro(L({}), L({ ativo: 'RECR12', quantidade: 4, valor: 0, preco: 0 })), null, null, {}, [], ['RECR12'])
+    expect(p.linhas.map((l) => l.ativo)).toEqual(['VALE3'])
+  })
+  it('não esconde um ativo digitado à mão com o mesmo nome (esse tem a sua própria exclusão)', () => {
+    const manual = { ativo: 'CDB X', nome: 'CDB X', quantidade: 1, precoMedio: 100, valorAtual: null, classe: 'cdbLiquidez' as const }
+    expect(montarPainel([], null, null, {}, [manual], ['CDB X']).linhas.map((l) => l.ativo)).toEqual(['CDB X'])
+  })
+})
+
 describe('origem do preço médio: informado, valor aplicado da B3 ou calculado', () => {
   const tesouro = (aplicado: number | null): ItemPosicaoB3 => ({ ativo: 'TESOURO IPCA+ 2045', categoria: 'tesouro', quantidade: 40, precoFechamento: null, valorAtualizado: 5000, valorAplicado: aplicado })
 

@@ -51,9 +51,11 @@ function descreverResumo(r: ResumoArquivo): string {
 
 export const MODELO_CSV_URL = `data:text/csv;charset=utf-8,${encodeURIComponent(`\uFEFF${MODELO_CSV}`)}`
 
-export function ImportarArquivos({ onImportar }: { onImportar: (arquivos: ArquivoImportado[]) => ResumoArquivo[] }) {
+export function ImportarArquivos({ onImportar, onLancarDireto }: { onImportar: (arquivos: ArquivoImportado[]) => ResumoArquivo[]; onLancarDireto: () => void }) {
   const idEntrada = useId()
+  const idPlanilha = `${idEntrada}-planilha`
   const entrada = useRef<HTMLInputElement>(null)
+  const entradaPlanilha = useRef<HTMLInputElement>(null)
   const [lendo, setLendo] = useState(false)
   const [arrastando, setArrastando] = useState(false)
   const [resumos, setResumos] = useState<ResumoArquivo[]>([])
@@ -67,81 +69,74 @@ export function ImportarArquivos({ onImportar }: { onImportar: (arquivos: Arquiv
     setResumos(onImportar(lidos))
     setLendo(false)
     if (entrada.current) entrada.current.value = ''
+    if (entradaPlanilha.current) entradaPlanilha.current.value = ''
+  }
+
+  const soltar = (e: React.DragEvent) => {
+    e.preventDefault()
+    setArrastando(false)
+    void processar(e.dataTransfer.files)
+  }
+  const arrastar = (e: React.DragEvent) => {
+    e.preventDefault()
+    setArrastando(true)
   }
 
   return (
-    <section className="mc-card mc-importar" aria-labelledby={`${idEntrada}-t`}>
-      <h2 id={`${idEntrada}-t`} className="mc-titulo-grande">Traga os seus dados da B3</h2>
+    <section className="mc-importar" aria-labelledby={`${idEntrada}-t`}>
+      <h2 id={`${idEntrada}-t`} className="mc-titulo-grande">3 formas de trazer a sua carteira para o Carteira Ideal</h2>
+      <p className="mc-sub">Escolha a que for mais fácil para você. As três levam ao mesmo resultado.</p>
 
-      <ol className="mc-passos">
-        <li className="mc-passo">
-          <span className="mc-num" aria-hidden="true">1</span>
-          <div className="mc-passo-corpo">
-            <div className="mc-passo-titulo">Baixe na B3</div>
-            <p className="mc-passo-texto">
-              Na Área do Investidor, em <strong>Extratos</strong>, baixe <strong>Posição</strong> (o que você tem hoje) e <strong>Negociação</strong> (suas compras e vendas), em Excel.
-            </p>
-            <a className="mc-link" href="https://www.investidor.b3.com.br" target="_blank" rel="noopener noreferrer">
-              Abrir a Área do Investidor da B3 ↗
-            </a>
+      <ul className="mc-formas">
+        <li className="mc-card mc-forma">
+          <h3 className="mc-forma-titulo">Dados da B3</h3>
+          <p className="mc-passo-texto">
+            Na Área do Investidor, em <strong>Extratos</strong>, baixe <strong>Posição</strong> (o que você tem hoje) e <strong>Negociação</strong> (suas compras e vendas), em Excel. Depois envie aqui.
+          </p>
+          <a className="mc-link" href="https://www.investidor.b3.com.br" target="_blank" rel="noopener noreferrer">
+            Abrir a Área do Investidor da B3 ↗
+          </a>
+          <div className={`mc-soltar ${arrastando ? 'ativo' : ''}`} onDragOver={arrastar} onDragLeave={() => setArrastando(false)} onDrop={soltar}>
+            <label htmlFor={idEntrada} className="btn btn-primary mc-btn">
+              {lendo ? 'Lendo…' : 'Enviar extratos da B3'}
+            </label>
+            <input id={idEntrada} ref={entrada} type="file" multiple accept=".xlsx,.csv,.txt,.tsv" className="mc-arquivo" disabled={lendo} onChange={(e) => void processar(e.target.files)} />
+            <span className="mc-dica">ou arraste para cá</span>
           </div>
         </li>
 
-        <li className="mc-passo">
-          <span className="mc-num" aria-hidden="true">2</span>
-          <div className="mc-passo-corpo">
-            <div className="mc-passo-titulo">Envie aqui</div>
-            <div
-              className={`mc-soltar ${arrastando ? 'ativo' : ''}`}
-              onDragOver={(e) => {
-                e.preventDefault()
-                setArrastando(true)
-              }}
-              onDragLeave={() => setArrastando(false)}
-              onDrop={(e) => {
-                e.preventDefault()
-                setArrastando(false)
-                void processar(e.dataTransfer.files)
-              }}
-            >
-              <label htmlFor={idEntrada} className="btn btn-primary mc-btn">
-                {lendo ? 'Lendo…' : 'Escolher arquivos'}
-              </label>
-              <input
-                id={idEntrada}
-                ref={entrada}
-                type="file"
-                multiple
-                accept=".xlsx,.csv,.txt,.tsv"
-                className="mc-arquivo"
-                disabled={lendo}
-                onChange={(e) => void processar(e.target.files)}
-              />
-              <span className="mc-dica">ou arraste para cá</span>
-            </div>
+        <li className="mc-card mc-forma">
+          <h3 className="mc-forma-titulo">Sua própria planilha</h3>
+          <p className="mc-passo-texto">
+            Use o seu controle em <strong>Excel ou CSV</strong>. Se preferir, baixe a planilha-modelo, preencha e envie. Dá para enviar vários arquivos de uma vez.
+          </p>
+          <a className="mc-link" href={MODELO_CSV_URL} download="modelo-minha-carteira.csv">
+            Baixar planilha-modelo
+          </a>
+          <div className={`mc-soltar ${arrastando ? 'ativo' : ''}`} onDragOver={arrastar} onDragLeave={() => setArrastando(false)} onDrop={soltar}>
+            <label htmlFor={idPlanilha} className="btn btn-primary mc-btn">
+              {lendo ? 'Lendo…' : 'Enviar minha planilha'}
+            </label>
+            <input id={idPlanilha} ref={entradaPlanilha} type="file" multiple accept=".xlsx,.csv,.txt,.tsv" className="mc-arquivo" disabled={lendo} onChange={(e) => void processar(e.target.files)} />
+            <span className="mc-dica">ou arraste para cá</span>
           </div>
         </li>
 
-        <li className="mc-passo">
-          <span className="mc-num" aria-hidden="true">3</span>
-          <div className="mc-passo-corpo">
-            <div className="mc-passo-titulo">Pronto!</div>
-            <p className="mc-passo-texto">Seu preço médio e seus gráficos aparecem logo abaixo.</p>
+        <li className="mc-card mc-forma">
+          <h3 className="mc-forma-titulo">Lançamento direto</h3>
+          <p className="mc-passo-texto">
+            Registre você mesmo, <strong>um a um</strong>: compras, vendas e proventos. Indicado para poucos ativos ou para completar o que faltou.
+          </p>
+          <span className="mc-link-vazio" aria-hidden="true" />
+          <div className="mc-soltar mc-soltar-simples">
+            <button type="button" className="btn btn-primary mc-btn" onClick={onLancarDireto}>
+              Lançar um a um
+            </button>
           </div>
         </li>
-      </ol>
+      </ul>
 
       <div className="mc-privacidade"><span aria-hidden="true">🔒</span> Seus dados ficam só neste aparelho.</div>
-
-      <details className="mc-detalhes">
-        <summary>Prefere usar a sua própria planilha?</summary>
-        <p className="mc-passo-texto" style={{ marginTop: 8 }}>
-          Baixe a planilha-modelo, preencha e envie no passo 2. Você também pode enviar vários arquivos de uma vez e escolher o período que quiser.
-        </p>
-        <a className="mc-link" href={MODELO_CSV_URL} download="modelo-minha-carteira.csv">
-          Baixar planilha-modelo
-        </a>
-      </details>
 
       {resumos.length > 0 && (
         <ul className="mc-resumos" aria-label="Resultado da importação">

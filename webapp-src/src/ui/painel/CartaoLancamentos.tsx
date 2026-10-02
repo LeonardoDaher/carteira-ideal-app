@@ -1,4 +1,4 @@
-import { useId, useState } from 'react'
+import { useEffect, useId, useState } from 'react'
 import { lerNumero } from '../../domain/importacao/celulas'
 import type { Lancamento, LancamentoNovo, OrigemLancamento, ProblemaLancamento, SubtipoProvento, TipoLancamento } from '../../domain/lancamentos'
 import { dataCurta, quantidadeBR, reais } from './formatar'
@@ -184,6 +184,7 @@ export function CartaoLancamentos({
   onAdicionar,
   onCorrigir,
   onExcluir,
+  abrirNovo = 0,
   filtro,
   onFiltro,
   filtroTipo,
@@ -191,6 +192,8 @@ export function CartaoLancamentos({
 }: {
   lancamentos: Lancamento[]
   hoje: string
+  /** Contador: cada vez que sobe, abre o formulário de novo lançamento (usado pelo cartão "Lançamento direto"). */
+  abrirNovo?: number
   /** Texto digitado no filtro por ativo (vazio = todos). */
   filtro: string
   onFiltro: (texto: string) => void
@@ -205,6 +208,9 @@ export function CartaoLancamentos({
   const [modo, setModo] = useState<{ tipo: 'fechado' } | { tipo: 'novo' } | { tipo: 'editar'; id: string }>({ tipo: 'fechado' })
   const [excluindo, setExcluindo] = useState<string | null>(null)
   const [todos, setTodos] = useState(false)
+  useEffect(() => {
+    if (abrirNovo > 0) setModo({ tipo: 'novo' })
+  }, [abrirNovo])
   const termo = filtro.trim().toUpperCase()
   const filtrando = !!termo || filtroTipo !== 'todos'
   const filtrados = lancamentos.filter(

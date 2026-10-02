@@ -54,10 +54,11 @@ export function MinhaCarteira({ ctx, hoje }: { ctx: AppCtx; hoje?: Date }) {
   const [apagando, setApagando] = useState(false)
   const [filtroAtivo, setFiltroAtivo] = useState('')
   const [filtroTipo, setFiltroTipo] = useState<FiltroTipo>('todos')
+  const [pedidoNovo, setPedidoNovo] = useState(0)
 
   const painel = useMemo(
-    () => montarPainel(c.lancamentos, c.posicao, c.dataPosicao, c.precosMedios, c.ativosManuais),
-    [c.lancamentos, c.posicao, c.dataPosicao, c.precosMedios, c.ativosManuais],
+    () => montarPainel(c.lancamentos, c.posicao, c.dataPosicao, c.precosMedios, c.ativosManuais, c.ativosExcluidos),
+    [c.lancamentos, c.posicao, c.dataPosicao, c.precosMedios, c.ativosManuais, c.ativosExcluidos],
   )
   // A classe de um ativo digitado à mão é a que a pessoa escolheu ao cadastrá-lo; vale mais que qualquer outra.
   const classesEfetivas = useMemo(
@@ -78,6 +79,7 @@ export function MinhaCarteira({ ctx, hoje }: { ctx: AppCtx; hoje?: Date }) {
     onClasse: escolherClasse,
     onSalvarManual: h.salvarAtivoManual,
     onRemoverManual: h.removerAtivoManual,
+    onExcluirAtivo: h.excluirAtivo,
     sugerirClasse: (nome: string): ClasseCarteira | null => {
       const r = classificarAtivo(nome, CATALOGO_ATIVOS)
       return r.classe && r.classe !== 'foraDaRegua' ? r.classe : null
@@ -92,6 +94,12 @@ export function MinhaCarteira({ ctx, hoje }: { ctx: AppCtx; hoje?: Date }) {
   const proximos = useMemo(() => proximosProventos(c.eventosFuturos, hojeISO), [c.eventosFuturos, hojeISO])
   const temDados = c.lancamentos.length > 0 || !!c.posicao || c.ativosManuais.length > 0
 
+  /** "Lançamento direto": rola até a lista e abre o formulário de novo lançamento. */
+  function abrirLancamento() {
+    setPedidoNovo((n) => n + 1)
+    document.getElementById('mc-lancamentos')?.scrollIntoView?.({ behavior: 'smooth', block: 'start' })
+  }
+
   /** De um ativo (conferência ou posições) para a lista de lançamentos, já filtrada por ele e só com compras e vendas, que é o que forma o preço médio. */
   function verLancamentosDe(ativo: string) {
     setFiltroAtivo(ativo)
@@ -104,10 +112,10 @@ export function MinhaCarteira({ ctx, hoje }: { ctx: AppCtx; hoje?: Date }) {
       <VoltarInicio />
       <div className="col" style={{ gap: 6 }}>
         <h1 style={{ fontSize: 26 }}>Minha Carteira</h1>
-        <p className="mc-sub">Veja a sua carteira real em 3 passos.</p>
+        <p className="mc-sub">Traga a sua carteira real para o app.</p>
       </div>
 
-      <ImportarArquivos onImportar={h.importarArquivos} />
+      <ImportarArquivos onImportar={h.importarArquivos} onLancarDireto={abrirLancamento} />
 
       {h.hidratado && !temDados && (
         <>
@@ -155,11 +163,13 @@ export function MinhaCarteira({ ctx, hoje }: { ctx: AppCtx; hoje?: Date }) {
           classes={classesEfetivas}
           acoes={acoesDoPainel}
           onVerLancamentos={verLancamentosDe}
+          excluidos={c.ativosExcluidos}
+          onRestaurar={h.restaurarAtivo}
         />
       )}
 
       {h.hidratado && (
-        <CartaoLancamentos lancamentos={c.lancamentos} hoje={hojeISO} onAdicionar={h.adicionar} onCorrigir={h.corrigir} onExcluir={h.excluir} filtro={filtroAtivo} onFiltro={setFiltroAtivo} filtroTipo={filtroTipo} onFiltroTipo={setFiltroTipo} />
+        <CartaoLancamentos abrirNovo={pedidoNovo} lancamentos={c.lancamentos} hoje={hojeISO} onAdicionar={h.adicionar} onCorrigir={h.corrigir} onExcluir={h.excluir} filtro={filtroAtivo} onFiltro={setFiltroAtivo} filtroTipo={filtroTipo} onFiltroTipo={setFiltroTipo} />
       )}
 
       {h.hidratado && (

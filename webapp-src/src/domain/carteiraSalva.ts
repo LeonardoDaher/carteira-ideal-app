@@ -24,12 +24,14 @@ export interface CarteiraSalva {
   precosMedios: Record<string, number>
   /** Ativos digitados à mão (posição, não compra). */
   ativosManuais: AtivoManual[]
+  /** Ativos da B3 que a pessoa tirou da lista de Posições (ex.: direito de subscrição vencido). O histórico de lançamentos e proventos fica. */
+  ativosExcluidos: string[]
 }
 
-export const CARTEIRA_VAZIA: CarteiraSalva = { lancamentos: [], excluidas: [], posicao: null, dataPosicao: null, eventosFuturos: [], classes: {}, precosMedios: {}, ativosManuais: [] }
+export const CARTEIRA_VAZIA: CarteiraSalva = { lancamentos: [], excluidas: [], posicao: null, dataPosicao: null, eventosFuturos: [], classes: {}, precosMedios: {}, ativosManuais: [], ativosExcluidos: [] }
 
 export function carteiraVazia(): CarteiraSalva {
-  return { lancamentos: [], excluidas: [], posicao: null, dataPosicao: null, eventosFuturos: [], classes: {}, precosMedios: {}, ativosManuais: [] }
+  return { lancamentos: [], excluidas: [], posicao: null, dataPosicao: null, eventosFuturos: [], classes: {}, precosMedios: {}, ativosManuais: [], ativosExcluidos: [] }
 }
 
 const TIPOS = new Set<TipoLancamento>(['saldoInicial', 'compra', 'venda', 'bonificacao', 'ajusteQuantidade', 'provento'])
@@ -207,6 +209,7 @@ export function lerCarteiraSalva(bruto: string | null): CarteiraSalva | null {
       classes: lerClasses(c.classes),
       precosMedios: lerPrecos(c.precosMedios),
       ativosManuais: lerAtivosManuais(c.ativosManuais),
+      ativosExcluidos: Array.isArray(c.ativosExcluidos) ? [...new Set(c.ativosExcluidos.filter(txt).map((a) => ativoDoTexto(a)))] : [],
     }))
   } catch {
     return null

@@ -118,7 +118,11 @@ export function montarPainel(
   dataPosicao: string | null,
   precosInformados: Readonly<Record<string, number>> = {},
   manuais: readonly AtivoManual[] = [],
+  excluidos: readonly string[] = [],
 ): Painel {
+  const fora = new Set(excluidos)
+  // Ativo que a pessoa excluiu não aparece nas Posições, nem no patrimônio e nos gráficos; os manuais têm a sua própria exclusão.
+  const semExcluidos = (ls: LinhaPosicao[]) => (fora.size ? ls.filter((l) => l.manual || !fora.has(l.ativo)) : ls)
   const derivadas = derivarPosicoes(lancamentos).posicoes.filter((p) => p.quantidade > EPS)
   const derivadaPorAtivo = new Map(derivadas.map((p) => [p.ativo, p]))
 
@@ -142,7 +146,7 @@ export function montarPainel(
         }
       })
       .sort((a, b) => (b.custoTotal ?? 0) - (a.custoTotal ?? 0))
-    const todas = comManuais(linhas, manuais).sort((a, b) => (b.valorAtual ?? b.custoTotal ?? 0) - (a.valorAtual ?? a.custoTotal ?? 0))
+    const todas = semExcluidos(comManuais(linhas, manuais)).sort((a, b) => (b.valorAtual ?? b.custoTotal ?? 0) - (a.valorAtual ?? a.custoTotal ?? 0))
     const capital = todas.reduce((t, l) => t + (l.custoTotal ?? 0), 0)
     return { linhas: todas, ativosAtuais: todas.map((l) => l.ativo), resumo: { capitalAplicado: capital, patrimonio: null, dataPosicao: null, resultado: null } }
   }
@@ -222,7 +226,7 @@ export function montarPainel(
       aguardandoLiquidacao: true,
     })
   }
-  const todas = comManuais(linhas, manuais).sort((a, b) => (b.valorAtual ?? b.custoTotal ?? 0) - (a.valorAtual ?? a.custoTotal ?? 0))
+  const todas = semExcluidos(comManuais(linhas, manuais)).sort((a, b) => (b.valorAtual ?? b.custoTotal ?? 0) - (a.valorAtual ?? a.custoTotal ?? 0))
 
   const patrimonio = todas.reduce((s, l) => s + valorDaLinha(l), 0)
   const comRes = todas.filter((l) => l.resultado !== null)

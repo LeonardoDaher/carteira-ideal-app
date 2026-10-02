@@ -54,7 +54,11 @@ export function useCarteiraReal(hoje: string) {
   const adicionar = useCallback(
     (novo: Omit<LancamentoNovo, 'origem'>): ProblemaLancamento | null => {
       const r = adicionarLancamento({ lancamentos: ref.current.lancamentos, excluidas: ref.current.excluidas }, novo)
-      if (!r.problema) aplicar({ ...ref.current, ...r.livro })
+      if (!r.problema) {
+        // Lançar uma compra de um ativo antes excluído é a pessoa dizendo que o tem de novo: volta à lista.
+        const volta = ref.current.ativosExcluidos.filter((a) => a !== novo.ativo.trim().toUpperCase())
+        aplicar({ ...ref.current, ...r.livro, ativosExcluidos: volta })
+      }
       return r.problema
     },
     [aplicar],
@@ -122,6 +126,17 @@ export function useCarteiraReal(hoje: string) {
     [aplicar],
   )
 
+  /** Tira da lista de Posições um ativo da B3. Lançamentos e proventos ficam no histórico. */
+  const excluirAtivo = useCallback(
+    (ativo: string) => aplicar({ ...ref.current, ativosExcluidos: [...new Set([...ref.current.ativosExcluidos, ativo])] }),
+    [aplicar],
+  )
+
+  const restaurarAtivo = useCallback(
+    (ativo: string) => aplicar({ ...ref.current, ativosExcluidos: ref.current.ativosExcluidos.filter((a) => a !== ativo) }),
+    [aplicar],
+  )
+
   const definirDataPosicao = useCallback((dataPosicao: string) => aplicar({ ...ref.current, dataPosicao }), [aplicar])
   const limpar = useCallback(() => aplicar(carteiraVazia()), [aplicar])
   const exportarBackup = useCallback(() => serializarCarteira(ref.current), [])
@@ -137,7 +152,7 @@ export function useCarteiraReal(hoje: string) {
     [aplicar],
   )
 
-  return { carteira, hidratado, importarArquivos, adicionar, corrigir, excluir, definirClasse, definirPrecoMedio, salvarAtivoManual, removerAtivoManual, definirDataPosicao, limpar, exportarBackup, restaurarBackup }
+  return { carteira, hidratado, importarArquivos, adicionar, corrigir, excluir, definirClasse, definirPrecoMedio, salvarAtivoManual, removerAtivoManual, excluirAtivo, restaurarAtivo, definirDataPosicao, limpar, exportarBackup, restaurarBackup }
 }
 
 export type CarteiraReal = ReturnType<typeof useCarteiraReal>
