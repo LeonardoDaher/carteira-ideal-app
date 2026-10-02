@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import type React from 'react'
+import { createPortal } from 'react-dom'
 import type { AtivoManual } from '../../domain/ativosManuais'
 import { TAXA_MAX } from '../../domain/ativosManuais'
 import { CLASSES_ESCOLHA, ehClasseValida, ROTULO_CLASSE } from '../../domain/classesDaCarteira'
@@ -136,7 +137,9 @@ export function PainelEdicaoAtivo({
 
   const titulo = ehNovo ? (grupo ? `Adicionar ativo em ${grupo.rotulo}` : 'Adicionar posição') : `Editar ${linha!.ativo}`
 
-  return (
+  // Vai para o <body> (portal): o cartão que chama este painel tem backdrop-filter, que prende elementos position:fixed
+  // dentro dele (o painel ficava cortado no meio da página em vez de cobrir a tela).
+  return createPortal(
     <div
       className="mc-modal-fundo"
       onMouseDown={(e) => {
@@ -311,7 +314,8 @@ export function PainelEdicaoAtivo({
           </>
         )}
       </form>
-    </div>
+    </div>,
+    document.body,
   )
 }
 

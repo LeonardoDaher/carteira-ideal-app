@@ -43,4 +43,15 @@ PACOTE ACUMULADO (tudo desde o D33). Aplique ESTE zip por cima do projeto; ele s
     "selecionado" não mudam. PARA DESFAZER: apague o bloco "CAIXAS SÓLIDAS EM TODAS AS TELAS" no fim de webapp-src/src/index.css
     (e o teste ui/caixasSolidas.test.ts).
 
-VERIFICAÇÃO: tsc, lint, 1019 testes do app, 158 do gerador de páginas e build de produção OK.
+15) Meus Ativos, linha da posição em UMA linha só quando o cartão é largo (computador): cabeçalho (lápis, ativo, quantidade, selos,
+    "Ver lançamentos") à esquerda e Preço médio / Valor atual / Resultado à direita. A decisão é pela largura do próprio cartão
+    (container query de 720 px), não da tela; no celular, ou se a lista ficar estreita, continua em duas linhas. A linha de
+    vencimento/taxa dos ativos digitados à mão continua embaixo. Só layout (index.css, bloco "@container mc-posicoes").
+    Para desfazer: apague esse bloco e a linha ".mc-posicoes { container-type ... }" no fim do index.css (e ui/painel/linhaPosicao.test.ts).
+
+16) CORREÇÃO: "Adicionar posição" / "Adicionar ativo" / editar ativo ficavam presos e cortados no meio da página (celular e computador),
+    em vez de abrir como janela por cima da tela. Causa: o cartão tem backdrop-filter, que faz position:fixed valer só dentro dele.
+    Agora o painel é renderizado direto no <body> (portal em ui/painel/PainelEdicaoAtivo.tsx), imune a qualquer ancestral com blur.
+    Teste de regressão em screens/MinhaCarteira.test.tsx.
+
+VERIFICAÇÃO: tsc, lint, 1024 testes do app, 158 do gerador de páginas e build de produção OK.

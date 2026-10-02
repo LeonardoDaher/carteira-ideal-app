@@ -1949,3 +1949,14 @@ select option:disabled { color: #6b7280 !important; -webkit-text-fill-color: #6b
   box-shadow: var(--caixa-sombra), inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 .titulo-opcao.selecionado { background: color-mix(in oklch, var(--accent) 12%, var(--caixa-fundo)); }
+
+/* Meus Ativos: em cartão largo (computador), a linha da posição cabe em UMA linha: cabeçalho (lápis, ativo, quantidade,
+   selos, "Ver lançamentos") à esquerda e Preço médio / Valor atual / Resultado à direita. No celular continua em duas linhas.
+   A decisão é pela largura do próprio cartão (container query), não da tela: se a lista ficar estreita, volta para duas linhas. */
+.mc-posicoes { container-type: inline-size; container-name: mc-posicoes; }
+@container mc-posicoes (min-width: 720px) {
+  .mc-posicao { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
+  .mc-pos-topo { flex: 1 1 0; min-width: 0; }
+  .mc-pos-numeros { flex: 0 0 360px; }
+  .mc-pos-extra { flex: 1 1 100%; }
+}

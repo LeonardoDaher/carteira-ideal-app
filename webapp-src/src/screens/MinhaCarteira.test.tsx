@@ -681,6 +681,15 @@ describe('MinhaCarteira: posições agrupadas, com lápis na frente e "Ver lanç
     expect(screen.queryByRole('dialog')).toBeNull()
     expect(lerSalvo().precosMedios).toEqual({})
   })
+  it('o painel de edição/adição abre direto no <body>, fora dos cartões (cartão com backdrop-filter prendia o painel no meio da página)', async () => {
+    semear({ lancs: [L()] })
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
+    const c = await posicoes()
+    fireEvent.click(within(c).getByRole('button', { name: 'Editar VALE3' }))
+    const fundo = document.querySelector('.mc-modal-fundo') as HTMLElement
+    expect(fundo.parentElement).toBe(document.body)
+    expect(fundo.closest('.card, .mc-card')).toBeNull()
+  })
   it('sem a Posição também dá para editar o preço médio', async () => {
     semear({ lancs: [L()] })
     render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
