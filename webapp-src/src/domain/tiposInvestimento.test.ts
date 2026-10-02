@@ -29,11 +29,16 @@ describe('catálogo de tipos de investimento', () => {
       expect(tipoPorId(id)).toMatchObject({ classe: 'lciLca' })
       expect(tipoPorId(id)!.equivalencia).toMatch(/LCI \/ LCA/)
     }
-    for (const id of ['cdb', 'lc', 'debenture', 'fundo-credito', 'fundo-rf']) expect(tipoPorId(id)!.classe).toBe('lciLca')
+    // só CRI e CRA entram em LCI / LCA; os demais papéis de crédito e fundos de renda fixa ficam fora da comparação
+    for (const id of ['cdb', 'lc', 'debenture', 'fundo-credito', 'fundo-rf']) {
+      expect(tipoPorId(id)!.classe).toBe('foraDaRegua')
+      expect(tipoPorId(id)!.equivalencia).toBeUndefined()
+    }
+    expect(TIPOS_INVESTIMENTO.filter((t) => t.classe === 'lciLca').map((t) => t.id).sort()).toEqual(['cra', 'cri', 'lci-lca'])
     expect(tipoPorId('fundo-di')).toMatchObject({ classe: 'tesouroSelic' })
     expect(tipoPorId('poupanca')).toMatchObject({ classe: 'cdbLiquidez' })
     // toda classe que não é a "própria" do tipo traz a observação
-    for (const t of TIPOS_INVESTIMENTO.filter((x) => ['cdb', 'lc', 'cri', 'cra', 'debenture', 'fundo-di', 'fundo-rf', 'fundo-credito', 'fundo-multi', 'poupanca'].includes(x.id))) {
+    for (const t of TIPOS_INVESTIMENTO.filter((x) => ['cri', 'cra', 'fundo-di', 'fundo-multi', 'poupanca'].includes(x.id))) {
       expect(t.equivalencia, t.id).toBeTruthy()
     }
   })
@@ -42,9 +47,9 @@ describe('catálogo de tipos de investimento', () => {
     expect(d).toEqual({ fiis: 0.4, ouro: 0.2, bdrs: 0.2, fundosInternacionais: 0.2 })
     expect(Object.values(d).reduce((s, x) => s + (x ?? 0), 0)).toBeCloseTo(1, 10)
   })
-  it('só invólucros e produtos sem classe parecida ficam fora da régua: previdência e COE', () => {
+  it('ficam fora da régua: previdência, COE, CDB com prazo, LC, debênture, fundo de crédito e fundo de renda fixa', () => {
     const fora = TIPOS_INVESTIMENTO.filter((t) => t.classe === 'foraDaRegua' && !t.distribuicao).map((t) => t.id)
-    expect(fora.sort()).toEqual(['coe', 'pgbl', 'vgbl'])
+    expect(fora.sort()).toEqual(['cdb', 'coe', 'debenture', 'fundo-credito', 'fundo-rf', 'lc', 'pgbl', 'vgbl'])
   })
   it('vencimento na renda fixa e no COE; taxa na renda fixa, nos fundos e na previdência; bolsa não tem nenhum dos dois', () => {
     for (const id of ['tesouro-selic', 'cdb', 'lci-lca', 'cri', 'cra', 'debenture', 'coe']) expect(tipoPorId(id)!.vencimento, id).toBe(true)

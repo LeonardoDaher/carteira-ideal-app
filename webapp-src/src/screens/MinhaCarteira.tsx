@@ -120,7 +120,7 @@ export function MinhaCarteira({ ctx, hoje, valoresVisiveis = false }: { ctx: App
       <VoltarInicio />
       <div className="mc-cabecalho">
         <div className="col" style={{ gap: 6 }}>
-          <h1 style={{ fontSize: 26 }}>Meus Ativos</h1>
+          <h1 style={{ fontSize: 21 }}>Meus Ativos</h1>
           <p className="mc-sub">Traga a sua carteira real para o app.</p>
         </div>
         <button

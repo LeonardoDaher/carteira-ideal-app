@@ -11,12 +11,16 @@ PACOTE ACUMULADO (tudo desde o D33). Aplique ESTE zip por cima do projeto; ele s
 7) Dentro de cada posição: "+ Adicionar ativo" (tipos daquela posição; se só há um, vai direto ao formulário).
 8) Novos blocos de Posições: Fundos de investimento, Previdência, Ouro, Criptomoedas. "Renda fixa (bancos)" virou "Renda fixa".
 
-9) Classes sugeridas por EQUIVALÊNCIA: o que não existe na carteira sugerida é alocado na classe mais parecida, e a comparação mostra,
-   embaixo da classe, "Inclui <ativo> (valor). <explicação>". CRI/CRA, debênture, CDB com prazo, LC, fundo de crédito e de renda fixa
-   contam em LCI / LCA (CRI/CRA como nas carteiras-modelo); Fundo DI em Tesouro Selic; poupança em CDB de liquidez diária;
-   multimercado repartido 40% FIIs / 20% Ouro / 20% BDRs / 20% Fundos internacionais. Previdência e COE ficam fora da comparação.
+9) Classes sugeridas por EQUIVALÊNCIA: só CRI e CRA são alocados em LCI / LCA (como nas carteiras-modelo), com a observação embaixo
+   da classe na comparação ("Inclui <ativo> (valor). <explicação>"). Fundo DI conta em Tesouro Selic; poupança em CDB de liquidez
+   diária; multimercado é repartido 40% FIIs / 20% Ouro / 20% BDRs / 20% Fundos internacionais.
+   FICAM FORA DA COMPARAÇÃO: CDB com prazo, LC, debênture, fundo de crédito privado, fundo de renda fixa, previdência e COE.
    Se a pessoa trocar a classe, a escolha dela manda e a observação some.
 10) Vencimento e taxa (opcionais): renda fixa e COE (vencimento); renda fixa, fundos e previdência (taxa). Aparecem na linha da posição.
 11) Correção: trocar a classe pela tela de comparação não apaga mais o tipo, o vencimento e a taxa do ativo.
+
+12) Letra de Meus Ativos na mesma escala do Meu Mês: título da tela 21 px; abertura 15; títulos de cartão 16; itens de lista 14;
+    textos e notas 12. Mantidos: números grandes (R$), botões e campos de digitação (16 px, por causa do zoom do iPhone).
+    A trava de legibilidade passou de "13 px" para "12 px" (o piso do Meu Mês) e agora também exige só tamanhos dessa escala.
 
 VERIFICAÇÃO: tsc, lint, 994 testes do app, 158 do gerador de páginas e build de produção OK.

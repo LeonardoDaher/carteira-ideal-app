@@ -35,11 +35,14 @@ function token(nome: string, tema: 'escuro' | 'claro'): [number, number, number]
 }
 
 describe('legibilidade da Minha Carteira', () => {
-  it('nenhuma letra abaixo de 11,5 px (só o eixo dos gráficos chega perto) e o texto corrido tem pelo menos 13 px', () => {
+  it('mesma escala de letra do Meu Mês: nenhuma letra abaixo de 12 px (só o eixo dos meses chega a 11,5) e nada de texto de cartão acima de 16 px, fora os números de destaque', () => {
     const tamanhos = [...bloco.matchAll(/font-size:\s*([\d.]+)px/g)].map((m) => Number(m[1]))
     expect(tamanhos.length).toBeGreaterThan(20)
     expect(Math.min(...tamanhos)).toBeGreaterThanOrEqual(11.5)
-    expect(tamanhos.filter((t) => t < 13)).toHaveLength(1) // só o eixo dos meses
+    expect(tamanhos.filter((t) => t < 12)).toHaveLength(1) // só o eixo dos meses
+    // escala do Meu Mês: 12 (texto), 14 (itens), 15 (abertura/botões), 16 (títulos e campos); 19 e 30 são só os números de destaque
+    const permitidos = new Set([11.5, 12, 14, 15, 16, 19, 30])
+    expect([...new Set(tamanhos)].filter((t) => !permitidos.has(t))).toEqual([])
   })
   it('campos de digitação com 16 px (abaixo disso o iPhone dá zoom ao tocar)', () => {
     const campo = /\.mc-campo \{[^}]*font-size:\s*([\d.]+)px/.exec(bloco)
