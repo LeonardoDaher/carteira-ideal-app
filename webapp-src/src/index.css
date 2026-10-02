@@ -1725,11 +1725,9 @@ select option:disabled { color: #6b7280 !important; -webkit-text-fill-color: #6b
 .mc-barra-progresso span { display: block; height: 100%; background: var(--mc-pos); border-radius: 99px; }
 .mc-pendentes { list-style: none; margin: 4px 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
 .mc-pendente { border-left: 3px solid var(--warning); padding: 4px 0 4px 10px; display: flex; flex-direction: column; gap: 4px; }
-.mc-pendente.inconsistente { border-left-color: var(--mc-neg); }
 .mc-pendente-topo { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .mc-selo { font-size: 13px; font-weight: 600; padding: 2px 8px; border-radius: 99px; border: 1px solid var(--mc-card-borda); color: var(--mc-suave); white-space: nowrap; }
 .mc-selo.faltaSaldoAnterior { color: var(--warning); border-color: var(--warning); }
-.mc-selo.inconsistente { color: var(--mc-neg); border-color: var(--mc-neg); }
 .mc-selo.info { color: var(--mc-ouro); border-color: var(--mc-ouro); }
 
 /* posições e lançamentos */
@@ -1807,3 +1805,24 @@ select option:disabled { color: #6b7280 !important; -webkit-text-fill-color: #6b
 @media (max-width: 430px) {
   .mc-eixo span:nth-child(even) { visibility: hidden; }
 }
+
+/* Minha Carteira: posições agrupadas por tipo de ativo (como "Produtos da sua carteira" na Área do Investidor
+   da B3), editor de preço médio e filtro por tipo de lançamento. */
+.mc-grupos { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
+.mc-grupo { border: 1px solid var(--mc-card-borda); border-radius: 14px; background: var(--mc-campo-fundo); }
+.mc-grupo > summary { list-style: none; cursor: pointer; padding: 14px; display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: center; }
+.mc-grupo > summary::-webkit-details-marker { display: none; }
+.mc-grupo > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 14px; }
+.mc-grupo[open] > summary { border-bottom: 1px solid var(--mc-card-borda); }
+.mc-grupo-nome { font-weight: 700; font-size: 15px; }
+.mc-grupo-valor { font-weight: 700; font-size: 15px; font-variant-numeric: tabular-nums; text-align: right; }
+.mc-grupo-info { color: var(--mc-suave); font-size: 13px; }
+.mc-grupo-barra { grid-column: 1 / -1; display: block; height: 6px; border-radius: 99px; background: var(--mc-barra); overflow: hidden; }
+.mc-grupo-barra > span { display: block; height: 100%; background: var(--mc-ouro); border-radius: 99px; }
+.mc-grupo .mc-posicoes { padding: 0 14px 8px; margin: 0; }
+.mc-pos-acoes { grid-column: 1 / -1; display: flex; gap: 8px; flex-wrap: wrap; }
+.mc-pos-editor { grid-column: 1 / -1; }
+.mc-chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 2px 0 4px; }
+.mc-chip { padding: 8px 14px; border-radius: 99px; border: 1px solid var(--mc-campo-borda); background: transparent; color: var(--text); font: inherit; font-size: 13px; cursor: pointer; }
+.mc-chip[aria-pressed='true'] { background: var(--mc-ouro); border-color: var(--mc-ouro); color: #1a1400; font-weight: 700; }
+.mc-chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }

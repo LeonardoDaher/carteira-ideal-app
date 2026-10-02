@@ -7,6 +7,7 @@ import { CartaoComparacao } from '../ui/painel/CartaoComparacao'
 import { CartaoCarteira, CartaoComposicao, CartaoProventos, CartaoVazio } from '../ui/painel/CartoesPainel'
 import { CartaoConferencia } from '../ui/painel/CartaoConferencia'
 import { CartaoLancamentos } from '../ui/painel/CartaoLancamentos'
+import type { FiltroTipo } from '../ui/painel/CartaoLancamentos'
 import { CartaoPosicoes } from '../ui/painel/CartaoPosicoes'
 import { ImportarArquivos } from '../ui/painel/ImportarArquivos'
 import { VoltarInicio } from '../ui/VoltarInicio'
@@ -49,8 +50,9 @@ export function MinhaCarteira({ ctx, hoje }: { ctx: AppCtx; hoje?: Date }) {
   const [aviso, setAviso] = useState<{ tipo: 'ok' | 'erro'; texto: string } | null>(null)
   const [apagando, setApagando] = useState(false)
   const [filtroAtivo, setFiltroAtivo] = useState('')
+  const [filtroTipo, setFiltroTipo] = useState<FiltroTipo>('todos')
 
-  const painel = useMemo(() => montarPainel(c.lancamentos, c.posicao, c.dataPosicao), [c.lancamentos, c.posicao, c.dataPosicao])
+  const painel = useMemo(() => montarPainel(c.lancamentos, c.posicao, c.dataPosicao, c.precosMedios), [c.lancamentos, c.posicao, c.dataPosicao, c.precosMedios])
   // Com a Posição, o gráfico mostra só o que a pessoa tem hoje; sem ela, todo o histórico.
   const atuais = useMemo(() => (painel.resumo.patrimonio !== null ? new Set(painel.ativosAtuais) : null), [painel])
   const serieCapital = useMemo(() => capitalAplicadoPorMes(c.lancamentos, mesAtual, 12, atuais), [c.lancamentos, mesAtual, atuais])
@@ -59,9 +61,10 @@ export function MinhaCarteira({ ctx, hoje }: { ctx: AppCtx; hoje?: Date }) {
   const proximos = useMemo(() => proximosProventos(c.eventosFuturos, hojeISO), [c.eventosFuturos, hojeISO])
   const temDados = c.lancamentos.length > 0 || !!c.posicao
 
-  /** Do cartão de conferência para a lista de lançamentos, já filtrada pelo ativo que a pessoa quer corrigir. */
+  /** De um ativo (conferência ou posições) para a lista de lançamentos, já filtrada por ele e só com compras e vendas, que é o que forma o preço médio. */
   function verLancamentosDe(ativo: string) {
     setFiltroAtivo(ativo)
+    setFiltroTipo('negocios')
     document.getElementById('mc-lancamentos')?.scrollIntoView?.({ behavior: 'smooth', block: 'start' })
   }
 
@@ -105,13 +108,13 @@ export function MinhaCarteira({ ctx, hoje }: { ctx: AppCtx; hoje?: Date }) {
           <CartaoComposicao fatias={fatias} />
           <CartaoConferencia carteira={c} onAdicionar={h.adicionar} onDataPosicao={h.definirDataPosicao} onVerLancamentos={verLancamentosDe} />
           <div className="mc-largo">
-            <CartaoPosicoes linhas={painel.linhas} />
+            <CartaoPosicoes linhas={painel.linhas} onDefinirPrecoMedio={h.definirPrecoMedio} onVerLancamentos={verLancamentosDe} />
           </div>
         </div>
       )}
 
       {h.hidratado && (
-        <CartaoLancamentos lancamentos={c.lancamentos} hoje={hojeISO} onAdicionar={h.adicionar} onCorrigir={h.corrigir} onExcluir={h.excluir} filtro={filtroAtivo} onFiltro={setFiltroAtivo} />
+        <CartaoLancamentos lancamentos={c.lancamentos} hoje={hojeISO} onAdicionar={h.adicionar} onCorrigir={h.corrigir} onExcluir={h.excluir} filtro={filtroAtivo} onFiltro={setFiltroAtivo} filtroTipo={filtroTipo} onFiltroTipo={setFiltroTipo} />
       )}
 
       {h.hidratado && (

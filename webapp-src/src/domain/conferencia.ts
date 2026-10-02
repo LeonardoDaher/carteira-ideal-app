@@ -16,6 +16,10 @@
 // conferir nem corrigir, e ele não polui a lista. O que fica de fora é devolvido em `foraDaPosicao`, só
 // para o painel reconhecer compras muito recentes que a custódia ainda não mostra (D+2).
 //
+// Por isso só existem DOIS resultados, sem "inconsistência": o ativo BATE (mesmo que os lançamentos mostrem
+// MAIS do que a Posição: venda ou ajuste fora do histórico; a Posição manda e o preço médio não muda) ou
+// FALTA o preço de compra de cotas que a Posição mostra e o histórico importado não explica.
+//
 // Módulo puro: sem rede, sem React.
 import type { ItemPosicaoB3 } from './importacao/planilha'
 import { ordenarLancamentos, somarDiasUteis, type Lancamento, type LancamentoNovo } from './lancamentos'
@@ -23,12 +27,10 @@ import { ordenarLancamentos, somarDiasUteis, type Lancamento, type LancamentoNov
 const EPS = 1e-6
 
 export type StatusConferencia =
-  /** A quantidade dos lançamentos liquidados é igual à da Posição. */
+  /** O histórico explica a Posição (ou até mostra a mais: a Posição manda). O preço médio é confiável. */
   | 'confere'
-  /** Falta histórico anterior: sugere um saldo inicial com a quantidade que falta. */
+  /** A Posição tem cotas cuja compra não está no histórico importado: falta o preço médio desse saldo. */
   | 'faltaSaldoAnterior'
-  /** Não dá para explicar por saldo anterior (ex.: lançamentos a mais que a custódia). Exige revisão. */
-  | 'inconsistente'
 
 export interface ItemConferencia {
   ativo: string
@@ -38,12 +40,10 @@ export interface ItemConferencia {
   quantidadeLancamentos: number
   /** Soma líquida de negócios feitos mas ainda não liquidados na data da Posição (informativo). */
   naoLiquidado: number
-  /** Quantidade que falta (só em faltaSaldoAnterior). */
+  /** Quantidade cujo preço de compra falta (só em faltaSaldoAnterior). */
   faltante: number
-  /** Quanto os lançamentos liquidados somam A MAIS do que a Posição mostra (0 se não há excesso). Pede uma baixa. */
+  /** Quanto os lançamentos liquidados somam A MAIS do que a Posição mostra (0 se não há). Só informativo: a Posição manda e o preço médio não muda. */
   excesso: number
-  /** Saldo que a pessoa precisaria ter antes do primeiro lançamento para o histórico nunca ficar negativo (0 se nenhum). */
-  saldoNecessario: number
   /** Dia útil anterior ao primeiro lançamento do ativo (ou do livro), para o saldo inicial entrar antes de tudo. A pessoa pode trocar. */
   dataSugeridaSaldo: string
   explicacao: string
@@ -87,15 +87,32 @@ function eventoDe(l: Lancamento, limiteLiquidacao: string, dataPosicao: string):
 
 const fmt = (n: number) => String(Number(n.toFixed(6)))
 
+/** Ativos cuja Posição traz o valor aplicado em TODAS as linhas (Tesouro Direto): o custo vem da B3. */
+export function ativosComValorAplicado(posicao: ItemPosicaoB3[]): Set<string> {
+  const por = new Map<string, { soma: number; todos: boolean }>()
+  for (const p of posicao) {
+    const a = por.get(p.ativo) ?? { soma: 0, todos: true }
+    if (p.valorAplicado === null || !(p.valorAplicado > 0)) a.todos = false
+    else a.soma += p.valorAplicado
+    por.set(p.ativo, a)
+  }
+  return new Set([...por].filter(([, a]) => a.todos && a.soma > 0).map(([ativo]) => ativo))
+}
+
 /**
  * @param dataPosicao data a que a Posição se refere (AAAA-MM-DD): o último pregão antes do download.
+ * @param informados ativos cujo preço médio a PESSOA informou: não há mais o que pedir deles.
+ *
+ * O preço de compra também é conhecido, sem pedir nada, quando a própria Posição traz o VALOR APLICADO
+ * (é o caso do Tesouro Direto): ele é o custo, informado pela B3.
  */
-export function conferirComPosicao(lancamentos: Lancamento[], posicao: ItemPosicaoB3[], dataPosicao: string): Conferencia {
+export function conferirComPosicao(lancamentos: Lancamento[], posicao: ItemPosicaoB3[], dataPosicao: string, informados: ReadonlySet<string> = new Set()): Conferencia {
   // Negócio feito no dia d só aparece na custódia em d + 2 dias úteis.
   const limiteLiquidacao = somarDiasUteis(dataPosicao, -2)
 
   const naPosicao = new Map<string, number>()
   for (const p of posicao) naPosicao.set(p.ativo, (naPosicao.get(p.ativo) ?? 0) + p.quantidade)
+  const custoDaB3 = ativosComValorAplicado(posicao)
 
   const porAtivo = new Map<string, Lancamento[]>()
   for (const l of ordenarLancamentos(lancamentos)) {
@@ -125,32 +142,37 @@ export function conferirComPosicao(lancamentos: Lancamento[], posicao: ItemPosic
     const naoLiquidado = eventos.filter((e) => !e.liquidado).reduce((s, e) => s + e.q, 0)
     const qPos = naPosicao.get(ativo) ?? 0
 
-    // Saldo anterior ao primeiro lançamento que faria a conta fechar com a Posição.
+    // A Posição manda. Menor saldo ANTERIOR ao histórico que explica tudo: o que cobre a Posição e o que evita
+    // o histórico ficar negativo no meio do caminho (vendeu antes de ter). Lançamentos a MAIS não pedem nada.
     const faltante = qPos - liquido
-    const exigidoPeloHistorico = -minimo // quanto era preciso ter antes para nunca ficar negativo
+    const exigidoPeloHistorico = -minimo
+    const saldoAnterior = Math.max(faltante, exigidoPeloHistorico, 0)
+    const excesso = faltante < -EPS ? -faltante : 0
     const primeira = ls.length ? ls[0].data : inicioDoLivro
     const dataSugeridaSaldo = primeira ? somarDiasUteis(primeira, -1) : dataPosicao
 
     let status: StatusConferencia
     let explicacao: string
-    if (Math.abs(faltante) <= EPS && exigidoPeloHistorico <= EPS) {
+    if (saldoAnterior > EPS) {
+      if (informados.has(ativo) || custoDaB3.has(ativo)) {
+        // O preço médio já é conhecido (informado pela pessoa ou pelo valor aplicado da B3): nada a pedir.
+        status = 'confere'
+        explicacao = informados.has(ativo) ? 'O preço médio foi informado por você.' : 'O preço médio vem do valor aplicado informado pela B3.'
+      } else {
+        status = 'faltaSaldoAnterior'
+        explicacao =
+          ls.length === 0
+            ? `Você tem ${fmt(qPos)} na Posição, mas nenhum lançamento: a compra é anterior ao período importado. Informe o preço médio para registrar o saldo inicial.`
+            : `Faltam ${fmt(saldoAnterior)} que você já tinha antes do período importado. Informe o preço médio desse saldo ou importe um período mais longo.`
+      }
+    } else {
       status = 'confere'
       explicacao =
-        naoLiquidado !== 0
-          ? `Confere com a Posição. ${fmt(Math.abs(naoLiquidado))} em negócios recentes ainda não liquidados (D+2) entram na custódia nos próximos dias.`
-          : 'Confere com a Posição.'
-    } else if (faltante > EPS && faltante + EPS >= exigidoPeloHistorico) {
-      status = 'faltaSaldoAnterior'
-      explicacao =
-        ls.length === 0
-          ? `Você tem ${fmt(qPos)} na Posição, mas nenhum lançamento: a compra é anterior ao período importado. Informe o preço médio para registrar o saldo inicial.`
-          : `Faltam ${fmt(faltante)} que você já tinha antes do período importado. Informe o preço médio desse saldo ou importe um período mais longo.`
-    } else {
-      status = 'inconsistente'
-      explicacao =
-        faltante < -EPS
-          ? `Os lançamentos somam ${fmt(liquido)} e a Posição mostra ${fmt(qPos)}: há ${fmt(-faltante)} a mais nos lançamentos. Confira transferências entre corretoras, lançamentos repetidos ou vendas já registradas.`
-          : `As vendas superam o que os lançamentos justificam e o saldo anterior necessário (${fmt(exigidoPeloHistorico)}) é maior que a diferença com a Posição (${fmt(Math.max(faltante, 0))}). Revise os lançamentos deste ativo.`
+        excesso > EPS
+          ? `Confere com a Posição, que é quem manda. Seus lançamentos mostram ${fmt(excesso)} a mais (uma venda ou ajuste fora do histórico). Isso não muda o preço médio.`
+          : naoLiquidado !== 0
+            ? `Confere com a Posição. ${fmt(Math.abs(naoLiquidado))} em negócios recentes ainda não liquidados (D+2) entram na custódia nos próximos dias.`
+            : 'Confere com a Posição.'
     }
 
     itens.push({
@@ -159,18 +181,17 @@ export function conferirComPosicao(lancamentos: Lancamento[], posicao: ItemPosic
       quantidadePosicao: qPos,
       quantidadeLancamentos: liquido,
       naoLiquidado,
-      faltante: status === 'faltaSaldoAnterior' ? faltante : 0,
-      excesso: faltante < -EPS ? -faltante : 0,
-      saldoNecessario: exigidoPeloHistorico > EPS ? exigidoPeloHistorico : 0,
+      faltante: status === 'faltaSaldoAnterior' ? saldoAnterior : 0,
+      excesso,
       dataSugeridaSaldo,
       explicacao,
     })
   }
 
-  const ordem: Record<StatusConferencia, number> = { inconsistente: 0, faltaSaldoAnterior: 1, confere: 2 }
+  const ordem: Record<StatusConferencia, number> = { faltaSaldoAnterior: 0, confere: 1 }
   itens.sort((a, b) => ordem[a.status] - ordem[b.status] || a.ativo.localeCompare(b.ativo))
 
-  const resumo: Conferencia['resumo'] = { confere: 0, faltaSaldoAnterior: 0, inconsistente: 0 }
+  const resumo: Conferencia['resumo'] = { confere: 0, faltaSaldoAnterior: 0 }
   for (const i of itens) resumo[i.status]++
   const foraDaPosicao: ForaDaPosicao[] = []
   for (const [ativo, ls] of porAtivo) {
@@ -186,14 +207,10 @@ export function conferirComPosicao(lancamentos: Lancamento[], posicao: ItemPosic
   return { dataPosicao, itens, resumo, foraDaPosicao }
 }
 
-/**
- * Transforma uma pendência da conferência em lançamento de saldo inicial, com o preço médio informado.
- * A quantidade é a que falta (faltaSaldoAnterior) ou, numa pendência inconsistente porque as vendas
- * superam o histórico, o saldo que o histórico exige ter tido antes. Sem nenhuma das duas, devolve null.
- */
+/** Transforma uma pendência da conferência em lançamento de saldo inicial, com o preço médio informado. */
 export function criarSaldoInicial(item: ItemConferencia, precoMedio: number): LancamentoNovo | null {
-  const quantidade = item.status === 'faltaSaldoAnterior' ? item.faltante : item.saldoNecessario
-  if (!(quantidade > EPS) || !(precoMedio > 0)) return null
+  if (item.status !== 'faltaSaldoAnterior' || !(precoMedio > 0)) return null
+  const quantidade = item.faltante
   return {
     data: item.dataSugeridaSaldo,
     tipo: 'saldoInicial',

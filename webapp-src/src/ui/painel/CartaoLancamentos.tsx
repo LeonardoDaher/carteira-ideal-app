@@ -21,6 +21,9 @@ const ROTULO_ORIGEM: Record<OrigemLancamento, string> = {
 }
 const ROTULO_SUBTIPO: Record<SubtipoProvento, string> = { dividendo: 'Dividendo', jcp: 'JCP', rendimento: 'Rendimento' }
 
+export type FiltroTipo = 'todos' | 'negocios' | 'proventos'
+const ROTULO_FILTRO: Record<FiltroTipo, string> = { todos: 'Todos', negocios: 'Compras e vendas', proventos: 'Proventos' }
+
 interface Campos {
   tipo: TipoLancamento
   data: string
@@ -176,12 +179,17 @@ export function CartaoLancamentos({
   onExcluir,
   filtro,
   onFiltro,
+  filtroTipo,
+  onFiltroTipo,
 }: {
   lancamentos: Lancamento[]
   hoje: string
   /** Texto digitado no filtro por ativo (vazio = todos). */
   filtro: string
   onFiltro: (texto: string) => void
+  /** Que tipo de lançamento mostrar: todos, só compras/vendas (o que forma o preço médio) ou só proventos. */
+  filtroTipo: FiltroTipo
+  onFiltroTipo: (tipo: FiltroTipo) => void
   onAdicionar: (novo: Omit<LancamentoNovo, 'origem'>) => ProblemaLancamento | null
   onCorrigir: (id: string, correcao: Partial<Omit<LancamentoNovo, 'origem'>>) => ProblemaLancamento | null
   onExcluir: (id: string) => void
@@ -191,7 +199,10 @@ export function CartaoLancamentos({
   const [excluindo, setExcluindo] = useState<string | null>(null)
   const [todos, setTodos] = useState(false)
   const termo = filtro.trim().toUpperCase()
-  const filtrados = termo ? lancamentos.filter((l) => l.ativo.includes(termo)) : lancamentos
+  const filtrando = !!termo || filtroTipo !== 'todos'
+  const filtrados = lancamentos.filter(
+    (l) => (!termo || l.ativo.includes(termo)) && (filtroTipo === 'todos' || (filtroTipo === 'proventos') === (l.tipo === 'provento')),
+  )
   const recentes = [...filtrados].sort((a, b) => b.data.localeCompare(a.data))
   const visiveis = todos ? recentes : recentes.slice(0, 15)
   const editando = modo.tipo === 'editar' ? lancamentos.find((l) => l.id === modo.id) : undefined
@@ -206,7 +217,7 @@ export function CartaoLancamentos({
           </button>
         )}
       </div>
-      <div className="mc-rotulo">{termo ? `${filtrados.length} de ${lancamentos.length} lançamento(s)` : `${lancamentos.length} lançamento(s)`}</div>
+      <div className="mc-rotulo">{filtrando ? `${filtrados.length} de ${lancamentos.length} lançamento(s)` : `${lancamentos.length} lançamento(s)`}</div>
       <div className="mc-filtro">
         <input
           className="mc-campo mc-campo-curto"
@@ -215,11 +226,25 @@ export function CartaoLancamentos({
           value={filtro}
           onChange={(e) => onFiltro(e.target.value)}
         />
-        {termo && (
-          <button type="button" className="btn btn-ghost mc-btn" onClick={() => onFiltro('')}>
+        {filtrando && (
+          <button
+            type="button"
+            className="btn btn-ghost mc-btn"
+            onClick={() => {
+              onFiltro('')
+              onFiltroTipo('todos')
+            }}
+          >
             Limpar filtro
           </button>
         )}
+      </div>
+      <div className="mc-chips" role="group" aria-label="Tipo de lançamento">
+        {(['todos', 'negocios', 'proventos'] as FiltroTipo[]).map((t) => (
+          <button key={t} type="button" className="mc-chip" aria-pressed={filtroTipo === t} onClick={() => onFiltroTipo(t)}>
+            {ROTULO_FILTRO[t]}
+          </button>
+        ))}
       </div>
 
       {modo.tipo === 'novo' && (
@@ -250,7 +275,7 @@ export function CartaoLancamentos({
       )}
 
       {recentes.length === 0 ? (
-        <p className="mc-texto">{termo ? `Nenhum lançamento de ${termo}.` : 'Nenhum lançamento ainda. Importe um extrato ou adicione o primeiro à mão.'}</p>
+        <p className="mc-texto">{termo ? `Nenhum lançamento de ${termo}.` : filtrando ? 'Nenhum lançamento deste tipo.' : 'Nenhum lançamento ainda. Importe um extrato ou adicione o primeiro à mão.'}</p>
       ) : (
         <ul className="mc-lancamentos">
           {visiveis.map((l) => (

@@ -86,6 +86,17 @@ export function useCarteiraReal(hoje: string) {
     [aplicar],
   )
 
+  /** Guarda o preço médio que a pessoa informou para um ativo; com null (ou valor inválido), volta ao calculado. */
+  const definirPrecoMedio = useCallback(
+    (ativo: string, preco: number | null) => {
+      const precosMedios = { ...ref.current.precosMedios }
+      if (preco !== null && preco > 0 && Number.isFinite(preco)) precosMedios[ativo] = preco
+      else delete precosMedios[ativo]
+      aplicar({ ...ref.current, precosMedios })
+    },
+    [aplicar],
+  )
+
   const definirDataPosicao = useCallback((dataPosicao: string) => aplicar({ ...ref.current, dataPosicao }), [aplicar])
   const limpar = useCallback(() => aplicar(carteiraVazia()), [aplicar])
   const exportarBackup = useCallback(() => serializarCarteira(ref.current), [])
@@ -101,7 +112,7 @@ export function useCarteiraReal(hoje: string) {
     [aplicar],
   )
 
-  return { carteira, hidratado, importarArquivos, adicionar, corrigir, excluir, definirClasse, definirDataPosicao, limpar, exportarBackup, restaurarBackup }
+  return { carteira, hidratado, importarArquivos, adicionar, corrigir, excluir, definirClasse, definirPrecoMedio, definirDataPosicao, limpar, exportarBackup, restaurarBackup }
 }
 
 export type CarteiraReal = ReturnType<typeof useCarteiraReal>

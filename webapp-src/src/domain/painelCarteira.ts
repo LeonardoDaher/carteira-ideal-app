@@ -11,7 +11,7 @@
 //    sobre o que ela tem hoje; o histórico serve para dar o preço médio de quem está lá.
 //  - Resultado (lucro/prejuízo) só é calculado para ativos cujo histórico CONFERE com a Posição;
 //    a tela mostra qual parte da carteira essa conta cobre.
-import { conferirComPosicao, type StatusConferencia } from './conferencia'
+import { ativosComValorAplicado, conferirComPosicao, type StatusConferencia } from './conferencia'
 import type { CategoriaPosicao, EventoFuturo, ItemPosicaoB3 } from './importacao/planilha'
 import { derivarPosicoes, type Lancamento } from './lancamentos'
 
@@ -24,12 +24,16 @@ export const ROTULOS_CATEGORIA: Record<CategoriaPosicao, string> = {
   outra: 'Outros',
 }
 
+export type OrigemPrecoMedio = 'calculado' | 'b3' | 'informado'
+
 export interface LinhaPosicao {
   ativo: string
   categoria: CategoriaPosicao | null
   quantidade: number
-  /** null quando o histórico não permite saber (falta saldo anterior ou lançamentos inconsistentes). */
+  /** null quando o histórico não permite saber (falta o saldo anterior ao período importado). */
   precoMedio: number | null
+  /** De onde vem o preço médio: calculado pelos lançamentos, valor aplicado da B3 (Tesouro) ou informado pela pessoa. */
+  origemPrecoMedio: OrigemPrecoMedio | null
   custoTotal: number | null
   valorAtual: number | null
   resultado: number | null
@@ -64,38 +68,53 @@ export interface Painel {
 
 const EPS = 1e-9
 
-export function montarPainel(lancamentos: Lancamento[], posicao: ItemPosicaoB3[] | null, dataPosicao: string | null): Painel {
+/**
+ * @param precosInformados preço médio que a PESSOA informou por ativo: vale mais que o calculado e que o da B3.
+ */
+export function montarPainel(
+  lancamentos: Lancamento[],
+  posicao: ItemPosicaoB3[] | null,
+  dataPosicao: string | null,
+  precosInformados: Readonly<Record<string, number>> = {},
+): Painel {
   const derivadas = derivarPosicoes(lancamentos).posicoes.filter((p) => p.quantidade > EPS)
   const derivadaPorAtivo = new Map(derivadas.map((p) => [p.ativo, p]))
-  const capitalAplicado = derivadas.reduce((s, p) => s + p.custoTotal, 0)
 
   if (!posicao || !posicao.length || !dataPosicao) {
     const linhas: LinhaPosicao[] = derivadas
-      .map((p) => ({
-        ativo: p.ativo,
-        categoria: null,
-        quantidade: p.quantidade,
-        precoMedio: p.precoMedio,
-        custoTotal: p.custoTotal,
-        valorAtual: null,
-        resultado: null,
-        resultadoPct: null,
-        status: 'semPosicao' as const,
-        aguardandoLiquidacao: false,
-      }))
+      .map((p) => {
+        const informado = precosInformados[p.ativo]
+        const pm = informado > 0 ? informado : p.precoMedio
+        return {
+          ativo: p.ativo,
+          categoria: null,
+          quantidade: p.quantidade,
+          precoMedio: pm,
+          origemPrecoMedio: (informado > 0 ? 'informado' : 'calculado') as OrigemPrecoMedio,
+          custoTotal: pm * p.quantidade,
+          valorAtual: null,
+          resultado: null,
+          resultadoPct: null,
+          status: 'semPosicao' as const,
+          aguardandoLiquidacao: false,
+        }
+      })
       .sort((a, b) => (b.custoTotal ?? 0) - (a.custoTotal ?? 0))
-    return { linhas, ativosAtuais: linhas.map((l) => l.ativo), resumo: { capitalAplicado, patrimonio: null, dataPosicao: null, resultado: null } }
+    const capital = linhas.reduce((t, l) => t + (l.custoTotal ?? 0), 0)
+    return { linhas, ativosAtuais: linhas.map((l) => l.ativo), resumo: { capitalAplicado: capital, patrimonio: null, dataPosicao: null, resultado: null } }
   }
 
-  const conferencia = conferirComPosicao(lancamentos, posicao, dataPosicao)
+  const conferencia = conferirComPosicao(lancamentos, posicao, dataPosicao, new Set(Object.keys(precosInformados)))
   const confPorAtivo = new Map(conferencia.itens.map((i) => [i.ativo, i]))
 
   // Posição agregada por ativo (a mesma ação pode estar em mais de uma instituição).
-  const agregada = new Map<string, { quantidade: number; valor: number; categoria: CategoriaPosicao }>()
+  const custoDaB3 = ativosComValorAplicado(posicao)
+  const agregada = new Map<string, { quantidade: number; valor: number; aplicado: number; categoria: CategoriaPosicao }>()
   for (const p of posicao) {
-    const a = agregada.get(p.ativo) ?? { quantidade: 0, valor: 0, categoria: p.categoria }
+    const a = agregada.get(p.ativo) ?? { quantidade: 0, valor: 0, aplicado: 0, categoria: p.categoria }
     a.quantidade += p.quantidade
     a.valor += p.valorAtualizado
+    a.aplicado += p.valorAplicado ?? 0
     agregada.set(p.ativo, a)
   }
 
@@ -104,17 +123,34 @@ export function montarPainel(lancamentos: Lancamento[], posicao: ItemPosicaoB3[]
     const c = confPorAtivo.get(ativo)
     const d = derivadaPorAtivo.get(ativo)
     const status: StatusConferencia = c?.status ?? 'faltaSaldoAnterior'
-    const confere = status === 'confere' && !!d
     const aguardando = !!c && Math.abs(c.naoLiquidado) > EPS
-    const custoTotal = confere ? d!.precoMedio * a.quantidade : null
-    // Só dá para dizer o resultado quando a custódia e o histórico coincidem exatamente.
-    const comResultado = confere && !aguardando
+
+    // Preço médio, por ordem de confiança: o que a pessoa informou, o valor aplicado da B3 (Tesouro) e,
+    // por último, o calculado pelos lançamentos (só quando o histórico confere com a Posição).
+    const informado = precosInformados[ativo]
+    let precoMedio: number | null = null
+    let origem: OrigemPrecoMedio | null = null
+    if (informado > 0) {
+      precoMedio = informado
+      origem = 'informado'
+    } else if (custoDaB3.has(ativo) && a.quantidade > EPS) {
+      precoMedio = a.aplicado / a.quantidade
+      origem = 'b3'
+    } else if (status === 'confere' && d) {
+      precoMedio = d.precoMedio
+      origem = 'calculado'
+    }
+    const custoTotal = precoMedio !== null ? precoMedio * a.quantidade : null
+    // O calculado só dá resultado quando a custódia e o histórico coincidem (sem negócio a caminho);
+    // o informado e o da B3 são o custo de hoje, então dão resultado sempre.
+    const comResultado = precoMedio !== null && (origem !== 'calculado' || !aguardando)
     const resultado = comResultado ? a.valor - custoTotal! : null
     linhas.push({
       ativo,
       categoria: a.categoria,
       quantidade: a.quantidade,
-      precoMedio: confere ? d!.precoMedio : null,
+      precoMedio,
+      origemPrecoMedio: origem,
       custoTotal,
       valorAtual: a.valor,
       resultado,
@@ -134,6 +170,7 @@ export function montarPainel(lancamentos: Lancamento[], posicao: ItemPosicaoB3[]
       categoria: null,
       quantidade: f.naoLiquidado,
       precoMedio: d ? d.precoMedio : null,
+      origemPrecoMedio: d ? 'calculado' : null,
       custoTotal: d ? d.precoMedio * f.naoLiquidado : null,
       valorAtual: null,
       resultado: null,
@@ -155,6 +192,45 @@ export function montarPainel(lancamentos: Lancamento[], posicao: ItemPosicaoB3[]
   // Com Posição, o capital aplicado é o custo dos ativos que a pessoa TEM e cujo preço médio é conhecido.
   const capitalDosAtuais = linhas.reduce((s, l) => s + (l.custoTotal ?? 0), 0)
   return { linhas, ativosAtuais: linhas.map((l) => l.ativo), resumo: { capitalAplicado: capitalDosAtuais, patrimonio, dataPosicao, resultado } }
+}
+
+export interface GrupoPosicoes {
+  /** Categoria da B3, ou 'recentes' para compras ainda não liquidadas. */
+  chave: CategoriaPosicao | 'recentes'
+  rotulo: string
+  ativos: number
+  valor: number
+  /** Fatia do patrimônio, de 0 a 100. */
+  pct: number
+  linhas: LinhaPosicao[]
+}
+
+/**
+ * Agrupa as posições como a Área do Investidor da B3 ("Produtos da sua carteira"): Ações, Tesouro Direto,
+ * FIIs, BDRs, ETFs. Cada grupo traz quantos ativos tem, quanto vale e que fatia da carteira é; os
+ * grupos e os ativos de dentro saem do maior para o menor valor.
+ */
+export function agruparPosicoes(linhas: LinhaPosicao[]): GrupoPosicoes[] {
+  const total = linhas.reduce((s, l) => s + (l.valorAtual ?? 0), 0)
+  const porChave = new Map<GrupoPosicoes['chave'], LinhaPosicao[]>()
+  for (const l of linhas) {
+    const chave: GrupoPosicoes['chave'] = l.categoria ?? 'recentes'
+    porChave.set(chave, [...(porChave.get(chave) ?? []), l])
+  }
+  const valorDe = (l: LinhaPosicao) => l.valorAtual ?? l.custoTotal ?? 0
+  return [...porChave.entries()]
+    .map(([chave, ls]) => {
+      const valor = ls.reduce((s, l) => s + (l.valorAtual ?? 0), 0)
+      return {
+        chave,
+        rotulo: chave === 'recentes' ? 'Compras recentes (aguardando liquidação)' : ROTULOS_CATEGORIA[chave],
+        ativos: ls.length,
+        valor,
+        pct: total > EPS ? (valor / total) * 100 : 0,
+        linhas: [...ls].sort((a, b) => valorDe(b) - valorDe(a)),
+      }
+    })
+    .sort((a, b) => (a.chave === 'recentes' ? 1 : b.chave === 'recentes' ? -1 : b.valor - a.valor))
 }
 
 export interface FatiaComposicao {

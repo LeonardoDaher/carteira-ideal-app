@@ -173,3 +173,32 @@ describe('migração: ativos gravados com o nome inteiro do produto', () => {
     expect(canonizarAtivos(uma)).toBe(uma)
   })
 })
+
+describe('preços médios informados pela pessoa', () => {
+  const bruto = (precos: unknown) => JSON.stringify({ versao: VERSAO_CARTEIRA, carteira: { lancamentos: [], excluidas: [], posicao: null, dataPosicao: null, eventosFuturos: [], classes: {}, precosMedios: precos } })
+
+  it('sobrevivem à gravação', () => {
+    const c0 = { ...carteiraVazia(), precosMedios: { VALE3: 12.5, 'TESOURO IPCA+ 2045': 99.9 } }
+    expect(lerCarteiraSalva(serializarCarteira(c0))!.precosMedios).toEqual({ VALE3: 12.5, 'TESOURO IPCA+ 2045': 99.9 })
+  })
+  it('só valores numéricos maiores que zero são aceitos', () => {
+    expect(lerCarteiraSalva(bruto({ A: 10, B: 0, C: -5, D: 'dez', E: null, F: Number.NaN }))!.precosMedios).toEqual({ A: 10 })
+  })
+  it('carteira gravada antes deste recurso (sem o campo) abre normalmente, com preços vazios', () => {
+    const antiga = JSON.stringify({ versao: VERSAO_CARTEIRA, carteira: { lancamentos: [], excluidas: [], posicao: null, dataPosicao: null, eventosFuturos: [] } })
+    expect(lerCarteiraSalva(antiga)!.precosMedios).toEqual({})
+  })
+  it('valor que não é objeto vira vazio', () => {
+    expect(lerCarteiraSalva(bruto('texto'))!.precosMedios).toEqual({})
+    expect(lerCarteiraSalva(bruto([10]))!.precosMedios).toEqual({})
+  })
+  it('a migração dos nomes antigos de ativo também remapeia o preço informado', () => {
+    const c0 = canonizarAtivos({ ...carteiraVazia(), precosMedios: { 'B3SA3 - B3 S.A. - BRASIL, BOLSA, BALCAO': 11.2 } })
+    expect(c0.precosMedios).toEqual({ B3SA3: 11.2 })
+  })
+  it('importar arquivos não apaga os preços já informados', () => {
+    const c0 = { ...carteiraVazia(), precosMedios: { VALE3: 10 } }
+    const r = aplicarImportacao(c0, [{ nome: 'n.xlsx', resultado: { perfil: 'b3-negociacao', lancamentos: [], avisos: [], erros: [], linhasLidas: 0 } }], '2026-10-01')
+    expect(r.carteira.precosMedios).toEqual({ VALE3: 10 })
+  })
+})

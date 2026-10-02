@@ -14,7 +14,7 @@ const catalogo = montarCatalogo({
 })
 
 const linha = (ativo: string, valorAtual: number | null, categoria: LinhaPosicao['categoria'] = null, custoTotal: number | null = null): LinhaPosicao => ({
-  ativo, categoria, quantidade: 10, precoMedio: null, custoTotal, valorAtual, resultado: null, resultadoPct: null, status: 'confere', aguardandoLiquidacao: false,
+  ativo, categoria, quantidade: 10, precoMedio: null, origemPrecoMedio: null, custoTotal, valorAtual, resultado: null, resultadoPct: null, status: 'confere', aguardandoLiquidacao: false,
 })
 
 describe('classificarPosicoes', () => {

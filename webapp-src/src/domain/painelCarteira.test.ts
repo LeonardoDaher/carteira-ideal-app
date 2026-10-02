@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { EventoFuturo, ItemPosicaoB3 } from './importacao/planilha'
 import { mesclarLancamentos, type LancamentoNovo } from './lancamentos'
-import { capitalAplicadoPorMes, composicaoPorCategoria, mesesAte, montarPainel, proventosPorMes, proximosProventos, variacaoPct } from './painelCarteira'
+import { agruparPosicoes, capitalAplicadoPorMes, composicaoPorCategoria, mesesAte, montarPainel, proventosPorMes, proximosProventos, variacaoPct } from './painelCarteira'
 
 const L = (o: Partial<LancamentoNovo>): LancamentoNovo => ({
   data: '2026-03-02', tipo: 'compra', ativo: 'VALE3', quantidade: 100, preco: 10, valor: 1000, taxas: 0, origem: 'b3-negociacao', ...o,
@@ -104,6 +104,85 @@ describe('montarPainel: ativo que a Posição não tem (já zerado) não aparece
   })
   it('sem restrição, a série continua mostrando todo o histórico (comportamento sem Posição)', () => {
     expect(capitalAplicadoPorMes(lancs, '2026-10', 1)[0].valor).toBe(6000)
+  })
+})
+
+describe('origem do preço médio: informado, valor aplicado da B3 ou calculado', () => {
+  const tesouro = (aplicado: number | null): ItemPosicaoB3 => ({ ativo: 'TESOURO IPCA+ 2045', categoria: 'tesouro', quantidade: 40, precoFechamento: null, valorAtualizado: 5000, valorAplicado: aplicado })
+
+  it('Tesouro: o custo vem do valor aplicado da B3, sem precisar de nenhum lançamento', () => {
+    const p = montarPainel([], [tesouro(4000)], DATA_POS)
+    expect(p.linhas[0]).toMatchObject({ origemPrecoMedio: 'b3', precoMedio: 100, custoTotal: 4000, resultado: 1000, resultadoPct: 25, status: 'confere' })
+    expect(p.resumo.resultado).toEqual({ valor: 1000, pct: 25, cobertura: 1 })
+  })
+  it('sem valor aplicado e sem histórico, o preço médio é desconhecido (e falta o preço de compra)', () => {
+    const p = montarPainel([], [tesouro(null)], DATA_POS)
+    expect(p.linhas[0]).toMatchObject({ origemPrecoMedio: null, precoMedio: null, resultado: null, status: 'faltaSaldoAnterior' })
+  })
+  it('o preço informado pela pessoa vale mais que o calculado', () => {
+    const calculado = montarPainel(livro(L({})), [P('VALE3', 100, 1500)], DATA_POS).linhas[0]
+    expect(calculado).toMatchObject({ origemPrecoMedio: 'calculado', precoMedio: 10 })
+    const informado = montarPainel(livro(L({})), [P('VALE3', 100, 1500)], DATA_POS, { VALE3: 12.5 }).linhas[0]
+    expect(informado).toMatchObject({ origemPrecoMedio: 'informado', precoMedio: 12.5, custoTotal: 1250, resultado: 250, resultadoPct: 20 })
+  })
+  it('o preço informado vale mais que o valor aplicado da B3', () => {
+    const l = montarPainel([], [tesouro(4000)], DATA_POS, { 'TESOURO IPCA+ 2045': 90 }).linhas[0]
+    expect(l).toMatchObject({ origemPrecoMedio: 'informado', precoMedio: 90, custoTotal: 3600 })
+  })
+  it('informar o preço resolve o ativo com histórico incompleto: passa a ter resultado e deixa de faltar', () => {
+    const lancs = livro(L({ quantidade: 20, valor: 200 }))
+    const antes = montarPainel(lancs, [P('VALE3', 100, 1500)], DATA_POS).linhas[0]
+    expect(antes).toMatchObject({ status: 'faltaSaldoAnterior', precoMedio: null, resultado: null })
+    const depois = montarPainel(lancs, [P('VALE3', 100, 1500)], DATA_POS, { VALE3: 10 }).linhas[0]
+    expect(depois).toMatchObject({ status: 'confere', precoMedio: 10, resultado: 500 })
+  })
+  it('informar o preço de um ativo não mexe nos outros', () => {
+    const lancs = livro(L({ quantidade: 20, valor: 200 }), L({ ativo: 'BBAS3', quantidade: 20, valor: 400, preco: 20 }))
+    const p = montarPainel(lancs, [P('VALE3', 100, 1500), P('BBAS3', 100, 3000)], DATA_POS, { VALE3: 10 })
+    expect(p.linhas.find((l) => l.ativo === 'BBAS3')).toMatchObject({ status: 'faltaSaldoAnterior', precoMedio: null })
+  })
+  it('compra recente ainda não liquidada: o preço informado também dá resultado (é o custo de hoje)', () => {
+    const lancs = livro(L({}), L({ data: '2026-09-30', quantidade: 10, preco: 12, valor: 120 }))
+    expect(montarPainel(lancs, [P('VALE3', 100, 1500)], DATA_POS).linhas[0].resultado).toBeNull() // calculado: espera liquidar
+    expect(montarPainel(lancs, [P('VALE3', 100, 1500)], DATA_POS, { VALE3: 10 }).linhas[0].resultado).toBe(500)
+  })
+  it('sem Posição, o preço informado também vale (e o total investido usa ele)', () => {
+    const p = montarPainel(livro(L({})), null, null, { VALE3: 15 })
+    expect(p.linhas[0]).toMatchObject({ origemPrecoMedio: 'informado', precoMedio: 15, custoTotal: 1500 })
+    expect(p.resumo.capitalAplicado).toBe(1500)
+  })
+  it('o preço informado de um ativo que não está na Posição é ignorado', () => {
+    const p = montarPainel(livro(L({})), [P('BBAS3', 10, 100)], DATA_POS, { VALE3: 99 })
+    expect(p.linhas.map((l) => l.ativo)).toEqual(['BBAS3'])
+  })
+})
+
+describe('agruparPosicoes: por tipo de ativo, como na Área do Investidor da B3', () => {
+  const pos4 = [P('VALE3', 600, 600), P('BBAS3', 200, 200), P('MXRF11', 150, 150, 'fundos'), P('AAPL34', 50, 50, 'bdr')]
+  const grupos = agruparPosicoes(montarPainel([], pos4, DATA_POS).linhas)
+
+  it('um grupo por categoria, do maior para o menor valor, com quantos ativos tem', () => {
+    expect(grupos.map((g) => [g.chave, g.ativos])).toEqual([['acoes', 2], ['fundos', 1], ['bdr', 1]])
+    expect(grupos.map((g) => g.rotulo)).toEqual(['Ações', 'FIIs e fundos', 'BDRs'])
+  })
+  it('valor e fatia da carteira de cada grupo (somam 100%)', () => {
+    expect(grupos.map((g) => g.valor)).toEqual([800, 150, 50])
+    expect(grupos.map((g) => g.pct)).toEqual([80, 15, 5])
+    expect(grupos.reduce((s, g) => s + g.pct, 0)).toBeCloseTo(100, 8)
+  })
+  it('dentro do grupo, os ativos saem do maior para o menor valor', () => {
+    expect(grupos[0].linhas.map((l) => l.ativo)).toEqual(['VALE3', 'BBAS3'])
+  })
+  it('compras recentes ainda não liquidadas ficam num grupo à parte, sempre por último', () => {
+    const lancs = livro(L({ ativo: 'CMIN3', data: '2026-09-30', quantidade: 100, preco: 5, valor: 500 }))
+    const g = agruparPosicoes(montarPainel(lancs, [P('VALE3', 10, 100)], DATA_POS).linhas)
+    expect(g.map((x) => x.chave)).toEqual(['acoes', 'recentes'])
+    expect(g[1]).toMatchObject({ ativos: 1, valor: 0, pct: 0 })
+  })
+  it('sem posições: nenhum grupo; sem valor: fatia zero sem dividir por zero', () => {
+    expect(agruparPosicoes([])).toEqual([])
+    const g = agruparPosicoes(montarPainel(livro(L({})), null, null).linhas)
+    expect(g.every((x) => Number.isFinite(x.pct))).toBe(true)
   })
 })
 

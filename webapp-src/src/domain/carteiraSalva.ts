@@ -19,12 +19,14 @@ export interface CarteiraSalva {
   eventosFuturos: EventoFuturo[]
   /** Classe que a pessoa escolheu para um ativo na comparação com a carteira sugerida (vence a dedução automática). */
   classes: Record<string, ClasseCarteira>
+  /** Preço médio que a pessoa informou por ativo (vale mais que o calculado e que o valor aplicado da B3). */
+  precosMedios: Record<string, number>
 }
 
-export const CARTEIRA_VAZIA: CarteiraSalva = { lancamentos: [], excluidas: [], posicao: null, dataPosicao: null, eventosFuturos: [], classes: {} }
+export const CARTEIRA_VAZIA: CarteiraSalva = { lancamentos: [], excluidas: [], posicao: null, dataPosicao: null, eventosFuturos: [], classes: {}, precosMedios: {} }
 
 export function carteiraVazia(): CarteiraSalva {
-  return { lancamentos: [], excluidas: [], posicao: null, dataPosicao: null, eventosFuturos: [], classes: {} }
+  return { lancamentos: [], excluidas: [], posicao: null, dataPosicao: null, eventosFuturos: [], classes: {}, precosMedios: {} }
 }
 
 const TIPOS = new Set<TipoLancamento>(['saldoInicial', 'compra', 'venda', 'bonificacao', 'ajusteQuantidade', 'provento'])
@@ -91,6 +93,14 @@ function eventoValido(x: unknown): EventoFuturo | null {
   }
 }
 
+/** Preços médios gravados: só valores numéricos maiores que zero. */
+function lerPrecos(x: unknown): Record<string, number> {
+  const saida: Record<string, number> = {}
+  if (!x || typeof x !== 'object' || Array.isArray(x)) return saida
+  for (const [ativo, preco] of Object.entries(x)) if (txt(ativo) && num(preco) && preco > 0) saida[ativo] = preco
+  return saida
+}
+
 function lerClasses(x: unknown): Record<string, ClasseCarteira> {
   const saida: Record<string, ClasseCarteira> = {}
   if (!x || typeof x !== 'object' || Array.isArray(x)) return saida
@@ -121,7 +131,8 @@ export function canonizarAtivos(c: CarteiraSalva): CarteiraSalva {
     c.excluidas.some((id) => idCanonico(id) !== id) || // descartados com o nome antigo voltariam ao reimportar
     (c.posicao ?? []).some((p) => canon(p.ativo) !== p.ativo) ||
     c.eventosFuturos.some((e) => canon(e.ativo) !== e.ativo) ||
-    Object.keys(c.classes).some((a) => canon(a) !== a)
+    Object.keys(c.classes).some((a) => canon(a) !== a) ||
+    Object.keys(c.precosMedios).some((a) => canon(a) !== a)
   if (!mudou) return c
 
   const excluidas = [...new Set(c.excluidas.map(idCanonico))]
@@ -133,6 +144,8 @@ export function canonizarAtivos(c: CarteiraSalva): CarteiraSalva {
 
   const classes: Record<string, ClasseCarteira> = {}
   for (const [ativo, classe] of Object.entries(c.classes)) classes[canon(ativo)] = classe
+  const precosMedios: Record<string, number> = {}
+  for (const [ativo, preco] of Object.entries(c.precosMedios)) precosMedios[canon(ativo)] = preco
   return {
     ...c,
     lancamentos: m.lancamentos,
@@ -140,6 +153,7 @@ export function canonizarAtivos(c: CarteiraSalva): CarteiraSalva {
     posicao: c.posicao ? c.posicao.map((p) => ({ ...p, ativo: canon(p.ativo) })) : null,
     eventosFuturos: c.eventosFuturos.map((e) => ({ ...e, ativo: canon(e.ativo) })),
     classes,
+    precosMedios,
   }
 }
 
@@ -158,6 +172,7 @@ export function lerCarteiraSalva(bruto: string | null): CarteiraSalva | null {
       dataPosicao: txt(c.dataPosicao) && ISO.test(c.dataPosicao) ? c.dataPosicao : null,
       eventosFuturos: lista(c.eventosFuturos, eventoValido),
       classes: lerClasses(c.classes),
+      precosMedios: lerPrecos(c.precosMedios),
     })
   } catch {
     return null
