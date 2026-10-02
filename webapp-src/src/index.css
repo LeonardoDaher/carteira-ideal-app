@@ -1881,3 +1881,43 @@ select option:disabled { color: #6b7280 !important; -webkit-text-fill-color: #6b
   .mc-formas { grid-template-columns: repeat(3, 1fr); align-items: stretch; }
   .mc-link-vazio { display: block; min-height: 1.3em; }
 }
+
+/* Meus Ativos: cabeçalho com o olho que mostra/esconde os valores (padrão: escondidos, ****). */
+.mc-cabecalho { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.mc-olho { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--mc-campo-borda); background: var(--mc-card); color: var(--text); cursor: pointer; }
+.mc-olho:hover { background: var(--mc-ouro-fundo); border-color: var(--mc-ouro); }
+.mc-olho:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Posições: rosca de cada grupo na frente do nome (cor da categoria, a mesma da bolinha da Composição). */
+.mc-grupo > summary { grid-template-columns: auto 1fr auto auto; grid-template-areas: "pizza nome valor seta" "pizza info info seta"; column-gap: 12px; }
+.mc-grupo > summary > .mc-mini-pizza { grid-area: pizza; align-self: center; }
+.mc-grupo > summary > .mc-grupo-nome { grid-area: nome; }
+.mc-grupo > summary > .mc-grupo-valor { grid-area: valor; }
+.mc-grupo > summary > .mc-grupo-info { grid-area: info; }
+.mc-grupo > summary > .mc-grupo-seta { grid-area: seta; align-self: center; color: var(--mc-suave); transition: transform 0.15s; }
+.mc-grupo[open] > summary > .mc-grupo-seta { transform: rotate(180deg); }
+/* Composição: pizza ao lado da legenda (empilha no celular). */
+.mc-comp-corpo { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 16px 24px; }
+.mc-comp-corpo .mc-pizza { flex: none; }
+.mc-comp-corpo .mc-legenda-lista { flex: 1 1 260px; min-width: 0; margin: 0; }
+.mc-cartao-vazio .mc-pizza { display: block; margin: 0 auto; filter: grayscale(1); opacity: 0.55; }
+
+/* Adicionar ativo: lista de tipos de investimento e formulário adaptado ao tipo. */
+.mc-tipos-grupo { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; }
+.mc-tipos-titulo { font-size: 13px; font-weight: 700; letter-spacing: 0.02em; text-transform: uppercase; color: var(--mc-suave); }
+.mc-tipos { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr; gap: 8px; }
+.mc-tipo { width: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; padding: 10px 12px; min-height: 44px; border-radius: 12px; border: 1px solid var(--mc-campo-borda); background: var(--mc-campo-fundo); color: var(--text); font: inherit; cursor: pointer; }
+.mc-tipo strong { font-size: 15px; }
+.mc-tipo small { font-size: 13px; color: var(--mc-suave); line-height: 1.35; }
+.mc-tipo:hover { border-color: var(--mc-ouro); background: var(--mc-ouro-fundo); }
+.mc-tipo:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.mc-tipo-escolhido { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--mc-card-borda); background: var(--mc-campo-fundo); }
+.mc-tipo-escolhido > span { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.mc-tipo-escolhido small { font-size: 13px; color: var(--mc-suave); }
+.mc-modos { display: inline-flex; align-self: flex-start; border: 1px solid var(--mc-campo-borda); border-radius: 99px; overflow: hidden; }
+.mc-modo { min-height: 40px; padding: 0 14px; border: 0; background: transparent; color: var(--text); font: inherit; font-size: 14px; cursor: pointer; }
+.mc-modo[aria-pressed='true'] { background: var(--mc-ouro); color: #1a1a1a; font-weight: 700; }
+.mc-modo:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+@media (min-width: 560px) { .mc-tipos { grid-template-columns: 1fr 1fr; } }
+.mc-grupo-rodape { padding: 4px 14px 12px; display: flex; }
+.mc-equiv { border-left: 3px solid var(--mc-ouro); padding-left: 8px; margin-top: 2px; }

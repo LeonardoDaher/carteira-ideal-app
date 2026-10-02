@@ -1,8 +1,9 @@
 import { useId } from 'react'
 import { MESES_CURTOS } from '../../domain/painelCarteira'
 import type { FatiaComposicao, ItemProvento, Painel, PontoMensal, PontoProventos, ProximosProventos } from '../../domain/painelCarteira'
-import { BarraComposicao, GraficoArea, GraficoBarras, GraficoProventos, corDaCategoria } from './Graficos'
-import { dataCurta, pct, reais } from './formatar'
+import { GraficoArea, GraficoBarras, GraficoPizza, GraficoProventos, corDaCategoria } from './Graficos'
+import { dataCurta } from './formatar'
+import { useValores } from './valoresOcultos'
 
 function Delta({ valor, texto }: { valor: number; texto: string }) {
   const positivo = valor >= 0
@@ -16,6 +17,7 @@ function Delta({ valor, texto }: { valor: number; texto: string }) {
 const rotulo = (p: PontoMensal | undefined) => (p ? `${p.rotulo}/${p.mes.slice(2, 4)}` : '')
 
 export function CartaoCarteira({ painel, serie }: { painel: Painel; serie: PontoMensal[] }) {
+  const { reais, resultadoPct } = useValores()
   const idTitulo = useId()
   const { resumo } = painel
   const temPatrimonio = resumo.patrimonio !== null
@@ -35,7 +37,7 @@ export function CartaoCarteira({ painel, serie }: { painel: Painel; serie: Ponto
 
       {resumo.resultado ? (
         <div className="mc-linha-delta">
-          <Delta valor={resumo.resultado.valor} texto={`${pct(resumo.resultado.pct)} · ${reais(resumo.resultado.valor)}`} />
+          <Delta valor={resumo.resultado.valor} texto={`${resultadoPct(resumo.resultado.pct)} · ${reais(resumo.resultado.valor)}`} />
           <span className="mc-nota">
             calculado sobre {Math.round(resumo.resultado.cobertura * 100)}% da carteira
           </span>
@@ -85,6 +87,7 @@ export function CartaoProventos({
   itensDoMes: (mes: string) => ItemProvento[]
   proximos: ProximosProventos | null
 }) {
+  const { reais } = useValores()
   const idTitulo = useId()
   const temAlgo = pontos.some((p) => p.recebido > 0 || p.aReceber > 0)
   const comValor = [...pontos].filter((p) => p.recebido > 0 || p.aReceber > 0).reverse()
@@ -162,23 +165,26 @@ export function CartaoProventos({
 }
 
 export function CartaoComposicao({ fatias }: { fatias: FatiaComposicao[] }) {
+  const { reais } = useValores()
   const idTitulo = useId()
   if (!fatias.length) return null
   return (
     <section className="mc-card" aria-labelledby={idTitulo}>
       <h2 id={idTitulo} className="mc-titulo">Composição</h2>
       <div className="mc-rotulo">Por tipo de ativo</div>
-      <BarraComposicao fatias={fatias} ariaLabel={`Composição do patrimônio: ${fatias.map((f) => `${f.rotulo} ${f.pct.toFixed(0)}%`).join(', ')}`} />
-      <ul className="mc-legenda-lista">
-        {fatias.map((f) => (
-          <li key={f.categoria}>
-            <span className="mc-bolinha" style={{ background: corDaCategoria(f.categoria) }} aria-hidden="true" />
-            <span className="mc-leg-nome">{f.rotulo}</span>
-            <span className="mc-leg-valor">{reais(f.valor)}</span>
-            <span className="mc-leg-pct">{f.pct.toFixed(1).replace('.', ',')}%</span>
-          </li>
-        ))}
-      </ul>
+      <div className="mc-comp-corpo">
+        <GraficoPizza fatias={fatias} ariaLabel={`Composição do patrimônio: ${fatias.map((f) => `${f.rotulo} ${f.pct.toFixed(0)}%`).join(', ')}`} />
+        <ul className="mc-legenda-lista">
+          {fatias.map((f) => (
+            <li key={f.categoria}>
+              <span className="mc-bolinha" style={{ background: corDaCategoria(f.categoria) }} aria-hidden="true" />
+              <span className="mc-leg-nome">{f.rotulo}</span>
+              <span className="mc-leg-valor">{reais(f.valor)}</span>
+              <span className="mc-leg-pct">{f.pct.toFixed(1).replace('.', ',')}%</span>
+            </li>
+          ))}
+        </ul>
+      </div>
     </section>
   )
 }
@@ -207,9 +213,10 @@ export function CartaoVazio({ titulo, rotulo, tipo }: { titulo: string; rotulo: 
         {tipo === 'area' && <GraficoArea pontos={comoSerie(FORMA_AREA)} ariaLabel="" decorativo />}
         {tipo === 'barras' && <GraficoBarras pontos={comoSerie(FORMA_BARRAS)} ariaLabel="" destaques={0} decorativo />}
         {tipo === 'composicao' && (
-          <BarraComposicao
+          <GraficoPizza
             ariaLabel=""
             decorativo
+            tamanho={120}
             fatias={[
               { categoria: 'outra', rotulo: '', pct: 45 },
               { categoria: 'outra', rotulo: '', pct: 30 },

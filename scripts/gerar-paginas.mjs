@@ -196,7 +196,7 @@ const LINKS_RODAPE = [
   ['Simulador de FII', '/simulador-fii/'],
   ['Simulador de BDR', '/simulador-bdr/'],
   ['Simulador de ETF', '/simulador-etf/'],
-  ['Minha Carteira', '/minha-carteira/'],
+  ['Meus Ativos', '/minha-carteira/'],
   ['Meu Mês', '/meu-mes/'],
   ['Aprender', '/aprender/'],
   ['Sobre', '/sobre/'],
@@ -601,12 +601,12 @@ function paginaMeuMes(hubDividas) {
 function paginaMinhaCarteira() {
   return {
     caminho: '/minha-carteira/',
-    titulo: 'Minha Carteira: preço médio dos seus ativos da B3',
+    titulo: 'Meus Ativos: preço médio dos seus ativos da B3',
     descricao: 'Importe os extratos da B3 e veja o preço médio de cada ativo, os proventos recebidos e se o histórico confere com a sua custódia. Grátis, dados só no seu aparelho.',
-    h1: 'Minha Carteira: seus ativos da B3 com preço médio confiável',
+    h1: 'Meus Ativos: seus ativos da B3 com preço médio confiável',
     lead: 'Importe os extratos da Área do Investidor da B3 e acompanhe a carteira que você realmente tem: preço médio de cada ativo, proventos, evolução do capital aplicado e a conferência com a sua posição.',
     botoes: [
-      { texto: 'Abrir a Minha Carteira', href: '/app/?tela=minhaCarteira' },
+      { texto: 'Abrir Meus Ativos', href: '/app/?tela=minhaCarteira' },
       { texto: 'Descubra o seu perfil de investidor', href: '/teste-perfil-de-investidor/', tipo: 'site' },
     ],
     migalhas: [],
@@ -615,7 +615,7 @@ function paginaMinhaCarteira() {
     corpo: [
       secao(
         'Como funciona',
-        `<p>Na Área do Investidor da B3, em Extratos, você baixa os arquivos em Excel e os arrasta para a Minha Carteira. Os mais úteis são:</p>
+        `<p>Na Área do Investidor da B3, em Extratos, você baixa os arquivos em Excel e os arrasta para Meus Ativos. Os mais úteis são:</p>
 <ul>
 <li><strong>Negociação:</strong> cada compra e venda, com a data real do negócio.</li>
 <li><strong>Movimentação:</strong> o Tesouro Direto, os proventos e outros eventos.</li>
@@ -640,15 +640,15 @@ function paginaMinhaCarteira() {
       ),
       secao(
         'Com ou sem o questionário',
-        `<p>A Minha Carteira funciona sozinha: você não precisa responder o questionário para usá-la.</p>
-<p>Se você respondê-lo, ela compara a carteira que você tem com a carteira de referência do seu perfil e mostra, classe por classe, o que está acima ou abaixo do alvo e como distribuir um novo aporte entre as classes que ficaram abaixo. A carteira de referência é um exemplo educacional gerado pelas suas respostas, não uma recomendação.</p>`,
+        `<p>Meus Ativos funciona sozinho: você não precisa responder o questionário para usá-lo.</p>
+<p>Se você respondê-lo, o app compara a carteira que você tem com a carteira de referência do seu perfil e mostra, classe por classe, o que está acima ou abaixo do alvo e como distribuir um novo aporte entre as classes que ficaram abaixo. A carteira de referência é um exemplo educacional gerado pelas suas respostas, não uma recomendação.</p>`,
       ),
       secao(
         'Onde ficam os seus dados',
         `<p>Os arquivos são lidos no seu aparelho e os lançamentos ficam só nele. Nada é enviado para servidor, e o app oferece uma cópia de segurança para você guardar. Colunas como número da conta ou CPF, se vierem no arquivo, não são guardadas.</p>`,
       ),
       secao(
-        'O que ela ainda não faz',
+        'O que ele ainda não faz',
         `<ul>
 <li>Não lê notas de corretagem em PDF.</li>
 <li>Não importa automaticamente a renda fixa de bancos (CDB, LCI), a previdência nem investimentos fora da B3: dá para cadastrá-los à mão, informando quantidade, preço médio e a classe do ativo.</li>
@@ -657,8 +657,8 @@ function paginaMinhaCarteira() {
       ),
     ].join('\n'),
     faq: [
-      { p: 'A Minha Carteira é gratuita?', r: 'Sim, é gratuita e não pede cadastro.' },
-      { p: 'Preciso responder o questionário para usar?', r: 'Não. A Minha Carteira funciona sozinha. Quem responde o questionário ganha, além disso, a comparação entre a carteira que tem e a carteira de referência do seu perfil.' },
+      { p: 'Meus Ativos é gratuito?', r: 'Sim, é gratuito e não pede cadastro.' },
+      { p: 'Preciso responder o questionário para usar?', r: 'Não. Meus Ativos funciona sozinho. Quem responde o questionário ganha, além disso, a comparação entre a carteira que tem e a carteira de referência do seu perfil.' },
       { p: 'Meus ativos ficam guardados na internet?', r: 'Não. Os arquivos são lidos no seu aparelho e os lançamentos ficam só nele, sem envio a nenhum servidor.' },
       { p: 'Quais arquivos da B3 posso importar?', r: 'Os extratos de Negociação, Movimentação e Posição, além dos de proventos, em Excel ou CSV. Você também pode importar uma planilha própria ou lançar à mão.' },
     ],
@@ -695,7 +695,7 @@ function paginaSobre() {
       secao(
         'Por que o projeto existe',
         `<p>O teste de perfil de investidor que as corretoras aplicam mede a intenção: quanto risco você diz aceitar. A vida real também conta: a reserva que você tem, as dívidas, os gastos previstos, a estabilidade da renda. O Carteira Ideal cruza as duas coisas e mostra uma carteira de referência.</p>
-<p>Junto com o teste, o projeto traz ferramentas para acompanhar a carteira que você tem (<a href="/minha-carteira/">Minha Carteira</a>) e organizar o mês (<a href="/meu-mes/">Meu Mês</a>), um caminho para <a href="/aprender/sair-das-dividas/">sair das dívidas</a> antes de investir, <a href="/aprender/">guias sobre cada classe de ativo</a>, simuladores com dados oficiais e o livro infantil <strong>Os Três Potes de Clara</strong>.</p>`,
+<p>Junto com o teste, o projeto traz ferramentas para acompanhar a carteira que você tem (<a href="/minha-carteira/">Meus Ativos</a>) e organizar o mês (<a href="/meu-mes/">Meu Mês</a>), um caminho para <a href="/aprender/sair-das-dividas/">sair das dívidas</a> antes de investir, <a href="/aprender/">guias sobre cada classe de ativo</a>, simuladores com dados oficiais e o livro infantil <strong>Os Três Potes de Clara</strong>.</p>`,
       ),
       secao(
         'Como o projeto se mantém',

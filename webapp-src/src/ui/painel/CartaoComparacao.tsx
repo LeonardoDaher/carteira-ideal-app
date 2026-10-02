@@ -2,7 +2,7 @@ import { useId, useMemo, useState } from 'react'
 import { CATALOGO_ATIVOS } from '../../data/catalogoAtivos'
 import { ATIVOS } from '../../data/assets'
 import { carteiraParaExibicao } from '../../data/carteiraVisual'
-import { agruparTesouroDireto, CLASSES_ESCOLHA, classificarPosicoes, ehClasseValida, ROTULO_CLASSE, valoresPorClasse } from '../../domain/classesDaCarteira'
+import { agruparTesouroDireto, CLASSES_ESCOLHA, classificarPosicoes, ehClasseValida, ROTULO_CLASSE, valoresPorClasse, observacoesPorClasse, type ObservacaoDaClasse } from '../../domain/classesDaCarteira'
 import type { AtivoClassificado } from '../../domain/classesDaCarteira'
 import { compararComReferencia, distribuirAporte } from '../../domain/carteiraAtual'
 import type { LinhaClasse } from '../../domain/carteiraAtual'
@@ -11,7 +11,8 @@ import { lerNumero } from '../../domain/importacao/celulas'
 import type { Painel } from '../../domain/painelCarteira'
 import type { AtivoKey, ResultadoRecomendacao } from '../../domain/types'
 import { semNumero } from '../nomePerfil'
-import { dataCurta, pct, reais } from './formatar'
+import { dataCurta, pct } from './formatar'
+import { useValores } from './valoresOcultos'
 
 interface Props {
   resultado: ResultadoRecomendacao | null | undefined
@@ -45,7 +46,8 @@ function SeletorDeClasse({ ativo, valor, onEscolher }: { ativo: string; valor: C
   )
 }
 
-function Linha({ l }: { l: LinhaClasse }) {
+function Linha({ l, observacoes = [] }: { l: LinhaClasse; observacoes?: ObservacaoDaClasse[] }) {
+  const { reais } = useValores()
   const dentro = l.situacao === 'dentro'
   const faltando = l.difPp < 0
   const rotulo = rotuloDaClasse(l.classe)
@@ -74,11 +76,17 @@ function Linha({ l }: { l: LinhaClasse }) {
           {l.classe === 'foraDaRegua' ? `${reais(l.valor)} estão fora das classes da carteira sugerida.` : faltando ? `Faltam ${reais(Math.abs(l.difReais))} para chegar na sugerida.` : `Passam ${reais(l.difReais)} da sugerida.`}
         </div>
       )}
+      {observacoes.map((o) => (
+        <div key={o.texto} className="mc-nota mc-equiv">
+          <strong>Inclui {o.ativos.map((a) => `${a.ativo} (${reais(a.valor)})`).join(', ')}.</strong> {o.texto}
+        </div>
+      ))}
     </li>
   )
 }
 
 function Aporte({ valores, referencia }: { valores: Partial<Record<ClasseCarteira, number>>; referencia: Record<string, number | undefined> }) {
+  const { reais } = useValores()
   const id = useId()
   const [texto, setTexto] = useState('')
   const valor = lerNumero(texto)
@@ -106,10 +114,12 @@ function Aporte({ valores, referencia }: { valores: Partial<Record<ClasseCarteir
 }
 
 export function CartaoComparacao({ resultado, pendente, erro, onTentarNovamente, onResponderQuestionario, painel, classes, onEscolherClasse }: Props) {
+  const { reais } = useValores()
   const idTitulo = useId()
   const classificados = useMemo(() => classificarPosicoes(painel.linhas, CATALOGO_ATIVOS, classes), [painel.linhas, classes])
   const { valores, pendentes, valorPendente } = useMemo(() => valoresPorClasse(classificados), [classificados])
   const valoresExibicao = useMemo(() => agruparTesouroDireto(valores), [valores])
+  const observacoes = useMemo(() => observacoesPorClasse(classificados), [classificados])
   const referencia = useMemo(() => (resultado ? carteiraParaExibicao(resultado.carteira) : null), [resultado])
   const comparativo = useMemo(() => (referencia ? compararComReferencia(valoresExibicao, referencia) : null), [valoresExibicao, referencia])
 
@@ -199,7 +209,7 @@ export function CartaoComparacao({ resultado, pendente, erro, onTentarNovamente,
 
       <ul className="mc-comp-lista" aria-label="Comparação por classe">
         {linhas.map((l) => (
-          <Linha key={l.classe} l={l} />
+          <Linha key={l.classe} l={l} observacoes={observacoes[l.classe]} />
         ))}
       </ul>
 

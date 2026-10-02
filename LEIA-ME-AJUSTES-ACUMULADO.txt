@@ -1,0 +1,22 @@
+PACOTE ACUMULADO (tudo desde o D33). Aplique ESTE zip por cima do projeto; ele substitui os dois anteriores
+(ajustes-minha-carteira.zip e ajustes-meus-ativos.zip). Caminhos a partir da raiz do repositório.
+
+1) Entrada: "3 formas de trazer a sua carteira" (B3 | sua planilha Excel/CSV | lançamento direto), mesmo peso visual.
+2) Excluir ativo da B3 (lápis > Excluir ativo), gravado; "Mostrar de novo" desfaz.
+3) Nome: Minha Carteira -> Meus Ativos. Olho no cabeçalho: valores abrem como ****. Endereços /minha-carteira/ mantidos.
+4) Posições: rosca (pizza) na frente de cada posição, na cor da bolinha da Composição.
+5) Composição em pizza (rosca), com a legenda ao lado.
+6) "Adicionar posição" (topo): abre a LISTA de tipos de investimento (renda fixa, fundos, bolsa, previdência, exterior/ouro/cripto,
+   outros), com busca. Formulário adaptado ao tipo: pelo VALOR (aplicado e atual) ou por quantidade x preço.
+7) Dentro de cada posição: "+ Adicionar ativo" (tipos daquela posição; se só há um, vai direto ao formulário).
+8) Novos blocos de Posições: Fundos de investimento, Previdência, Ouro, Criptomoedas. "Renda fixa (bancos)" virou "Renda fixa".
+
+9) Classes sugeridas por EQUIVALÊNCIA: o que não existe na carteira sugerida é alocado na classe mais parecida, e a comparação mostra,
+   embaixo da classe, "Inclui <ativo> (valor). <explicação>". CRI/CRA, debênture, CDB com prazo, LC, fundo de crédito e de renda fixa
+   contam em LCI / LCA (CRI/CRA como nas carteiras-modelo); Fundo DI em Tesouro Selic; poupança em CDB de liquidez diária;
+   multimercado repartido 40% FIIs / 20% Ouro / 20% BDRs / 20% Fundos internacionais. Previdência e COE ficam fora da comparação.
+   Se a pessoa trocar a classe, a escolha dela manda e a observação some.
+10) Vencimento e taxa (opcionais): renda fixa e COE (vencimento); renda fixa, fundos e previdência (taxa). Aparecem na linha da posição.
+11) Correção: trocar a classe pela tela de comparação não apaga mais o tipo, o vencimento e a taxa do ativo.
+
+VERIFICAÇÃO: tsc, lint, 994 testes do app, 158 do gerador de páginas e build de produção OK.

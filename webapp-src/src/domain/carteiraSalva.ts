@@ -1,7 +1,8 @@
 // Minha Carteira (D36): o que fica gravado no aparelho e como uma importação o altera. Tudo puro
 // (sem React nem localStorage): o hook só chama estas funções. Nada daqui vai para a API.
+import { tipoPorId } from './tiposInvestimento'
 import { ehClasseValida } from './classesDaCarteira'
-import { chaveDoAtivoManual, validarAtivoManual, type AtivoManual } from './ativosManuais'
+import { chaveDoAtivoManual, ehDataValida, TAXA_MAX, validarAtivoManual, type AtivoManual } from './ativosManuais'
 import type { ClasseCarteira } from './classificadorAtivo'
 import { ativoDoTexto } from './importacao/planilha'
 import type { EventoFuturo, ItemPosicaoB3, ResultadoImportacao } from './importacao/planilha'
@@ -113,7 +114,16 @@ function lerAtivosManuais(x: unknown): AtivoManual[] {
     const ativo = chaveDoAtivoManual(m.nome)
     if (vistos.has(ativo)) continue
     vistos.add(ativo)
-    saida.push({ ativo, ...m, classe: o.classe })
+    const vencimento = typeof o.vencimento === 'string' && ehDataValida(o.vencimento) ? o.vencimento : undefined
+    const taxa = typeof o.taxa === 'string' && o.taxa.trim() && o.taxa.trim().length <= TAXA_MAX ? o.taxa.trim() : undefined
+    saida.push({
+      ativo,
+      ...m,
+      classe: o.classe,
+      ...(tipoPorId(typeof o.tipo === 'string' ? o.tipo : null) ? { tipo: o.tipo as string } : {}),
+      ...(vencimento ? { vencimento } : {}),
+      ...(taxa ? { taxa } : {}),
+    })
   }
   return saida
 }

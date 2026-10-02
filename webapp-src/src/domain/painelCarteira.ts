@@ -11,7 +11,7 @@
 //    sobre o que ela tem hoje; o histórico serve para dar o preço médio de quem está lá.
 //  - Resultado (lucro/prejuízo) só é calculado para ativos cujo histórico CONFERE com a Posição;
 //    a tela mostra qual parte da carteira essa conta cobre.
-import { categoriaDaClasse, type AtivoManual } from './ativosManuais'
+import { categoriaDoManual, type AtivoManual } from './ativosManuais'
 import type { ClasseCarteira } from './classificadorAtivo'
 import { ativosComValorAplicado, conferirComPosicao, type StatusConferencia } from './conferencia'
 import type { CategoriaPosicao, EventoFuturo, ItemPosicaoB3 } from './importacao/planilha'
@@ -23,8 +23,12 @@ export const ROTULOS_CATEGORIA: Record<CategoriaPosicao, string> = {
   etf: 'ETFs',
   fundos: 'FIIs e fundos',
   tesouro: 'Tesouro Direto',
-  rendaFixa: 'Renda fixa (bancos)',
+  rendaFixa: 'Renda fixa',
   outra: 'Outros',
+  fundosInvest: 'Fundos de investimento',
+  previdencia: 'Previdência',
+  ouro: 'Ouro',
+  cripto: 'Criptomoedas',
 }
 
 export type OrigemPrecoMedio = 'calculado' | 'b3' | 'informado'
@@ -48,6 +52,11 @@ export interface LinhaPosicao {
   manual?: boolean
   /** Classe escolhida para um ativo digitado à mão. */
   classeManual?: ClasseCarteira
+  /** Tipo de investimento escolhido na lista (CDB, CRI, fundo DI...), quando há. */
+  tipoManual?: string
+  /** Vencimento (AAAA-MM-DD) e taxa informados num ativo digitado à mão. */
+  vencimentoManual?: string
+  taxaManual?: string
 }
 
 /**
@@ -61,7 +70,7 @@ function linhaManual(m: AtivoManual): LinhaPosicao {
   const resultado = m.valorAtual !== null ? m.valorAtual - custo : null
   return {
     ativo: m.ativo,
-    categoria: categoriaDaClasse(m.classe),
+    categoria: categoriaDoManual(m),
     quantidade: m.quantidade,
     precoMedio: m.precoMedio,
     origemPrecoMedio: 'informado',
@@ -73,6 +82,9 @@ function linhaManual(m: AtivoManual): LinhaPosicao {
     aguardandoLiquidacao: false,
     manual: true,
     classeManual: m.classe,
+    tipoManual: m.tipo,
+    vencimentoManual: m.vencimento,
+    taxaManual: m.taxa,
   }
 }
 

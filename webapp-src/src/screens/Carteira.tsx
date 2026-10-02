@@ -40,7 +40,7 @@ export function Carteira({ ctx }: { ctx: AppCtx }) {
           Importe os extratos da B3 e acompanhe o preço médio, os proventos e a evolução do que você já investiu. Grátis, sem cadastro; seus dados ficam só neste aparelho.
         </div>
         <button className="btn btn-outline" onClick={() => ctx.setScreen('minhaCarteira')}>
-          Abrir Minha Carteira
+          Abrir Meus Ativos
         </button>
       </div>
 

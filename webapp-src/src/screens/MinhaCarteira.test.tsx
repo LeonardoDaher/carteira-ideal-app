@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { MinhaCarteira } from './MinhaCarteira'
 import { ATIVOS } from '../data/assets'
@@ -47,7 +47,7 @@ afterEach(() => vi.restoreAllMocks())
 
 describe('MinhaCarteira: primeira vez', () => {
   it('convida a importar, explica a privacidade e não mostra gráficos vazios', async () => {
-    render(<MinhaCarteira ctx={ctx} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctx} hoje={hoje} />)
     expect(await screen.findByText('Seus gráficos vão aparecer aqui')).toBeTruthy()
     expect(screen.getByText(/Seus dados ficam só neste aparelho/)).toBeTruthy()
     expect(screen.getByRole('button', { name: 'Adicionar lançamento' })).toBeTruthy()
@@ -57,7 +57,7 @@ describe('MinhaCarteira: primeira vez', () => {
 
 describe('MinhaCarteira: simples e didática', () => {
   it('apresenta 3 formas de trazer a carteira, todas com o mesmo peso (mesma estrutura e mesmo botão primário)', async () => {
-    render(<MinhaCarteira ctx={ctx} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctx} hoje={hoje} />)
     await screen.findByText('Seus gráficos vão aparecer aqui')
     expect(screen.getByRole('heading', { name: /3 formas de trazer a sua carteira/i })).toBeTruthy()
     expect(screen.queryByText(/em 3 passos/i)).toBeNull()
@@ -74,14 +74,14 @@ describe('MinhaCarteira: simples e didática', () => {
     expect(within(formas[1]).getByRole('link', { name: /planilha-modelo/i })).toBeTruthy()
   })
   it('"Lançar um a um" abre o formulário de novo lançamento', async () => {
-    render(<MinhaCarteira ctx={ctx} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctx} hoje={hoje} />)
     await screen.findByText('Seus gráficos vão aparecer aqui')
     expect(screen.queryByText('Novo lançamento')).toBeNull()
     fireEvent.click(screen.getByRole('button', { name: 'Lançar um a um' }))
     expect(await screen.findByText('Novo lançamento')).toBeTruthy()
   })
   it('antes de importar, mostra os gráficos como EXEMPLO: etiqueta, valor em "R$ —", nenhum número inventado', async () => {
-    render(<MinhaCarteira ctx={ctx} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctx} hoje={hoje} />)
     await screen.findByText('Seus gráficos vão aparecer aqui')
     const cartoes = Array.from(document.querySelectorAll('.mc-cartao-vazio'))
     expect(cartoes).toHaveLength(3)
@@ -95,7 +95,7 @@ describe('MinhaCarteira: simples e didática', () => {
     expect(screen.queryByRole('img')).toBeNull()
   })
   it('depois de importar, os cartões de exemplo somem e entram os reais', async () => {
-    render(<MinhaCarteira ctx={ctx} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctx} hoje={hoje} />)
     await screen.findByText('Seus gráficos vão aparecer aqui')
     await enviarArquivo('a.csv', 'Data;Tipo;Ativo;Quantidade;Preço\n05/03/2026;Compra;MXRF11;100;10,00\n')
     await screen.findByRole('list', { name: 'Resultado da importação' })
@@ -109,7 +109,7 @@ describe('MinhaCarteira: importar um arquivo', () => {
   const csv = 'Data;Tipo;Ativo;Quantidade;Preço\n05/03/2026;Compra;MXRF11;100;10,05\n12/03/2026;Compra;MXRF11;100;10,15\n20/04/2026;Dividendo;MXRF11;200;0,10\n'
 
   it('lê o CSV, resume o que entrou, calcula o preço médio e grava no aparelho', async () => {
-    render(<MinhaCarteira ctx={ctx} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctx} hoje={hoje} />)
     await screen.findByText('Seus gráficos vão aparecer aqui')
     await enviarArquivo('minha-carteira.csv', csv)
 
@@ -123,7 +123,7 @@ describe('MinhaCarteira: importar um arquivo', () => {
   })
 
   it('reimportar o mesmo arquivo não duplica nada', async () => {
-    render(<MinhaCarteira ctx={ctx} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctx} hoje={hoje} />)
     await screen.findByText('Seus gráficos vão aparecer aqui')
     await enviarArquivo('a.csv', csv)
     await screen.findByRole('list', { name: 'Resultado da importação' })
@@ -133,7 +133,7 @@ describe('MinhaCarteira: importar um arquivo', () => {
   })
 
   it('arquivo irreconhecível: explica o problema e não altera a carteira', async () => {
-    render(<MinhaCarteira ctx={ctx} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctx} hoje={hoje} />)
     await screen.findByText('Seus gráficos vão aparecer aqui')
     await enviarArquivo('qualquer.csv', 'Nome;Idade\nAna;30\n')
     expect(txt(await screen.findByRole('list', { name: 'Resultado da importação' }))).toContain('colunas mínimas')
@@ -141,7 +141,7 @@ describe('MinhaCarteira: importar um arquivo', () => {
   })
 
   it('nota de corretagem em PDF: avisa que ainda não é lida aqui', async () => {
-    render(<MinhaCarteira ctx={ctx} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctx} hoje={hoje} />)
     await screen.findByText('Seus gráficos vão aparecer aqui')
     const entrada = document.querySelector('input[type=file][multiple]') as HTMLInputElement
     await act(async () => {
@@ -154,7 +154,7 @@ describe('MinhaCarteira: importar um arquivo', () => {
 describe('MinhaCarteira: painel com dados', () => {
   it('com Posição: patrimônio, resultado (só onde há preço médio) e composição', async () => {
     semear({ lancs: [L()], posicao: [pos('VALE3', 100, 1500), pos('HGBS11', 10, 500, 'fundos')], dataPosicao: '2026-09-30' })
-    render(<MinhaCarteira ctx={ctx} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctx} hoje={hoje} />)
     const carteira = (await screen.findByRole('heading', { name: 'Carteira' })).closest('section')!
     expect(txt(carteira)).toContain('Patrimônio em 30/09/2026')
     expect(txt(carteira)).toContain('R$ 2.000,00')
@@ -167,7 +167,7 @@ describe('MinhaCarteira: painel com dados', () => {
 
   it('sem Posição: mostra capital aplicado a preço de custo, sem inventar patrimônio', async () => {
     semear({ lancs: [L()] })
-    render(<MinhaCarteira ctx={ctx} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctx} hoje={hoje} />)
     const carteira = (await screen.findByRole('heading', { name: 'Carteira' })).closest('section')!
     expect(txt(carteira)).toContain('Total investido')
     expect(txt(carteira)).toContain('R$ 1.000,00')
@@ -176,7 +176,7 @@ describe('MinhaCarteira: painel com dados', () => {
 
   it('os gráficos têm texto alternativo para leitores de tela', async () => {
     semear({ lancs: [L(), L({ tipo: 'provento', data: '2026-09-10', valor: 25, quantidade: 100, preco: 0.25, subtipo: 'rendimento' })] })
-    render(<MinhaCarteira ctx={ctx} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctx} hoje={hoje} />)
     await screen.findByRole('heading', { name: 'Carteira' })
     expect(screen.getByRole('img', { name: /Total investido, pelo preço pago: de R\$/ })).toBeTruthy()
     expect(screen.getByRole('img', { name: /Proventos por mês, de Out\/25 a Dez\/26; recebido este ano R\$\s25,00/ })).toBeTruthy()
@@ -190,7 +190,7 @@ describe('MinhaCarteira: painel com dados', () => {
         { ativo: 'ITSA4', tipoEvento: 'jcp', previsao: '2026-10-01', quantidade: 100, precoUnitario: 0.02, valorLiquido: 2 },
       ],
     })
-    render(<MinhaCarteira ctx={ctx} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctx} hoje={hoje} />)
     const prov = (await screen.findByRole('heading', { name: 'Proventos' })).closest('section')!
     expect(txt(prov)).toContain('Próximo pagamento')
     expect(txt(prov)).toContain('R$ 4,84')
@@ -200,7 +200,7 @@ describe('MinhaCarteira: painel com dados', () => {
 
 describe('MinhaCarteira: lançamentos manuais', () => {
   async function abrirFormulario() {
-    render(<MinhaCarteira ctx={ctx} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctx} hoje={hoje} />)
     fireEvent.click(await screen.findByRole('button', { name: 'Adicionar lançamento' }))
     return screen.getByRole('form', { name: 'Novo lançamento' })
   }
@@ -254,7 +254,7 @@ describe('MinhaCarteira: lançamentos manuais', () => {
 describe('MinhaCarteira: corrigir e excluir', () => {
   it('corrigir um lançamento importado: o erro some e a reimportação não o traz de volta', async () => {
     const csv = 'Data;Tipo;Ativo;Quantidade;Preço\n05/03/2026;Compra;VALE3;100;99,00\n'
-    render(<MinhaCarteira ctx={ctx} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctx} hoje={hoje} />)
     await screen.findByText('Seus gráficos vão aparecer aqui')
     await enviarArquivo('a.csv', csv)
     await screen.findByRole('list', { name: 'Resultado da importação' })
@@ -273,7 +273,7 @@ describe('MinhaCarteira: corrigir e excluir', () => {
   })
   it('excluir pede confirmação e não volta ao reimportar', async () => {
     const csv = 'Data;Tipo;Ativo;Quantidade;Preço\n05/03/2026;Compra;VALE3;100;10,00\n'
-    render(<MinhaCarteira ctx={ctx} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctx} hoje={hoje} />)
     await screen.findByText('Seus gráficos vão aparecer aqui')
     await enviarArquivo('a.csv', csv)
     await screen.findByRole('list', { name: 'Resultado da importação' })
@@ -290,7 +290,7 @@ describe('MinhaCarteira: corrigir e excluir', () => {
 describe('MinhaCarteira: seus dados', () => {
   it('restaura um backup válido e recusa um inválido sem alterar nada', async () => {
     semear({ lancs: [L()] })
-    render(<MinhaCarteira ctx={ctx} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctx} hoje={hoje} />)
     await screen.findByRole('heading', { name: 'Seus dados' })
     const entrada = document.querySelector('input[accept*=json]') as HTMLInputElement
 
@@ -309,7 +309,7 @@ describe('MinhaCarteira: seus dados', () => {
   })
   it('apagar tudo exige confirmação', async () => {
     semear({ lancs: [L()] })
-    render(<MinhaCarteira ctx={ctx} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctx} hoje={hoje} />)
     fireEvent.click(await screen.findByRole('button', { name: 'Apagar todos os dados' }))
     expect(lerSalvo().lancamentos).toHaveLength(1)
     fireEvent.click(screen.getByRole('button', { name: 'Sim, apagar tudo' }))
@@ -318,7 +318,7 @@ describe('MinhaCarteira: seus dados', () => {
   })
   it('dado corrompido no aparelho não trava a tela: começa vazio', async () => {
     localStorage.setItem(CHAVE_CARTEIRA, '{isto está quebrado')
-    render(<MinhaCarteira ctx={ctx} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctx} hoje={hoje} />)
     expect(await screen.findByText('Seus gráficos vão aparecer aqui')).toBeTruthy()
   })
 })
@@ -341,7 +341,7 @@ describe('MinhaCarteira: comparação com a carteira sugerida', () => {
   it('sem questionário: convida (é opcional) e o botão abre o questionário', async () => {
     base()
     const ctx = ctxCom({ resultado: null })
-    render(<MinhaCarteira ctx={ctx} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctx} hoje={hoje} />)
     const c = await cartao()
     expect(txt(c)).toContain('É opcional')
     fireEvent.click(within(c).getByRole('button', { name: 'Responder o questionário' }))
@@ -349,7 +349,7 @@ describe('MinhaCarteira: comparação com a carteira sugerida', () => {
   })
   it('a carteira sugerida está sendo calculada: avisa, sem convidar a responder de novo', async () => {
     base()
-    render(<MinhaCarteira ctx={ctxCom({ resultado: null, resultadoPendente: true })} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxCom({ resultado: null, resultadoPendente: true })} hoje={hoje} />)
     const c = await cartao()
     expect(within(c).getByRole('status').textContent).toContain('Montando a sua carteira sugerida')
     expect(within(c).queryByRole('button', { name: 'Responder o questionário' })).toBeNull()
@@ -357,7 +357,7 @@ describe('MinhaCarteira: comparação com a carteira sugerida', () => {
   it('falha ao calcular: mostra o erro e deixa tentar de novo', async () => {
     base()
     const ctx = ctxCom({ resultado: null, erroResultado: 'sem internet' })
-    render(<MinhaCarteira ctx={ctx} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctx} hoje={hoje} />)
     const c = await cartao()
     expect(within(c).getByRole('alert').textContent).toContain('sem internet')
     fireEvent.click(within(c).getByRole('button', { name: 'Tentar novamente' }))
@@ -366,7 +366,7 @@ describe('MinhaCarteira: comparação com a carteira sugerida', () => {
 
   it('com a carteira sugerida: mostra o perfil, a aderência e, por classe, o que você tem x o sugerido', async () => {
     base()
-    render(<MinhaCarteira ctx={ctxCom()} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxCom()} hoje={hoje} />)
     const c = await cartao()
     const esperado = compararComReferencia({ acoesETFs: 600, fiis: 400 }, referencia)
     expect(txt(c)).toContain(`${Math.round(esperado.aderencia!)}%`)
@@ -384,7 +384,7 @@ describe('MinhaCarteira: comparação com a carteira sugerida', () => {
   })
   it('classe em 0% não desenha nenhuma fatia na barra (só a marca do alvo)', async () => {
     base()
-    render(<MinhaCarteira ctx={ctxCom()} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxCom()} hoje={hoje} />)
     const c = await cartao()
     const esperado = compararComReferencia({ acoesETFs: 600, fiis: 400 }, referencia)
     const zerada = esperado.linhas.find((l) => l.valor === 0 && l.pctReferencia > 5)!
@@ -398,7 +398,7 @@ describe('MinhaCarteira: comparação com a carteira sugerida', () => {
   })
   it('classes sugeridas que a pessoa não tem aparecem como "abaixo", com o quanto falta em reais', async () => {
     base()
-    render(<MinhaCarteira ctx={ctxCom()} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxCom()} hoje={hoje} />)
     const c = await cartao()
     const esperado = compararComReferencia({ acoesETFs: 600, fiis: 400 }, referencia)
     const faltando = esperado.linhas.find((l) => l.valor === 0 && l.pctReferencia > 5)!
@@ -408,7 +408,7 @@ describe('MinhaCarteira: comparação com a carteira sugerida', () => {
   })
   it('os três Tesouros viram uma fatia só ("Tesouro Direto"), como na tela Carteira', async () => {
     semear({ posicao: [pos('VALE3', 10, 500), { ...pos('TESOURO SELIC 2031', 1, 300, 'tesouro') }, { ...pos('TESOURO IPCA+ 2029', 1, 200, 'tesouro') }], dataPosicao: '2026-09-30' })
-    render(<MinhaCarteira ctx={ctxCom()} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxCom()} hoje={hoje} />)
     const c = await cartao()
     const linha = within(lista(c)).getByText(ATIVOS.tesouroIPCA.label).closest('li')!
     expect(txt(linha)).toContain(`Você: ${pct(50, false)}`)
@@ -416,13 +416,13 @@ describe('MinhaCarteira: comparação com a carteira sugerida', () => {
   })
   it('sem a Posição, avisa que a conta usa o preço de custo', async () => {
     semear({ lancs: [L({ ativo: 'VALE3', quantidade: 100, valor: 1000 })] })
-    render(<MinhaCarteira ctx={ctxCom()} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxCom()} hoje={hoje} />)
     expect(txt(await cartao())).toContain('Valores a preço de custo')
   })
 
   it('ativo que o app não sabe classificar fica de fora, avisa quanto, e a escolha da pessoa o inclui e fica gravada', async () => {
     semear({ posicao: [pos('VALE3', 10, 400), pos('XXXX11', 10, 100, 'fundos')], dataPosicao: '2026-09-30' })
-    render(<MinhaCarteira ctx={ctxCom()} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxCom()} hoje={hoje} />)
     const c = await cartao()
     const caixa = within(c).getByRole('group', { name: 'Ativos sem classe' })
     expect(txt(caixa)).toContain('1 ativo(s), somando R$ 100,00, ficaram de fora')
@@ -438,14 +438,14 @@ describe('MinhaCarteira: comparação com a carteira sugerida', () => {
   })
   it('a escolha da pessoa continua valendo ao reabrir', async () => {
     semear({ posicao: [pos('VALE3', 10, 400), pos('XXXX11', 10, 100, 'fundos')], dataPosicao: '2026-09-30', classes: { XXXX11: 'fiis' } })
-    render(<MinhaCarteira ctx={ctxCom()} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxCom()} hoje={hoje} />)
     const c = await cartao()
     expect(within(c).queryByRole('group', { name: 'Ativos sem classe' })).toBeNull()
     expect(within(lista(c)).getByText(ATIVOS.fiis.label)).toBeTruthy()
   })
   it('classe provável mas incerta (ETF de ações) entra na conta e pede confirmação; confirmar grava a escolha', async () => {
     semear({ posicao: [pos('BOVA11', 10, 500, 'etf')], dataPosicao: '2026-09-30' })
-    render(<MinhaCarteira ctx={ctxCom()} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxCom()} hoje={hoje} />)
     const c = await cartao()
     expect(txt(c)).toMatch(/1 para confirmar/)
     fireEvent.click(within(c).getByRole('button', { name: /Confirmar .* para BOVA11/ }))
@@ -455,7 +455,7 @@ describe('MinhaCarteira: comparação com a carteira sugerida', () => {
 
   it('aporte guiado: distribui o valor entre as classes abaixo do alvo, sem perder nem criar centavo', async () => {
     base()
-    render(<MinhaCarteira ctx={ctxCom()} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxCom()} hoje={hoje} />)
     const c = await cartao()
     fireEvent.change(within(c).getByLabelText(/Quanto você vai aportar/), { target: { value: '1.000,00' } })
     const itens = within(within(c).getByRole('list', { name: 'Distribuição do aporte' })).getAllByRole('listitem')
@@ -465,14 +465,14 @@ describe('MinhaCarteira: comparação com a carteira sugerida', () => {
   })
   it('aviso educacional e de privacidade no cartão', async () => {
     base()
-    render(<MinhaCarteira ctx={ctxCom()} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxCom()} hoje={hoje} />)
     const nota = within(await cartao()).getByRole('note')
     expect(nota.textContent).toContain('não é recomendação de investimento')
     expect(nota.textContent).toContain('ativos nunca saem deste aparelho')
   })
   it('sem nenhum ativo importado, não mostra comparação vazia', async () => {
     semear({ lancs: [L({ tipo: 'provento', valor: 10, quantidade: 1, preco: 0, subtipo: 'jcp' })] })
-    render(<MinhaCarteira ctx={ctxCom()} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxCom()} hoje={hoje} />)
     expect(txt(await cartao())).toContain('Importe os seus ativos')
   })
 })
@@ -483,7 +483,7 @@ describe('MinhaCarteira: sem lista de pendências (quem não tem o preço de com
 
   it('o cartão de conferência e os formulários de saldo inicial não existem mais', async () => {
     semear({ lancs: [L({ quantidade: 20, valor: 200 })], posicao: [pos('VALE3', 100, 1500)], dataPosicao: '2026-09-30' })
-    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
     await posicoes()
     expect(screen.queryByRole('heading', { name: 'Conferência com a Posição' })).toBeNull()
     expect(screen.queryByText(/pedem atenção/)).toBeNull()
@@ -492,7 +492,7 @@ describe('MinhaCarteira: sem lista de pendências (quem não tem o preço de com
   })
   it('ativo sem preço médio aparece com "—", um selo discreto e UMA linha de aviso, sem formulário', async () => {
     semear({ lancs: [L({ quantidade: 20, valor: 200 })], posicao: [pos('VALE3', 100, 1500)], dataPosicao: '2026-09-30' })
-    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
     const c = await posicoes()
     expect(txt(c)).toContain('Sem preço médio')
     expect(txt(c)).toContain('1 ativo(s) sem preço médio. Toque no lápis do ativo para informar.')
@@ -500,7 +500,7 @@ describe('MinhaCarteira: sem lista de pendências (quem não tem o preço de com
   })
   it('ativo que a Posição não tem (já zerado) não aparece em lugar nenhum, nem como pendência', async () => {
     semear({ lancs: [L(), L({ ativo: 'BRML3', quantidade: 300, valor: 3000 }), L({ ativo: 'BEEF11', quantidade: 100, valor: 2000 })], posicao: [pos('VALE3', 100, 1500)], dataPosicao: '2026-09-30' })
-    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
     const c = await posicoes()
     expect(txt(c)).not.toContain('BRML3')
     expect(txt(c)).not.toContain('BEEF11')
@@ -508,7 +508,7 @@ describe('MinhaCarteira: sem lista de pendências (quem não tem o preço de com
   })
   it('lançamentos a MAIS que a Posição não são problema: o preço médio do histórico aparece e nada é cobrado', async () => {
     semear({ lancs: [L({ quantidade: 115, valor: 1150 })], posicao: [pos('VALE3', 100, 1500)], dataPosicao: '2026-09-30' })
-    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
     const c = await posicoes()
     expect(txt(c)).toContain('R$ 10,00')
     expect(txt(c)).toContain('R$ 500,00') // 1.500 de valor atual − 100 × 10 de custo
@@ -516,14 +516,14 @@ describe('MinhaCarteira: sem lista de pendências (quem não tem o preço de com
   })
   it('o total investido e o resultado não são inflados pelos ativos zerados', async () => {
     semear({ lancs: [L(), L({ ativo: 'BRML3', quantidade: 300, valor: 3000 })], posicao: [pos('VALE3', 100, 1500)], dataPosicao: '2026-09-30' })
-    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
     const carteira = (await screen.findByRole('heading', { name: 'Carteira' })).closest('section')!
     expect(txt(carteira)).toContain('R$ 1.500,00')
     expect(txt(carteira)).toMatch(/Investido nos ativos com preço médio conhecido: R\$\s1\.000,00/)
   })
   it('a data da Posição fica no cartão de Posições, e dá para alterar', async () => {
     semear({ lancs: [L()], posicao: [pos('VALE3', 100, 1500)], dataPosicao: '2026-09-30' })
-    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
     const c = await posicoes()
     expect(txt(c)).toContain('Posição da B3 de 30/09/2026')
     fireEvent.change(within(c).getByLabelText('Data da Posição'), { target: { value: '2026-09-29' } })
@@ -545,7 +545,7 @@ describe('MinhaCarteira: posições agrupadas, com lápis na frente e "Ver lanç
 
   it('as posições vêm separadas por tipo, como na Área do Investidor: ativos, fatia da carteira e valor de cada grupo', async () => {
     semear({ posicao: quatro, dataPosicao: '2026-09-30' })
-    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
     const c = await posicoes()
     expect(txt(c)).toContain('4 ativo(s) em 3 tipos')
     const grupos = [...c.querySelectorAll('details.mc-grupo')]
@@ -557,7 +557,7 @@ describe('MinhaCarteira: posições agrupadas, com lápis na frente e "Ver lanç
   })
   it('cada grupo abre só com os seus ativos; com um tipo só, já vem aberto', async () => {
     semear({ posicao: quatro, dataPosicao: '2026-09-30' })
-    const { unmount } = render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    const { unmount } = render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
     await posicoes()
     const acoes = abrir('Ações')
     expect(txt(acoes)).toContain('VALE3')
@@ -565,13 +565,13 @@ describe('MinhaCarteira: posições agrupadas, com lápis na frente e "Ver lanç
     unmount()
     localStorage.clear()
     semear({ posicao: [pos('VALE3', 10, 100)], dataPosicao: '2026-09-30' })
-    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
     await posicoes()
     expect((document.querySelector('details.mc-grupo') as HTMLDetailsElement).open).toBe(true)
   })
   it('a linha do ativo: o LÁPIS na frente e "Ver lançamentos" no FIM da linha (nada embaixo)', async () => {
     semear({ lancs: [L()], posicao: [pos('VALE3', 100, 1500)], dataPosicao: '2026-09-30' })
-    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
     await posicoes()
     const topo = document.querySelector('.mc-pos-topo') as HTMLElement
     const filhos = [...topo.children]
@@ -585,7 +585,7 @@ describe('MinhaCarteira: posições agrupadas, com lápis na frente e "Ver lanç
 
   it('o lápis abre o PAINEL de edição por cima da tela, com preço médio e classe', async () => {
     semear({ lancs: [L()], posicao: [pos('VALE3', 100, 1500)], dataPosicao: '2026-09-30' })
-    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
     const c = await posicoes()
     fireEvent.click(within(c).getByRole('button', { name: 'Editar VALE3' }))
     const painel = screen.getByRole('dialog', { name: 'Editar VALE3' })
@@ -596,7 +596,7 @@ describe('MinhaCarteira: posições agrupadas, com lápis na frente e "Ver lanç
   })
   it('editar o preço médio no painel: passa a valer o informado, com o resultado recalculado, e fica gravado', async () => {
     semear({ lancs: [L()], posicao: [pos('VALE3', 100, 1500)], dataPosicao: '2026-09-30' })
-    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
     const c = await posicoes()
     fireEvent.click(within(c).getByRole('button', { name: 'Editar VALE3' }))
     const painel = screen.getByRole('dialog', { name: 'Editar VALE3' })
@@ -610,7 +610,7 @@ describe('MinhaCarteira: posições agrupadas, com lápis na frente e "Ver lanç
   })
   it('informar o preço no painel resolve o ativo "sem preço médio"', async () => {
     semear({ lancs: [L({ quantidade: 20, valor: 200 })], posicao: [pos('VALE3', 100, 1500)], dataPosicao: '2026-09-30' })
-    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
     const c = await posicoes()
     expect(txt(c)).toContain('Sem preço médio')
     fireEvent.click(within(c).getByRole('button', { name: 'Editar VALE3' }))
@@ -621,7 +621,7 @@ describe('MinhaCarteira: posições agrupadas, com lápis na frente e "Ver lanç
   })
   it('escolher a classe no painel: fica gravada; "Automática" desfaz', async () => {
     semear({ posicao: [pos('XXXX11', 10, 100, 'fundos')], dataPosicao: '2026-09-30' })
-    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
     const c = await posicoes()
     fireEvent.click(within(c).getByRole('button', { name: 'Editar XXXX11' }))
     fireEvent.change(within(screen.getByRole('dialog')).getByLabelText('Classe do ativo'), { target: { value: 'fiis' } })
@@ -634,14 +634,14 @@ describe('MinhaCarteira: posições agrupadas, com lápis na frente e "Ver lanç
   })
   it('"Voltar ao calculado" só aparece quando o preço foi informado, e desfaz', async () => {
     semear({ lancs: [L()], posicao: [pos('VALE3', 100, 1500)], dataPosicao: '2026-09-30' })
-    const { unmount } = render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    const { unmount } = render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
     let c = await posicoes()
     fireEvent.click(within(c).getByRole('button', { name: 'Editar VALE3' }))
     expect(within(screen.getByRole('dialog')).queryByRole('button', { name: 'Voltar ao calculado' })).toBeNull()
     unmount()
     localStorage.clear()
     semear({ lancs: [L()], posicao: [pos('VALE3', 100, 1500)], dataPosicao: '2026-09-30', precosMedios: { VALE3: 12.5 } })
-    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
     c = await posicoes()
     fireEvent.click(within(c).getByRole('button', { name: 'Editar VALE3' }))
     fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Voltar ao calculado' }))
@@ -651,7 +651,7 @@ describe('MinhaCarteira: posições agrupadas, com lápis na frente e "Ver lanç
   })
   it('preço inválido no painel: explica e não grava', async () => {
     semear({ lancs: [L()], posicao: [pos('VALE3', 100, 1500)], dataPosicao: '2026-09-30' })
-    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
     const c = await posicoes()
     fireEvent.click(within(c).getByRole('button', { name: 'Editar VALE3' }))
     const painel = screen.getByRole('dialog')
@@ -664,7 +664,7 @@ describe('MinhaCarteira: posições agrupadas, com lápis na frente e "Ver lanç
   })
   it('Cancelar, Esc, o X e clicar fora fecham o painel sem mudar nada', async () => {
     semear({ lancs: [L()], posicao: [pos('VALE3', 100, 1500)], dataPosicao: '2026-09-30' })
-    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
     const c = await posicoes()
     const abrirPainel = () => fireEvent.click(within(c).getByRole('button', { name: 'Editar VALE3' }))
     abrirPainel()
@@ -683,7 +683,7 @@ describe('MinhaCarteira: posições agrupadas, com lápis na frente e "Ver lanç
   })
   it('sem a Posição também dá para editar o preço médio', async () => {
     semear({ lancs: [L()] })
-    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
     const c = await posicoes()
     fireEvent.click(within(c).getByRole('button', { name: 'Editar VALE3' }))
     fireEvent.change(within(screen.getByRole('dialog')).getByLabelText(/Preço médio/), { target: { value: '15' } })
@@ -692,7 +692,7 @@ describe('MinhaCarteira: posições agrupadas, com lápis na frente e "Ver lanç
   })
   it('Tesouro: o preço médio vem do valor aplicado da B3, sem histórico e sem pedir nada', async () => {
     semear({ posicao: [{ ...pos('TESOURO IPCA+ 2045', 40, 5000, 'tesouro'), valorAplicado: 4000 }], dataPosicao: '2026-09-30' })
-    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
     const c = await posicoes()
     expect(txt(c)).toContain('R$ 100,00')
     expect(txt(c)).toContain('Valor aplicado informado pela B3')
@@ -701,7 +701,7 @@ describe('MinhaCarteira: posições agrupadas, com lápis na frente e "Ver lanç
 
   it('"Ver lançamentos", no fim da linha, abre a lista filtrada pelo ativo e só com compras e vendas', async () => {
     semear({ lancs: [L(), proventoDeVale, L({ ativo: 'BBAS3', quantidade: 5, valor: 50 })], posicao: [pos('VALE3', 100, 1500), pos('BBAS3', 5, 60)], dataPosicao: '2026-09-30' })
-    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
     const c = await posicoes()
     abrir('Ações')
     fireEvent.click(within(c).getByRole('button', { name: 'Ver lançamentos de VALE3' }))
@@ -713,7 +713,7 @@ describe('MinhaCarteira: posições agrupadas, com lápis na frente e "Ver lanç
   })
   it('o filtro por tipo separa compras e vendas dos proventos, e "Limpar filtro" volta a tudo', async () => {
     semear({ lancs: [L(), proventoDeVale] })
-    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
     const lista = await lancamentosCard()
     expect(txt(lista)).toContain('2 lançamento(s)')
     fireEvent.click(within(lista).getByRole('button', { name: 'Proventos' }))
@@ -728,7 +728,7 @@ describe('MinhaCarteira: posições agrupadas, com lápis na frente e "Ver lanç
   })
   it('filtro por tipo sem nenhum lançamento daquele tipo: avisa', async () => {
     semear({ lancs: [L()] })
-    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
     const lista = await lancamentosCard()
     fireEvent.click(within(lista).getByRole('button', { name: 'Proventos' }))
     expect(txt(lista)).toContain('Nenhum lançamento deste tipo')
@@ -740,8 +740,14 @@ describe('MinhaCarteira: ativo digitado à mão (posição, com a classe escolhi
   const posicoes = async () => (await screen.findByRole('heading', { name: 'Posições' })).closest('section')!
   const abrirNovo = async () => {
     const c = await posicoes()
-    fireEvent.click(within(c).getByRole('button', { name: 'Adicionar ativo' }))
-    return screen.getByRole('dialog', { name: 'Adicionar ativo' })
+    fireEvent.click(within(c).getByRole('button', { name: 'Adicionar posição' }))
+    return screen.getByRole('dialog', { name: 'Adicionar posição' })
+  }
+  /** Passo 1 (lista de tipos) e depois o formulário. 'Outro investimento' deixa a classe para a pessoa escolher. */
+  const abrirNovoComTipo = async (tipo = 'Outro investimento') => {
+    const painel = await abrirNovo()
+    fireEvent.click(within(painel).getByRole('button', { name: new RegExp(`^${tipo}`) }))
+    return painel
   }
   const preencher = (painel: HTMLElement, campos: Record<string, string>) => {
     for (const [rotulo, valor] of Object.entries(campos)) fireEvent.change(within(painel).getByLabelText(rotulo), { target: { value: valor } })
@@ -751,30 +757,30 @@ describe('MinhaCarteira: ativo digitado à mão (posição, com a classe escolhi
     g.open = true
   }
 
-  it('o botão "Adicionar ativo" existe mesmo antes de importar qualquer coisa', async () => {
-    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
-    expect(txt(await posicoes())).toContain('Nenhum ativo ainda')
+  it('o botão "Adicionar posição" existe mesmo antes de importar qualquer coisa', async () => {
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
+    expect(txt(await posicoes())).toContain('Nenhuma posição ainda')
     expect(await abrirNovo()).toBeTruthy()
   })
   it('cadastra uma POSIÇÃO: quantidade, preço médio, valor atual e classe; aparece no bloco da sua classe', async () => {
-    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
-    const painel = await abrirNovo()
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
+    const painel = await abrirNovoComTipo()
     preencher(painel, { 'Nome ou código do ativo': 'CDB Banco X', Quantidade: '1', 'Preço médio (R$ por unidade)': '10000', 'Valor atual total (R$, opcional)': '10500' })
     fireEvent.change(within(painel).getByLabelText('Classe do ativo'), { target: { value: 'cdbLiquidez' } })
     fireEvent.click(within(painel).getByRole('button', { name: 'Salvar' }))
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
     const c = await posicoes()
-    expect(txt(c)).toContain('Renda fixa (bancos)')
-    abrirGrupo('Renda fixa (bancos)')
+    expect(txt(c)).toContain('Renda fixa')
+    abrirGrupo('Renda fixa')
     expect(txt(c)).toContain('CDB BANCO X')
     expect(txt(c)).toContain('Digitado por você')
     expect(txt(c)).toContain('R$ 10.000,00')
     expect(txt(c)).toContain('R$ 500,00') // resultado
-    expect(lerSalvo().ativosManuais).toEqual([{ ativo: 'CDB BANCO X', nome: 'CDB Banco X', quantidade: 1, precoMedio: 10000, valorAtual: 10500, classe: 'cdbLiquidez' }])
+    expect(lerSalvo().ativosManuais).toEqual([{ ativo: 'CDB BANCO X', nome: 'CDB Banco X', quantidade: 1, precoMedio: 10000, valorAtual: 10500, classe: 'cdbLiquidez', tipo: 'outro' }])
   })
   it('NÃO grava nenhum lançamento (antes a posição digitada virava uma "Compra de hoje")', async () => {
-    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
-    const painel = await abrirNovo()
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
+    const painel = await abrirNovoComTipo()
     preencher(painel, { 'Nome ou código do ativo': 'BBAS3', Quantidade: '1600', 'Preço médio (R$ por unidade)': '19,50' })
     fireEvent.change(within(painel).getByLabelText('Classe do ativo'), { target: { value: 'acoesETFs' } })
     fireEvent.click(within(painel).getByRole('button', { name: 'Salvar' }))
@@ -784,8 +790,8 @@ describe('MinhaCarteira: ativo digitado à mão (posição, com a classe escolhi
     expect(txt(lista)).toContain('Nenhum lançamento ainda')
   })
   it('sugere a classe pelo nome enquanto a pessoa ainda não escolheu (e respeita a escolha dela depois)', async () => {
-    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
-    const painel = await abrirNovo()
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
+    const painel = await abrirNovoComTipo()
     const classe = within(painel).getByLabelText('Classe do ativo') as HTMLSelectElement
     expect(classe.value).toBe('')
     preencher(painel, { 'Nome ou código do ativo': 'PETR4' })
@@ -795,20 +801,20 @@ describe('MinhaCarteira: ativo digitado à mão (posição, com a classe escolhi
     expect(classe.value).toBe('ouro') // a escolha da pessoa não é sobrescrita
   })
   it('sem valor atual, usa o custo e não mostra resultado', async () => {
-    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
-    const painel = await abrirNovo()
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
+    const painel = await abrirNovoComTipo()
     preencher(painel, { 'Nome ou código do ativo': 'LCI Banco Y', Quantidade: '1', 'Preço médio (R$ por unidade)': '5000' })
     fireEvent.change(within(painel).getByLabelText('Classe do ativo'), { target: { value: 'lciLca' } })
     fireEvent.click(within(painel).getByRole('button', { name: 'Salvar' }))
     await waitFor(() => expect(lerSalvo().ativosManuais[0].valorAtual).toBeNull())
     const c = await posicoes()
-    abrirGrupo('Renda fixa (bancos)')
+    abrirGrupo('Renda fixa')
     expect(txt(c)).toContain('Custo')
     expect(txt(c)).toContain('R$ 5.000,00')
   })
   it('recusa com explicação: classe não escolhida, quantidade zero, números inválidos e nome repetido', async () => {
-    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
-    let painel = await abrirNovo()
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
+    let painel = await abrirNovoComTipo()
     preencher(painel, { 'Nome ou código do ativo': 'X1', Quantidade: '1', 'Preço médio (R$ por unidade)': '10' })
     fireEvent.click(within(painel).getByRole('button', { name: 'Salvar' }))
     expect((await within(painel).findByRole('alert')).textContent).toContain('Escolha a classe')
@@ -824,7 +830,7 @@ describe('MinhaCarteira: ativo digitado à mão (posição, com a classe escolhi
     preencher(painel, { Quantidade: '1' })
     fireEvent.click(within(painel).getByRole('button', { name: 'Salvar' }))
     await waitFor(() => expect(lerSalvo().ativosManuais).toHaveLength(1))
-    painel = await abrirNovo()
+    painel = await abrirNovoComTipo()
     preencher(painel, { 'Nome ou código do ativo': 'x1', Quantidade: '1', 'Preço médio (R$ por unidade)': '10' })
     fireEvent.change(within(painel).getByLabelText('Classe do ativo'), { target: { value: 'fiis' } })
     fireEvent.click(within(painel).getByRole('button', { name: 'Salvar' }))
@@ -832,7 +838,7 @@ describe('MinhaCarteira: ativo digitado à mão (posição, com a classe escolhi
   })
   it('EDITAR um ativo digitado: muda quantidade, preço, valor e classe; o lápis traz tudo preenchido', async () => {
     semear({ ativosManuais: [{ ativo: 'CDB BANCO X', nome: 'CDB Banco X', quantidade: 1, precoMedio: 10000, valorAtual: 10500, classe: 'cdbLiquidez' }] })
-    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
     const c = await posicoes()
     fireEvent.click(within(c).getByRole('button', { name: 'Editar CDB BANCO X' }))
     const painel = screen.getByRole('dialog', { name: 'Editar CDB BANCO X' })
@@ -848,7 +854,7 @@ describe('MinhaCarteira: ativo digitado à mão (posição, com a classe escolhi
   })
   it('REMOVER um ativo digitado pede confirmação', async () => {
     semear({ ativosManuais: [{ ativo: 'CDB BANCO X', nome: 'CDB Banco X', quantidade: 1, precoMedio: 100, valorAtual: null, classe: 'cdbLiquidez' }] })
-    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
     const c = await posicoes()
     fireEvent.click(within(c).getByRole('button', { name: 'Editar CDB BANCO X' }))
     const painel = screen.getByRole('dialog')
@@ -857,9 +863,140 @@ describe('MinhaCarteira: ativo digitado à mão (posição, com a classe escolhi
     fireEvent.click(within(painel).getByRole('button', { name: 'Sim, excluir' }))
     await waitFor(() => expect(lerSalvo().ativosManuais).toEqual([]))
   })
+  it('"Adicionar posição" abre primeiro a LISTA de tipos de investimento, agrupada, com busca', async () => {
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
+    const painel = await abrirNovo()
+    for (const g of ['Renda fixa', 'Fundos de investimento', 'Previdência']) expect(within(painel).getByRole('heading', { name: g })).toBeTruthy()
+    for (const t of ['CRI', 'CRA', 'Fundo DI / Referenciado DI', 'Fundo de renda fixa', 'Debênture', 'PGBL']) {
+      expect(within(painel).getByRole('button', { name: new RegExp(`^${t.replace('/', '\\/')}`) })).toBeTruthy()
+    }
+    expect(within(painel).queryByLabelText('Nome ou código do ativo')).toBeNull() // ainda não é o formulário
+    fireEvent.change(within(painel).getByLabelText('Buscar tipo de investimento'), { target: { value: 'previdencia' } })
+    expect(within(painel).getByRole('button', { name: /^PGBL/ })).toBeTruthy()
+    expect(within(painel).queryByRole('button', { name: /^Tesouro Selic/ })).toBeNull()
+    fireEvent.change(within(painel).getByLabelText('Buscar tipo de investimento'), { target: { value: 'zzz' } })
+    expect(txt(painel)).toContain('Nenhum tipo com esse nome')
+  })
+  it('CRI: informa pelo VALOR (aplicado e atual); a classe vem alocada em LCI / LCA (com a observação) e o ativo cai em Renda fixa', async () => {
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
+    const painel = await abrirNovoComTipo('CRI')
+    expect(within(painel).queryByLabelText('Quantidade')).toBeNull()
+    expect((within(painel).getByLabelText('Classe do ativo') as HTMLSelectElement).value).toBe('lciLca')
+    expect(txt(painel)).toContain('Na comparação com a carteira sugerida: CRI contado como LCI / LCA')
+    preencher(painel, { 'Nome ou código do ativo': 'CRI Alfa 2031', 'Valor aplicado (R$)': '20000', 'Valor atual (R$, opcional)': '21300' })
+    fireEvent.click(within(painel).getByRole('button', { name: 'Salvar' }))
+    await waitFor(() => expect(lerSalvo().ativosManuais).toHaveLength(1))
+    expect(lerSalvo().ativosManuais[0]).toMatchObject({ nome: 'CRI Alfa 2031', quantidade: 1, precoMedio: 20000, valorAtual: 21300, classe: 'lciLca', tipo: 'cri' })
+    const c = await posicoes()
+    abrirGrupo('Renda fixa')
+    expect(txt(c)).toContain('CRI ALFA 2031')
+    expect(txt(c)).toContain('R$ 1.300,00') // resultado
+  })
+  it('fundo DI cai em "Fundos de investimento" e entra na classe Tesouro Selic (papel de caixa)', async () => {
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
+    const painel = await abrirNovoComTipo('Fundo DI')
+    preencher(painel, { 'Nome ou código do ativo': 'Fundo DI Banco X', 'Valor aplicado (R$)': '5000' })
+    fireEvent.click(within(painel).getByRole('button', { name: 'Salvar' }))
+    await waitFor(() => expect(lerSalvo().ativosManuais).toHaveLength(1))
+    expect(lerSalvo().ativosManuais[0]).toMatchObject({ classe: 'tesouroSelic', tipo: 'fundo-di' })
+    expect(txt(await posicoes())).toContain('Fundos de investimento')
+  })
+  it('dá para trocar "Pelo valor" por "Por quantidade e preço" e voltar; trocar de tipo antes de preencher', async () => {
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
+    const painel = await abrirNovoComTipo('LCI')
+    fireEvent.click(within(painel).getByRole('button', { name: 'Por quantidade e preço' }))
+    expect(within(painel).getByLabelText('Quantidade')).toBeTruthy()
+    expect(within(painel).getByLabelText(/Preço médio/)).toBeTruthy()
+    fireEvent.click(within(painel).getByRole('button', { name: 'Pelo valor' }))
+    expect(within(painel).queryByLabelText('Quantidade')).toBeNull()
+    fireEvent.click(within(painel).getByRole('button', { name: 'Trocar tipo' }))
+    expect(within(painel).getByLabelText('Buscar tipo de investimento')).toBeTruthy()
+  })
+  it('DENTRO de uma posição: "Adicionar ativo" em Ações vai direto ao formulário (tipo já definido) e o ativo fica nessa posição', async () => {
+    semear({ posicao: [pos('VALE3', 100, 1500)], dataPosicao: '2026-09-30' })
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
+    const c = await posicoes()
+    fireEvent.click(within(c).getByRole('button', { name: 'Adicionar ativo em Ações' }))
+    const painel = screen.getByRole('dialog', { name: 'Adicionar ativo em Ações' })
+    expect(within(painel).queryByLabelText('Buscar tipo de investimento')).toBeNull()
+    expect((within(painel).getByLabelText('Classe do ativo') as HTMLSelectElement).value).toBe('acoesETFs')
+    preencher(painel, { 'Nome ou código do ativo': 'BBAS3', Quantidade: '50', 'Preço médio (R$ por unidade)': '25' })
+    fireEvent.click(within(painel).getByRole('button', { name: 'Salvar' }))
+    await waitFor(() => expect(lerSalvo().ativosManuais).toHaveLength(1))
+    expect(lerSalvo().ativosManuais[0]).toMatchObject({ nome: 'BBAS3', tipo: 'acao', classe: 'acoesETFs' })
+    abrirGrupo('Ações')
+    expect(txt(c)).toContain('BBAS3')
+    expect(c.querySelectorAll('details.mc-grupo')).toHaveLength(1) // não criou outro bloco
+  })
+  it('DENTRO de uma posição com vários tipos (Renda fixa): a lista traz só os tipos dela', async () => {
+    semear({ ativosManuais: [{ ativo: 'CDB BANCO X', nome: 'CDB Banco X', quantidade: 1, precoMedio: 100, valorAtual: null, classe: 'cdbLiquidez', tipo: 'cdb-liquidez' }] })
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
+    const c = await posicoes()
+    fireEvent.click(within(c).getByRole('button', { name: 'Adicionar ativo em Renda fixa' }))
+    const painel = screen.getByRole('dialog', { name: 'Adicionar ativo em Renda fixa' })
+    expect(within(painel).getByRole('button', { name: /^CRI/ })).toBeTruthy()
+    expect(within(painel).getByRole('button', { name: /^LCI/ })).toBeTruthy()
+    expect(within(painel).queryByRole('button', { name: /^Fundo DI/ })).toBeNull()
+    expect(within(painel).queryByRole('button', { name: /^PGBL/ })).toBeNull()
+  })
+  it('editar um ativo digitado com tipo mantém o tipo e o modo por valor', async () => {
+    semear({ ativosManuais: [{ ativo: 'CRI ALFA', nome: 'CRI Alfa', quantidade: 1, precoMedio: 20000, valorAtual: 21000, classe: 'foraDaRegua', tipo: 'cri' }] })
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
+    const c = await posicoes()
+    fireEvent.click(within(c).getByRole('button', { name: 'Editar CRI ALFA' }))
+    const painel = screen.getByRole('dialog', { name: 'Editar CRI ALFA' })
+    expect(txt(painel)).toContain('CRI')
+    expect((within(painel).getByLabelText('Valor aplicado (R$)') as HTMLInputElement).value).toBe('20000')
+    preencher(painel, { 'Valor atual (R$, opcional)': '22000' })
+    fireEvent.click(within(painel).getByRole('button', { name: 'Salvar' }))
+    await waitFor(() => expect(lerSalvo().ativosManuais[0]).toMatchObject({ valorAtual: 22000, tipo: 'cri', quantidade: 1 }))
+  })
+  it('pizzas: cada posição tem a sua rosca na cor da bolinha da Composição, e a Composição é uma pizza', async () => {
+    semear({ posicao: [pos('VALE3', 100, 1500), pos('MXRF11', 100, 500, 'fundos')], dataPosicao: '2026-09-30' })
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
+    const c = await posicoes()
+    expect(c.querySelectorAll('details.mc-grupo > summary .mc-mini-pizza')).toHaveLength(2)
+    const comp = (await screen.findByRole('heading', { name: 'Composição' })).closest('section')!
+    expect(comp.querySelector('svg.mc-pizza[role="img"]')).toBeTruthy()
+    expect(comp.querySelector('.mc-composicao')).toBeNull() // a barra horizontal foi substituída
+    const corBolinha = (comp.querySelector('.mc-bolinha') as HTMLElement).style.background
+    const arcos = Array.from(c.querySelectorAll('details.mc-grupo > summary .mc-mini-pizza circle[pathLength]'))
+    expect(arcos.map((a) => a.getAttribute('stroke'))).toContain(corBolinha)
+  })
+  it('vencimento e taxa: campos opcionais na renda fixa; salvam e aparecem na linha da posição; bolsa não tem', async () => {
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
+    const painel = await abrirNovoComTipo('CRI')
+    expect((within(painel).getByLabelText(/^Taxa/) as HTMLInputElement).placeholder).toContain('IPCA + 7,50% a.a.')
+    preencher(painel, { 'Nome ou código do ativo': 'CRI Alfa 2031', 'Valor aplicado (R$)': '20000', 'Vencimento (opcional)': '2031-03-15', 'Taxa (opcional)': 'IPCA + 7,5% a.a.' })
+    fireEvent.click(within(painel).getByRole('button', { name: 'Salvar' }))
+    await waitFor(() => expect(lerSalvo().ativosManuais).toHaveLength(1))
+    expect(lerSalvo().ativosManuais[0]).toMatchObject({ vencimento: '2031-03-15', taxa: 'IPCA + 7,5% a.a.' })
+    const c = await posicoes()
+    abrirGrupo('Renda fixa')
+    expect(txt(c)).toContain('Vence em 15/03/2031 · IPCA + 7,5% a.a.')
+  })
+  it('vencimento e taxa NÃO aparecem para ações; e dá para limpar o que foi informado', async () => {
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
+    const acao = await abrirNovoComTipo('Ações')
+    expect(within(acao).queryByLabelText('Vencimento (opcional)')).toBeNull()
+    expect(within(acao).queryByLabelText(/^Taxa/)).toBeNull()
+    fireEvent.click(within(acao).getByRole('button', { name: 'Cancelar' }))
+    cleanup()
+    semear({ ativosManuais: [{ ativo: 'CRI ALFA', nome: 'CRI Alfa', quantidade: 1, precoMedio: 100, valorAtual: null, classe: 'lciLca', tipo: 'cri', vencimento: '2031-03-15', taxa: 'IPCA + 7%' }] })
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
+    const c = await posicoes()
+    fireEvent.click(within(c).getByRole('button', { name: 'Editar CRI ALFA' }))
+    const painel = screen.getByRole('dialog', { name: 'Editar CRI ALFA' })
+    expect((within(painel).getByLabelText('Vencimento (opcional)') as HTMLInputElement).value).toBe('2031-03-15')
+    preencher(painel, { 'Vencimento (opcional)': '', 'Taxa (opcional)': '' })
+    fireEvent.click(within(painel).getByRole('button', { name: 'Salvar' }))
+    await waitFor(() => expect(lerSalvo().ativosManuais[0].vencimento).toBeUndefined())
+    expect(lerSalvo().ativosManuais[0].taxa).toBeUndefined()
+    expect(lerSalvo().ativosManuais[0].tipo).toBe('cri') // trocar/limpar campos não perde o tipo
+  })
   it('EXCLUIR um ativo da B3 (ex.: direito de subscrição vencido): pede confirmação, some da lista e dá para mostrar de novo', async () => {
     semear({ posicao: [pos('VALE3', 100, 1500), pos('XPML12', 4, 0)], dataPosicao: '2026-09-30' })
-    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
     const c = await posicoes()
     fireEvent.click(within(c).getByRole('button', { name: 'Editar XPML12' }))
     const painel = screen.getByRole('dialog', { name: 'Editar XPML12' })
@@ -877,17 +1014,17 @@ describe('MinhaCarteira: ativo digitado à mão (posição, com a classe escolhi
   })
   it('um ativo digitado não tem "Ver lançamentos" (não há lançamentos dele)', async () => {
     semear({ ativosManuais: [{ ativo: 'CDB BANCO X', nome: 'CDB Banco X', quantidade: 1, precoMedio: 100, valorAtual: null, classe: 'cdbLiquidez' }] })
-    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
     const c = await posicoes()
     expect(within(c).queryByRole('button', { name: /Ver lançamentos de/ })).toBeNull()
   })
   it('entra no total, na composição e funciona junto com a Posição da B3', async () => {
     semear({ posicao: [pos('VALE3', 100, 1500)], dataPosicao: '2026-09-30', ativosManuais: [{ ativo: 'CDB BANCO X', nome: 'CDB Banco X', quantidade: 1, precoMedio: 10000, valorAtual: 10500, classe: 'cdbLiquidez' }] })
-    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
     const carteira = (await screen.findByRole('heading', { name: 'Carteira' })).closest('section')!
     expect(txt(carteira)).toContain('R$ 12.000,00') // 1.500 da B3 + 10.500 digitados
     const comp = (await screen.findByRole('heading', { name: 'Composição' })).closest('section')!
-    expect(txt(comp)).toContain('Renda fixa (bancos)')
+    expect(txt(comp)).toContain('Renda fixa')
     expect(txt(comp)).toContain('Ações')
   })
   it('a classe escolhida para um ativo digitado vale na comparação com a carteira sugerida', async () => {
@@ -895,7 +1032,7 @@ describe('MinhaCarteira: ativo digitado à mão (posição, com a classe escolhi
     const resultado = gerarRecomendacao(resposta(PERGUNTAS) as never, { idade: 35 }, resposta(PERGUNTAS_ARQUITETURA) as never)
     const ctx = { resultado, resultadoPendente: false, erroResultado: null } as unknown as AppCtx
     semear({ ativosManuais: [{ ativo: 'CDB BANCO X', nome: 'CDB Banco X', quantidade: 1, precoMedio: 1000, valorAtual: null, classe: 'cdbLiquidez' }] })
-    render(<MinhaCarteira ctx={ctx} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctx} hoje={hoje} />)
     const c = (await screen.findByRole('heading', { name: 'Comparar com a carteira sugerida' })).closest('section')!
     const linha = within(within(c).getByRole('list', { name: 'Comparação por classe' })).getByText(ATIVOS.cdbLiquidez.label).closest('li')!
     expect(txt(linha)).toContain(`Você: ${pct(100, false)}`)
@@ -903,11 +1040,47 @@ describe('MinhaCarteira: ativo digitado à mão (posição, com a classe escolhi
   })
 })
 
+describe('MinhaCarteira: comparação mostra o que foi contado por equivalência, embaixo da classe', () => {
+  const resposta = (l: { id: string }[]) => Object.fromEntries(l.map((p) => [p.id, 'b']))
+  const resultado = gerarRecomendacao(resposta(PERGUNTAS) as never, { idade: 35 }, resposta(PERGUNTAS_ARQUITETURA) as never)
+  const ctx = { resultado, resultadoPendente: false, erroResultado: null } as unknown as AppCtx
+  const cartao = async () => (await screen.findByRole('heading', { name: 'Comparar com a carteira sugerida' })).closest('section')!
+  const linhaDe = (c: HTMLElement, classe: string) => within(within(c).getByRole('list', { name: 'Comparação por classe' })).getByText(classe).closest('li')!
+
+  it('CRI aparece na linha LCI / LCA com "Inclui CRI ALFA" e a explicação; nada fica "fora da carteira sugerida"', async () => {
+    semear({ ativosManuais: [{ ativo: 'CRI ALFA', nome: 'CRI Alfa', quantidade: 1, precoMedio: 20000, valorAtual: null, classe: 'lciLca', tipo: 'cri' }] })
+    render(<MinhaCarteira valoresVisiveis ctx={ctx} hoje={hoje} />)
+    const c = await cartao()
+    const linha = linhaDe(c, ATIVOS.lciLca.label)
+    expect(txt(linha)).toContain('Inclui CRI ALFA (R$ 20.000,00)')
+    expect(txt(linha)).toContain('CRI contado como LCI / LCA')
+    expect(within(c).queryByText('Fora da carteira sugerida')).toBeNull()
+  })
+  it('com os valores escondidos, a observação não mostra o valor em reais', async () => {
+    semear({ ativosManuais: [{ ativo: 'CRI ALFA', nome: 'CRI Alfa', quantidade: 1, precoMedio: 20000, valorAtual: null, classe: 'lciLca', tipo: 'cri' }] })
+    render(<MinhaCarteira ctx={ctx} hoje={hoje} />)
+    const c = await cartao()
+    const linha = linhaDe(c, ATIVOS.lciLca.label)
+    expect(txt(linha)).toContain('Inclui CRI ALFA (R$ ****)')
+    expect(txt(linha)).not.toContain('20.000')
+  })
+  it('trocar a classe do CRI pela própria comparação mantém o tipo e tira a observação', async () => {
+    semear({ ativosManuais: [{ ativo: 'CRI ALFA', nome: 'CRI Alfa', quantidade: 1, precoMedio: 20000, valorAtual: null, classe: 'lciLca', tipo: 'cri', vencimento: '2031-03-15' }] })
+    render(<MinhaCarteira valoresVisiveis ctx={ctx} hoje={hoje} />)
+    const c = await cartao()
+    fireEvent.click(within(c).getByText(/Como classificamos os seus ativos/))
+    fireEvent.change(within(c).getByLabelText('Classe de CRI ALFA'), { target: { value: 'tesouroIPCA' } })
+    await waitFor(() => expect(lerSalvo().ativosManuais[0].classe).toBe('tesouroIPCA'))
+    expect(lerSalvo().ativosManuais[0]).toMatchObject({ tipo: 'cri', vencimento: '2031-03-15' })
+    expect(txt(await cartao())).not.toContain('Inclui CRI ALFA')
+  })
+})
+
 describe('MinhaCarteira: filtro "Digitados por mim" nos lançamentos', () => {
   const ctxVazio = {} as AppCtx
   it('mostra só o que a pessoa lançou à mão, para achar e apagar de uma vez', async () => {
     semear({ lancs: [L(), L({ ativo: 'BBAS3', quantidade: 1600, preco: 19.5, valor: 31200, data: '2026-10-01', origem: 'manual' }), L({ ativo: 'PETR4', origem: 'manual', data: '2026-10-01' })] })
-    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
     const lista = (await screen.findByRole('heading', { name: 'Lançamentos' })).closest('section')!
     expect(txt(lista)).toContain('3 lançamento(s)')
     fireEvent.click(within(lista).getByRole('button', { name: 'Digitados por mim' }))
@@ -922,7 +1095,7 @@ describe('MinhaCarteira: filtro "Digitados por mim" nos lançamentos', () => {
   })
   it('sem nenhum lançamento digitado, avisa', async () => {
     semear({ lancs: [L()] })
-    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
     const lista = (await screen.findByRole('heading', { name: 'Lançamentos' })).closest('section')!
     fireEvent.click(within(lista).getByRole('button', { name: 'Digitados por mim' }))
     expect(txt(lista)).toContain('Nenhum lançamento deste tipo')
@@ -940,7 +1113,7 @@ describe('MinhaCarteira: proventos como na página Proventos da B3', () => {
 
   it('mostra o recebido ESTE ANO e nos ÚLTIMOS 12 MESES, como a B3', async () => {
     semear({ lancs: [L(), prov('2026-03-10', 'MXRF11', 100), prov('2026-09-15', 'MXRF11', 50), prov('2025-11-20', 'MXRF11', 30), prov('2025-06-01', 'MXRF11', 999)] })
-    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
     const c = await cartao()
     const blocos = [...c.querySelectorAll('.mc-duplo > div')].map((d) => txt(d as HTMLElement))
     expect(blocos[0]).toContain('Recebido este ano')
@@ -950,7 +1123,7 @@ describe('MinhaCarteira: proventos como na página Proventos da B3', () => {
   })
   it('o gráfico tem 15 meses (12 antes, o atual e 2 depois), com o valor escrito sobre cada barra e o mês atual em destaque', async () => {
     semear({ lancs: [L(), prov('2026-08-14', 'MXRF11', 812.99), prov('2026-09-15', 'MXRF11', 1048.71)] })
-    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
     const c = await cartao()
     const colunas = [...c.querySelectorAll('.mc-pb-col')]
     expect(colunas).toHaveLength(15)
@@ -970,7 +1143,7 @@ describe('MinhaCarteira: proventos como na página Proventos da B3', () => {
         { ativo: 'MXRF11', tipoEvento: 'rendimento', previsao: '2026-11-14', quantidade: 100, precoUnitario: 1.07, valorLiquido: 107.46 },
       ],
     })
-    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
     const c = await cartao()
     const nov = coluna(c, 'Nov/26')
     expect(nov.querySelector('.mc-pb-areceber')).toBeTruthy()
@@ -984,7 +1157,7 @@ describe('MinhaCarteira: proventos como na página Proventos da B3', () => {
       lancs: [L(), prov('2026-10-01', 'BBDC3', 2.84, { subtipo: 'jcp' })],
       eventosFuturos: [{ ativo: 'BBDC3', tipoEvento: 'jcp', previsao: '2026-10-01', quantidade: 200, precoUnitario: 0.02, valorLiquido: 2.84 }],
     })
-    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
     const c = await cartao()
     const out = coluna(c, 'Out/26')
     expect(plano(out.querySelector('.mc-pb-valor')!.textContent)).toBe('R$ 2,84') // e não 5,68
@@ -993,7 +1166,7 @@ describe('MinhaCarteira: proventos como na página Proventos da B3', () => {
 
   it('"Valores de cada mês" lista os meses com proventos; cada um abre com o detalhe, para conferir com a B3', async () => {
     semear({ lancs: [L(), prov('2026-08-14', 'MXRF11', 25), prov('2026-08-20', 'BBAS3', 788.99, { subtipo: 'jcp', origem: 'b3-proventos' }), prov('2026-09-15', 'HGLG11', 40)] })
-    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
     const c = await cartao()
     const meses = [...c.querySelectorAll('.mc-meses > li')]
     expect(meses.map((m) => txt(m.querySelector('summary') as HTMLElement))).toEqual([expect.stringContaining('Set/26'), expect.stringContaining('Ago/26')])
@@ -1011,7 +1184,7 @@ describe('MinhaCarteira: proventos como na página Proventos da B3', () => {
   })
   it('o detalhe do mês inclui o que ainda será pago, marcado como "a receber"', async () => {
     semear({ lancs: [L()], eventosFuturos: [{ ativo: 'BBDC3', tipoEvento: 'jcp', previsao: '2026-11-03', quantidade: 200, precoUnitario: 0.02, valorLiquido: 9 }] })
-    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
     const c = await cartao()
     const nov = [...c.querySelectorAll('.mc-meses > li')].find((m) => txt(m.querySelector('summary') as HTMLElement).includes('Nov/26'))!
     expect(txt(nov.querySelector('.mc-itens-mes') as HTMLElement)).toContain('a receber')
@@ -1019,7 +1192,7 @@ describe('MinhaCarteira: proventos como na página Proventos da B3', () => {
   })
   it('amortização e reembolso entram como proventos, como a B3 os conta', async () => {
     semear({ lancs: [L(), prov('2026-09-10', 'XPTO11', 50, { subtipo: 'amortizacao' }), prov('2026-09-12', 'PETR4', 7, { subtipo: 'reembolso' })] })
-    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
     const c = await cartao()
     expect(txt(c.querySelector('.mc-duplo') as HTMLElement)).toContain('R$ 57,00')
     expect(txt(c)).toContain('Amortização')
@@ -1027,7 +1200,7 @@ describe('MinhaCarteira: proventos como na página Proventos da B3', () => {
   })
   it('sem nenhum provento: avisa e não desenha gráfico vazio', async () => {
     semear({ lancs: [L()] })
-    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
     const c = await cartao()
     expect(txt(c)).toContain('Ainda sem proventos')
     expect(c.querySelector('.mc-pb')).toBeNull()
@@ -1045,7 +1218,7 @@ describe('MinhaCarteira: proventos repetidos em par (transferência de custódia
 
   it('abre dados já gravados com os pares e mostra o mês SEM eles, igual ao da B3', async () => {
     semear({ lancs: [L(), ...unicos, ...pares] })
-    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
     const c = (await screen.findByRole('heading', { name: 'Proventos' })).closest('section')!
     const ago = c.querySelector('.mc-pb-col[title^="Ago/26:"]') as HTMLElement
     expect(plano(ago.querySelector('.mc-pb-valor')!.textContent)).toBe('R$ 812,99') // 100 + 300,50 + 412,49, e não 1.634,29
@@ -1053,7 +1226,7 @@ describe('MinhaCarteira: proventos repetidos em par (transferência de custódia
   })
   it('a lista "Valores de cada mês" de agosto não traz os pares', async () => {
     semear({ lancs: [L(), ...unicos, ...pares] })
-    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
     const c = (await screen.findByRole('heading', { name: 'Proventos' })).closest('section')!
     const ago = [...c.querySelectorAll('.mc-meses > li')].find((m) => txt(m.querySelector('summary') as HTMLElement).includes('Ago/26'))!
     const itens = [...ago.querySelectorAll('.mc-itens-mes li')].map((li) => txt(li as HTMLElement))
@@ -1062,9 +1235,65 @@ describe('MinhaCarteira: proventos repetidos em par (transferência de custódia
   })
   it('o par some também da lista de lançamentos (e fica gravado limpo)', async () => {
     semear({ lancs: [L(), ...unicos, ...pares] })
-    render(<MinhaCarteira ctx={ctxVazio} hoje={hoje} />)
+    render(<MinhaCarteira valoresVisiveis ctx={ctxVazio} hoje={hoje} />)
     const lista = (await screen.findByRole('heading', { name: 'Lançamentos' })).closest('section')!
     await waitFor(() => expect(txt(lista)).toContain('4 lançamento(s)')) // a compra + 3 pagamentos verdadeiros
     expect(lerSalvo().lancamentos.filter((l) => l.tipo === 'provento')).toHaveLength(3)
+  })
+})
+
+describe('Meus Ativos: valores escondidos por padrão (olho)', () => {
+  const dados = () => semear({ lancs: [L({})], posicao: [pos('VALE3', 100, 1500)], dataPosicao: '2026-09-30' })
+  const cartaoPosicoes = async () => (await screen.findByRole('heading', { name: 'Posições' })).closest('section')!
+
+  it('a tela se chama Meus Ativos', async () => {
+    render(<MinhaCarteira ctx={ctx} hoje={hoje} />)
+    expect(await screen.findByRole('heading', { level: 1, name: 'Meus Ativos' })).toBeTruthy()
+    expect(screen.queryByRole('heading', { name: 'Minha Carteira' })).toBeNull()
+  })
+  it('abre com **** no lugar de dinheiro, quantidade e resultado; só o nome do ativo continua visível', async () => {
+    dados()
+    render(<MinhaCarteira ctx={ctx} hoje={hoje} />)
+    const c = await cartaoPosicoes()
+    expect(within(c).getByText('VALE3')).toBeTruthy()
+    expect(txt(c)).toContain('****')
+    expect(txt(c)).not.toMatch(/R\$\s?\d/)
+    expect(txt(c)).not.toContain('1.500')
+    expect(txt(c)).not.toContain('100 un.')
+    expect(txt(c)).not.toContain('50,00%')
+    // o resumo da carteira e os gráficos também
+    expect(document.querySelector('.mc-grade')!.textContent).not.toMatch(/R\$\s?\d/)
+    expect(screen.getByText(/Valores ocultos/)).toBeTruthy()
+  })
+  it('o olho mostra os valores e esconde de novo; o rótulo do botão acompanha', async () => {
+    dados()
+    render(<MinhaCarteira ctx={ctx} hoje={hoje} />)
+    const c = await cartaoPosicoes()
+    fireEvent.click(screen.getByRole('button', { name: 'Mostrar valores' }))
+    expect(txt(c)).toContain('R$ 1.500,00')
+    expect(txt(c)).toContain('100 un.')
+    expect(screen.queryByText(/Valores ocultos/)).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Ocultar valores' }))
+    expect(txt(c)).not.toContain('1.500,00')
+    expect(screen.getByRole('button', { name: 'Mostrar valores' })).toBeTruthy()
+  })
+  it('escondido, nem os rótulos para leitores de tela vazam números', async () => {
+    dados()
+    render(<MinhaCarteira ctx={ctx} hoje={hoje} />)
+    await cartaoPosicoes()
+    const rotulos = Array.from(document.querySelectorAll('[aria-label]')).map((e) => e.getAttribute('aria-label')!).join(' | ')
+    expect(rotulos).not.toMatch(/R\$\s?\d/)
+    const titulos = Array.from(document.querySelectorAll('svg title')).map((e) => e.textContent).join(' ')
+    expect(titulos).not.toMatch(/R\$\s?\d/)
+  })
+  it('a escolha não é gravada: ao reabrir, volta escondido', async () => {
+    dados()
+    const { unmount } = render(<MinhaCarteira ctx={ctx} hoje={hoje} />)
+    await cartaoPosicoes()
+    fireEvent.click(screen.getByRole('button', { name: 'Mostrar valores' }))
+    unmount()
+    render(<MinhaCarteira ctx={ctx} hoje={hoje} />)
+    await cartaoPosicoes()
+    expect(screen.getByRole('button', { name: 'Mostrar valores' })).toBeTruthy()
   })
 })

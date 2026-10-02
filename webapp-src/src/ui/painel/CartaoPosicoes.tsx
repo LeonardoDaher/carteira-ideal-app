@@ -1,11 +1,14 @@
 import { useId, useState } from 'react'
 import type { ClasseCarteira } from '../../domain/classificadorAtivo'
+import type { CategoriaPosicao } from '../../domain/importacao/planilha'
 import { agruparPosicoes } from '../../domain/painelCarteira'
 import type { LinhaPosicao, OrigemPrecoMedio } from '../../domain/painelCarteira'
-import { PencilIcon } from '../Icon'
+import { ChevronDownIcon, PencilIcon } from '../Icon'
+import { MiniPizza } from './Graficos'
 import { PainelEdicaoAtivo } from './PainelEdicaoAtivo'
 import type { AcoesPainel } from './PainelEdicaoAtivo'
-import { dataCurta, pct, quantidadeBR, reais } from './formatar'
+import { dataCurta, pct } from './formatar'
+import { useValores } from './valoresOcultos'
 
 const ORIGEM: Record<OrigemPrecoMedio, string> = {
   calculado: 'Calculado pelos seus lançamentos',
@@ -14,6 +17,7 @@ const ORIGEM: Record<OrigemPrecoMedio, string> = {
 }
 
 function LinhaDoAtivo({ l, onEditar, onVerLancamentos }: { l: LinhaPosicao; onEditar: () => void; onVerLancamentos: (ativo: string) => void }) {
+  const { reais, quantidade: quantidadeBR, resultadoPct } = useValores()
   return (
     <li className="mc-posicao">
       <div className="mc-pos-topo">
@@ -46,13 +50,20 @@ function LinhaDoAtivo({ l, onEditar, onVerLancamentos }: { l: LinhaPosicao; onEd
           {l.resultado !== null ? (
             <span className={l.resultado >= 0 ? 'mc-pos' : 'mc-neg'}>
               {reais(l.resultado)}
-              {l.resultadoPct !== null && <small> ({pct(l.resultadoPct)})</small>}
+              {l.resultadoPct !== null && <small> ({resultadoPct(l.resultadoPct)})</small>}
             </span>
           ) : (
             <span>—</span>
           )}
         </div>
       </div>
+      {l.manual && (l.vencimentoManual || l.taxaManual) && (
+        <div className="mc-nota mc-pos-extra">
+          {l.vencimentoManual && <span>Vence em {dataCurta(l.vencimentoManual)}</span>}
+          {l.vencimentoManual && l.taxaManual && ' · '}
+          {l.taxaManual && <span>{l.taxaManual}</span>}
+        </div>
+      )}
     </li>
   )
 }
@@ -88,17 +99,18 @@ export function CartaoPosicoes({
   onRestaurar?: (ativo: string) => void
 }) {
   const idTitulo = useId()
-  const [editando, setEditando] = useState<{ ativo: string } | 'novo' | null>(null)
+  const { reais } = useValores()
+  const [editando, setEditando] = useState<{ ativo: string } | { grupo: { categoria: CategoriaPosicao; rotulo: string } } | 'novo' | null>(null)
   const grupos = agruparPosicoes(linhas)
   const semPreco = linhas.filter((l) => l.status === 'faltaSaldoAnterior').length
-  const linhaEditada = editando && editando !== 'novo' ? linhas.find((l) => l.ativo === editando.ativo) : undefined
+  const linhaEditada = editando && editando !== 'novo' && 'ativo' in editando ? linhas.find((l) => l.ativo === editando.ativo) : undefined
 
   return (
     <section className="mc-card" aria-labelledby={idTitulo}>
       <div className="mc-topo-linha">
         <h2 id={idTitulo} className="mc-titulo">Posições</h2>
         <button type="button" className="btn btn-secondary mc-btn" onClick={() => setEditando('novo')}>
-          Adicionar ativo
+          Adicionar posição
         </button>
       </div>
       {linhas.length > 0 && (
@@ -121,7 +133,7 @@ export function CartaoPosicoes({
       )}
       {semPreco > 0 && <div className="mc-nota">{semPreco} ativo(s) sem preço médio. Toque no lápis do ativo para informar.</div>}
 
-      {linhas.length === 0 && <p className="mc-texto">Nenhum ativo ainda. Importe os extratos da B3 ou adicione um ativo à mão.</p>}
+      {linhas.length === 0 && <p className="mc-texto">Nenhuma posição ainda. Importe os extratos da B3 ou adicione uma posição à mão.</p>}
 
       {excluidos.length > 0 && onRestaurar && (
         <details className="mc-detalhes">
@@ -143,27 +155,41 @@ export function CartaoPosicoes({
         {grupos.map((g) => (
           <details key={g.chave} className="mc-grupo" open={grupos.length === 1}>
             <summary aria-label={`${g.rotulo}: ${g.ativos} ativo(s)`}>
+              <MiniPizza pct={g.pct} categoria={g.chave} />
               <span className="mc-grupo-nome">{g.rotulo}</span>
               <span className="mc-grupo-valor">{g.valor > 0 ? reais(g.valor) : '—'}</span>
               <span className="mc-grupo-info">
                 {g.ativos} {g.ativos === 1 ? 'ativo' : 'ativos'}
                 {g.valor > 0 && ` · ${pct(g.pct, false)} da carteira`}
               </span>
-              <span className="mc-grupo-barra" aria-hidden="true">
-                <span style={{ width: `${Math.max(0, Math.min(100, g.pct))}%` }} />
-              </span>
+              <ChevronDownIcon size={18} className="mc-grupo-seta" />
             </summary>
             <ul className="mc-posicoes">
               {g.linhas.map((l) => (
                 <LinhaDoAtivo key={l.ativo} l={l} onEditar={() => setEditando({ ativo: l.ativo })} onVerLancamentos={onVerLancamentos} />
               ))}
             </ul>
+            {g.chave !== 'recentes' && (
+              <div className="mc-grupo-rodape">
+                <button
+                  type="button"
+                  className="btn btn-ghost mc-btn"
+                  aria-label={`Adicionar ativo em ${g.rotulo}`}
+                  onClick={() => setEditando({ grupo: { categoria: g.chave as CategoriaPosicao, rotulo: g.rotulo } })}
+                >
+                  + Adicionar ativo
+                </button>
+              </div>
+            )}
           </details>
         ))}
       </div>
 
       {editando === 'novo' && (
         <PainelEdicaoAtivo classeAtual={null} classeEscolhida={undefined} acoes={acoes} onFechar={() => setEditando(null)} />
+      )}
+      {editando && editando !== 'novo' && 'grupo' in editando && (
+        <PainelEdicaoAtivo key={editando.grupo.categoria} grupo={editando.grupo} classeAtual={null} classeEscolhida={undefined} acoes={acoes} onFechar={() => setEditando(null)} />
       )}
       {linhaEditada && (
         <PainelEdicaoAtivo

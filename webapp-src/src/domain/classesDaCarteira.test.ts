@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { agruparTesouroDireto, classificarPosicoes, ehClasseValida, valoresPorClasse } from './classesDaCarteira'
+import { agruparTesouroDireto, classificarPosicoes, ehClasseValida, observacoesPorClasse, valoresPorClasse } from './classesDaCarteira'
 import { montarCatalogo } from './classificadorAtivo'
 import type { LinhaPosicao } from './painelCarteira'
 
@@ -80,5 +80,46 @@ describe('valoresPorClasse e agruparTesouroDireto', () => {
     expect(ehClasseValida('foraDaRegua')).toBe(true)
     expect(ehClasseValida('inventada')).toBe(false)
     expect(ehClasseValida(42)).toBe(false)
+  })
+})
+
+describe('equivalência: tipo novo alocado na classe parecida da carteira sugerida', () => {
+  const manual = (ativo: string, valor: number, tipo: string, classe: string): LinhaPosicao => ({ ...linha(ativo, valor, 'rendaFixa', valor), manual: true, tipoManual: tipo, classeManual: classe as never })
+
+  it('CRI conta em LCI / LCA e traz a observação', () => {
+    const c = classificarPosicoes([manual('CRI ALFA', 20000, 'cri', 'lciLca')], catalogo, { 'CRI ALFA': 'lciLca' })
+    expect(c[0].equivalencia).toMatch(/CRI contado como LCI \/ LCA/)
+    expect(valoresPorClasse(c).valores).toEqual({ lciLca: 20000 })
+    expect(observacoesPorClasse(c).lciLca).toEqual([{ texto: c[0].equivalencia, ativos: [{ ativo: 'CRI ALFA', valor: 20000 }] }])
+  })
+  it('vários ativos com a mesma observação ficam juntos numa linha só', () => {
+    const c = classificarPosicoes([manual('CRI A', 1000, 'cri', 'lciLca'), manual('CRI B', 500, 'cri', 'lciLca')], catalogo, { 'CRI A': 'lciLca', 'CRI B': 'lciLca' })
+    const obs = observacoesPorClasse(c).lciLca!
+    expect(obs).toHaveLength(1)
+    expect(obs[0].ativos.map((a) => a.ativo)).toEqual(['CRI A', 'CRI B'])
+  })
+  it('se a pessoa trocar a classe sugerida pelo tipo, a escolha dela manda e a observação some', () => {
+    const c = classificarPosicoes([manual('CRI ALFA', 20000, 'cri', 'lciLca')], catalogo, { 'CRI ALFA': 'tesouroIPCA' })
+    expect(c[0].equivalencia).toBeUndefined()
+    expect(c[0].motivo).toBe('Escolhida por você.')
+    expect(valoresPorClasse(c).valores).toEqual({ tesouroIPCA: 20000 })
+  })
+  it('multimercado é repartido entre FIIs, Ouro, BDRs e Internacionais, sem perder nem criar dinheiro', () => {
+    const c = classificarPosicoes([{ ...manual('MULTI X', 10000, 'fundo-multi', 'foraDaRegua'), categoria: 'fundosInvest' }], catalogo, { 'MULTI X': 'foraDaRegua' })
+    const { valores } = valoresPorClasse(c)
+    expect(valores).toEqual({ fiis: 4000, ouro: 2000, bdrs: 2000, fundosInternacionais: 2000 })
+    expect(valores.foraDaRegua).toBeUndefined()
+    expect(Object.values(valores).reduce((s, v) => s + (v ?? 0), 0)).toBeCloseTo(10000, 8)
+    expect(Object.keys(observacoesPorClasse(c)).sort()).toEqual(['bdrs', 'fiis', 'fundosInternacionais', 'ouro'])
+  })
+  it('Fundo DI (Tesouro Selic) aparece na linha "Tesouro Direto" da comparação (chave tesouroIPCA)', () => {
+    const c = classificarPosicoes([manual('DI X', 3000, 'fundo-di', 'tesouroSelic')], catalogo, { 'DI X': 'tesouroSelic' })
+    expect(observacoesPorClasse(c).tesouroIPCA?.[0].ativos).toEqual([{ ativo: 'DI X', valor: 3000 }])
+    expect(observacoesPorClasse(c).tesouroSelic).toBeUndefined()
+  })
+  it('previdência fica fora da régua e sem observação de equivalência', () => {
+    const c = classificarPosicoes([manual('PGBL X', 8000, 'pgbl', 'foraDaRegua')], catalogo, { 'PGBL X': 'foraDaRegua' })
+    expect(c[0].equivalencia).toBeUndefined()
+    expect(valoresPorClasse(c).valores).toEqual({ foraDaRegua: 8000 })
   })
 })

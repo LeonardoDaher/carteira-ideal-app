@@ -7,6 +7,7 @@
 import { classificarAtivo, precisaConfirmar, type CatalogoAtivos, type ClasseCarteira } from './classificadorAtivo'
 import type { LinhaPosicao } from './painelCarteira'
 import type { AtivoKey } from './types'
+import { tipoPorId } from './tiposInvestimento'
 
 /** Rótulos para a escolha da classe (distintos dos de exibição: lá o Tesouro aparece agrupado). */
 export const ROTULO_CLASSE: Record<ClasseCarteira, string> = {
@@ -45,6 +46,10 @@ export interface AtivoClassificado {
   /** Classe provável mas não certa: entra na conta e pede conferência. */
   precisaConfirmar: boolean
   alternativas: ClasseCarteira[]
+  /** Observação quando o ativo foi alocado numa classe PARECIDA da carteira sugerida (ex.: CRI contado como LCI / LCA). */
+  equivalencia?: string
+  /** Ativo repartido entre várias classes (fundo multimercado): quanto vai para cada uma. */
+  partes?: { classe: ClasseCarteira; valor: number }[]
 }
 
 const EPS = 1e-9
@@ -62,7 +67,12 @@ export function classificarPosicoes(linhas: LinhaPosicao[], catalogo: CatalogoAt
 
     const escolhida = escolhas[l.ativo]
     if (escolhida) {
-      saida.push({ ativo: l.ativo, valor, classe: escolhida, origem: 'pessoa', motivo: 'Escolhida por você.', precisaConfirmar: false, alternativas: [] })
+      // Equivalência vale enquanto a pessoa não trocou a classe sugerida pelo tipo (se trocou, ela manda).
+      const tipo = tipoPorId(l.tipoManual)
+      const sugeridaPeloTipo = !!tipo && tipo.classe === escolhida
+      const equivalencia = sugeridaPeloTipo ? tipo.equivalencia : undefined
+      const partes = sugeridaPeloTipo && tipo.distribuicao ? Object.entries(tipo.distribuicao).map(([classe, peso]) => ({ classe: classe as ClasseCarteira, valor: valor * (peso ?? 0) })) : undefined
+      saida.push({ ativo: l.ativo, valor, classe: escolhida, origem: 'pessoa', motivo: equivalencia ?? 'Escolhida por você.', precisaConfirmar: false, alternativas: [], ...(equivalencia ? { equivalencia } : {}), ...(partes ? { partes } : {}) })
       continue
     }
 
@@ -101,12 +111,36 @@ export function valoresPorClasse(classificados: AtivoClassificado[]): ValoresPor
   const pendentes: AtivoClassificado[] = []
   for (const a of classificados) {
     if (a.classe === null) pendentes.push(a)
+    else if (a.partes) for (const p of a.partes) valores[p.classe] = (valores[p.classe] ?? 0) + p.valor
     else valores[a.classe] = (valores[a.classe] ?? 0) + a.valor
   }
   return { valores, pendentes, valorPendente: pendentes.reduce((s, p) => s + p.valor, 0) }
 }
 
 const TESOUROS: AtivoKey[] = ['tesouroSelic', 'tesouroIPCA', 'tesouroPrefixado']
+
+/** Em qual linha da comparação a classe aparece (os três Tesouros dividem a linha "Tesouro Direto", sob a chave tesouroIPCA). */
+export const classeNaComparacao = (c: ClasseCarteira): ClasseCarteira => ((TESOUROS as ClasseCarteira[]).includes(c) ? 'tesouroIPCA' : c)
+
+/** Observações por linha da comparação: o que foi contado ali por EQUIVALÊNCIA (ex.: CRI na linha LCI / LCA), agrupado pelo texto. */
+export interface ObservacaoDaClasse {
+  texto: string
+  ativos: { ativo: string; valor: number }[]
+}
+export function observacoesPorClasse(classificados: AtivoClassificado[]): Partial<Record<ClasseCarteira, ObservacaoDaClasse[]>> {
+  const saida: Partial<Record<ClasseCarteira, ObservacaoDaClasse[]>> = {}
+  for (const a of classificados) {
+    if (!a.equivalencia || a.classe === null) continue
+    for (const d of a.partes ?? [{ classe: a.classe, valor: a.valor }]) {
+      const linha = classeNaComparacao(d.classe)
+      const lista = (saida[linha] ??= [])
+      const grupo = lista.find((o) => o.texto === a.equivalencia)
+      if (grupo) grupo.ativos.push({ ativo: a.ativo, valor: d.valor })
+      else lista.push({ texto: a.equivalencia, ativos: [{ ativo: a.ativo, valor: d.valor }] })
+    }
+  }
+  return saida
+}
 
 /**
  * Soma Tesouro Selic, IPCA+ e Prefixado numa fatia só ("Tesouro Direto", sob a chave tesouroIPCA),

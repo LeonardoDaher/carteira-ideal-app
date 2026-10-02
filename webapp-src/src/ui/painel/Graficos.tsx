@@ -1,7 +1,7 @@
 import { useId } from 'react'
 import { geometriaArea, geometriaBarras } from '../../domain/graficosSvg'
 import type { PontoMensal, PontoProventos } from '../../domain/painelCarteira'
-import { reais } from './formatar'
+import { useValores } from './valoresOcultos'
 
 // Gráficos do painel em SVG próprio (o app não usa biblioteca de gráficos). O desenho segue a
 // referência de design: linha dourada com preenchimento em degradê, e barras cinzas com as mais
@@ -46,6 +46,7 @@ export function GraficoArea({ pontos, ariaLabel, altura = 120, decorativo = fals
 }
 
 export function GraficoBarras({ pontos, ariaLabel, altura = 110, destaques = 2, decorativo = false }: { pontos: PontoMensal[]; ariaLabel: string; altura?: number; destaques?: number; decorativo?: boolean }) {
+  const { reais } = useValores()
   const id = useId().replace(/:/g, '')
   const barras = geometriaBarras(pontos.map((p) => p.valor), LARGURA, altura, destaques)
   return (
@@ -77,7 +78,7 @@ export function GraficoBarras({ pontos, ariaLabel, altura = 110, destaques = 2, 
 }
 
 /** Valor curto para escrever sobre a barra: "R$ 522,70", "R$ 1,1 mil". */
-const compacto = (n: number) => (n >= 1000 ? `R$ ${(n / 1000).toFixed(1).replace('.', ',')} mil` : reais(n))
+const compacto = (n: number, reais: (n: number) => string) => (n >= 1000 ? `R$ ${(n / 1000).toFixed(1).replace('.', ',')} mil` : reais(n))
 
 /**
  * Proventos mês a mês como na página Proventos da B3: o valor escrito sobre cada barra, o mês atual em destaque
@@ -85,6 +86,7 @@ const compacto = (n: number) => (n >= 1000 ? `R$ ${(n / 1000).toFixed(1).replace
  * lado a lado até no celular; a lista "Valores de cada mês", abaixo do gráfico, traz os mesmos números por extenso.
  */
 export function GraficoProventos({ pontos, mesAtual, ariaLabel, altura = 100 }: { pontos: PontoProventos[]; mesAtual: string; ariaLabel: string; altura?: number }) {
+  const { reais, oculto } = useValores()
   const maximo = Math.max(0, ...pontos.map((p) => p.recebido + p.aReceber))
   const h = (v: number) => (maximo > 0 ? (v / maximo) * altura : 0)
   return (
@@ -94,7 +96,7 @@ export function GraficoProventos({ pontos, mesAtual, ariaLabel, altura = 100 }: 
         return (
           <div key={p.mes} className={`mc-pb-col${p.mes === mesAtual ? ' destaque' : ''}`} title={`${p.rotulo}/${p.mes.slice(2, 4)}: ${reais(p.recebido)} recebidos${p.aReceber > 0 ? ` e ${reais(p.aReceber)} a receber` : ''}`}>
             <div className="mc-pb-barra" style={{ height: altura + 62 }}>
-              {total > 0 && <span className="mc-pb-valor">{compacto(total)}</span>}
+              {total > 0 && !oculto && <span className="mc-pb-valor">{compacto(total, reais)}</span>}
               {p.aReceber > 0 && <span className="mc-pb-areceber" style={{ height: Math.max(3, h(p.aReceber)) }} />}
               {p.recebido > 0 && <span className="mc-pb-recebido" style={{ height: Math.max(3, h(p.recebido)) }} />}
             </div>
@@ -114,19 +116,81 @@ const COR_CATEGORIA: Record<string, string> = {
   tesouro: 'var(--asset-tesouro)',
   rendaFixa: 'var(--asset-cdb)',
   outra: 'var(--text-muted)',
+  fundosInvest: 'var(--asset-lcilca)',
+  previdencia: 'var(--asset-tesouro-pre)',
+  ouro: 'var(--asset-ouro)',
+  cripto: 'var(--asset-cripto)',
 }
 
 export function corDaCategoria(categoria: string): string {
   return COR_CATEGORIA[categoria] ?? 'var(--text-muted)'
 }
 
-/** Barra horizontal empilhada: cada fatia com a cor da sua categoria. A legenda fica em HTML ao lado. */
-export function BarraComposicao({ fatias, ariaLabel, decorativo = false }: { fatias: { categoria: string; rotulo: string; pct: number }[]; ariaLabel: string; decorativo?: boolean }) {
+// ---------- pizza (rosca) ----------
+// Desenhada com círculos de traço: com pathLength=100, o comprimento do traço É a porcentagem da fatia.
+const RAIO = 15.9155
+const ESPESSURA = 7
+
+/** Pizza (rosca) da composição: uma fatia por categoria, na cor da categoria. A legenda fica em HTML ao lado. */
+export function GraficoPizza({ fatias, ariaLabel, tamanho = 148, decorativo = false }: { fatias: { categoria: string; rotulo: string; pct: number }[]; ariaLabel: string; tamanho?: number; decorativo?: boolean }) {
+  const total = fatias.reduce((s, f) => s + Math.max(0, f.pct), 0) || 1
+  const folga = fatias.length > 1 ? 0.8 : 0
+  let acumulado = 0
   return (
-    <div className="mc-composicao" {...(decorativo ? { 'aria-hidden': true } : { role: 'img', 'aria-label': ariaLabel })}>
-      {fatias.map((f) => (
-        <span key={f.categoria} className="mc-fatia" style={{ width: `${f.pct}%`, background: corDaCategoria(f.categoria) }} title={decorativo ? undefined : `${f.rotulo}: ${f.pct.toFixed(1)}%`} />
-      ))}
-    </div>
+    <svg
+      viewBox="0 0 36 36"
+      width={tamanho}
+      height={tamanho}
+      className="mc-pizza"
+      {...(decorativo ? { 'aria-hidden': true } : { role: 'img', 'aria-label': ariaLabel })}
+    >
+      {fatias.map((f) => {
+        const parte = (Math.max(0, f.pct) / total) * 100
+        const inicio = acumulado
+        acumulado += parte
+        if (parte <= 0) return null
+        return (
+          <circle
+            key={f.categoria}
+            cx="18"
+            cy="18"
+            r={RAIO}
+            fill="none"
+            stroke={corDaCategoria(f.categoria)}
+            strokeWidth={ESPESSURA}
+            pathLength={100}
+            strokeDasharray={`${Math.max(0.2, parte - folga)} ${100 - Math.max(0.2, parte - folga)}`}
+            strokeDashoffset={-(inicio + folga / 2)}
+            transform="rotate(-90 18 18)"
+          >
+            {!decorativo && <title>{`${f.rotulo}: ${f.pct.toFixed(1).replace('.', ',')}%`}</title>}
+          </circle>
+        )
+      })}
+    </svg>
+  )
+}
+
+/** Rosca pequena de UMA fatia: o quanto o grupo pesa na carteira, na cor da categoria (o resto fica no tom claro). */
+export function MiniPizza({ pct, categoria, tamanho = 46 }: { pct: number; categoria: string; tamanho?: number }) {
+  const parte = Math.max(0, Math.min(100, pct))
+  const cor = corDaCategoria(categoria)
+  return (
+    <svg viewBox="0 0 36 36" width={tamanho} height={tamanho} className="mc-mini-pizza" aria-hidden="true">
+      <circle cx="18" cy="18" r={RAIO} fill="none" stroke={cor} strokeOpacity={0.22} strokeWidth={ESPESSURA} />
+      {parte > 0 && (
+        <circle
+          cx="18"
+          cy="18"
+          r={RAIO}
+          fill="none"
+          stroke={cor}
+          strokeWidth={ESPESSURA}
+          pathLength={100}
+          strokeDasharray={`${parte} ${100 - parte}`}
+          transform="rotate(-90 18 18)"
+        />
+      )}
+    </svg>
   )
 }

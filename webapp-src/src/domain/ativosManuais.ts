@@ -8,6 +8,7 @@
 import { normalizarBusca } from './rendaFii'
 import type { ClasseCarteira } from './classificadorAtivo'
 import type { CategoriaPosicao } from './importacao/planilha'
+import { tipoPorId } from './tiposInvestimento'
 
 export interface AtivoManual {
   /** Chave única, em maiúsculas e sem acento (como os tickers). */
@@ -19,6 +20,12 @@ export interface AtivoManual {
   /** Valor atual TOTAL do ativo. null = não informado (usa o custo, sem resultado). */
   valorAtual: number | null
   classe: ClasseCarteira
+  /** Tipo escolhido na lista "Adicionar posição" (id de tiposInvestimento). Ativos antigos não têm. */
+  tipo?: string
+  /** Vencimento (AAAA-MM-DD), opcional: renda fixa e COE. */
+  vencimento?: string
+  /** Taxa em texto livre ("110% do CDI", "IPCA + 6,2% a.a."), opcional. */
+  taxa?: string
 }
 
 export const chaveDoAtivoManual = (nome: string): string => normalizarBusca(nome).replace(/\s+/g, ' ').trim()
@@ -41,16 +48,38 @@ export function categoriaDaClasse(classe: ClasseCarteira): CategoriaPosicao {
     case 'cdbLiquidez':
     case 'lciLca':
       return 'rendaFixa'
+    case 'ouro':
+      return 'ouro'
+    case 'cripto':
+      return 'cripto'
     default:
       return 'outra'
   }
 }
 
+/** Bloco de Posições de um ativo digitado: o do tipo escolhido na lista ou, nos antigos, o da classe. */
+export function categoriaDoManual(m: Pick<AtivoManual, 'classe' | 'tipo'>): CategoriaPosicao {
+  const t = tipoPorId(m.tipo)
+  // "Outro investimento" não define bloco: segue a classe que a pessoa escolheu.
+  return t && t.classe !== null ? t.categoria : categoriaDaClasse(m.classe)
+}
+
 /** Mensagem do que está errado, ou null se o ativo é válido. */
-export function validarAtivoManual(m: { nome: string; quantidade: number; precoMedio: number; valorAtual: number | null }): string | null {
+export const TAXA_MAX = 60
+
+/** AAAA-MM-DD que existe no calendário. */
+export function ehDataValida(iso: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return false
+  const d = new Date(`${iso}T00:00:00Z`)
+  return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === iso
+}
+
+export function validarAtivoManual(m: { nome: string; quantidade: number; precoMedio: number; valorAtual: number | null; vencimento?: string; taxa?: string }): string | null {
   if (!chaveDoAtivoManual(m.nome)) return 'Informe o nome do ativo (ex.: PETR4, CDB Banco X, Tesouro Selic 2029).'
   if (!(m.quantidade > 0) || !Number.isFinite(m.quantidade)) return 'Informe a quantidade (maior que zero).'
   if (!(m.precoMedio > 0) || !Number.isFinite(m.precoMedio)) return 'Informe o preço médio (maior que zero).'
   if (m.valorAtual !== null && (!(m.valorAtual > 0) || !Number.isFinite(m.valorAtual))) return 'O valor atual, se informado, deve ser maior que zero.'
+  if (m.vencimento !== undefined && !ehDataValida(m.vencimento)) return 'Confira a data de vencimento.'
+  if (m.taxa !== undefined && m.taxa.length > TAXA_MAX) return `A taxa pode ter até ${TAXA_MAX} caracteres.`
   return null
 }

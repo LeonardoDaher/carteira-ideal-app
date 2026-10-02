@@ -13,6 +13,8 @@ import { CartaoLancamentos } from '../ui/painel/CartaoLancamentos'
 import type { FiltroTipo } from '../ui/painel/CartaoLancamentos'
 import { CartaoPosicoes } from '../ui/painel/CartaoPosicoes'
 import { ImportarArquivos } from '../ui/painel/ImportarArquivos'
+import { EyeIcon, EyeOffIcon } from '../ui/Icon'
+import { ValoresProvider } from '../ui/painel/valoresOcultos'
 import { VoltarInicio } from '../ui/VoltarInicio'
 
 const dois = (n: number) => String(n).padStart(2, '0')
@@ -43,7 +45,7 @@ function lerTextoDoArquivo(arquivo: File): Promise<string> {
  * proventos, composição e a conferência com a Posição. Tela avulsa, como o Meu Mês: abre por
  * `?tela=minhaCarteira`, não depende do questionário e guarda tudo só no aparelho.
  */
-export function MinhaCarteira({ ctx, hoje }: { ctx: AppCtx; hoje?: Date }) {
+export function MinhaCarteira({ ctx, hoje, valoresVisiveis = false }: { ctx: AppCtx; hoje?: Date; /** Só para testes e demonstrações: abre com os valores à mostra. No app, abre sempre escondido (****). */ valoresVisiveis?: boolean }) {
   const agora = useRef(hoje ?? new Date()).current
   const hojeISO = isoDe(agora)
   const mesAtual = hojeISO.slice(0, 7)
@@ -55,6 +57,8 @@ export function MinhaCarteira({ ctx, hoje }: { ctx: AppCtx; hoje?: Date }) {
   const [filtroAtivo, setFiltroAtivo] = useState('')
   const [filtroTipo, setFiltroTipo] = useState<FiltroTipo>('todos')
   const [pedidoNovo, setPedidoNovo] = useState(0)
+  // Privacidade: os valores abrem escondidos (****) toda vez; só o olho os mostra, e a escolha não é gravada.
+  const [oculto, setOculto] = useState(!valoresVisiveis)
 
   const painel = useMemo(
     () => montarPainel(c.lancamentos, c.posicao, c.dataPosicao, c.precosMedios, c.ativosManuais, c.ativosExcluidos),
@@ -71,7 +75,10 @@ export function MinhaCarteira({ ctx, hoje }: { ctx: AppCtx; hoje?: Date }) {
   function escolherClasse(ativo: string, classe: ClasseCarteira | null) {
     const manual = c.ativosManuais.find((m) => m.ativo === ativo)
     if (manual) {
-      if (classe) h.salvarAtivoManual({ nome: manual.nome, quantidade: manual.quantidade, precoMedio: manual.precoMedio, valorAtual: manual.valorAtual, classe }, ativo)
+      if (classe) {
+        const { ativo: _chave, ...dados } = manual
+        h.salvarAtivoManual({ ...dados, classe }, ativo)
+      }
     } else h.definirClasse(ativo, classe)
   }
   const acoesDoPainel = {
@@ -108,12 +115,25 @@ export function MinhaCarteira({ ctx, hoje }: { ctx: AppCtx; hoje?: Date }) {
   }
 
   return (
+    <ValoresProvider oculto={oculto}>
     <div className="screen mc-tela">
       <VoltarInicio />
-      <div className="col" style={{ gap: 6 }}>
-        <h1 style={{ fontSize: 26 }}>Minha Carteira</h1>
-        <p className="mc-sub">Traga a sua carteira real para o app.</p>
+      <div className="mc-cabecalho">
+        <div className="col" style={{ gap: 6 }}>
+          <h1 style={{ fontSize: 26 }}>Meus Ativos</h1>
+          <p className="mc-sub">Traga a sua carteira real para o app.</p>
+        </div>
+        <button
+          type="button"
+          className="mc-olho"
+          aria-label={oculto ? 'Mostrar valores' : 'Ocultar valores'}
+          title={oculto ? 'Mostrar valores' : 'Ocultar valores'}
+          onClick={() => setOculto((v) => !v)}
+        >
+          {oculto ? <EyeOffIcon size={22} /> : <EyeIcon size={22} />}
+        </button>
       </div>
+      {oculto && temDados && <p className="mc-nota">Valores ocultos (****). Toque no olho para ver.</p>}
 
       <ImportarArquivos onImportar={h.importarArquivos} onLancarDireto={abrirLancamento} />
 
@@ -227,5 +247,6 @@ export function MinhaCarteira({ ctx, hoje }: { ctx: AppCtx; hoje?: Date }) {
 
       <AvisoEducacional />
     </div>
+    </ValoresProvider>
   )
 }

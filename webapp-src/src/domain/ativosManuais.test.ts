@@ -38,7 +38,7 @@ describe('categoriaDaClasse: em que bloco de "Posições" cada classe aparece', 
   it.each([
     ['acoesETFs', 'acoes'], ['fiis', 'fundos'], ['bdrs', 'bdr'], ['fundosInternacionais', 'etf'],
     ['tesouroSelic', 'tesouro'], ['tesouroIPCA', 'tesouro'], ['tesouroPrefixado', 'tesouro'],
-    ['cdbLiquidez', 'rendaFixa'], ['lciLca', 'rendaFixa'], ['ouro', 'outra'], ['cripto', 'outra'], ['foraDaRegua', 'outra'],
+    ['cdbLiquidez', 'rendaFixa'], ['lciLca', 'rendaFixa'], ['ouro', 'ouro'], ['cripto', 'cripto'], ['foraDaRegua', 'outra'],
   ] as const)('%s -> %s', (classe, cat) => expect(categoriaDaClasse(classe)).toBe(cat))
 })
 
@@ -73,8 +73,8 @@ describe('montarPainel com ativos digitados à mão', () => {
   it('aparece no agrupamento, no bloco da sua classe, e na composição', () => {
     const p = montarPainel([], [P('VALE3', 10, 1000)], DATA, {}, [M({ valorAtual: 1000 })])
     const grupos = agruparPosicoes(p.linhas)
-    expect(grupos.map((g) => g.rotulo).sort()).toEqual(['Ações', 'Renda fixa (bancos)'])
-    expect(composicaoDasLinhas(p.linhas).map((f) => [f.rotulo, f.pct])).toEqual([['Ações', 50], ['Renda fixa (bancos)', 50]].sort())
+    expect(grupos.map((g) => g.rotulo).sort()).toEqual(['Ações', 'Renda fixa'])
+    expect(composicaoDasLinhas(p.linhas).map((f) => [f.rotulo, f.pct])).toEqual([['Ações', 50], ['Renda fixa', 50]].sort())
   })
 })
 
@@ -104,5 +104,31 @@ describe('persistência dos ativos digitados à mão', () => {
   it('a categoria nova (renda fixa) também é aceita na Posição gravada', () => {
     const c = { ...carteiraVazia(), posicao: [{ ativo: 'X', categoria: 'rendaFixa' as const, quantidade: 1, precoFechamento: null, valorAtualizado: 1, valorAplicado: null }] }
     expect(lerCarteiraSalva(serializarCarteira(c))!.posicao).toHaveLength(1)
+  })
+})
+
+describe('vencimento e taxa do ativo digitado', () => {
+  const ok = { nome: 'CRI A', quantidade: 1, precoMedio: 100, valorAtual: null }
+  it('validam: data real no calendário e taxa curta; sem eles, tudo certo', () => {
+    expect(validarAtivoManual(ok)).toBeNull()
+    expect(validarAtivoManual({ ...ok, vencimento: '2031-03-15', taxa: 'IPCA + 7,5% a.a.' })).toBeNull()
+    expect(validarAtivoManual({ ...ok, vencimento: '2031-02-30' })).toMatch(/vencimento/)
+    expect(validarAtivoManual({ ...ok, vencimento: '15/03/2031' })).toMatch(/vencimento/)
+    expect(validarAtivoManual({ ...ok, taxa: 'x'.repeat(61) })).toMatch(/taxa/i)
+  })
+  it('sobrevivem à gravação e aparecem na linha da posição', () => {
+    const m = { ...M(), tipo: 'cri', classe: 'lciLca' as const, vencimento: '2031-03-15', taxa: 'IPCA + 7,5% a.a.' }
+    const c = { ...carteiraVazia(), ativosManuais: [m] }
+    const lido = lerCarteiraSalva(serializarCarteira(c))!.ativosManuais
+    expect(lido).toEqual([m])
+    const p = montarPainel([], null, null, {}, lido)
+    expect(p.linhas[0]).toMatchObject({ vencimentoManual: '2031-03-15', taxaManual: 'IPCA + 7,5% a.a.', tipoManual: 'cri' })
+  })
+  it('lendo do aparelho, descarta vencimento inválido e taxa comprida demais, mas mantém o ativo', () => {
+    const bruto = JSON.stringify({ versao: VERSAO_CARTEIRA, carteira: { lancamentos: [], excluidas: [], posicao: null, dataPosicao: null, eventosFuturos: [], classes: {}, precosMedios: {}, ativosManuais: [{ nome: 'A', quantidade: 1, precoMedio: 1, valorAtual: null, classe: 'fiis', vencimento: '2031-13-45', taxa: 'x'.repeat(200) }] } })
+    const [a] = lerCarteiraSalva(bruto)!.ativosManuais
+    expect(a.ativo).toBe('A')
+    expect(a.vencimento).toBeUndefined()
+    expect(a.taxa).toBeUndefined()
   })
 })

@@ -33,7 +33,8 @@ export type PerfilArquivo =
   | 'b3-calendario'
   | 'generico'
 
-export type CategoriaPosicao = 'acoes' | 'bdr' | 'etf' | 'fundos' | 'tesouro' | 'rendaFixa' | 'outra'
+/** As 7 primeiras vêm da Posição da B3; as 4 últimas só existem nos ativos digitados à mão (fundos, previdência, ouro e cripto). */
+export type CategoriaPosicao = 'acoes' | 'bdr' | 'etf' | 'fundos' | 'tesouro' | 'rendaFixa' | 'outra' | 'fundosInvest' | 'previdencia' | 'ouro' | 'cripto'
 
 /** Uma linha da Posição da B3: foto do que a pessoa tem, sem custo (exceto Tesouro). */
 export interface ItemPosicaoB3 {

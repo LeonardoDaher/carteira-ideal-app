@@ -1,7 +1,8 @@
 import { useEffect, useId, useState } from 'react'
 import { lerNumero } from '../../domain/importacao/celulas'
 import type { Lancamento, LancamentoNovo, OrigemLancamento, ProblemaLancamento, SubtipoProvento, TipoLancamento } from '../../domain/lancamentos'
-import { dataCurta, quantidadeBR, reais } from './formatar'
+import { dataCurta } from './formatar'
+import { useValores } from './valoresOcultos'
 
 const ROTULO_TIPO: Record<TipoLancamento, string> = {
   compra: 'Compra',
@@ -205,6 +206,7 @@ export function CartaoLancamentos({
   onExcluir: (id: string) => void
 }) {
   const idTitulo = useId()
+  const { reais, quantidade: quantidadeBR } = useValores()
   const [modo, setModo] = useState<{ tipo: 'fechado' } | { tipo: 'novo' } | { tipo: 'editar'; id: string }>({ tipo: 'fechado' })
   const [excluindo, setExcluindo] = useState<string | null>(null)
   const [todos, setTodos] = useState(false)

@@ -145,7 +145,7 @@ export function useCarteiraReal(hoje: string) {
   const restaurarBackup = useCallback(
     (texto: string): { ok: boolean; erro?: string } => {
       const lida = lerCarteiraSalva(texto)
-      if (!lida) return { ok: false, erro: 'Este arquivo não é um backup válido da Minha Carteira.' }
+      if (!lida) return { ok: false, erro: 'Este arquivo não é um backup válido de Meus Ativos.' }
       aplicar(lida)
       return { ok: true }
     },
