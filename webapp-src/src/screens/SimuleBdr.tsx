@@ -80,7 +80,7 @@ export function SimuleBdr({
 
   return (
     <div className="screen">
-      <VoltarInicio />
+      <VoltarInicio href="./?tela=simuleAtivos" rotulo="← Simule Ativos" />
 
       <div className="col" style={{ gap: 4 }}>
         <h1 style={{ fontSize: 21 }}>Simule BDR</h1>
