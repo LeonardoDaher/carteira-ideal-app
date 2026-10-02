@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { SemResultado } from '../ui/SemResultado'
+import { SimularComMeusAtivos } from '../ui/SimularComMeusAtivos'
 import { ATIVOS } from '../data/assets'
 import { carteiraParaExibicao } from '../data/carteiraVisual'
 import { TabBar } from '../ui/TabBar'
@@ -10,8 +12,11 @@ function formatarReais(valor: number) {
   return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 })
 }
 
+type Aba = 'percentual' | 'meusAtivos'
+
 export function Simulador({ ctx }: { ctx: AppCtx }) {
   const resultado = ctx.resultado
+  const [aba, setAba] = useState<Aba>('percentual')
 
   if (!resultado) {
     return <SemResultado ctx={ctx} convite="Responda o questionário para simular valores." />
@@ -23,8 +28,30 @@ export function Simulador({ ctx }: { ctx: AppCtx }) {
     <div className="screen">
       <div className="col" style={{ gap: 4, paddingTop: 8 }}>
         <h1 style={{ fontSize: 21 }}>Simular valores</h1>
-        <div className="muted small justify">Quanto você pretende investir? A carteira de referência se ajusta automaticamente.</div>
+        <div className="muted small justify">
+          {aba === 'percentual'
+            ? 'Quanto você pretende investir? A carteira de referência se ajusta automaticamente.'
+            : 'Com o que você já tem em Meus Ativos, veja quanto investir para chegar aos percentuais da carteira sugerida, sem vender nada.'}
+        </div>
       </div>
+
+      <div className="mc-modos" role="tablist" aria-label="Tipo de simulação">
+        <button type="button" role="tab" id="sim-tab-percentual" aria-selected={aba === 'percentual'} aria-controls="sim-painel" className="mc-modo" onClick={() => setAba('percentual')}>
+          Pelo percentual
+        </button>
+        <button type="button" role="tab" id="sim-tab-meus-ativos" aria-selected={aba === 'meusAtivos'} aria-controls="sim-painel" className="mc-modo" onClick={() => setAba('meusAtivos')}>
+          Com os meus ativos
+        </button>
+      </div>
+
+      {aba === 'meusAtivos' && (
+        <div id="sim-painel" role="tabpanel" aria-labelledby="sim-tab-meus-ativos" className="col" style={{ gap: 14 }}>
+          <SimularComMeusAtivos ctx={ctx} referencia={carteiraParaExibicao(resultado.carteira)} />
+        </div>
+      )}
+
+      {aba === 'percentual' && (
+      <div id="sim-painel" role="tabpanel" aria-labelledby="sim-tab-percentual" style={{ display: 'contents' }}>
 
       {/* No computador: controle do valor fixo à esquerda, divisão por classe em grade à direita (D20). */}
       <div className="desk-split">
@@ -75,6 +102,8 @@ export function Simulador({ ctx }: { ctx: AppCtx }) {
       <AvisoEducacional />
       </div>
       </div>
+      </div>
+      )}
 
       <div className="grow" />
       <TabBar ctx={ctx} />

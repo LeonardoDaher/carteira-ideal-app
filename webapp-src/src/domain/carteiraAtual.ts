@@ -109,7 +109,7 @@ export function toleranciaPp(pctReferencia: number): number {
 }
 
 /** Referência normalizada para somar 100 (defesa contra arredondamento). */
-function referenciaNormalizada(referencia: Carteira): Partial<Record<AtivoKey, number>> {
+export function referenciaNormalizada(referencia: Carteira): Partial<Record<AtivoKey, number>> {
   const soma = ORDEM_CLASSES.reduce((s, k) => s + (referencia[k] ?? 0), 0)
   const out: Partial<Record<AtivoKey, number>> = {}
   if (soma <= 0) return out

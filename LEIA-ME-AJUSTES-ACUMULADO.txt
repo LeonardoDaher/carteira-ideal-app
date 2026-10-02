@@ -23,4 +23,12 @@ PACOTE ACUMULADO (tudo desde o D33). Aplique ESTE zip por cima do projeto; ele s
     textos e notas 12. Mantidos: números grandes (R$), botões e campos de digitação (16 px, por causa do zoom do iPhone).
     A trava de legibilidade passou de "13 px" para "12 px" (o piso do Meu Mês) e agora também exige só tamanhos dessa escala.
 
-VERIFICAÇÃO: tsc, lint, 994 testes do app, 158 do gerador de páginas e build de produção OK.
+13) SIMULAR VALORES ganhou duas abas: "Pelo percentual" (o simulador de sempre, intacto) e "Com os meus ativos" (novo).
+    A nova aba usa o que a pessoa tem em Meus Ativos e mostra QUANTO INVESTIR, SEM VENDER NADA, para chegar à carteira sugerida:
+    - "Percentual exato": cada classe termina no percentual da carteira sugerida. A classe mais acima do alvo define o total.
+    - "Dentro do alvo": cada classe termina dentro da tolerância da comparação (o maior entre 2 pp e 20% do alvo); pede bem menos.
+    - Por classe: hoje, alvo, quanto investir e como fica depois.
+    - "E se eu investir um valor menor?": distribui o valor entre as classes abaixo do alvo e mostra a aderência antes e depois.
+    - Fica de fora da conta (e é mostrado à parte): o que está fora da carteira sugerida e as classes sem alvo.
+
+VERIFICAÇÃO: tsc, lint, 1014 testes do app, 158 do gerador de páginas e build de produção OK.
