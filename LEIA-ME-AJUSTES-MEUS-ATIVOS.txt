@@ -1,0 +1,7 @@
+Ajustes: olho (valores ocultos) e novo nome "Meus Ativos"
+
+1) Olho no cabeçalho de Meus Ativos. Padrão: valores escondidos (****), toda vez que a tela abre; a escolha não é gravada.
+   Escondem: dinheiro (R$), quantidades e rentabilidade em %, inclusive nos rótulos para leitor de tela e nas dicas dos gráficos.
+   Continuam visíveis: nome do ativo e a fatia de cada um na carteira (% da carteira). Campos de edição mostram o valor digitado.
+2) Nome: "Minha Carteira" virou "Meus Ativos" (tela, landing, atalho do app, páginas geradas, privacidade, manifest).
+   Mantidos de propósito: o endereço /minha-carteira/ e ?tela=minhaCarteira (não quebrar links), e "carteira de referência".

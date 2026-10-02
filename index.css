@@ -1,0 +1,1889 @@
+:root {
+  --bg: oklch(16% 0.014 262);
+  /* Mesmos tokens da landing "Link na bio": vidro sobre o degradê de fundo */
+  --surface: rgba(255, 255, 255, 0.05);        /* caixas (vidro) */
+  --surface2: rgba(255, 255, 255, 0.1);        /* variação: chips, trilhas de barra, letras */
+  --stroke: rgba(255, 255, 255, 0.5);          /* contorno das caixas (igual à landing) */
+  --highlight: rgba(255, 255, 255, 0.2);       /* hover (igual à landing) */
+  --highlight-soft: rgba(255, 255, 255, 0.06); /* toque bem leve — ex: card de exemplos, para não atrapalhar a leitura do texto revelado */
+  --border: rgba(255, 255, 255, 0.16);         /* linhas divisórias discretas dentro das caixas */
+  --glass-blur: blur(4px);
+  --text: oklch(96% 0.006 262);
+  --text-muted: oklch(68% 0.02 262);
+  --accent: oklch(84% 0.19 100);
+  --accent-text: oklch(18% 0.02 262);
+  --success: oklch(74% 0.17 150);
+  --warning: oklch(78% 0.15 70);
+  --danger: oklch(63% 0.21 25);
+  --z1: oklch(72% 0.16 145);
+  --z2: oklch(80% 0.16 95);
+  --z3: oklch(72% 0.15 250);
+  --z4: oklch(72% 0.15 300);
+  --z5: oklch(74% 0.16 40);
+
+  /* Paleta dedicada às classes de ativo — 9 tons com 40° de distância entre si no
+     círculo de cores, para nunca haver duas classes parecidas numa mesma carteira. */
+  /* Paleta dedicada às classes de ativo. As 4 mais visíveis usam as cores exatas do
+     gráfico de referência (dourado, vermelho, azul, verde); as demais foram calculadas
+     para nunca ficarem parecidas com nenhuma outra que apareça na mesma carteira —
+     testei as 9 combinações reais do motor e a menor distância entre cores vizinhas é
+     de 27,5° no círculo cromático (o ideal é manter acima de 25°). */
+  --asset-acoes: #f3b218;         /* dourado — Ações e ETFs */
+  --asset-bdrs: #ed1c24;          /* vermelho — BDRs */
+  --asset-cdb: #09a0fa;           /* azul — CDB com liquidez diária */
+  --asset-lcilca: #0d9488;        /* verde-azulado escuro — LCI / LCA (isento, com FGC) */
+  --asset-tesouro: #27a94c;       /* verde — Tesouro Selic */
+  --asset-tesouro-ipca: #2bab96;  /* verde-azulado — Tesouro IPCA+ */
+  --asset-tesouro-pre: #5e50a5;   /* azul-violeta — Tesouro Prefixado */
+  --asset-fiis: #92b234;          /* verde-oliva — Fundos Imobiliários (FIIs) */
+  --asset-ouro: #b851af;          /* violeta — Ouro */
+  --asset-fundosinternacionais: #5e944c; /* verde-oliva — Fundos Internacionais (ETFs) */
+  --asset-cripto: #f7931a;        /* laranja — Criptomoedas */
+
+  /* Paleta do sub-gráfico "Diversificação por segmento" dentro do detalhe de FIIs.
+     Não precisa respeitar a distância angular da paleta de ativos acima porque
+     aparece isolada, num gráfico à parte — só precisa ser distinguível entre si. */
+  /* Paleta do sub-gráfico "Diversificação por segmento" dentro do detalhe de FIIs.
+     9 tons com ~40° de distância entre si no círculo cromático — não precisa ser
+     distinta da paleta de ativos acima porque aparece isolada, num gráfico à parte. */
+  --sector-papel: #3b82f6;      /* azul — Papel / CRIs */
+  --sector-logistica: #f59e0b;  /* laranja — Galpões Logísticos */
+  --sector-shopping: #ef4444;   /* vermelho — Shopping Centers */
+  --sector-rendaurbana: #84cc16; /* verde-limão — Renda Urbana / Varejo */
+  --sector-fiagro: #ec4899;     /* rosa — Fiagros (Agronegócio) */
+  --sector-multi: #a855f7;      /* violeta — FOFs / Multiestratégia */
+  --sector-lajes: #14b8a6;      /* verde-azulado — Lajes Corporativas */
+  --sector-saude: #22c55e;      /* verde — Hospital / Saúde */
+  --sector-energia: #0ea5e9;    /* azul-céu — Energia / Infraestrutura */
+
+  /* Paleta do sub-gráfico "Diversificação por setor" dentro do detalhe de Ações.
+     7 tons distinguíveis entre si — mesma lógica da paleta de segmentos de FIIs acima,
+     isolada num gráfico à parte, sem precisar respeitar a distância angular das demais. */
+  --sector-financeiro: #3b82f6;      /* azul — Financeiro / Bancos */
+  --sector-energia-eletrica: #eab308; /* amarelo — Energia Elétrica */
+  --sector-saneamento: #10b981;      /* verde-esmeralda — Saneamento, Utilidades e Serviços */
+  --sector-commodities: #ef4444;     /* vermelho — Commodities / Básicos */
+  --sector-consumo-saude: #ec4899;   /* rosa — Consumo / Varejo e Saúde */
+  --sector-industria: #8b5cf6;       /* violeta — Indústria e Bens de Capital */
+  --sector-seguros-holding: #06b6d4; /* ciano — Seguros e Holding */
+
+  /* Paleta do sub-gráfico "Alocação setorial global" dentro do detalhe de BDRs.
+     7 tons distinguíveis entre si — mesma lógica das paletas de segmento acima. */
+  --sector-bigtechs: #3b82f6;             /* azul — Big Techs & Inteligência Artificial */
+  --sector-saude-global: #22c55e;         /* verde — Saúde, Farmacêutica e Biotecnologia */
+  --sector-consumo-global: #ec4899;       /* rosa — Consumo Global & Marcas Fortes */
+  --sector-financeiro-global: #eab308;    /* amarelo — Serviços Financeiros & Meios de Pagamento */
+  --sector-industria-defesa: #8b5cf6;     /* violeta — Indústria, Defesa e Logística Global */
+  --sector-energia-global: #ef4444;       /* vermelho — Energia & Commodities Globais */
+  --sector-midia-global: #06b6d4;         /* ciano — Comunicação, Mídia e Entretenimento */
+
+  /* Paleta do sub-gráfico "Diversificação por indexador" dentro do detalhe de CDBs.
+     4 tons distinguíveis entre si — mesma lógica das paletas de segmento acima. */
+  --sector-cdb-posfixado: #3b82f6;   /* azul — Pós-Fixados (CDI) - Curto Prazo / Liquidez */
+  --sector-cdb-ipca: #22c55e;        /* verde — Atrelados à Inflação (IPCA + Taxa) */
+  --sector-cdb-prefixado: #eab308;   /* amarelo — Pré-Fixados (Taxa Fixa) */
+  --sector-cdb-highyield: #ef4444;   /* vermelho — Oportunidade / High Yield (Bancos Médios) */
+
+  /* Paleta do sub-gráfico "Diversificação por estratégia/vencimento" dentro do detalhe
+     de Tesouro Prefixado. 4 tons distinguíveis entre si — mesma lógica das paletas acima. */
+  --sector-pre-curto: #3b82f6;    /* azul — Prefixado Curto Prazo (1 a 3 anos) */
+  --sector-pre-longo: #22c55e;    /* verde — Prefixado Longo Prazo (5 a 10 anos) */
+  --sector-pre-semestral: #eab308; /* amarelo — Com Juros Semestrais (NTN-F) */
+  --sector-pre-marcacao: #ef4444;  /* vermelho — Marcação a Mercado (Tática) */
+
+  --sector-cripto-fundos: #3b82f6;   /* azul — Fundos de Investimento Cripto */
+  --sector-cripto-etf: #eab308;      /* amarelo — ETFs na B3 */
+  --sector-cripto-bdr: #ec4899;      /* rosa — BDRs da B3 */
+  --sector-cripto-spot: #f7931a;     /* laranja — Compra Direta (Mercado Spot) */
+
+  /* Paleta do sub-gráfico "Diversificação por forma de acesso" dentro do detalhe de Ouro.
+     3 tons distinguíveis entre si — mesma lógica das paletas de segmento acima. */
+  --sector-ouro-etf: #eab308;    /* amarelo (tom "ouro") — ETFs na B3 */
+  --sector-ouro-bdr: #3b82f6;    /* azul — BDRs de ETFs Internacionais */
+  --sector-ouro-fundo: #a855f7;  /* violeta — Fundos de Investimento em Ouro */
+
+  /* Paleta do sub-gráfico "Diversificação por estratégia" dentro do detalhe de
+     Fundos Multimercado. 5 tons distinguíveis entre si — mesma lógica das paletas
+     de segmento acima, isolada num gráfico à parte. */
+  --sector-multi-macro: #3b82f6;     /* azul — Macro */
+  --sector-multi-longshort: #ef4444; /* vermelho — Long & Short (Ações) */
+  --sector-multi-quant: #8b5cf6;     /* violeta — Quantitativos (Quant) */
+  --sector-multi-trading: #f59e0b;   /* laranja — Trading / Arbitragem */
+  --sector-multi-juros: #22c55e;     /* verde — Juros e Moedas */
+
+  /* Paleta do sub-gráfico "Diversificação por função" dentro do detalhe de Tesouro
+     Selic. 3 tons distinguíveis entre si — mesma lógica das paletas de segmento acima. */
+  --sector-selic-reserva: #3b82f6;      /* azul — Reserva Imediata */
+  --sector-selic-metas: #22c55e;        /* verde — Metas de Curtíssimo Prazo */
+  --sector-selic-oportunidades: #eab308; /* amarelo — Caixa & Transição de Aportes */
+
+  /* Paleta do sub-gráfico "Diversificação por indexador" dentro do detalhe de LCI/LCA.
+     3 tons distinguíveis entre si — mesma lógica das paletas de segmento acima. */
+  --sector-lcilca-posfixado: #3b82f6;  /* azul — Pós-Fixada (% do CDI) */
+  --sector-lcilca-ipca: #22c55e;       /* verde — Inflação (IPCA + Taxa) */
+  --sector-lcilca-prefixado: #eab308;  /* amarelo — Prefixada (Taxa Fixa) */
+
+  /* Paletas dos sub-gráficos por objetivo dentro do chip "IPCA+" dentro do detalhe de
+     Tesouro Direto (Aposentadoria, Educação e Renda Passiva). 3 tons distinguíveis
+     entre si por objetivo — mesma lógica das paletas de segmento acima. */
+  --sector-ipca-apo-longuissimo: #3b82f6; /* azul — Vencimento Longuíssimo (Sem Cupom) */
+  --sector-ipca-apo-longo: #22c55e;       /* verde — Vencimento Longo (Sem Cupom) */
+  --sector-ipca-apo-medio: #eab308;       /* amarelo — Vencimento Intermediário (Sem Cupom) */
+
+  --sector-ipca-edu-alvo: #3b82f6;          /* azul — Vencimento Alvo (Sem Cupom) */
+  --sector-ipca-edu-intermediario: #22c55e; /* verde — Vencimento Intermediário (Sem Cupom) */
+  --sector-ipca-edu-semestral: #eab308;     /* amarelo — Com Juros Semestrais (Início do Uso) */
+
+  --sector-ipca-renda-semestral-curto: #3b82f6; /* azul — Com Juros Semestrais (Vencimento Mais Próximo) */
+  --sector-ipca-renda-semestral-longo: #22c55e; /* verde — Com Juros Semestrais (Vencimento Mais Longo) */
+  --sector-ipca-renda-reserva: #eab308;         /* amarelo — Sem Cupom (Reforço Futuro) */
+}
+
+/* Tema claro — sobrescreve só as cores de base da interface (fundo, superfícies, texto).
+   Cores de destaque (accent, success/warning/danger) e a paleta de ativos permanecem
+   as mesmas nos dois temas, pois já são vivas o bastante para funcionar em ambos. */
+:root[data-theme='light'] {
+  --bg: oklch(97% 0.006 262);
+  --surface: rgba(255, 255, 255, 0.2);
+  --surface2: rgba(0, 0, 0, 0.07);
+  --stroke: rgba(0, 0, 0, 0.5);
+  --highlight: rgba(0, 0, 0, 0.1);
+  --highlight-soft: rgba(0, 0, 0, 0.035);
+  --border: rgba(0, 0, 0, 0.16);
+  --text: oklch(20% 0.02 262);
+  --text-muted: oklch(42% 0.02 262);
+  --accent-text: oklch(14% 0.02 262);
+}
+
+* {
+  box-sizing: border-box;
+  /* Desliga o destaque cinza que os navegadores mobile aplicam por padrão em qualquer
+     elemento tocável (botões, itens de lista, fatias do gráfico). Sem isso, esse flash
+     do sistema se soma ao nosso próprio destaque (.setor-card-toggle, .aula-card etc.)
+     e escurece demais a caixinha tocada, prejudicando a leitura do texto dentro dela.
+     Os estados de toque continuam existindo — são só os definidos abaixo, mais sutis. */
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body, #root {
+  margin: 0;
+  height: 100%;
+  color: var(--text);
+  font-family: 'IBM Plex Sans', system-ui, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Fundo em degradê (mesma composição e cores da landing). O <body> propaga o fundo para toda a
+   página; html, #root e .app-frame ficam transparentes para o degradê aparecer. */
+body {
+  background: var(--bg) url('./assets/bg-mobile.jpg') no-repeat top center / cover fixed;
+}
+:root[data-theme='light'] body {
+  background-image: url('./assets/bg-mobile-light.jpg');
+}
+@media (min-width: 700px) {
+  body { background-image: url('./assets/bg-desktop.jpg'); }
+  :root[data-theme='light'] body { background-image: url('./assets/bg-desktop-light.jpg'); }
+}
+
+.font-display {
+  font-family: 'Sora', 'IBM Plex Sans', sans-serif;
+}
+
+.app-frame {
+  width: 100%;
+  max-width: 430px;
+  margin: 0 auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+.screen {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  padding: 24px 20px 26px 20px;
+  gap: 14px;
+}
+
+.row { display: flex; align-items: center; gap: 10px; }
+.row-between { display: flex; align-items: center; justify-content: space-between; }
+.col { display: flex; flex-direction: column; }
+.grow { flex-grow: 1; }
+.muted { color: var(--text-muted); }
+.small { font-size: 12px; }
+.tiny { font-size: 10.5px; }
+/* Padrão de texto corrido do app: justificado, exceto pela última linha (que segue
+   o alinhamento normal). Aplicado a blocos explicativos de várias palavras; textos
+   curtos (rótulos, valores, uma palavra) não são afetados visualmente por essa regra. */
+.justify { text-align: justify; }
+
+h1, h2, h3 { margin: 0; font-family: 'Sora', sans-serif; font-weight: 700; }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--stroke);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.card-outline {
+  background: var(--surface);
+  border: 1px solid var(--stroke);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.setor-card-toggle {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px;
+  border-radius: 16px;
+  transition: background 0.15s ease;
+}
+
+.setor-card-toggle:not(:disabled):hover,
+.setor-card-toggle:not(:disabled):active {
+  background: var(--highlight-soft);
+}
+
+/* Enquanto o exemplo está aberto, mantém o mesmo sombreado bem leve na parte de cima
+   (em vez de deixar sem nenhum), como uma pista visual sutil de que aquele card está
+   expandido — sem escurecer a leitura do texto do exemplo logo abaixo. */
+.setor-card-toggle:not(:disabled)[aria-expanded='true'] {
+  background: var(--highlight-soft);
+}
+
+.aula-card {
+  width: 100%;
+  transition: background 0.15s ease;
+}
+
+.aula-card:hover,
+.aula-card:active {
+  background: var(--highlight);
+}
+
+.aula-thumb {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #000;
+  opacity: 0.9;
+  flex-shrink: 0;
+}
+
+.trilha-card {
+  width: 100%;
+  transition: background 0.15s ease;
+}
+
+.trilha-card:not(:disabled):hover,
+.trilha-card:not(:disabled):active {
+  background: var(--highlight);
+}
+
+.trilha-card:disabled {
+  opacity: 0.7;
+}
+
+.trilha-badge {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--surface2);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+}
+
+.btn {
+  display: block;
+  width: 100%;
+  text-align: center;
+  padding: 15px 0;
+  border-radius: 14px;
+  font-weight: 700;
+  font-size: 15px;
+  font-family: 'Sora', sans-serif;
+}
+
+.btn-primary { background: var(--accent); color: var(--accent-text); }
+.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--stroke); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); }
+.btn-outline { background: var(--surface); color: var(--text); border: 1px solid var(--stroke); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); }
+.btn-secondary:hover, .btn-outline:hover { background: var(--highlight); border-color: var(--text); }
+.btn-ghost { background: transparent; color: var(--text-muted); }
+
+.chip {
+  flex: 1;
+  text-align: center;
+  padding: 9px 4px;
+  border-radius: 10px;
+  background: var(--surface2);
+  color: var(--text);
+  font-weight: 600;
+  font-size: 11.5px;
+}
+.chip:hover { background: var(--highlight); }
+.chip.selected { background: var(--accent); color: var(--accent-text); }
+
+.theme-toggle {
+  display: flex;
+  align-self: center;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--stroke);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+.theme-toggle button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.theme-toggle button.selected { background: var(--accent); color: var(--accent-text); }
+
+.vehicle-card {
+  border-radius: 14px;
+  padding: 14px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface);
+  border: 1px solid var(--stroke);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  color: var(--text);
+  font-weight: 600;
+  font-size: 12px;
+}
+.vehicle-card.selected { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+
+.stat-tile {
+  background: var(--surface);
+  border: 1px solid var(--stroke);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border-radius: 14px;
+  padding: 14px 10px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 76px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 8px;
+  font-size: 10.5px;
+  font-weight: 700;
+}
+.badge-alta { background: color-mix(in oklch, var(--success) 20%, transparent); color: var(--success); }
+.badge-media { background: color-mix(in oklch, var(--warning) 20%, transparent); color: var(--warning); }
+.badge-baixa { background: color-mix(in oklch, var(--danger) 20%, transparent); color: var(--danger); }
+
+.progressbar {
+  height: 5px;
+  background: var(--surface2);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.progressbar > div { height: 100%; background: var(--accent); border-radius: 3px; }
+
+.tabbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 14px 12px;
+  border-top: 1px solid var(--border);
+}
+/* Rótulos das abas numa linha só (a barra chegou a ter 5 abas; hoje tem 3). */
+.tab { white-space: nowrap; display: flex; flex-direction: column; align-items: center; gap: 6px; color: var(--text-muted); font-size: 13px; font-weight: 500; }
+.tab.active { color: var(--accent); font-weight: 600; }
+@media (max-width: 380px) {
+  .tabbar { padding: 14px 4px; }
+  .tab { font-size: 11.5px; }
+}
+
+.icon-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--stroke);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+}
+.icon-btn svg { width: 22px; height: 22px; }
+
+/* --- Extensões para o InvestFit (reaproveitando os mesmos tokens de design) --- */
+
+.quiz-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  padding: 14px;
+  border-radius: 14px;
+  background: var(--surface);
+  border: 1px solid var(--stroke);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  color: var(--text);
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1.35;
+}
+.quiz-option:hover { background: var(--highlight); border-color: var(--text); }
+.quiz-option.selected { background: var(--accent); border-color: var(--accent); color: var(--accent-text); font-weight: 700; }
+
+.quiz-option-letter {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: var(--surface2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Sora', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+}
+.quiz-option.selected .quiz-option-letter { background: var(--accent-text); color: var(--accent); }
+
+.alloc-bar {
+  display: flex;
+  width: 100%;
+  height: 14px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--surface2);
+}
+.alloc-bar > div { height: 100%; }
+
+.alloc-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.alloc-row:last-child { border-bottom: none; }
+
+/* Gráfico de rosca: mesmo efeito das caixinhas ao passar o mouse/dedo numa fatia
+   (realce, contorno e leve subida de 3 px). A fatia original some enquanto a cópia sobe. */
+.pie-topo.ativo { opacity: 0; }
+
+.pie-destaque {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(0);
+  transition: transform 0.2s, opacity 0s linear 0.2s;
+}
+
+.pie-destaque.ativo {
+  opacity: 1;
+  transform: translateY(-3px);
+  transition: transform 0.2s, opacity 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pie-destaque, .pie-destaque.ativo { transition: none; }
+}
+
+/* Linhas de resultado da carteira: cada classe de ativo numa caixinha, com o mesmo efeito
+   das caixinhas da landing (vidro, contorno, desfoque e leve subida ao passar o mouse). */
+.alloc-list { gap: 12px; }
+
+.alloc-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 16px 18px;
+  text-align: left;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--stroke);
+  border-radius: 8px;
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+}
+
+button.alloc-box:hover {
+  background: var(--highlight);
+  border-color: var(--text);
+  transform: translateY(-2px);
+}
+
+button.alloc-box:active {
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .alloc-box { transition: none; }
+  button.alloc-box:hover { transform: none; }
+}
+
+.alloc-dot {
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.perfil-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-family: 'Sora', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+}
+.perfil-badge.Conservador { background: color-mix(in oklch, var(--success) 20%, transparent); color: var(--success); }
+.perfil-badge.Moderado { background: color-mix(in oklch, var(--warning) 20%, transparent); color: var(--warning); }
+.perfil-badge.Arrojado { background: color-mix(in oklch, var(--danger) 20%, transparent); color: var(--danger); }
+
+/* Perfil final da Arquitetura Patrimonial (Seção 4.3 do documento). Reaproveita as
+ * mesmas 3 cores semânticas do suitability: Defensivo = mesma leitura de Conservador,
+ * Equilibrado = Moderado, Crescimento Pleno = Arrojado. */
+.perfil-badge.Defensivo { background: color-mix(in oklch, var(--success) 20%, transparent); color: var(--success); }
+.perfil-badge.Equilibrado { background: color-mix(in oklch, var(--warning) 20%, transparent); color: var(--warning); }
+.perfil-badge.CrescimentoPleno { background: color-mix(in oklch, var(--danger) 20%, transparent); color: var(--danger); }
+
+/* ---------------------------------------------------------------------------------------
+   Aba "Simule FII" (screens/SimuleFii.tsx)
+   --------------------------------------------------------------------------------------- */
+
+/* Os 10 tickers do IFIX em 2 linhas de 5, em vez de chips esticados ocupando a tela. */
+.grade-tickers {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+}
+
+/* Tabela cotas × investimento × renda: 3 colunas alinhadas; valores à direita para
+   facilitar comparar ordens de grandeza de cima para baixo. */
+.tabela-fii {
+  display: grid;
+  grid-template-columns: minmax(64px, 0.8fr) 1.2fr 1fr;
+  gap: 8px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-variant-numeric: tabular-nums;
+}
+.tabela-fii > :not(:first-child) { text-align: right; }
+.tabela-fii:last-child { border-bottom: none; }
+.tabela-fii-cabecalho { padding-top: 0; font-weight: 600; }
+
+.input-cotas {
+  width: 100%;
+  min-width: 0;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--stroke);
+  background: var(--surface2);
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+}
+.input-cotas:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+/* Aviso de atraso da CVM: mesma caixa dos outros avisos, com a borda esquerda em tom de
+   alerta para não se perder entre os textos legais. */
+.aviso-atraso { border-left: 4px solid var(--warning); }
+
+/* Título de cada setor da lista de FIIs (D13): caixa amarela na largura toda, com o texto
+   escuro centralizado, no mesmo desenho do botão principal da landing ("Ver minha carteira
+   de referência": fundo accent, cantos de 8px). Amarelo com texto escuro funciona igual nos
+   dois temas, então não há variação para o tema claro. É um título, não um botão: sem hover. */
+.titulo-setor {
+  margin: 0;
+  width: 100%;
+  padding: 12px 20px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--accent-text);
+  text-align: center;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+/* Busca livre de FIIs (decisão D12). O campo tem a mesma altura de toque dos botões
+   principais; os resultados são uma lista de linhas, não chips, porque carregam o nome. */
+.busca-fii {
+  width: 100%;
+  min-width: 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--stroke);
+  background: var(--surface2);
+  color: var(--text);
+  font: inherit;
+  font-size: 16px; /* 16px: abaixo disso o Safari do iPhone dá zoom ao focar */
+  font-weight: 600;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.busca-fii::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; } /* "×" azul nativo destoa do tema; Esc limpa */
+.busca-fii::placeholder { color: var(--text-muted); font-weight: 400; }
+.busca-fii:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+.resultados-busca {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-radius: 12px;
+  border: 1px solid var(--stroke);
+  background: var(--surface);
+  overflow: hidden;
+}
+.resultados-busca li + li { border-top: 1px solid var(--border); }
+.resultado-busca {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 11px 14px;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  font: inherit;
+}
+.resultado-busca:hover { background: var(--highlight); }
+.resultado-busca:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.resultado-nome { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ---------------------------------------------------------------------------------------
+   Telas abertas direto pela landing (Aprender e Simule FII)
+   --------------------------------------------------------------------------------------- */
+
+/* "← Início": mesmo visual do "← Voltar" das trilhas, mas é um link para a landing. */
+.voltar-inicio {
+  align-self: flex-start;
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 13px;
+  text-decoration: none;
+}
+.voltar-inicio:hover { color: var(--text); }
+
+/* Botão que veio da landing ("Educação Financeira Infantil"; o do curso saiu na D22),
+   copiando o visual de lá: caixa de vidro, contorno fino, cantos de 8px, texto centralizado. */
+.link-extra {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 16px 16px;
+  background: var(--surface);
+  border: 1px solid var(--stroke);
+  border-radius: 8px;
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  color: var(--text);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+}
+.link-extra:hover {
+  background: var(--highlight);
+  border-color: var(--text);
+  transform: translateY(-2px);
+}
+.link-extra:active { transform: translateY(0); }
+.link-extra:focus-visible { outline: 2px solid var(--text); outline-offset: 3px; }
+
+.link-extra-2 { flex-direction: column; gap: 2px; }
+.link-extra-titulo { display: inline-flex; align-items: center; gap: 8px; }
+.link-extra-sub { font-size: 12px; font-weight: 400; color: var(--text-muted); }
+
+/* Diálogo do livro (liberação por confiança) */
+.livro-dialog {
+  width: min(400px, calc(100% - 32px));
+  margin: auto;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--stroke);
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+.livro-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.6);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+}
+.livro-dialog-corpo { position: relative; padding: 28px 22px 20px; }
+.livro-dialog-fechar {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text);
+}
+.livro-dialog-fechar:hover { background: var(--highlight); }
+.livro-dialog-titulo { font-size: 18px; line-height: 1.3; padding-right: 32px; text-wrap: balance; }
+.livro-dialog-desc { margin: 12px 0 0; font-size: 14px; line-height: 1.55; }
+.livro-dialog .btn { text-decoration: none; }
+.livro-dialog .btn.is-locked { opacity: 0.45; cursor: not-allowed; }
+.livro-dialog .btn.is-locked:hover { background: var(--surface); border-color: var(--stroke); }
+.livro-dialog-ja-sigo {
+  align-self: center;
+  padding: 8px 12px;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.livro-dialog-status { min-height: 1.4em; margin: 12px 0 0; font-size: 13.5px; line-height: 1.4; text-align: center; }
+.livro-dialog-nota { margin: 8px 0 0; font-size: 11.5px; line-height: 1.5; color: var(--text-muted); text-align: center; }
+
+/* ---------------------------------------------------------------------------------------
+   Dados oficiais de mercado (decisão D15): taxas do Tesouro, cenário e gráfico de juros
+   --------------------------------------------------------------------------------------- */
+
+/* Cores das duas séries do gráfico. No tema claro o amarelo de destaque some como linha
+   fina sobre fundo claro: usa um tom mais escuro da mesma família. */
+:root {
+  --grafico-selic: var(--accent);
+  --grafico-ipca: oklch(72% 0.13 235);
+}
+:root[data-theme='light'] {
+  --grafico-selic: oklch(58% 0.15 85);
+  --grafico-ipca: oklch(50% 0.15 250);
+}
+
+/* Linha de um título: nome e vencimento à esquerda, taxa e preço alinhados à direita. */
+.taxa-linha {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.taxa-linha:last-child { border-bottom: none; }
+.taxa-valor {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Indicadores do Banco Central: grade que cabe 3 por linha no celular. */
+.cenario-grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+  gap: 12px 10px;
+  margin: 0;
+}
+.cenario-item { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.cenario-item dd { margin: 0; }
+.cenario-valor {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Gráfico de juros */
+.grafico-juros {
+  width: 100%;
+  height: auto;
+  display: block;
+  touch-action: pan-y; /* o arraste horizontal lê o gráfico; o vertical continua rolando a tela */
+  cursor: crosshair;
+  border-radius: 8px;
+}
+.grafico-juros:focus-visible { outline: 2px solid var(--grafico-selic); outline-offset: 4px; }
+.grafico-juros-grade { stroke: var(--border); stroke-width: 1; }
+.grafico-juros-eixo { fill: var(--text-muted); font-size: 9.5px; font-family: 'IBM Plex Sans', sans-serif; font-variant-numeric: tabular-nums; }
+.grafico-juros-linha { fill: none; stroke-linejoin: round; stroke-linecap: round; }
+.grafico-juros-linha.selic { stroke: var(--grafico-selic); stroke-width: 2.4; }
+.grafico-juros-linha.ipca { stroke: var(--grafico-ipca); stroke-width: 1.6; }
+.grafico-juros-guia { stroke: var(--text-muted); stroke-width: 1; stroke-dasharray: 2 3; }
+.grafico-juros-ponto { stroke: var(--bg); stroke-width: 1.5; }
+.grafico-juros-ponto.selic { fill: var(--grafico-selic); }
+.grafico-juros-ponto.ipca { fill: var(--grafico-ipca); }
+
+/* Leitura do mês escolhido, acima do gráfico. */
+.grafico-juros-leitura {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 14px;
+  font-size: 12px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  min-height: 18px;
+}
+.grafico-juros-leitura strong { color: var(--text); font-weight: 700; }
+.grafico-juros-mes { color: var(--text); font-weight: 700; min-width: 58px; }
+.grafico-juros-marca {
+  display: inline-block;
+  width: 12px;
+  height: 3px;
+  border-radius: 2px;
+  margin-right: 5px;
+  vertical-align: middle;
+}
+.grafico-juros-marca.selic { background: var(--grafico-selic); }
+.grafico-juros-marca.ipca { background: var(--grafico-ipca); }
+
+/* ---------------------------------------------------------------------------------------
+   Aba "Simule Tesouro" (screens/SimuleTesouro.tsx, decisão D16)
+   --------------------------------------------------------------------------------------- */
+
+/* Título escolhível: mesma caixa de vidro das demais, contorno amarelo quando escolhido. */
+.titulo-opcao {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--stroke);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+.titulo-opcao:hover { background: var(--highlight); }
+.titulo-opcao:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.titulo-opcao.selecionado {
+  border: 2px solid var(--accent);
+  padding: 11px 13px; /* compensa o contorno mais grosso, para a lista não "pular" */
+  background: color-mix(in oklch, var(--accent) 12%, var(--surface));
+}
+
+/* Tabela do resultado: rótulo à esquerda, valor à direita, números alinhados. */
+.tabela-simulacao { display: flex; flex-direction: column; }
+.linha-simulacao {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.linha-simulacao > :first-child { color: var(--text-muted); }
+.linha-simulacao > :last-child { text-align: right; white-space: nowrap; }
+.linha-simulacao.destaque { border-bottom: none; font-weight: 700; }
+.linha-simulacao.destaque > :first-child { color: var(--text); }
+
+.caixa-numero {
+  gap: 2px;
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--surface2);
+  font-variant-numeric: tabular-nums;
+}
+
+/* "Como a conta é feita": fechado por padrão, para o resultado vir primeiro. */
+.premissas-tesouro summary { list-style-position: inside; }
+.tabela-premissas {
+  display: grid;
+  grid-template-columns: auto 1fr 1.4fr;
+  gap: 4px 14px;
+  font-variant-numeric: tabular-nums;
+}
+.tabela-premissas [role='columnheader'] { font-weight: 600; color: var(--text); }
+
+/* Quantidade de ativos de cada segmento no detalhe (ex.: "4 títulos"): caixa amarela com
+   texto escuro, o mesmo desenho do botão selecionado do Simule FII. Uma linha só, para
+   não quebrar em "4 / títulos" como a pílula cinza antiga. */
+.contagem-setor {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--accent-text);
+  font-size: 11.5px;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ---------------------------------------------------------------------------------------
+   Aba "Simule BDR" (screens/SimuleBdr.tsx, decisão D19)
+   --------------------------------------------------------------------------------------- */
+
+/* Resultado da simulação de compra: rótulo à esquerda, valor à direita, mesma régua de
+   linhas da tabela do Simule FII. */
+.tabela-bdr {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+  font-variant-numeric: tabular-nums;
+}
+.tabela-bdr > :last-child { text-align: right; }
+.tabela-bdr:last-child { border-bottom: none; }
+
+/* =========================================================================================
+   D20 · Layout para computador
+   -----------------------------------------------------------------------------------------
+   Regra de ouro: no celular NADA muda. Os invólucros .desk-grid / .desk-split / .desk-main /
+   .desk-side usam display: contents abaixo de 960px, então os filhos continuam na mesma
+   coluna, com o mesmo espaçamento (gap) da .screen de sempre. A partir de 960px eles viram
+   grade de duas colunas. A largura de cada tela vem da classe tela-* no .app-frame (App.tsx).
+   ========================================================================================= */
+
+/* Texto de instrução: "Toque" em tela de toque, "Clique" / "Passe o mouse" com mouse. */
+.so-mouse { display: none; }
+@media (hover: hover) and (pointer: fine) {
+  .so-toque { display: none; }
+  .so-mouse { display: inline; }
+}
+
+.desk-grid,
+.desk-split,
+.desk-main,
+.desk-side { display: contents; }
+
+/* Logo (D20): no início de cada tela, no celular e no computador. */
+.marca {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text);
+  text-decoration: none;
+  border-radius: 10px;
+}
+.marca:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+.marca-logo { width: 30px; height: 30px; flex-shrink: 0; }
+.marca-nome {
+  font-family: 'Sora', 'IBM Plex Sans', sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+}
+/* Telas sem "← Início": logo sozinha no alto, alinhada ao conteúdo. */
+.marca-topo { padding: 20px 20px 0; align-self: flex-start; }
+.marca-topo + .screen { padding-top: 14px; }
+/* Telas com "← Início": logo à esquerda e o link na mesma linha, à direita. */
+.topo-pagina {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.topo-pagina .voltar-inicio { align-self: center; }
+/* Tela inicial: logo centralizada, acima do seletor Claro/Escuro. */
+.marca-onboarding { align-self: center; gap: 12px; }
+.marca-onboarding .marca-logo { width: 36px; height: 36px; }
+.marca-onboarding .marca-nome { font-size: 22px; }
+/* No celular a barra de abas fica embaixo: a logo dela só aparece no menu lateral. */
+.marca-menu { display: none; }
+
+.app-frame { min-height: 100dvh; }
+
+@media (min-width: 960px) {
+  /* --- Larguras por tipo de tela --- */
+  .app-frame { max-width: 1120px; }
+  .app-frame.tela-onboarding,
+  .app-frame.tela-idade,
+  .app-frame.tela-questionario,
+  .app-frame.tela-questionarioArquitetura,
+  .app-frame.tela-processando,
+  .app-frame.tela-trilha,
+  .app-frame.tela-aprenderVideo { max-width: 680px; }
+  .app-frame.tela-detalheAtivo,
+  .app-frame.tela-aprender { max-width: 840px; }
+
+  .screen { padding: 36px 32px 48px; gap: 18px; }
+  .screen h1 { font-size: 26px !important; }
+
+  /* --- Logo no início de cada tela: um pouco maior no computador --- */
+  .marca { gap: 12px; }
+  .marca-logo { width: 36px; height: 36px; }
+  .marca-nome { font-size: 21px; }
+  .marca-onboarding .marca-logo { width: 40px; height: 40px; }
+  .marca-onboarding .marca-nome { font-size: 24px; }
+  .marca-topo { padding: 28px 32px 0; }
+  .marca-topo + .screen { padding-top: 20px; }
+  /* Telas com menu lateral: a logo vai para o topo do menu, não acima do conteúdo. */
+  .tela-resultado > .marca-topo,
+  .tela-carteira > .marca-topo,
+  .tela-simulador > .marca-topo { display: none; }
+  .tela-resultado .screen,
+  .tela-carteira .screen,
+  .tela-simulador .screen { padding-top: 36px; }
+
+  /* Menu compacto (960 a 1199 px): só o símbolo, centralizado, separado das abas por uma linha. */
+  .marca-menu {
+    display: flex;
+    justify-content: center;
+    padding: 2px 0 12px;
+    margin-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  .marca-menu .marca-logo { width: 34px; height: 34px; }
+  .marca-menu .marca-nome { display: none; font-size: 17px; }
+
+  /* --- Barra de abas vira menu lateral à esquerda (D20) ---
+     Só existe nas telas com abas (Perfil, Carteira, Simular). Essas telas reservam uma faixa
+     à esquerda no .app-frame e o menu fica fixo nela, alinhado ao conteúdo centralizado.
+     Entre 960 e 1199 px o menu fica compacto (ícone em cima, nome embaixo), para sobrar
+     largura às duas colunas; a partir de 1200 px mostra ícone e nome lado a lado. */
+  .app-frame.tela-resultado,
+  .app-frame.tela-carteira,
+  .app-frame.tela-simulador {
+    max-width: calc(1120px + var(--menu-lateral));
+    padding-left: var(--menu-lateral);
+  }
+  :root { --menu-lateral: 104px; }
+
+  .tabbar {
+    position: fixed;
+    z-index: 20;
+    top: 24px;
+    bottom: 24px;
+    left: max(16px, calc(50% - (1120px + var(--menu-lateral)) / 2 + 16px));
+    width: calc(var(--menu-lateral) - 24px);
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    gap: 6px;
+    padding: 14px 8px;
+    border: 1px solid var(--stroke);
+    border-radius: 16px;
+    background: var(--surface);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+  }
+  .tab {
+    padding: 10px 4px;
+    border-radius: 10px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .tab > span:first-child { font-size: 20px !important; }
+  .tab:hover { color: var(--text); background: var(--highlight-soft); }
+  .tab.active { background: var(--surface2); }
+  .tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* --- Grades de duas colunas --- */
+  .desk-grid,
+  .desk-split {
+    display: grid;
+    gap: 18px 40px;
+    align-items: start;
+  }
+  .desk-main,
+  .desk-side {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-width: 0;
+  }
+
+  /* Lista/controles à esquerda (mais larga), resultado fixo à direita. */
+  .desk-split { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); }
+  /* Sem overflow/max-height de propósito: recortar a coluna cortava a sombra do gráfico,
+     os contornos de foco e o fim dos cartões em telas baixas. A coluna só fica fixa
+     (sticky) quando a janela tem altura para mostrá-la inteira (regra min-height abaixo). */
+  /* Variante com a coluna fixa à esquerda (gráfico da Carteira, valor do Simulador). */
+  .desk-split:has(> .desk-side-esquerda) { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.3fr); }
+  .desk-side-esquerda { order: -1; }
+
+
+  /* --- Resultado: perfil à esquerda, gráfico fixo à direita --- */
+  .grade-resultado {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas:
+      'cab     graf'
+      'desc    graf'
+      'alertas graf'
+      'ponte   graf'
+      'aviso   graf'
+      'acao    graf'
+      '.       graf';
+    grid-template-rows: auto auto auto auto auto 1fr;
+  }
+  .area-cabecalho { grid-area: cab; }
+  .area-descricao { grid-area: desc; }
+  .area-alertas   { grid-area: alertas; }
+  .area-ponte     { grid-area: ponte; }
+  .area-aviso     { grid-area: aviso; }
+  .area-acao      { grid-area: acao; justify-self: start; min-width: 260px; }
+  .area-grafico   { grid-area: graf; margin-top: 0 !important; }
+
+  /* --- Leitura no computador: textos de apoio um pouco maiores e sem justificar
+     (justificado em fonte pequena abre buracos entre as palavras). --- */
+  .small { font-size: 13px; }
+  .tiny { font-size: 12px; line-height: 1.5; }
+  .tiny.justify,
+  .justify .tiny { text-align: left; }
+
+  /* --- Simulador: valores por classe em duas colunas --- */
+  .grade-simulador {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* --- Listas de códigos (FII / BDR): mais colunas cabem na largura --- */
+  .grade-tickers { grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); }
+
+  /* --- Interação com mouse --- */
+  .chip,
+  .titulo-opcao,
+  .btn { cursor: pointer; }
+  .chip:focus-visible,
+  .titulo-opcao:focus-visible,
+  .btn:focus-visible,
+  .voltar-inicio:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+}
+
+/* Coluna fixa (resultado ao lado da lista) só quando a janela é alta o bastante para ela
+   caber inteira; em janelas baixas ela rola junto com a página, sem nada escondido. */
+@media (min-width: 960px) and (min-height: 720px) {
+  .desk-side { position: sticky; top: 24px; }
+  .area-grafico { position: sticky; top: 24px; }
+}
+
+/* A partir de 1200 px: menu lateral largo, com o nome do app e ícone ao lado do texto. */
+@media (min-width: 1200px) {
+  :root { --menu-lateral: 232px; }
+  .tabbar { padding: 18px 12px; gap: 4px; }
+  .marca-menu { justify-content: flex-start; padding: 2px 8px 14px; }
+  .marca-menu .marca-nome { display: inline; }
+  .tab {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 12px;
+    padding: 11px 12px;
+    font-size: 14px;
+  }
+  .tab > span:first-child { font-size: 18px !important; }
+}
+
+/* Telas muito largas: um respiro maior entre as colunas. */
+@media (min-width: 1280px) {
+  .desk-grid,
+  .desk-split { column-gap: 56px; }
+}
+
+/* ================================================================================
+   D21 · Meu Mês — controle do mês no molde dos Três Potes de Clara.
+   As cores dos potes são as do livro: 🟢 Gastar, 🔵 Guardar, 🟡 Fazer Crescer.
+   Contas e cofrinhos ficam em tons neutros: são o que sai antes de qualquer pote.
+   ================================================================================ */
+.pote-gastar { background: var(--z1); }
+.pote-guardar { background: var(--z3); }
+.pote-crescer { background: var(--z2); }
+.seg-contas { background: var(--text-muted); }
+.seg-cofrinhos { background: color-mix(in oklch, var(--text-muted) 55%, transparent); }
+
+.mm-mes-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.mm-mes-nav .icon-btn { font-size: 26px; line-height: 1; width: 44px; height: 44px; }
+.mm-mes-nome { font-size: 18px; font-weight: 700; }
+.mm-mes-nome::first-letter { text-transform: uppercase; }
+
+.mm-link {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  /* Só família e peso: font-size fica com .tiny/.small quando presentes. */
+  font-family: inherit;
+  font-weight: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.mm-link:not(.tiny):not(.small) { font-size: inherit; }
+
+.mm-progresso { height: 6px; border-radius: 3px; background: var(--surface2); overflow: hidden; }
+.mm-progresso > div { height: 100%; background: var(--z1); transition: width 0.25s ease; }
+
+.mm-lista { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.mm-lista > li + li { border-top: 1px solid var(--border); }
+
+/* A linha inteira é tocável (label), com 48px de altura mínima para o dedo. */
+.mm-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 8px 0;
+  cursor: pointer;
+}
+.mm-item-nome { font-weight: 600; font-size: 14px; overflow-wrap: anywhere; }
+.mm-item-valor { font-weight: 600; font-size: 14px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.mm-item.ticado .mm-item-nome,
+.mm-item.ticado .mm-item-valor { color: var(--text-muted); text-decoration: line-through; text-decoration-thickness: 1px; }
+
+/* O tique: caixa redonda que enche de verde, como a caneta no papel. */
+.mm-check {
+  appearance: none;
+  -webkit-appearance: none;
+  flex: none;
+  width: 26px;
+  height: 26px;
+  margin: 0;
+  border-radius: 50%;
+  border: 2px solid var(--stroke);
+  background: transparent;
+  display: grid;
+  place-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.mm-check::after {
+  content: '';
+  width: 11px;
+  height: 6px;
+  border-left: 2.5px solid var(--accent-text);
+  border-bottom: 2.5px solid var(--accent-text);
+  transform: rotate(-45deg) translate(1px, -1px) scale(0);
+  transition: transform 0.15s ease;
+}
+.mm-check:checked { background: var(--z1); border-color: var(--z1); }
+.mm-check:checked::after { transform: rotate(-45deg) translate(1px, -1px) scale(1); }
+.mm-check:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.mm-rodape-lista { border-top: 1px solid var(--border); padding-top: 10px; }
+
+.mm-campo { display: flex; align-items: center; gap: 8px; }
+.mm-campo .input-cotas { padding: 10px 12px; font-size: 16px; font-variant-numeric: tabular-nums; }
+.mm-form .input-cotas { padding: 10px 12px; font-size: 16px; }
+
+/* Caminho do salário: uma barra que se divide na ordem em que o dinheiro sai. */
+.mm-barra {
+  display: flex;
+  height: 14px;
+  border-radius: 7px;
+  overflow: hidden;
+  background: var(--surface2);
+  gap: 2px;
+}
+.mm-barra > div { height: 100%; transition: width 0.25s ease; }
+.mm-bolinha { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+.mm-total { border-top: 1px solid var(--border); padding-top: 8px; font-size: 15px; }
+.mm-negativo { color: var(--danger); }
+.mm-situacao { border-left: 4px solid var(--z1); padding: 2px 0 2px 10px; line-height: 1.5; }
+.mm-situacao-apertado { border-left-color: var(--warning); }
+.mm-situacao-negativo { border-left-color: var(--danger); }
+
+.mm-sugestoes { display: flex; flex-wrap: wrap; gap: 6px; }
+.mm-sugestao {
+  padding: 7px 11px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.mm-sugestao:hover { background: var(--highlight); }
+.mm-sugestao:focus-visible,
+.mm-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.mm-conta { display: flex; align-items: center; gap: 12px; padding: 8px 0; }
+.mm-conta .mm-link { flex: none; }
+.mm-perigo { color: var(--danger); }
+
+@media (prefers-reduced-motion: reduce) {
+  .mm-check, .mm-check::after, .mm-progresso > div, .mm-barra > div { transition: none; }
+}
+
+/* D21 · Etapa 2: cartão de crédito. A fatura é mais uma saída antes dos potes (laranja);
+   o semáforo usa as cores de estado já existentes. */
+.seg-cartao { background: var(--z5); }
+.mm-semaforo { height: 10px; border-radius: 5px; background: var(--surface2); overflow: hidden; }
+.mm-semaforo > div { height: 100%; transition: width 0.25s ease; }
+.mm-semaforo-verde > div { background: var(--success); }
+.mm-semaforo-amarelo > div { background: var(--warning); }
+.mm-semaforo-vermelho > div { background: var(--danger); }
+.mm-cartao-sem-teto { border-left-color: var(--text-muted); }
+.mm-cartao-verde { border-left-color: var(--success); }
+.mm-cartao-amarelo { border-left-color: var(--warning); }
+.mm-cartao-vermelho { border-left-color: var(--danger); }
+.mm-alerta-parcela { border-left: 4px solid var(--warning); padding: 2px 0 2px 10px; line-height: 1.5; }
+@media (prefers-reduced-motion: reduce) { .mm-semaforo > div { transition: none; } }
+
+/* D21 · Etapa 3: Modo Recuperação. O pote Quitar é vermelho (a cor de "dívida" que a pessoa
+   quer ver sumir); as parcelas mínimas saem em violeta, antes dos potes, como as contas. */
+.pote-quitar { background: var(--danger); }
+.seg-dividas { background: var(--z4); }
+/* Título "Minhas dívidas": mesma cor da barra e do pote Quitar (var(--z4)), para o roxo das
+   dívidas ser reconhecível em qualquer lugar da tela (pedido do responsável). */
+.mm-titulo-dividas {
+  display: inline-block;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--z4);
+  color: #1a1025;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.mm-recuperacao { border-left: 4px solid var(--danger); }
+
+/* Fases: marcador redondo como o tique das contas; a fase atual em destaque. */
+.mm-fases { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.mm-fase { display: flex; align-items: flex-start; gap: 10px; }
+.mm-fase-marca {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  margin-top: 1px;
+  border-radius: 50%;
+  border: 2px solid var(--stroke);
+  display: grid;
+  place-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent-text);
+}
+.mm-fase-feito .mm-fase-marca { background: var(--z1); border-color: var(--z1); }
+.mm-fase-atual .mm-fase-marca { border-color: var(--danger); box-shadow: inset 0 0 0 4px color-mix(in oklch, var(--danger) 55%, transparent); }
+.mm-fase-proximo { opacity: 0.75; }
+
+.mm-divida-progresso { height: 6px; border-radius: 3px; background: var(--surface2); overflow: hidden; }
+.mm-divida-progresso > div { height: 100%; background: var(--z1); transition: width 0.25s ease; }
+.mm-aviso-divida { color: var(--danger); font-weight: 600; }
+.mm-celebra { border-left-color: var(--success); }
+.mm-pausado { border-left: 4px solid var(--z2); padding: 2px 0 2px 10px; line-height: 1.5; }
+
+/* Avalanche x bola de neve lado a lado; em telas muito estreitas, um embaixo do outro. */
+.mm-metodos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+@media (max-width: 340px) { .mm-metodos { grid-template-columns: 1fr; } }
+.mm-metodo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.mm-metodo:hover { background: var(--highlight); }
+.mm-metodo.selected { border: 2px solid var(--accent); padding: 9px 11px; }
+.mm-metodo:focus-visible,
+.mm-externo:focus-visible,
+.mm-roteiro summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.mm-ordem { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; }
+
+.mm-pacto { border-left: 4px solid var(--warning); }
+.mm-pacto-feito { border-left-color: var(--success); }
+
+.mm-roteiro ol { margin: 0; padding-left: 20px; }
+.mm-externo { color: inherit; text-decoration: underline; text-underline-offset: 2px; font-weight: 600; }
+
+@media (prefers-reduced-motion: reduce) { .mm-divida-progresso > div { transition: none; } }
+.mm-lista > li.mm-divida { padding: 10px 0; }
+
+/* D21 · Etapa 4: ponte com o questionário e com o resultado.
+   A sugestão do Meu Mês usa o amarelo da marca só na borda, para não competir com a opção
+   marcada (fundo amarelo cheio). A opção sugerida ganha só uma etiqueta: nada é marcado
+   sozinho. */
+.ponte-sugestao {
+  gap: 6px;
+  border: 1px dashed var(--accent);
+}
+.quiz-option.sugerida:not(.selected) { border-style: dashed; border-color: var(--accent); }
+.quiz-option-tag {
+  align-self: flex-start;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 700;
+  background: var(--surface2);
+  color: var(--text);
+}
+.quiz-option.selected .quiz-option-tag { background: var(--accent-text); color: var(--accent); }
+
+.ponte-meu-mes { gap: 8px; }
+.ponte-meu-mes .btn { align-self: flex-start; }
+
+/* Aula em texto (trilha "Sair das dívidas"): leitura confortável no celular. */
+.aula-texto { gap: 12px; line-height: 1.6; }
+.aula-texto p { margin: 0; }
+.aula-links { gap: 6px; }
+.aula-links a { color: var(--text); font-weight: 600; text-underline-offset: 3px; }
+.mm-trilha { gap: 4px; text-align: left; width: 100%; cursor: pointer; color: var(--text); }
+.mm-trilha:hover { background: var(--highlight); }
+
+/* Ajustes após a Etapa 4 (uso real do responsável).
+   1. Lista suspensa de meses, tipos e parcelas: no tema escuro, alguns navegadores abriam as
+      opções com texto claro sobre fundo claro. As opções agora têm sempre texto escuro sobre
+      fundo branco, legíveis nos dois temas. */
+select option,
+select optgroup {
+  color: #111418 !important;
+  background-color: #ffffff !important;
+  -webkit-text-fill-color: #111418;
+  font-weight: 500;
+}
+/* A caixa aberta segue o esquema claro em qualquer tema: o navegador desenha a lista com
+   fundo branco e texto preto, sem herdar o texto claro do tema escuro. A caixa fechada
+   continua com as cores do tema. */
+select { color-scheme: light; }
+select option:disabled { color: #6b7280 !important; -webkit-text-fill-color: #6b7280; }
+/* 2. "Editar" ao lado de cada conta da lista do mês, fora da área que tica. */
+.mm-linha { display: flex; align-items: center; gap: 10px; }
+.mm-linha .mm-item { min-width: 0; }
+.mm-editar { flex: none; min-height: 44px; padding: 0 2px; color: var(--text-muted); }
+.mm-editar:hover { color: var(--text); }
+
+/* Ajustes de 26/09/2026 (segunda rodada do Meu Mês).
+   1. Texto de abertura do Meu Mês: de 12px para 15px, com entrelinha confortável. */
+.mm-abertura { font-size: 15px; line-height: 1.5; }
+/* 2. "Apagar tudo e começar de novo": saiu do link cinza pequeno, fácil de perder, para uma
+      caixa amarela com texto escuro, no mesmo desenho do botão principal. Continua pedindo
+      confirmação antes de apagar. */
+.mm-apagar-tudo {
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--accent-text);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+  cursor: pointer;
+}
+.mm-apagar-tudo:hover { filter: brightness(1.05); }
+.mm-apagar-tudo:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+
+/* Caixas simples do cartão (ajuste de 26/09/2026): "Compras à vista do mês, de uma vez" e
+   "Começando agora no app?" ficam cada uma numa caixa com borda, para não se perderem no bloco. */
+.mm-caixa {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--stroke);
+  border-radius: 10px;
+  background: var(--surface2);
+}
+.mm-caixa-titulo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+.mm-caixa-titulo:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+.mm-caixa-secao { display: flex; flex-direction: column; gap: 8px; padding-top: 10px; border-top: 1px solid var(--stroke); }
+
+/* Títulos em caixinha na cor da bolinha de "Para onde vai o salário" (ajuste de 26/09/2026), no
+   mesmo esquema de "Minhas dívidas": "Minhas contas" e os grupos de Contas do mês. O fundo vem da
+   classe seg-* (a mesma da bolinha e da barra); a cor do texto garante contraste nos dois temas. */
+/* Faixa na largura toda do card, como .mm-titulo-dividas (ajuste de 26/09/2026: a primeira
+   versão era uma caixinha só do tamanho do texto). A fonte dos grupos de Contas do mês continua
+   menor, como era. */
+.mm-titulo-cor {
+  display: block;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 999px;
+}
+.mm-titulo-cor-pequeno { font-size: 12px; padding: 3px 10px; margin-bottom: 4px; }
+.mm-titulo-cor.seg-contas { color: var(--bg); }
+.mm-titulo-cor.seg-cofrinhos { color: var(--text); }
+.mm-titulo-cor.seg-cartao { color: #2a1400; }
+.mm-titulo-cor.seg-dividas { color: #1a1025; }
+
+/* Lista curta dentro de um aviso (ex.: onde usar a reserva acima da mini-reserva). */
+.mm-lista-simples { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 2px; }
+
+/* =====================================================================================
+   Minha Carteira (D36) — painel de gestão da carteira real.
+   Visual inspirado em painéis financeiros escuros: cartões de fundo escuro com contorno
+   sutil, números grandes, variação em verde/vermelho e DOURADO nos gráficos. Tudo isolado
+   em classes `mc-*`, com tokens próprios para tema escuro e claro; as demais telas não são
+   afetadas. Os tokens abaixo podem ser reaproveitados em outros gráficos do app.
+   ===================================================================================== */
+:root {
+  --mc-card: rgba(12, 14, 20, 0.8);
+  --mc-card-borda: rgba(255, 255, 255, 0.1);
+  --mc-card-sombra: 0 12px 32px rgba(0, 0, 0, 0.32);
+  --mc-ouro: var(--asset-acoes);
+  --mc-ouro-fundo: rgba(243, 178, 24, 0.32);
+  --mc-barra: rgba(255, 255, 255, 0.17);
+  --mc-grade-cor: rgba(255, 255, 255, 0.07);
+  --mc-campo-fundo: rgba(255, 255, 255, 0.06);
+  --mc-campo-borda: rgba(255, 255, 255, 0.22);
+  --mc-pos: var(--success);
+  --mc-neg: oklch(72% 0.19 25);
+  /* Texto secundário: bem mais claro que o --text-muted do app (contraste de ~10:1 no cartão escuro, em vez de ~6:1). */
+  --mc-suave: oklch(84% 0.012 262);
+}
+:root[data-theme='light'] {
+  --mc-card: rgba(255, 255, 255, 0.88);
+  --mc-card-borda: rgba(0, 0, 0, 0.1);
+  --mc-card-sombra: 0 10px 28px rgba(20, 24, 40, 0.1);
+  --mc-ouro: #b97c00;
+  --mc-ouro-fundo: rgba(185, 124, 0, 0.28);
+  --mc-barra: rgba(0, 0, 0, 0.18);
+  --mc-grade-cor: rgba(0, 0, 0, 0.07);
+  --mc-campo-fundo: rgba(0, 0, 0, 0.04);
+  --mc-campo-borda: rgba(0, 0, 0, 0.3);
+  --mc-pos: oklch(45% 0.14 150);
+  --mc-neg: oklch(50% 0.2 25);
+  --mc-suave: oklch(34% 0.02 262);
+}
+
+.mc-tela { gap: 14px; }
+.mc-grade { display: grid; grid-template-columns: 1fr; gap: 14px; }
+.mc-largo { grid-column: 1 / -1; }
+
+.mc-card {
+  background: var(--mc-card);
+  border: 1px solid var(--mc-card-borda);
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: var(--mc-card-sombra), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.mc-titulo { font-size: 17px; font-weight: 700; letter-spacing: 0.01em; }
+.mc-subtitulo { font-size: 15.5px; font-weight: 700; margin: 2px 0 6px; }
+.mc-topo-linha { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.mc-rotulo { color: var(--mc-suave); font-size: 14px; }
+.mc-valor { font-family: 'Sora', 'IBM Plex Sans', sans-serif; font-weight: 700; font-size: 30px; line-height: 1.15; font-variant-numeric: tabular-nums; }
+.mc-destaque { font-family: 'Sora', 'IBM Plex Sans', sans-serif; font-weight: 700; font-size: 19px; font-variant-numeric: tabular-nums; }
+.mc-nota { color: var(--mc-suave); font-size: 13.5px; line-height: 1.4; }
+.mc-legenda { color: var(--mc-suave); font-size: 13px; }
+.mc-dica { color: var(--mc-suave); font-size: 13.5px; }
+.mc-texto { margin: 0; font-size: 15px; line-height: 1.55; color: var(--mc-suave); }
+.mc-texto strong { color: var(--text); }
+.mc-vazio-mini { color: var(--mc-suave); font-size: 14.5px; padding: 18px 4px; text-align: center; }
+.mc-ok { color: var(--mc-pos); font-size: 15px; margin: 2px 0; }
+.mc-erro { color: var(--mc-neg); font-size: 14.5px; margin-top: 4px; }
+
+.mc-linha-delta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.mc-delta { font-weight: 700; font-size: 15px; font-variant-numeric: tabular-nums; }
+.mc-pos { color: var(--mc-pos); }
+.mc-neg { color: var(--mc-neg); }
+
+/* gráficos */
+.mc-grafico { margin-top: 6px; }
+.mc-svg { display: block; width: 100%; overflow: visible; }
+.mc-grade-linha { stroke: var(--mc-grade-cor); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.mc-linha-ouro { stroke: var(--mc-ouro); stroke-width: 2.2; stroke-linejoin: round; stroke-linecap: round; }
+.mc-ponto-ouro { fill: var(--mc-ouro); stroke: var(--mc-card); stroke-width: 2; }
+.mc-eixo { display: flex; justify-content: space-between; margin-top: 4px; font-size: 11.5px; color: var(--mc-suave); }
+.mc-eixo span { flex: 1; min-width: 0; text-align: center; }
+
+.mc-composicao { display: flex; height: 12px; border-radius: 99px; overflow: hidden; background: var(--mc-barra); gap: 2px; margin: 6px 0 4px; }
+.mc-fatia { display: block; height: 100%; min-width: 3px; }
+.mc-legenda-lista { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 7px; }
+.mc-legenda-lista li { display: grid; grid-template-columns: 12px 1fr auto auto; align-items: center; gap: 8px; font-size: 14.5px; }
+.mc-bolinha { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.mc-leg-valor, .mc-leg-pct { font-variant-numeric: tabular-nums; text-align: right; }
+.mc-leg-pct { color: var(--mc-suave); min-width: 46px; }
+
+.mc-proximos { margin-top: 8px; padding-top: 10px; border-top: 1px solid var(--mc-card-borda); display: flex; flex-direction: column; gap: 4px; }
+
+/* importação */
+.mc-arquivo { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; clip: rect(0 0 0 0); }
+.mc-soltar {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  border: 1.5px dashed var(--mc-campo-borda); border-radius: 14px; padding: 14px; margin-top: 4px;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.mc-soltar.ativo { background: var(--mc-ouro-fundo); border-color: var(--mc-ouro); }
+.mc-soltar:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+.mc-links { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.mc-link { color: var(--mc-ouro); font-size: 14.5px; font-weight: 600; }
+.mc-resumos { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.mc-resumo { border-left: 3px solid var(--mc-pos); padding: 6px 0 6px 10px; font-size: 14.5px; line-height: 1.45; }
+.mc-resumo.atencao { border-left-color: var(--warning); }
+.mc-resumo.erro { border-left-color: var(--mc-neg); }
+.mc-resumo-nome { color: var(--mc-suave); font-size: 13.5px; word-break: break-all; }
+.mc-resumo details { margin-top: 4px; color: var(--mc-suave); }
+.mc-resumo details ul { margin: 4px 0 0; padding-left: 18px; }
+
+/* botões e formulários */
+.mc-btn { padding: 11px 16px; font-size: 15px; width: auto; min-height: 44px; }
+.mc-rotulo-botao { position: relative; display: inline-flex; align-items: center; cursor: pointer; }
+.mc-perigo { border-color: var(--mc-neg); color: var(--mc-neg); }
+.mc-acoes { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+.mc-form { display: flex; flex-direction: column; gap: 8px; padding: 12px; margin: 6px 0; border: 1px solid var(--mc-card-borda); border-radius: 14px; background: var(--mc-campo-fundo); }
+.mc-form-grade { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.mc-form-linha { display: flex; flex-direction: column; gap: 6px; margin: 4px 0; }
+.mc-campo-bloco { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.mc-rotulo-campo { font-size: 13.5px; color: var(--mc-suave); }
+.mc-campo {
+  width: 100%; min-width: 0; padding: 9px 10px; font: inherit; font-size: 16px; color: var(--text);
+  background: var(--mc-campo-fundo); border: 1px solid var(--mc-campo-borda); border-radius: 10px;
+}
+.mc-campo:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.mc-campo-data { max-width: 190px; }
+
+/* conferência */
+.mc-barra-progresso { height: 8px; border-radius: 99px; background: var(--mc-barra); overflow: hidden; }
+.mc-barra-progresso span { display: block; height: 100%; background: var(--mc-pos); border-radius: 99px; }
+.mc-pendentes { list-style: none; margin: 4px 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.mc-pendente { border-left: 3px solid var(--warning); padding: 4px 0 4px 10px; display: flex; flex-direction: column; gap: 4px; }
+.mc-pendente-topo { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.mc-selo { font-size: 13px; font-weight: 600; padding: 2px 8px; border-radius: 99px; border: 1px solid var(--mc-card-borda); color: var(--mc-suave); white-space: nowrap; }
+.mc-selo.faltaSaldoAnterior { color: var(--warning); border-color: var(--warning); }
+.mc-selo.info { color: var(--mc-ouro); border-color: var(--mc-ouro); }
+
+/* posições e lançamentos */
+.mc-posicoes, .mc-lancamentos { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; }
+.mc-posicao { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; padding: 10px 0; border-top: 1px solid var(--mc-card-borda); font-size: 15px; }
+.mc-posicao:first-child { border-top: 0; }
+.mc-pos-ativo { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.mc-pos-num { display: flex; flex-direction: column; font-variant-numeric: tabular-nums; }
+.mc-pos-num small { color: var(--mc-suave); }
+.mc-lancamento { padding: 10px 0; border-top: 1px solid var(--mc-card-borda); display: flex; flex-direction: column; gap: 4px; font-size: 15px; }
+.mc-lancamento:first-child { border-top: 0; }
+.mc-lanc-topo { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.mc-lanc-meio { font-variant-numeric: tabular-nums; }
+
+@media (min-width: 900px) {
+  .app-frame.tela-minhaCarteira { max-width: 1120px; }
+  .tela-minhaCarteira .marca-topo { padding-left: 32px; }
+  .mc-tela { padding: 28px 32px 36px; }
+  .mc-grade { grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+  .mc-posicao { grid-template-columns: 1.4fr 1fr 1fr 1fr; align-items: center; }
+  .mc-pos-ativo { grid-column: auto; }
+  .mc-form-grade { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* Minha Carteira: comparação com a carteira sugerida ("você x sugerida"). Barra preenchida = o que a
+   pessoa tem; marca vertical = o alvo da carteira sugerida. */
+.mc-aderencia { display: flex; flex-direction: column; gap: 4px; margin: 2px 0 4px; }
+.mc-comp-lista { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-direction: column; }
+.mc-comp-linha { padding: 11px 0; border-top: 1px solid var(--mc-card-borda); display: flex; flex-direction: column; gap: 6px; font-size: 15px; }
+.mc-comp-linha:first-child { border-top: 0; }
+.mc-comp-topo { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.mc-comp-numeros { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-variant-numeric: tabular-nums; }
+.mc-trilha { position: relative; height: 10px; border-radius: 99px; background: var(--mc-barra); overflow: visible; }
+.mc-preench { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 99px; }
+.mc-marca { position: absolute; top: -4px; bottom: -4px; width: 3px; margin-left: -1.5px; border-radius: 2px; background: var(--text); box-shadow: 0 0 0 2px var(--mc-card); }
+.mc-chip-situacao { font-size: 13px; font-weight: 700; padding: 3px 9px; border-radius: 99px; border: 1px solid var(--mc-card-borda); white-space: nowrap; }
+.mc-chip-situacao.dentro { color: var(--mc-pos); border-color: var(--mc-pos); }
+.mc-chip-situacao.abaixo { color: var(--warning); border-color: var(--warning); }
+.mc-chip-situacao.acima { color: var(--mc-neg); border-color: var(--mc-neg); }
+.mc-aviso-caixa { border: 1px solid var(--warning); border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; font-size: 15px; }
+.mc-pendentes-classe, .mc-classif { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.mc-pendentes-classe li, .mc-classif li { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 15px; }
+.mc-classif-acao { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.mc-seletor { width: auto; min-width: 180px; max-width: 100%; }
+.mc-filtro { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 4px 0; }
+.mc-filtro .mc-campo-curto { max-width: 280px; }
+.mc-campo-curto { max-width: 190px; }
+.mc-detalhes { border-top: 1px solid var(--mc-card-borda); padding-top: 8px; font-size: 15px; }
+.mc-detalhes summary { cursor: pointer; color: var(--mc-ouro); font-weight: 600; }
+.mc-aporte { border-top: 1px solid var(--mc-card-borda); padding-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+.mc-aporte-lista { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 15px; }
+.mc-aporte-lista li { display: flex; justify-content: space-between; gap: 10px; font-variant-numeric: tabular-nums; }
+
+
+/* Minha Carteira: passo a passo, cabeçalho simples e gráficos "de exemplo" antes da importação. */
+.mc-sub { margin: 0; font-size: 17px; line-height: 1.4; color: var(--mc-suave); }
+.mc-titulo-grande { font-size: 20px; font-weight: 700; letter-spacing: 0.01em; }
+.mc-passos { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 16px; }
+.mc-passo { display: flex; gap: 14px; align-items: flex-start; }
+.mc-num {
+  flex: none; width: 34px; height: 34px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+  font-family: 'Sora', 'IBM Plex Sans', sans-serif; font-weight: 700; font-size: 17px; color: #1a1500; background: var(--mc-ouro);
+}
+.mc-passo-corpo { display: flex; flex-direction: column; gap: 6px; min-width: 0; flex: 1; }
+.mc-passo-titulo { font-size: 17px; font-weight: 700; }
+.mc-passo-texto { margin: 0; font-size: 15px; line-height: 1.5; color: var(--mc-suave); }
+.mc-passo-texto strong { color: var(--text); }
+.mc-privacidade { font-size: 15px; font-weight: 600; padding-top: 4px; }
+.mc-fantasma { opacity: 0.5; --mc-ouro: var(--mc-suave); --mc-ouro-fundo: transparent; pointer-events: none; }
+.mc-fantasma .mc-linha-ouro { stroke-dasharray: 6 6; }
+.mc-cartao-vazio .mc-valor { color: var(--mc-suave); }
+.mc-chamada-vazia { font-size: 16px; font-weight: 600; margin: 2px 0 -4px; }
+
+/* Em telas estreitas, 12 nomes de mês ficam apertados: mostra um sim, outro não (as barras seguem todas lá). */
+@media (max-width: 430px) {
+  .mc-eixo span:nth-child(even) { visibility: hidden; }
+}
+
+/* Minha Carteira: posições agrupadas por tipo de ativo (como "Produtos da sua carteira" na Área do Investidor
+   da B3), editor de preço médio e filtro por tipo de lançamento. */
+.mc-grupos { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
+.mc-grupo { border: 1px solid var(--mc-card-borda); border-radius: 14px; background: var(--mc-campo-fundo); }
+.mc-grupo > summary { list-style: none; cursor: pointer; padding: 14px; display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: center; }
+.mc-grupo > summary::-webkit-details-marker { display: none; }
+.mc-grupo > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 14px; }
+.mc-grupo[open] > summary { border-bottom: 1px solid var(--mc-card-borda); }
+.mc-grupo-nome { font-weight: 700; font-size: 15px; }
+.mc-grupo-valor { font-weight: 700; font-size: 15px; font-variant-numeric: tabular-nums; text-align: right; }
+.mc-grupo-info { color: var(--mc-suave); font-size: 13px; }
+.mc-grupo-barra { grid-column: 1 / -1; display: block; height: 6px; border-radius: 99px; background: var(--mc-barra); overflow: hidden; }
+.mc-grupo-barra > span { display: block; height: 100%; background: var(--mc-ouro); border-radius: 99px; }
+.mc-grupo .mc-posicoes { padding: 0 14px 8px; margin: 0; }
+.mc-pos-acoes { grid-column: 1 / -1; display: flex; gap: 8px; flex-wrap: wrap; }
+.mc-pos-editor { grid-column: 1 / -1; }
+.mc-chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 2px 0 4px; }
+.mc-chip { padding: 8px 14px; border-radius: 99px; border: 1px solid var(--mc-campo-borda); background: transparent; color: var(--text); font: inherit; font-size: 13px; cursor: pointer; }
+.mc-chip[aria-pressed='true'] { background: var(--mc-ouro); border-color: var(--mc-ouro); color: #1a1400; font-weight: 700; }
+.mc-chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Minha Carteira: linha de posição com o lápis na frente e "Ver lançamentos" no fim da linha; painel de
+   edição do ativo numa janela por cima da tela (sobe de baixo no celular, centralizada no computador). */
+:root { --mc-modal-fundo: #12151c; }
+:root[data-theme='light'] { --mc-modal-fundo: #ffffff; }
+.mc-posicao { display: flex; flex-direction: column; gap: 8px; }
+.mc-pos-topo { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.mc-pos-numeros { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 12px; }
+.mc-lapis { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--mc-campo-borda); background: transparent; color: var(--text); cursor: pointer; }
+.mc-lapis:hover { background: var(--mc-ouro-fundo); border-color: var(--mc-ouro); }
+.mc-link-linha { margin-left: auto; background: none; border: 0; color: var(--mc-ouro); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; padding: 6px 4px; white-space: nowrap; }
+.mc-lapis:focus-visible, .mc-link-linha:focus-visible, .mc-fechar:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.mc-modal-fundo { position: fixed; inset: 0; z-index: 60; background: rgba(0, 0, 0, 0.6); display: flex; align-items: flex-end; justify-content: center; overflow-y: auto; }
+.mc-modal { width: 100%; max-width: 560px; max-height: 92vh; overflow-y: auto; background: var(--mc-modal-fundo); border: 1px solid var(--mc-card-borda); border-radius: 18px 18px 0 0; padding: 18px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.4); }
+.mc-fechar { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border: 0; border-radius: 50%; background: transparent; color: var(--text); cursor: pointer; }
+.mc-ocupa-linha { grid-column: 1 / -1; }
+@media (min-width: 700px) {
+  .mc-modal-fundo { align-items: center; padding: 24px; }
+  .mc-modal { border-radius: 18px; }
+}
+
+/* Minha Carteira: proventos como na página Proventos da B3 (valor sobre cada barra, 15 meses, a receber tracejado). */
+.mc-duplo { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.mc-pb { display: flex; align-items: flex-end; gap: 4px; overflow-x: auto; padding-top: 4px; }
+.mc-pb-col { flex: 1 0 28px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.mc-pb-barra { width: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; }
+.mc-pb-valor { font-size: 13px; writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin-bottom: 4px; font-variant-numeric: tabular-nums; }
+.mc-pb-recebido { display: block; width: 100%; max-width: 26px; border-radius: 3px 3px 0 0; background: var(--mc-barra); }
+.mc-pb-areceber { display: block; width: 100%; max-width: 26px; box-sizing: border-box; border: 1px dashed var(--mc-ouro); border-bottom: 0; border-radius: 3px 3px 0 0; }
+.mc-pb-col.destaque .mc-pb-recebido { background: linear-gradient(to bottom, var(--mc-ouro), var(--mc-ouro-fundo)); }
+.mc-pb-mes { font-size: 13px; color: var(--mc-suave); }
+.mc-pb-col.destaque .mc-pb-mes { color: var(--text); font-weight: 700; }
+.mc-legenda-proventos { display: flex; gap: 16px; font-size: 13px; color: var(--mc-suave); }
+.mc-quadro { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 4px; }
+.mc-quadro.recebido { background: var(--mc-barra); }
+.mc-quadro.areceber { border: 1px dashed var(--mc-ouro); }
+.mc-meses, .mc-itens-mes { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.mc-meses > li > details > summary { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; cursor: pointer; padding: 6px 0; }
+.mc-meses > li > details > summary > :first-child { min-width: 52px; }
+.mc-itens-mes { padding: 0 0 6px 8px; }
+.mc-itens-mes li { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; font-size: 13px; }
+.mc-item-valor { margin-left: auto; font-variant-numeric: tabular-nums; }
+
+/* Três formas de trazer a carteira: cartões de peso idêntico (mesmo tamanho, mesmo botão). */
+.mc-importar { display: flex; flex-direction: column; gap: 12px; }
+.mc-formas { list-style: none; margin: 4px 0 0; padding: 0; display: grid; grid-template-columns: 1fr; gap: 14px; }
+.mc-forma { display: flex; flex-direction: column; gap: 10px; height: 100%; }
+.mc-forma-titulo { font-size: 18px; font-weight: 700; }
+.mc-forma .mc-soltar { margin-top: auto; }
+.mc-soltar-simples { border-style: solid; justify-content: center; }
+.mc-link-vazio { display: none; }
+@media (min-width: 900px) {
+  .mc-formas { grid-template-columns: repeat(3, 1fr); align-items: stretch; }
+  .mc-link-vazio { display: block; min-height: 1.3em; }
+}
+
+/* Meus Ativos: cabeçalho com o olho que mostra/esconde os valores (padrão: escondidos, ****). */
+.mc-cabecalho { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.mc-olho { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--mc-campo-borda); background: var(--mc-card); color: var(--text); cursor: pointer; }
+.mc-olho:hover { background: var(--mc-ouro-fundo); border-color: var(--mc-ouro); }
+.mc-olho:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
