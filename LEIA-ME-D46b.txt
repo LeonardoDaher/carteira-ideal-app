@@ -1,0 +1,21 @@
+O QUE É
+Ajuste da D46 depois de uso real (o usuário perguntou por que o botão dizia R$ 520.000 para um imóvel de R$ 500.000):
+1) O campo "Dinheiro disponível hoje" sobe para logo depois do valor do imóvel, no começo do formulário.
+2) O campo "ITBI, escritura e registro" sai do bloco do Financiamento e vai para o primeiro bloco, com o valor em reais e o aviso de que
+   varia por cidade. Ele vale para toda compra (à vista, financiamento e consórcio), não só para financiar.
+3) O botão agora diz "Usar R$ 520.000 (imóvel + ITBI e cartório)" e a dica mostra a conta: o imóvel (R$ 500.000) mais o ITBI e o
+   cartório (R$ 20.000). Antes da edição do campo, a dica mostra "a entrada mais o ITBI e o cartório (R$ 100.000 + R$ 20.000)".
+NÃO MUDOU: nenhum cálculo, nenhuma premissa, nenhum texto fora do formulário do comparativo.
+ATENÇÃO: os 4% de ITBI, escritura e registro são valor de partida NOSSO. O ITBI varia por município; confira o do seu antes de divulgar.
+
+ARQUIVOS (em relação ao que você já subiu na D46)
+   + LEIA-ME-D46b.txt
+   ~ docs/07-registro-de-decisoes.md
+   ~ webapp-src/src/screens/SimuleImovel.test.tsx
+   ~ webapp-src/src/screens/SimuleImovel.tsx
+
+COMO SUBIR - no GitHub: Add file > Upload files
+Extraia o zip, abra a pasta "D46b-subir" e arraste o CONTEÚDO (as pastas docs e webapp-src e o arquivo solto), num único envio.
+Mensagem do commit: "D46: ITBI e dinheiro disponível no começo do formulário; botão mostra a conta".
+
+VERIFICAÇÃO: testes, typecheck, lint e build sem erros, também depois de aplicar este zip por cima do que já está no GitHub.

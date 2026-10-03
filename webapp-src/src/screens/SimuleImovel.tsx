@@ -75,13 +75,6 @@ export function SimuleImovel({
                 <div className="span2">
                   <CampoReais rotulo="Valor do imóvel" valor={entrada.valorImovel} onMudar={(v) => mudar('valorImovel', v)} />
                 </div>
-                <CampoReais
-                  rotulo="Entrada do financiamento"
-                  valor={entrada.entrada}
-                  onMudar={(v) => mudar('entrada', v)}
-                  dica={entrada.valorImovel > 0 ? `${porcentagem((entrada.entrada / entrada.valorImovel) * 100, 0, 1)} do imóvel` : undefined}
-                />
-                <CampoNumero rotulo="Comparar por quantos anos?" valor={entrada.horizonteAnos} onMudar={(v) => mudar('horizonteAnos', v)} sufixo="anos" casas={0} />
                 <div className="span2 col" style={{ gap: 6 }}>
                   <CampoReais
                     rotulo="Dinheiro disponível hoje"
@@ -89,13 +82,13 @@ export function SimuleImovel({
                     onMudar={(v) => mudar('dinheiroDisponivel', v > 0 ? v : null)}
                     dica={
                       entrada.dinheiroDisponivel === null
-                        ? 'Por enquanto, só a entrada e o ITBI. Informe tudo o que você tem: a sobra fica aplicada e, se der para pagar o imóvel, entra a rota de comprar à vista.'
-                        : `Para comprar à vista seriam necessários ${reais0(necessarioAvista)} (o imóvel mais ITBI e cartório). A sobra, em qualquer caminho, fica aplicada.`
+                        ? `Por enquanto, a entrada mais o ITBI e o cartório (${reais0(entrada.entrada)} + ${reais0(custosIniciais)}). Informe tudo o que você tem: a sobra fica aplicada e, se der para pagar o imóvel, entra a rota de comprar à vista.`
+                        : `Para comprar à vista seriam necessários ${reais0(necessarioAvista)}: o imóvel (${reais0(entrada.valorImovel)}) mais o ITBI e o cartório (${reais0(custosIniciais)}). A sobra, em qualquer caminho, fica aplicada.`
                     }
                   />
                   <div className="row" style={{ gap: 6, flexWrap: 'wrap' }}>
                     <button type="button" className="chip" onClick={() => mudar('dinheiroDisponivel', necessarioAvista)}>
-                      Usar {reais0(necessarioAvista)} (comprar à vista)
+                      Usar {reais0(necessarioAvista)} (imóvel + ITBI e cartório)
                     </button>
                     {entrada.dinheiroDisponivel !== null && (
                       <button type="button" className="chip" onClick={() => mudar('dinheiroDisponivel', null)}>
@@ -104,6 +97,20 @@ export function SimuleImovel({
                     )}
                   </div>
                 </div>
+                <CampoNumero
+                  rotulo="ITBI, escritura e registro"
+                  valor={entrada.custosIniciaisPct}
+                  onMudar={(v) => mudar('custosIniciaisPct', v)}
+                  sufixo="%"
+                  dica={`${reais0(custosIniciais)} sobre o valor do imóvel, pagos em toda compra. Varia por cidade: confira o seu.`}
+                />
+                <CampoReais
+                  rotulo="Entrada do financiamento"
+                  valor={entrada.entrada}
+                  onMudar={(v) => mudar('entrada', v)}
+                  dica={entrada.valorImovel > 0 ? `${porcentagem((entrada.entrada / entrada.valorImovel) * 100, 0, 1)} do imóvel` : undefined}
+                />
+                <CampoNumero rotulo="Comparar por quantos anos?" valor={entrada.horizonteAnos} onMudar={(v) => mudar('horizonteAnos', v)} sufixo="anos" casas={0} />
               </div>
             </details>
 
@@ -157,7 +164,6 @@ export function SimuleImovel({
                   </div>
                   <span className="tiny muted">SAC: parcela começa maior e cai. Price: parcela fixa.</span>
                 </div>
-                <CampoNumero rotulo="ITBI, escritura e registro" valor={entrada.custosIniciaisPct} onMudar={(v) => mudar('custosIniciaisPct', v)} sufixo="%" dica="Sobre o valor do imóvel" />
                 <CampoReais rotulo="Tarifa do banco por mês" valor={entrada.tarifaMensal} onMudar={(v) => mudar('tarifaMensal', v)} />
                 <CampoNumero rotulo="Seguro MIP" valor={entrada.mipMensalPct} onMudar={(v) => mudar('mipMensalPct', v)} sufixo="% ao mês" casas={3} dica="Sobre o saldo devedor" />
                 <CampoNumero rotulo="Seguro DFI" valor={entrada.dfiMensalPct} onMudar={(v) => mudar('dfiMensalPct', v)} sufixo="% ao mês" casas={3} dica="Sobre o valor do imóvel" />

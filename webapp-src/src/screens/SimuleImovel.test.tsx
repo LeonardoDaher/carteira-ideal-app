@@ -259,7 +259,7 @@ describe('SimuleImovel: comprar à vista (D46)', () => {
 
   it('o bloco explica os custos da rota: ITBI e custos de dono, sem juros nem seguros', async () => {
     render(<SimuleImovel snapshot={comFocus} />)
-    fireEvent.click(screen.getByRole('button', { name: /Usar R\$\s520\.000 \(comprar à vista\)/ }))
+    fireEvent.click(screen.getByRole('button', { name: /Usar R\$\s520\.000 \(imóvel \+ ITBI e cartório\)/ }))
     const bloco = (await screen.findByText('Comprar à vista: cada custo e cada taxa')).closest('details') as HTMLElement
     for (const item of ['ITBI, escritura e registro', 'Custos de quem é dono', 'Imóvel pago à vista', 'Valorização do imóvel', 'Rendimento bruto', 'Imposto de Renda']) {
       expect(within(bloco).getAllByText(item).length, item).toBeGreaterThan(0)
@@ -271,7 +271,7 @@ describe('SimuleImovel: comprar à vista (D46)', () => {
   it('"Só entrada + ITBI" volta ao padrão e a rota sai; limpar o campo faz o mesmo', async () => {
     render(<SimuleImovel snapshot={comFocus} />)
     expect(screen.queryByRole('button', { name: 'Só entrada + ITBI' })).toBeNull()
-    fireEvent.click(screen.getByRole('button', { name: /Usar R\$\s520\.000 \(comprar à vista\)/ }))
+    fireEvent.click(screen.getByRole('button', { name: /Usar R\$\s520\.000 \(imóvel \+ ITBI e cartório\)/ }))
     await screen.findByText('Comprar à vista: cada custo e cada taxa')
     fireEvent.click(screen.getByRole('button', { name: 'Só entrada + ITBI' }))
     expect(await screen.findByText(/Comprar à vista não entrou na comparação/)).toBeTruthy()
@@ -300,5 +300,37 @@ describe('SimuleImovel: comprar à vista (D46)', () => {
     const premissas = screen.getByText('Todas as premissas desta simulação').closest('details') as HTMLElement
     expect(within(premissas).getByText('Dinheiro disponível hoje')).toBeTruthy()
     expect(within(premissas).getByText(/só a entrada e o ITBI/)).toBeTruthy()
+  })
+})
+
+describe('SimuleImovel: ordem do formulário e de onde vem o R$ 520.000', () => {
+  it('o dinheiro disponível vem logo depois do valor do imóvel, antes da entrada do financiamento', () => {
+    render(<SimuleImovel snapshot={comFocus} />)
+    const ordem = ['Valor do imóvel', 'Dinheiro disponível hoje', 'ITBI, escritura e registro', 'Entrada do financiamento', 'Comparar por quantos anos?'].map((n) => campo(n))
+    for (let k = 1; k < ordem.length; k++) {
+      expect(ordem[k - 1].compareDocumentPosition(ordem[k]) & Node.DOCUMENT_POSITION_FOLLOWING, `${k}`).toBeTruthy()
+    }
+  })
+
+  it('o ITBI fica no começo (primeiro bloco), não escondido no bloco do financiamento', () => {
+    render(<SimuleImovel snapshot={comFocus} />)
+    const primeiro = screen.getByText('O imóvel e o prazo').closest('details') as HTMLElement
+    expect(within(primeiro).getByLabelText('ITBI, escritura e registro')).toBeTruthy()
+    const financiamento = screen.getAllByText('Financiamento').find((e) => e.tagName === 'SUMMARY')!.closest('details') as HTMLElement
+    expect(within(financiamento).queryByLabelText('ITBI, escritura e registro')).toBeNull()
+  })
+
+  it('o botão e a dica mostram a conta: imóvel + ITBI e cartório = valor necessário', () => {
+    render(<SimuleImovel snapshot={comFocus} />)
+    expect(screen.getByText(/a entrada mais o ITBI e o cartório \(R\$\s100\.000 \+ R\$\s20\.000\)/)).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: /Usar R\$\s520\.000 \(imóvel \+ ITBI e cartório\)/ }))
+    expect(screen.getByText(/seriam necessários R\$\s520\.000: o imóvel \(R\$\s500\.000\) mais o ITBI e o cartório \(R\$\s20\.000\)/)).toBeTruthy()
+  })
+
+  it('mudar o percentual do ITBI muda o valor necessário para comprar à vista', () => {
+    render(<SimuleImovel snapshot={comFocus} />)
+    fireEvent.change(campo('ITBI, escritura e registro'), { target: { value: '2' } })
+    expect(screen.getByRole('button', { name: /Usar R\$\s510\.000 \(imóvel \+ ITBI e cartório\)/ })).toBeTruthy()
+    expect(screen.getByText(/R\$\s10\.000 sobre o valor do imóvel, pagos em toda compra/)).toBeTruthy()
   })
 })
