@@ -24,6 +24,7 @@ export type Screen =
   | 'simuleTesouro'
   | 'simuleBdr'
   | 'simuleEtf'
+  | 'simuleAcoes'
   | 'simuleAtivos'
   | 'meuMes'
   | 'minhaCarteira'
@@ -41,7 +42,7 @@ export const CHAVE_TEMA_COMPARTILHADA = 'theme'
  * depender do questionário. Ficam fora da barra de abas e nunca são salvas como "última
  * tela": assim o botão amarelo da landing (./app/) continua devolvendo a pessoa ao ponto
  * em que parou no fluxo do questionário/resultado, e não à aula que ela viu por último. */
-export const TELAS_AVULSAS: readonly Screen[] = ['aprender', 'trilha', 'aprenderVideo', 'simuleFii', 'simuleTesouro', 'simuleBdr', 'simuleEtf', 'simuleAtivos', 'meuMes', 'minhaCarteira']
+export const TELAS_AVULSAS: readonly Screen[] = ['aprender', 'trilha', 'aprenderVideo', 'simuleFii', 'simuleTesouro', 'simuleBdr', 'simuleEtf', 'simuleAcoes', 'simuleAtivos', 'meuMes', 'minhaCarteira']
 
 export function ehTelaAvulsa(tela: Screen) {
   return TELAS_AVULSAS.includes(tela)
@@ -68,6 +69,8 @@ const TELAS_PELA_URL: Record<string, Screen> = {
   simuleBdr: 'simuleBdr',
   // Simule ETF (D23): dados oficiais da B3, no molde do Simule BDR.
   simuleEtf: 'simuleEtf',
+  // Simule Ações (D43): setores da B3 com as principais empresas de cada um; dados oficiais da B3.
+  simuleAcoes: 'simuleAcoes',
   // Simule Ativos (D42): hub único que reúne FII, Tesouro, BDR e ETF; a landing só tem este botão.
   simuleAtivos: 'simuleAtivos',
   // Meu Mês (D21): botão na landing desde a Etapa 4; também aberto pelo resultado e pela

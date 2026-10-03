@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { SimuleAtivos, SIMULADORES } from './SimuleAtivos'
+import { SimuleAcoes } from './SimuleAcoes'
 import { SimuleBdr } from './SimuleBdr'
 import { SimuleEtf } from './SimuleEtf'
 import { SimuleFii } from './SimuleFii'
@@ -13,6 +14,7 @@ describe('SimuleAtivos (hub)', () => {
   it('mostra um cartão para cada simulador, com o endereço ?tela= que a landing usava', () => {
     render(<SimuleAtivos ctx={ctx} />)
     const esperado: Record<string, string> = {
+      'Simule Ações': './?tela=simuleAcoes',
       'Simule FII': './?tela=simuleFii',
       'Simule Tesouro Direto': './?tela=simuleTesouro',
       'Simule BDR': './?tela=simuleBdr',
@@ -22,7 +24,7 @@ describe('SimuleAtivos (hub)', () => {
       const link = screen.getByRole('link', { name: new RegExp(titulo) })
       expect(link.getAttribute('href')).toBe(href)
     }
-    expect(SIMULADORES).toHaveLength(4)
+    expect(SIMULADORES).toHaveLength(5)
   })
 
   it('volta para a landing e não mostra a barra de abas do questionário', () => {
@@ -34,6 +36,7 @@ describe('SimuleAtivos (hub)', () => {
 
 describe('simuladores abertos pelo hub', () => {
   it.each([
+    ['Ações', () => render(<SimuleAcoes ctx={ctx} />)],
     ['FII', () => render(<SimuleFii ctx={ctx} />)],
     ['Tesouro', () => render(<SimuleTesouro ctx={ctx} />)],
     ['BDR', () => render(<SimuleBdr ctx={ctx} />)],

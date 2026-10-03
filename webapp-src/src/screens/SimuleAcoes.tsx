@@ -1,0 +1,401 @@
+import { useId, useState } from 'react'
+import { SNAPSHOT_ACOES } from '../data/snapshotAcoes'
+import { agruparPorGrupo, buscarAcoes, simularCompraAcoes, totaisDe } from '../domain/acoes'
+import type { Acao, AcaoBusca, SnapshotAcoes } from '../domain/acoes'
+import { VALORES_PADRAO, formatarVariacao } from '../domain/bdrs'
+import { formatarData, formatarVolume } from '../domain/rendaFii'
+import { VoltarInicio } from '../ui/VoltarInicio'
+import { AvisoEducacional } from '../ui/AvisoEducacional'
+import type { AppCtx } from '../state/useAppState'
+
+function reais(valor: number) {
+  return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+}
+
+function inteiro(valor: number) {
+  return valor.toLocaleString('pt-BR')
+}
+
+/** O que está aberto no cartão: uma empresa do cadastro (dado completo) ou um código da busca (resumido). */
+type Selecao = { origem: 'lista'; acao: Acao; setor: string } | { origem: 'busca'; acao: AcaoBusca }
+
+/**
+ * Aba "Simule Ações" (D43). Tela estritamente descritiva: as principais empresas de cada setor da
+ * B3 (com a contagem de setores e de empresas), em ordem de volume dentro do setor, e a busca para
+ * qualquer outro código. Sem ranking, sem múltiplos de avaliação, sem projeção de retorno.
+ */
+export function SimuleAcoes({
+  snapshot = SNAPSHOT_ACOES,
+}: {
+  /** Recebido como as demais telas avulsas; esta tela só volta ao Simule Ativos. */
+  ctx: AppCtx
+  /** Permite injetar dados nos testes. No app, usa o arquivo gerado pelo job diário. */
+  snapshot?: SnapshotAcoes
+}) {
+  const grupos = agruparPorGrupo(snapshot.setores, snapshot.gruposOrdem)
+  const totais = totaisDe(snapshot.setores)
+  const primeiraSetor = snapshot.setores[0]
+  const primeira = primeiraSetor?.empresas[0]
+  const [selecao, setSelecao] = useState<Selecao | undefined>(primeira && primeiraSetor ? { origem: 'lista', acao: primeira, setor: primeiraSetor.setor } : undefined)
+  const [valorLivre, setValorLivre] = useState('')
+  const [valorEscolhido, setValorEscolhido] = useState<number>(VALORES_PADRAO[1])
+
+  const levarAoCartao = () => {
+    requestAnimationFrame(() => {
+      const semAnimacao = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+      const cartao = document.getElementById('cartao-acao')
+      // No computador o cartão fica fixo ao lado da lista e já está visível: não rola (D20).
+      if (cartao && window.matchMedia?.('(min-width: 960px)').matches) return
+      cartao?.scrollIntoView?.({ behavior: semAnimacao ? 'auto' : 'smooth', block: 'start' })
+    })
+  }
+
+  const abrir = (nova: Selecao) => {
+    setSelecao(nova)
+    levarAoCartao()
+  }
+
+  const abrirDaBusca = (b: AcaoBusca) => {
+    for (const s of snapshot.setores) {
+      const naLista = s.empresas.find((e) => e.ticker === b.ticker)
+      if (naLista) return abrir({ origem: 'lista', acao: naLista, setor: s.setor })
+    }
+    abrir({ origem: 'busca', acao: b })
+  }
+
+  const selecionado = selecao?.acao.ticker
+
+  return (
+    <div className="screen">
+      <VoltarInicio href="./?tela=simuleAtivos" rotulo="← Simule Ativos" />
+
+      <div className="col" style={{ gap: 4 }}>
+        <h1 style={{ fontSize: 21 }}>Simule Ações</h1>
+        <div className="muted small justify">
+          Ações são pedaços de empresas listadas na B3. Veja as principais empresas de cada setor da bolsa, escolha uma ou busque
+          pelo código, e descubra o preço de fechamento e quantas ações um valor compra.
+        </div>
+      </div>
+
+      {!selecao ? (
+        <div className="card col" style={{ gap: 6 }} role="status">
+          <span style={{ fontWeight: 700 }}>Os dados das ações ainda não foram carregados.</span>
+          <span className="muted small justify">
+            As cotações são atualizadas nos dias úteis, depois do fechamento da B3. Volte mais tarde.
+          </span>
+        </div>
+      ) : (
+        // No computador: busca e lista por setor à esquerda, cartão da ação fixo à direita (D20).
+        <div className="desk-split">
+          <div className="desk-main">
+            <div className="row" style={{ gap: 10, alignItems: 'stretch' }} role="group" aria-label="Tamanho da lista">
+              <div className="col" style={{ padding: '10px 12px', borderRadius: 12, background: 'var(--surface2)', gap: 2, flex: 1 }}>
+                <span className="font-display" style={{ fontWeight: 700, fontSize: 24 }} data-testid="total-setores">{totais.setores}</span>
+                <span className="tiny muted">setores da bolsa</span>
+              </div>
+              <div className="col" style={{ padding: '10px 12px', borderRadius: 12, background: 'var(--surface2)', gap: 2, flex: 1 }}>
+                <span className="font-display" style={{ fontWeight: 700, fontSize: 24 }} data-testid="total-empresas">{totais.empresas}</span>
+                <span className="tiny muted">empresas na lista</span>
+              </div>
+            </div>
+
+            <BuscaAcoes busca={snapshot.busca} onSelecionar={abrirDaBusca} />
+
+            <div className="small muted justify" style={{ lineHeight: 1.5 }}>
+              A lista reúne as principais empresas de cada setor, em ordem de volume negociado dentro do setor (média dos últimos{' '}
+              {snapshot.sessoesLiquidez ?? 21} pregões). Ela é uma seleção, não a bolsa inteira: as demais ações estão na busca
+              acima. Estar na lista não é uma indicação de compra.
+            </div>
+
+            <div className="col" style={{ gap: 22 }}>
+              {grupos.map((g) => (
+                <div key={g.grupo} className="col" style={{ gap: 14 }}>
+                  <div className="col" style={{ gap: 2 }}>
+                    <h2 className="titulo-setor font-display">{g.grupo}</h2>
+                    <span className="tiny muted">
+                      {g.setores.length} {g.setores.length === 1 ? 'setor' : 'setores'}, {g.empresas} {g.empresas === 1 ? 'empresa' : 'empresas'}
+                    </span>
+                  </div>
+                  {g.setores.map((s) => (
+                    <div key={s.setor} className="col" style={{ gap: 8 }}>
+                      <h3 style={{ fontSize: 14.5, fontWeight: 700 }}>
+                        {s.setor} <span className="muted" style={{ fontWeight: 400 }}>({s.empresas.length})</span>
+                      </h3>
+                      <div className="grade-tickers" role="group" aria-label={`Ações do setor ${s.setor}`}>
+                        {s.empresas.map((e) => (
+                          <button
+                            key={e.ticker}
+                            className={`chip ${e.ticker === selecionado ? 'selected' : ''}`}
+                            aria-pressed={e.ticker === selecionado}
+                            onClick={() => abrir({ origem: 'lista', acao: e, setor: s.setor })}
+                          >
+                            {e.ticker}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="desk-side">
+            <CartaoAcao
+              selecao={selecao}
+              dataPregao={snapshot.dataPregao}
+              valorEscolhido={valorEscolhido}
+              setValorEscolhido={setValorEscolhido}
+              valorLivre={valorLivre}
+              setValorLivre={setValorLivre}
+            />
+          </div>
+        </div>
+      )}
+
+      <div className="card-outline small justify" style={{ lineHeight: 1.5 }} role="note">
+        <strong>Como o IR funciona nas ações.</strong>{' '}
+        <span className="muted">
+          Na venda em operações comuns, quem vende até R$ 20 mil no mês em ações não paga Imposto de Renda sobre o lucro. Acima
+          disso, o lucro paga 15%; no day trade, 20%, sem isenção. O imposto é calculado e pago pelo próprio investidor por DARF.
+          Os dividendos são isentos para a maioria das pessoas, mas passou a haver retenção de 10% quando uma mesma empresa paga
+          mais de R$ 50 mil por mês à pessoa física. Essas regras estão em discussão no Congresso e podem mudar: confirme a regra
+          vigente com um contador antes de declarar.
+        </span>
+      </div>
+
+      <div className="card-outline small muted justify" style={{ lineHeight: 1.5 }} role="note">
+        <strong>Rentabilidade obtida no passado não representa garantia de rentabilidade futura.</strong> O preço de uma ação
+        sobe e desce todos os dias, e é possível perder parte ou todo o dinheiro aplicado. A variação de 3 meses e a faixa de 52
+        semanas mostram só o preço, sem os dividendos recebidos; desdobramentos e bonificações podem distorcê-las. A lista e a
+        busca não são recomendação: o critério de ordem é só o volume negociado.
+        {snapshot.geradoEm
+          ? ` Preços e volumes oficiais da B3 (Boletim de Preços); setores e nomes do cadastro do Carteira Ideal. Atualizados em ${formatarData(snapshot.geradoEm)}.`
+          : ''}
+      </div>
+
+      <AvisoEducacional />
+    </div>
+  )
+}
+
+/** Busca por código ou nome, no mesmo desenho da busca de FIIs (D12) e BDRs. */
+function BuscaAcoes({ busca, onSelecionar }: { busca: AcaoBusca[]; onSelecionar: (b: AcaoBusca) => void }) {
+  const [termo, setTermo] = useState('')
+  const idResultados = useId()
+  const resultados = buscarAcoes(busca, termo)
+  const buscando = termo.trim().length >= 2
+
+  const escolher = (b: AcaoBusca) => {
+    onSelecionar(b)
+    setTermo('')
+  }
+
+  return (
+    <div className="col" style={{ gap: 6 }}>
+      <input
+        type="search"
+        className="busca-fii"
+        placeholder="Código ou nome, ex.: PETR4 ou Itaú"
+        aria-label="Buscar ação por código ou nome"
+        aria-controls={idResultados}
+        autoCapitalize="characters"
+        autoCorrect="off"
+        spellCheck={false}
+        enterKeyHint="search"
+        value={termo}
+        onChange={(e) => setTermo(e.target.value.slice(0, 40))}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && resultados[0]) {
+            e.preventDefault()
+            escolher(resultados[0])
+          }
+          if (e.key === 'Escape') setTermo('')
+        }}
+      />
+
+      <div id={idResultados} aria-live="polite">
+        {buscando && resultados.length > 0 && (
+          <ul className="resultados-busca" aria-label="Ações encontradas">
+            {resultados.map((b) => (
+              <li key={b.ticker}>
+                <button className="resultado-busca" onClick={() => escolher(b)}>
+                  <span style={{ fontWeight: 700 }}>{b.ticker}</span>
+                  <span className="tiny muted resultado-nome">{[b.nome, b.setor !== 'Outros' ? b.setor : null].filter(Boolean).join(', ')}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {buscando && resultados.length === 0 && (
+          <div className="card-outline small justify" style={{ lineHeight: 1.5 }} role="status">
+            <strong>Nenhuma ação encontrada para “{termo.trim()}”.</strong>{' '}
+            <span className="muted">
+              Confira o código (4 caracteres e um número, como PETR4, VALE3 ou B3SA3). A busca por nome só alcança as empresas da
+              lista; para as demais, use o código. Units (código terminado em 11) e ações sem negócio nos últimos meses podem não
+              aparecer.
+            </span>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function CartaoAcao({
+  selecao,
+  dataPregao,
+  valorEscolhido,
+  setValorEscolhido,
+  valorLivre,
+  setValorLivre,
+}: {
+  selecao: Selecao
+  dataPregao: string | null
+  valorEscolhido: number
+  setValorEscolhido: (v: number) => void
+  valorLivre: string
+  setValorLivre: (v: string) => void
+}) {
+  const completo = selecao.origem === 'lista' ? selecao.acao : null
+  const resumo = selecao.origem === 'busca' ? selecao.acao : null
+  const acao = selecao.acao
+  const setor = selecao.origem === 'lista' ? selecao.setor : selecao.acao.setor
+  // Na busca, o preço é o do último negócio, que pode ser anterior ao último pregão.
+  const dataFechamento = completo?.dataCotacao ?? resumo?.dataCotacao ?? dataPregao
+
+  const valorDigitado = Number(valorLivre.replace(/\D/g, ''))
+  const valor = valorDigitado > 0 ? valorDigitado : valorEscolhido
+  const simulacao = simularCompraAcoes(valor, acao.cotacao)
+
+  const caixa = { padding: '10px 12px', borderRadius: 12, background: 'var(--surface2)' } as const
+
+  return (
+    <>
+      <div id="cartao-acao" className="card col" style={{ gap: 14, scrollMarginTop: 12 }}>
+        <div className="row-between" style={{ alignItems: 'flex-start', gap: 12 }}>
+          <div className="col" style={{ gap: 2, minWidth: 0 }}>
+            <span className="font-display" style={{ fontWeight: 700, fontSize: 24 }}>{acao.ticker}</span>
+            {acao.nome && acao.nome !== acao.ticker && (
+              <span className="tiny muted" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                {acao.nome}
+              </span>
+            )}
+            <span className="tiny muted">
+              {[setor !== 'Outros' ? setor : 'Fora da lista de setores', completo ? `negocia ${formatarVolume(completo.volumeMedio)} por dia` : null]
+                .filter(Boolean)
+                .join(', ')}
+            </span>
+          </div>
+          <div className="col" style={{ gap: 2, alignItems: 'flex-end', flexShrink: 0 }}>
+            <span className="tiny muted">Preço da ação</span>
+            <span className="font-display" style={{ fontWeight: 700, fontSize: 20, color: 'var(--accent)' }}>{reais(acao.cotacao)}</span>
+            {dataFechamento && <span className="tiny muted">fechamento de {formatarData(dataFechamento)}</span>}
+          </div>
+        </div>
+
+        {completo && (
+          <div className="row" style={{ gap: 10, alignItems: 'stretch' }}>
+            <div className="col" style={{ ...caixa, gap: 2, flex: 1 }}>
+              <span className="tiny muted">Variação em 3 meses</span>
+              <span style={{ fontWeight: 700, fontSize: 16 }}>{completo.variacao3m != null ? formatarVariacao(completo.variacao3m) : '—'}</span>
+              <span className="tiny muted">só o preço, sem dividendos</span>
+            </div>
+            <div className="col" style={{ ...caixa, gap: 2, flex: 1 }}>
+              <span className="tiny muted">Faixa em 52 semanas</span>
+              {completo.minima52 != null && completo.maxima52 != null ? (
+                <span style={{ fontWeight: 700, fontSize: 15, lineHeight: 1.3 }}>
+                  {reais(completo.minima52)}
+                  <br />
+                  <span className="muted" style={{ fontWeight: 400 }}>a </span>
+                  {reais(completo.maxima52)}
+                </span>
+              ) : (
+                <span style={{ fontWeight: 700, fontSize: 16 }}>—</span>
+              )}
+              <span className="tiny muted">menor e maior preço</span>
+            </div>
+          </div>
+        )}
+
+        {resumo && (
+          <div className="card-outline small justify aviso-atraso" style={{ lineHeight: 1.5 }} role="note">
+            <strong>Fora da lista de setores.</strong>{' '}
+            <span className="muted">
+              {resumo.volumeDia > 0
+                ? `No último pregão, esta ação negociou ${formatarVolume(resumo.volumeDia)}. `
+                : resumo.dataCotacao
+                  ? `Esta ação não teve negócios no último pregão: o preço exibido é o do último negócio, em ${formatarData(resumo.dataCotacao)}. `
+                  : 'Esta ação não teve negócios no último pregão, e o preço exibido pode ser de um dia anterior. '}
+              Para ações fora da lista, a tela mostra só o preço. Com pouca negociação, comprar ou vender pode levar tempo ou
+              exigir aceitar um preço pior.
+            </span>
+          </div>
+        )}
+      </div>
+
+      <div className="card col" style={{ gap: 12 }}>
+        <span style={{ fontWeight: 700 }}>Quantas ações esse valor compra</span>
+        <div className="row" style={{ gap: 6, flexWrap: 'wrap' }} role="group" aria-label="Valor para simular">
+          {VALORES_PADRAO.map((v) => (
+            <button
+              key={v}
+              className={`chip ${valorDigitado === 0 && v === valorEscolhido ? 'selected' : ''}`}
+              aria-pressed={valorDigitado === 0 && v === valorEscolhido}
+              onClick={() => {
+                setValorEscolhido(v)
+                setValorLivre('')
+              }}
+            >
+              {reais(v).replace(',00', '')}
+            </button>
+          ))}
+          <input
+            inputMode="numeric"
+            placeholder="Outro valor"
+            aria-label="Outro valor em reais"
+            value={valorLivre}
+            onChange={(e) => setValorLivre(e.target.value.replace(/\D/g, '').slice(0, 9))}
+            className="input-cotas"
+            style={{ flex: '1 1 110px', width: 'auto' }}
+          />
+        </div>
+
+        {simulacao && simulacao.quantidade > 0 ? (
+          <div className="col" style={{ gap: 0 }}>
+            <div className="tabela-bdr small">
+              <span className="muted">Ações compradas</span>
+              <span style={{ fontWeight: 700 }}>{inteiro(simulacao.quantidade)}</span>
+            </div>
+            <div className="tabela-bdr small">
+              <span className="muted">Valor investido</span>
+              <span style={{ fontWeight: 700 }}>{reais(simulacao.investido)}</span>
+            </div>
+            <div className="tabela-bdr small">
+              <span className="muted">Sobra</span>
+              <span>{reais(simulacao.sobra)}</span>
+            </div>
+            <div className="tabela-bdr small">
+              <span className="muted">Lotes de 100</span>
+              <span>
+                {simulacao.lotes > 0 ? `${inteiro(simulacao.lotes)} ${simulacao.lotes === 1 ? 'lote' : 'lotes'}` : 'nenhum'}
+                {simulacao.fracionario > 0 ? ` + ${simulacao.fracionario} no fracionário` : ''}
+              </span>
+            </div>
+          </div>
+        ) : (
+          <span className="small muted">
+            {reais(valor)} não compra nenhuma ação de {acao.ticker}: o preço de 1 ação é {reais(acao.cotacao)}.
+          </span>
+        )}
+
+        <span className="tiny muted justify">
+          A conta usa o preço de fechamento exibido, sem corretagem, emolumentos e impostos. É só a divisão do valor pelo preço:
+          não é uma projeção de quanto o investimento vai render. O lote padrão da bolsa é de 100 ações; de 1 a 99 ações, a compra
+          é feita no mercado fracionário, com o código terminado em F.
+        </span>
+      </div>
+    </>
+  )
+}

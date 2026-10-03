@@ -4,6 +4,7 @@ import type { AppCtx } from '../state/useAppState'
 
 /** Simuladores reunidos no hub. Cada um é aberto por ?tela=, o mesmo endereço que a landing usava. */
 export const SIMULADORES: { tela: string; emoji: string; titulo: string; descricao: string }[] = [
+  { tela: 'simuleAcoes', emoji: '📊', titulo: 'Simule Ações', descricao: 'Empresas de todos os setores da B3: quantas há em cada um e quantas ações um valor compra' },
   { tela: 'simuleFii', emoji: '🏢', titulo: 'Simule FII', descricao: 'Quanto rendem as cotas dos maiores FIIs do IFIX' },
   { tela: 'simuleTesouro', emoji: '🏛️', titulo: 'Simule Tesouro Direto', descricao: 'Quanto cada título rende até o vencimento, já com IR' },
   { tela: 'simuleBdr', emoji: '🌎', titulo: 'Simule BDR', descricao: 'Os BDRs mais negociados na B3, por setor' },

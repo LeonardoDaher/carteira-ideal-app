@@ -1,0 +1,44 @@
+D43 (02/10/2026) - Simule Ações (job + tela) dentro do hub Simule Ativos. Este pacote JÁ INCLUI o D42
+(landing com um cartão "Simule Ativos" + novo texto do "Sobre"). Se já subiu o D42, suba este por cima.
+Feito em cima do zip atual (carteira-ideal-app-main).
+
+O QUE É
+1) Job diário scripts/atualizar-acoes.mjs: preço e volume do Boletim de Preços da B3 (sem cota). Setor e nome vêm
+   do cadastro config/acoes.json. NÃO usa a brapi: nenhuma requisição a API, nenhum token. Mesmo molde dos BDRs/ETFs
+   (histórico em historico/acoes.json, série de 260 pregões, variação de 3 meses, faixa de 52 semanas, trava de
+   desdobramento, travas de segurança: o job falha sem alterar nada se algo estiver errado).
+2) Cadastro config/acoes.json: 37 setores, 226 empresas, nos 10 setores econômicos da B3. "conferidoPeloResponsavel": true
+   (você confirmou a lista). Códigos com "revisar": true saíram de memória; o job só mostra quem negociou.
+3) Tela Simule Ações (?tela=simuleAcoes): total de setores e de empresas, lista por grupo da B3 e por setor com a
+   contagem, busca por código/nome (inclui TODA ação com negócio recente, fora do cadastro, como "Outros"), cartão com
+   preço, variação, faixa de 52 semanas e a simulação (ações, lotes de 100 e fracionário). Descritiva: sem ranking.
+4) Novo cartão "Simule Ações" no hub Simule Ativos. A landing continua com um cartão só.
+5) Dois workflows: "Atualizar Ações" (seg-sex, 23h de Brasília) e "Carga inicial de Ações" (manual, uma vez).
+6) Registro D43 em docs/07-registro-de-decisoes.md.
+
+NÃO MUDOU: motor, questionário, BDR/ETF/FII/Tesouro (dados e regras), API, Meu Mês, Meus Ativos, Aprender.
+NÃO FEITO (de propósito): página de SEO /simulador-acoes/ e seção "Ferramentas gratuitas" da landing (fica para depois
+da primeira carga, para não prometer uma ferramenta vazia).
+
+COMO SUBIR - no GitHub: Add file > Upload files
+1. Extraia o zip e arraste o CONTEÚDO: as pastas "webapp-src", "docs", "scripts", "config" e ".github" (como pastas),
+   mais os arquivos soltos index.html, gerar-paginas.mjs, package.json.
+   ATENÇÃO: a pasta ".github" começa com ponto e o Finder/Explorer pode escondê-la. Se ela não aparecer na lista do
+   GitHub, crie os dois arquivos à mão: Add file > Create new file, nome ".github/workflows/atualizar-acoes.yml"
+   (o GitHub cria as pastas ao digitar as barras) e depois ".github/workflows/carga-inicial-acoes.yml", e cole o conteúdo.
+2. Mensagem do commit: "D43: Simule Ações (job, tela e cadastro de setores)".
+
+DEPOIS DO DEPLOY - UMA VEZ
+1. GitHub > Actions > "Carga inicial de Ações" > Run workflow (260 pregões; leva cerca de 30 minutos).
+2. Abra o log e leia as linhas:
+   [sem negócio]   códigos do cadastro que não negociaram em 21 pregões: corrija o código ou retire do config/acoes.json.
+   [revisar]       códigos marcados que negociaram normalmente: tire o "revisar": true.
+   [desdobramento] salto de preço no último ano: confirme em "desdobramentos" (a linha já traz o trecho pronto).
+3. Quando a carga terminar, a tela Simule Ações (Simule Ativos > Simule Ações) aparece com os dados. Até lá ela mostra
+   "Os dados das ações ainda não foram carregados." (de propósito).
+4. Depois disso o job diário roda sozinho. Mudou o config/acoes.json (empresa nova, nome, setor)? A tela é regravada
+   no próximo job (ou rode "Atualizar Ações" à mão).
+
+VERIFICAÇÃO: 1046 testes do app e 178 dos scripts passando; typecheck, lint e build de produção sem erros. O job foi
+testado de ponta a ponta com boletins simulados (sem rede) e o filtro de códigos foi conferido contra um XML no formato
+do boletim. NÃO consegui baixar um boletim real da B3 daqui: a primeira carga real é a prova final.

@@ -842,3 +842,17 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 **Decisão.** A landing passa a ter só o cartão **Simule Ativos** (`?tela=simuleAtivos`). A nova tela `SimuleAtivos` reúne os simuladores; cada um mantém o endereço `?tela=` de antes, então as páginas de SEO (`/simule-fii/` etc.) e os links externos continuam funcionando. Nos simuladores, o link de topo passou de "← Início" para "← Simule Ativos"; no hub, "← Início" volta à landing. A tela é avulsa: não depende do questionário e não vira ponto de retomada.
 
 **Consequência.** Um novo simulador (o Simule Ações, a seguir) entra só como mais um cartão no hub, sem mexer na landing. Motor, dados e API não mudaram.
+
+## D43 (02/10/2026): Simule Ações, com setores da B3 e cadastro próprio, sem brapi
+
+**Contexto.** O Simule Ações precisava de muitas empresas, de todos os setores, sem estourar a cota gratuita da brapi (que já sustenta nome, setor e proporção dos BDRs). A conta de requisições seria o limite do tamanho da lista.
+
+**Decisão.** Seguir o molde dos ETFs (D23) e BDRs (D24), mas **sem a brapi**. Preço e volume saem do Boletim de Preços oficial da B3 (BVBG.086), que é gratuito e sem cota. Setor e nome saem de um **cadastro curado** em `config/acoes.json` (37 setores, 226 empresas, nos 10 setores econômicos da B3; um código por empresa, o mais líquido). O job `scripts/atualizar-acoes.mjs` roda às 23h de Brasília, depois do job de BDRs, e guarda o histórico em `historico/acoes.json`. Reaproveita do job de BDRs a série alinhada pela direita, a detecção de desdobramento (salto de preço) e a faixa de 52 semanas.
+
+**A tela.** `SimuleAcoes` mostra o total de setores e de empresas, a lista por grupo da B3 e por setor (com a contagem de cada um), a busca por código ou nome e a simulação de compra (ações inteiras, lotes de 100 e fracionário). Tela descritiva: ordem por volume dentro do setor, sem ranking nem múltiplos de avaliação (como a D19).
+
+**Cobertura.** O que o job publica na lista é só o que negociou nos últimos 21 pregões; o resto do cadastro some e aparece como `[sem negócio]` no log. Qualquer código de ação (4 caracteres + 3 a 6) fora do cadastro com negócio nos últimos 63 pregões entra na **busca**, com setor "Outros". Mudar o cadastro regrava a tela mesmo sem pregão novo (`cadastroId`).
+
+**Limites conhecidos.** (1) Preço bruto: bonificações pequenas não são detectadas como salto e deslocam um pouco a variação de 3 meses; dividendos nunca entram. (2) Códigos marcados `revisar` no cadastro foram montados de memória e precisam de conferência na primeira carga. (3) O histórico de ~230 empresas com 260 pregões é um arquivo de alguns megabytes regravado todo dia; se o repositório crescer demais, reduzir a janela. (4) Units (11) só entram se estiverem no cadastro.
+
+**Consequência.** O Simule Ações é mais um cartão no hub Simule Ativos (D42). Antes de aparecer com dados, rodar uma vez o workflow "Carga inicial de Ações".

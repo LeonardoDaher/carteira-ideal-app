@@ -13,7 +13,8 @@
     "atualizar-fii": "node scripts/atualizar-rendimentos-fii.mjs",
     "atualizar-mercado": "node scripts/atualizar-mercado-oficial.mjs",
     "atualizar-bdrs": "node scripts/atualizar-bdrs.mjs",
-    "atualizar-etfs": "node scripts/atualizar-etfs.mjs"
+    "atualizar-etfs": "node scripts/atualizar-etfs.mjs",
+    "atualizar-acoes": "node scripts/atualizar-acoes.mjs"
   },
   "dependencies": {
     "pdfjs-dist": "^6.3.289",
