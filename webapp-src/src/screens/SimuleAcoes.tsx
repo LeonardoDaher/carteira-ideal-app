@@ -5,6 +5,7 @@ import type { Acao, AcaoBusca, SnapshotAcoes } from '../domain/acoes'
 import { VALORES_PADRAO, formatarVariacao } from '../domain/bdrs'
 import { formatarData, formatarVolume } from '../domain/rendaFii'
 import { VoltarInicio } from '../ui/VoltarInicio'
+import { rolarParaResultado } from '../ui/rolarParaResultado'
 import { AvisoEducacional } from '../ui/AvisoEducacional'
 import type { AppCtx } from '../state/useAppState'
 
@@ -40,15 +41,7 @@ export function SimuleAcoes({
   const [valorLivre, setValorLivre] = useState('')
   const [valorEscolhido, setValorEscolhido] = useState<number>(VALORES_PADRAO[1])
 
-  const levarAoCartao = () => {
-    requestAnimationFrame(() => {
-      const semAnimacao = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-      const cartao = document.getElementById('cartao-acao')
-      // No computador o cartão fica fixo ao lado da lista e já está visível: não rola (D20).
-      if (cartao && window.matchMedia?.('(min-width: 960px)').matches) return
-      cartao?.scrollIntoView?.({ behavior: semAnimacao ? 'auto' : 'smooth', block: 'start' })
-    })
-  }
+  const levarAoCartao = () => rolarParaResultado('cartao-acao')
 
   const abrir = (nova: Selecao) => {
     setSelecao(nova)

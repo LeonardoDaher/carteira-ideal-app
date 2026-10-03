@@ -13,6 +13,7 @@ import type { Indexador, SnapshotMercado, TituloTesouro } from '../domain/mercad
 import { VALORES_PADRAO, lerValor, minimoDeCompra, prazoPorExtenso, premissasDoSnapshot, simulavel, simular } from '../domain/simulaTesouro'
 import { CenarioJuros } from '../ui/CenarioJuros'
 import { VoltarInicio } from '../ui/VoltarInicio'
+import { rolarParaResultado } from '../ui/rolarParaResultado'
 import { AvisoEducacional } from '../ui/AvisoEducacional'
 import type { AppCtx } from '../state/useAppState'
 
@@ -100,7 +101,10 @@ export function SimuleTesouro({
           ) : (
             <div className="col" style={{ gap: 6 }} role="group" aria-label={`Títulos ${familia} à venda`}>
               {opcoes.map((t) => (
-                <OpcaoTitulo key={t.nome} titulo={t} selecionado={t.nome === titulo?.nome} onEscolher={() => setNomeTitulo(t.nome)} />
+                <OpcaoTitulo key={t.nome} titulo={t} selecionado={t.nome === titulo?.nome} onEscolher={() => {
+                  setNomeTitulo(t.nome)
+                  rolarParaResultado('cartao-tesouro', { soNoComputador: true })
+                }} />
               ))}
             </div>
           )}
@@ -246,7 +250,7 @@ function CartaoSimulacao({
   ]
 
   return (
-    <div className="card col" style={{ gap: 14 }} aria-live="polite">
+    <div id="cartao-tesouro" className="card col" style={{ gap: 14, scrollMarginTop: 12 }} aria-live="polite">
       <div className="col" style={{ gap: 2 }}>
         <span style={{ fontWeight: 700, fontSize: 15 }}>{titulo.nome}</span>
         <span className="tiny muted">

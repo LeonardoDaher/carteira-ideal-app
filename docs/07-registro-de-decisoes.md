@@ -856,3 +856,11 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 **Limites conhecidos.** (1) Preço bruto: bonificações pequenas não são detectadas como salto e deslocam um pouco a variação de 3 meses; dividendos nunca entram. (2) Códigos marcados `revisar` no cadastro foram montados de memória e precisam de conferência na primeira carga. (3) O histórico de ~230 empresas com 260 pregões é um arquivo de alguns megabytes regravado todo dia; se o repositório crescer demais, reduzir a janela. (4) Units (11) só entram se estiverem no cadastro.
 
 **Consequência.** O Simule Ações é mais um cartão no hub Simule Ativos (D42). Antes de aparecer com dados, rodar uma vez o workflow "Carga inicial de Ações".
+
+## D44 (03/10/2026): resultado dos simuladores sempre à vista no computador
+
+**Problema.** No computador, a lista de ativos fica à esquerda e o cartão de resultado à direita. A coluna do resultado só é fixa (sticky) quando a janela tem 720 px de altura ou mais. Em notebook, com a barra do navegador, a janela útil costuma ter menos que isso: a coluna rola junto com a página, e quem clicava num ativo no meio da lista tinha de subir à mão até o resultado. No mesmo caso, o código das telas de FII, BDR, ETF e Ações **não rolava** em telas de 960 px ou mais, porque presumia que o cartão sempre estava fixo e à vista. O Tesouro nunca rolava.
+
+**Decisão.** Uma regra única, `ui/rolarParaResultado.ts`, usada pelos cinco simuladores (FII, Tesouro, BDR, ETF e Ações). Abaixo de 960 px (celular e tablet em pé) nada muda: sempre rola até o cartão. A partir de 960 px, a regra olha onde o cartão está: se o topo já está à vista, não mexe (caso do cartão fixo, sem pulo desnecessário); se está fora da janela, acima ou abaixo, rola até ele. No Tesouro a rolagem vale só no computador, porque no celular o resultado já aparece logo abaixo das opções. Respeita "reduzir movimento".
+
+**Consequência.** Telas novas com lista e cartão ao lado devem chamar `rolarParaResultado(id)` ao escolher um item, em vez de reescrever a lógica.

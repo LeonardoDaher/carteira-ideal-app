@@ -19,6 +19,7 @@ import {
 } from '../domain/rendaFii'
 import type { FundoFii, SnapshotRendimentosFii } from '../domain/rendaFii'
 import { VoltarInicio } from '../ui/VoltarInicio'
+import { rolarParaResultado } from '../ui/rolarParaResultado'
 import { AvisoEducacional } from '../ui/AvisoEducacional'
 import type { AppCtx } from '../state/useAppState'
 
@@ -62,15 +63,8 @@ export function SimuleFii({
   const selecionar = (ticker: string) => {
     setTickerSelecionado(ticker)
     setQuantidadeLivre('')
-    // Com dezenas de botões, o cartão fica abaixo da dobra: leva a pessoa até ele, para o
-    // toque ter resposta visível. Sem animação se o aparelho pede menos movimento.
-    requestAnimationFrame(() => {
-      const semAnimacao = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-      const cartao = document.getElementById('cartao-fundo-fii')
-      // No computador o cartão fica fixo ao lado da lista e já está visível: não rola (D20).
-      if (cartao && window.matchMedia?.('(min-width: 960px)').matches) return
-      cartao?.scrollIntoView?.({ behavior: semAnimacao ? 'auto' : 'smooth', block: 'start' })
-    })
+    // Com dezenas de botões, o cartão pode ficar fora da janela: leva a pessoa até ele (D44).
+    rolarParaResultado('cartao-fundo-fii')
   }
 
   return (

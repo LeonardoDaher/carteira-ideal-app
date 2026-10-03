@@ -1,0 +1,35 @@
+D44 (03/10/2026) - Resultado dos simuladores sempre à vista no computador (notebook, PC, tablet deitado).
+Pacote pequeno: suba por cima do D43.
+
+PROBLEMA
+No celular, ao tocar num ativo a tela rolava até o cartão de resultado. No computador não: o cartão só fica fixo ao
+lado da lista quando a janela tem 720 px de altura ou mais; em notebook (janela mais baixa) ele rolava junto com a
+página e o código, além disso, nem tentava rolar a partir de 960 px de largura.
+
+CORREÇÃO
+Regra única nova (ui/rolarParaResultado.ts) nos 5 simuladores: Simule FII, Tesouro, BDR, ETF e Ações.
+- Celular e tablet em pé (< 960 px): igual a antes (sempre rola até o resultado). No Tesouro continua sem rolar.
+- Computador, notebook e tablet deitado (>= 960 px): se o resultado já está à vista (cartão fixo), não rola; se ficou
+  fora da janela, rola suavemente até ele. No Tesouro agora também rola, só nesses tamanhos.
+
+ARQUIVOS (11) - caminhos a partir da raiz do repositório
+N  webapp-src/src/ui/rolarParaResultado.ts
+N  webapp-src/src/ui/rolarParaResultado.test.ts
+A  webapp-src/src/screens/SimuleFii.tsx
+A  webapp-src/src/screens/SimuleTesouro.tsx
+A  webapp-src/src/screens/SimuleBdr.tsx
+A  webapp-src/src/screens/SimuleEtf.tsx
+A  webapp-src/src/screens/SimuleAcoes.tsx
+A  docs/07-registro-de-decisoes.md   (D44 acrescentada no fim; já contém D42 e D43)
+N  LEIA-ME-D44.txt (pode subir ou não)
+
+COMO SUBIR - GitHub: Add file > Upload files. Extraia o zip e arraste as pastas "webapp-src" e "docs".
+Mensagem do commit: "D44: resultado dos simuladores sempre à vista no computador".
+
+COMO CONFERIR (depois do deploy da Vercel): no notebook, abra Simule Ativos > qualquer simulador, role a lista até o
+meio ou o fim e clique num ativo: a página deve subir sozinha até o cartão de resultado. Teste também diminuindo a
+altura da janela do navegador.
+
+VERIFICAÇÃO: 1054 testes do app passando (8 novos, da regra de rolagem); typecheck, lint e build sem erros.
+Esta regra foi testada por simulação de janela (largura, altura e posição do cartão); a conferência no seu notebook
+real é a prova final.
