@@ -52,7 +52,7 @@ export function SimuleImovel({
 
   return (
     <div className="screen">
-      <VoltarInicio />
+      <VoltarInicio href="./?tela=simuleBens" rotulo="← Simule Bens" />
 
       <div className="col" style={{ gap: 4 }}>
         <h1 style={{ fontSize: 21 }}>Financiar, alugar ou consórcio?</h1>

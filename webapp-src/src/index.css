@@ -1674,6 +1674,9 @@ select option:disabled { color: #6b7280 !important; -webkit-text-fill-color: #6b
 .conta-item-linha > :last-child { white-space: nowrap; font-weight: 700; }
 .conta-item.custo .conta-item-linha > :last-child { color: var(--imovel-contra); }
 .conta-item.patrimonio .conta-item-linha > :last-child { color: var(--imovel-favor); }
+/* Simule Bens (D45): bem ainda não disponível — sem link, sem hover, com selo. */
+.simule-bens-breve { opacity: 0.65; cursor: default; pointer-events: none; }
+.simule-bens-selo { margin-left: auto; flex-shrink: 0; padding: 3px 9px; border-radius: 8px; background: var(--surface2); font-size: 12px; font-weight: 600; white-space: nowrap; }
 
 /* =====================================================================================
    Minha Carteira (D36) — painel de gestão da carteira real.

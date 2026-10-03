@@ -1,28 +1,42 @@
-D45 (03/10/2026) - "Ferramentas gratuitas" da landing: um cartão só de simuladores. Suba por cima do D44.
+O QUE É
+D45: hub "Simule Bens" (?tela=simuleBens). O cartão da landing ("Financiar, alugar ou consórcio?") agora abre esse hub, que tem um cartão
+para Imóvel (leva ao comparativo da D44, no mesmo endereço de sempre) e, sinalizados como "Em breve" e sem link, Carro e Moto.
+O comparativo de imóvel passa a voltar para "← Simule Bens". Nenhum cálculo mudou.
 
-O QUE MUDOU
-1) Landing (index.html), seção "Ferramentas gratuitas": saem os cartões Simulador de Tesouro Direto, FII, BDR e ETF;
-   entra "Simule Ativos". A seção fica com 4 cartões: Meus Ativos, Meu Mês, Aprender e Simule Ativos.
-2) Página nova /simule-ativos/ (gerada pelo build): lista Ações, FII, Tesouro, BDR e ETF, com link para as páginas
-   /simulador-*/ já existentes e botão "Abrir o Simule Ativos" (app). É ela que o cartão da landing abre.
-   Motivo: os cartões antigos eram o link da home para as páginas dos simuladores; sem eles o Google deixaria de
-   achá-las pela página inicial. Agora home > /simule-ativos/ > cada simulador.
-3) Rodapé de todas as páginas: link "Simule Ativos" (os outros continuam).
-4) Entra automaticamente no sitemap.xml. Teste atualizado (agora 33 páginas estáticas).
-Os simuladores de financiamento, aluguel e consórcio (outro chat) entram depois como mais itens desta página/hub.
+O TÍTULO DA LANDING AINDA NÃO DIZ "À VISTA" DE PROPÓSITO
+O comparativo publicado ainda não tem a rota "comprar à vista" (D46). Anunciar quatro caminhos antes de calculá-los seria prometer o que a
+ferramenta não faz. Quando a D46 entrar, o título muda para "Comprar à vista, financiar, consórcio ou alugar?" (uma linha em index.html).
 
-ARQUIVOS (6)
-A  index.html
-A  scripts/gerar-paginas.mjs
-A  scripts/gerar-paginas.test.mjs
-A  gerar-paginas.mjs        (RAIZ: cópia idêntica de scripts/gerar-paginas.mjs)
-A  docs/07-registro-de-decisoes.md   (D45 no fim; já contém D42 a D44)
-N  LEIA-ME-D45.txt (pode subir ou não)
+NÃO MUDOU: motor, premissas, textos do comparativo, página de SEO /financiar-alugar-ou-consorcio/ (o botão dela continua abrindo o
+comparativo direto), questionário, API, demais telas.
 
-COMO SUBIR - GitHub: Add file > Upload files. Extraia o zip e arraste a pasta "scripts", a pasta "docs" e os arquivos
-soltos index.html e gerar-paginas.mjs. Commit: "D45: landing com cartão único Simule Ativos e página /simule-ativos/".
+ARQUIVOS (em relação ao que você já subiu na D44)
+   + webapp-src/src/screens/SimuleBens.test.tsx
+   + webapp-src/src/screens/SimuleBens.tsx
+   + LEIA-ME-D45.txt
+   ~ docs/04-jornada-do-cliente.md
+   ~ docs/06-proximos-passos.md
+   ~ docs/07-registro-de-decisoes.md
+   ~ index.html
+   ~ webapp-src/src/App.tsx
+   ~ webapp-src/src/index.css
+   ~ webapp-src/src/screens/SimuleImovel.test.tsx
+   ~ webapp-src/src/screens/SimuleImovel.tsx
+   ~ webapp-src/src/state/useAppState.test.ts
+   ~ webapp-src/src/state/useAppState.ts
 
-CONFERIR depois do deploy: a página inicial mostra 4 cartões em "Ferramentas gratuitas"; o cartão Simule Ativos abre
-/simule-ativos/ com os 5 simuladores.
+COMO SUBIR - no GitHub: Add file > Upload files
+1. Extraia o zip. Vai aparecer a pasta "D45-subir". Abra-a e arraste o CONTEÚDO (as pastas docs e webapp-src e os arquivos soltos), não a pasta em si.
+2. São 13 arquivos, num ÚNICO envio. Não separe: o App.tsx passa a importar a tela nova, e se só parte dos arquivos subir o build da Vercel falha
+   (a Vercel mantém o site antigo no ar, mas aparece erro em Deployments).
+3. Mensagem do commit: "D45: hub Simule Bens (imóvel; carro e moto em breve)".
 
-VERIFICAÇÃO: 178 testes dos scripts e 1054 do app passando; typecheck e build (33 páginas estáticas) sem erros.
+DEPOIS DO DEPLOY
+1. Abra a landing, toque em "Financiar, alugar ou consórcio?": deve abrir o Simule Bens.
+2. Toque em Imóvel: abre o comparativo; "← Simule Bens" volta ao hub.
+3. Carro e Moto aparecem apagados, com "Em breve", e não respondem ao toque.
+4. Opcional: se preferir outro nome que não "Simule Bens", é uma troca de texto em webapp-src/src/screens/SimuleBens.tsx.
+
+VERIFICAÇÃO: 1134 testes do app (6 novos) e 180 dos scripts passando; typecheck, lint e build sem erros. O fluxo landing > hub > imóvel >
+voltar ao hub > início foi percorrido num navegador. Também apliquei este zip por cima do pacote que já está no GitHub (original + D44) e
+rodei typecheck, testes e build nesse resultado, para garantir que a lista de arquivos está completa.

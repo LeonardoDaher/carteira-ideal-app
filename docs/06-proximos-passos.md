@@ -129,3 +129,12 @@ A mudança para a API tirou a metodologia do código visível. Ainda assim, vale
 - [ ] **Avaliar incluir:** isenção de ganho de capital do imóvel único, devolução do fundo de reserva no fim do grupo, FGTS na entrada e a TR no financiamento.
 - [ ] **Nova captura** `docs/jornada/20-financiar-alugar-consorcio.jpg`.
 - [ ] **Search Console:** pedir a indexação da nova página depois do deploy.
+
+## 11. Simule Bens: à vista, carro e moto (decisões D45 em diante)
+
+- [x] **Hub Simule Bens** (D45) com Imóvel ativo e Carro e Moto "em breve".
+- [ ] **D46, comprar à vista no imóvel:** quarta rota, com a pergunta nova "quanto você tem disponível hoje" (quem financia, entra no consórcio ou aluga aplica a sobra). Mexe no motor já publicado: testes de conservação e reconciliação precisam cobrir a rota nova. Depois, trocar o título do cartão da landing para "Comprar à vista, financiar, consórcio ou alugar?".
+- [ ] **Caso "não tenho o dinheiro todo":** "juntar e comprar depois", com aporte mensal. Fica para depois da D46.
+- [ ] **Carro:** depreciação (não linear), IPVA, seguro, manutenção, IOF e gravame, financiamento em Price e juros próprios, índice do consórcio, e a rota "alugar" como locação ou assinatura (o carro não tem um aluguel óbvio, como o imóvel tem). Fonte sugerida para o valor de partida da taxa: série de taxa média de financiamento de veículos do Banco Central (a confirmar).
+- [ ] **Moto:** reaproveita o motor do carro com outros valores de partida; decidir se moto de trabalho (renda gerada pelo bem) é caso à parte.
+- [ ] **Cada bem novo:** página de SEO, registro de decisão, testes e **revisão do texto de aviso pelo responsável certificado**.

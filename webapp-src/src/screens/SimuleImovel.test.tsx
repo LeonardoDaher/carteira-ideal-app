@@ -25,9 +25,9 @@ describe('SimuleImovel', () => {
     expect(screen.getByText(/não indica banco, administradora de consórcio nem produto/)).toBeTruthy()
   })
 
-  it('o link de topo volta para a landing', () => {
+  it('o link de topo volta para o hub Simule Bens', () => {
     render(<SimuleImovel snapshot={comFocus} />)
-    expect(screen.getByRole('link', { name: '← Início' }).getAttribute('href')).toBe('../')
+    expect(screen.getByRole('link', { name: '← Simule Bens' }).getAttribute('href')).toBe('./?tela=simuleBens')
   })
 
   it('usa a projeção de longo prazo do Focus como ponto de partida e mostra o CDI de hoje', () => {

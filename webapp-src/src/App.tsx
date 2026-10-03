@@ -18,13 +18,14 @@ import { SimuleBdr } from './screens/SimuleBdr'
 import { SimuleEtf } from './screens/SimuleEtf'
 import { SimuleAtivos } from './screens/SimuleAtivos'
 import { SimuleAcoes } from './screens/SimuleAcoes'
+import { SimuleBens } from './screens/SimuleBens'
 import { SimuleImovel } from './screens/SimuleImovel'
 import { MeuMes } from './screens/MeuMes'
 import { MinhaCarteira } from './screens/MinhaCarteira'
 import { Marca } from './ui/Marca'
 import type { Screen } from './state/useAppState'
 
-const TELAS_COM_LOGO_PROPRIA: Screen[] = ['onboarding', 'aprender', 'simuleTesouro', 'simuleFii', 'simuleBdr', 'simuleEtf', 'simuleAcoes', 'simuleAtivos', 'simuleImovel', 'meuMes', 'minhaCarteira']
+const TELAS_COM_LOGO_PROPRIA: Screen[] = ['onboarding', 'aprender', 'simuleTesouro', 'simuleFii', 'simuleBdr', 'simuleEtf', 'simuleAcoes', 'simuleAtivos', 'simuleImovel', 'simuleBens', 'meuMes', 'minhaCarteira']
 
 function App() {
   const ctx = useAppState()
@@ -51,6 +52,7 @@ function App() {
     simuleAcoes: () => <SimuleAcoes ctx={ctx} />,
     simuleAtivos: () => <SimuleAtivos ctx={ctx} />,
     simuleImovel: () => <SimuleImovel ctx={ctx} />,
+    simuleBens: () => <SimuleBens ctx={ctx} />,
     meuMes: () => <MeuMes ctx={ctx} />,
     minhaCarteira: () => <MinhaCarteira ctx={ctx} />,
     trilha: () => <Trilha ctx={ctx} key={ctx.trilhaSelecionadaId} />,

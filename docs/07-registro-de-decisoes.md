@@ -889,3 +889,19 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 **Testes.** 1.046 → 1.128 no app e 178 → 180 nos scripts. Cobrem as tabelas SAC/Price, o CET, a conservação de dinheiro com taxas zeradas, a reconciliação item a item em 11 cenários, a decomposição da vantagem, o ponto de virada (empate na valorização encontrada e ordem acima e abaixo dela), a sensibilidade à contemplação, o lance nas duas regras, a série mensal sem o mergulho pré-contemplação, os campos com três casas decimais (seguros), os fluxos de tela (vencedor, erro de validação, regra do lance, SAC/Price, custos de venda, gráfico por teclado) e as páginas de SEO.
 
 **Consequência.** Motor, questionário, API e simuladores de ativos não mudaram. O comparativo roda inteiro no navegador (aritmética sobre premissas informadas, sem regra proprietária a proteger).
+
+## D45 (03/10/2026): Simule Bens, o hub do comparativo (imóvel hoje; carro e moto depois)
+
+**Contexto.** Depois da D44 (comparativo de imóvel), a ideia é atender também carro e moto, e incluir **comprar à vista** como quarta rota. Como na D42 (Simule Ativos), a landing não deve ganhar um cartão por bem; o certo é um cartão só que abre um hub.
+
+**Decisão.** Tela nova **Simule Bens** (`?tela=simuleBens`, tela avulsa, sem questionário), com um cartão para cada bem: **Imóvel** (ativo, leva a `?tela=simuleImovel`, que não mudou de endereço) e **Carro** e **Moto** como **"Em breve"** (sem link, `aria-disabled`, para ninguém cair numa tela vazia). O cartão da landing passa a abrir o hub, e o comparativo de imóvel volta para "← Simule Bens", como os simuladores de ativos voltam para o Simule Ativos. Quando carro ou moto ficarem prontos, basta trocar `disponivel` para `true` em `BENS` (`screens/SimuleBens.tsx`).
+
+**Decisão sobre "comprar".** No desenho do responsável, **comprar significa pagar à vista**: as quatro rotas serão *comprar à vista, financiar, consórcio e alugar*. Isso muda o motor (a pessoa informa **quanto tem disponível hoje**; quem financia, entra no consórcio ou aluga aplica a sobra), então não entra nesta decisão: fica para a **D46**, com testes e registro próprios.
+
+**Por que o título da landing ainda NÃO diz "à vista".** O cartão continua "Financiar, alugar ou consórcio?", porque o comparativo publicado ainda não tem a rota à vista. Anunciar quatro caminhos antes de calculá-los seria prometer o que a ferramenta não faz. O título passa a "Comprar à vista, financiar, consórcio ou alugar?" junto com a D46 (uma linha em `index.html`).
+
+**O que não mudou.** Nenhum cálculo, nenhuma premissa, nenhuma página de SEO. A página `/financiar-alugar-ou-consorcio/` continua abrindo o comparativo direto (`/app/?tela=simuleImovel`), e os endereços já divulgados seguem valendo. Quem chega por ela volta, no app, para o hub.
+
+**Consequência.** Um clique a mais para quem sai da landing até o comparativo de imóvel (landing → hub → imóvel), o mesmo custo do Simule Ativos. Em troca, a landing não cresce quando carro e moto chegarem.
+
+**Testes.** 1.128 → 1.134 no app: o hub (links, itens indisponíveis sem link, aviso, volta à landing), o retorno do imóvel ao hub e o `?tela=simuleBens` abrindo a tela sem nenhuma resposta salva.
