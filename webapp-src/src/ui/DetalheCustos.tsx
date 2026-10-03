@@ -6,6 +6,9 @@ import type { ChaveCenario, InputsComparativo, ResultadoComparativo } from '../d
 /** Reais inteiros, sem centavos: "R$ 1.234.567". Nos detalhes, centavos só atrapalham a leitura. */
 export const reais0 = (v: number) => reais(Math.round(v)).replace(/,00$/, '')
 
+const contagem = (r: ResultadoComparativo) => (r.rotas.length === 4 ? 'quatro' : 'três')
+/** O dinheiro disponível é exatamente entrada + ITBI (o padrão antes da D46)? */
+const soEntradaEItbi = (r: ResultadoComparativo) => Math.abs(r.capitalInicial - (r.detalhe.financiamento.entrada + r.detalhe.financiamento.itbiCartorio)) < 0.01
 const sinalReais = (v: number) => `${v >= 0 ? '+' : '−'} ${reais0(Math.abs(v))}`
 const pct = (v: number) => porcentagem(v, 0, 3)
 const anosTexto = (n: number) => `${n} ${n === 1 ? 'ano' : 'anos'}`
@@ -63,26 +66,39 @@ const QUEM_DEFINE: Record<ChaveCenario, string> = {
   financiamento: 'pelo financiamento (parcela, seguros, tarifa e custos de dono)',
   aluguel: 'pelo aluguel',
   consorcio: 'pelo consórcio, que paga parcela e aluguel ao mesmo tempo até a contemplação',
+  avista: 'pela compra à vista',
 }
 
 function Investimentos({ r, chave, quem, entrada }: { r: ResultadoComparativo; chave: ChaveCenario; quem: string; entrada: InputsComparativo }) {
   const v = r.detalhe.investimentos[chave]
   const orc = r.detalhe.orcamentoInicial
   const meses = Math.round(entrada.horizonteAnos * 12)
-  const itbi = r.capitalInicial - entrada.entrada
+  const itbi = r.detalhe.financiamento.itbiCartorio
   return (
     <>
       <Secao titulo="Investimentos" subtitulo={quem} />
       {v.capitalInicial > 0 && (
         <Item rotulo="Capital inicial aplicado" valor={v.capitalInicial} tipo="neutro">
-          É a entrada ({reais0(entrada.entrada)}) mais o ITBI e o cartório ({reais0(itbi)}): o dinheiro que quem financia gasta na compra do imóvel. Aqui ele não vai
-          para o imóvel; fica aplicado desde o primeiro dia.
+          {chave === 'avista' ? (
+            <>Sobra do seu dinheiro depois de pagar o imóvel ({reais0(entrada.valorImovel)}) e o ITBI/cartório ({reais0(itbi)}): fica aplicada desde o primeiro dia.</>
+          ) : chave === 'financiamento' ? (
+            <>Sobra do seu dinheiro depois de pagar a entrada ({reais0(entrada.entrada)}) e o ITBI/cartório ({reais0(itbi)}): fica aplicada desde o primeiro dia.</>
+          ) : soEntradaEItbi(r) ? (
+            <>
+              É a entrada ({reais0(entrada.entrada)}) mais o ITBI e o cartório ({reais0(itbi)}): o dinheiro que quem financia gasta na compra do imóvel. Aqui ele não vai
+              para o imóvel; fica aplicado desde o primeiro dia.
+            </>
+          ) : (
+            <>
+              É todo o dinheiro que você tem hoje. Quem compra gasta parte dele na aquisição do imóvel; aqui ele fica aplicado inteiro desde o primeiro dia.
+            </>
+          )}
         </Item>
       )}
       <Item rotulo="Aportes mensais" valor={v.aportesMensais} tipo="neutro">
         {v.aportesMensais > 0 ? (
           <>
-            Todo mês, o orçamento de referência (a maior despesa entre os três caminhos) menos o que este caminho gasta vira investimento. No 1º mês o orçamento é de{' '}
+            Todo mês, o orçamento de referência (a maior despesa entre os caminhos) menos o que este caminho gasta vira investimento. No 1º mês o orçamento é de{' '}
             {reais0(orc.valor)}, definido {QUEM_DEFINE[orc.definidoPor]}; este caminho gasta {reais0(v.gastoPrimeiroMes)}, então você aplica {reais0(v.primeiroAporte)}. Ao longo
             de {anosTexto(entrada.horizonteAnos)}, a média é de {reais0(v.aportesMensais / meses)} por mês. Não é dinheiro além do seu orçamento: é a parte do que os outros
             caminhos gastam com parcelas que aqui fica guardada. Se você não investir essa diferença todo mês, o resultado deste caminho cai.
@@ -140,8 +156,9 @@ export function ComoLer({ r, entrada }: { r: ResultadoComparativo; entrada: Inpu
           {entrada.descontarCustosVenda ? ' Aqui já estão descontados a corretagem e o imposto da venda.' : ' Aqui não estão descontados a corretagem e o imposto da venda do imóvel (a opção está desligada).'}
         </span>
         <span>
-          <strong>Os três caminhos usam o mesmo dinheiro.</strong> Todos partem do mesmo capital ({reais0(r.capitalInicial)}, que seria a entrada e o ITBI/cartório) e gastam o
-          mesmo orçamento por mês: a maior despesa entre os três, que hoje é de {reais0(r.orcamentoReferencia[0] ?? 0)}. Quem paga menos investe a diferença. Por isso a
+          <strong>Os {contagem(r)} caminhos usam o mesmo dinheiro.</strong> Todos partem do mesmo capital ({reais0(r.capitalInicial)},{' '}
+          {soEntradaEItbi(r) ? 'que seria a entrada e o ITBI/cartório' : 'o dinheiro que você informou ter hoje'}) e gastam o
+          mesmo orçamento por mês: a maior despesa entre eles, que no primeiro mês é de {reais0(r.orcamentoReferencia[0] ?? 0)}. Quem paga menos investe a diferença. Por isso a
           diferença no resultado vem só de <em>para onde o dinheiro foi</em>: virou patrimônio ou virou custo.
         </span>
         <span>
@@ -178,9 +195,11 @@ export function ComoLer({ r, entrada }: { r: ResultadoComparativo; entrada: Inpu
 }
 
 /** Visão rápida: as mesmas linhas de fechamento, lado a lado, em valores compactos. */
-export function ParaOndeFoi({ r, compacto }: { r: ResultadoComparativo; compacto: (v: number) => string }) {
-  const chaves: ChaveCenario[] = ['financiamento', 'aluguel', 'consorcio']
-  const nomes: Record<ChaveCenario, string> = { financiamento: 'Financiar', aluguel: 'Alugar', consorcio: 'Consórcio' }
+export function ParaOndeFoi({ r, compacto: compactoBruto }: { r: ResultadoComparativo; compacto: (v: number) => string }) {
+  // Sem o "R$" repetido em cada célula: a unidade vai na legenda e os números cabem em quatro colunas no celular.
+  const compacto = (v: number) => compactoBruto(v).replace(/R\$\s?/, '')
+  const chaves = r.rotas
+  const nomes: Record<ChaveCenario, string> = { financiamento: 'Financiar', aluguel: 'Alugar', consorcio: 'Consórcio', avista: 'À vista' }
   const c = r.detalhe.contabilidade
   const linhas: [string, (k: ChaveCenario) => string, boolean?][] = [
     ['Dinheiro colocado', (k) => compacto(c[k].totalColocado)],
@@ -194,7 +213,7 @@ export function ParaOndeFoi({ r, compacto }: { r: ResultadoComparativo; compacto
   return (
     <div className="col" style={{ gap: 8 }}>
       <span style={{ fontWeight: 700, fontSize: 14.5 }}>Para onde foi cada real</span>
-      <div className="tabela-comparativo" role="table" aria-label="Para onde foi o dinheiro em cada caminho">
+      <div className="tabela-comparativo" role="table" aria-label="Para onde foi o dinheiro em cada caminho" style={{ gridTemplateColumns: `minmax(0, ${chaves.length > 3 ? 1.4 : 1.3}fr) repeat(${chaves.length}, minmax(0, 1fr))` }}>
         <span className="cab" role="columnheader" />
         {chaves.map((k) => (
           <span key={k} className="cab" role="columnheader">{nomes[k]}</span>
@@ -210,7 +229,7 @@ export function ParaOndeFoi({ r, compacto }: { r: ResultadoComparativo; compacto
       </div>
       <span className="tiny muted justify" style={{ lineHeight: 1.5 }}>
         Patrimônio = dinheiro colocado − custos + valorização do imóvel + rendimento − IR{c.financiamento.custosDeVenda || c.consorcio.custosDeVenda ? ' − custos de venda' : ''}.
-        A primeira linha é igual nos três: é a prova de que todos gastaram o mesmo. Abaixo, cada custo é explicado.
+        Valores em R$ (mil = milhares; mi = milhões). A primeira linha é igual em todos: é a prova de que todos gastaram o mesmo. Abaixo, cada custo é explicado.
       </span>
     </div>
   )
@@ -292,7 +311,7 @@ export function BlocoAlugar({ r, entrada }: { r: ResultadoComparativo; entrada: 
       <summary style={{ fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>Alugar e investir: cada custo e cada taxa</summary>
       <div className="col" style={{ gap: 4, marginTop: 10 }}>
         <span className="small justify" style={{ lineHeight: 1.5 }}>
-          Você não compra o imóvel: paga aluguel e investe todo o resto. O capital que seria a entrada e o ITBI/cartório ({reais0(r.capitalInicial)}) fica aplicado desde o primeiro
+          Você não compra o imóvel: paga aluguel e investe todo o resto. {soEntradaEItbi(r) ? 'O capital que seria a entrada e o ITBI/cartório' : 'Todo o dinheiro que você tem hoje'} ({reais0(r.capitalInicial)}) fica aplicado desde o primeiro
           dia, e todo mês você investe a diferença entre o orçamento de referência e o aluguel.
         </span>
 
@@ -386,6 +405,53 @@ export function BlocoConsorcio({ r, entrada }: { r: ResultadoComparativo; entrad
   )
 }
 
+export function BlocoAvista({ r, entrada }: { r: ResultadoComparativo; entrada: InputsComparativo }) {
+  const d = r.detalhe.avista
+  const c = r.cenarios.avista
+  return (
+    <details className="card-outline" open>
+      <summary style={{ fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>Comprar à vista: cada custo e cada taxa</summary>
+      <div className="col" style={{ gap: 4, marginTop: 10 }}>
+        <span className="small justify" style={{ lineHeight: 1.5 }}>
+          Você paga o imóvel inteiro de uma vez ({reais0(d.valorPago)}), mais o ITBI e o cartório, e passa a ser dono sem nenhuma dívida. Como não há parcela nem aluguel, a mesma
+          verba mensal dos outros caminhos vai para o investimento. O que você deixa de ter é o rendimento do dinheiro que virou imóvel: esse é o preço escondido deste caminho, e é
+          ele que decide se compensa.
+        </span>
+
+        <Secao titulo="Custos (dinheiro que não volta)" subtitulo={`Total: ${reais0(c.custoTotal)}`} />
+        <Item rotulo="ITBI, escritura e registro" valor={d.itbiCartorio} tipo="custo">
+          Imposto municipal sobre a compra e taxas de cartório. Pago uma vez, no início. Você informou {pct(entrada.custosIniciaisPct)} do valor do imóvel.
+        </Item>
+        <Item rotulo="Custos de quem é dono" valor={d.custosPropriedade} tipo="custo">
+          IPTU, condomínio e manutenção. Usamos {pct(entrada.custosPropriedadeAA)} do valor do imóvel por ano, reajustado pela inflação. Não há juros, seguros nem tarifa neste caminho.
+        </Item>
+
+        <Secao titulo="Dinheiro que vira patrimônio" subtitulo="O que você paga e continua sendo seu" />
+        <Item rotulo="Imóvel pago à vista" valor={d.valorPago} tipo="patrimonio">
+          O imóvel é seu desde o primeiro dia, sem dívida.
+        </Item>
+        <Item rotulo="Valorização do imóvel" valor={r.detalhe.contabilidade.avista.valorizacaoImovel} tipo="patrimonio">
+          O imóvel sai de {reais0(entrada.valorImovel)} para {reais0(c.imovel)} em {anosTexto(entrada.horizonteAnos)}, a {pct(entrada.valorizacaoImovelAA)} ao ano. É uma suposição sua, não uma garantia.
+        </Item>
+
+        <Investimentos r={r} entrada={entrada} chave="avista" quem="Aqui só investe quem tem mais dinheiro que o imóvel; o grosso vem da verba mensal que os outros caminhos gastam com parcela" />
+
+        <Secao titulo="O que sobra no fim" subtitulo="" />
+        <div className="tabela-simulacao">
+          <div className="linha-simulacao"><span>Imóvel valorizado</span><span>{reais0(c.imovel)}</span></div>
+          <div className="linha-simulacao"><span>Investimentos (líquidos de IR)</span><span>+ {reais0(c.fundoLiquido)}</span></div>
+        </div>
+        <Fechamento r={r} chave="avista" />
+
+        <div className="tiny muted justify" style={{ lineHeight: 1.5, marginTop: 4 }}>
+          Quanto mais alto o rendimento dos investimentos, mais caro fica ter colocado o dinheiro no imóvel; quanto mais o imóvel valoriza, mais compensa. O ponto de virada abaixo
+          mostra em que valorização comprar à vista e alugar empatam. Este caminho supõe que você mantém a mesma verba mensal dos outros e investe a diferença.
+        </div>
+      </div>
+    </details>
+  )
+}
+
 /** Todas as premissas usadas, para a pessoa conferir e saber exatamente o que gerou o resultado. */
 export function PremissasUsadas({ i }: { i: InputsComparativo }) {
   const grupos: [string, [string, string][]][] = [
@@ -395,6 +461,7 @@ export function PremissasUsadas({ i }: { i: InputsComparativo }) {
         ['Valor do imóvel', reais0(i.valorImovel)],
         ['Entrada', `${reais0(i.entrada)} (${pct((i.entrada / i.valorImovel) * 100)})`],
         ['Horizonte da comparação', anosTexto(i.horizonteAnos)],
+        ['Dinheiro disponível hoje', i.dinheiroDisponivel === null ? 'só a entrada e o ITBI (sem comprar à vista)' : reais0(i.dinheiroDisponivel)],
       ],
     ],
     [

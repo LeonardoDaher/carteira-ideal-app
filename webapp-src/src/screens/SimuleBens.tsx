@@ -7,7 +7,7 @@ import type { AppCtx } from '../state/useAppState'
  * para ninguém cair numa tela vazia. Quando um deles ficar pronto, basta trocar `disponivel` para true.
  */
 export const BENS: { tela: string; emoji: string; titulo: string; descricao: string; disponivel: boolean }[] = [
-  { tela: 'simuleImovel', emoji: '🏠', titulo: 'Imóvel', descricao: 'Financiar, alugar ou consórcio: qual rota deixa o maior patrimônio', disponivel: true },
+  { tela: 'simuleImovel', emoji: '🏠', titulo: 'Imóvel', descricao: 'Comprar à vista, financiar, consórcio ou alugar: qual rota deixa o maior patrimônio', disponivel: true },
   { tela: 'simuleCarro', emoji: '🚗', titulo: 'Carro', descricao: 'O mesmo comparativo, com depreciação, IPVA e seguro', disponivel: false },
   { tela: 'simuleMoto', emoji: '🏍️', titulo: 'Moto', descricao: 'O mesmo comparativo, com os custos de uma moto', disponivel: false },
 ]

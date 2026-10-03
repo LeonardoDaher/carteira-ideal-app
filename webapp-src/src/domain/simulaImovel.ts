@@ -6,11 +6,15 @@
 // aritmética sem metodologia proprietária, por isso roda no navegador.
 //
 // ── Regra que torna a comparação justa ("apples to apples") ──────────────────────────────
-// 1. Capital inicial comum: entrada + ITBI/cartório do financiamento (K0). Quem não gasta isso
-//    na compra mantém aplicado desde o mês 0.
+// 1. Capital inicial comum (C): o dinheiro que a pessoa tem hoje. Se ela não informar, C = entrada +
+//    ITBI/cartório do financiamento (K0). Cada caminho gasta o que precisa na compra e mantém o resto
+//    aplicado desde o mês 0: quem aluga e o consórcio aplicam C inteiro; quem financia aplica C − K0;
+//    quem compra à vista (D46) paga o imóvel e o ITBI e aplica C − V − ITBI. Sem dinheiro para pagar o
+//    imóvel à vista, essa rota fica de fora do ranking (nunca se inventa dinheiro).
 // 2. Orçamento mensal comum: em cada mês, o orçamento de referência é o MAIOR desembolso entre
-//    os três cenários. Quem desembolsa menos investe a diferença. Assim os três "gastam" o
-//    mesmo dinheiro de bolso e só muda para onde ele vai (imóvel, aluguel, juros, taxas).
+//    cenários (à vista nunca define: só paga custos de dono). Quem desembolsa menos investe a
+//    diferença. Assim todos "gastam" o mesmo dinheiro de bolso e só muda para onde ele vai
+//    (imóvel, aluguel, juros, taxas).
 // 3. Patrimônio líquido final = imóvel (a preço de mercado) − dívida + fundo de investimento
 //    (líquido de IR). Opcionalmente, ainda desconta os custos de venda do imóvel.
 //
@@ -85,18 +89,28 @@ export interface InputsComparativo {
   regraLance: RegraLance
   /** Mês da contemplação (1 a prazo do consórcio e ao horizonte). */
   mesContemplacao: number
+
+  // Dinheiro disponível (D46)
+  /**
+   * Quanto a pessoa tem hoje, em R$. `null` = só o necessário para a entrada e o ITBI do financiamento (comportamento
+   * anterior à D46). Se for maior, a sobra fica aplicada em todos os caminhos; se cobrir o imóvel inteiro mais o ITBI,
+   * a rota "comprar à vista" entra na comparação.
+   */
+  dinheiroDisponivel: number | null
 }
 
-export type ChaveCenario = 'financiamento' | 'aluguel' | 'consorcio'
+export type ChaveCenario = 'financiamento' | 'aluguel' | 'consorcio' | 'avista'
 
 export const NOMES_CENARIOS: Record<ChaveCenario, string> = {
   financiamento: 'Financiar',
   aluguel: 'Alugar e investir',
   consorcio: 'Consórcio',
+  avista: 'Comprar à vista',
 }
 
 export interface PontoMensal {
   mes: number
+  avista: number
   financiamento: number
   aluguel: number
   consorcio: number
@@ -200,7 +214,18 @@ export interface DetalheConsorcio {
   saldoDevedor: number
 }
 
+export interface DetalheAvista {
+  /** Preço do imóvel pago de uma vez no mês 0. */
+  valorPago: number
+  itbiCartorio: number
+  custosPropriedade: number
+}
+
 export interface ResultadoComparativo {
+  /** Rotas que entraram na comparação: as 3 de sempre, mais `avista` quando o dinheiro disponível cobre o imóvel e o ITBI. */
+  rotas: ChaveCenario[]
+  /** Se dá para comprar à vista com o dinheiro informado, quanto seria preciso e quanto falta. */
+  avista: { disponivel: boolean; necessario: number; falta: number }
   vencedor: ChaveCenario
   nomeVencedor: string
   /** Quanto o vencedor termina à frente do segundo colocado (R$, nominal). */
@@ -229,6 +254,7 @@ export interface ResultadoComparativo {
   /** Detalhe item a item de cada cenário, para explicar ao cliente de onde vem cada custo. */
   detalhe: {
     financiamento: DetalheFinanciamento
+    avista: DetalheAvista
     aluguel: DetalheAluguel
     consorcio: DetalheConsorcio
     investimentos: Record<ChaveCenario, DetalheInvestimentos>
@@ -245,6 +271,8 @@ export interface ResultadoComparativo {
 }
 
 export interface PontoDeVirada {
+  /** Valorização em que comprar à vista e alugar empatam; null = não muda no intervalo, ou à vista indisponível. */
+  avistaVsAluguel: number | null
   /** Valorização anual do imóvel (%) em que financiar e alugar empatam; null = não muda no intervalo testado. */
   financiamentoVsAluguel: number | null
   consorcioVsAluguel: number | null
@@ -285,6 +313,7 @@ export function inputsPadrao(parcial: Partial<InputsComparativo> = {}): InputsCo
     lance: 0,
     regraLance: 'prazo',
     mesContemplacao: 36,
+    dinheiroDisponivel: null,
     ...parcial,
   }
 }
@@ -306,6 +335,11 @@ export function validarInputs(i: InputsComparativo): string[] {
   }
   if (i.lance < 0 || i.lance > i.valorImovel) erros.push('O lance não pode ser negativo nem maior que o valor do imóvel.')
   if (i.jurosNominalAA < 0 || i.rendimentoAA < -50) erros.push('Confira as taxas informadas.')
+  if (i.dinheiroDisponivel !== null) {
+    const minimo = i.entrada + (i.valorImovel * i.custosIniciaisPct) / 100
+    if (!Number.isFinite(i.dinheiroDisponivel) || i.dinheiroDisponivel < 0) erros.push('O dinheiro disponível não pode ser negativo.')
+    else if (i.dinheiroDisponivel < minimo - 0.005) erros.push(`O dinheiro disponível precisa cobrir ao menos a entrada mais o ITBI e o cartório (${minimo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}).`)
+  }
   return erros
 }
 
@@ -408,6 +442,10 @@ function simularNucleo(i: InputsComparativo, leve = false): ResultadoComparativo
   const preco = (mes: number) => V * Math.pow(1 + i.valorizacaoImovelAA / 100, mes / 12)
   const custosIniciais = (V * i.custosIniciaisPct) / 100
   const K0 = i.entrada + custosIniciais
+  // Dinheiro que a pessoa tem hoje (D46). Sem informar, é só o que a entrada e o ITBI do financiamento exigem.
+  const C = i.dinheiroDisponivel ?? K0
+  const necessarioAvista = V + custosIniciais
+  const avistaOk = C >= necessarioAvista - 0.005
 
   // Financiamento
   const financiado = V - i.entrada
@@ -432,9 +470,10 @@ function simularNucleo(i: InputsComparativo, leve = false): ResultadoComparativo
   const M = i.mesContemplacao
 
   // Estado
-  const fFin = new Fundo()
-  const fAlu = new Fundo(K0)
-  const fCon = new Fundo(K0)
+  const fFin = new Fundo(C - K0) // sobra depois da entrada e do ITBI (zero se C = K0)
+  const fAlu = new Fundo(C)
+  const fCon = new Fundo(C)
+  const fAv = new Fundo(C - necessarioAvista) // sobra depois de pagar o imóvel e o ITBI (negativa = não dá, rota fica de fora)
   let saldoFin = financiado
   let juros = 0
   let seguros = 0
@@ -444,12 +483,14 @@ function simularNucleo(i: InputsComparativo, leve = false): ResultadoComparativo
   let parcelasPagasFin = 0
   let somaOrcamento = 0
   let orc1 = { valor: 0, definidoPor: 'financiamento' as ChaveCenario }
-  let gasto1: Record<ChaveCenario, number> = { financiamento: 0, aluguel: 0, consorcio: 0 }
+  let gasto1: Record<ChaveCenario, number> = { financiamento: 0, aluguel: 0, consorcio: 0, avista: 0 }
   let aluguelFinal = i.aluguelMensal
   let parcelaFinalCon = 0
   let tarifas = 0
   let custosPropFin = 0
   let pagoFin = K0 // entrada + ITBI/cartório
+  let pagoAv = necessarioAvista // imóvel inteiro + ITBI/cartório
+  let custosPropAv = 0
   let pagoAlu = 0
   let pagoCon = 0
   let aluguelPagoCon = 0
@@ -469,7 +510,7 @@ function simularNucleo(i: InputsComparativo, leve = false): ResultadoComparativo
   const orcamentoRef: number[] = []
   let saldoCon = 0
 
-  const patrimonios = (mes: number): { fin: number; alu: number; con: number; imovelFin: number; imovelCon: number } => {
+  const patrimonios = (mes: number): { fin: number; alu: number; con: number; av: number; imovelFin: number; imovelCon: number } => {
     const imv = preco(mes)
     const imovelFin = imv
     const imovelCon = mes >= M ? imv : 0
@@ -477,13 +518,14 @@ function simularNucleo(i: InputsComparativo, leve = false): ResultadoComparativo
     const alu = fAlu.liquido(aliqIr)
     // Antes da contemplação não há imóvel nem dívida: as parcelas pagas são custo, e as futuras ainda não são obrigação de quem tem o bem.
     const con = mes >= M ? imovelCon - saldoCon + fCon.liquido(aliqIr) : fCon.liquido(aliqIr)
-    return { fin, alu, con, imovelFin, imovelCon }
+    const av = imv + fAv.liquido(aliqIr)
+    return { fin, alu, con, av, imovelFin, imovelCon }
   }
 
   // Mês 0: financiamento paga entrada e custos; os outros dois mantêm K0 aplicado.
   if (!leve) {
     const p0 = patrimonios(0)
-    serie.push({ mes: 0, financiamento: arred(p0.fin), aluguel: arred(p0.alu), consorcio: arred(p0.con) })
+    serie.push({ mes: 0, financiamento: arred(p0.fin), aluguel: arred(p0.alu), consorcio: arred(p0.con), avista: arred(p0.av) })
   }
 
   for (let t = 1; t <= n; t++) {
@@ -527,11 +569,15 @@ function simularNucleo(i: InputsComparativo, leve = false): ResultadoComparativo
       custosPropCon += custosProp
     }
 
-    // — Orçamento de referência: o maior desembolso entre os três cenários —
-    const ref = Math.max(outFin, aluguel, outCon)
+    // — À vista: sem parcela nem aluguel, só os custos de quem é dono (por isso nunca define o orçamento) —
+    const outAv = custosProp
+    custosPropAv += custosProp
+
+    // — Orçamento de referência: o maior desembolso entre os cenários —
+    const ref = Math.max(outFin, aluguel, outCon, outAv)
     somaOrcamento += ref
     if (t === 1) {
-      gasto1 = { financiamento: outFin, aluguel, consorcio: outCon }
+      gasto1 = { financiamento: outFin, aluguel, consorcio: outCon, avista: outAv }
       orc1 = { valor: ref, definidoPor: ref === outFin ? 'financiamento' : ref === outCon ? 'consorcio' : 'aluguel' }
     }
     if ((t - 1) % 12 === 0) orcamentoRef.push(arred(ref))
@@ -539,14 +585,17 @@ function simularNucleo(i: InputsComparativo, leve = false): ResultadoComparativo
     pagoFin += outFin
     pagoAlu += aluguel
     pagoCon += outCon
+    pagoAv += outAv
 
     // rendimento do mês, depois aporte no fim do mês
     fFin.render(rm)
     fAlu.render(rm)
     fCon.render(rm)
+    fAv.render(rm)
     fFin.aportar(ref - outFin)
     fAlu.aportar(ref - aluguel)
     fCon.aportar(ref - outCon)
+    fAv.aportar(ref - outAv)
 
     // — Contemplação (fim do mês M) —
     if (t === M) {
@@ -574,7 +623,7 @@ function simularNucleo(i: InputsComparativo, leve = false): ResultadoComparativo
 
     if (!leve) {
       const p = patrimonios(t)
-      serie.push({ mes: t, financiamento: arred(p.fin), aluguel: arred(p.alu), consorcio: arred(p.con) })
+      serie.push({ mes: t, financiamento: arred(p.fin), aluguel: arred(p.alu), consorcio: arred(p.con), avista: arred(p.av) })
     }
   }
 
@@ -597,12 +646,18 @@ function simularNucleo(i: InputsComparativo, leve = false): ResultadoComparativo
   const finSem = imovelFim - saldoFin + fFin.liquido(aliqIr)
   const aluSem = fAlu.liquido(aliqIr)
   const conSem = imovelConFim - saldoCon + fCon.liquido(aliqIr)
+  const avSem = imovelFim + fAv.liquido(aliqIr)
+  const avCom = avSem - custoVenda(imovelFim, V + custosIniciais)
   const finCom = finSem - custoVenda(imovelFim, V + custosIniciais)
   const aluCom = aluSem
   const conCom = conSem - (imovelConFim > 0 ? custoVenda(imovelConFim, precoNaContemplacao + itbiCon) : 0)
-  const base = i.descontarCustosVenda ? { financiamento: finCom, aluguel: aluCom, consorcio: conCom } : { financiamento: finSem, aluguel: aluSem, consorcio: conSem }
+  const base: Record<ChaveCenario, number> = i.descontarCustosVenda
+    ? { financiamento: finCom, aluguel: aluCom, consorcio: conCom, avista: avCom }
+    : { financiamento: finSem, aluguel: aluSem, consorcio: conSem, avista: avSem }
 
-  const ranking = (Object.keys(base) as ChaveCenario[]).sort((a, b) => base[b] - base[a])
+  // À vista só concorre se o dinheiro cobre o imóvel e o ITBI; senão a rota fica de fora, sem inventar dinheiro.
+  const rotas: ChaveCenario[] = avistaOk ? ['financiamento', 'aluguel', 'consorcio', 'avista'] : ['financiamento', 'aluguel', 'consorcio']
+  const ranking = [...rotas].sort((a, b) => base[b] - base[a])
   const [primeiro, segundo] = ranking
 
   // taxas contratadas: as já pagas + as embutidas na dívida que ainda resta (o patrimônio desconta a dívida inteira)
@@ -620,6 +675,16 @@ function simularNucleo(i: InputsComparativo, leve = false): ResultadoComparativo
       totalPagoDeBolso: arred(pagoFin),
       custoTotal: arred(juros + seguros + tarifas + custosIniciais + custosPropFin),
       custoDescricao: 'juros, seguros, tarifa, ITBI/cartório e custos de propriedade',
+    },
+    avista: {
+      patrimonioFinal: arred(base.avista),
+      patrimonioFinalHoje: arred(base.avista / deflator),
+      imovel: arred(imovelFim),
+      saldoDevedor: 0,
+      fundoLiquido: arred(fAv.liquido(aliqIr)),
+      totalPagoDeBolso: arred(pagoAv),
+      custoTotal: arred(custosIniciais + custosPropAv),
+      custoDescricao: 'ITBI/cartório e custos de propriedade (não há juros, seguros nem parcelas)',
     },
     aluguel: {
       patrimonioFinal: arred(base.aluguel),
@@ -656,11 +721,12 @@ function simularNucleo(i: InputsComparativo, leve = false): ResultadoComparativo
     saldoLiquido: arred(f.liquido(aliqIr)),
   })
   const investimentos: Record<ChaveCenario, DetalheInvestimentos> = {
-    financiamento: resumoFundo(fFin, 0, 'financiamento'),
-    aluguel: resumoFundo(fAlu, K0, 'aluguel'),
-    consorcio: resumoFundo(fCon, K0, 'consorcio'),
+    financiamento: resumoFundo(fFin, C - K0, 'financiamento'),
+    aluguel: resumoFundo(fAlu, C, 'aluguel'),
+    consorcio: resumoFundo(fCon, C, 'consorcio'),
+    avista: resumoFundo(fAv, C - necessarioAvista, 'avista'),
   }
-  const totalColocado = K0 + somaOrcamento
+  const totalColocado = C + somaOrcamento
   const custosDeVendaDe = (sem: number, com: number) => (i.descontarCustosVenda ? sem - com : 0)
   const montarConta = (chave: ChaveCenario, valorizacao: number, sem: number, com: number): ContabilidadeCenario => {
     const inv = investimentos[chave]
@@ -682,6 +748,7 @@ function simularNucleo(i: InputsComparativo, leve = false): ResultadoComparativo
     financiamento: montarConta('financiamento', imovelFim - V, finSem, finCom),
     aluguel: montarConta('aluguel', 0, aluSem, aluCom),
     consorcio: montarConta('consorcio', imovelConFim > 0 ? imovelConFim - precoNaContemplacao : 0, conSem, conCom),
+    avista: montarConta('avista', imovelFim - V, avSem, avCom),
   }
   const itbiConsorcioPago = M <= n ? itbiCon : 0
   const adm = fracAdm > 0 ? i.taxaAdmTotalPct / (i.taxaAdmTotalPct + i.fundoReservaPct) : 0
@@ -698,6 +765,7 @@ function simularNucleo(i: InputsComparativo, leve = false): ResultadoComparativo
       custosPropriedade: arred(custosPropFin),
       saldoDevedor: arred(saldoFin),
     },
+    avista: { valorPago: arred(V), itbiCartorio: arred(custosIniciais), custosPropriedade: arred(custosPropAv) },
     aluguel: { aluguelInicial: arred(i.aluguelMensal), aluguelFinal: arred(aluguelFinal), aluguelPago: arred(pagoAlu) },
     consorcio: {
       parcelaInicial: arred(parcelaBase),
@@ -719,13 +787,15 @@ function simularNucleo(i: InputsComparativo, leve = false): ResultadoComparativo
   }
 
   return {
+    rotas,
+    avista: { disponivel: avistaOk, necessario: arred(necessarioAvista), falta: arred(Math.max(0, necessarioAvista - C)) },
     vencedor: primeiro,
     nomeVencedor: NOMES_CENARIOS[primeiro],
     vantagemSobreSegundo: arred(base[primeiro] - base[segundo]),
     ranking,
     cenarios,
-    patrimonioSemCustosVenda: { financiamento: arred(finSem), aluguel: arred(aluSem), consorcio: arred(conSem) },
-    patrimonioComCustosVenda: { financiamento: arred(finCom), aluguel: arred(aluCom), consorcio: arred(conCom) },
+    patrimonioSemCustosVenda: { financiamento: arred(finSem), aluguel: arred(aluSem), consorcio: arred(conSem), avista: arred(avSem) },
+    patrimonioComCustosVenda: { financiamento: arred(finCom), aluguel: arred(aluCom), consorcio: arred(conCom), avista: arred(avCom) },
     serieMensal: serie,
     financiamento: {
       financiado: arred(financiado),
@@ -740,7 +810,7 @@ function simularNucleo(i: InputsComparativo, leve = false): ResultadoComparativo
       complementoPago: arred(complemento),
       parcelaInicial: arred(parcelaBase),
     },
-    capitalInicial: arred(K0),
+    capitalInicial: arred(C),
     detalhe,
     orcamentoReferencia: orcamentoRef,
     avisos,
@@ -773,11 +843,13 @@ function raiz(f: (x: number) => number, a: number, b: number): number | null {
  */
 export function pontoDeVirada(i: InputsComparativo): PontoDeVirada {
   const intervalo: [number, number] = [-2, 20]
-  const dif = (qual: 'financiamento' | 'consorcio') => (v: number) => {
+  const dif = (qual: 'financiamento' | 'consorcio' | 'avista') => (v: number) => {
     const r = simularNucleo({ ...i, valorizacaoImovelAA: v, descontarCustosVenda: false }, true)
     return r.patrimonioSemCustosVenda[qual] - r.patrimonioSemCustosVenda.aluguel
   }
+  const avistaPossivel = simularNucleo(i, true).avista.disponivel
   return {
+    avistaVsAluguel: avistaPossivel ? raiz(dif('avista'), intervalo[0], intervalo[1]) : null,
     financiamentoVsAluguel: raiz(dif('financiamento'), intervalo[0], intervalo[1]),
     consorcioVsAluguel: raiz(dif('consorcio'), intervalo[0], intervalo[1]),
     intervalo,

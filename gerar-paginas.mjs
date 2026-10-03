@@ -198,7 +198,7 @@ const LINKS_RODAPE = [
   ['Simulador de FII', '/simulador-fii/'],
   ['Simulador de BDR', '/simulador-bdr/'],
   ['Simulador de ETF', '/simulador-etf/'],
-  ['Financiar, alugar ou consórcio', '/financiar-alugar-ou-consorcio/'],
+  ['Comprar à vista, financiar, consórcio ou alugar', '/financiar-alugar-ou-consorcio/'],
   ['Meus Ativos', '/minha-carteira/'],
   ['Meu Mês', '/meu-mes/'],
   ['Aprender', '/aprender/'],
@@ -501,10 +501,10 @@ function paginaBdr() {
 function paginaImovel() {
   return {
     caminho: '/financiar-alugar-ou-consorcio/',
-    titulo: 'Financiar, alugar ou consórcio: qual rende mais patrimônio',
-    descricao: 'Compare financiamento, aluguel com investimento e consórcio de imóvel e veja qual deixa o maior patrimônio líquido, com cada custo explicado. Grátis.',
-    h1: 'Financiar, alugar ou consórcio: qual deixa o maior patrimônio?',
-    lead: 'Informe o valor do imóvel, a entrada, as taxas e o prazo. A ferramenta compara as três rotas com o mesmo dinheiro e mostra qual termina com o maior patrimônio líquido, com cada custo e cada taxa explicados.',
+    titulo: 'Comprar à vista, financiar, consórcio ou alugar',
+    descricao: 'Compare comprar à vista, financiar, consórcio e alugar um imóvel e veja qual deixa o maior patrimônio líquido, com cada custo explicado. Grátis.',
+    h1: 'Comprar à vista, financiar, consórcio ou alugar: qual deixa o maior patrimônio?',
+    lead: 'Informe o valor do imóvel, o dinheiro que você tem, as taxas e o prazo. A ferramenta compara os caminhos com o mesmo dinheiro e mostra qual termina com o maior patrimônio líquido, com cada custo e cada taxa explicados.',
     botoes: [{ texto: 'Abrir o comparativo', href: '/app/?tela=simuleImovel' }],
     migalhas: [],
     schema: 'WebPage',
@@ -513,28 +513,30 @@ function paginaImovel() {
       secao(
         'O que a ferramenta calcula',
         `<ul>
-<li><strong>Patrimônio líquido final</strong> de cada rota: o imóvel a preço de mercado, mais os investimentos já descontado o Imposto de Renda, menos a dívida que ainda resta.</li>
-<li><strong>Qual rota termina na frente</strong> e por quanto, com a vantagem decomposta em custos, valorização do imóvel e rendimento dos investimentos.</li>
+<li><strong>Patrimônio líquido final</strong> de cada caminho (comprar à vista, financiar, consórcio e alugar): o imóvel a preço de mercado, mais os investimentos já descontado o Imposto de Renda, menos a dívida que ainda resta.</li>
+<li><strong>Qual caminho termina na frente</strong> e por quanto, com a vantagem decomposta em custos, valorização do imóvel e rendimento dos investimentos.</li>
 <li><strong>Todos os custos e taxas</strong> de cada caminho, um por um, e o que cada um significa.</li>
-<li><strong>A evolução mês a mês</strong> do patrimônio das três rotas, em gráfico.</li>
+<li><strong>A evolução mês a mês</strong> do patrimônio de cada caminho, em gráfico.</li>
 <li><strong>O ponto de virada</strong>: a valorização do imóvel em que o resultado muda de lado, e como o consórcio se comporta se a contemplação demorar.</li>
+<li><strong>Comprar à vista</strong> entra na comparação quando o dinheiro que você informa cobre o imóvel e o ITBI. Se não cobrir, a ferramenta diz quanto falta.</li>
 </ul>
 <p>A conta é matemática, feita com as taxas que você informa. A ferramenta não indica banco, administradora de consórcio nem produto, e a comparação não é recomendação de financiamento, de consórcio ou de investimento.</p>`,
       ),
       secao(
         'Como a comparação é justa',
-        `<p>Os três caminhos partem do mesmo dinheiro. O capital que seria a entrada e o ITBI/cartório do financiamento fica aplicado desde o primeiro dia para quem aluga ou entra no consórcio. Todo mês, a maior despesa entre os três caminhos vira o orçamento de referência, e quem paga menos investe a diferença.</p>
+        `<p>Todos os caminhos partem do mesmo dinheiro: o que você tem hoje. Cada um gasta o que precisa na compra (a entrada e o ITBI no financiamento; o imóvel inteiro e o ITBI à vista) e mantém o resto aplicado desde o primeiro dia. Todo mês, a maior despesa entre os caminhos vira o orçamento de referência, e quem paga menos investe a diferença.</p>
 <p>Assim, nenhuma rota leva vantagem só por gastar menos: a diferença no resultado vem de para onde o dinheiro foi, se virou patrimônio ou se virou custo.</p>`,
       ),
       secao(
         'Os custos que a ferramenta mostra',
         `<p><strong>No financiamento:</strong> ITBI, escritura e registro; juros pela tabela SAC ou Price; os seguros obrigatórios MIP (morte e invalidez) e DFI (danos ao imóvel); a tarifa de administração do banco; e os custos de quem é dono (IPTU, condomínio e manutenção). O CET, que junta juros, seguros e tarifa numa taxa só, aparece como resultado.</p>
+<p><strong>Comprando à vista:</strong> ITBI, escritura e registro, e os custos de quem é dono (IPTU, condomínio e manutenção). Não há juros, seguros nem parcelas. O preço escondido é o rendimento que o dinheiro teria dado se não tivesse virado imóvel, e a ferramenta mostra o efeito disso no patrimônio final.</p>
 <p><strong>No aluguel:</strong> o aluguel pago ao longo do período, reajustado todo ano. O capital e as sobras mensais ficam investidos, com o Imposto de Renda regressivo sobre o ganho.</p>
 <p><strong>No consórcio:</strong> taxa de administração, fundo de reserva, aluguel pago enquanto espera a contemplação, ITBI e cartório na compra do imóvel, e o reajuste anual das parcelas, que continua depois que a carta de crédito é usada.</p>`,
       ),
       secao(
         'O que pode mudar o vencedor',
-        `<p>O resultado depende de três premissas que ninguém conhece de antemão: quanto os investimentos vão render, quanto o imóvel vai valorizar e, no consórcio, em que mês a contemplação vai acontecer. Por isso a ferramenta mostra o ponto de virada: a valorização do imóvel em que financiar e alugar empatam, e o resultado do consórcio se a contemplação for no 12º, no 60º ou no 120º mês.</p>
+        `<p>O resultado depende de três premissas que ninguém conhece de antemão: quanto os investimentos vão render, quanto o imóvel vai valorizar e, no consórcio, em que mês a contemplação vai acontecer. Por isso a ferramenta mostra o ponto de virada: a valorização do imóvel em que cada caminho empata com o aluguel, e o resultado do consórcio se a contemplação for no 12º, no 60º ou no 120º mês.</p>
 <p>Como ponto de partida, os campos de rendimento, inflação e valorização usam a projeção de longo prazo do Boletim Focus, do Banco Central. Você pode trocar por qualquer número.</p>`,
       ),
       secao(
@@ -552,6 +554,8 @@ function paginaImovel() {
       { p: 'A ferramenta indica qual banco ou qual consórcio escolher?', r: 'Não. Ela compara três caminhos com as taxas que você informar, de qualquer banco ou administradora, e mostra qual deixa o maior patrimônio. Não indica instituição nem produto.' },
       { p: 'O resultado é uma recomendação de financiar, alugar ou entrar num consórcio?', r: 'Não. É uma conta matemática com premissas de taxa e de valorização que podem não se confirmar. Se as premissas mudam, o vencedor pode mudar, e a ferramenta mostra em que ponto isso acontece.' },
       { p: 'O que é patrimônio líquido neste comparativo?', r: 'É o que você teria no fim do período se vendesse o imóvel pelo preço de mercado, pagasse o que ainda deve e resgatasse os investimentos, já descontado o Imposto de Renda.' },
+      { p: 'E se eu tiver dinheiro para pagar o imóvel à vista?', r: 'Informe quanto você tem hoje. Se o valor cobrir o imóvel e o ITBI, a compra à vista entra na comparação, e o que sobrar fica investido em todos os caminhos. Se não cobrir, a ferramenta diz quanto falta.' },
+      { p: 'Por que pagar à vista nem sempre vence?', r: 'Porque o dinheiro que vira imóvel deixa de render. Se os investimentos rendem mais do que o imóvel valoriza, alugar e investir pode terminar na frente, mesmo sem pagar juros. A ferramenta mostra a valorização em que comprar à vista e alugar empatam.' },
       { p: 'Por que o aluguel entra com investimentos?', r: 'Porque quem não compra o imóvel pode aplicar o capital da entrada e a diferença mensal entre a parcela e o aluguel. Sem isso, a comparação favoreceria quem compra por gastar menos.' },
     ],
     relacionados: [
@@ -827,7 +831,7 @@ function paginaMetodologia() {
 <li><strong>Imposto de Renda e custódia:</strong> regras vigentes na data da última revisão, que mudam com a legislação.</li>
 </ul>
 <p>Os simuladores de ativos <strong>descrevem</strong> dados: ordenam por vencimento ou por liquidez, agrupam por setor ou categoria e não fazem ranking, valor justo nem recomendação de compra.</p>
-<p>O comparativo <a href="/financiar-alugar-ou-consorcio/">Financiar, alugar ou consórcio</a> é diferente: é uma conta que ordena três <strong>caminhos</strong> pelo patrimônio líquido final, com as taxas que você informa. Ele nunca ordena bancos, administradoras ou produtos, e o resultado muda quando as premissas mudam.</p>`,
+<p>O comparativo <a href="/financiar-alugar-ou-consorcio/">Comprar à vista, financiar, consórcio ou alugar</a> é diferente: é uma conta que ordena os <strong>caminhos</strong> (comprar à vista, financiar, consórcio e alugar) pelo patrimônio líquido final, com as taxas que você informa. Ele nunca ordena bancos, administradoras ou produtos, e o resultado muda quando as premissas mudam.</p>`,
       ),
       secao(
         'Revisão e correções',
@@ -1030,7 +1034,7 @@ function paginaAprender(dividasDisponivel) {
 <li><a href="/simulador-fii/">Simulador de FII</a></li>
 <li><a href="/simulador-bdr/">Simulador de BDR</a></li>
 <li><a href="/simulador-etf/">Simulador de ETF</a></li>
-<li><a href=\"/financiar-alugar-ou-consorcio/\">Financiar, alugar ou consórcio</a></li>
+<li><a href=\"/financiar-alugar-ou-consorcio/\">Comprar à vista, financiar, consórcio ou alugar</a></li>
 </ul>`,
       ),
       secao('Livro infantil grátis', `<p>O livro <strong>Os Três Potes de Clara</strong>, de educação financeira infantil, está disponível de graça na tela Aprender do app.</p>`),

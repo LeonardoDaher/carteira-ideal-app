@@ -12,7 +12,7 @@ const B = 22
 const W = 340
 const H = 200
 
-const CHAVES: ChaveCenario[] = ['aluguel', 'financiamento', 'consorcio']
+const ROTAS_PADRAO: ChaveCenario[] = ['aluguel', 'financiamento', 'consorcio']
 
 /** Passo "redondo" (1, 2 ou 5 × 10^k) para o eixo vertical ter poucas linhas legíveis. */
 function passoRedondo(amplitude: number, linhas = 4) {
@@ -27,14 +27,15 @@ function passoRedondo(amplitude: number, linhas = 4) {
  * tracejado, pontilhado) além da cor: quem não distingue cores continua lendo o gráfico. Toque, arraste
  * ou use as setas do teclado para ver o valor de cada cenário em cada mês.
  */
-export function GraficoPatrimonio({ serie }: { serie: PontoMensal[] }) {
+export function GraficoPatrimonio({ serie, rotas = ROTAS_PADRAO }: { serie: PontoMensal[]; rotas?: ChaveCenario[] }) {
+  const CHAVES = rotas
   const [indice, setIndice] = useState<number | null>(null)
   const svgRef = useRef<SVGSVGElement>(null)
   const idLeitura = useId()
   const ultimo = serie.length - 1
 
   const dados = useMemo(() => {
-    const todos = serie.flatMap((p) => [p.financiamento, p.aluguel, p.consorcio])
+    const todos = serie.flatMap((p) => CHAVES.map((c) => p[c]))
     const minimo = Math.min(0, ...todos)
     const maximo = Math.max(...todos, 1)
     const passo = passoRedondo(maximo - minimo)
@@ -51,10 +52,9 @@ export function GraficoPatrimonio({ serie }: { serie: PontoMensal[] }) {
     for (let a = 0; a <= anosTotal; a += passoAnos) anos.push(a)
     const fim = serie[ultimo]
     const resumo =
-      `Patrimônio líquido ao longo de ${anosTotal} anos. No fim: ${NOMES_CENARIOS.financiamento} ${reais(fim.financiamento)}, ` +
-      `${NOMES_CENARIOS.aluguel} ${reais(fim.aluguel)}, ${NOMES_CENARIOS.consorcio} ${reais(fim.consorcio)}.`
-    return { x, y, caminhos: { aluguel: caminho('aluguel'), financiamento: caminho('financiamento'), consorcio: caminho('consorcio') }, grade, anos, resumo }
-  }, [serie, ultimo])
+      `Patrimônio líquido ao longo de ${anosTotal} anos. No fim: ` + CHAVES.map((c) => `${NOMES_CENARIOS[c]} ${reais(fim[c])}`).join(', ') + '.'
+    return { x, y, caminhos: Object.fromEntries(CHAVES.map((c) => [c, caminho(c)])) as Record<ChaveCenario, string>, grade, anos, resumo }
+  }, [serie, ultimo, CHAVES])
 
   const { x, y } = dados
   const atual = serie[indice ?? ultimo]

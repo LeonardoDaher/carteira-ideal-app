@@ -239,7 +239,7 @@ test('a página do comparativo de imóvel explica os custos e não indica instit
 test('o comparativo é citado na metodologia como exceção ao "não fazem ranking" e aparece no rodapé e no hub Aprender', async () => {
   const paginas = await gerarPaginas({ raiz, snapshot: SNAPSHOT_VAZIO })
   const metodologia = textoVisivel(paginas.find((p) => p.caminho === '/metodologia-e-fontes/').html)
-  assert.match(metodologia, /ordena três caminhos pelo patrimônio líquido final/)
+  assert.match(metodologia, /ordena os caminhos \(comprar à vista, financiar, consórcio e alugar\) pelo patrimônio líquido final/)
   assert.match(metodologia, /nunca ordena bancos, administradoras ou produtos/)
   const aprender = paginas.find((p) => p.caminho === '/aprender/').html
   assert.ok(aprender.includes('/financiar-alugar-ou-consorcio/'))

@@ -14,9 +14,9 @@ const campo = (nome: string) => screen.getByLabelText(nome) as HTMLInputElement
 const digitar = (nome: string, valor: string) => fireEvent.change(campo(nome), { target: { value: valor } })
 
 describe('SimuleImovel', () => {
-  it('abre com um vencedor, o ranking dos três e o aviso de que não indica produto', () => {
+  it('abre com um vencedor, o ranking das três rotas e o aviso de que não indica produto', () => {
     render(<SimuleImovel snapshot={comFocus} />)
-    expect(screen.getByRole('heading', { name: 'Financiar, alugar ou consórcio?' })).toBeTruthy()
+    expect(screen.getByRole('heading', { name: 'Comprar à vista, financiar, consórcio ou alugar?' })).toBeTruthy()
     expect(screen.getByText(/termina com o maior patrimônio:/)).toBeTruthy()
     const ranking = screen.getByText('Patrimônio líquido final').closest('.card') as HTMLElement
     expect(within(ranking).getByText(/1º/)).toBeTruthy()
@@ -63,7 +63,7 @@ describe('SimuleImovel', () => {
 
   it('entrada maior que o imóvel mostra o erro em vez do resultado', async () => {
     render(<SimuleImovel snapshot={comFocus} />)
-    fireEvent.change(campo('Entrada disponível'), { target: { value: '900.000' } })
+    fireEvent.change(campo('Entrada do financiamento'), { target: { value: '900.000' } })
     const alerta = await screen.findByRole('alert')
     expect(within(alerta).getByText(/A entrada não pode ser negativa nem maior/)).toBeTruthy()
     expect(screen.queryByText(/termina com o maior patrimônio:/)).toBeNull()
@@ -219,5 +219,86 @@ describe('SimuleImovel: de onde vem o dinheiro aplicado', () => {
     const bloco = screen.getByText('Financiar: cada custo e cada taxa').closest('details') as HTMLElement
     expect(within(bloco).queryByText('Capital inicial aplicado')).toBeNull()
     expect(within(bloco).getByText('Aportes mensais')).toBeTruthy()
+  })
+})
+
+describe('SimuleImovel: comprar à vista (D46)', () => {
+  it('por padrão a rota fica de fora e a tela diz quanto falta, com um atalho para incluí-la', () => {
+    render(<SimuleImovel snapshot={comFocus} />)
+    expect(campo('Dinheiro disponível hoje').value).toBe('120.000,00') // só a entrada e o ITBI
+    const aviso = screen.getByText(/Comprar à vista não entrou na comparação/).closest('div') as HTMLElement
+    expect(within(aviso).getByText(/seriam necessários R\$ 520\.000, e faltam R\$ 400\.000/)).toBeTruthy()
+    expect(screen.queryByText('Comprar à vista: cada custo e cada taxa')).toBeNull()
+    const ranking = screen.getByText('Patrimônio líquido final').closest('.card') as HTMLElement
+    expect(within(ranking).queryByText(/Comprar à vista/)).toBeNull()
+  })
+
+  it('o botão do aviso inclui a rota: 4 caminhos, bloco explicativo, coluna na tabela e linha no ponto de virada', async () => {
+    render(<SimuleImovel snapshot={comFocus} />)
+    fireEvent.click(screen.getByRole('button', { name: /Incluir comprar à vista \(usar R\$\s520\.000\)/ }))
+    const ranking = (await screen.findByText('Patrimônio líquido final')).closest('.card') as HTMLElement
+    expect(within(ranking).getByText(/Comprar à vista/)).toBeTruthy()
+    expect(within(ranking).getByText(/4º/)).toBeTruthy()
+    expect(screen.queryByText(/Comprar à vista não entrou na comparação/)).toBeNull()
+    expect(screen.getByText('Comprar à vista: cada custo e cada taxa')).toBeTruthy()
+    expect(screen.getByText(/Os quatro caminhos usam o mesmo dinheiro/)).toBeTruthy()
+    const tabela = screen.getByRole('table', { name: 'Para onde foi o dinheiro em cada caminho' })
+    expect(within(tabela).getAllByRole('columnheader').map((c) => c.textContent).filter(Boolean)).toEqual(['Financiar', 'Alugar', 'Consórcio', 'À vista'])
+    expect(screen.getByText('Comprar à vista × alugar:')).toBeTruthy()
+    expect(screen.getByRole('img', { name: /Comprar à vista R\$/ })).toBeTruthy()
+  })
+
+  it('digitar um valor que cobre o imóvel e o ITBI também inclui a rota', async () => {
+    render(<SimuleImovel snapshot={comFocus} />)
+    fireEvent.change(campo('Dinheiro disponível hoje'), { target: { value: '600.000' } })
+    expect(await screen.findByText('Comprar à vista: cada custo e cada taxa')).toBeTruthy()
+    // o dinheiro que sobra depois do imóvel e do ITBI (80.000) fica aplicado e aparece no bloco
+    const bloco = screen.getByText('Comprar à vista: cada custo e cada taxa').closest('details') as HTMLElement
+    expect(within(bloco).getByText(/Sobra do seu dinheiro depois de pagar o imóvel \(R\$ 500\.000\) e o ITBI\/cartório \(R\$ 20\.000\)/)).toBeTruthy()
+  })
+
+  it('o bloco explica os custos da rota: ITBI e custos de dono, sem juros nem seguros', async () => {
+    render(<SimuleImovel snapshot={comFocus} />)
+    fireEvent.click(screen.getByRole('button', { name: /Usar R\$\s520\.000 \(comprar à vista\)/ }))
+    const bloco = (await screen.findByText('Comprar à vista: cada custo e cada taxa')).closest('details') as HTMLElement
+    for (const item of ['ITBI, escritura e registro', 'Custos de quem é dono', 'Imóvel pago à vista', 'Valorização do imóvel', 'Rendimento bruto', 'Imposto de Renda']) {
+      expect(within(bloco).getAllByText(item).length, item).toBeGreaterThan(0)
+    }
+    expect(within(bloco).getByText(/Não há juros, seguros nem tarifa neste caminho/)).toBeTruthy()
+    expect(within(bloco).getByText(/o preço escondido deste caminho/)).toBeTruthy()
+  })
+
+  it('"Só entrada + ITBI" volta ao padrão e a rota sai; limpar o campo faz o mesmo', async () => {
+    render(<SimuleImovel snapshot={comFocus} />)
+    expect(screen.queryByRole('button', { name: 'Só entrada + ITBI' })).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: /Usar R\$\s520\.000 \(comprar à vista\)/ }))
+    await screen.findByText('Comprar à vista: cada custo e cada taxa')
+    fireEvent.click(screen.getByRole('button', { name: 'Só entrada + ITBI' }))
+    expect(await screen.findByText(/Comprar à vista não entrou na comparação/)).toBeTruthy()
+    fireEvent.change(campo('Dinheiro disponível hoje'), { target: { value: '700.000' } })
+    await screen.findByText('Comprar à vista: cada custo e cada taxa')
+    fireEvent.change(campo('Dinheiro disponível hoje'), { target: { value: '' } })
+    expect(await screen.findByText(/Comprar à vista não entrou na comparação/)).toBeTruthy()
+  })
+
+  it('dinheiro menor que a entrada + ITBI mostra o erro em português', async () => {
+    render(<SimuleImovel snapshot={comFocus} />)
+    fireEvent.change(campo('Dinheiro disponível hoje'), { target: { value: '50.000' } })
+    const alerta = await screen.findByRole('alert')
+    expect(within(alerta).getByText(/precisa cobrir ao menos a entrada mais o ITBI e o cartório/)).toBeTruthy()
+  })
+
+  it('subir a entrada acompanha o dinheiro disponível enquanto ele não foi informado', () => {
+    render(<SimuleImovel snapshot={comFocus} />)
+    fireEvent.change(campo('Entrada do financiamento'), { target: { value: '150.000' } })
+    expect(campo('Dinheiro disponível hoje').value).toBe('170.000,00') // 150.000 + ITBI de 20.000
+    expect(screen.queryByRole('alert')).toBeNull()
+  })
+
+  it('lista o dinheiro disponível nas premissas', () => {
+    render(<SimuleImovel snapshot={comFocus} />)
+    const premissas = screen.getByText('Todas as premissas desta simulação').closest('details') as HTMLElement
+    expect(within(premissas).getByText('Dinheiro disponível hoje')).toBeTruthy()
+    expect(within(premissas).getByText(/só a entrada e o ITBI/)).toBeTruthy()
   })
 })

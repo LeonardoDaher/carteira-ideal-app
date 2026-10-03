@@ -1,0 +1,57 @@
+O QUE É
+D46: "Comprar à vista" vira a quarta rota do comparativo de imóvel (comprar à vista, financiar, consórcio e alugar).
+1) Campo novo "Dinheiro disponível hoje". Sem preencher, tudo funciona exatamente como antes (só a entrada e o ITBI). Se for maior,
+   a sobra fica aplicada em todos os caminhos. Se cobrir o imóvel mais o ITBI, a rota "comprar à vista" entra na comparação; senão a
+   tela diz quanto falta e oferece um botão para preencher o valor necessário. Nunca se inventa dinheiro.
+2) À vista: paga o imóvel e o ITBI no mês 0, sem dívida, juros, seguros nem parcelas; só os custos de quem é dono. Como não paga parcela
+   nem aluguel, investe a mesma verba mensal dos outros caminhos. O "preço escondido" é o rendimento do dinheiro que virou imóvel.
+3) A tela ganhou: bloco "Comprar à vista: cada custo e cada taxa", quarta linha no gráfico, quarta coluna na tabela "Para onde foi
+   cada real", linha "Comprar à vista x alugar" no ponto de virada (que agora diz quem fica sempre na frente quando a ordem não muda).
+4) O título do cartão da landing, o hub Simule Bens, a página de SEO e a Metodologia passam a falar em quatro caminhos.
+5) Corrigido um defeito antigo da tabela comparativa (as bordas e o alinhamento das células nunca eram aplicados): agora ela tem bordas,
+   números à direita e cabe em até quatro colunas em tela de 360 px.
+6) O campo "Entrada disponível" passou a se chamar "Entrada do financiamento".
+
+NÃO MUDOU: o resultado de quem não preencher o dinheiro disponível. Foi comprovado comparando o motor da D45 com o da D46 em 12
+cenários (288 campos de cenário, contabilidade, investimentos, série mês a mês, ponto de virada e sensibilidade): idênticos.
+Também não mudaram: questionário, API, Meu Mês, Meus Ativos, Aprender, Simule Ativos e o endereço /financiar-alugar-ou-consorcio/.
+
+ARQUIVOS (em relação ao que você já subiu na D45)
+   + LEIA-ME-D46.txt
+   ~ docs/04-jornada-do-cliente.md
+   ~ docs/06-proximos-passos.md
+   ~ docs/07-registro-de-decisoes.md
+   ~ gerar-paginas.mjs
+   ~ index.html
+   ~ scripts/gerar-paginas.mjs
+   ~ scripts/gerar-paginas.test.mjs
+   ~ webapp-src/src/domain/simulaImovel.test.ts
+   ~ webapp-src/src/domain/simulaImovel.ts
+   ~ webapp-src/src/index.css
+   ~ webapp-src/src/screens/SimuleBens.test.tsx
+   ~ webapp-src/src/screens/SimuleBens.tsx
+   ~ webapp-src/src/screens/SimuleImovel.test.tsx
+   ~ webapp-src/src/screens/SimuleImovel.tsx
+   ~ webapp-src/src/ui/DetalheCustos.tsx
+   ~ webapp-src/src/ui/GraficoPatrimonio.tsx
+   Obs.: gerar-paginas.mjs na raiz é a cópia solta que já vinha no pacote; foi mantida igual a scripts/gerar-paginas.mjs.
+
+COMO SUBIR - no GitHub: Add file > Upload files
+1. Extraia o zip. Vai aparecer a pasta "D46-subir". Abra-a e arraste o CONTEÚDO (as pastas docs, scripts e webapp-src e os arquivos soltos),
+   não a pasta em si.
+2. Num ÚNICO envio, sem dividir. Os arquivos dependem uns dos outros; se só parte subir, o build da Vercel falha (a Vercel mantém o
+   site antigo no ar, mas aparece erro em Deployments).
+3. Mensagem do commit: "D46: comprar à vista, quarta rota do comparativo de imóvel".
+
+DEPOIS DO DEPLOY
+1. Landing: o cartão agora diz "Comprar à vista, financiar, consórcio ou alugar?". Toque nele: abre o Simule Bens; Imóvel abre o comparativo.
+2. Com os valores de partida, o campo "Dinheiro disponível hoje" mostra R$ 120.000 (entrada + ITBI) e aparece o aviso de que faltam
+   R$ 400.000 para comprar à vista. Toque em "Incluir comprar à vista": entram a quarta rota, o bloco explicativo, a quarta linha do gráfico
+   e a quarta coluna da tabela.
+3. Confira se o resultado das TRÊS rotas sem preencher o campo é o mesmo de antes (no exemplo padrão, alugar termina com R$ 1.867.687
+   e o consórcio com R$ 1.855.453, diferença de R$ 12.233).
+4. Revise o texto da página de SEO e dos avisos, que agora mencionam a compra à vista.
+
+VERIFICAÇÃO: 1170 testes do app (36 novos) e 180 dos scripts passando; typecheck, lint e build sem erros. A tela foi conferida num navegador
+(celular, rota ativada e desativada, tabela em 360, 390 e 430 px). Apliquei este zip por cima do pacote que já está no GitHub
+(original + D44 + D45) e rodei typecheck, testes e build nesse resultado, para garantir que a lista de arquivos está completa.

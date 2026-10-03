@@ -133,8 +133,9 @@ A mudança para a API tirou a metodologia do código visível. Ainda assim, vale
 ## 11. Simule Bens: à vista, carro e moto (decisões D45 em diante)
 
 - [x] **Hub Simule Bens** (D45) com Imóvel ativo e Carro e Moto "em breve".
-- [ ] **D46, comprar à vista no imóvel:** quarta rota, com a pergunta nova "quanto você tem disponível hoje" (quem financia, entra no consórcio ou aluga aplica a sobra). Mexe no motor já publicado: testes de conservação e reconciliação precisam cobrir a rota nova. Depois, trocar o título do cartão da landing para "Comprar à vista, financiar, consórcio ou alugar?".
-- [ ] **Caso "não tenho o dinheiro todo":** "juntar e comprar depois", com aporte mensal. Fica para depois da D46.
+- [x] **D46, comprar à vista no imóvel:** quarta rota, com o campo "Dinheiro disponível hoje"; título da landing atualizado. Regressão comprovada contra o motor da D45.
+- [ ] **Conferir com uso real:** o resultado do à vista depende de a pessoa investir a diferença mensal; ver se a explicação da tela basta para o cliente entender isso.
+- [ ] **Caso "não tenho o dinheiro todo":** "juntar e comprar depois", com aporte mensal até chegar ao valor do imóvel. Hoje a tela só avisa quanto falta.
 - [ ] **Carro:** depreciação (não linear), IPVA, seguro, manutenção, IOF e gravame, financiamento em Price e juros próprios, índice do consórcio, e a rota "alugar" como locação ou assinatura (o carro não tem um aluguel óbvio, como o imóvel tem). Fonte sugerida para o valor de partida da taxa: série de taxa média de financiamento de veículos do Banco Central (a confirmar).
 - [ ] **Moto:** reaproveita o motor do carro com outros valores de partida; decidir se moto de trabalho (renda gerada pelo bem) é caso à parte.
 - [ ] **Cada bem novo:** página de SEO, registro de decisão, testes e **revisão do texto de aviso pelo responsável certificado**.

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import type { ChaveCenario } from './simulaImovel'
 import {
   calcularCet,
   inputsDoSnapshot,
@@ -131,7 +132,7 @@ describe('regras do racional', () => {
   const r = simularComparativoImobiliario({})
 
   it('o vencedor é o de maior patrimônio e o ranking está em ordem', () => {
-    const p = (k: 'financiamento' | 'aluguel' | 'consorcio') => r.cenarios[k].patrimonioFinal
+    const p = (k: ChaveCenario) => r.cenarios[k].patrimonioFinal
     expect(p(r.vencedor)).toBe(Math.max(p('financiamento'), p('aluguel'), p('consorcio')))
     expect(r.ranking[0]).toBe(r.vencedor)
     expect(p(r.ranking[0])).toBeGreaterThanOrEqual(p(r.ranking[1]))
@@ -423,5 +424,182 @@ describe('de onde vem o dinheiro aplicado', () => {
     const a = simularComparativoImobiliario({}).detalhe.investimentos.aluguel
     expect(a.aportesMensais).toBeGreaterThan(0)
     expect(a.aportesMensais).toBeLessThan(5_400 * 240)
+  })
+})
+
+// ───────────────────────── D46: comprar à vista ─────────────────────────
+
+const ROTAS_4 = ['financiamento', 'aluguel', 'consorcio', 'avista'] as const
+const COM_DINHEIRO = { dinheiroDisponivel: 520_000 } // imóvel de 500.000 + ITBI/cartório de 4% (20.000)
+
+describe('comprar à vista: quando entra na comparação', () => {
+  it('sem informar o dinheiro disponível, usa só entrada + ITBI: à vista fica de fora e diz quanto falta', () => {
+    const r = simularComparativoImobiliario({})
+    expect(r.rotas).toEqual(['financiamento', 'aluguel', 'consorcio'])
+    expect(r.ranking).toHaveLength(3)
+    expect(r.ranking).not.toContain('avista')
+    expect(r.avista).toEqual({ disponivel: false, necessario: 520_000, falta: 400_000 })
+    expect(r.capitalInicial).toBe(120_000)
+  })
+
+  it('informar null e informar entrada + ITBI explicitamente dão o mesmo resultado', () => {
+    const a = simularComparativoImobiliario({ dinheiroDisponivel: null })
+    const b = simularComparativoImobiliario({ dinheiroDisponivel: 120_000 })
+    expect(b.cenarios).toEqual(a.cenarios)
+    expect(b.ranking).toEqual(a.ranking)
+  })
+
+  it('com dinheiro para o imóvel e o ITBI, à vista entra: 4 rotas, nada falta', () => {
+    const r = simularComparativoImobiliario(COM_DINHEIRO)
+    expect(r.rotas).toEqual([...ROTAS_4])
+    expect(r.ranking).toHaveLength(4)
+    expect(r.ranking).toContain('avista')
+    expect(r.avista).toEqual({ disponivel: true, necessario: 520_000, falta: 0 })
+    expect(r.capitalInicial).toBe(520_000)
+  })
+
+  it('um real a menos que o necessário já deixa a rota de fora', () => {
+    const r = simularComparativoImobiliario({ dinheiroDisponivel: 519_999 })
+    expect(r.avista.disponivel).toBe(false)
+    expect(r.avista.falta).toBe(1)
+    expect(r.ranking).not.toContain('avista')
+  })
+
+  it('o dinheiro disponível não pode ser menor que a entrada + ITBI nem negativo', () => {
+    expect(validarInputs(inputsPadrao({ dinheiroDisponivel: 100_000 })).join(' ')).toMatch(/cobrir ao menos a entrada mais o ITBI/)
+    expect(validarInputs(inputsPadrao({ dinheiroDisponivel: -5 })).join(' ')).toMatch(/negativo/)
+    expect(validarInputs(inputsPadrao({ dinheiroDisponivel: 120_000 }))).toEqual([])
+    expect(validarInputs(inputsPadrao({ dinheiroDisponivel: null }))).toEqual([])
+    expect(validarInputs(inputsPadrao({ entrada: 200_000, dinheiroDisponivel: 210_000 })).join(' ')).toMatch(/entrada mais o ITBI/)
+  })
+})
+
+describe('comprar à vista: o que a rota faz', () => {
+  const r = simularComparativoImobiliario(COM_DINHEIRO)
+
+  it('não tem juros, seguros nem parcelas: o custo é só ITBI e custos de dono', () => {
+    const d = r.detalhe.avista
+    expect(d.valorPago).toBe(500_000)
+    expect(d.itbiCartorio).toBe(20_000)
+    perto(d.itbiCartorio + d.custosPropriedade, r.cenarios.avista.custoTotal, 0.05)
+    expect(r.cenarios.avista.saldoDevedor).toBe(0)
+    perto(r.cenarios.avista.totalPagoDeBolso, 500_000 + 20_000 + d.custosPropriedade, 0.05)
+  })
+
+  it('o dinheiro que sobra depois do imóvel e do ITBI fica aplicado desde o mês 0', () => {
+    expect(r.detalhe.investimentos.avista.capitalInicial).toBe(0) // 520.000 − 520.000
+    const mais = simularComparativoImobiliario({ dinheiroDisponivel: 620_000 })
+    expect(mais.detalhe.investimentos.avista.capitalInicial).toBe(100_000)
+    expect(mais.cenarios.avista.patrimonioFinal).toBeGreaterThan(r.cenarios.avista.patrimonioFinal)
+  })
+
+  it('sem parcela nem aluguel, a mesma verba mensal dos outros caminhos vai para o investimento (nunca define o orçamento)', () => {
+    const a = r.detalhe.investimentos.avista
+    expect(r.detalhe.orcamentoInicial.definidoPor).not.toBe('avista')
+    perto(a.gastoPrimeiroMes + a.primeiroAporte, r.detalhe.orcamentoInicial.valor, 0.02)
+    expect(a.primeiroAporte).toBeGreaterThan(a.gastoPrimeiroMes) // gasta ~417; guarda o resto
+  })
+
+  it('o patrimônio no mês 0 já perdeu o ITBI: imóvel + sobra = dinheiro disponível − ITBI', () => {
+    perto(r.serieMensal[0].avista, 520_000 - 20_000, 0.02)
+    expect(r.serieMensal).toHaveLength(241)
+    perto(r.serieMensal.at(-1)!.avista, r.cenarios.avista.patrimonioFinal, 0.02)
+  })
+
+  it('o dinheiro extra também é aplicado em quem financia, aluga e entra no consórcio', () => {
+    const r2 = simularComparativoImobiliario({ dinheiroDisponivel: 300_000 })
+    expect(r2.avista.disponivel).toBe(false)
+    expect(r2.detalhe.investimentos.aluguel.capitalInicial).toBe(300_000)
+    expect(r2.detalhe.investimentos.consorcio.capitalInicial).toBe(300_000)
+    expect(r2.detalhe.investimentos.financiamento.capitalInicial).toBe(180_000) // 300.000 − (100.000 + 20.000)
+    const base = simularComparativoImobiliario({})
+    expect(r2.cenarios.aluguel.patrimonioFinal).toBeGreaterThan(base.cenarios.aluguel.patrimonioFinal)
+    expect(r2.cenarios.financiamento.patrimonioFinal).toBeGreaterThan(base.cenarios.financiamento.patrimonioFinal)
+  })
+})
+
+describe('comprar à vista: a conta fecha (mesmo teste das outras rotas)', () => {
+  const casos: [string, Parameters<typeof simularComparativoImobiliario>[0]][] = [
+    ['dinheiro exato', COM_DINHEIRO],
+    ['sobrando dinheiro', { dinheiroDisponivel: 800_000 }],
+    ['Price', { ...COM_DINHEIRO, sistema: 'PRICE' }],
+    ['lance abatendo a parcela', { ...COM_DINHEIRO, lance: 60_000, regraLance: 'parcela', mesContemplacao: 24 }],
+    ['com custos de venda', { ...COM_DINHEIRO, descontarCustosVenda: true }],
+    ['taxa já líquida', { ...COM_DINHEIRO, aplicarIR: false }],
+    ['horizonte curto', { ...COM_DINHEIRO, horizonteAnos: 5, mesContemplacao: 24 }],
+    ['horizonte maior que o financiamento', { ...COM_DINHEIRO, horizonteAnos: 35, prazoFinanciamentoAnos: 20 }],
+    ['imóvel que desvaloriza', { ...COM_DINHEIRO, valorizacaoImovelAA: -2 }],
+    ['entrada grande', { dinheiroDisponivel: 900_000, entrada: 300_000 }],
+  ]
+
+  it.each(casos)('%s: patrimônio = colocado − custos + valorização + rendimento − IR − venda, nas 4 rotas', (_nome, entrada) => {
+    const r = simularComparativoImobiliario(entrada)
+    expect(r.rotas).toHaveLength(4)
+    for (const k of ROTAS_4) {
+      const c = r.detalhe.contabilidade[k]
+      expect(Math.abs(c.diferenca), `${k}: diferença ${c.diferenca}`).toBeLessThanOrEqual(1)
+      expect(c.patrimonioFinal).toBe(r.cenarios[k].patrimonioFinal)
+    }
+    const total = r.detalhe.contabilidade.aluguel.totalColocado
+    for (const k of ROTAS_4) expect(r.detalhe.contabilidade[k].totalColocado).toBe(total)
+  })
+
+  it('com taxas zeradas, as quatro rotas fecham o mesmo total (patrimônio + custo)', () => {
+    const r = simularComparativoImobiliario({ ...SEM_TAXAS, ...COM_DINHEIRO, horizonteAnos: 10, jurosNominalAA: 9 })
+    const alvo = r.cenarios.aluguel.patrimonioFinal + r.cenarios.aluguel.custoTotal
+    for (const k of ROTAS_4) perto(r.cenarios[k].patrimonioFinal + r.cenarios[k].custoTotal, alvo, 1)
+  })
+
+  it('a decomposição da vantagem continua somando exatamente com quatro rotas', () => {
+    for (const entrada of [COM_DINHEIRO, { ...COM_DINHEIRO, rendimentoAA: 4, valorizacaoImovelAA: 9 }, { ...COM_DINHEIRO, descontarCustosVenda: true }]) {
+      const r = simularComparativoImobiliario(entrada)
+      const [p, s] = r.ranking
+      const a = r.detalhe.contabilidade[p]
+      const b = r.detalhe.contabilidade[s]
+      const soma =
+        b.custos - a.custos + (a.valorizacaoImovel - b.valorizacaoImovel) + (a.rendimentoBruto - a.irSobreRendimento - (b.rendimentoBruto - b.irSobreRendimento)) + (b.custosDeVenda - a.custosDeVenda)
+      perto(soma, r.vantagemSobreSegundo, 1)
+    }
+  })
+})
+
+describe('comprar à vista: o que move o resultado', () => {
+  it('valorização maior favorece quem tem o imóvel; rendimento maior favorece quem aluga', () => {
+    const base = simularComparativoImobiliario(COM_DINHEIRO)
+    const sobe = simularComparativoImobiliario({ ...COM_DINHEIRO, valorizacaoImovelAA: 11 })
+    expect(sobe.cenarios.avista.patrimonioFinal).toBeGreaterThan(base.cenarios.avista.patrimonioFinal)
+    const rende = simularComparativoImobiliario({ ...COM_DINHEIRO, rendimentoAA: 16 })
+    expect(rende.cenarios.aluguel.patrimonioFinal).toBeGreaterThan(rende.cenarios.avista.patrimonioFinal)
+  })
+
+  it('com juros do financiamento muito acima do rendimento, pagar à vista bate financiar', () => {
+    const r = simularComparativoImobiliario({ ...COM_DINHEIRO, jurosNominalAA: 20, rendimentoAA: 6 })
+    expect(r.cenarios.avista.patrimonioFinal).toBeGreaterThan(r.cenarios.financiamento.patrimonioFinal)
+  })
+
+  it('com rendimento zero e imóvel valorizando, comprar à vista bate alugar (aluguel é só custo)', () => {
+    const r = simularComparativoImobiliario({ ...COM_DINHEIRO, rendimentoAA: 0, valorizacaoImovelAA: 4 })
+    expect(r.cenarios.avista.patrimonioFinal).toBeGreaterThan(r.cenarios.aluguel.patrimonioFinal)
+  })
+
+  it('o ponto de virada de à vista × aluguel existe quando a rota entra e empata na valorização encontrada', () => {
+    const pv = pontoDeVirada(inputsPadrao(COM_DINHEIRO))
+    expect(pv.avistaVsAluguel).not.toBeNull()
+    const r = simularComparativoImobiliario({ ...COM_DINHEIRO, valorizacaoImovelAA: pv.avistaVsAluguel! })
+    expect(Math.abs(r.patrimonioSemCustosVenda.avista - r.patrimonioSemCustosVenda.aluguel)).toBeLessThan(5_000)
+    const acima = simularComparativoImobiliario({ ...COM_DINHEIRO, valorizacaoImovelAA: pv.avistaVsAluguel! + 1.5 }).patrimonioSemCustosVenda
+    expect(acima.avista).toBeGreaterThan(acima.aluguel)
+  })
+
+  it('sem dinheiro para o à vista, o ponto de virada dele é null e os outros continuam iguais', () => {
+    const pv = pontoDeVirada(inputsPadrao({}))
+    expect(pv.avistaVsAluguel).toBeNull()
+    expect(pv.financiamentoVsAluguel).not.toBeNull()
+  })
+
+  it('a sensibilidade à contemplação considera o vencedor entre as 4 rotas', () => {
+    const s = simularComparativoImobiliario(COM_DINHEIRO).sensibilidadeContemplacao!
+    expect(s.length).toBeGreaterThan(0)
+    for (const x of s) expect(ROTAS_4).toContain(x.vencedor)
   })
 })

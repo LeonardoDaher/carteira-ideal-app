@@ -10,16 +10,15 @@ import {
   simularComparativoImobiliario,
   validarInputs,
 } from '../domain/simulaImovel'
-import type { ChaveCenario, InputsComparativo, ResultadoComparativo } from '../domain/simulaImovel'
+import type { ChaveCenario, InputsComparativo, PontoDeVirada, ResultadoComparativo } from '../domain/simulaImovel'
 import { CampoNumero } from '../ui/CampoNumero'
 import { CampoReais } from '../ui/CampoReais'
-import { BlocoAlugar, BlocoConsorcio, BlocoFinanciar, ComoLer, ParaOndeFoi, PremissasUsadas } from '../ui/DetalheCustos'
+import { BlocoAlugar, BlocoAvista, BlocoConsorcio, BlocoFinanciar, ComoLer, ParaOndeFoi, PremissasUsadas, reais0 } from '../ui/DetalheCustos'
 import { GraficoPatrimonio } from '../ui/GraficoPatrimonio'
 import { VoltarInicio } from '../ui/VoltarInicio'
 import type { AppCtx } from '../state/useAppState'
 
-const CHAVES: ChaveCenario[] = ['financiamento', 'aluguel', 'consorcio']
-const NOMES_CURTOS: Record<ChaveCenario, string> = { financiamento: 'Financiar', aluguel: 'Alugar', consorcio: 'Consórcio' }
+const NOMES_CURTOS: Record<ChaveCenario, string> = { financiamento: 'Financiar', aluguel: 'Alugar', consorcio: 'Consórcio', avista: 'À vista' }
 
 function resolver(entrada: InputsComparativo): { resultado: ResultadoComparativo | null; erros: string[] } {
   const erros = validarInputs(entrada)
@@ -28,7 +27,7 @@ function resolver(entrada: InputsComparativo): { resultado: ResultadoComparativo
 }
 
 /**
- * Simule Imóvel (D44): compara financiar, alugar e investir, ou entrar num consórcio, e aponta qual das três
+ * Simule Imóvel (D44, D46): compara comprar à vista, financiar, entrar num consórcio ou alugar e investir, e aponta qual das
  * rotas termina com o maior patrimônio líquido depois de N anos. Tela avulsa: não depende do questionário.
  * Conta matemática sobre premissas de taxa; não indica banco, administradora nem produto.
  */
@@ -49,16 +48,20 @@ export function SimuleImovel({
   const mudar = <K extends keyof InputsComparativo>(chave: K, valor: InputsComparativo[K]) => setEntrada((e) => ({ ...e, [chave]: valor }))
   const focus = snapshot.focus
   const cdi = snapshot.indicadores.cdi?.valor
+  const custosIniciais = (entrada.valorImovel * entrada.custosIniciaisPct) / 100
+  const disponivel = entrada.dinheiroDisponivel ?? entrada.entrada + custosIniciais
+  const necessarioAvista = Math.round((entrada.valorImovel + custosIniciais) * 100) / 100
 
   return (
     <div className="screen">
       <VoltarInicio href="./?tela=simuleBens" rotulo="← Simule Bens" />
 
       <div className="col" style={{ gap: 4 }}>
-        <h1 style={{ fontSize: 21 }}>Financiar, alugar ou consórcio?</h1>
+        <h1 style={{ fontSize: 21 }}>Comprar à vista, financiar, consórcio ou alugar?</h1>
         <div className="muted small justify">
-          Informe o imóvel e as taxas e veja qual das três rotas termina com o <strong>maior patrimônio líquido</strong> depois de
-          alguns anos. É uma conta matemática, que compara o dinheiro de bolso de cada caminho nas mesmas condições.
+          Informe o imóvel e as taxas e veja qual dos caminhos termina com o <strong>maior patrimônio líquido</strong> depois de
+          alguns anos. É uma conta matemática, que compara o dinheiro de bolso de cada caminho nas mesmas condições. Para incluir
+          a compra à vista, informe quanto dinheiro você tem hoje.
         </div>
         <a className="small" href="#resultado-imovel" style={{ color: 'var(--accent)' }}>Ir para o resultado ↓</a>
       </div>
@@ -73,12 +76,34 @@ export function SimuleImovel({
                   <CampoReais rotulo="Valor do imóvel" valor={entrada.valorImovel} onMudar={(v) => mudar('valorImovel', v)} />
                 </div>
                 <CampoReais
-                  rotulo="Entrada disponível"
+                  rotulo="Entrada do financiamento"
                   valor={entrada.entrada}
                   onMudar={(v) => mudar('entrada', v)}
                   dica={entrada.valorImovel > 0 ? `${porcentagem((entrada.entrada / entrada.valorImovel) * 100, 0, 1)} do imóvel` : undefined}
                 />
                 <CampoNumero rotulo="Comparar por quantos anos?" valor={entrada.horizonteAnos} onMudar={(v) => mudar('horizonteAnos', v)} sufixo="anos" casas={0} />
+                <div className="span2 col" style={{ gap: 6 }}>
+                  <CampoReais
+                    rotulo="Dinheiro disponível hoje"
+                    valor={disponivel}
+                    onMudar={(v) => mudar('dinheiroDisponivel', v > 0 ? v : null)}
+                    dica={
+                      entrada.dinheiroDisponivel === null
+                        ? 'Por enquanto, só a entrada e o ITBI. Informe tudo o que você tem: a sobra fica aplicada e, se der para pagar o imóvel, entra a rota de comprar à vista.'
+                        : `Para comprar à vista seriam necessários ${reais0(necessarioAvista)} (o imóvel mais ITBI e cartório). A sobra, em qualquer caminho, fica aplicada.`
+                    }
+                  />
+                  <div className="row" style={{ gap: 6, flexWrap: 'wrap' }}>
+                    <button type="button" className="chip" onClick={() => mudar('dinheiroDisponivel', necessarioAvista)}>
+                      Usar {reais0(necessarioAvista)} (comprar à vista)
+                    </button>
+                    {entrada.dinheiroDisponivel !== null && (
+                      <button type="button" className="chip" onClick={() => mudar('dinheiroDisponivel', null)}>
+                        Só entrada + ITBI
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
             </details>
 
@@ -190,13 +215,13 @@ export function SimuleImovel({
               ))}
             </div>
           ) : (
-            <Resultado r={resultado} entrada={adiada} />
+            <Resultado r={resultado} entrada={adiada} onIncluirAvista={(v) => mudar('dinheiroDisponivel', v)} />
           )}
         </div>
       </div>
 
       <div className="card-outline small muted justify" style={{ lineHeight: 1.5 }} role="note">
-        <strong>O que este resultado é, e o que não é.</strong> É uma conta matemática: com as taxas e prazos informados, qual das três
+        <strong>O que este resultado é, e o que não é.</strong> É uma conta matemática: com as taxas e prazos informados, qual das
         rotas deixa o maior patrimônio. Ele <strong>não indica banco, administradora de consórcio nem produto</strong>, e não é
         recomendação de investimento, de financiamento ou de consórcio. As projeções de juros e inflação podem não se confirmar; por
         isso a tela mostra o ponto em que o vencedor muda. Rentabilidade passada não garante rentabilidade futura. Confira as condições
@@ -206,9 +231,36 @@ export function SimuleImovel({
   )
 }
 
-function Resultado({ r, entrada }: { r: ResultadoComparativo; entrada: InputsComparativo }) {
+const FRASES_VIRADA: Record<'avista' | 'financiamento' | 'consorcio', { titulo: string; sujeito: string }> = {
+  avista: { titulo: 'Comprar à vista × alugar', sujeito: 'comprar à vista' },
+  financiamento: { titulo: 'Financiar × alugar', sujeito: 'financiar' },
+  consorcio: { titulo: 'Consórcio × alugar', sujeito: 'o consórcio' },
+}
+
+/** Uma linha do ponto de virada: a valorização do imóvel em que a rota e o aluguel empatam, ou quem fica sempre na frente. */
+function LinhaVirada({ quem, r, pv, valorizacao }: { quem: 'avista' | 'financiamento' | 'consorcio'; r: ResultadoComparativo; pv: PontoDeVirada; valorizacao: number }) {
+  const f = FRASES_VIRADA[quem]
+  const ponto = quem === 'avista' ? pv.avistaVsAluguel : quem === 'financiamento' ? pv.financiamentoVsAluguel : pv.consorcioVsAluguel
+  const naFrente = r.patrimonioSemCustosVenda[quem] >= r.patrimonioSemCustosVenda.aluguel ? f.sujeito : 'alugar e investir'
+  return (
+    <div className="small justify" style={{ lineHeight: 1.5 }}>
+      {ponto != null ? (
+        <>
+          <strong>{f.titulo}:</strong> empatam se o imóvel valorizar {porcentagem(ponto)} ao ano (você supôs {porcentagem(valorizacao)}). Acima disso, {f.sujeito} leva vantagem; abaixo,
+          alugar e investir.
+        </>
+      ) : (
+        <>
+          <strong>{f.titulo}:</strong> entre {pv.intervalo[0]}% e {pv.intervalo[1]}% de valorização ao ano, a ordem entre os dois não muda com as demais premissas: {naFrente} fica sempre à frente.
+        </>
+      )}
+    </div>
+  )
+}
+
+function Resultado({ r, entrada, onIncluirAvista }: { r: ResultadoComparativo; entrada: InputsComparativo; onIncluirAvista: (valor: number) => void }) {
   const [primeiro, segundo] = r.ranking
-  const maior = Math.max(...CHAVES.map((c) => r.cenarios[c].patrimonioFinal), 1)
+  const maior = Math.max(...r.rotas.map((c) => r.cenarios[c].patrimonioFinal), 1)
   const pv = r.pontoDeVirada
   const fimDeVida = r.cenarios
 
@@ -227,6 +279,20 @@ function Resultado({ r, entrada }: { r: ResultadoComparativo; entrada: InputsCom
           </span>
         )}
       </div>
+
+      {!r.avista.disponivel && (
+        <div className="card-outline col" style={{ gap: 8 }} role="note">
+          <span className="small justify" style={{ lineHeight: 1.5 }}>
+            <strong>Comprar à vista não entrou na comparação.</strong> Com {reais0(r.capitalInicial)} disponíveis você não paga o imóvel ({reais0(entrada.valorImovel)}) e o ITBI e o
+            cartório: seriam necessários {reais0(r.avista.necessario)}, e faltam {reais0(r.avista.falta)}. Informe em "Dinheiro disponível hoje" quanto você tem para incluir essa rota.
+          </span>
+          <div className="row">
+            <button type="button" className="chip" onClick={() => onIncluirAvista(r.avista.necessario)}>
+              Incluir comprar à vista (usar {reais0(r.avista.necessario)})
+            </button>
+          </div>
+        </div>
+      )}
 
       <ComoLer r={r} entrada={entrada} />
 
@@ -248,13 +314,13 @@ function Resultado({ r, entrada }: { r: ResultadoComparativo; entrada: InputsCom
         <span className="tiny muted justify">
           Valores em R$ do último mês simulado. Imóvel a preço de mercado + investimentos (líquidos de IR) − dívida restante
           {entrada.descontarCustosVenda ? ', já descontados os custos de venda' : '. Sem custos de venda'}.
-          Com os custos de venda: {CHAVES.map((c) => `${NOMES_CURTOS[c]} ${reais(r.patrimonioComCustosVenda[c])}`).join('; ')}.
+          Com os custos de venda: {r.rotas.map((c) => `${NOMES_CURTOS[c]} ${reais(r.patrimonioComCustosVenda[c])}`).join('; ')}.
         </span>
       </div>
 
       <div className="card col" style={{ gap: 10 }}>
         <span style={{ fontWeight: 700, fontSize: 14.5 }}>Como o patrimônio evolui</span>
-        <GraficoPatrimonio serie={r.serieMensal} />
+        <GraficoPatrimonio serie={r.serieMensal} rotas={r.rotas.includes('avista') ? ['aluguel', 'financiamento', 'consorcio', 'avista'] : ['aluguel', 'financiamento', 'consorcio']} />
       </div>
 
       <div className="card col" style={{ gap: 10 }}>
@@ -263,39 +329,18 @@ function Resultado({ r, entrada }: { r: ResultadoComparativo; entrada: InputsCom
 
       <div className="col" style={{ gap: 10 }}>
         <span style={{ fontWeight: 700, fontSize: 14.5 }}>Cada custo e cada taxa, caminho por caminho</span>
+        {r.avista.disponivel && <BlocoAvista r={r} entrada={entrada} />}
         <BlocoFinanciar r={r} entrada={entrada} />
-        <BlocoAlugar r={r} entrada={entrada} />
         <BlocoConsorcio r={r} entrada={entrada} />
+        <BlocoAlugar r={r} entrada={entrada} />
       </div>
 
       {pv && (
         <div className="card col" style={{ gap: 8 }}>
           <span style={{ fontWeight: 700, fontSize: 14.5 }}>Em que ponto o resultado muda?</span>
-          <div className="small justify" style={{ lineHeight: 1.5 }}>
-            {pv.financiamentoVsAluguel != null ? (
-              <>
-                <strong>Financiar × alugar:</strong> empatam se o imóvel valorizar {porcentagem(pv.financiamentoVsAluguel)} ao ano (você supôs{' '}
-                {porcentagem(entrada.valorizacaoImovelAA)}). Acima disso, financiar leva vantagem; abaixo, alugar e investir.
-              </>
-            ) : (
-              <>
-                <strong>Financiar × alugar:</strong> entre {pv.intervalo[0]}% e {pv.intervalo[1]}% de valorização ao ano, a ordem entre os dois não muda
-                com as demais premissas.
-              </>
-            )}
-          </div>
-          <div className="small justify" style={{ lineHeight: 1.5 }}>
-            {pv.consorcioVsAluguel != null ? (
-              <>
-                <strong>Consórcio × alugar:</strong> empatam com valorização de {porcentagem(pv.consorcioVsAluguel)} ao ano. Acima, o consórcio leva
-                vantagem; abaixo, alugar e investir.
-              </>
-            ) : (
-              <>
-                <strong>Consórcio × alugar:</strong> entre {pv.intervalo[0]}% e {pv.intervalo[1]}% de valorização ao ano, a ordem entre os dois não muda.
-              </>
-            )}
-          </div>
+          {r.avista.disponivel && <LinhaVirada quem="avista" r={r} pv={pv} valorizacao={entrada.valorizacaoImovelAA} />}
+          <LinhaVirada quem="financiamento" r={r} pv={pv} valorizacao={entrada.valorizacaoImovelAA} />
+          <LinhaVirada quem="consorcio" r={r} pv={pv} valorizacao={entrada.valorizacaoImovelAA} />
 
           {r.sensibilidadeContemplacao && r.sensibilidadeContemplacao.length > 0 && (
             <>
@@ -329,13 +374,18 @@ function Resultado({ r, entrada }: { r: ResultadoComparativo; entrada: InputsCom
         <summary style={{ fontWeight: 700, fontSize: 13.5, cursor: 'pointer' }}>Como a conta é feita</summary>
         <div className="col small muted justify" style={{ gap: 8, marginTop: 10, lineHeight: 1.5 }}>
           <span>
-            <strong>Mesmo dinheiro nos três caminhos.</strong> A entrada e o ITBI/cartório do financiamento ficam aplicados desde o mês 0 para
-            quem aluga ou entra no consórcio. Todo mês, o maior desembolso entre os três vira o orçamento de referência: quem paga menos
-            investe a diferença. Assim, nenhum caminho leva vantagem só por gastar menos.
+            <strong>Mesmo dinheiro em todos os caminhos.</strong> O dinheiro que você tem hoje fica aplicado desde o mês 0, menos o que cada caminho
+            gasta na compra: a entrada e o ITBI/cartório no financiamento; o imóvel e o ITBI à vista; nada, para quem aluga e no consórcio até a
+            contemplação. Todo mês, o maior desembolso entre os caminhos vira o orçamento de referência: quem paga menos investe a diferença. Assim,
+            nenhum caminho leva vantagem só por gastar menos.
           </span>
           <span>
             <strong>Financiar.</strong> Tabela SAC ou Price pela taxa nominal ao ano dividida por 12, com seguros (MIP sobre o saldo, DFI sobre o imóvel)
             e tarifa. TR zerada. Patrimônio = imóvel valorizado − saldo devedor + investimentos.
+          </span>
+          <span>
+            <strong>Comprar à vista.</strong> Só entra se o dinheiro disponível cobrir o imóvel e o ITBI/cartório. Você paga tudo no mês 0, não tem dívida, juros nem
+            seguros, e paga apenas os custos de quem é dono. Como não há parcela nem aluguel, a mesma verba mensal dos outros caminhos vai para o investimento.
           </span>
           <span>
             <strong>Alugar.</strong> Aluguel reajustado uma vez por ano; o capital inicial e as diferenças mensais ficam aplicados.

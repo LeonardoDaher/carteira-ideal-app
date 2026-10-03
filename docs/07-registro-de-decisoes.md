@@ -905,3 +905,30 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 **Consequência.** Um clique a mais para quem sai da landing até o comparativo de imóvel (landing → hub → imóvel), o mesmo custo do Simule Ativos. Em troca, a landing não cresce quando carro e moto chegarem.
 
 **Testes.** 1.128 → 1.134 no app: o hub (links, itens indisponíveis sem link, aviso, volta à landing), o retorno do imóvel ao hub e o `?tela=simuleBens` abrindo a tela sem nenhuma resposta salva.
+
+## D46 (03/10/2026): Comprar à vista, a quarta rota do comparativo de imóvel
+
+**Contexto.** No desenho do responsável, "comprar" significa **pagar à vista**: as rotas passam a ser comprar à vista, financiar, consórcio e alugar. A D44 só tinha as três últimas.
+
+**Decisão: campo novo "Dinheiro disponível hoje" (`dinheiroDisponivel`).** Quanto a pessoa tem hoje, em R$. Regras:
+- **`null` (padrão) = só a entrada + o ITBI do financiamento**, exatamente o comportamento anterior. Com isso, **nada do que estava publicado muda** para quem não mexer no campo. Comprovado por um teste de regressão que comparou o motor da D45 com o da D46 em 12 cenários (288 campos de cenário, a contabilidade, os investimentos, a série mês a mês, o ponto de virada e a sensibilidade): idênticos, número a número.
+- **Maior que a entrada + ITBI:** a sobra fica aplicada desde o mês 0 em todos os caminhos (no financiamento, `C − entrada − ITBI`; no aluguel e no consórcio, `C` inteiro).
+- **Menor que a entrada + ITBI:** erro em português ("precisa cobrir ao menos a entrada mais o ITBI e o cartório").
+- **Cobre o imóvel + ITBI (`C ≥ V + ITBI`): a rota "comprar à vista" entra** (4 caminhos). **Senão, fica de fora do ranking**, e a tela diz quanto falta, com um botão que preenche o valor necessário. Nunca se inventa dinheiro para viabilizá-la.
+- Na tela, enquanto o campo não for informado, ele acompanha a entrada (entrada + ITBI). Apagar o campo volta a esse modo. O campo antigo "Entrada disponível" passou a se chamar **"Entrada do financiamento"**, porque "disponível" agora é o dinheiro total.
+
+**Como a rota funciona.** No mês 0 paga o imóvel inteiro e o ITBI/cartório com o dinheiro disponível e aplica o que sobrar. Não há dívida, juros, seguros nem parcela; só os custos de quem é dono (IPTU, condomínio, manutenção). **Mesma regra do mesmo dinheiro:** como o à vista só gasta os custos de dono, ele **nunca define o orçamento de referência** (que continua sendo o maior desembolso entre os outros caminhos) e **investe a diferença todo mês**, como quem aluga. Isso supõe que a pessoa mantém a mesma verba mensal dos outros caminhos, e a tela diz isso. O "preço escondido" da rota é o rendimento do dinheiro que virou imóvel; é isso que decide se compensa, e o texto do bloco e o ponto de virada mostram.
+
+**Contabilidade.** A identidade `patrimônio = colocado − custos + valorização + rendimento − IR − custos de venda` passou a usar **C (o dinheiro disponível)** no lugar do capital K0 (entrada + ITBI) e vale para as quatro rotas; um teste a verifica em 10 cenários com a rota ativa (dinheiro exato, com sobra, Price, lance, custos de venda, IR desligado, horizonte curto e longo, imóvel que desvaloriza, entrada grande). A decomposição da vantagem do primeiro sobre o segundo colocado continua somando exatamente, agora com quatro rotas.
+
+**O que a tela ganhou.** Título "Comprar à vista, financiar, consórcio ou alugar?"; o campo e um atalho para preencher o valor necessário; um aviso quando a rota fica de fora; quarta linha no gráfico (traço ponto-e-traço e cor própria, para quem não distingue cores); quarta coluna em "Para onde foi cada real"; bloco "Comprar à vista: cada custo e cada taxa" (primeiro na lista, na ordem do título); linha "Comprar à vista × alugar" no ponto de virada. **Quando a ordem não muda no intervalo testado, o ponto de virada agora diz quem fica sempre na frente** (antes dizia só que a ordem não mudava).
+
+**Tabela comparativa.** Corrigido um defeito antigo: o CSS mirava filhos diretos, mas as linhas ficam em `div` de linha com `display: contents`, então bordas e alinhamento das células nunca foram aplicados. Agora a tabela tem bordas e números alinhados, sem o "R$" repetido (a unidade vai na legenda) e cabe em até quatro colunas em tela de 360 px.
+
+**Textos públicos.** Cartão da landing, hub Simule Bens, página de SEO (`/financiar-alugar-ou-consorcio/`, endereço mantido, com título, descrição, lead, custos e duas perguntas novas sobre pagar à vista) e Metodologia agora falam em quatro caminhos. O título da página de SEO foi encurtado para caber nos 75 caracteres que o teste de qualidade exige.
+
+**Limites conhecidos.** (1) Não há ainda a rota "juntar e comprar depois" para quem não tem o dinheiro (aporte mensal até chegar ao valor): quem não cobre o imóvel só vê o aviso do que falta. (2) O à vista supõe que a pessoa investe a diferença mensal; se gastar, o resultado cai, como no aluguel. (3) O IR do fundo continua aproximado (alíquota do horizonte inteira). (4) A isenção de ganho de capital do imóvel único continua fora do cálculo.
+
+**Testes.** 1.134 → 1.170 no app (28 do motor, 8 de tela, ajustes nos existentes) e 180 nos scripts (um teste de metodologia atualizado).
+
+**Consequência.** O comparativo agora cobre as quatro rotas que o responsável definiu. O motor continua sendo função pura rodando no navegador. Carro e moto (D47 em diante) herdam o campo de dinheiro disponível e a rota à vista.

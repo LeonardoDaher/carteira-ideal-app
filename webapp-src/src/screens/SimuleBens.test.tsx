@@ -10,7 +10,7 @@ describe('SimuleBens (hub)', () => {
     render(<SimuleBens ctx={ctx} />)
     const link = screen.getByRole('link', { name: /Imóvel/ })
     expect(link.getAttribute('href')).toBe('./?tela=simuleImovel')
-    expect(within(link).getByText(/Financiar, alugar ou consórcio/)).toBeTruthy()
+    expect(within(link).getByText(/Comprar à vista, financiar, consórcio ou alugar/)).toBeTruthy()
   })
 
   it('carro e moto aparecem como "Em breve", sem link e sinalizados como indisponíveis', () => {
