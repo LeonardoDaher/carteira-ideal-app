@@ -1,0 +1,60 @@
+# Atualiza nos dias úteis os dados da aba Simule Ações (decisão D43): as empresas do cadastro
+# config/acoes.json (setores da B3), com fechamento, variação de 3 meses, faixa de 52 semanas e
+# volume médio dos últimos 21 pregões, mais a busca por qualquer código de ação.
+#
+# Fonte do preço e do volume: Boletim de Preços oficial da B3 (BVBG.086), sem cota, o mesmo
+# arquivo dos jobs de ETFs (D23) e BDRs (D24). Setor e nome vêm do cadastro do repositório.
+# Este job NÃO usa a brapi: não há token nem cota, e a lista pode crescer à vontade.
+#
+# Segunda a sexta às 23h de Brasília (02h UTC do dia seguinte): depois do job de BDRs (22h30), para
+# os três não disputarem o commit.
+#
+# Antes da primeira execução diária, rode UMA VEZ o workflow "Carga inicial de Ações".
+#
+# Se o script encontrar algo errado, o job falha SEM alterar os arquivos: o app continua com os
+# dados do último dia bom e o GitHub envia um e-mail avisando da falha. Feriado da B3 (zip
+# vazio) ou pregão já processado: nada muda, sem commit e sem deploy.
+
+name: Atualizar Ações
+
+on:
+  schedule:
+    - cron: '0 2 * * 2-6' # terça a sábado, 02h UTC = segunda a sexta, 23h de Brasília
+  workflow_dispatch: {} # botão "Run workflow" para rodar manualmente
+
+permissions:
+  contents: write
+
+jobs:
+  atualizar:
+    runs-on: ubuntu-24.04 # fixo, mesmo motivo dos outros jobs
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Buscar o boletim da B3 e gerar acoes.json
+        run: node scripts/atualizar-acoes.mjs
+
+      # Compila o site com os dados novos ANTES de publicar (mesma proteção dos outros jobs).
+      - name: Conferir se o site compila com os dados novos
+        run: |
+          npm ci
+          npm run build
+
+      - name: Publicar (commit) se houver mudança
+        run: |
+          if [ -z "$(git status --porcelain webapp-src/src/data/acoes.json historico)" ]; then
+            echo "Sem mudanças nos dados."
+            exit 0
+          fi
+          git config user.name "${{ vars.COMMIT_AUTOR_NOME || 'github-actions[bot]' }}"
+          git config user.email "${{ vars.COMMIT_AUTOR_EMAIL || '41898283+github-actions[bot]@users.noreply.github.com' }}"
+          git add webapp-src/src/data/acoes.json historico/acoes.json
+          git commit -m "dados: Ações ($(date -u +%Y-%m-%d))"
+          git pull --rebase
+          git push
