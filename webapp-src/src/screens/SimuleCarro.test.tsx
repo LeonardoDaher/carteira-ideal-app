@@ -1,0 +1,107 @@
+import { fireEvent, render, screen, within } from '@testing-library/react'
+import { describe, expect, it } from 'vitest'
+import { SimuleCarro } from './SimuleCarro'
+import type { SnapshotMercado } from '../domain/mercadoOficial'
+
+const vazio: SnapshotMercado = { geradoEm: null, indicadores: {}, derivados: {}, tesouro: { dataBase: null, titulos: [] } }
+const comFocus: SnapshotMercado = {
+  ...vazio,
+  indicadores: { cdi: { nome: 'CDI', unidade: '% a.a.', codigoSgs: 4389, data: '2026-09-28', valor: 13.65 } },
+  focus: { data: '2026-09-25', ipca: { 2027: 4.3, 2030: 3.5 }, selic: { 2027: 12, 2030: 10 } },
+}
+
+const campo = (nome: string) => screen.getByLabelText(nome) as HTMLInputElement
+const digitar = (nome: string, valor: string) => fireEvent.change(campo(nome), { target: { value: valor } })
+const SEM_CARRO = 'Quanto você gastaria por mês para se mover sem o carro'
+
+describe('SimuleCarro', () => {
+  it('abre com um vencedor, as duas leituras (custo e patrimônio) e o aviso de que não indica produto', () => {
+    render(<SimuleCarro snapshot={comFocus} />)
+    expect(screen.getByRole('heading', { name: 'Comprar à vista, financiar, consórcio ou ficar sem carro?' })).toBeTruthy()
+    expect(screen.getByText(/o caminho de menor custo, que também termina com o maior patrimônio, é:/)).toBeTruthy()
+    for (const titulo of ['Custo de mobilidade por mês', 'Patrimônio líquido final']) {
+      const cartao = screen.getByText(titulo).closest('.card') as HTMLElement
+      expect(within(cartao).getByText(/1º/)).toBeTruthy()
+      expect(within(cartao).getByText(/2º/)).toBeTruthy()
+      expect(within(cartao).getByText(/3º/)).toBeTruthy()
+    }
+    expect(screen.getAllByText(/não indica banco, administradora de consórcio, locadora, aplicativo nem produto/).length).toBeGreaterThan(0)
+  })
+
+  it('o link de topo volta para o hub Simule Bens', () => {
+    render(<SimuleCarro snapshot={comFocus} />)
+    expect(screen.getByRole('link', { name: '← Simule Bens' }).getAttribute('href')).toBe('./?tela=simuleBens')
+  })
+
+  it('usa a projeção de longo prazo do Focus como ponto de partida; sem Focus, os padrões', () => {
+    const { unmount } = render(<SimuleCarro snapshot={comFocus} />)
+    expect(campo('Rendimento dos investimentos').value).toBe('10')
+    expect(campo('Inflação esperada').value).toBe('3,5')
+    expect(screen.getByText(/CDI de hoje: 13,65%/)).toBeTruthy()
+    expect(screen.getByText(/Boletim Focus \(coleta de 25\/09\/2026\)/)).toBeTruthy()
+    unmount()
+    render(<SimuleCarro snapshot={vazio} />)
+    expect(campo('Inflação esperada').value).toBe('4,5')
+    expect(screen.queryByText(/Boletim Focus \(coleta/)).toBeNull()
+  })
+
+  it('o tipo é um botão que fica marcado e recarrega os valores de partida do tipo', () => {
+    render(<SimuleCarro snapshot={vazio} />)
+    const zero = screen.getByRole('button', { name: '0 km' })
+    const semi = screen.getByRole('button', { name: 'Seminovo' })
+    expect(zero.getAttribute('aria-pressed')).toBe('true')
+    expect(campo('Perda de valor no 1º ano').value).toBe('14')
+    fireEvent.click(semi)
+    expect(semi.getAttribute('aria-pressed')).toBe('true')
+    expect(zero.getAttribute('aria-pressed')).toBe('false')
+    expect(campo('Perda de valor no 1º ano').value).toBe('9')
+    expect(campo('Valor do carro').value).toBe('100.000,00')
+  })
+
+  it('gasto muito baixo sem carro faz "Sem carro" vencer', async () => {
+    render(<SimuleCarro snapshot={comFocus} />)
+    digitar(SEM_CARRO, '200')
+    expect(await screen.findByText('Sem carro', { selector: 'span.font-display' })).toBeTruthy()
+  })
+
+  it('gasto muito alto sem carro faz ter o carro vencer', async () => {
+    render(<SimuleCarro snapshot={comFocus} />)
+    digitar(SEM_CARRO, '9000')
+    const vencedor = await screen.findByText(/o caminho de menor custo/)
+    const cartao = vencedor.closest('.imovel-vencedor') as HTMLElement
+    expect(within(cartao).queryByText('Sem carro', { selector: 'span.font-display' })).toBeNull()
+  })
+
+  it('sem dinheiro para o à vista, diz quanto falta; ao incluir, o bloco da compra à vista aparece', async () => {
+    render(<SimuleCarro snapshot={comFocus} />)
+    expect(screen.getByText(/Comprar à vista não entrou na comparação/)).toBeTruthy()
+    expect(screen.queryByText('Comprar à vista: cada custo e cada taxa')).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: /Incluir comprar à vista/ }))
+    expect(await screen.findByText('Comprar à vista: cada custo e cada taxa')).toBeTruthy()
+    expect(screen.queryByText(/Comprar à vista não entrou na comparação/)).toBeNull()
+  })
+
+  it('explica cada custo do carro: IPVA, seguro, manutenção, IOF, gravame e a perda de valor', () => {
+    render(<SimuleCarro snapshot={comFocus} />)
+    for (const termo of ['Emplacamento e licenciamento', 'IOF do financiamento', 'Gravame', 'Juros do financiamento', 'Taxa de administração', 'Mobilidade sem carro']) {
+      expect(screen.getAllByText(termo).length).toBeGreaterThan(0)
+    }
+    expect(screen.getAllByText('IPVA').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Seguro do carro').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Manutenção e revisões').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Perda de valor do carro').length).toBeGreaterThan(0)
+  })
+
+  it('mostra o ponto de virada em reais por mês sem carro', () => {
+    render(<SimuleCarro snapshot={comFocus} />)
+    expect(screen.getByText('Em que ponto o resultado muda?')).toBeTruthy()
+    expect(screen.getByText(/Financiar × sem carro:/)).toBeTruthy()
+  })
+
+  it('valor do carro zerado mostra o erro em vez do resultado', async () => {
+    render(<SimuleCarro snapshot={comFocus} />)
+    digitar('Valor do carro', '0')
+    expect(await screen.findByRole('alert')).toBeTruthy()
+    expect(screen.getByText('Informe o valor do carro.')).toBeTruthy()
+  })
+})

@@ -132,10 +132,11 @@ A mudança para a API tirou a metodologia do código visível. Ainda assim, vale
 
 ## 11. Simule Bens: à vista, carro e moto (decisões D45 em diante)
 
-- [x] **Hub Simule Bens** (D45) com Imóvel ativo e Carro e Moto "em breve".
+- [x] **Hub Simule Bens** (D45) com Imóvel ativo. Carro ativado na D47; Moto segue "em breve".
 - [x] **D46, comprar à vista no imóvel:** quarta rota, com o campo "Dinheiro disponível hoje"; título da landing atualizado. Regressão comprovada contra o motor da D45.
 - [ ] **Conferir com uso real:** o resultado do à vista depende de a pessoa investir a diferença mensal; ver se a explicação da tela basta para o cliente entender isso.
 - [ ] **Caso "não tenho o dinheiro todo":** "juntar e comprar depois", com aporte mensal até chegar ao valor do imóvel. Hoje a tela só avisa quanto falta.
-- [ ] **Carro:** depreciação (não linear), IPVA, seguro, manutenção, IOF e gravame, financiamento em Price e juros próprios, índice do consórcio, e a rota "alugar" como locação ou assinatura (o carro não tem um aluguel óbvio, como o imóvel tem). Fonte sugerida para o valor de partida da taxa: série de taxa média de financiamento de veículos do Banco Central (a confirmar).
-- [ ] **Moto:** reaproveita o motor do carro com outros valores de partida; decidir se moto de trabalho (renda gerada pelo bem) é caso à parte.
+- [x] **Carro (D47):** à vista, financiar (Price), consórcio e ficar sem carro; custo de mobilidade e patrimônio final lado a lado; depreciação em dois trechos; 0 km e seminovo; ponto de virada em "gasto mensal sem carro". Página de SEO `/carro-a-vista-financiar-consorcio-ou-sem-carro/`.
+- [ ] **Carro, pendências:** (1) trazer o valor mais recente da série 25471 do Banco Central (juros médios de aquisição de veículos, PF, % ao mês) para o valor de partida dos juros, hoje "nosso"; (2) validar depreciação, IPVA, seguro, manutenção e uso de partida contra a tabela FIPE e cotações reais; (3) rota "juntar e comprar depois"; (4) troca de carro no meio de horizontes longos; (5) revisão do texto de aviso pelo responsável certificado.
+- [ ] **Moto:** reaproveita o motor do carro (`simulaCarro.ts`) com outros valores de partida; decidir se moto de trabalho (renda gerada pelo bem) é caso à parte.
 - [ ] **Cada bem novo:** página de SEO, registro de decisão, testes e **revisão do texto de aviso pelo responsável certificado**.

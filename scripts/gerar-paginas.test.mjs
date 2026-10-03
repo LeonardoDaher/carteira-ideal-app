@@ -40,6 +40,7 @@ test('gera as páginas esperadas, sem repetir endereço', async () => {
     '/simulador-bdr/',
     '/simulador-etf/',
     '/financiar-alugar-ou-consorcio/',
+    '/carro-a-vista-financiar-consorcio-ou-sem-carro/',
     '/minha-carteira/',
     '/meu-mes/',
     '/aprender/',
@@ -53,8 +54,8 @@ test('gera as páginas esperadas, sem repetir endereço', async () => {
   ]) {
     assert.ok(caminhos.includes(c), `faltou ${c}`)
   }
-  // 8 ferramentas (com a Minha Carteira e o comparativo de imóvel) + hub Aprender + Sobre e Metodologia + 11 ativos + hub e 9 aulas das dívidas + taxas
-  assert.equal(paginas.length, 8 + 1 + 2 + 11 + 1 + 9 + 1)
+  // 9 ferramentas (com a Minha Carteira e os comparativos de imóvel e de carro) + hub Aprender + Sobre e Metodologia + 11 ativos + hub e 9 aulas das dívidas + taxas
+  assert.equal(paginas.length, 9 + 1 + 2 + 11 + 1 + 9 + 1)
 })
 
 test('sem dados do Tesouro, a página de taxas não é gerada e ninguém aponta para ela', async () => {
@@ -245,4 +246,30 @@ test('o comparativo é citado na metodologia como exceção ao "não fazem ranki
   assert.ok(aprender.includes('/financiar-alugar-ou-consorcio/'))
   const sobre = paginas.find((p) => p.caminho === '/sobre/').html
   assert.ok(sobre.includes('/financiar-alugar-ou-consorcio/'), 'rodapé')
+})
+
+test('a página do comparativo de carro explica os custos, cita a série oficial e não indica instituição nem promete resultado', async () => {
+  const paginas = await gerarPaginas({ raiz, snapshot: SNAPSHOT_VAZIO })
+  const pg = paginas.find((p) => p.caminho === '/carro-a-vista-financiar-consorcio-ou-sem-carro/')
+  assert.ok(pg, 'a página existe')
+  const texto = textoVisivel(pg.html)
+  for (const termo of ['custo de mobilidade', 'patrimônio líquido', 'IPVA', 'seguro', 'manutenção', 'IOF', 'gravame', 'taxa de administração', 'fundo de reserva', 'CET', 'ponto de virada', 'depreciação', 'Boletim Focus', 'série 25471']) {
+    assert.ok(texto.toLowerCase().includes(termo.toLowerCase()), `faltou explicar: ${termo}`)
+  }
+  assert.match(texto, /não indica banco, administradora de consórcio, locadora, aplicativo nem produto/)
+  assert.match(texto, /não é recomendação de financiamento, de consórcio ou de investimento/)
+  assert.ok(pg.html.includes('href="/app/?tela=simuleCarro"'), 'o botão abre o comparativo no app')
+  // sem promessa nem instituição citada
+  assert.doesNotMatch(texto, /garantid[oa]|sem risco|melhor banco|melhor consórcio|Caixa|Itaú|Bradesco|Santander|Porto Seguro|Embracon|Localiza|Movida|Uber|99 ?Pop/i)
+})
+
+test('o comparativo de carro aparece no rodapé, no hub Aprender e na metodologia, sem tirar o do imóvel', async () => {
+  const paginas = await gerarPaginas({ raiz, snapshot: SNAPSHOT_VAZIO })
+  const CAMINHO = '/carro-a-vista-financiar-consorcio-ou-sem-carro/'
+  assert.ok(paginas.find((p) => p.caminho === '/aprender/').html.includes(CAMINHO))
+  assert.ok(paginas.find((p) => p.caminho === '/sobre/').html.includes(CAMINHO), 'rodapé')
+  const metodologia = textoVisivel(paginas.find((p) => p.caminho === '/metodologia-e-fontes/').html)
+  assert.match(metodologia, /ordena os caminhos \(comprar à vista, financiar, consórcio e alugar\) pelo patrimônio líquido final/)
+  assert.match(metodologia, /comparativo de carro segue a mesma regra/)
+  assert.ok(paginas.some((p) => p.caminho === '/financiar-alugar-ou-consorcio/'))
 })

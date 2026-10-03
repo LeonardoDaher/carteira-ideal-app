@@ -27,7 +27,7 @@ function passoRedondo(amplitude: number, linhas = 4) {
  * tracejado, pontilhado) além da cor: quem não distingue cores continua lendo o gráfico. Toque, arraste
  * ou use as setas do teclado para ver o valor de cada cenário em cada mês.
  */
-export function GraficoPatrimonio({ serie, rotas = ROTAS_PADRAO }: { serie: PontoMensal[]; rotas?: ChaveCenario[] }) {
+export function GraficoPatrimonio({ serie, rotas = ROTAS_PADRAO, nomes = NOMES_CENARIOS }: { serie: PontoMensal[]; rotas?: ChaveCenario[]; nomes?: Record<ChaveCenario, string> }) {
   const CHAVES = rotas
   const [indice, setIndice] = useState<number | null>(null)
   const svgRef = useRef<SVGSVGElement>(null)
@@ -52,9 +52,9 @@ export function GraficoPatrimonio({ serie, rotas = ROTAS_PADRAO }: { serie: Pont
     for (let a = 0; a <= anosTotal; a += passoAnos) anos.push(a)
     const fim = serie[ultimo]
     const resumo =
-      `Patrimônio líquido ao longo de ${anosTotal} anos. No fim: ` + CHAVES.map((c) => `${NOMES_CENARIOS[c]} ${reais(fim[c])}`).join(', ') + '.'
+      `Patrimônio líquido ao longo de ${anosTotal} anos. No fim: ` + CHAVES.map((c) => `${nomes[c]} ${reais(fim[c])}`).join(', ') + '.'
     return { x, y, caminhos: Object.fromEntries(CHAVES.map((c) => [c, caminho(c)])) as Record<ChaveCenario, string>, grade, anos, resumo }
-  }, [serie, ultimo, CHAVES])
+  }, [serie, ultimo, CHAVES, nomes])
 
   const { x, y } = dados
   const atual = serie[indice ?? ultimo]
@@ -91,7 +91,7 @@ export function GraficoPatrimonio({ serie, rotas = ROTAS_PADRAO }: { serie: Pont
             <svg width="18" height="8" aria-hidden="true" className="grafico-pat-amostra">
               <line x1="1" x2="17" y1="4" y2="4" className={`grafico-pat-linha ${c}`} />
             </svg>
-            {NOMES_CENARIOS[c]} <strong>{reaisCompacto(atual[c])}</strong>
+            {nomes[c]} <strong>{reaisCompacto(atual[c])}</strong>
           </span>
         ))}
       </div>
