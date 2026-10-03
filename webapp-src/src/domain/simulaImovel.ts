@@ -125,6 +125,13 @@ export interface DetalheCenario {
 export interface DetalheInvestimentos {
   /** Capital inicial + aportes mensais colocados no fundo. */
   aportado: number
+  /** Parte do aportado que já estava no fundo no mês 0 (entrada + ITBI/cartório, para quem não compra na hora). */
+  capitalInicial: number
+  /** Soma dos aportes mensais (a sobra do orçamento de referência) ao longo de todo o horizonte. */
+  aportesMensais: number
+  /** Quanto este caminho gasta no mês 1 e, por consequência, quanto aporta nesse mês. */
+  gastoPrimeiroMes: number
+  primeiroAporte: number
   /** Retiradas do fundo (no consórcio: lance, ITBI e diferença da carta na contemplação). */
   retirado: number
   /** Rendimento bruto acumulado, antes do IR. */
@@ -226,6 +233,8 @@ export interface ResultadoComparativo {
     consorcio: DetalheConsorcio
     investimentos: Record<ChaveCenario, DetalheInvestimentos>
     contabilidade: Record<ChaveCenario, ContabilidadeCenario>
+    /** Orçamento de referência do mês 1 e qual caminho o define (o que mais desembolsa naquele mês). */
+    orcamentoInicial: { valor: number; definidoPor: ChaveCenario }
   }
   /** Orçamento mensal de referência nos meses 1, 13, 25... (primeiro mês de cada ano). */
   orcamentoReferencia: number[]
@@ -434,6 +443,8 @@ function simularNucleo(i: InputsComparativo, leve = false): ResultadoComparativo
   let amortPaga = 0
   let parcelasPagasFin = 0
   let somaOrcamento = 0
+  let orc1 = { valor: 0, definidoPor: 'financiamento' as ChaveCenario }
+  let gasto1: Record<ChaveCenario, number> = { financiamento: 0, aluguel: 0, consorcio: 0 }
   let aluguelFinal = i.aluguelMensal
   let parcelaFinalCon = 0
   let tarifas = 0
@@ -519,6 +530,10 @@ function simularNucleo(i: InputsComparativo, leve = false): ResultadoComparativo
     // — Orçamento de referência: o maior desembolso entre os três cenários —
     const ref = Math.max(outFin, aluguel, outCon)
     somaOrcamento += ref
+    if (t === 1) {
+      gasto1 = { financiamento: outFin, aluguel, consorcio: outCon }
+      orc1 = { valor: ref, definidoPor: ref === outFin ? 'financiamento' : ref === outCon ? 'consorcio' : 'aluguel' }
+    }
     if ((t - 1) % 12 === 0) orcamentoRef.push(arred(ref))
 
     pagoFin += outFin
@@ -629,10 +644,21 @@ function simularNucleo(i: InputsComparativo, leve = false): ResultadoComparativo
   }
 
   const aliqEfetivaIr = (f: Fundo) => f.saldo - f.liquido(aliqIr)
+  const resumoFundo = (f: Fundo, capitalInicial: number, chave: ChaveCenario): DetalheInvestimentos => ({
+    aportado: arred(f.aportado),
+    capitalInicial: arred(capitalInicial),
+    aportesMensais: arred(f.aportado - capitalInicial),
+    gastoPrimeiroMes: arred(gasto1[chave]),
+    primeiroAporte: arred(orc1.valor - gasto1[chave]),
+    retirado: arred(f.retirado),
+    rendimentoBruto: arred(f.rendimentoBruto()),
+    irPago: arred(aliqEfetivaIr(f)),
+    saldoLiquido: arred(f.liquido(aliqIr)),
+  })
   const investimentos: Record<ChaveCenario, DetalheInvestimentos> = {
-    financiamento: { aportado: arred(fFin.aportado), retirado: arred(fFin.retirado), rendimentoBruto: arred(fFin.rendimentoBruto()), irPago: arred(aliqEfetivaIr(fFin)), saldoLiquido: arred(fFin.liquido(aliqIr)) },
-    aluguel: { aportado: arred(fAlu.aportado), retirado: arred(fAlu.retirado), rendimentoBruto: arred(fAlu.rendimentoBruto()), irPago: arred(aliqEfetivaIr(fAlu)), saldoLiquido: arred(fAlu.liquido(aliqIr)) },
-    consorcio: { aportado: arred(fCon.aportado), retirado: arred(fCon.retirado), rendimentoBruto: arred(fCon.rendimentoBruto()), irPago: arred(aliqEfetivaIr(fCon)), saldoLiquido: arred(fCon.liquido(aliqIr)) },
+    financiamento: resumoFundo(fFin, 0, 'financiamento'),
+    aluguel: resumoFundo(fAlu, K0, 'aluguel'),
+    consorcio: resumoFundo(fCon, K0, 'consorcio'),
   }
   const totalColocado = K0 + somaOrcamento
   const custosDeVendaDe = (sem: number, com: number) => (i.descontarCustosVenda ? sem - com : 0)
@@ -689,6 +715,7 @@ function simularNucleo(i: InputsComparativo, leve = false): ResultadoComparativo
     },
     investimentos,
     contabilidade,
+    orcamentoInicial: { valor: arred(orc1.valor), definidoPor: orc1.definidoPor },
   }
 
   return {

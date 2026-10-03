@@ -59,14 +59,41 @@ function Fechamento({ r, chave }: { r: ResultadoComparativo; chave: ChaveCenario
   )
 }
 
-function Investimentos({ r, chave, quem }: { r: ResultadoComparativo; chave: ChaveCenario; quem: string }) {
+const QUEM_DEFINE: Record<ChaveCenario, string> = {
+  financiamento: 'pelo financiamento (parcela, seguros, tarifa e custos de dono)',
+  aluguel: 'pelo aluguel',
+  consorcio: 'pelo consórcio, que paga parcela e aluguel ao mesmo tempo até a contemplação',
+}
+
+function Investimentos({ r, chave, quem, entrada }: { r: ResultadoComparativo; chave: ChaveCenario; quem: string; entrada: InputsComparativo }) {
   const v = r.detalhe.investimentos[chave]
+  const orc = r.detalhe.orcamentoInicial
+  const meses = Math.round(entrada.horizonteAnos * 12)
+  const itbi = r.capitalInicial - entrada.entrada
   return (
     <>
       <Secao titulo="Investimentos" subtitulo={quem} />
-      <Item rotulo="Dinheiro aplicado" valor={v.aportado} tipo="neutro">
-        Capital inicial mais os aportes mensais. Em cada mês, o que sobra do orçamento de referência depois de pagar as despesas deste caminho vai para o investimento.
-        {v.retirado ? ` Já saíram do investimento ${reais0(v.retirado)}.` : ''}
+      {v.capitalInicial > 0 && (
+        <Item rotulo="Capital inicial aplicado" valor={v.capitalInicial} tipo="neutro">
+          É a entrada ({reais0(entrada.entrada)}) mais o ITBI e o cartório ({reais0(itbi)}): o dinheiro que quem financia gasta na compra do imóvel. Aqui ele não vai
+          para o imóvel; fica aplicado desde o primeiro dia.
+        </Item>
+      )}
+      <Item rotulo="Aportes mensais" valor={v.aportesMensais} tipo="neutro">
+        {v.aportesMensais > 0 ? (
+          <>
+            Todo mês, o orçamento de referência (a maior despesa entre os três caminhos) menos o que este caminho gasta vira investimento. No 1º mês o orçamento é de{' '}
+            {reais0(orc.valor)}, definido {QUEM_DEFINE[orc.definidoPor]}; este caminho gasta {reais0(v.gastoPrimeiroMes)}, então você aplica {reais0(v.primeiroAporte)}. Ao longo
+            de {anosTexto(entrada.horizonteAnos)}, a média é de {reais0(v.aportesMensais / meses)} por mês. Não é dinheiro além do seu orçamento: é a parte do que os outros
+            caminhos gastam com parcelas que aqui fica guardada. Se você não investir essa diferença todo mês, o resultado deste caminho cai.
+          </>
+        ) : (
+          <>Este caminho já gasta, todos os meses, o valor do orçamento de referência. Por isso não sobra nada para investir além do capital inicial.</>
+        )}
+      </Item>
+      <Item rotulo="Total aplicado" valor={v.aportado} tipo="neutro">
+        Capital inicial + aportes mensais.
+        {v.retirado ? ` Já saíram do investimento ${reais0(v.retirado)} (lance, ITBI e complemento da carta).` : ''}
       </Item>
       <Item rotulo="Rendimento bruto" valor={v.rendimentoBruto} tipo="patrimonio">
         O que o dinheiro aplicado rendeu na taxa que você informou, com juros sobre juros mês a mês.
@@ -238,7 +265,7 @@ export function BlocoFinanciar({ r, entrada }: { r: ResultadoComparativo; entrad
           O imóvel sai de {reais0(entrada.valorImovel)} para {reais0(c.imovel)} em {anosTexto(entrada.horizonteAnos)}, a {pct(entrada.valorizacaoImovelAA)} ao ano. É uma suposição sua, não uma garantia.
         </Item>
 
-        <Investimentos r={r} chave="financiamento" quem="A diferença entre o orçamento de referência e o que o financiamento custa por mês" />
+        <Investimentos r={r} entrada={entrada} chave="financiamento" quem="A diferença entre o orçamento de referência e o que o financiamento custa por mês" />
 
         <Secao titulo="O que sobra no fim" subtitulo="" />
         <div className="tabela-simulacao">
@@ -275,7 +302,7 @@ export function BlocoAlugar({ r, entrada }: { r: ResultadoComparativo; entrada: 
           {reais(d.aluguelFinal)}. Se o seu aluguel não inclui condomínio ou IPTU, some esses valores ao aluguel informado. Não há juros, seguros nem ITBI neste caminho.
         </Item>
 
-        <Investimentos r={r} chave="aluguel" quem="É aqui que o patrimônio de quem aluga se forma: não há imóvel, só investimentos" />
+        <Investimentos r={r} entrada={entrada} chave="aluguel" quem="É aqui que o patrimônio de quem aluga se forma: não há imóvel, só investimentos" />
 
         <Secao titulo="O que sobra no fim" subtitulo="" />
         <Fechamento r={r} chave="aluguel" />
@@ -340,7 +367,7 @@ export function BlocoConsorcio({ r, entrada }: { r: ResultadoComparativo; entrad
           Do mês da contemplação até o fim, o imóvel sobe de {reais0(r.consorcio.precoImovelNaContemplacao)} para {reais0(c.imovel)} ({pct(entrada.valorizacaoImovelAA)} ao ano).
         </Item>
 
-        <Investimentos r={r} chave="consorcio" quem="Capital inicial aplicado desde o mês 0, de onde saem o lance, o ITBI e o complemento da carta" />
+        <Investimentos r={r} entrada={entrada} chave="consorcio" quem="Capital inicial aplicado desde o mês 0, de onde saem o lance, o ITBI e o complemento da carta" />
 
         <Secao titulo="O que sobra no fim" subtitulo="" />
         <div className="tabela-simulacao">

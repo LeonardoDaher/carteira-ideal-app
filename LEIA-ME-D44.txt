@@ -56,7 +56,7 @@ DEPOIS DO DEPLOY
 3. Revise o texto de aviso (final da tela e da página de SEO). É a parte que sustenta "conta matemática, não recomendação".
 4. Search Console: pedir indexação de /financiar-alugar-ou-consorcio/.
 
-VERIFICAÇÃO: 1123 testes do app (77 novos) e 180 dos scripts (2 novos) passando; typecheck, lint e build de produção sem erros
+VERIFICAÇÃO: 1128 testes do app (82 novos) e 180 dos scripts (2 novos) passando; typecheck, lint e build de produção sem erros
 (33 páginas estáticas, a nova no sitemap). A contabilidade fecha em 11 cenários (Price, lance por prazo e por parcela, horizonte
 maior que o prazo, IR ligado e desligado, consórcio quitado antes, reajustes altos...). A tela foi conferida em celular e
 computador, nos temas escuro e claro. Não validei os números contra uma proposta real de banco ou de administradora: isso fica

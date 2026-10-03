@@ -389,3 +389,39 @@ describe('decomposição da vantagem', () => {
     },
   )
 })
+
+describe('de onde vem o dinheiro aplicado', () => {
+  it('total aplicado = capital inicial + aportes mensais; o aluguel e o consórcio começam com a entrada + ITBI, o financiamento começa do zero', () => {
+    const r = simularComparativoImobiliario({})
+    for (const k of ['financiamento', 'aluguel', 'consorcio'] as const) {
+      const v = r.detalhe.investimentos[k]
+      perto(v.capitalInicial + v.aportesMensais, v.aportado, 0.02)
+    }
+    expect(r.detalhe.investimentos.financiamento.capitalInicial).toBe(0)
+    expect(r.detalhe.investimentos.aluguel.capitalInicial).toBe(120_000) // entrada 100.000 + ITBI/cartório 20.000
+    expect(r.detalhe.investimentos.consorcio.capitalInicial).toBe(120_000)
+  })
+
+  it('o aporte do mês 1 é o orçamento de referência menos o gasto do caminho, e o orçamento é o maior desembolso', () => {
+    const r = simularComparativoImobiliario({})
+    const orc = r.detalhe.orcamentoInicial
+    expect(orc.valor).toBe(r.orcamentoReferencia[0])
+    // nos primeiros meses quem mais desembolsa é o consórcio: parcela (2.900) + aluguel (2.500)
+    expect(orc.definidoPor).toBe('consorcio')
+    perto(orc.valor, 5_400, 0.01)
+    const a = r.detalhe.investimentos.aluguel
+    perto(a.gastoPrimeiroMes, 2_500, 0.01)
+    perto(a.primeiroAporte, 2_900, 0.01)
+    expect(r.detalhe.investimentos.consorcio.primeiroAporte).toBe(0) // quem define o orçamento não aporta no mês 1
+    for (const k of ['financiamento', 'aluguel', 'consorcio'] as const) {
+      const v = r.detalhe.investimentos[k]
+      perto(v.gastoPrimeiroMes + v.primeiroAporte, orc.valor, 0.02)
+    }
+  })
+
+  it('os aportes do aluguel são positivos e menores que o orçamento total de 20 anos', () => {
+    const a = simularComparativoImobiliario({}).detalhe.investimentos.aluguel
+    expect(a.aportesMensais).toBeGreaterThan(0)
+    expect(a.aportesMensais).toBeLessThan(5_400 * 240)
+  })
+})

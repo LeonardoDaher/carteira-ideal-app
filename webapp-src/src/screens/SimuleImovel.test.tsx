@@ -200,3 +200,24 @@ describe('SimuleImovel: explicação detalhada de custos e taxas', () => {
     expect(screen.getAllByText('Custos de venda do imóvel').length).toBeGreaterThan(0)
   })
 })
+
+describe('SimuleImovel: de onde vem o dinheiro aplicado', () => {
+  it('no aluguel, separa o capital inicial (entrada + ITBI) dos aportes mensais e explica o orçamento', () => {
+    render(<SimuleImovel snapshot={comFocus} />)
+    const bloco = screen.getByText('Alugar e investir: cada custo e cada taxa').closest('details') as HTMLElement
+    expect(within(bloco).getByText('Capital inicial aplicado')).toBeTruthy()
+    expect(within(bloco).getByText(/É a entrada \(R\$ 100\.000\) mais o ITBI e o cartório \(R\$ 20\.000\)/)).toBeTruthy()
+    expect(within(bloco).getByText('Aportes mensais')).toBeTruthy()
+    expect(within(bloco).getByText(/No 1º mês o orçamento é de R\$ 5\.400, definido pelo consórcio/)).toBeTruthy()
+    expect(within(bloco).getByText(/então você aplica R\$ 2\.900/)).toBeTruthy()
+    expect(within(bloco).getByText(/Se você não investir essa diferença todo mês, o resultado deste caminho cai/)).toBeTruthy()
+    expect(within(bloco).getByText('Total aplicado')).toBeTruthy()
+  })
+
+  it('no financiamento não há capital inicial aplicado (ele foi para o imóvel)', () => {
+    render(<SimuleImovel snapshot={comFocus} />)
+    const bloco = screen.getByText('Financiar: cada custo e cada taxa').closest('details') as HTMLElement
+    expect(within(bloco).queryByText('Capital inicial aplicado')).toBeNull()
+    expect(within(bloco).getByText('Aportes mensais')).toBeTruthy()
+  })
+})
