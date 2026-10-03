@@ -35,11 +35,11 @@ test('gera as páginas esperadas, sem repetir endereço', async () => {
   assert.equal(new Set(caminhos).size, caminhos.length)
   for (const c of [
     '/teste-perfil-de-investidor/',
-    '/simule-ativos/',
     '/simulador-tesouro-direto/',
     '/simulador-fii/',
     '/simulador-bdr/',
     '/simulador-etf/',
+    '/financiar-alugar-ou-consorcio/',
     '/minha-carteira/',
     '/meu-mes/',
     '/aprender/',
@@ -53,7 +53,7 @@ test('gera as páginas esperadas, sem repetir endereço', async () => {
   ]) {
     assert.ok(caminhos.includes(c), `faltou ${c}`)
   }
-  // 8 ferramentas (com a Minha Carteira e o Simule Ativos) + hub Aprender + Sobre e Metodologia + 11 ativos + hub e 9 aulas das dívidas + taxas
+  // 8 ferramentas (com a Minha Carteira e o comparativo de imóvel) + hub Aprender + Sobre e Metodologia + 11 ativos + hub e 9 aulas das dívidas + taxas
   assert.equal(paginas.length, 8 + 1 + 2 + 11 + 1 + 9 + 1)
 })
 
@@ -219,4 +219,30 @@ test('montarPagina escapa o texto e não deixa o JSON-LD fechar o script', () =>
   assert.match(html, /<title>Título &lt;b&gt; \| Carteira Ideal<\/title>/)
   assert.doesNotMatch(html.split('application/ld+json')[1].split('</script>')[0], /<\/script/)
   assert.equal((html.match(/<h1>/g) ?? []).length, 1)
+})
+
+test('a página do comparativo de imóvel explica os custos e não indica instituição nem promete resultado', async () => {
+  const paginas = await gerarPaginas({ raiz, snapshot: SNAPSHOT_VAZIO })
+  const pg = paginas.find((p) => p.caminho === '/financiar-alugar-ou-consorcio/')
+  assert.ok(pg, 'a página existe')
+  const texto = textoVisivel(pg.html)
+  for (const termo of ['patrimônio líquido', 'ITBI', 'MIP', 'DFI', 'taxa de administração', 'fundo de reserva', 'CET', 'ponto de virada', 'Boletim Focus']) {
+    assert.ok(texto.toLowerCase().includes(termo.toLowerCase()), `faltou explicar: ${termo}`)
+  }
+  assert.match(texto, /não indica banco, administradora de consórcio nem produto/)
+  assert.match(texto, /não é recomendação de financiamento, de consórcio ou de investimento/)
+  assert.ok(pg.html.includes('href="/app/?tela=simuleImovel"'), 'o botão abre o comparativo no app')
+  // sem promessa nem instituição citada
+  assert.doesNotMatch(texto, /garantid[oa]|sem risco|melhor banco|melhor consórcio|Caixa|Itaú|Bradesco|Santander|Porto Seguro|Embracon/i)
+})
+
+test('o comparativo é citado na metodologia como exceção ao "não fazem ranking" e aparece no rodapé e no hub Aprender', async () => {
+  const paginas = await gerarPaginas({ raiz, snapshot: SNAPSHOT_VAZIO })
+  const metodologia = textoVisivel(paginas.find((p) => p.caminho === '/metodologia-e-fontes/').html)
+  assert.match(metodologia, /ordena três caminhos pelo patrimônio líquido final/)
+  assert.match(metodologia, /nunca ordena bancos, administradoras ou produtos/)
+  const aprender = paginas.find((p) => p.caminho === '/aprender/').html
+  assert.ok(aprender.includes('/financiar-alugar-ou-consorcio/'))
+  const sobre = paginas.find((p) => p.caminho === '/sobre/').html
+  assert.ok(sobre.includes('/financiar-alugar-ou-consorcio/'), 'rodapé')
 })

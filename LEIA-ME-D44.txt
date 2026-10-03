@@ -1,35 +1,63 @@
-D44 (03/10/2026) - Resultado dos simuladores sempre à vista no computador (notebook, PC, tablet deitado).
-Pacote pequeno: suba por cima do D43.
+O QUE É
+1) Nova ferramenta na página inicial: "Financiar, alugar ou consórcio?" (?tela=simuleImovel). A pessoa informa o imóvel, a
+   entrada, as taxas e o prazo, e a tela aponta QUAL das três rotas termina com o MAIOR PATRIMÔNIO LÍQUIDO e por quanto.
+   É conta matemática: não indica banco, administradora de consórcio nem produto, e não é recomendação de investimento.
+2) Regra "mesmo dinheiro": os três caminhos partem do mesmo capital (entrada + ITBI/cartório) e gastam o mesmo orçamento
+   mensal (o maior desembolso entre os três; quem paga menos investe a diferença). O motor roda no navegador, em funções
+   puras (webapp-src/src/domain/simulaImovel.ts), no molde do Simule Tesouro.
+3) Explicação detalhada no resultado: o que é patrimônio líquido; por que o primeiro colocado ficou na frente (decomposição
+   que soma exatamente a vantagem); "para onde foi cada real" (colocado - custos + valorização + rendimento - IR = patrimônio);
+   CADA custo e taxa de cada caminho, com valor e explicação (ITBI, juros, MIP, DFI, tarifa, custos de dono, aluguel, taxa
+   de administração, fundo de reserva, aluguel de espera, ITBI do consórcio, reajuste das parcelas, lance); investimentos
+   (aplicado, rendimento, IR, saldo); todas as premissas usadas; gráfico mês a mês; ponto de virada; e o efeito de a
+   contemplação do consórcio demorar (12, 36, 60, 120 e 180 meses).
+4) Cartão "Financiar, alugar ou consórcio?" na landing (abaixo do Simule Ativos), página de SEO
+   /financiar-alugar-ou-consorcio/ (com cartão em "Ferramentas gratuitas", rodapé e hub Aprender) e ajuste da página
+   Metodologia: o comparativo ordena CAMINHOS (nunca bancos ou produtos), diferente dos simuladores de ativos (D19).
+5) Registro D44 em docs/07-registro-de-decisoes.md, jornada (4.6) e próximos passos (seção 10).
 
-PROBLEMA
-No celular, ao tocar num ativo a tela rolava até o cartão de resultado. No computador não: o cartão só fica fixo ao
-lado da lista quando a janela tem 720 px de altura ou mais; em notebook (janela mais baixa) ele rolava junto com a
-página e o código, além disso, nem tentava rolar a partir de 960 px de largura.
+NÃO MUDOU: motor de decisão do questionário, questionário, API, Meu Mês, Meus Ativos, Aprender, Simule Ativos
+(FII/Tesouro/BDR/ETF/Ações). Nenhum dado novo, nenhum job novo, nenhuma dependência nova.
 
-CORREÇÃO
-Regra única nova (ui/rolarParaResultado.ts) nos 5 simuladores: Simule FII, Tesouro, BDR, ETF e Ações.
-- Celular e tablet em pé (< 960 px): igual a antes (sempre rola até o resultado). No Tesouro continua sem rolar.
-- Computador, notebook e tablet deitado (>= 960 px): se o resultado já está à vista (cartão fixo), não rola; se ficou
-  fora da janela, rola suavemente até ele. No Tesouro agora também rola, só nesses tamanhos.
+ARQUIVOS (em relação ao pacote da D43)
+   + LEIA-ME-D44.txt
+   + webapp-src/src/domain/simulaImovel.test.ts
+   + webapp-src/src/domain/simulaImovel.ts
+   + webapp-src/src/screens/SimuleImovel.test.tsx
+   + webapp-src/src/screens/SimuleImovel.tsx
+   + webapp-src/src/ui/CampoNumero.tsx
+   + webapp-src/src/ui/DetalheCustos.tsx
+   + webapp-src/src/ui/GraficoPatrimonio.tsx
+   ~ docs/04-jornada-do-cliente.md
+   ~ docs/06-proximos-passos.md
+   ~ docs/07-registro-de-decisoes.md
+   ~ gerar-paginas.mjs
+   ~ index.html
+   ~ scripts/gerar-paginas.mjs
+   ~ scripts/gerar-paginas.test.mjs
+   ~ webapp-src/src/App.tsx
+   ~ webapp-src/src/index.css
+   ~ webapp-src/src/state/useAppState.test.ts
+   ~ webapp-src/src/state/useAppState.ts
+   Obs.: gerar-paginas.mjs na raiz é a cópia solta que já vinha no pacote; foi mantida igual a scripts/gerar-paginas.mjs.
 
-ARQUIVOS (11) - caminhos a partir da raiz do repositório
-N  webapp-src/src/ui/rolarParaResultado.ts
-N  webapp-src/src/ui/rolarParaResultado.test.ts
-A  webapp-src/src/screens/SimuleFii.tsx
-A  webapp-src/src/screens/SimuleTesouro.tsx
-A  webapp-src/src/screens/SimuleBdr.tsx
-A  webapp-src/src/screens/SimuleEtf.tsx
-A  webapp-src/src/screens/SimuleAcoes.tsx
-A  docs/07-registro-de-decisoes.md   (D44 acrescentada no fim; já contém D42 e D43)
-N  LEIA-ME-D44.txt (pode subir ou não)
+COMO SUBIR - no GitHub: Add file > Upload files
+1. Este pacote é COMPLETO. Extraia o zip e arraste o CONTEÚDO da pasta (as pastas "webapp-src", "docs", "scripts", "config",
+   "api", "assets", ".github" etc. como pastas, e os arquivos soltos). ATENÇÃO: a pasta ".github" começa com ponto e o
+   Finder/Explorer pode escondê-la; ela não mudou na D44, então se não aparecer pode ficar de fora.
+   Só precisam mesmo ser enviados os arquivos listados acima (novos "+" e alterados "~").
+2. Mensagem do commit: "D44: Financiar, alugar ou consórcio (comparativo de patrimônio e custos explicados)".
 
-COMO SUBIR - GitHub: Add file > Upload files. Extraia o zip e arraste as pastas "webapp-src" e "docs".
-Mensagem do commit: "D44: resultado dos simuladores sempre à vista no computador".
+DEPOIS DO DEPLOY
+1. Abra a landing e confira o cartão novo; toque nele e confirme que abre o comparativo (?tela=simuleImovel).
+2. Preencha com uma proposta real que você tenha em mãos e compare a primeira parcela e o CET da tela com os da proposta.
+   Os valores de partida (juros 10,5%, MIP 0,03%, DFI 0,012%, tarifa R$ 25, ITBI 4%, custos de dono 1% ao ano, administração 15%
+   e fundo de reserva 1% do consórcio, grupo de 200 meses, contemplação no 36o mês) são NOSSOS e editáveis, não de mercado.
+3. Revise o texto de aviso (final da tela e da página de SEO). É a parte que sustenta "conta matemática, não recomendação".
+4. Search Console: pedir indexação de /financiar-alugar-ou-consorcio/.
 
-COMO CONFERIR (depois do deploy da Vercel): no notebook, abra Simule Ativos > qualquer simulador, role a lista até o
-meio ou o fim e clique num ativo: a página deve subir sozinha até o cartão de resultado. Teste também diminuindo a
-altura da janela do navegador.
-
-VERIFICAÇÃO: 1054 testes do app passando (8 novos, da regra de rolagem); typecheck, lint e build sem erros.
-Esta regra foi testada por simulação de janela (largura, altura e posição do cartão); a conferência no seu notebook
-real é a prova final.
+VERIFICAÇÃO: 1123 testes do app (77 novos) e 180 dos scripts (2 novos) passando; typecheck, lint e build de produção sem erros
+(33 páginas estáticas, a nova no sitemap). A contabilidade fecha em 11 cenários (Price, lance por prazo e por parcela, horizonte
+maior que o prazo, IR ligado e desligado, consórcio quitado antes, reajustes altos...). A tela foi conferida em celular e
+computador, nos temas escuro e claro. Não validei os números contra uma proposta real de banco ou de administradora: isso fica
+com você (item 2 de "Depois do deploy").

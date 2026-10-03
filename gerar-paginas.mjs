@@ -23,6 +23,8 @@ export const DOMINIO = 'https://carteiraideal.app.br'
 
 /** Data da última revisão do conteúdo escrito à mão. Atualizar quando os textos forem revisados. */
 export const REVISADO_EM = '2026-09-28'
+/** Páginas criadas ou reescritas na D44 (comparativo de imóvel): data própria, sem fingir que as demais foram revisadas. */
+const REVISADO_D44 = '2026-10-03'
 
 const AVISO = 'Conteúdo educacional. Não é recomendação de investimento.'
 
@@ -192,11 +194,11 @@ function jsonLd(pg) {
 
 const LINKS_RODAPE = [
   ['Teste de perfil de investidor', '/teste-perfil-de-investidor/'],
-  ['Simule Ativos', '/simule-ativos/'],
   ['Simulador de Tesouro Direto', '/simulador-tesouro-direto/'],
   ['Simulador de FII', '/simulador-fii/'],
   ['Simulador de BDR', '/simulador-bdr/'],
   ['Simulador de ETF', '/simulador-etf/'],
+  ['Financiar, alugar ou consórcio', '/financiar-alugar-ou-consorcio/'],
   ['Meus Ativos', '/minha-carteira/'],
   ['Meu Mês', '/meu-mes/'],
   ['Aprender', '/aprender/'],
@@ -351,45 +353,6 @@ function paginaPerfil() {
   }
 }
 
-function paginaSimuleAtivos() {
-  return {
-    caminho: '/simule-ativos/',
-    titulo: 'Simule Ativos: ações, FII, Tesouro, BDR e ETF',
-    descricao: 'Simuladores gratuitos com dados oficiais: ações por setor, FIIs, Tesouro Direto, BDRs e ETFs. Veja os mais negociados e quanto o seu dinheiro compra.',
-    h1: 'Simule Ativos',
-    lead: 'Cinco simuladores gratuitos, sem cadastro, com dados oficiais. Escolha o tipo de ativo, veja os mais negociados e descubra quanto o valor que você tem hoje consegue comprar ou render.',
-    botoes: [{ texto: 'Abrir o Simule Ativos', href: '/app/?tela=simuleAtivos' }],
-    migalhas: [],
-    schema: 'WebPage',
-    lastmod: REVISADO_EM,
-    corpo: [
-      secao(
-        'Os simuladores',
-        `<ul>
-<li><strong>Simule Ações:</strong> as principais empresas de cada setor da B3, com o preço de fechamento e quantas ações o seu valor compra. <a href="/app/?tela=simuleAcoes">Abrir no app</a>.</li>
-<li><strong><a href="/simulador-fii/">Simulador de FII</a>:</strong> os fundos imobiliários mais negociados, por setor, com o rendimento estimado a partir do informe mensal da CVM.</li>
-<li><strong><a href="/simulador-tesouro-direto/">Simulador de Tesouro Direto</a>:</strong> quanto cada título Selic, Prefixado ou IPCA+ rende até o vencimento, já com Imposto de Renda e taxa de custódia.</li>
-<li><strong><a href="/simulador-bdr/">Simulador de BDR</a>:</strong> os BDRs mais negociados na B3, por setor, e quantos recibos o seu valor compra.</li>
-<li><strong><a href="/simulador-etf/">Simulador de ETF</a>:</strong> os ETFs mais negociados na B3, por categoria, e quantas cotas o seu valor compra.</li>
-</ul>`,
-      ),
-      secao(
-        'Como funcionam',
-        `<p>Todos seguem a mesma ideia: mostrar os dados do mercado de forma organizada e fazer a conta de quanto o seu dinheiro compra. Preços e volumes vêm do Boletim de Preços oficial da B3, e as taxas do Tesouro, do Tesouro Nacional. A ordem das listas é só o volume negociado: <strong>as ferramentas não fazem ranking nem recomendação de compra</strong>. A conta usa o preço de fechamento, sem corretagem e impostos, e não é uma projeção de retorno. <a href="/metodologia-e-fontes/">Veja as fontes e a metodologia</a>.</p>`,
-      ),
-    ].join('\n'),
-    faq: [
-      { p: 'Os simuladores são gratuitos?', r: 'Sim. São gratuitos e não pedem cadastro, e-mail nem telefone.' },
-      { p: 'Os simuladores indicam o que comprar?', r: 'Não. Eles mostram dados na ordem de volume negociado e fazem a conta de quanto o valor compra. Não há ranking nem recomendação de investimento.' },
-      { p: 'De onde vêm os dados?', r: 'Preços e volumes, do Boletim de Preços oficial da B3; taxas do Tesouro, do Tesouro Nacional; rendimentos dos FIIs, dos informes mensais da CVM.' },
-    ],
-    relacionados: [
-      { texto: 'Descubra o seu perfil de investidor', href: '/teste-perfil-de-investidor/' },
-      { texto: 'Aprender a investir, do zero', href: '/aprender/' },
-    ],
-  }
-}
-
 function paginaTesouro(temTaxas) {
   return {
     caminho: '/simulador-tesouro-direto/',
@@ -530,6 +493,70 @@ function paginaBdr() {
     relacionados: [
       { texto: 'BDRs: como investir em empresas estrangeiras pela B3', href: '/aprender/ativos/bdrs/' },
       { texto: 'Simulador de ETF', href: '/simulador-etf/' },
+      { texto: 'Descubra o seu perfil de investidor', href: '/teste-perfil-de-investidor/' },
+    ],
+  }
+}
+
+function paginaImovel() {
+  return {
+    caminho: '/financiar-alugar-ou-consorcio/',
+    titulo: 'Financiar, alugar ou consórcio: qual rende mais patrimônio',
+    descricao: 'Compare financiamento, aluguel com investimento e consórcio de imóvel e veja qual deixa o maior patrimônio líquido, com cada custo explicado. Grátis.',
+    h1: 'Financiar, alugar ou consórcio: qual deixa o maior patrimônio?',
+    lead: 'Informe o valor do imóvel, a entrada, as taxas e o prazo. A ferramenta compara as três rotas com o mesmo dinheiro e mostra qual termina com o maior patrimônio líquido, com cada custo e cada taxa explicados.',
+    botoes: [{ texto: 'Abrir o comparativo', href: '/app/?tela=simuleImovel' }],
+    migalhas: [],
+    schema: 'WebPage',
+    lastmod: REVISADO_D44,
+    corpo: [
+      secao(
+        'O que a ferramenta calcula',
+        `<ul>
+<li><strong>Patrimônio líquido final</strong> de cada rota: o imóvel a preço de mercado, mais os investimentos já descontado o Imposto de Renda, menos a dívida que ainda resta.</li>
+<li><strong>Qual rota termina na frente</strong> e por quanto, com a vantagem decomposta em custos, valorização do imóvel e rendimento dos investimentos.</li>
+<li><strong>Todos os custos e taxas</strong> de cada caminho, um por um, e o que cada um significa.</li>
+<li><strong>A evolução mês a mês</strong> do patrimônio das três rotas, em gráfico.</li>
+<li><strong>O ponto de virada</strong>: a valorização do imóvel em que o resultado muda de lado, e como o consórcio se comporta se a contemplação demorar.</li>
+</ul>
+<p>A conta é matemática, feita com as taxas que você informa. A ferramenta não indica banco, administradora de consórcio nem produto, e a comparação não é recomendação de financiamento, de consórcio ou de investimento.</p>`,
+      ),
+      secao(
+        'Como a comparação é justa',
+        `<p>Os três caminhos partem do mesmo dinheiro. O capital que seria a entrada e o ITBI/cartório do financiamento fica aplicado desde o primeiro dia para quem aluga ou entra no consórcio. Todo mês, a maior despesa entre os três caminhos vira o orçamento de referência, e quem paga menos investe a diferença.</p>
+<p>Assim, nenhuma rota leva vantagem só por gastar menos: a diferença no resultado vem de para onde o dinheiro foi, se virou patrimônio ou se virou custo.</p>`,
+      ),
+      secao(
+        'Os custos que a ferramenta mostra',
+        `<p><strong>No financiamento:</strong> ITBI, escritura e registro; juros pela tabela SAC ou Price; os seguros obrigatórios MIP (morte e invalidez) e DFI (danos ao imóvel); a tarifa de administração do banco; e os custos de quem é dono (IPTU, condomínio e manutenção). O CET, que junta juros, seguros e tarifa numa taxa só, aparece como resultado.</p>
+<p><strong>No aluguel:</strong> o aluguel pago ao longo do período, reajustado todo ano. O capital e as sobras mensais ficam investidos, com o Imposto de Renda regressivo sobre o ganho.</p>
+<p><strong>No consórcio:</strong> taxa de administração, fundo de reserva, aluguel pago enquanto espera a contemplação, ITBI e cartório na compra do imóvel, e o reajuste anual das parcelas, que continua depois que a carta de crédito é usada.</p>`,
+      ),
+      secao(
+        'O que pode mudar o vencedor',
+        `<p>O resultado depende de três premissas que ninguém conhece de antemão: quanto os investimentos vão render, quanto o imóvel vai valorizar e, no consórcio, em que mês a contemplação vai acontecer. Por isso a ferramenta mostra o ponto de virada: a valorização do imóvel em que financiar e alugar empatam, e o resultado do consórcio se a contemplação for no 12º, no 60º ou no 120º mês.</p>
+<p>Como ponto de partida, os campos de rendimento, inflação e valorização usam a projeção de longo prazo do Boletim Focus, do Banco Central. Você pode trocar por qualquer número.</p>`,
+      ),
+      secao(
+        'O que a ferramenta não faz',
+        `<ul>
+<li>Não confirma se o seu crédito seria aprovado, nem a taxa que o banco ofereceria.</li>
+<li>Não garante a data de contemplação no consórcio, que depende de sorteio ou de lance.</li>
+<li>Não considera FGTS, reformas, vacância, queda de preço por região, mudança de taxa do financiamento nem isenções de ganho de capital na venda.</li>
+<li>Não substitui a leitura do contrato nem uma conversa com um profissional certificado.</li>
+</ul>`,
+      ),
+    ].join('\n'),
+    faq: [
+      { p: 'O comparativo de financiamento, aluguel e consórcio é gratuito?', r: 'Sim, é gratuito e não pede cadastro. Os valores que você digita ficam só no seu aparelho.' },
+      { p: 'A ferramenta indica qual banco ou qual consórcio escolher?', r: 'Não. Ela compara três caminhos com as taxas que você informar, de qualquer banco ou administradora, e mostra qual deixa o maior patrimônio. Não indica instituição nem produto.' },
+      { p: 'O resultado é uma recomendação de financiar, alugar ou entrar num consórcio?', r: 'Não. É uma conta matemática com premissas de taxa e de valorização que podem não se confirmar. Se as premissas mudam, o vencedor pode mudar, e a ferramenta mostra em que ponto isso acontece.' },
+      { p: 'O que é patrimônio líquido neste comparativo?', r: 'É o que você teria no fim do período se vendesse o imóvel pelo preço de mercado, pagasse o que ainda deve e resgatasse os investimentos, já descontado o Imposto de Renda.' },
+      { p: 'Por que o aluguel entra com investimentos?', r: 'Porque quem não compra o imóvel pode aplicar o capital da entrada e a diferença mensal entre a parcela e o aluguel. Sem isso, a comparação favoreceria quem compra por gastar menos.' },
+    ],
+    relacionados: [
+      { texto: 'Simulador de Tesouro Direto', href: '/simulador-tesouro-direto/' },
+      { texto: 'Meu Mês: organize as contas antes de decidir', href: '/meu-mes/' },
       { texto: 'Descubra o seu perfil de investidor', href: '/teste-perfil-de-investidor/' },
     ],
   }
@@ -781,7 +808,7 @@ function paginaMetodologia() {
     botoes: [{ texto: 'Fazer o teste de perfil', href: '/app/' }],
     migalhas: [{ nome: 'Sobre', caminho: '/sobre/' }],
     schema: 'WebPage',
-    lastmod: REVISADO_EM,
+    lastmod: REVISADO_D44,
     corpo: [
       secao(
         'Como o teste chega à carteira de referência',
@@ -796,9 +823,11 @@ function paginaMetodologia() {
 <li><strong>Tesouro Direto:</strong> taxas e preços do Tesouro Transparente; Selic, CDI, IPCA, dólar e Boletim Focus do Banco Central. Atualizados uma vez por semana.</li>
 <li><strong>FIIs:</strong> Informe Mensal Estruturado da CVM, com cotação e volume de mercado. Atualizados uma vez por mês.</li>
 <li><strong>BDRs e ETFs:</strong> Boletim de Preços oficial da B3, nos dias úteis à noite. Nome, setor e proporção dos BDRs vêm de cadastros de mercado.</li>
+<li><strong>Financiar, alugar ou consórcio:</strong> não usa cadastro de produtos. Parte das taxas que você informa e, como sugestão inicial, da projeção de longo prazo de Selic e IPCA do Boletim Focus, do Banco Central.</li>
 <li><strong>Imposto de Renda e custódia:</strong> regras vigentes na data da última revisão, que mudam com a legislação.</li>
 </ul>
-<p>Os simuladores <strong>descrevem</strong> dados: ordenam por vencimento ou por liquidez, agrupam por setor ou categoria e não fazem ranking, valor justo nem recomendação de compra.</p>`,
+<p>Os simuladores de ativos <strong>descrevem</strong> dados: ordenam por vencimento ou por liquidez, agrupam por setor ou categoria e não fazem ranking, valor justo nem recomendação de compra.</p>
+<p>O comparativo <a href="/financiar-alugar-ou-consorcio/">Financiar, alugar ou consórcio</a> é diferente: é uma conta que ordena três <strong>caminhos</strong> pelo patrimônio líquido final, com as taxas que você informa. Ele nunca ordena bancos, administradoras ou produtos, e o resultado muda quando as premissas mudam.</p>`,
       ),
       secao(
         'Revisão e correções',
@@ -989,7 +1018,7 @@ function paginaAprender(dividasDisponivel) {
     botoes: [{ texto: 'Ver as aulas em vídeo no app', href: '/app/?tela=aprender' }],
     migalhas: [],
     schema: 'WebPage',
-    lastmod: REVISADO_EM,
+    lastmod: REVISADO_D44,
     corpo: [
       secao('Antes de investir', `<p>Reserva de emergência e dívida cara vêm antes de qualquer investimento de risco. ${dividasDisponivel ? `Comece pelo <a href="${CAMINHO_DIVIDAS}">guia para sair das dívidas</a> e pelo <a href="/meu-mes/">Meu Mês</a>.` : `Comece pelo <a href="/meu-mes/">Meu Mês</a>.`}</p>`),
       secao('Guias sobre os investimentos', `<ul class="lista-aulas">${itens}</ul>`),
@@ -1001,6 +1030,7 @@ function paginaAprender(dividasDisponivel) {
 <li><a href="/simulador-fii/">Simulador de FII</a></li>
 <li><a href="/simulador-bdr/">Simulador de BDR</a></li>
 <li><a href="/simulador-etf/">Simulador de ETF</a></li>
+<li><a href=\"/financiar-alugar-ou-consorcio/\">Financiar, alugar ou consórcio</a></li>
 </ul>`,
       ),
       secao('Livro infantil grátis', `<p>O livro <strong>Os Três Potes de Clara</strong>, de educação financeira infantil, está disponível de graça na tela Aprender do app.</p>`),
@@ -1111,11 +1141,11 @@ export async function gerarPaginas({ raiz, snapshot } = {}) {
 
     const paginas = [
       paginaPerfil(),
-      paginaSimuleAtivos(),
       paginaTesouro(Boolean(taxas)),
       paginaFii(),
       paginaBdr(),
       paginaEtf(),
+      paginaImovel(),
       paginaMinhaCarteira(),
       paginaMeuMes(dividas ? CAMINHO_DIVIDAS : '/aprender/'),
       paginaAprender(Boolean(dividas)),

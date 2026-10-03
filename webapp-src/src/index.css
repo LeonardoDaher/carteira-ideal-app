@@ -817,10 +817,17 @@ button.alloc-box:active {
 :root {
   --grafico-selic: var(--accent);
   --grafico-ipca: oklch(72% 0.13 235);
+  /* Gráfico de patrimônio (D44): três cenários */
+  --grafico-alu: var(--accent);
+  --grafico-fin: oklch(72% 0.13 235);
+  --grafico-con: oklch(74% 0.17 150);
 }
 :root[data-theme='light'] {
   --grafico-selic: oklch(58% 0.15 85);
   --grafico-ipca: oklch(50% 0.15 250);
+  --grafico-alu: oklch(58% 0.15 85);
+  --grafico-fin: oklch(50% 0.15 250);
+  --grafico-con: oklch(50% 0.14 150);
 }
 
 /* Linha de um título: nome e vencimento à esquerda, taxa e preço alinhados à direita. */
@@ -1605,6 +1612,69 @@ select option:disabled { color: #6b7280 !important; -webkit-text-fill-color: #6b
 /* Lista curta dentro de um aviso (ex.: onde usar a reserva acima da mini-reserva). */
 .mm-lista-simples { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 2px; }
 
+/* ── Simule Imóvel (D44): financiamento × aluguel × consórcio ─────────────────────────────── */
+/* Cores de texto para "custo" (âmbar) e "a favor" (verde): no tema claro os tons do app ficam fracos sobre o branco, então ganham versão escura. */
+:root { --imovel-contra: var(--warning); --imovel-favor: var(--success); }
+:root[data-theme='light'] { --imovel-contra: oklch(46% 0.14 50); --imovel-favor: oklch(42% 0.13 150); }
+.grafico-pat { width: 100%; height: auto; display: block; touch-action: pan-y; cursor: crosshair; border-radius: 8px; }
+.grafico-pat:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+.grafico-pat-grade { stroke: var(--border); stroke-width: 1; }
+.grafico-pat-eixo { fill: var(--text-muted); font-size: 9px; font-family: 'IBM Plex Sans', sans-serif; font-variant-numeric: tabular-nums; }
+.grafico-pat-linha { fill: none; stroke-linejoin: round; stroke-linecap: round; stroke-width: 2.4; }
+.grafico-pat-linha.aluguel { stroke: var(--grafico-alu); }
+.grafico-pat-linha.financiamento { stroke: var(--grafico-fin); stroke-dasharray: 7 3.5; }
+.grafico-pat-linha.consorcio { stroke: var(--grafico-con); stroke-dasharray: 0.1 4; stroke-width: 3; }
+.grafico-pat-guia { stroke: var(--text-muted); stroke-width: 1; stroke-dasharray: 2 3; }
+.grafico-pat-ponto { stroke: var(--bg); stroke-width: 1.5; }
+.grafico-pat-ponto.aluguel { fill: var(--grafico-alu); }
+.grafico-pat-ponto.financiamento { fill: var(--grafico-fin); }
+.grafico-pat-ponto.consorcio { fill: var(--grafico-con); }
+.grafico-pat-leitura {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  font-size: 12px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.grafico-pat-leitura strong { color: var(--text); font-weight: 700; }
+.grafico-pat-tempo { color: var(--text); font-weight: 700; min-width: 64px; }
+.grafico-pat-amostra { vertical-align: middle; margin-right: 4px; }
+
+.imovel-vencedor {
+  border: 2px solid var(--accent);
+  background: color-mix(in oklch, var(--accent) 12%, var(--surface));
+}
+.imovel-ranking { display: flex; flex-direction: column; gap: 10px; }
+.imovel-barra-trilha { height: 10px; border-radius: 6px; background: var(--surface2); overflow: hidden; }
+.imovel-barra { height: 100%; border-radius: 6px; }
+.imovel-barra.aluguel { background: var(--grafico-alu); }
+.imovel-barra.financiamento { background: var(--grafico-fin); }
+.imovel-barra.consorcio { background: var(--grafico-con); }
+.tabela-comparativo {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) repeat(3, minmax(0, 1fr));
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.tabela-comparativo > span { padding: 7px 4px; border-bottom: 1px solid var(--border); }
+.tabela-comparativo > span:nth-child(4n + 1) { color: var(--text-muted); padding-left: 0; }
+.tabela-comparativo > span:not(:nth-child(4n + 1)) { text-align: right; white-space: nowrap; }
+.tabela-comparativo > .cab { font-weight: 700; color: var(--text); border-bottom: 1px solid var(--stroke); }
+.tabela-comparativo > .destaque { font-weight: 700; color: var(--text); }
+.imovel-form { display: flex; flex-direction: column; gap: 12px; }
+.imovel-bloco > summary { cursor: pointer; font-weight: 700; font-size: 14px; list-style-position: inside; }
+.imovel-grade { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
+.imovel-grade .span2 { grid-column: 1 / -1; }
+.imovel-aviso-erro { border: 1px solid var(--danger); }
+.conta-secao { font-weight: 700; font-size: 13px; }
+.conta-item { display: flex; flex-direction: column; gap: 3px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+.conta-item-linha { display: flex; justify-content: space-between; gap: 12px; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+.conta-item-linha > :first-child { font-weight: 600; }
+.conta-item-linha > :last-child { white-space: nowrap; font-weight: 700; }
+.conta-item.custo .conta-item-linha > :last-child { color: var(--imovel-contra); }
+.conta-item.patrimonio .conta-item-linha > :last-child { color: var(--imovel-favor); }
+
 /* =====================================================================================
    Minha Carteira (D36) — painel de gestão da carteira real.
    Visual inspirado em painéis financeiros escuros: cartões de fundo escuro com contorno
@@ -1974,3 +2044,4 @@ select option:disabled { color: #6b7280 !important; -webkit-text-fill-color: #6b
   .mc-pos-numeros { flex: 0 0 360px; }
   .mc-pos-extra { flex: 1 1 100%; }
 }
+

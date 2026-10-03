@@ -119,3 +119,13 @@ A mudança para a API tirou a metodologia do código visível. Ainda assim, vale
 - [ ] **Grupos dos BDRs de ETF:** completar `gruposEtf` conforme os ETFs que entrarem na lista.
 - [ ] **Nova captura** `docs/jornada/19-simule-bdr.jpg`.
 - [ ] **Próximas frentes, uma por vez, cada uma em sua conversa:** ETFs da B3, criptomoedas e ações da B3.
+## 10. Financiar, alugar ou consórcio (decisão D44)
+
+- [x] **Motor** (`domain/simulaImovel.ts`), **tela** (`SimuleImovel`, `?tela=simuleImovel`), cartão na landing e **página de SEO** `/financiar-alugar-ou-consorcio/`.
+- [x] **Explicação completa de custos e taxas** no resultado, com a contabilidade fechada por teste.
+- [ ] **Conferir os valores de partida** contra propostas reais antes de divulgar: juros do financiamento (10,5%), MIP (0,03%) e DFI (0,012%) ao mês, tarifa (R$ 25), ITBI e cartório (4%), custos de dono (1% ao ano), taxa de administração (15%) e fundo de reserva (1%) do consórcio, prazo do grupo (200 meses) e contemplação (36º mês). São nossos, não de mercado.
+- [ ] **Revisão do texto de aviso** ("conta matemática, não indica banco nem consórcio, não é recomendação") pelo responsável certificado, na tela, na página de SEO e na Metodologia.
+- [ ] **Testar com 3 ou 4 propostas reais** (um banco, uma administradora) e comparar a parcela e o CET da simulação com os da proposta. Diferença de poucos por cento é esperada (TR zerada, seguros aproximados).
+- [ ] **Avaliar incluir:** isenção de ganho de capital do imóvel único, devolução do fundo de reserva no fim do grupo, FGTS na entrada e a TR no financiamento.
+- [ ] **Nova captura** `docs/jornada/20-financiar-alugar-consorcio.jpg`.
+- [ ] **Search Console:** pedir a indexação da nova página depois do deploy.
