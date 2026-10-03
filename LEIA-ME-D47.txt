@@ -1,0 +1,67 @@
+O QUE É
+D47: Simule Carro. O segundo bem do Simule Bens (comprar à vista, financiar, consórcio ou ficar sem carro).
+1) Resultado em DUAS LEITURAS LADO A LADO, com o custo em destaque: o custo de mobilidade por mês (líquido do rendimento do dinheiro e bruto)
+   e o patrimônio líquido final. São a mesma conta vista de dois lados: como todos colocam o mesmo dinheiro, custo líquido = dinheiro
+   colocado - patrimônio final, então a ordem por custo é a inversa da ordem por patrimônio. A tela explica isso.
+2) "Sem carro" = um gasto mensal único de mobilidade que a pessoa informa (assinatura, locação ou aplicativo), corrigido pela inflação.
+   O ponto de virada diz a partir de que gasto mensal sem carro ter o carro compensa.
+3) 0 km e seminovo (botões amarelos quando selecionados). Ao trocar, recarregam SÓ depreciação, manutenção e envelhecimento da manutenção.
+4) O carro perde valor: curva em dois trechos (taxa do 1º ano e taxa dos anos seguintes). A perda aparece como linha própria em cada caminho.
+5) Custos explicados um a um, em linguagem simples: emplacamento, IOF, gravame, juros (Price, em % ao mês), IPVA, seguro, manutenção,
+   uso, taxa de administração, fundo de reserva e reajuste das parcelas.
+6) Mesmas regras do imóvel: mesmo dinheiro, contabilidade que fecha (teste), campo "Dinheiro disponível hoje" (vazio = só entrada + custos),
+   rota à vista só entra se o dinheiro cobrir, CET como resultado, antes da contemplação não há carro nem dívida.
+7) Página de SEO nova: /carro-a-vista-financiar-consorcio-ou-sem-carro/ (no rodapé, no Aprender e na Metodologia).
+8) O cartão "Carro" do hub deixa de ser "Em breve" e abre ./?tela=simuleCarro. Moto continua "Em breve".
+
+ATENÇÃO - VALORES DE PARTIDA (importante antes de divulgar)
+   Rendimento e inflação vêm do Boletim Focus, como no imóvel. TODO O RESTO É NOSSO e está marcado como tal na tela: juros 1,9% ao mês,
+   depreciação (0 km 14% e 9%; seminovo 9% e 7%), IPVA 3%, seguro 4%, manutenção, uso R$ 800, IOF 3%, gravame R$ 400, emplacamento 1,5%,
+   consórcio (adm 15%, fundo 2%, 72 meses, contemplação no 18º), sem carro R$ 1.800.
+   Fonte oficial para os juros: série SGS 25471 do Banco Central (juros médios de aquisição de veículos, PF, % ao mês). A série foi
+   confirmada, mas o ÚLTIMO VALOR NÃO FOI LIDO nesta entrega. Traga o número e eu troco o valor de partida.
+
+NÃO MUDOU: o motor e as premissas do imóvel (simulaImovel.ts intacto), questionário, API, Meu Mês, Meus Ativos, Aprender, Simule Ativos,
+o cartão da landing e o endereço /financiar-alugar-ou-consorcio/. Não foi feito: seletor "Quais caminhos comparar?", botão de cenário
+histórico nem desabilitar campos do financiamento.
+Única mudança em código compartilhado: o GraficoPatrimonio aceita a propriedade opcional "nomes" (padrão idêntico ao antigo).
+
+ARQUIVOS (em relação ao que está hoje no GitHub, versão D46c)
+   + LEIA-ME-D47.txt
+   + webapp-src/src/domain/simulaCarro.ts
+   + webapp-src/src/domain/simulaCarro.test.ts
+   + webapp-src/src/screens/SimuleCarro.tsx
+   + webapp-src/src/screens/SimuleCarro.test.tsx
+   + webapp-src/src/ui/DetalheCustosCarro.tsx
+   ~ docs/04-jornada-do-cliente.md
+   ~ docs/06-proximos-passos.md
+   ~ docs/07-registro-de-decisoes.md
+   ~ gerar-paginas.mjs
+   ~ scripts/gerar-paginas.mjs
+   ~ scripts/gerar-paginas.test.mjs
+   ~ webapp-src/src/App.tsx
+   ~ webapp-src/src/screens/SimuleBens.tsx
+   ~ webapp-src/src/screens/SimuleBens.test.tsx
+   ~ webapp-src/src/state/useAppState.ts
+   ~ webapp-src/src/state/useAppState.test.ts
+   ~ webapp-src/src/ui/GraficoPatrimonio.tsx
+   Obs.: gerar-paginas.mjs na raiz é a cópia solta que já vinha no pacote; foi mantida igual a scripts/gerar-paginas.mjs.
+
+COMO SUBIR - no GitHub: Add file > Upload files
+1. Extraia o zip. Vai aparecer a pasta "D47-subir". Abra-a e arraste o CONTEÚDO (as pastas docs, scripts e webapp-src e os arquivos soltos),
+   não a pasta em si.
+2. Num ÚNICO envio, sem dividir (são 18 arquivos, abaixo do limite de 100). Os arquivos dependem uns dos outros; se só parte subir, o build
+   da Vercel falha (a Vercel mantém o site antigo no ar, mas aparece erro em Deployments).
+3. Mensagem do commit: "D47: Simule Carro (à vista, financiar, consórcio ou sem carro)".
+
+DEPOIS DO DEPLOY
+1. Landing > cartão > Simule Bens: o cartão "Carro" agora é um link. Toque nele: abre o comparativo de carro.
+2. Com os valores de partida e o dinheiro padrão (entrada + emplacamento + IOF + gravame = R$ 34.000), "Sem carro" (R$ 1.800 por mês) termina na frente e a tela avisa
+   que comprar à vista não entrou (faltam R$ 67.500). Toque em "Incluir comprar à vista": entram a quarta rota, o bloco explicativo e a linha no gráfico.
+3. Em "Em que ponto o resultado muda?": com os valores de partida, financiar e o consórcio empatam com ficar sem carro perto de R$ 2.960 por mês.
+4. Troque 0 km por Seminovo: a perda de valor no 1º ano passa de 14% para 9% e o valor do carro não muda.
+5. Revise o texto da página de SEO e dos avisos, que citam IOF, gravame e a série 25471 do Banco Central.
+
+VERIFICAÇÃO: 1230 testes do app (48 novos) e 182 dos scripts (2 novos) passando; typecheck, lint e build sem erros. A tela foi exercitada
+por testes de renderização; NÃO foi aberta num navegador neste ambiente (conferir no celular depois do deploy). Apliquei este zip por cima do
+pacote que está no GitHub e rodei typecheck, lint, testes e build nesse resultado, para garantir que a lista de arquivos está completa.
