@@ -34,7 +34,7 @@ const AVISO = 'Conteúdo educacional. Não é recomendação de investimento.'
  */
 export const AUTOR = {
   nome: 'Leonardo Daher',
-  formacao: 'Administração e Direito',
+  formacao: 'Administração de Empresas e Direito',
   email: 'acarteiraideal@gmail.com',
   instagram: 'https://www.instagram.com/acarteiraideal/',
   youtube: 'https://www.youtube.com/@acarteiraideal',
@@ -689,12 +689,14 @@ function paginaSobre() {
     corpo: [
       secao(
         'Quem faz',
-        `<p>Eu sou ${esc(AUTOR.nome)}, formado em ${esc(AUTOR.formacao)}. Crio e mantenho o Carteira Ideal, escrevo os conteúdos e cuido dos dados e das ferramentas.</p>
-<p>Não sou analista nem consultor de valores mobiliários registrado na CVM. O site não presta consultoria e não faz recomendação de investimento: o conteúdo é educacional.</p>`,
+        `<p>${esc(AUTOR.nome)} é formado em ${esc(AUTOR.formacao)}. Cria, mantém e atualiza os conteúdos e as ferramentas do app.</p>
+<p>Atua e estuda o mercado financeiro desde 1998, quando ele ainda funcionava no mercado de balcão organizado e nem existia home broker. Sua monografia do curso de Administração de Empresas da UFES foi “O mercado de ações no Brasil: um estudo da análise gráfica para tomada de decisão”.</p>
+<p>Não é analista ou consultor financeiro, e o aplicativo não faz recomendação de investimentos. O conteúdo é 100% educacional e gratuito.</p>`,
       ),
       secao(
         'Por que o projeto existe',
-        `<p>O teste de perfil de investidor que as corretoras aplicam mede a intenção: quanto risco você diz aceitar. A vida real também conta: a reserva que você tem, as dívidas, os gastos previstos, a estabilidade da renda. O Carteira Ideal cruza as duas coisas e mostra uma carteira de referência.</p>
+        `<p>Nascemos da necessidade de ajudar as pessoas menos familiarizadas com o mundo dos investimentos e que anseiam por aprender a investir. Temos espaços de aprendizagem e ferramentas de ajuda para quem deseja sair das dívidas. É um ambiente de ensino em constante evolução, com vídeos curtos e didáticos. Nossas ferramentas são simples, diretas e <strong>gratuitas</strong>, fáceis de entender e aplicar.</p>
+<p>O teste de perfil de investidor que as corretoras aplicam mede a intenção: quanto risco você diz aceitar. A vida real também conta: a reserva que você tem, as dívidas, os gastos previstos, a estabilidade da renda. O Carteira Ideal cruza as duas coisas e mostra uma carteira de referência.</p>
 <p>Junto com o teste, o projeto traz ferramentas para acompanhar a carteira que você tem (<a href="/minha-carteira/">Meus Ativos</a>) e organizar o mês (<a href="/meu-mes/">Meu Mês</a>), um caminho para <a href="/aprender/sair-das-dividas/">sair das dívidas</a> antes de investir, <a href="/aprender/">guias sobre cada classe de ativo</a>, simuladores com dados oficiais e o livro infantil <strong>Os Três Potes de Clara</strong>.</p>`,
       ),
       secao(

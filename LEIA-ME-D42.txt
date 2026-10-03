@@ -8,12 +8,16 @@ O QUE MUDOU
    ?tela= que a landing usava. É tela avulsa: não depende do questionário e não vira ponto de retomada.
 3) Nos 4 simuladores, o link de topo passou de "← Início" para "← Simule Ativos" (volta ao hub). No hub,
    "← Início" volta à landing.
-4) A seção "Ferramentas gratuitas" (SEO) da landing e as páginas /simule-fii/ etc. NÃO mudaram; seus botões
+4) Texto da página /sobre/ atualizado ("Quem faz" e "Por que o projeto existe") com o texto de Quem_faz.txt:
+   formação "Administração de Empresas e Direito", atuação desde 1998, monografia da UFES, "não é analista ou
+   consultor financeiro" e o parágrafo "Nascemos da necessidade...". Erros de digitação do original corrigidos
+   ("aos foi", "uma ambiente", "videos"). O teste de /sobre/ foi atualizado para a nova frase.
+5) A seção "Ferramentas gratuitas" (SEO) da landing e as páginas /simule-fii/ etc. NÃO mudaram; seus botões
    "Abrir o simulador" continuam abrindo cada simulador direto.
 
 NÃO MUDOU: motor, questionário, dados (BDR/ETF/FII/Tesouro), API, Meu Mês, Meus Ativos, Aprender.
 
-ARQUIVOS (14) - caminhos a partir da raiz do repositório
+ARQUIVOS (17) - caminhos a partir da raiz do repositório
 A  index.html
 N  webapp-src/src/screens/SimuleAtivos.tsx
 N  webapp-src/src/screens/SimuleAtivos.test.tsx
@@ -28,10 +32,13 @@ A  webapp-src/src/App.tsx
 A  webapp-src/src/index.css
 A  webapp-src/src/ui/MateriaisExtras.test.tsx
 A  docs/07-registro-de-decisoes.md                (D42 acrescentada no fim)
+A  scripts/gerar-paginas.mjs                       (texto do Sobre; AUTOR.formacao)
+A  scripts/gerar-paginas.test.mjs                  (teste do Sobre)
+A  gerar-paginas.mjs                               (RAIZ: cópia idêntica de scripts/gerar-paginas.mjs)
 N  LEIA-ME-D42.txt (pode subir ou não)
 
 COMO SUBIR - no GitHub: Add file > Upload files
-Extraia o zip, arraste o CONTEÚDO (pastas "webapp-src" e "docs" como pastas + index.html). Mensagem do commit:
+Extraia o zip, arraste o CONTEÚDO (pastas "webapp-src", "docs" e "scripts" como pastas + index.html). Mensagem do commit:
 "D42: landing com cartão único Simule Ativos; simuladores numa página própria".
 
-VERIFICAÇÃO: 1031 testes do app e 158 dos scripts passando; typecheck, lint e build de produção sem erros.
+VERIFICAÇÃO: 1031 testes do app e 158 dos scripts (a página /sobre/ foi conferida no build) passando; typecheck, lint e build de produção sem erros.

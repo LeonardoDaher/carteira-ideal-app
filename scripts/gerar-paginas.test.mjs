@@ -191,7 +191,10 @@ test('nenhuma página afirma certificação ou registro que o responsável não 
   }
   const sobre = textoVisivel(paginas.find((p) => p.caminho === '/sobre/').html)
   assert.match(sobre, new RegExp(`formado em ${AUTOR.formacao}`))
-  assert.match(sobre, /não sou analista nem consultor de valores mobiliários registrado/i)
+  assert.match(sobre, /não é analista ou consultor financeiro/i)
+  assert.match(sobre, /desde 1998/)
+  assert.match(sobre, /monografia[^.]*UFES/i)
+  assert.match(sobre, /Nascemos da necessidade/)
 })
 
 test('esc, resumir e reescreverImports', () => {
