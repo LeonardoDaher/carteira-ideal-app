@@ -1,0 +1,65 @@
+# Carga inicial do histórico de Ações (decisão D43). Rodar UMA VEZ, à mão, antes do job diário
+# "Atualizar Ações" (e de novo só se o arquivo historico/acoes.json se perder).
+#
+# Baixa os boletins de preços da B3 dos pregões mais recentes (padrão: 260, o suficiente para a
+# faixa de 52 semanas), um por vez, do mais novo para o mais antigo. Referência: a carga dos
+# ETFs (D23) levou 28 minutos para 260 pregões; a das ações lê os mesmos arquivos.
+#
+# O histórico é publicado MESMO se a execução falhar ou for interrompida (passo final com
+# "if: always()"): nada do que já foi baixado se perde, e rodar de novo só baixa o que falta.
+# O arquivo do app (acoes.json) só é publicado se o site compilar.
+#
+# Depois da carga, ler no log as linhas [sem negócio] (códigos do cadastro que não negociaram:
+# corrija ou retire de config/acoes.json) e [desdobramento] (o boletim traz preço bruto; um
+# desdobramento ou grupamento no último ano precisa ser confirmado em config/acoes.json).
+
+name: Carga inicial de Ações
+
+on:
+  workflow_dispatch:
+    inputs:
+      pregoes:
+        description: 'Quantos pregões carregar (máximo 260)'
+        required: true
+        default: '260'
+
+permissions:
+  contents: write
+
+jobs:
+  carga:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Baixar os boletins e montar o histórico
+        run: node scripts/atualizar-acoes.mjs --carga-inicial=${{ github.event.inputs.pregoes }}
+
+      - name: Conferir se o site compila com os dados novos
+        id: build
+        run: |
+          npm ci
+          npm run build
+
+      - name: Publicar (commit) o que foi carregado
+        if: always()
+        run: |
+          if [ "${{ steps.build.outcome }}" != "success" ]; then
+            git checkout -- webapp-src/src/data/acoes.json 2>/dev/null || true
+          fi
+          if [ ! -f historico/acoes.json ]; then
+            echo "Nenhum histórico gravado."
+            exit 0
+          fi
+          git config user.name "${{ vars.COMMIT_AUTOR_NOME || 'github-actions[bot]' }}"
+          git config user.email "${{ vars.COMMIT_AUTOR_EMAIL || '41898283+github-actions[bot]@users.noreply.github.com' }}"
+          git add historico/acoes.json webapp-src/src/data/acoes.json
+          git commit -m "dados: carga inicial de Ações ($(date -u +%Y-%m-%d))" || { echo "Nada a publicar."; exit 0; }
+          git pull --rebase
+          git push
