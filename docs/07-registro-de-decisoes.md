@@ -864,3 +864,11 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 **Decisão.** Uma regra única, `ui/rolarParaResultado.ts`, usada pelos cinco simuladores (FII, Tesouro, BDR, ETF e Ações). Abaixo de 960 px (celular e tablet em pé) nada muda: sempre rola até o cartão. A partir de 960 px, a regra olha onde o cartão está: se o topo já está à vista, não mexe (caso do cartão fixo, sem pulo desnecessário); se está fora da janela, acima ou abaixo, rola até ele. No Tesouro a rolagem vale só no computador, porque no celular o resultado já aparece logo abaixo das opções. Respeita "reduzir movimento".
 
 **Consequência.** Telas novas com lista e cartão ao lado devem chamar `rolarParaResultado(id)` ao escolher um item, em vez de reescrever a lógica.
+
+## D45 (03/10/2026): "Ferramentas gratuitas" da landing com um único cartão de simuladores
+
+**Decisão.** Na seção "Ferramentas gratuitas" da página inicial, os quatro cartões de simulador (Tesouro Direto, FII, BDR e ETF) foram trocados por um só, **Simule Ativos**. Ficam na seção: Meus Ativos, Meu Mês, Aprender e Simule Ativos. Os simuladores de financiamento, aluguel e consórcio, em construção à parte, entrarão depois como mais itens do Simule Ativos.
+
+**Por que uma página nova.** O cartão leva a `/simule-ativos/` (página estática de SEO), e não direto ao app. Os cartões antigos eram o link da página inicial para `/simulador-fii/`, `/simulador-bdr/` etc.; sem eles, a home deixaria de apontar para essas páginas. A nova página lista os cinco simuladores (Ações, FII, Tesouro, BDR e ETF), linka as quatro páginas existentes e tem o botão que abre o Simule Ativos no app. O Simule Ações ainda não tem página própria de SEO: o item dele abre o app. O rodapé de todas as páginas ganhou o link "Simule Ativos"; os links dos quatro simuladores continuam lá.
+
+**Consequência.** Novo simulador = uma linha em `paginaSimuleAtivos` (scripts/gerar-paginas.mjs) e um cartão no hub do app (`SimuleAtivos.tsx`); a landing não muda mais.

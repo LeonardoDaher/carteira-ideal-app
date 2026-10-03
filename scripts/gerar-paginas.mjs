@@ -192,6 +192,7 @@ function jsonLd(pg) {
 
 const LINKS_RODAPE = [
   ['Teste de perfil de investidor', '/teste-perfil-de-investidor/'],
+  ['Simule Ativos', '/simule-ativos/'],
   ['Simulador de Tesouro Direto', '/simulador-tesouro-direto/'],
   ['Simulador de FII', '/simulador-fii/'],
   ['Simulador de BDR', '/simulador-bdr/'],
@@ -346,6 +347,45 @@ function paginaPerfil() {
       { texto: 'Guias sobre cada classe de ativo', href: '/aprender/' },
       { texto: 'Meu Mês: organize as contas antes de investir', href: '/meu-mes/' },
       { texto: 'Simulador de Tesouro Direto', href: '/simulador-tesouro-direto/' },
+    ],
+  }
+}
+
+function paginaSimuleAtivos() {
+  return {
+    caminho: '/simule-ativos/',
+    titulo: 'Simule Ativos: ações, FII, Tesouro, BDR e ETF',
+    descricao: 'Simuladores gratuitos com dados oficiais: ações por setor, FIIs, Tesouro Direto, BDRs e ETFs. Veja os mais negociados e quanto o seu dinheiro compra.',
+    h1: 'Simule Ativos',
+    lead: 'Cinco simuladores gratuitos, sem cadastro, com dados oficiais. Escolha o tipo de ativo, veja os mais negociados e descubra quanto o valor que você tem hoje consegue comprar ou render.',
+    botoes: [{ texto: 'Abrir o Simule Ativos', href: '/app/?tela=simuleAtivos' }],
+    migalhas: [],
+    schema: 'WebPage',
+    lastmod: REVISADO_EM,
+    corpo: [
+      secao(
+        'Os simuladores',
+        `<ul>
+<li><strong>Simule Ações:</strong> as principais empresas de cada setor da B3, com o preço de fechamento e quantas ações o seu valor compra. <a href="/app/?tela=simuleAcoes">Abrir no app</a>.</li>
+<li><strong><a href="/simulador-fii/">Simulador de FII</a>:</strong> os fundos imobiliários mais negociados, por setor, com o rendimento estimado a partir do informe mensal da CVM.</li>
+<li><strong><a href="/simulador-tesouro-direto/">Simulador de Tesouro Direto</a>:</strong> quanto cada título Selic, Prefixado ou IPCA+ rende até o vencimento, já com Imposto de Renda e taxa de custódia.</li>
+<li><strong><a href="/simulador-bdr/">Simulador de BDR</a>:</strong> os BDRs mais negociados na B3, por setor, e quantos recibos o seu valor compra.</li>
+<li><strong><a href="/simulador-etf/">Simulador de ETF</a>:</strong> os ETFs mais negociados na B3, por categoria, e quantas cotas o seu valor compra.</li>
+</ul>`,
+      ),
+      secao(
+        'Como funcionam',
+        `<p>Todos seguem a mesma ideia: mostrar os dados do mercado de forma organizada e fazer a conta de quanto o seu dinheiro compra. Preços e volumes vêm do Boletim de Preços oficial da B3, e as taxas do Tesouro, do Tesouro Nacional. A ordem das listas é só o volume negociado: <strong>as ferramentas não fazem ranking nem recomendação de compra</strong>. A conta usa o preço de fechamento, sem corretagem e impostos, e não é uma projeção de retorno. <a href="/metodologia-e-fontes/">Veja as fontes e a metodologia</a>.</p>`,
+      ),
+    ].join('\n'),
+    faq: [
+      { p: 'Os simuladores são gratuitos?', r: 'Sim. São gratuitos e não pedem cadastro, e-mail nem telefone.' },
+      { p: 'Os simuladores indicam o que comprar?', r: 'Não. Eles mostram dados na ordem de volume negociado e fazem a conta de quanto o valor compra. Não há ranking nem recomendação de investimento.' },
+      { p: 'De onde vêm os dados?', r: 'Preços e volumes, do Boletim de Preços oficial da B3; taxas do Tesouro, do Tesouro Nacional; rendimentos dos FIIs, dos informes mensais da CVM.' },
+    ],
+    relacionados: [
+      { texto: 'Descubra o seu perfil de investidor', href: '/teste-perfil-de-investidor/' },
+      { texto: 'Aprender a investir, do zero', href: '/aprender/' },
     ],
   }
 }
@@ -1071,6 +1111,7 @@ export async function gerarPaginas({ raiz, snapshot } = {}) {
 
     const paginas = [
       paginaPerfil(),
+      paginaSimuleAtivos(),
       paginaTesouro(Boolean(taxas)),
       paginaFii(),
       paginaBdr(),

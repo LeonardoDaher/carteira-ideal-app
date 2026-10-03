@@ -35,6 +35,7 @@ test('gera as páginas esperadas, sem repetir endereço', async () => {
   assert.equal(new Set(caminhos).size, caminhos.length)
   for (const c of [
     '/teste-perfil-de-investidor/',
+    '/simule-ativos/',
     '/simulador-tesouro-direto/',
     '/simulador-fii/',
     '/simulador-bdr/',
@@ -52,8 +53,8 @@ test('gera as páginas esperadas, sem repetir endereço', async () => {
   ]) {
     assert.ok(caminhos.includes(c), `faltou ${c}`)
   }
-  // 7 ferramentas (com a Minha Carteira) + hub Aprender + Sobre e Metodologia + 11 ativos + hub e 9 aulas das dívidas + taxas
-  assert.equal(paginas.length, 7 + 1 + 2 + 11 + 1 + 9 + 1)
+  // 8 ferramentas (com a Minha Carteira e o Simule Ativos) + hub Aprender + Sobre e Metodologia + 11 ativos + hub e 9 aulas das dívidas + taxas
+  assert.equal(paginas.length, 8 + 1 + 2 + 11 + 1 + 9 + 1)
 })
 
 test('sem dados do Tesouro, a página de taxas não é gerada e ninguém aponta para ela', async () => {

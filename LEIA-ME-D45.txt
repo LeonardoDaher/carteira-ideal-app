@@ -1,0 +1,28 @@
+D45 (03/10/2026) - "Ferramentas gratuitas" da landing: um cartão só de simuladores. Suba por cima do D44.
+
+O QUE MUDOU
+1) Landing (index.html), seção "Ferramentas gratuitas": saem os cartões Simulador de Tesouro Direto, FII, BDR e ETF;
+   entra "Simule Ativos". A seção fica com 4 cartões: Meus Ativos, Meu Mês, Aprender e Simule Ativos.
+2) Página nova /simule-ativos/ (gerada pelo build): lista Ações, FII, Tesouro, BDR e ETF, com link para as páginas
+   /simulador-*/ já existentes e botão "Abrir o Simule Ativos" (app). É ela que o cartão da landing abre.
+   Motivo: os cartões antigos eram o link da home para as páginas dos simuladores; sem eles o Google deixaria de
+   achá-las pela página inicial. Agora home > /simule-ativos/ > cada simulador.
+3) Rodapé de todas as páginas: link "Simule Ativos" (os outros continuam).
+4) Entra automaticamente no sitemap.xml. Teste atualizado (agora 33 páginas estáticas).
+Os simuladores de financiamento, aluguel e consórcio (outro chat) entram depois como mais itens desta página/hub.
+
+ARQUIVOS (6)
+A  index.html
+A  scripts/gerar-paginas.mjs
+A  scripts/gerar-paginas.test.mjs
+A  gerar-paginas.mjs        (RAIZ: cópia idêntica de scripts/gerar-paginas.mjs)
+A  docs/07-registro-de-decisoes.md   (D45 no fim; já contém D42 a D44)
+N  LEIA-ME-D45.txt (pode subir ou não)
+
+COMO SUBIR - GitHub: Add file > Upload files. Extraia o zip e arraste a pasta "scripts", a pasta "docs" e os arquivos
+soltos index.html e gerar-paginas.mjs. Commit: "D45: landing com cartão único Simule Ativos e página /simule-ativos/".
+
+CONFERIR depois do deploy: a página inicial mostra 4 cartões em "Ferramentas gratuitas"; o cartão Simule Ativos abre
+/simule-ativos/ com os 5 simuladores.
+
+VERIFICAÇÃO: 178 testes dos scripts e 1054 do app passando; typecheck e build (33 páginas estáticas) sem erros.
