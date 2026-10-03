@@ -1,0 +1,74 @@
+O QUE É
+D48: Simule Moto. O terceiro bem do Simule Bens (comprar à vista, financiar, consórcio ou ficar sem moto). Com isso os três bens previstos
+(imóvel, carro e moto) estão no ar.
+1) Não há motor novo: a moto reaproveita o motor do carro, com valores de partida próprios de moto (valor R$ 20.000, entrada R$ 6.000,
+   depreciação menor, seguro proporcionalmente maior por risco de roubo, manutenção mais frequente, juros maiores, prazos menores).
+   Valem as mesmas regras: mesmo dinheiro, contabilidade que fecha, "Dinheiro disponível hoje", à vista só se couber, CET como resultado,
+   e as duas leituras lado a lado (custo de mobilidade em destaque e patrimônio final).
+2) Textos próprios de moto, com a concordância certa (a moto, da moto, sem moto): risco de roubo no seguro, corrente na manutenção,
+   capacete e equipamentos no uso. Botões 0 km e Seminovo (amarelos quando selecionados) recarregam só depreciação e manutenção.
+3) A tela avisa, e a página de SEO também, que a MOTO DE TRABALHO (entrega, mototáxi), que gera renda, NÃO está modelada: a ferramenta só
+   compara custos. Esta primeira versão cobre moto de uso pessoal.
+4) Página de SEO nova: /moto-a-vista-financiar-consorcio-ou-sem-moto/ (no rodapé, no Aprender e na Metodologia).
+5) O cartão "Moto" do hub deixa de ser "Em breve" e abre ./?tela=simuleMoto. Nenhum cartão do hub fica mais como "Em breve".
+
+DECISÃO QUE FICOU COM VOCÊ
+   Moto de trabalho: você não respondeu se entra agora, então segui o padrão conservador (fora do escopo, e avisado). Se quiser que entre, é
+   um trabalho à parte: o motor precisa de um campo de renda líquida mensal gerada pelo bem e a pergunta passa a ser "quanto a moto se paga".
+
+ATENÇÃO - VALORES DE PARTIDA (importante antes de divulgar)
+   Rendimento e inflação vêm do Boletim Focus, como no imóvel e no carro. TODO O RESTO É NOSSO e está marcado como tal: juros 2,2% ao mês
+   (36 meses), depreciação (0 km 10% e 7%; seminovo 7% e 5%), IPVA 2%, seguro 6%, manutenção (3% em 0 km, 4% em seminovo), uso R$ 250, IOF 3%,
+   gravame R$ 400, emplacamento 2,5%, consórcio (adm 15%, fundo 2%, 60 meses, contemplação no 12º), sem moto R$ 600 por mês.
+   Nenhum vem de fonte oficial: a série 25471 do Banco Central (aquisição de veículos) não separa moto. Confira com a tabela FIPE de motos,
+   cotações de seguro e o IPVA do seu estado. Os de moto são ainda menos fundamentados que os de carro.
+   O texto de aviso precisa da revisão do responsável certificado.
+
+NÃO MUDOU: o resultado do carro e do imóvel, as premissas deles, questionário, API, Meu Mês, Meus Ativos, Aprender, Simule Ativos, o cartão
+da landing e os endereços das outras páginas. Não foi feito: seletor "Quais caminhos comparar?", botão de cenário histórico, nem desabilitar
+campos do financiamento.
+Única mudança no motor do carro (aditiva): o campo "bem" (padrão "carro"), que escolhe só o vocabulário das mensagens. O cálculo é o mesmo;
+os testes do carro continuaram passando sem alteração e outros comprovam que as mensagens do carro seguem idênticas.
+
+ARQUIVOS (em relação ao que está hoje no GitHub, versão D47)
+   + LEIA-ME-D48.txt
+   + webapp-src/src/domain/simulaMoto.ts
+   + webapp-src/src/domain/simulaMoto.test.ts
+   + webapp-src/src/screens/SimuleMoto.tsx
+   + webapp-src/src/screens/SimuleMoto.test.tsx
+   + webapp-src/src/ui/DetalheCustosMoto.tsx
+   ~ docs/04-jornada-do-cliente.md
+   ~ docs/06-proximos-passos.md
+   ~ docs/07-registro-de-decisoes.md
+   ~ gerar-paginas.mjs
+   ~ scripts/gerar-paginas.mjs
+   ~ scripts/gerar-paginas.test.mjs
+   ~ webapp-src/src/App.tsx
+   ~ webapp-src/src/domain/simulaCarro.ts
+   ~ webapp-src/src/screens/SimuleBens.tsx
+   ~ webapp-src/src/screens/SimuleBens.test.tsx
+   ~ webapp-src/src/state/useAppState.ts
+   ~ webapp-src/src/state/useAppState.test.ts
+   Obs.: gerar-paginas.mjs na raiz é a cópia solta que já vinha no pacote; foi mantida igual a scripts/gerar-paginas.mjs.
+
+COMO SUBIR - no GitHub: Add file > Upload files
+1. EXTRAIA o zip no computador (o GitHub não abre zip). Vai aparecer a pasta "D48-subir". Abra-a e arraste o CONTEÚDO (as pastas docs, scripts
+   e webapp-src e os arquivos soltos), não a pasta em si.
+2. Num ÚNICO envio, sem dividir (são 18 arquivos, abaixo do limite de 100). Espere a lista terminar de carregar e confira que mostra 18.
+3. Role até o fim da página, escreva a mensagem "D48: Simule Moto (à vista, financiar, consórcio ou sem moto)" e clique no botão verde
+   "Commit changes". Sem esse clique nada é salvo.
+4. Confira na aba Code se apareceu o commit novo e se existe webapp-src/src/domain/simulaMoto.ts. Se faltar, o envio não terminou: a Vercel
+   continua mostrando a versão anterior.
+
+DEPOIS DO DEPLOY
+1. Landing > cartão > Simule Bens: os três cartões (Imóvel, Carro, Moto) são links. Toque em Moto: abre o comparativo de moto.
+2. Com os valores de partida e o dinheiro padrão (entrada + emplacamento + IOF + gravame = R$ 7.320), "Sem moto" (R$ 600 por mês) termina na
+   frente e a tela avisa que comprar à vista não entrou (faltam R$ 13.180). Toque em "Incluir comprar à vista": entram a quarta rota, o bloco
+   explicativo e a linha no gráfico.
+3. Em "Em que ponto o resultado muda?": com os valores de partida, financiar empata com ficar sem moto perto de R$ 720 por mês, e o consórcio
+   perto de R$ 700.
+4. Troque 0 km por Seminovo: a perda de valor no 1º ano passa de 10% para 7% e o valor da moto não muda.
+5. Leia a tela inteira procurando a palavra "carro": só deve aparecer nas duas comparações de seguro ("maior que no carro").
+6. Revise o texto da página de SEO e dos avisos, e o aviso sobre moto de trabalho.
+
+VERIFICAÇÃO: 1258 testes do app (28 novos) e 184 dos scripts (2 novos) passando; typecheck, lint e build sem erros. Apliquei este zip por cima do pacote que está no GitHub (original + D47 entregue) e rodei typecheck, lint, testes e build nesse resultado, para garantir que a lista de arquivos está completa. A tela foi exercitada por testes de renderização (inclusive um que falha se a palavra "carro" aparecer fora das duas comparações de seguro); NÃO foi aberta num navegador neste ambiente: confira no celular depois do deploy.

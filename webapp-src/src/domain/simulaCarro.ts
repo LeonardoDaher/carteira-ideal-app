@@ -41,6 +41,8 @@ import { calcularCet, tabelaFinanciamento } from './simulaImovel'
 import type { SnapshotMercado } from './mercadoOficial'
 
 export type TipoCarro = 'zeroKm' | 'seminovo'
+/** Qual bem o motor simula. O cálculo é o mesmo; muda só o vocabulário das mensagens (D48: moto reaproveita este motor). */
+export type Bem = 'carro' | 'moto'
 export type RegraLanceCarro = 'prazo' | 'parcela'
 export type ChaveCarro = 'avista' | 'financiamento' | 'consorcio' | 'semCarro'
 
@@ -51,7 +53,20 @@ export const NOMES_CARRO: Record<ChaveCarro, string> = {
   semCarro: 'Sem carro',
 }
 
+/** Nomes dos caminhos para cada bem: só "sem carro" vira "sem moto". */
+export function nomesRotas(bem: Bem): Record<ChaveCarro, string> {
+  return bem === 'moto' ? { ...NOMES_CARRO, semCarro: 'Sem moto' } : NOMES_CARRO
+}
+
+/** Pedaços de texto que variam com o bem (gênero incluído), para as mensagens do motor. */
+const VOCAB: Record<Bem, { n: string; do: string; ficaVelho: string; trocar: string }> = {
+  carro: { n: 'carro', do: 'do carro', ficaVelho: 'o carro fica velho', trocar: 'trocar de carro' },
+  moto: { n: 'moto', do: 'da moto', ficaVelho: 'a moto fica velha', trocar: 'trocar de moto' },
+}
+
 export interface InputsCarro {
+  /** Qual bem: define só o vocabulário das mensagens. Padrão `carro`. */
+  bem: Bem
   tipo: TipoCarro
   valorCarro: number
   horizonteAnos: number
@@ -277,6 +292,7 @@ const arred = (n: number) => Math.round(n * 100) / 100
 export function inputsCarroPadrao(parcial: Partial<InputsCarro> = {}): InputsCarro {
   const tipo = parcial.tipo ?? 'zeroKm'
   return {
+    bem: 'carro',
     tipo,
     valorCarro: 100_000,
     horizonteAnos: 5,
@@ -325,13 +341,14 @@ export function custosAquisicaoFinanciamento(i: InputsCarro) {
 /** Mensagens em português para entradas impossíveis; vazio = pode simular. */
 export function validarInputsCarro(i: InputsCarro): string[] {
   const erros: string[] = []
+  const V = VOCAB[i.bem ?? 'carro']
   const numeros = Object.entries(i).filter(([, v]) => typeof v === 'number') as [string, number][]
   if (numeros.some(([, v]) => !Number.isFinite(v))) erros.push('Há um campo com valor inválido.')
-  if (i.valorCarro <= 0) erros.push('Informe o valor do carro.')
+  if (i.valorCarro <= 0) erros.push(`Informe o valor ${V.do}.`)
   if (i.horizonteAnos < 1 || i.horizonteAnos > 10) erros.push('O horizonte deve ficar entre 1 e 10 anos.')
-  if (i.entrada < 0 || i.entrada > i.valorCarro) erros.push('A entrada não pode ser negativa nem maior que o valor do carro.')
+  if (i.entrada < 0 || i.entrada > i.valorCarro) erros.push(`A entrada não pode ser negativa nem maior que o valor ${V.do}.`)
   if (i.prazoFinanciamentoMeses < 6 || i.prazoFinanciamentoMeses > 96) erros.push('O prazo do financiamento deve ficar entre 6 e 96 meses.')
-  if (i.mobilidadeMensal < 0) erros.push('O gasto mensal sem carro não pode ser negativo.')
+  if (i.mobilidadeMensal < 0) erros.push(`O gasto mensal sem ${V.n} não pode ser negativo.`)
   if (i.usoMensal < 0) erros.push('O gasto mensal de uso não pode ser negativo.')
   if (i.deprecAno1Pct < 0 || i.deprecAno1Pct > 60 || i.deprecDemaisPct < 0 || i.deprecDemaisPct > 60) erros.push('A depreciação deve ficar entre 0% e 60% ao ano.')
   if (i.prazoConsorcioMeses < 12 || i.prazoConsorcioMeses > 120) erros.push('O prazo do consórcio deve ficar entre 12 e 120 meses.')
@@ -339,7 +356,7 @@ export function validarInputsCarro(i: InputsCarro): string[] {
   if (i.mesContemplacao < 1 || i.mesContemplacao > Math.min(i.prazoConsorcioMeses, horizonteMeses)) {
     erros.push('A contemplação deve ocorrer entre o mês 1 e o fim do prazo do consórcio ou do horizonte, o que vier primeiro.')
   }
-  if (i.lance < 0 || i.lance > i.valorCarro) erros.push('O lance não pode ser negativo nem maior que o valor do carro.')
+  if (i.lance < 0 || i.lance > i.valorCarro) erros.push(`O lance não pode ser negativo nem maior que o valor ${V.do}.`)
   if (i.jurosMensalPct < 0 || i.rendimentoAA < -50) erros.push('Confira as taxas informadas.')
   if (i.dinheiroDisponivel !== null) {
     const minimo = i.entrada + custosAquisicaoFinanciamento(i).total
@@ -409,6 +426,8 @@ function simularNucleo(i: InputsCarro, leve = false): ResultadoCarro {
   const rm = mensal(i.rendimentoAA)
   const aliqIr = i.aplicarIR ? (n * 30 > 720 ? 15 : aliquotaIr(n * 30)) : 0
   const avisos: string[] = []
+  const T = VOCAB[i.bem ?? 'carro']
+  const nomes = nomesRotas(i.bem ?? 'carro')
 
   const V = i.valorCarro
   const valorEm = (p0: number, meses: number) => valorDeMercado(p0, meses, i.deprecAno1Pct, i.deprecDemaisPct)
@@ -602,11 +621,11 @@ function simularNucleo(i: InputsCarro, leve = false): ResultadoCarro {
   }
 
   if (capitalInsuficiente) {
-    avisos.push('No consórcio, o capital inicial não cobriu o lance, o emplacamento e a diferença entre a carta e o preço do carro na contemplação. O resultado trata esse buraco como dinheiro tomado ao mesmo custo do rendimento: na prática, seria preciso mais capital.')
+    avisos.push(`No consórcio, o capital inicial não cobriu o lance, o emplacamento e a diferença entre a carta e o preço ${T.do} na contemplação. O resultado trata esse buraco como dinheiro tomado ao mesmo custo do rendimento: na prática, seria preciso mais capital.`)
   }
   if (fFin.saldo < 0 || fSem.saldo < 0) avisos.push('O capital inicial e os aportes não bastaram em algum cenário; confira os valores informados.')
   if (n > prazoFin) avisos.push('O horizonte é maior que o prazo do financiamento: depois de quitado, a pessoa deixa de pagar parcela e passa a investir essa folga.')
-  if (n > 8) avisos.push('Em horizontes longos o carro fica velho: a curva de depreciação, a manutenção e a necessidade de trocar de carro pesam mais, e esta conta não troca o carro no meio do caminho.')
+  if (n > 8) avisos.push(`Em horizontes longos ${T.ficaVelho}: a curva de depreciação, a manutenção e a necessidade de ${T.trocar} pesam mais, e esta conta não troca ${T.n === 'carro' ? 'o carro' : 'a moto'} no meio do caminho.`)
 
   const carroFim = carroFinEm(n)
   const carroConFim = M <= n ? carroConEm(n) : 0
@@ -690,7 +709,7 @@ function simularNucleo(i: InputsCarro, leve = false): ResultadoCarro {
       fundoLiquido: arred(fSem.liquido(aliqIr)),
       totalPagoDeBolso: arred(pagoSem),
       custoTotal: arred(custoSem),
-      custoDescricao: 'todo o gasto mensal de mobilidade sem carro (assinatura, locação ou aplicativo)',
+      custoDescricao: `todo o gasto mensal de mobilidade sem ${T.n} (assinatura, locação ou aplicativo)`,
       depreciacao: 0,
     }),
     consorcio: montarCenario('consorcio', {
@@ -699,7 +718,7 @@ function simularNucleo(i: InputsCarro, leve = false): ResultadoCarro {
       fundoLiquido: arred(fCon.liquido(aliqIr)),
       totalPagoDeBolso: arred(pagoCon),
       custoTotal: arred(custoCon),
-      custoDescricao: 'taxa de administração e fundo de reserva (pagos e embutidos na dívida restante), mobilidade sem carro até a contemplação, emplacamento, custos de dono e reajuste das parcelas',
+      custoDescricao: `taxa de administração e fundo de reserva (pagos e embutidos na dívida restante), mobilidade sem ${T.n} até a contemplação, emplacamento, custos de dono e reajuste das parcelas`,
       depreciacao: arred(deprecCon),
     }),
   }
@@ -750,7 +769,7 @@ function simularNucleo(i: InputsCarro, leve = false): ResultadoCarro {
     rotas,
     avista: { disponivel: avistaOk, necessario: arred(necessarioAvista), falta: arred(Math.max(0, necessarioAvista - C)) },
     vencedor: primeiro,
-    nomeVencedor: NOMES_CARRO[primeiro],
+    nomeVencedor: nomes[primeiro],
     vantagemSobreSegundo: arred(base[primeiro] - base[segundo]),
     ranking,
     cenarios,

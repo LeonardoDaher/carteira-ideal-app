@@ -11,7 +11,7 @@ Landing → Meu Mês              (./app/?tela=meuMes, sem questionário; D21, 2
 Landing → Aprender (→ Trilha → Aula; livro infantil no fim da tela)
                                (./app/?tela=aprender, sem questionário)
 Landing → Simule FII           (./app/?tela=simuleFii, sem questionário)
-Landing → Simule Bens (hub)    (./app/?tela=simuleBens, sem questionário; D45) → Imóvel (?tela=simuleImovel; D44) ou Carro (?tela=simuleCarro; D47); moto "em breve"
+Landing → Simule Bens (hub)    (./app/?tela=simuleBens, sem questionário; D45) → Imóvel (?tela=simuleImovel; D44) , Carro (?tela=simuleCarro; D47) ou Moto (?tela=simuleMoto; D48)
 Resultado (Pilar 1 ou 2 em [A]) → Meu Mês;  Meu Mês (com dívida) → trilha "Sair das dívidas"
 ```
 
@@ -126,11 +126,13 @@ No fim da lista de trilhas, em **Mais conteúdo**, fica o botão que veio da lan
 ---
 
 ### 4.6 Financiar, alugar ou consórcio? (🏠), aberta pelo hub Simule Bens
-O cartão da landing abre o hub **Simule Bens** (`?tela=simuleBens`, D45), com um cartão para Imóvel, um para Carro (D47) e, sinalizada como "Em breve", a Moto. O comparativo de imóvel é uma tela avulsa (`?tela=simuleImovel`), sem questionário, com "← Simule Bens" de volta ao hub. À esquerda, o formulário em cinco blocos (imóvel e prazo, premissas de mercado, financiamento, aluguel, consórcio) e a opção de descontar os custos de venda; à direita, no computador, o resultado (no celular ele vem abaixo do formulário, com o atalho "Ir para o resultado ↓"). Os campos já abrem preenchidos com a projeção de longo prazo do Boletim Focus e podem ser trocados.
+O cartão da landing abre o hub **Simule Bens** (`?tela=simuleBens`, D45), com um cartão para Imóvel, um para Carro (D47) e um para Moto (D48). O comparativo de imóvel é uma tela avulsa (`?tela=simuleImovel`), sem questionário, com "← Simule Bens" de volta ao hub. À esquerda, o formulário em cinco blocos (imóvel e prazo, premissas de mercado, financiamento, aluguel, consórcio) e a opção de descontar os custos de venda; à direita, no computador, o resultado (no celular ele vem abaixo do formulário, com o atalho "Ir para o resultado ↓"). Os campos já abrem preenchidos com a projeção de longo prazo do Boletim Focus e podem ser trocados.
 
 O resultado aponta **qual dos caminhos (comprar à vista, financiar, consórcio ou alugar) termina com o maior patrimônio líquido** e por quanto. A compra à vista entra quando o campo "Dinheiro disponível hoje" cobre o imóvel e o ITBI; senão, a tela diz quanto falta e oferece um atalho (D46). E explica: o que é patrimônio líquido e por que os três caminhos usam o mesmo dinheiro; por que o primeiro colocado ficou na frente (decomposição que soma a vantagem); a evolução mês a mês em gráfico; "para onde foi cada real" nos três lado a lado; **cada custo e cada taxa de cada caminho**, com valor e explicação; o ponto de virada e o efeito de a contemplação do consórcio demorar; e todas as premissas usadas. No fim, o aviso de que é conta matemática e não indica banco, administradora nem produto (D44).
 
 O comparativo de **carro** (`?tela=simuleCarro`, D47) segue o mesmo molde, com quatro caminhos: comprar à vista, financiar (Price), consórcio e **ficar sem carro** (um gasto mensal único de mobilidade que a pessoa informa: assinatura, locação ou aplicativo). Como o carro perde valor, o resultado mostra **duas leituras da mesma conta, lado a lado**: o **custo de mobilidade por mês** (destaque; líquido do rendimento do dinheiro e bruto) e o **patrimônio líquido final**. O formulário tem botões para 0 km ou seminovo (que recarregam só os valores de partida de depreciação e manutenção) e blocos de depreciação e custos de dono (IPVA, seguro, manutenção, uso), financiamento, consórcio e sem carro. O ponto de virada é o **gasto mensal sem carro** a partir do qual ter o carro compensa. Cada custo (emplacamento, IOF, gravame, juros, IPVA, seguro, manutenção, uso, taxa de administração, fundo de reserva) é explicado em linguagem simples, e a perda de valor do carro aparece como linha própria. Mesmo aviso: conta matemática, não indica banco, administradora, locadora, aplicativo nem produto.
+
+O comparativo de **moto** (`?tela=simuleMoto`, D48) é o mesmo do carro com **valores de partida de moto** (valor, depreciação, seguro maior por risco de roubo, manutenção mais frequente, juros maiores, prazos menores) e texto próprio em cada frase. A primeira versão cobre **moto de uso pessoal**; a moto de trabalho, que gera renda, não está modelada e a tela e a página de SEO dizem isso.
 
 ## Comportamentos que não aparecem nas imagens
 

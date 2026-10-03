@@ -20,18 +20,22 @@ describe('SimuleBens (hub)', () => {
     expect(within(link).getByText(/ficar sem carro/)).toBeTruthy()
   })
 
-  it('a moto aparece como "Em breve", sem link e sinalizada como indisponível', () => {
+  it('a moto é um link para o comparativo de moto', () => {
     render(<SimuleBens ctx={ctx} />)
-    expect(screen.queryByRole('link', { name: /Moto/ })).toBeNull()
-    const selos = screen.getAllByText('Em breve')
-    expect(selos).toHaveLength(1)
-    expect(selos[0].closest('[aria-disabled="true"]')).toBeTruthy()
-    expect(screen.getByText('Moto')).toBeTruthy()
+    const link = screen.getByRole('link', { name: /Moto/ })
+    expect(link.getAttribute('href')).toBe('./?tela=simuleMoto')
+    expect(within(link).getByText(/ficar sem moto/)).toBeTruthy()
   })
 
-  it('a lista tem os três bens e só imóvel e carro estão disponíveis', () => {
+  it('com os três bens no ar, nenhum cartão fica como "Em breve"', () => {
+    render(<SimuleBens ctx={ctx} />)
+    expect(screen.queryByText('Em breve')).toBeNull()
+    expect(document.querySelector('[aria-disabled="true"]')).toBeNull()
+  })
+
+  it('a lista tem os três bens e todos estão disponíveis', () => {
     expect(BENS.map((b) => b.titulo)).toEqual(['Imóvel', 'Carro', 'Moto'])
-    expect(BENS.filter((b) => b.disponivel).map((b) => b.tela)).toEqual(['simuleImovel', 'simuleCarro'])
+    expect(BENS.filter((b) => b.disponivel).map((b) => b.tela)).toEqual(['simuleImovel', 'simuleCarro', 'simuleMoto'])
   })
 
   it('diz que é conta matemática e não indica banco, consórcio nem produto', () => {

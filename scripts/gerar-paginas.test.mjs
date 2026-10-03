@@ -41,6 +41,7 @@ test('gera as páginas esperadas, sem repetir endereço', async () => {
     '/simulador-etf/',
     '/financiar-alugar-ou-consorcio/',
     '/carro-a-vista-financiar-consorcio-ou-sem-carro/',
+    '/moto-a-vista-financiar-consorcio-ou-sem-moto/',
     '/minha-carteira/',
     '/meu-mes/',
     '/aprender/',
@@ -54,8 +55,8 @@ test('gera as páginas esperadas, sem repetir endereço', async () => {
   ]) {
     assert.ok(caminhos.includes(c), `faltou ${c}`)
   }
-  // 9 ferramentas (com a Minha Carteira e os comparativos de imóvel e de carro) + hub Aprender + Sobre e Metodologia + 11 ativos + hub e 9 aulas das dívidas + taxas
-  assert.equal(paginas.length, 9 + 1 + 2 + 11 + 1 + 9 + 1)
+  // 10 ferramentas (com a Minha Carteira e os comparativos de imóvel, de carro e de moto) + hub Aprender + Sobre e Metodologia + 11 ativos + hub e 9 aulas das dívidas + taxas
+  assert.equal(paginas.length, 10 + 1 + 2 + 11 + 1 + 9 + 1)
 })
 
 test('sem dados do Tesouro, a página de taxas não é gerada e ninguém aponta para ela', async () => {
@@ -271,5 +272,32 @@ test('o comparativo de carro aparece no rodapé, no hub Aprender e na metodologi
   const metodologia = textoVisivel(paginas.find((p) => p.caminho === '/metodologia-e-fontes/').html)
   assert.match(metodologia, /ordena os caminhos \(comprar à vista, financiar, consórcio e alugar\) pelo patrimônio líquido final/)
   assert.match(metodologia, /comparativo de carro segue a mesma regra/)
+  assert.ok(paginas.some((p) => p.caminho === '/financiar-alugar-ou-consorcio/'))
+})
+
+test('a página do comparativo de moto explica os custos, assume o escopo (uso pessoal) e não indica instituição nem promete resultado', async () => {
+  const paginas = await gerarPaginas({ raiz, snapshot: SNAPSHOT_VAZIO })
+  const pg = paginas.find((p) => p.caminho === '/moto-a-vista-financiar-consorcio-ou-sem-moto/')
+  assert.ok(pg, 'a página existe')
+  const texto = textoVisivel(pg.html)
+  for (const termo of ['custo de mobilidade', 'patrimônio líquido', 'IPVA', 'seguro', 'manutenção', 'IOF', 'gravame', 'taxa de administração', 'fundo de reserva', 'CET', 'ponto de virada', 'Boletim Focus', 'moto de trabalho', 'risco de roubo']) {
+    assert.ok(texto.toLowerCase().includes(termo.toLowerCase()), `faltou explicar: ${termo}`)
+  }
+  assert.match(texto, /não indica banco, administradora de consórcio, locadora, aplicativo nem produto/)
+  assert.match(texto, /não é recomendação de financiamento, de consórcio ou de investimento/)
+  assert.ok(pg.html.includes('href="/app/?tela=simuleMoto"'), 'o botão abre o comparativo no app')
+  // fala de moto, não de carro: só a menção ao comparativo de carro nos links e na comparação
+  assert.doesNotMatch(texto.replace(/Carro: à vista, financiar, consórcio ou (?:ficar )?sem carro|comparativo de carro|em relação ao carro|que um carro/gi, ''), /\bcarro\b/i)
+  assert.doesNotMatch(texto, /garantid[oa]|sem risco|melhor banco|melhor consórcio|Caixa|Itaú|Bradesco|Santander|Porto Seguro|Embracon|Localiza|Movida|Uber|99 ?Pop|Honda|Yamaha/i)
+})
+
+test('o comparativo de moto aparece no rodapé, no hub Aprender e na Metodologia, sem tirar os de carro e imóvel', async () => {
+  const paginas = await gerarPaginas({ raiz, snapshot: SNAPSHOT_VAZIO })
+  const CAMINHO = '/moto-a-vista-financiar-consorcio-ou-sem-moto/'
+  assert.ok(paginas.find((p) => p.caminho === '/aprender/').html.includes(CAMINHO))
+  assert.ok(paginas.find((p) => p.caminho === '/sobre/').html.includes(CAMINHO), 'rodapé')
+  const metodologia = textoVisivel(paginas.find((p) => p.caminho === '/metodologia-e-fontes/').html)
+  assert.match(metodologia, /O de moto também/)
+  assert.ok(paginas.some((p) => p.caminho === '/carro-a-vista-financiar-consorcio-ou-sem-carro/'))
   assert.ok(paginas.some((p) => p.caminho === '/financiar-alugar-ou-consorcio/'))
 })

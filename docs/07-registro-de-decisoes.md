@@ -970,3 +970,32 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 **Testes.** 1.182 → 1.230 no app (36 do motor, 10 de tela, 1 do hub, 1 do estado; testes do hub reescritos porque o carro deixou de ser "Em breve") e 180 → 182 nos scripts (página de SEO do carro; contagem de páginas 33 → 34).
 
 **Consequência.** O Simule Bens passa a ter dois bens. O motor do carro é função pura no navegador, como o do imóvel, e é a base da moto (D48).
+
+
+## D48 (03/10/2026): Simule Moto, o terceiro bem do Simule Bens
+
+**Contexto.** O hub Simule Bens (D45) tinha a Moto como "Em breve". O briefing previa que ela reaproveitasse o motor do carro "com outros valores de partida" e deixava em aberto se a **moto de trabalho** (que gera renda) seria caso à parte. O responsável pediu para seguir com a moto sem responder sobre a moto de trabalho.
+
+**Decisão 1: escopo = moto de uso pessoal; moto de trabalho fica de fora.** Foi o padrão conservador: a renda que o bem produz (entrega, mototáxi) muda a pergunta de "quanto custa" para "quanto o bem se paga", e o motor não tem esse fluxo. Não se inventou premissa de renda. A página de SEO e a FAQ dizem isso expressamente. **Decisão pendente do responsável:** se a moto de trabalho deve virar uma versão própria (com um campo de renda líquida mensal gerada pelo bem) ou se basta o aviso atual.
+
+**Decisão 2: nenhum motor novo.** `simulaMoto.ts` tem só os valores de partida da moto (`inputsMotoPadrao`, `PRESET_TIPO_MOTO`, `aplicarTipoMoto`, `simularComparativoMoto`) e chama `simularComparativoCarro`. Valem, portanto, as mesmas regras do carro: mesmo dinheiro, contabilidade que fecha, dinheiro disponível `null` = entrada + custos, à vista só se couber, CET como resultado, antes da contemplação não há bem nem dívida, e as duas leituras (custo e patrimônio) lado a lado.
+
+**Única mudança no motor do carro (aditiva).** Campo novo `bem: 'carro' | 'moto'` em `InputsCarro` (padrão `'carro'`), que escolhe só o **vocabulário** das mensagens do motor: erros de validação ("Informe o valor da moto."), avisos, descrições de custo e o nome do vencedor ("Sem moto"), com a concordância de gênero certa. Sem isso a moto herdaria mensagens falando em carro. O cálculo não mudou; os 46 testes do carro continuaram passando sem alteração, e novos testes comprovam que as mensagens do carro permanecem idênticas.
+
+**Valores de partida da moto (todos nossos, editáveis, a conferir antes de divulgar).** Moto de baixa cilindrada de R$ 20.000, entrada de R$ 6.000, financiamento em 36 meses a 2,2% ao mês (carro: 48 meses a 1,9%), IPVA de 2%, seguro de 6% do valor (carro: 4%, por causa do risco de roubo), emplacamento de 2,5%, uso de R$ 250 por mês (combustível, estacionamento e pedágio), consórcio de 60 meses com contemplação no 12º, e gasto de R$ 600 por mês sem moto. Depreciação: 0 km 10% no 1º ano e 7% depois; seminovo 7% e 5% (carro: 14/9 e 9/7). Manutenção: 3% do preço no 1º ano em 0 km e 4% em seminovo, com envelhecimento de 8% e 6% ao ano (carro: 1% e 2,5%), porque moto gasta mais com corrente, pneus e óleo. IOF de 3% e gravame de R$ 400 como no carro. **Nenhum vem de fonte oficial:** a série 25471 do Banco Central (aquisição de veículos) não separa moto, e não foi lida nesta entrega. Rendimento e inflação continuam vindo do Boletim Focus.
+
+**Resultado com os valores de partida e o dinheiro padrão (R$ 7.320).** Custo bruto de cerca de R$ 690 por mês para financiar e para o consórcio, R$ 656 sem moto; "Sem moto" termina à frente. O ponto de virada fica perto de R$ 720 por mês de gasto sem moto para financiar e perto de R$ 700 para o consórcio. Com R$ 30.000, a rota à vista entra e empata perto de R$ 630.
+
+**Telas.** `SimuleMoto.tsx` e `DetalheCustosMoto.tsx` foram gerados a partir das do carro por um filtro que protege os nomes de código e aplica o gênero (o carro → a moto, do carro → da moto, ao carro → à moto), **e depois revisados frase a frase**: o filtro não pegava concordâncias como "preço da moto novo", "moto mais velho" ou "a moto é comprado", todas corrigidas. Um teste da tela garante que a palavra "carro" só aparece nas duas comparações de seguro escritas de propósito ("seguro maior que no carro, por causa do risco de roubo"). Textos próprios de moto: risco de roubo no seguro, corrente na manutenção, capacete e equipamentos no uso. Os botões 0 km/Seminovo (amarelos, `chip` + `selected` + `aria-pressed`) recarregam só depreciação, manutenção e envelhecimento da manutenção.
+
+**Duplicação consciente.** As duas telas e os dois arquivos de detalhe da moto duplicam os do carro (cerca de 1.000 linhas) em vez de parametrizar os componentes por bem. Motivo: o briefing orienta copiar, evita mexer em telas do carro já publicadas e testadas, e deixa a moto livre para divergir (moto de trabalho). **Custo:** uma correção de texto no carro precisa ser repetida na moto. Se surgir um quarto bem, vale parametrizar por `bem` em vez de copiar de novo.
+
+**Textos públicos.** Cartão "Moto" do hub ativado (`disponivel: true`); com os três bens no ar, nenhum cartão fica como "Em breve" (o suporte a "Em breve" no hub continua para bens futuros). Página de SEO nova `/moto-a-vista-financiar-consorcio-ou-sem-moto/` (título de 54 caracteres, FAQ de 7 perguntas incluindo "posso usar para moto de trabalho?"), com links no rodapé, no hub Aprender e na Metodologia. **O cartão da landing não foi alterado.**
+
+**Não foi pedido e não foi feito:** mexer em premissas do imóvel ou do carro; seletor "Quais caminhos comparar?"; botão de cenário histórico; desabilitar campos do financiamento.
+
+**Limites conhecidos.** (1) Moto de trabalho fora do escopo. (2) Valores de partida sem fonte oficial. (3) Os mesmos do carro: sem "juntar e comprar depois", sem troca de moto no horizonte, IR aproximado, sem ganho de capital na venda, sem a utilidade de ter a moto. (4) Motos de alta cilindrada ou elétricas têm depreciação e custos bem diferentes e exigem trocar os valores de partida.
+
+**Testes.** 1.230 → 1.258 no app (motor da moto, tela da moto, hub e estado) e 182 → 184 nos scripts (página de SEO da moto; contagem de páginas 34 → 35).
+
+**Consequência.** O Simule Bens tem os três bens previstos. O próximo passo natural não é um novo bem, e sim fechar as pendências de fonte (série do Banco Central, FIPE) e decidir sobre a moto de trabalho.

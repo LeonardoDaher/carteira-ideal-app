@@ -3,13 +3,13 @@ import { ChevronDownIcon } from '../ui/Icon'
 import type { AppCtx } from '../state/useAppState'
 
 /**
- * Bens que o comparativo atende. Imóvel e carro estão no ar; a moto aparece como "Em breve", sem link,
- * para ninguém cair numa tela vazia. Quando um deles ficar pronto, basta trocar `disponivel` para true.
+ * Bens que o comparativo atende: imóvel (D44), carro (D47) e moto (D48), todos no ar. Um bem que ainda não esteja pronto aparece como
+ * "Em breve", sem link, para ninguém cair numa tela vazia: basta deixar `disponivel` como false e trocar para true quando ficar pronto.
  */
 export const BENS: { tela: string; emoji: string; titulo: string; descricao: string; disponivel: boolean }[] = [
   { tela: 'simuleImovel', emoji: '🏠', titulo: 'Imóvel', descricao: 'Comprar à vista, financiar, consórcio ou alugar: qual rota deixa o maior patrimônio', disponivel: true },
   { tela: 'simuleCarro', emoji: '🚗', titulo: 'Carro', descricao: 'À vista, financiar, consórcio ou ficar sem carro: quanto cada caminho custa e qual deixa o maior patrimônio', disponivel: true },
-  { tela: 'simuleMoto', emoji: '🏍️', titulo: 'Moto', descricao: 'O mesmo comparativo, com os custos de uma moto', disponivel: false },
+  { tela: 'simuleMoto', emoji: '🏍️', titulo: 'Moto', descricao: 'À vista, financiar, consórcio ou ficar sem moto: o mesmo comparativo, com os custos de uma moto de uso pessoal', disponivel: true },
 ]
 
 /**
