@@ -147,7 +147,8 @@ test('LTM: ITR usa exercício anterior + acumulado − acumulado do ano anterior
   assert.deepEqual(ebit.componentes.map((c) => c.papel), ['exercicio_anterior (+)', 'acumulado_atual (+)', 'acumulado_ano_anterior (−)'])
   assert.match(ebit.formula, /2025-12-31 \+ acumulado 2026-01-01→2026-06-30 − acumulado 2025-01-01→2025-06-30/)
   assert.equal(ltmDaConta(contabil.linhas, ultimo, 'con', CONTAS.fco).valor, 1550e6)
-  assert.equal(ltmDaConta(contabil.linhas, ultimo, 'con', CONTAS.depreciacao).valor, 420e6)
+  // A DVA da CVM traz a depreciação NEGATIVA: −400 + (−210) − (−190) = −420. O cálculo usa o valor absoluto.
+  assert.equal(ltmDaConta(contabil.linhas, ultimo, 'con', CONTAS.depreciacao).valor, -420e6)
   // último documento = DFP → o próprio exercício
   assert.equal(ltmDaConta(contabil.linhas, { doc: 'DFP', dtRefer: '2025-12-31' }, 'con', CONTAS.ebit).valor, 1500e6)
 })
@@ -226,6 +227,7 @@ function fabricar(ticker, o = {}) {
   const ebit = o.ebit ?? 100, fco = o.fco ?? 90, pl = o.pl ?? 800, lucro = o.lucro ?? 60
   const linhas = [
     ...(o.despFin === undefined ? [] : [cfgLinha('DRE', '3.06.02', 'Despesas Financeiras', o.despFin)]),
+    ...(o.da === undefined ? [] : [cfgLinha('DVA', '7.04.01', 'Depreciação, Amortização e Exaustão', o.da)]),
     cfgLinha('DRE', '3.01', 'Receita', 1000), cfgLinha('DRE', '3.05', 'Resultado Antes do Resultado Financeiro e dos Tributos', ebit),
     cfgLinha('DRE', '3.11', 'Lucro/Prejuízo do Período', lucro), cfgLinha('DFC', '6.01', 'Caixa Líquido das Atividades Operacionais', fco),
     cfgLinha('BPA', '1', 'Ativo Total', o.ativo ?? 2000), cfgLinha('BPA', '1.01.01', 'Caixa e Equivalentes de Caixa', 100),
@@ -624,4 +626,37 @@ test('o arquivo privado fica fora do que vai para o navegador: não está em web
   const vercel = JSON.parse(fs.readFileSync(path.join(RAIZ, 'vercel.json'), 'utf8'))
   assert.equal(vercel.functions['api/top15.ts'].includeFiles, 'dados-privados/**', 'só a função do código enxerga o arquivo')
   assert.equal(vercel.outputDirectory, 'dist-site', 'a Vercel serve apenas dist-site; dados-privados/ não está lá')
+})
+
+test('EBITDA soma a depreciação qualquer que seja o sinal (a DVA da CVM vem negativa); nunca a subtrai', () => {
+  // EBIT 100, dívida líquida 100 (dívida 200 − caixa 100), depreciação 30 → EBITDA 130 → 0,769x
+  for (const da of [-30, 30]) {
+    const r = calcular(insumosDe([fabricar('EBIT3', { da })]), cfg)
+    const e = r.resultado.ranking[0]
+    perto(e.dlEbitda, 100 / 130, 1e-4)
+    assert.equal(e.passaDlEbitda, true)
+    assert.equal(r.memoria.EBIT3.derivados.ebitda.valor, 130)
+  }
+  // O contrário (o erro da 1ª execução real) daria EBITDA 70 → 1,43x: este teste pega a regressão.
+  assert.notEqual(Math.round(calcular(insumosDe([fabricar('EBIT3', { da: -30 })]), cfg).resultado.ranking[0].dlEbitda * 100) / 100, 1.43)
+  // Identidade que precisa valer SEMPRE: dívida líquida/EBITDA <= (dívida líquida/EV) / (EBIT ajustado/EV)
+  const e = calcular(insumosDe([fabricar('EBIT3', { da: -30 })]), cfg).resultado.ranking[0]
+  assert.ok(e.dlEbitda <= 1 / e.ebitAjustadoSobreEv + 1e-9)
+})
+
+test('duplicidade econômica: holding que consolida empresa listada sai, a operacional fica', () => {
+  const emps = [fabricar('GGBR4'), fabricar('GOAU4')]
+  const { resultado } = calcular(insumosDe(emps), cfg)
+  assert.deepEqual(resultado.ranking.map((r) => r.ticker), ['GGBR4'])
+  const ex = resultado.exclusoes.find((e) => e.ticker === 'GOAU4')
+  assert.deepEqual([ex.etapa, ex.codigo], ['universo', 'duplicidade_economica'])
+  assert.match(ex.motivo, /holding que consolida a Gerdau/)
+  assert.equal(cfg.universo.excluirTickers.GOAU4 !== undefined, true)
+})
+
+test('capital implausível: o motivo mostra valor de mercado, PL e ações para dar para diagnosticar na tela', () => {
+  const { resultado } = calcular(insumosDe([fabricar('PLAU3', { acoes: 1e9 })]), cfg)
+  const ex = resultado.exclusoes[0]
+  assert.equal(ex.codigo, 'capital_implausivel')
+  assert.match(ex.motivo, /valor de mercado R\$ .* mi ÷ PL dos controladores R\$ .* mi; ON 1\.000\.000\.000 ações × R\$ 10/)
 })

@@ -375,7 +375,11 @@ export function calcularFundamentos(emp, preco, cfg, dataCorte) {
   const pvp = plControladores > 0 ? vm.valor / plControladores : null
   const pvpOk = pvp === null ? null : pvp >= cfg.verificacoes.pvpMinimoPlausivel && pvp <= cfg.verificacoes.pvpMaximoPlausivel
   verificacoes.push({ id: 'pvp_plausivel', ok: pvpOk, detalhe: pvp === null ? 'PL de controladores ≤ 0: teste não se aplica.' : `P/VP implícito = ${arred(pvp, 2)} (faixa aceita ${cfg.verificacoes.pvpMinimoPlausivel} a ${cfg.verificacoes.pvpMaximoPlausivel}).` })
-  if (pvpOk === false) return excluir('dados_contabeis', 'capital_implausivel', `P/VP implícito de ${arred(pvp, 2)} fora da faixa plausível: quantidade de ações ou unidade do capital sob suspeita.`, { pvp })
+  if (pvpOk === false) {
+    const mi = (n) => `R$ ${(n / 1e6).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} mi`
+    const acoes = vm.classes.map((k) => `${k.classe} ${k.quantidade.toLocaleString('pt-BR')} ações × R$ ${k.preco.toLocaleString('pt-BR')}`).join(' + ')
+    return excluir('dados_contabeis', 'capital_implausivel', `P/VP implícito de ${arred(pvp, 4)} (valor de mercado ${mi(vm.valor)} ÷ PL dos controladores ${mi(plControladores)}; ${acoes}) fora da faixa ${cfg.verificacoes.pvpMinimoPlausivel} a ${cfg.verificacoes.pvpMaximoPlausivel}: quantidade de ações ou unidade do capital sob suspeita.`, { pvp, valorDeMercado: reais(vm.valor), plControladores: reais(plControladores), capital: { ordinarias: cap.ordinarias, preferenciais: cap.preferenciais, tesouroOrd: cap.tesouroOrd, tesouroPref: cap.tesouroPref } })
+  }
 
   // EBIT ajustado
   const aj = cfg.indicador.ebitAjustado
@@ -403,7 +407,9 @@ export function calcularFundamentos(emp, preco, cfg, dataCorte) {
   const nopat = ebitAj * (1 - cfg.qualidade.roic.aliquotaImpostoNopat)
   const roic = capitalInvestido > 0 ? nopat / capitalInvestido : null
   const temDepreciacao = itens.depreciacao.componentes.length > 0
-  const ebitda = temDepreciacao ? ebitAj + V('depreciacao') : null
+  // A DVA apresenta as retenções (7.04.01) com sinal NEGATIVO; a depreciação é sempre uma soma ao EBIT.
+  // Por isso usamos o valor absoluto (e o resultado não depende do sinal que a empresa usar).
+  const ebitda = temDepreciacao ? ebitAj + Math.abs(V('depreciacao')) : null
   let dlEbitda = null
   if (ebitda !== null) dlEbitda = ebitda > 0 ? dividaLiquida / ebitda : dividaLiquida <= 0 ? -Infinity : null
   const dlEbitdaPublicado = dlEbitda === -Infinity ? null : dlEbitda
@@ -464,7 +470,7 @@ export function calcularFundamentos(emp, preco, cfg, dataCorte) {
       ev: { formula: 'valor de mercado + dívida líquida + minoritários (2.03.09)', valor: reais(ev) },
       capitalInvestido: { formula: 'PL total + dívida bruta − caixa', valor: reais(capitalInvestido) },
       nopat: { formula: `EBIT ajustado × (1 − ${q.roic.aliquotaImpostoNopat})`, valor: reais(nopat) },
-      ebitda: { formula: 'EBIT ajustado + depreciação e amortização (DVA 7.04.01)', valor: reais(ebitda) },
+      ebitda: { formula: 'EBIT ajustado + |depreciação e amortização 12m (DVA 7.04.01, que vem com sinal negativo)|', valor: reais(ebitda) },
     },
     indicadores: {
       plSobreValorDeMercado: { formula: 'PL controladores ÷ valor de mercado', valor: arred(metricas.plSobreValorDeMercado) },
@@ -529,6 +535,8 @@ export function calcular(insumos, cfg) {
 
   passo('universo', 'Setor fora do escopo (bancos, seguros, bolsa/holdings) ou empresa sem CNPJ mapeado', (emp) => {
     if (cfg.universo.setoresExcluidos.includes(emp.setor)) return { codigo: 'setor_excluido', motivo: `Setor "${emp.setor}" fora do escopo: EV, EBIT e FCO não medem o negócio de instituições financeiras.` }
+    const duplicada = cfg.universo.excluirTickers?.[emp.ticker]
+    if (duplicada) return { codigo: 'duplicidade_economica', motivo: duplicada }
     if (!emp.cnpj) return { codigo: 'sem_cnpj', motivo: 'Código não mapeado para um CNPJ da CVM (conferir config/acoes-baratas-cnpj.json).' }
     if (!emp.preco?.ref) return { codigo: 'sem_preco', motivo: 'Sem preço de fechamento no histórico da B3.' }
     return null

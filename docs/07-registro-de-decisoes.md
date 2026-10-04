@@ -1040,6 +1040,24 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 
 **Pendências.** (1) A **Política de Privacidade** (`/privacidade/`) deve citar que, para limitar tentativas de acesso por código, o servidor guarda por até 15 minutos um identificador irreversível (hash) do IP de quem erra o código, e conta acessos e erros de forma agregada; o texto é do responsável e não foi alterado. (2) Variável `TOP15_CODIGOS` precisa ser criada na Vercel antes do primeiro uso; sem ela a tela mostra "ainda não está disponível". (3) O limite de tentativas **não foi aplicado** à `api/recomendacao.ts` (pergunta em aberto: a API do motor, hoje sem limite, permite mapear as matrizes por tentativa e erro).
 
-**Testes.** Scripts: 215 → 231 (13 da função de acesso e do gerador de código, 3 do job e do vazamento). App: 1.274 → 1.288 (cliente do código e porta do código na tela). Ver os arquivos `scripts/top15-acesso.test.mjs`, `webapp-src/src/domain/acessoTop15.test.ts` e `Top15Baratas.test.tsx`.
+**Testes.** Scripts: 215 → 231 (13 da função de acesso e do gerador de código, 3 do job e do vazamento). App: 1.274 → 1.289 (cliente do código, porta do código na tela e um teste do Simule Ações inteiro com o arquivo de dados no estado que o job grava). Ver os arquivos `scripts/top15-acesso.test.mjs`, `webapp-src/src/domain/acessoTop15.test.ts` e `Top15Baratas.test.tsx`.
 
 **Consequência.** O motor do perfil, o questionário, os demais simuladores e a landing não mudaram. O Top 15 só mostra a lista a quem tem o código do mês; o simulador de ações segue aberto.
+
+## D51 (04/10/2026): Primeira execução com dados reais da CVM: um erro de cálculo, uma duplicidade e três pontos em aberto
+
+**Contexto.** O workflow rodou pela primeira vez com dados reais e o responsável enviou prints da tela (15 cartões e consultas ao "por que ficou de fora?"). Até então a metodologia só tinha sido exercitada contra arquivos de teste no layout documentado. A leitura dos prints (conferência de coerência interna, não contra a CVM) achou o seguinte.
+
+**1) Erro de cálculo confirmado: EBITDA.** RECV3 mostrava dívida líquida/EBITDA de 51,5x, AZZA3 60,3x e MGLU3 18,2x, com EBIT ajustado/EV de 15,0%, 12,1% e 16,3%. Isso é impossível: como DL/EBITDA = (DL/EV) ÷ (EBITDA/EV), DL/EV ≤ 1 e EBITDA ≥ EBIT, o teto seria 6,7x, 8,3x e 6,1x. Causa: a DVA da CVM apresenta as retenções (conta 7.04.01, depreciação) com **sinal negativo**, e o código somava o valor como veio, o que subtraía a depreciação do EBIT. **Por que os testes não pegaram:** o arquivo de teste foi escrito por quem programou, com a depreciação positiva, uma suposição sobre o formato que a realidade desmentiu; ao construir fixtures, o formato dos dados reais precisa ser confirmado, não suposto. Correção: valor absoluto, com teste nos dois sinais e uma identidade que precisa valer sempre. **Efeito:** só o indicador de dívida líquida/EBITDA e o filtro de qualidade correspondente; a nota e a ordem do ranking não usam EBITDA e não mudam. Versão da metodologia 1.0.0 → 1.0.1.
+
+**2) Duplicidade econômica: GGBR4 e GOAU4.** Apareceram nas posições 14 e 15 com ROIC, dívida líquida/EBITDA e cobertura idênticos: a Metalúrgica Gerdau é holding que consolida a Gerdau. Para o leitor parecem duas oportunidades; é uma. Criada a lista `universo.excluirTickers` (config), com GOAU4 e o motivo; fica a operacional. **Decisão do responsável:** pode remover a linha da config para voltar a listar os dois.
+
+**3) Exclusão do VALE3 por capital implausível.** A trava de integridade funcionou: o P/VP implícito saiu ~0 (valor de mercado muito menor que o PL), típico de quantidade de ações em milhares ou de demonstração em outra moeda. Sem os números na mensagem não dava para saber qual. A mensagem agora traz valor de mercado, PL e ações por classe; a causa será vista na próxima execução. Não foi aplicada correção automática de unidade, para não mascarar erro.
+
+**Em aberto (precisam da memória de cálculo da tela, não do código):** (a) MGLU3 com caixa operacional/EV de 180,4%, valor que exige EV muito pequeno e destoa de DL/EBITDA alto; (b) SEER3 com lucro positivo em 0 de 5 exercícios e ROIC de 17,9% (pode ser coerente se o EBIT é positivo e os juros e baixas levam o lucro a negativo, mas deve ser conferido); (c) 4 das 15 primeiras são varejistas, com FCO/EV de 8% a 180%, o que combina com o efeito do IFRS 16 descrito na seção 10 da metodologia (item 13).
+
+**O que os prints confirmam sem ressalva:** o leitor da CVM funcionou de primeira com arquivos reais (sem erro de layout); a trava de sanidade não barrou; PETR4 entrou no ranking e WEGE3 também (não aparecem como excluídas); o acesso por código funcionou (D50).
+
+**Testes.** Scripts: 231 → 234 (3 novos: EBITDA nos dois sinais com a identidade, duplicidade econômica, mensagem do capital). Mutação: voltar ao erro original, subtrair a depreciação e ignorar a lista de duplicados são detectados.
+
+**Consequência.** O ranking exibido na primeira execução tem a dívida líquida/EBITDA errada e uma duplicidade; ambos se corrigem na próxima execução do workflow (a ordem das 15, por não depender do EBITDA, deve mudar só pela saída de GOAU4).

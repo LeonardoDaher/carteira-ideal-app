@@ -1,0 +1,22 @@
+O QUE É
+D51: correções depois da 1ª execução com dados reais da CVM (metodologia 1.0.1). Leia docs/07-registro-de-decisoes.md, D51.
+
+O QUE FOI ENCONTRADO NOS SEUS PRINTS
+ 1) ERRO DE CÁLCULO (meu): dívida líquida/EBITDA estava errada (RECV3 51x, AZZA3 60x, MGLU3 18x). A depreciação da DVA vem NEGATIVA na CVM e eu a
+    subtraía. Corrigido. A ORDEM do ranking não muda por isso; só esse indicador e o filtro de qualidade correspondente.
+ 2) GGBR4 e GOAU4 eram o mesmo negócio (a Metalúrgica Gerdau é holding da Gerdau). GOAU4 saiu do ranking. Para voltar a listar os dois, apague a linha
+    "GOAU4" em config/acoes-baratas.json → universo → excluirTickers.
+ 3) VALE3 saiu por "capital implausível". Agora a mensagem mostra os números, e a causa aparece depois de rodar de novo.
+
+SUBA TODOS OS ARQUIVOS DO ZIP (não só alguns)
+   O workflow roda os testes antes de calcular, e eles leem a config, o código e os arquivos de teste (scripts/fixtures/cvm/*.zip). Se subir só uma parte,
+   o passo "Testes da metodologia" fica vermelho.
+
+DEPOIS
+ 1) Commit no GitHub (o upload já faz).  2) Actions → Atualizar Top 15 Ações Baratas → Run workflow.  3) Espere o ✅ e o deploy da Vercel ficar Ready.
+ 4) Abra o Top 15 de novo. Mande prints de:  (a) "Por que uma empresa ficou de fora?" com VALE3;  (b) a "Memória de cálculo" aberta de MGLU3 e de SEER3.
+
+ARQUIVOS ALTERADOS
+   config/acoes-baratas.json, scripts/acoes-baratas-calculo.mjs, scripts/acoes-baratas.test.mjs, scripts/fixtures/gerar-fixtures-cvm.py,
+   scripts/fixtures/cvm/dfp_cia_aberta_2025.zip, scripts/fixtures/cvm/itr_cia_aberta_2026.zip, docs/07-registro-de-decisoes.md,
+   docs/09-metodologia-acoes-baratas.md

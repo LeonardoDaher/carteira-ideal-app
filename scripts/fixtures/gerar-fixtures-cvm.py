@@ -36,7 +36,7 @@ def dfp():
     dre.append(fl(ALFA, R, V, 'DF Consolidado - Demonstração do Resultado', 'ÚLTIMO', '2025-01-01', R, '3.01', 'Receita', 5, moeda='DÓLAR'))  # moeda errada: descartar
     dre_ind = [fl(ALFA, R, V, 'DF Individual - Demonstração do Resultado', 'ÚLTIMO', '2025-01-01', R, '3.05', 'Resultado Antes do Resultado Financeiro e dos Tributos', 777)]
     dfc = [fl(ALFA, R, V, 'DF Consolidado - Demonstração do Fluxo de Caixa (Método Indireto)', 'ÚLTIMO', '2025-01-01', R, '6.01', 'Caixa Líquido Atividades Operacionais', 1400)]
-    dva = [fl(ALFA, R, V, 'DF Consolidado - Demonstração de Valor Adicionado', 'ÚLTIMO', '2025-01-01', R, '7.04.01', 'Depreciação, Amortização e Exaustão', 400)]
+    dva = [fl(ALFA, R, V, 'DF Consolidado - Demonstração de Valor Adicionado', 'ÚLTIMO', '2025-01-01', R, '7.04.01', 'Depreciação, Amortização e Exaustão', -400)]  # DVA: retenções com sinal NEGATIVO, como na CVM
     main = [[ALFA, R, 1, 'ALFA S.A.', '000001', 'DFP', '1001', '2026-02-20', 'https://exemplo.cvm/doc?id=1001'],
             [ALFA, R, V, 'ALFA S.A.', '000001', 'DFP', '1002', '2026-03-10', 'https://exemplo.cvm/doc?id=1002'],
             [BETA, R, 1, 'BETA S.A.', '000002', 'DFP', '2001', '2026-03-12', 'https://exemplo.cvm/doc?id=2001']]
@@ -68,7 +68,7 @@ def itr():
     GF = 'DF Consolidado - Demonstração do Fluxo de Caixa (Método Indireto)'
     dfc = [fl(ALFA, R, V, GF, 'ÚLTIMO', '2026-01-01', R, '6.01', 'Caixa Líquido Atividades Operacionais', 800), fl(ALFA, R, V, GF, 'PENÚLTIMO', '2025-01-01', '2025-06-30', '6.01', 'Caixa Líquido Atividades Operacionais', 650)]
     GV = 'DF Consolidado - Demonstração de Valor Adicionado'
-    dva = [fl(ALFA, R, V, GV, 'ÚLTIMO', '2026-01-01', R, '7.04.01', 'Depreciação, Amortização e Exaustão', 210), fl(ALFA, R, V, GV, 'PENÚLTIMO', '2025-01-01', '2025-06-30', '7.04.01', 'Depreciação, Amortização e Exaustão', 190)]
+    dva = [fl(ALFA, R, V, GV, 'ÚLTIMO', '2026-01-01', R, '7.04.01', 'Depreciação, Amortização e Exaustão', -210), fl(ALFA, R, V, GV, 'PENÚLTIMO', '2025-01-01', '2025-06-30', '7.04.01', 'Depreciação, Amortização e Exaustão', -190)]
     A, P = 'DF Consolidado - Balanço Patrimonial Ativo', 'DF Consolidado - Balanço Patrimonial Passivo'
     bpa = [bp(ALFA,R,V,A,'ÚLTIMO',R,'1','Ativo Total',20000), bp(ALFA,R,V,A,'ÚLTIMO',R,'1.01.01','Caixa e Equivalentes de Caixa',1000), bp(ALFA,R,V,A,'ÚLTIMO',R,'1.01.02','Aplicações Financeiras',500)]
     bpp = [bp(ALFA,R,V,P,'ÚLTIMO',R,'2','Passivo Total',20000), bp(ALFA,R,V,P,'ÚLTIMO',R,'2.01.04','Empréstimos e Financiamentos',700),

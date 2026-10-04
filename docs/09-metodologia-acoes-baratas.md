@@ -1,6 +1,6 @@
 # Metodologia da triagem "Top 15 ações mais baratas"
 
-**Versão da metodologia: 1.0.0** · Decisão de origem: D49 · Parâmetros: `config/acoes-baratas.json` (fonte única) · Código: `scripts/acoes-baratas-calculo.mjs` (cálculo puro), `scripts/acoes-baratas-cvm.mjs` (leitura da CVM), `scripts/atualizar-acoes-baratas.mjs` (orquestração e gravação da auditoria), `scripts/acoes-baratas-verificar.mjs` (verificação independente).
+**Versão da metodologia: 1.0.1** · Decisão de origem: D49 · Parâmetros: `config/acoes-baratas.json` (fonte única) · Código: `scripts/acoes-baratas-calculo.mjs` (cálculo puro), `scripts/acoes-baratas-cvm.mjs` (leitura da CVM), `scripts/atualizar-acoes-baratas.mjs` (orquestração e gravação da auditoria), `scripts/acoes-baratas-verificar.mjs` (verificação independente).
 
 > **Regra de ouro deste documento.** Tudo o que está aqui deve poder ser conferido contra o código e contra a pasta `auditoria/acoes-baratas/<data>/`. Se o código mudar, a versão em `config/acoes-baratas.json` sobe, o histórico de versões (final deste arquivo) ganha uma linha, e este texto é atualizado no mesmo commit.
 
@@ -37,7 +37,7 @@ Anos baixados (com a data de corte no ano *A*): DFP de *A−5* a *A* (5 exercíc
 
 Empresas de `config/acoes.json` (um código por empresa, o mais líquido). **O universo é o cadastro do app, não a bolsa inteira**; a tela diz quantas empresas foram analisadas. Ampliar o universo é editar o cadastro.
 
-Saem do escopo (etapa `universo`): setores **Bancos**, **Seguros e previdência** e **Bolsa, holdings e serviços financeiros**, porque EV, EBIT e caixa operacional não medem o negócio de instituições financeiras. Também sai quem não tem CNPJ resolvido ou preço recente (último negócio há mais de 10 dias do último pregão).
+Saem do escopo (etapa `universo`): setores **Bancos**, **Seguros e previdência** e **Bolsa, holdings e serviços financeiros**, porque EV, EBIT e caixa operacional não medem o negócio de instituições financeiras. Sai também, pela lista `universo.excluirTickers` da config, a empresa que repete o mesmo negócio de outra do cadastro (hoje: **GOAU4**, holding que consolida a Gerdau/GGBR4; fica a operacional). Sai ainda quem não tem CNPJ resolvido ou preço recente (último negócio há mais de 10 dias do último pregão).
 
 **CNPJ.** Ordem de prioridade: correção manual em `config/acoes-baratas-cnpj.json` → FCA com um único CNPJ de negociação vigente → FCA com um único CNPJ → ambíguo (empresa sai com motivo). Cada decisão e sua origem estão em `mapeamento-ticker-cnpj.csv`.
 
@@ -73,7 +73,7 @@ Consolidado (`con`) quando existe a conta 3.05 no documento mais recente; senão
 | Lucro consolidado | 3.11 | DRE | fluxo | usado se não houver 3.11.01 |
 | Lucro dos controladores | 3.11.01 | DRE | fluxo, opcional | preferido |
 | **Caixa das atividades operacionais (FCO)** | **6.01** | DFC (MD ou MI) | fluxo | |
-| Depreciação e amortização | 7.04.01 | DVA | fluxo, opcional | EBITDA; sem ela o EBITDA é indisponível |
+| Depreciação e amortização | 7.04.01 | DVA | fluxo, opcional | EBITDA; sem ela o EBITDA é indisponível. **A DVA mostra as retenções com sinal negativo**, então usa-se o valor absoluto |
 | Ativo total / Passivo total | 1 / 2 | BPA / BPP | saldo | verificação de que o balanço fecha |
 | Caixa e equivalentes | 1.01.01 | BPA | saldo | |
 | Aplicações financeiras (circulante) | 1.01.02 | BPA | saldo, opcional | |
@@ -103,7 +103,7 @@ PL controladores   = 2.03 − 2.03.09
 EV                 = Valor de mercado + Dívida líquida + 2.03.09
 EBIT ajustado      = 3.05 − 3.04.06 − 3.04.03 − (3.04.04 + 3.04.05)
                      (cada parcela pode ser desligada em config: indicador.ebitAjustado)
-EBITDA             = EBIT ajustado + 7.04.01
+EBITDA             = EBIT ajustado + |7.04.01|   (a DVA traz a depreciação negativa; soma-se o valor absoluto)
 Capital investido  = PL total (2.03) + Dívida bruta − Caixa
 NOPAT              = EBIT ajustado × (1 − 0,34)
 ```
@@ -207,7 +207,10 @@ Qualquer alteração de parâmetro, de conta ou de fórmula: (1) muda `config/ac
 9. **Sem proventos.** Dividendos não entram no indicador; preço sem ajuste por dividendos, e desdobramentos só confirmados manualmente em `config/acoes.json`.
 10. **Universo = cadastro do app** (uma classe por empresa). Empresas fora do cadastro não são avaliadas.
 11. **Não há backtest.** Esta versão não afirma nada sobre desempenho passado do método, e a tela não faz nenhuma promessa de retorno. Qualquer afirmação de desempenho exigiria um backtest com dados *point-in-time*.
-12. **Dados da CVM podem ter erros de divulgação** que passam pelas verificações; a pasta de auditoria permite localizá-los depois.
+12. **Holdings que consolidam empresa listada** repetem o mesmo negócio (caso Gerdau/Metalúrgica Gerdau, tratado em `universo.excluirTickers`). Outros casos só são vistos lendo o ranking; a lista é manual.
+13. **IFRS 16 (arrendamentos) e varejo.** Os pagamentos de aluguel ficam no fluxo de financiamento, não no FCO, e o passivo de arrendamento pode ficar fora da dívida usada no EV. Isso tende a **inflar FCO/EV de varejistas e empresas com muitas lojas ou frota alugada**. Na primeira execução real, 4 das 15 primeiras eram desse perfil, com FCO/EV de 8% a 180%. É hipótese a confirmar na memória de cálculo de cada uma, e candidata a correção na v1.1 (somar o passivo de arrendamento à dívida e/ou descontar o aluguel pago do FCO).
+14. **Cobertura de juros.** A conta 3.06.02 inclui variação cambial e custo de derivativos de várias empresas, o que reduz a cobertura (valores de 0,5x a 2x apareceram até em empresas com caixa líquido).
+15. **Dados da CVM podem ter erros de divulgação** que passam pelas verificações; a pasta de auditoria permite localizá-los depois.
 
 ## 11. Publicação: aprovação, trava de sanidade e o que ainda é recomendado
 
@@ -259,4 +262,5 @@ Opcional: `TOP15_SAL` (qualquer texto aleatório) reforça o hash do IP. Com as 
 
 | Versão | Data | Mudança |
 |---|---|---|
+| 1.0.1 | 2026-10-04 | Primeira execução real: (1) corrige o EBITDA (a depreciação da DVA vem negativa e era subtraída), que inflava a dívida líquida/EBITDA e o filtro de qualidade correspondente; a nota e a ordem do ranking não mudam; (2) exclui a holding GOAU4; (3) a exclusão por capital implausível passa a mostrar os números usados. |
 | 1.0.0 | 2026-10-04 | Versão inicial: universo, filtros, indicador composto (PL/VM, FCO/EV, EBIT ajustado/EV), ranking por média de ranks percentuais, filtros de qualidade opcionais (ROIC, dívida líquida/EBITDA, FCO, cobertura de juros, consistência de 5 exercícios), trilha de auditoria e verificação independente. |
