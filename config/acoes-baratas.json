@@ -21,7 +21,12 @@
       "minimoNoRanking": 40,
       "maximoFracaoSemDados": 0.35
     },
-    "_leia": "Trava regulatória. Com aprovadoPeloResponsavel=false, o job calcula e grava a auditoria completa, mas o app NÃO recebe o ranking (mostra 'em validação'). Aprovado em 04/10/2026 pelo responsável (que o classifica como análise estritamente contábil de informações públicas, não recomendação). Sem parecer independente de terceiros."
+    "_leia": "Trava regulatória. Com aprovadoPeloResponsavel=false, o job calcula e grava a auditoria completa, mas o app NÃO recebe o ranking (mostra 'em validação'). Aprovado em 04/10/2026 pelo responsável (que o classifica como análise estritamente contábil de informações públicas, não recomendação). Sem parecer independente de terceiros.",
+    "acesso": {
+      "restritoPorCodigo": true,
+      "instagram": "acarteiraideal",
+      "_leia": "Com restritoPorCodigo=true, o ranking NÃO vai no arquivo do app: o job grava o cabeçalho em webapp-src/src/data/acoesBaratas.json e a lista completa em dados-privados/acoes-baratas.json, que só a função api/top15.ts lê, e só depois de conferir o código do mês (variável TOP15_CODIGOS na Vercel). Com false, volta ao modo aberto (ranking no arquivo do app)."
+    }
   },
   "tamanhoDaLista": 15,
   "dataCorteContabil": null,

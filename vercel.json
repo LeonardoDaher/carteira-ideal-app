@@ -4,9 +4,19 @@
   "redirects": [
     {
       "source": "/:caminho*",
-      "has": [{ "type": "host", "value": "carteira-ideal-app.vercel.app" }],
+      "has": [
+        {
+          "type": "host",
+          "value": "carteira-ideal-app.vercel.app"
+        }
+      ],
       "destination": "https://carteiraideal.app.br/:caminho*",
       "permanent": true
     }
-  ]
+  ],
+  "functions": {
+    "api/top15.ts": {
+      "includeFiles": "dados-privados/**"
+    }
+  }
 }

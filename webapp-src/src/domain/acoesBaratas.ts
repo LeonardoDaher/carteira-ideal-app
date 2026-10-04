@@ -71,6 +71,10 @@ export interface EtapaTriagem {
 
 export interface SnapshotAcoesBaratas {
   publicado: boolean
+  /** Acesso por código (D50): o arquivo do app traz só o cabeçalho; a lista vem de /api/top15. */
+  acessoRestrito?: boolean
+  /** Perfil do Instagram onde o código do mês é divulgado (sem @). */
+  instagram?: string | null
   versaoMetodologia: string
   geradoEm: string | null
   dataPrecos: string | null

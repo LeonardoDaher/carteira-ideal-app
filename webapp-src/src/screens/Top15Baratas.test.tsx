@@ -1,8 +1,11 @@
-import { fireEvent, render, screen, within } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { Top15Baratas } from './Top15Baratas'
 import { SimuleAcoes } from './SimuleAcoes'
 import type { ItemRanking, SnapshotAcoesBaratas } from '../domain/acoesBaratas'
+import { CHAVE_CODIGO_TOP15 } from '../domain/acessoTop15'
+import type { RespostaTop15 } from '../domain/acessoTop15'
+import { SNAPSHOT_ACOES_BARATAS } from '../data/snapshotAcoesBaratas'
 import type { AppCtx } from '../state/useAppState'
 
 const item = (ticker: string, posicao: number, o: Partial<ItemRanking> = {}): ItemRanking => ({
@@ -105,7 +108,7 @@ describe('Simule Ações: as duas caixinhas', () => {
     busca: [],
   }
 
-  it('abre no simulador e troca para o Top 15 e de volta', () => {
+  it('abre no simulador e troca para o Top 15 e de volta', async () => {
     render(<SimuleAcoes ctx={ctx} snapshot={base} />)
     const abas = screen.getAllByRole('tab')
     expect(abas.map((a) => a.textContent)).toEqual([expect.stringContaining('Simulador'), expect.stringContaining('Top 15 mais baratas')])
@@ -116,10 +119,113 @@ describe('Simule Ações: as duas caixinhas', () => {
     expect(abas[1].getAttribute('aria-selected')).toBe('true')
     expect(screen.queryByText('Quantas ações esse valor compra')).toBeNull()
     expect(screen.queryByText(/Como o IR funciona nas ações/)).toBeNull()
-    // dados reais do repositório ainda sem aprovação do responsável → "em validação"
-    expect(screen.getByTestId('top15-validacao')).toBeTruthy()
+    // O painel mostra um destes estados, conforme o arquivo de dados que o job gerou (antes da 1ª
+    // execução: "em validação"; depois: a porta do código). Nunca a lista, que não vai no arquivo do app.
+    expect(screen.queryByTestId('top15-validacao') ?? (await screen.findByTestId('top15-codigo'))).toBeTruthy()
+    expect(screen.queryByTestId('top15')).toBeNull()
 
     fireEvent.click(abas[0])
     expect(screen.getByText('Quantas ações esse valor compra')).toBeTruthy()
+  })
+})
+
+describe('Top15Baratas com acesso por código (D50)', () => {
+  const cabecalho = (): SnapshotAcoesBaratas => snapshot({ acessoRestrito: true, instagram: 'acarteiraideal', ranking: [], exclusoes: [], etapas: [] })
+  const completo = (): SnapshotAcoesBaratas => snapshot({ acessoRestrito: true, instagram: 'acarteiraideal' })
+  const memoria = (inicial: Record<string, string> = {}) => {
+    const d = new Map(Object.entries(inicial))
+    return {
+      d,
+      getItem: async (k: string) => d.get(k) ?? null,
+      setItem: async (k: string, v: string) => void d.set(k, v),
+      removeItem: async (k: string) => void d.delete(k),
+    }
+  }
+  const digitar = (valor: string) => fireEvent.change(screen.getByLabelText('Código do mês'), { target: { value: valor } })
+
+  it('sem código: pede o código, aponta o Instagram e NÃO mostra nenhuma ação', async () => {
+    render(<Top15Baratas snapshot={cabecalho()} carregar={vi.fn()} armazenamento={memoria()} />)
+    await screen.findByTestId('top15-codigo')
+    const link = screen.getByRole('link', { name: '@acarteiraideal' })
+    expect(link.getAttribute('href')).toBe('https://www.instagram.com/acarteiraideal/')
+    expect(link.getAttribute('rel')).toContain('noopener')
+    expect(screen.queryByTestId('top15')).toBeNull()
+    expect(document.body.textContent).not.toContain('AAAA3')
+    expect((screen.getByRole('button', { name: 'Ver a lista' }) as HTMLButtonElement).disabled).toBe(true)
+  })
+
+  it('código errado: mostra o aviso, não salva e não libera a lista', async () => {
+    const mem = memoria()
+    const carregar = vi.fn(async (): Promise<RespostaTop15> => ({ ok: false, motivo: 'invalido' }))
+    render(<Top15Baratas snapshot={cabecalho()} carregar={carregar} armazenamento={mem} />)
+    await screen.findByTestId('top15-codigo')
+    digitar('ciaaaabbbb')
+    fireEvent.click(screen.getByRole('button', { name: 'Ver a lista' }))
+    expect((await screen.findByRole('alert')).textContent).toContain('Código inválido ou vencido')
+    expect(carregar).toHaveBeenCalledWith('CIAAAABBBB')
+    expect(mem.d.size).toBe(0)
+    expect(screen.queryByTestId('top15')).toBeNull()
+  })
+
+  it('código certo: libera a lista, salva o código e oferece trocar', async () => {
+    const mem = memoria()
+    const carregar = vi.fn(async (): Promise<RespostaTop15> => ({ ok: true, snapshot: completo() }))
+    render(<Top15Baratas snapshot={cabecalho()} carregar={carregar} armazenamento={mem} />)
+    await screen.findByTestId('top15-codigo')
+    digitar('CI-AAAA-BBBB')
+    expect((screen.getByLabelText('Código do mês') as HTMLInputElement).value).toBe('CI-AAAA-BBBB')
+    fireEvent.click(screen.getByRole('button', { name: 'Ver a lista' }))
+    await screen.findByTestId('top15')
+    expect(screen.getByTestId('top15-AAAA3')).toBeTruthy()
+    expect(mem.d.get(CHAVE_CODIGO_TOP15)).toBe('CIAAAABBBB')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Sair e trocar o código' }))
+    await screen.findByTestId('top15-codigo')
+    expect(mem.d.has(CHAVE_CODIGO_TOP15)).toBe(false)
+    expect(screen.queryByTestId('top15')).toBeNull()
+  })
+
+  it('código salvo e ainda válido: abre sozinho, sem pedir de novo', async () => {
+    const carregar = vi.fn(async (): Promise<RespostaTop15> => ({ ok: true, snapshot: completo() }))
+    render(<Top15Baratas snapshot={cabecalho()} carregar={carregar} armazenamento={memoria({ [CHAVE_CODIGO_TOP15]: 'CIAAAABBBB' })} />)
+    await screen.findByTestId('top15')
+    expect(carregar).toHaveBeenCalledWith('CIAAAABBBB')
+    expect(screen.queryByTestId('top15-codigo')).toBeNull()
+  })
+
+  it('código salvo que venceu (virou o mês): apaga, avisa e volta a pedir', async () => {
+    const mem = memoria({ [CHAVE_CODIGO_TOP15]: 'CIANTIGOXX' })
+    render(<Top15Baratas snapshot={cabecalho()} carregar={async () => ({ ok: false, motivo: 'invalido' })} armazenamento={mem} />)
+    await screen.findByTestId('top15-codigo')
+    expect(screen.getByRole('alert').textContent).toContain('venceu')
+    expect(mem.d.has(CHAVE_CODIGO_TOP15)).toBe(false)
+  })
+
+  it('falha de rede com código salvo não apaga o código (a pessoa só está sem internet)', async () => {
+    const mem = memoria({ [CHAVE_CODIGO_TOP15]: 'CIAAAABBBB' })
+    render(<Top15Baratas snapshot={cabecalho()} carregar={async () => ({ ok: false, motivo: 'rede' })} armazenamento={mem} />)
+    await screen.findByTestId('top15-codigo')
+    expect(screen.getByRole('alert').textContent).toContain('internet')
+    expect(mem.d.get(CHAVE_CODIGO_TOP15)).toBe('CIAAAABBBB')
+  })
+
+  it('limite de tentativas: mostra o aviso com os minutos', async () => {
+    render(<Top15Baratas snapshot={cabecalho()} carregar={async () => ({ ok: false, motivo: 'limite', espera: 900 })} armazenamento={memoria()} />)
+    await screen.findByTestId('top15-codigo')
+    digitar('CIAAAABBBB')
+    fireEvent.click(screen.getByRole('button', { name: 'Ver a lista' }))
+    await waitFor(() => expect(screen.getByRole('alert').textContent).toContain('15 minutos'))
+  })
+
+  it('não publicado: nem pede código, mostra "em validação"', () => {
+    render(<Top15Baratas snapshot={snapshot({ publicado: false, acessoRestrito: true, ranking: [] })} carregar={vi.fn()} armazenamento={memoria()} />)
+    expect(screen.getByTestId('top15-validacao')).toBeTruthy()
+    expect(screen.queryByTestId('top15-codigo')).toBeNull()
+  })
+
+  it('o arquivo de dados que vai no app NÃO contém ranking: só o cabeçalho com acesso por código', () => {
+    // Vale para o arquivo real do repositório, em qualquer momento (antes ou depois da 1ª execução do job).
+    expect(SNAPSHOT_ACOES_BARATAS.ranking).toEqual([])
+    expect(SNAPSHOT_ACOES_BARATAS.exclusoes).toEqual([])
   })
 })

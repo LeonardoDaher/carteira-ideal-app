@@ -10,8 +10,10 @@
 //   1. EXTRAÇÃO  : CVM (DFP, ITR, FCA) + histórico de preços da B3 → insumos.json.gz (linhas exatas usadas)
 //   2. CÁLCULO   : scripts/acoes-baratas-calculo.mjs (puro) → resultado.json + memoria-de-calculo.json.gz
 //   3. REGISTRO  : manifesto.json com sha256 de fontes, config, insumos, resultado e do código de cálculo
-//   4. PUBLICAÇÃO: webapp-src/src/data/acoesBaratas.json (o que o app lê). Só leva o ranking se
-//                  config/acoes-baratas.json → publicacao.aprovadoPeloResponsavel === true.
+//   4. PUBLICAÇÃO: só leva o ranking se config/acoes-baratas.json → publicacao.aprovadoPeloResponsavel === true.
+//                  Com acesso por código (padrão): cabeçalho em webapp-src/src/data/acoesBaratas.json e a lista
+//                  completa em dados-privados/acoes-baratas.json (só api/top15.ts lê, com o código do mês).
+//                  Sem acesso por código: tudo em webapp-src/src/data/acoesBaratas.json.
 //
 // Se algo falhar (layout da CVM mudou, poucos dados), o job termina com erro SEM alterar arquivos.
 
@@ -169,11 +171,26 @@ export function csvRanking(resultado) {
 export const csvExclusoes = (resultado) => csv(['ticker', 'nome', 'setor', 'etapa', 'codigo', 'motivo'], resultado.exclusoes.map((e) => [e.ticker, csvTxt(e.nome), csvTxt(e.setor), e.etapa, e.codigo, csvTxt(e.motivo)]))
 export const csvMapeamento = (mapeamento, empresas) => csv(['ticker', 'nome_no_cadastro', 'cnpj', 'origem'], mapeamento.map((m) => [m.ticker, csvTxt(empresas.find((e) => e.ticker === m.ticker)?.nome), m.cnpj ?? '', csvTxt(m.origem)]))
 
+/**
+ * Separa o snapshot em duas metades quando o acesso é por código (D50):
+ *  - publico : vai no arquivo do app (cabeçalho, parâmetros, hashes). NENHUM nome de ação, NENHUM número de empresa.
+ *  - privado : lista completa, só lida por api/top15.ts depois de conferir o código.
+ * Sem acesso restrito, o arquivo do app leva tudo (modo aberto) e o privado fica vazio.
+ */
+export function separarSnapshot(completo) {
+  if (!completo.acessoRestrito) return { publico: completo, privado: { publicado: false } }
+  const publico = { ...completo, etapas: [], ranking: [], exclusoes: [] }
+  return { publico, privado: completo.publicado ? completo : { publicado: false } }
+}
+
 /** O que o app lê. Sem aprovação do responsável, vai só o cabeçalho (o app mostra "em validação"). */
 export function montarSnapshotApp({ resultado, cfg, manifesto, pasta, publicado }) {
   const q = cfg.qualidade
+  const acesso = cfg.publicacao?.acesso ?? {}
   return {
     publicado,
+    acessoRestrito: acesso.restritoPorCodigo === true,
+    instagram: acesso.instagram ?? null,
     versaoMetodologia: cfg.versaoMetodologia,
     geradoEm: manifesto.geradoEm,
     dataPrecos: resultado.dataPrecos,
@@ -371,11 +388,14 @@ export function concluir({ raiz, cfg, empresas, mapeamento, insumos, fontes = []
 
   const manifesto = lerJson(path.join(pasta, 'manifesto.json'))
   const snapshot = montarSnapshotApp({ resultado, cfg, manifesto, pasta: rel.replace(/\\/g, '/'), publicado })
-  gravarJson(path.join(raiz, 'webapp-src', 'src', 'data', 'acoesBaratas.json'), snapshot)
+  const { publico, privado } = separarSnapshot(snapshot)
+  gravarJson(path.join(raiz, 'webapp-src', 'src', 'data', 'acoesBaratas.json'), publico)
+  fs.mkdirSync(path.join(raiz, 'dados-privados'), { recursive: true })
+  gravarJson(path.join(raiz, 'dados-privados', 'acoes-baratas.json'), privado)
 
   const topo = resultado.ranking.slice(0, cfg.tamanhoDaLista).map((r) => r.ticker).join(' ')
   log(`Universo ${resultado.universo} → ${resultado.ranking.length} no ranking, ${resultado.exclusoes.length} fora. Top ${cfg.tamanhoDaLista}: ${topo}`)
-  log(publicado ? 'App: ranking PUBLICADO.' : 'App: ranking NÃO publicado (aprovadoPeloResponsavel = false). A auditoria completa foi gravada.')
+  log(publicado ? (snapshot.acessoRestrito ? 'App: ranking PUBLICADO com acesso por código (lista em dados-privados/, servida por api/top15).' : 'App: ranking PUBLICADO (acesso aberto).') : 'App: ranking NÃO publicado (aprovadoPeloResponsavel = false). A auditoria completa foi gravada.')
   return { resultado, hashes, pasta, publicado }
 }
 

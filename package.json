@@ -16,7 +16,8 @@
     "atualizar-etfs": "node scripts/atualizar-etfs.mjs",
     "atualizar-acoes": "node scripts/atualizar-acoes.mjs",
     "atualizar-acoes-baratas": "node scripts/atualizar-acoes-baratas.mjs",
-    "verificar-acoes-baratas": "node scripts/acoes-baratas-verificar.mjs ultima"
+    "verificar-acoes-baratas": "node scripts/acoes-baratas-verificar.mjs ultima",
+    "codigo-top15": "node scripts/gerar-codigo-top15.mjs"
   },
   "dependencies": {
     "pdfjs-dist": "^6.3.289",

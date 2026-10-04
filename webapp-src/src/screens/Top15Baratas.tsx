@@ -1,5 +1,8 @@
-import { useId, useState } from 'react'
+import { useEffect, useId, useState } from 'react'
+import { storage } from '../data/storage'
 import { SNAPSHOT_ACOES_BARATAS } from '../data/snapshotAcoesBaratas'
+import { CHAVE_CODIGO_TOP15, buscarTop15, formatarCodigo, limparCodigoDigitado, mensagemDaFalha } from '../domain/acessoTop15'
+import type { RespostaTop15 } from '../domain/acessoTop15'
 import {
   CONTAGEM_POR_ETAPA, SEM_FILTROS, buscarExclusao, formatarMultiplo, formatarPercentual, formatarReaisCompacto, selecionarTop,
 } from '../domain/acoesBaratas'
@@ -15,20 +18,147 @@ function reais(valor: number) {
  * cada empresa vêm prontos do job (pasta de auditoria versionada); a tela só aplica os filtros de
  * qualidade opcionais, sem recalcular nota nem reordenar, e mostra de onde cada número veio.
  */
-export function Top15Baratas({ snapshot = SNAPSHOT_ACOES_BARATAS }: { snapshot?: SnapshotAcoesBaratas }) {
+export function Top15Baratas({
+  snapshot = SNAPSHOT_ACOES_BARATAS,
+  carregar = buscarTop15,
+  armazenamento = storage,
+}: {
+  snapshot?: SnapshotAcoesBaratas
+  /** Pede a lista completa ao servidor com o código do mês. Injetável nos testes. */
+  carregar?: (codigo: string) => Promise<RespostaTop15>
+  armazenamento?: Pick<typeof storage, 'getItem' | 'setItem' | 'removeItem'>
+}) {
+  if (!snapshot.publicado) return <EmValidacao />
+  // Acesso por código (D50): o arquivo do app traz só o cabeçalho; a lista vem do servidor.
+  if (snapshot.acessoRestrito) return <PortaoDoCodigo cabecalho={snapshot} carregar={carregar} armazenamento={armazenamento} />
+  if (snapshot.ranking.length === 0) return <EmValidacao />
+  return <ListaTop15 snapshot={snapshot} />
+}
+
+function EmValidacao() {
+  return (
+    <div className="card col" style={{ gap: 8 }} role="status" data-testid="top15-validacao">
+      <span style={{ fontWeight: 700 }}>Top 15 mais baratas: em validação</span>
+      <span className="muted small justify">
+        Esta triagem compara as empresas da bolsa pelo preço em relação ao que elas têm e geram (patrimônio, caixa e lucro operacional).
+        A lista aparece aqui assim que a primeira atualização de dados for concluída e passar nas verificações automáticas. Enquanto isso, use o simulador.
+      </span>
+    </div>
+  )
+}
+
+/**
+ * Pede o código do mês. O código fica salvo neste aparelho; quando ele vence, o servidor o recusa
+ * e a tela volta a pedir. Nenhum dado da lista existe no navegador antes de o código ser aceito.
+ */
+function PortaoDoCodigo({
+  cabecalho, carregar, armazenamento,
+}: {
+  cabecalho: SnapshotAcoesBaratas
+  carregar: (codigo: string) => Promise<RespostaTop15>
+  armazenamento: Pick<typeof storage, 'getItem' | 'setItem' | 'removeItem'>
+}) {
+  const [completo, setCompleto] = useState<SnapshotAcoesBaratas | null>(null)
+  const [fase, setFase] = useState<'verificando-salvo' | 'livre' | 'carregando'>('verificando-salvo')
+  const [aviso, setAviso] = useState<string | null>(null)
+  const [codigo, setCodigo] = useState('')
+  const idCampo = useId()
+
+  const tentar = async (valor: string, doSalvo: boolean) => {
+    setFase(doSalvo ? 'verificando-salvo' : 'carregando')
+    setAviso(null)
+    const r = await carregar(valor)
+    if (r.ok) {
+      await armazenamento.setItem(CHAVE_CODIGO_TOP15, valor)
+      setCompleto(r.snapshot)
+      return
+    }
+    if (r.motivo === 'invalido') await armazenamento.removeItem(CHAVE_CODIGO_TOP15)
+    setAviso(doSalvo && r.motivo === 'invalido' ? 'O código salvo neste aparelho venceu. Digite o código mais recente.' : mensagemDaFalha(r))
+    setFase('livre')
+  }
+
+  useEffect(() => {
+    let cancelado = false
+    void (async () => {
+      const salvo = await armazenamento.getItem(CHAVE_CODIGO_TOP15)
+      if (cancelado) return
+      if (!salvo) return setFase('livre')
+      const r = await carregar(salvo)
+      if (cancelado) return
+      if (r.ok) return setCompleto(r.snapshot)
+      if (r.motivo === 'invalido') await armazenamento.removeItem(CHAVE_CODIGO_TOP15)
+      setAviso(r.motivo === 'invalido' ? 'O código salvo neste aparelho venceu. Digite o código mais recente.' : mensagemDaFalha(r))
+      setFase('livre')
+    })()
+    return () => {
+      cancelado = true
+    }
+  }, [armazenamento, carregar])
+
+  const sair = async () => {
+    await armazenamento.removeItem(CHAVE_CODIGO_TOP15)
+    setCompleto(null)
+    setCodigo('')
+    setFase('livre')
+  }
+
+  if (completo) return <ListaTop15 snapshot={completo} aoTrocarCodigo={sair} />
+
+  if (fase === 'verificando-salvo') {
+    return <div className="card small muted" role="status">Verificando o código salvo neste aparelho…</div>
+  }
+
+  const instagram = cabecalho.instagram
+  const pronto = limparCodigoDigitado(codigo).length >= 8 && fase !== 'carregando'
+  return (
+    <div className="card col" style={{ gap: 10 }} data-testid="top15-codigo">
+      <span style={{ fontWeight: 700 }}>Top 15 mais baratas: acesso por código</span>
+      <span className="muted small justify" style={{ lineHeight: 1.5 }}>
+        A lista é liberada com o código do mês
+        {instagram ? (
+          <>
+            , divulgado no Instagram{' '}
+            <a href={`https://www.instagram.com/${instagram}/`} target="_blank" rel="noopener noreferrer">@{instagram}</a>
+          </>
+        ) : null}
+        . Com ele você vê as 15 ações, os filtros de qualidade e a memória de cálculo de cada uma.
+      </span>
+      <form
+        className="col"
+        style={{ gap: 8 }}
+        onSubmit={(e) => {
+          e.preventDefault()
+          if (pronto) void tentar(limparCodigoDigitado(codigo), false)
+        }}
+      >
+        <label htmlFor={idCampo} className="small" style={{ fontWeight: 600 }}>Código do mês</label>
+        <input
+          id={idCampo}
+          className="busca-fii"
+          placeholder="CI-XXXX-XXXX"
+          autoCapitalize="characters"
+          autoComplete="off"
+          autoCorrect="off"
+          spellCheck={false}
+          enterKeyHint="go"
+          value={codigo}
+          onChange={(e) => setCodigo(formatarCodigo(e.target.value))}
+        />
+        <button type="submit" className="btn" disabled={!pronto}>
+          {fase === 'carregando' ? 'Verificando…' : 'Ver a lista'}
+        </button>
+      </form>
+      {aviso && <div className="card-outline small justify" role="alert">{aviso}</div>}
+      <span className="tiny muted">O código fica salvo neste aparelho. Quando ele mudar, o app pede o novo.</span>
+    </div>
+  )
+}
+
+function ListaTop15({ snapshot, aoTrocarCodigo }: { snapshot: SnapshotAcoesBaratas; aoTrocarCodigo?: () => void }) {
   const [filtros, setFiltros] = useState<FiltrosQualidade>(SEM_FILTROS)
 
-  if (!snapshot.publicado || snapshot.ranking.length === 0) {
-    return (
-      <div className="card col" style={{ gap: 8 }} role="status" data-testid="top15-validacao">
-        <span style={{ fontWeight: 700 }}>Top 15 mais baratas: em validação</span>
-        <span className="muted small justify">
-          Esta triagem compara as empresas da bolsa pelo preço em relação ao que elas têm e geram (patrimônio, caixa e lucro operacional).
-          A lista aparece aqui assim que a primeira atualização de dados for concluída e passar nas verificações automáticas. Enquanto isso, use o simulador.
-        </span>
-      </div>
-    )
-  }
+  if (snapshot.ranking.length === 0) return <EmValidacao />
 
   const q = snapshot.qualidade
   const { lista, elegiveis, retiradosPorQualidade } = selecionarTop(snapshot.ranking, filtros, snapshot.tamanhoDaLista)
@@ -85,6 +215,11 @@ export function Top15Baratas({ snapshot = SNAPSHOT_ACOES_BARATAS }: { snapshot?:
       <ComoFunciona snapshot={snapshot} />
       <PorQueFicouDeFora snapshot={snapshot} />
       <Auditoria snapshot={snapshot} />
+      {aoTrocarCodigo && (
+        <button type="button" className="btn btn-outline" onClick={aoTrocarCodigo} style={{ alignSelf: 'flex-start' }}>
+          Sair e trocar o código
+        </button>
+      )}
 
       <div className="card-outline small muted justify" style={{ lineHeight: 1.5 }} role="note">
         <strong>Não é recomendação de investimento.</strong> Esta lista é uma triagem automática por fórmula, igual para todos, e não considera o seu

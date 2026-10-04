@@ -1,0 +1,42 @@
+O QUE É
+D50: o Top 15 mais baratas só mostra a lista a quem digitar o CÓDIGO DO MÊS (um código único, para começar os testes). O código você divulga no
+Instagram (@acarteiraideal). O app NÃO verifica quem segue o perfil (a Meta não permite verificar isso de forma legítima): quem quer o código
+acompanha o perfil.
+
+POR QUE NÃO BASTA ESCONDER A CAIXA
+   O ranking ia dentro do arquivo do app, legível por qualquer um. Agora o ranking sai do app: fica em dados-privados/acoes-baratas.json e só a função
+   api/top15.ts o entrega, depois de conferir o código. Testado: simulei uma publicação, compilei o site e procurei a lista em tudo que a Vercel serve:
+   zero ocorrências (e, no controle com acesso aberto, a mesma busca achou). O repositório PRECISA continuar privado.
+
+O QUE VOCÊ PRECISA FAZER (nesta ordem)
+1) Subir os arquivos do zip. ATENÇÃO a dois: vercel.json (se o seu tiver mudado, adicione só o bloco "functions" que está no meu) e NÃO suba por cima
+   webapp-src/src/data/acoesBaratas.json (não está no zip, de propósito: o job gera esse arquivo).
+2) Gerar um código:  npm run codigo-top15   (ou use o código de teste que passei no chat; troque antes de divulgar de verdade).
+3) Vercel → Settings → Environment Variables → Add:  TOP15_CODIGOS = o código (Production). Depois Deployments → Redeploy.
+   Sem essa variável a porta fica FECHADA (a tela diz "ainda não está disponível").
+4) Rodar o workflow "Atualizar Top 15 Ações Baratas" (Actions → Run workflow). Só depois da 1ª execução com sucesso a caixa passa a pedir o código.
+5) Testar: Simule Ações → Top 15 mais baratas → digitar o código. Teste também um código errado (deve recusar) e depois de 10 erros seguidos
+   (deve bloquear por 15 min; o seu IP volta sozinho).
+
+VIRADA DO MÊS: edite TOP15_CODIGOS para "NOVO,ANTIGO", Redeploy, divulgue o novo no Instagram; dias depois deixe só o novo e Redeploy.
+   Detalhes: docs/09-metodologia-acoes-baratas.md, seção 11.1.
+
+HONESTIDADE SOBRE O LIMITE DESTA SOLUÇÃO
+   Código único circula e vaza: é atrito e funil para o Instagram, não segurança forte. Se vazar, troque. Código por pessoa fica para depois dos testes.
+   Restringir a audiência NÃO muda a natureza regulatória da lista, e condicionar o acesso ao relacionamento com o seu perfil pode ser lido como captação:
+   é um ponto para a sua análise jurídica.
+
+PENDÊNCIAS SUAS
+   - Política de Privacidade (/privacidade/): citar que o servidor guarda por até 15 min um hash do IP de quem erra o código e conta acessos/erros de forma
+     agregada. Não alterei o texto (é seu).
+   - O limite de tentativas NÃO foi aplicado à API do motor de perfil (api/recomendacao.ts). Quer que eu aplique?
+
+ARQUIVOS NOVOS
+   api/_top15.ts, api/top15.ts, dados-privados/acoes-baratas.json (placeholder), scripts/gerar-codigo-top15.mjs, scripts/top15-acesso.test.mjs,
+   webapp-src/src/domain/acessoTop15.ts (+ .test.ts)
+ARQUIVOS ALTERADOS
+   vercel.json (bloco "functions"), package.json (script codigo-top15), config/acoes-baratas.json (publicacao.acesso),
+   scripts/atualizar-acoes-baratas.mjs, scripts/acoes-baratas.test.mjs, .github/workflows/atualizar-acoes-baratas.yml (commita dados-privados),
+   webapp-src/src/screens/Top15Baratas.tsx (+ .test.tsx), webapp-src/src/domain/acoesBaratas.ts,
+   docs/07-registro-de-decisoes.md (D50), docs/09-metodologia-acoes-baratas.md (seção 11.1), LEIA-ME-D49.txt
+NÃO MUDOU: motor do perfil, questionário, os outros simuladores, o simulador de ações e a landing.

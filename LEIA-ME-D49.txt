@@ -5,7 +5,7 @@ D49: Top 15 ações mais baratas, dentro do Simule Ações, com metodologia audi
 PUBLICAÇÃO APROVADA (04/10/2026) - E O QUE ISSO SIGNIFICA NA PRÁTICA
    config/acoes-baratas.json  →  publicacao.aprovadoPeloResponsavel = true (aprovação registrada no arquivo; parecer independente: não há).
    Até a 1ª execução do workflow, a caixa mostra "Top 15 mais baratas: em validação" (o JSON de dados vem vazio).
-   A 1ª execução BEM-SUCEDIDA JÁ ATUALIZA O APP (commit + deploy). Rede de proteção: TRAVA DE SANIDADE (publicacao.sanidade): se houver menos
+   A 1ª execução BEM-SUCEDIDA JÁ ATUALIZA O APP (commit + deploy). Com o D50 (LEIA-ME-D50.txt), a lista só aparece a quem tem o código do mês. Rede de proteção: TRAVA DE SANIDADE (publicacao.sanidade): se houver menos
    de 40 empresas no ranking ou mais de 35% do escopo sem dados utilizáveis, o job FALHA, grava a auditoria como artefato do workflow (30 dias)
    e NÃO mexe no app. Ajuste esses limites depois de ver a 1ª execução real.
    Para DESLIGAR: aprovadoPeloResponsavel = false e rodar o workflow (o app volta a "em validação").

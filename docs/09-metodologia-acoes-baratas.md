@@ -233,6 +233,28 @@ Quando a trava barra, a auditoria da execução já foi gravada (e é guardada c
 
 **Para desligar** (qualquer motivo): `aprovadoPeloResponsavel: false` e rodar o workflow. O app volta a mostrar "em validação" e deixa de receber nomes de ações.
 
+### 11.1 Acesso por código mensal (D50)
+
+O ranking **não vai no arquivo do app**. O job grava o cabeçalho em `webapp-src/src/data/acoesBaratas.json` e a lista completa em `dados-privados/acoes-baratas.json`, que só a função `api/top15.ts` lê, e só depois de conferir o código do mês. Esta pasta e `auditoria/` contêm o ranking: **o repositório precisa ser privado**.
+
+**Como virar o código do mês (leva 2 minutos):**
+
+1. Gere um código novo: `npm run codigo-top15` (ou peça a quem tiver o projeto aberto). Formato `CI-XXXX-XXXX`.
+2. Na Vercel: projeto → **Settings → Environment Variables**.
+   - Primeira vez: **Add** `TOP15_CODIGOS` com o código, em **Production**.
+   - Nos meses seguintes: **edite** o valor para `CODIGO-NOVO,CODIGO-ANTIGO` (os dois, separados por vírgula).
+3. **Deployments → ⋯ → Redeploy.** A variável só vale em um deploy novo.
+4. Divulgue o código novo no Instagram (@acarteiraideal).
+5. Alguns dias depois, remova o antigo (deixe só o novo) e faça um novo Redeploy.
+
+Opcional: `TOP15_SAL` (qualquer texto aleatório) reforça o hash do IP. Com as variáveis de Redis do projeto presentes, o limite de tentativas é compartilhado entre os servidores; sem elas, vale um limite mais fraco por servidor.
+
+**Se o código vazar:** troque `TOP15_CODIGOS` por um código novo (só ele), faça Redeploy e divulgue o novo. O código antigo para de funcionar e, no aparelho de quem o tinha salvo, o app o apaga sozinho e volta a pedir.
+
+**Para desligar a restrição** (modo aberto): `acesso.restritoPorCodigo: false` em `config/acoes-baratas.json` e rodar o workflow. **Para tirar a lista do ar:** `aprovadoPeloResponsavel: false` e rodar o workflow.
+
+**Como testar:** a caixa só pede o código depois que o workflow roda a primeira vez com sucesso (até lá mostra "em validação"). Depois: Simule Ações → Top 15 mais baratas → digite o código.
+
 ## 12. Histórico de versões
 
 | Versão | Data | Mudança |

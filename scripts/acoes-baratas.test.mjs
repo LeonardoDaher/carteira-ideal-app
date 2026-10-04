@@ -11,7 +11,7 @@ import {
   ranksPercentuais, valorDeMercado, volatilidadeAnualizada, zscoresWinsorizados, CONTAS,
 } from './acoes-baratas-calculo.mjs'
 import { dividirLinha, extrairZip, fatorEscala, indiceDasColunas, mapaTickerCnpj, numeroCvm, resolverCnpjs } from './acoes-baratas-cvm.mjs'
-import { agruparPorCnpj, concluir, extrairPreco, montarInsumos, montarSnapshotApp, verificar, verificarSanidade } from './atualizar-acoes-baratas.mjs'
+import { agruparPorCnpj, concluir, extrairPreco, montarInsumos, montarSnapshotApp, separarSnapshot, verificar, verificarSanidade } from './atualizar-acoes-baratas.mjs'
 
 const AQUI = path.dirname(fileURLToPath(import.meta.url))
 const RAIZ = path.resolve(AQUI, '..')
@@ -459,6 +459,7 @@ test('auditoria: gera a pasta, a verificação refaz o cálculo e confere; adult
   assert.equal(snap.publicado, false)
   assert.deepEqual(snap.ranking, [])
   assert.equal(snap.hashResultado, manifesto.hashes.resultado)
+  assert.deepEqual(JSON.parse(fs.readFileSync(path.join(raiz, 'dados-privados/acoes-baratas.json'), 'utf8')), { publicado: false }, 'sem aprovação, nem o arquivo privado leva dados')
 
   const v = verificar(pasta, raiz)
   assert.equal(v.ok, true, JSON.stringify(v.mensagens.filter((m) => !m.ok)))
@@ -551,7 +552,11 @@ test('trava de sanidade: barra a publicação de resultado inverossímil, mas de
   const mk = (emps) => ({ empresas: emps.map((e) => ({ ticker: e.ticker, nome: e.nome, setor: e.setor })), mapeamento: emps.map((e) => ({ ticker: e.ticker, cnpj: e.cnpj, origem: 'teste' })), insumos: insumosDe(emps) })
   const ok = concluir({ raiz: raiz1, cfg: cfgSan, ...mk(boas), log: () => {} })
   assert.equal(ok.publicado, true)
-  assert.equal(JSON.parse(fs.readFileSync(path.join(raiz1, 'webapp-src/src/data/acoesBaratas.json'), 'utf8')).ranking.length, 4)
+  const publicoTxt = fs.readFileSync(path.join(raiz1, 'webapp-src/src/data/acoesBaratas.json'), 'utf8')
+  const privado = JSON.parse(fs.readFileSync(path.join(raiz1, 'dados-privados/acoes-baratas.json'), 'utf8'))
+  assert.equal(JSON.parse(publicoTxt).ranking.length, 0, 'acesso por código: o arquivo do app NÃO leva a lista')
+  assert.equal(privado.ranking.length, 4, 'a lista completa vai para dados-privados/')
+  assert.equal(privado.publicado, true)
 
   // metade do cadastro sem CNPJ (erro típico de mapeamento): barra, grava a auditoria, NÃO toca no app
   const raiz2 = raizTemporaria()
@@ -577,4 +582,46 @@ test('configuração distribuída: aprovação registrada e trava de sanidade pr
   assert.equal(cfg.publicacao.aprovacao.data, '2026-10-04')
   assert.equal(cfg.publicacao.aprovacao.parecerIndependente, false, 'registro honesto: não há parecer de terceiros')
   assert.ok(cfg.publicacao.sanidade.minimoNoRanking >= 30 && cfg.publicacao.sanidade.maximoFracaoSemDados <= 0.5)
+})
+
+test('acesso por código (D50): o arquivo PÚBLICO do app não contém nenhum nome de ação nem número de empresa', () => {
+  const emps = ['AAAA3', 'BBBB3', 'CCCC3', 'DDDD3'].map((t, i) => fabricar(t, { pl: 900 - i * 50, fco: 150 - i * 20, ebit: 160 - i * 20 }))
+  const { resultado } = calcular(insumosDe([...emps, fabricar('PREJ3', { lucro: -5 })]), cfg)
+  const manifesto = { geradoEm: 'x', hashes: { resultado: 'r', insumos: 'i', config: 'c' } }
+  const completo = montarSnapshotApp({ resultado, cfg, manifesto, pasta: 'p', publicado: true })
+  assert.equal(completo.acessoRestrito, true)
+  assert.equal(completo.instagram, 'acarteiraideal')
+  assert.equal(completo.ranking.length, 4)
+
+  const { publico, privado } = separarSnapshot(completo)
+  const txt = JSON.stringify(publico)
+  for (const t of ['AAAA3', 'BBBB3', 'CCCC3', 'DDDD3', 'PREJ3', 'Empresa AAAA3', 'Mineração']) assert.ok(!txt.includes(t), `vazou no arquivo público: ${t}`)
+  assert.deepEqual([publico.ranking, publico.exclusoes, publico.etapas], [[], [], []])
+  assert.equal(publico.publicado, true, 'o cabeçalho continua dizendo que está publicado, para a tela pedir o código')
+  assert.equal(publico.acessoRestrito, true)
+  assert.deepEqual(privado, completo, 'o privado é o snapshot completo')
+
+  // sem aprovação: nada no privado
+  const naoPub = montarSnapshotApp({ resultado, cfg, manifesto, pasta: 'p', publicado: false })
+  assert.deepEqual(separarSnapshot(naoPub).privado, { publicado: false })
+
+  // modo aberto (acesso.restritoPorCodigo = false): a lista volta para o arquivo do app
+  const aberto = montarSnapshotApp({ resultado, cfg: { ...cfg, publicacao: { ...cfg.publicacao, acesso: { restritoPorCodigo: false } } }, manifesto, pasta: 'p', publicado: true })
+  const partes = separarSnapshot(aberto)
+  assert.equal(partes.publico.ranking.length, 4)
+  assert.deepEqual(partes.privado, { publicado: false })
+})
+
+test('configuração distribuída: acesso por código ligado e perfil do Instagram definido', () => {
+  assert.equal(cfg.publicacao.acesso.restritoPorCodigo, true)
+  assert.match(cfg.publicacao.acesso.instagram, /^[A-Za-z0-9_.]+$/)
+})
+
+test('o arquivo privado fica fora do que vai para o navegador: não está em webapp-src nem no dist-site', () => {
+  const privado = path.join(RAIZ, 'dados-privados', 'acoes-baratas.json')
+  assert.ok(fs.existsSync(privado), 'precisa existir (a função o inclui no deploy)')
+  assert.ok(!privado.includes(`${path.sep}webapp-src${path.sep}`))
+  const vercel = JSON.parse(fs.readFileSync(path.join(RAIZ, 'vercel.json'), 'utf8'))
+  assert.equal(vercel.functions['api/top15.ts'].includeFiles, 'dados-privados/**', 'só a função do código enxerga o arquivo')
+  assert.equal(vercel.outputDirectory, 'dist-site', 'a Vercel serve apenas dist-site; dados-privados/ não está lá')
 })
