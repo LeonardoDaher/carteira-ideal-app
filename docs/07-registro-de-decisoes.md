@@ -1061,3 +1061,13 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 **Testes.** Scripts: 231 → 234 (3 novos: EBITDA nos dois sinais com a identidade, duplicidade econômica, mensagem do capital). Mutação: voltar ao erro original, subtrair a depreciação e ignorar a lista de duplicados são detectados.
 
 **Consequência.** O ranking exibido na primeira execução tem a dívida líquida/EBITDA errada e uma duplicidade; ambos se corrigem na próxima execução do workflow (a ordem das 15, por não depender do EBITDA, deve mudar só pela saída de GOAU4).
+
+## D52 (04/10/2026): VALE3 informa a quantidade de ações em milhares: ajuste manual e registrado de unidade
+
+**Contexto.** Depois do D51, a mensagem de exclusão passou a mostrar os números e o responsável enviou a de VALE3: "P/VP implícito de 0.0015 (valor de mercado R$ 293,6 mi ÷ PL dos controladores R$ 196.635 mi; ON 4.072.366 ações × R$ 72,1)". A Vale tem cerca de 4,07 **bilhões** de ações ON, então a quantidade veio **em milhares** no formulário da CVM. Com ×1000, o valor de mercado é ~R$ 293,6 bi e o P/VP ~1,49, plausíveis. Foi a trava de capital plausível (P/VP entre 0,02 e 100) que impediu um número absurdo de entrar no ranking.
+
+**Decisão.** Ajuste **manual, por ticker e registrado**, em `config/acoes-baratas.json → capital.ajustesManuais` (`VALE3: ×1000`, com o motivo). Não há correção automática de unidade: ela esconderia erro de outras empresas, e um erro de milhares em qualquer outra aparece sozinho como exclusão com os números na mensagem, que é como esta foi achada. O ajuste (a) vale só para o ticker listado; (b) fica na memória de cálculo, com a quantidade ORIGINAL da CVM e o motivo; (c) não dispensa a verificação de P/VP plausível, que roda depois: um ajuste errado continua excluindo a empresa, e a mensagem diz que foi "MESMO com o ajuste manual". Versão da metodologia 1.0.1 → 1.0.2.
+
+**Limite conhecido.** Se a Vale passar a informar em unidades, o ajuste a multiplicará por 1000 e o P/VP implícito ficará acima de 100: a trava a excluirá e a mensagem mostrará "MESMO com o ajuste manual". Aí basta remover a linha. As demonstrações dela (PL de ~R$ 196,6 bi) parecem corretas e em reais; só a contagem de ações estava em outra unidade.
+
+**Testes.** Scripts: 234 → 235 (ajuste só para o ticker listado, registro na memória, trava depois do ajuste). Mutação (ignorar o ajuste, aplicá-lo a qualquer ticker, não registrá-lo) detectada.

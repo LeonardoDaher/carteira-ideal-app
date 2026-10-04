@@ -1,0 +1,6 @@
+D52: VALE3 passa a entrar no cálculo (metodologia 1.0.2).
+A tela mostrou "ON 4.072.366 ações": a Vale tem ~4,07 BILHÕES; a CVM traz a quantidade em milhares. Criei um ajuste manual por ticker
+(config/acoes-baratas.json → capital.ajustesManuais → VALE3 ×1000). Fica na memória de cálculo com o motivo, e a trava de P/VP plausível continua depois.
+SUBA TODOS OS ARQUIVOS DO ZIP e depois Actions → Atualizar Top 15 Ações Baratas → Run workflow. Após o ✅ e o deploy Ready, procure a VALE3 no ranking.
+Se "Por que uma empresa ficou de fora?" ainda listar VALE3, mande o print: a mensagem dirá "MESMO com o ajuste manual".
+ARQUIVOS: config/acoes-baratas.json, scripts/acoes-baratas-calculo.mjs, scripts/acoes-baratas.test.mjs, docs/07-registro-de-decisoes.md, docs/09-metodologia-acoes-baratas.md

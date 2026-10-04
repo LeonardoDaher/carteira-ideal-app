@@ -1,6 +1,6 @@
 {
   "_leia": "Metodologia da triagem 'Top 15 ações mais baratas' (D49). ESTE ARQUIVO É A FONTE ÚNICA DOS PARÂMETROS: o script, o app e o documento docs/09-metodologia-acoes-baratas.md leem/citam estes valores. Qualquer mudança aqui exige subir 'versaoMetodologia' e registrar o motivo em 'historicoDeVersoes'. O hash SHA-256 deste arquivo vai no manifesto de cada execução.",
-  "versaoMetodologia": "1.0.1",
+  "versaoMetodologia": "1.0.2",
   "historicoDeVersoes": [
     {
       "versao": "1.0.0",
@@ -11,6 +11,11 @@
       "versao": "1.0.1",
       "data": "2026-10-04",
       "mudanca": "Primeira execução real. (1) Corrige o EBITDA: a depreciação da DVA (7.04.01) vem com sinal negativo e estava sendo subtraída em vez de somada, o que inflava a dívida líquida/EBITDA (ex.: 51x para empresa com 1,1x); afeta só esse indicador e o filtro de qualidade, não a nota nem a ordem do ranking. (2) Exclui GOAU4 (Metalúrgica Gerdau), holding que consolida a Gerdau (GGBR4) e aparecia como segunda empresa igual. (3) A exclusão por capital implausível passa a mostrar valor de mercado, PL e quantidade de ações usadas."
+    },
+    {
+      "versao": "1.0.2",
+      "data": "2026-10-04",
+      "mudanca": "VALE3 informa a quantidade de ações em milhares no formulário da CVM (4.072.366 em vez de ~4,07 bilhões), o que a derrubava na verificação de capital. Criado o ajuste manual e registrado de unidade (capital.ajustesManuais), aplicado só a VALE3 (×1000); a verificação de plausibilidade continua valendo depois do ajuste."
     }
   ],
   "publicacao": {
@@ -44,6 +49,15 @@
     ],
     "excluirTickers": {
       "GOAU4": "Duplicidade econômica: a Metalúrgica Gerdau é holding que consolida a Gerdau (GGBR4), então as demonstrações são as mesmas e a empresa apareceria duas vezes. Mantida a operacional, GGBR4."
+    }
+  },
+  "capital": {
+    "_leia": "Ajustes MANUAIS de unidade da quantidade de ações, um por ticker, com o motivo. Use só quando a mensagem de exclusão 'capital implausível' mostrar a quantidade de ações em milhares (o valor de mercado sai ~1000x menor que o real). Nunca é automático. O ajuste aparece na memória de cálculo, e a checagem de P/VP plausível roda depois dele: se ainda estiver fora da faixa, a empresa continua excluída.",
+    "ajustesManuais": {
+      "VALE3": {
+        "fatorQuantidade": 1000,
+        "motivo": "A tela mostrou ON 4.072.366 ações; a Vale tem cerca de 4,07 bilhões. O formulário da CVM traz a quantidade em milhares. Com ×1000: valor de mercado ~R$ 293,6 bi e P/VP ~1,49, plausíveis."
+      }
     }
   },
   "filtros": {

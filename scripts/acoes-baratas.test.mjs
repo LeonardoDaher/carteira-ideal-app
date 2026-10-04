@@ -660,3 +660,26 @@ test('capital implausível: o motivo mostra valor de mercado, PL e ações para 
   assert.equal(ex.codigo, 'capital_implausivel')
   assert.match(ex.motivo, /valor de mercado R\$ .* mi ÷ PL dos controladores R\$ .* mi; ON 1\.000\.000\.000 ações × R\$ 10/)
 })
+
+test('ajuste manual de unidade do capital (VALE3 informa ações em milhares): só vale para o ticker listado, fica registrado e a plausibilidade continua valendo', () => {
+  // mesmo cenário da Vale: PL 800, 0,1 "ação" × R$ 10 = valor de mercado 1 → P/VP 0,00125 (quantidade em milhares)
+  const semAjuste = calcular(insumosDe([fabricar('VALE3', { acoes: 0.1 })]), { ...cfg, capital: { ajustesManuais: {} } }).resultado
+  assert.equal(semAjuste.exclusoes[0].codigo, 'capital_implausivel')
+  assert.equal(semAjuste.ranking.length, 0)
+
+  const comAjuste = calcular(insumosDe([fabricar('VALE3', { acoes: 0.1 })]), cfg)
+  assert.equal(comAjuste.resultado.ranking.length, 1, JSON.stringify(comAjuste.resultado.exclusoes))
+  perto(comAjuste.resultado.ranking[0].pvp, 10 * 100 / 800, 1e-3)
+  const reg = comAjuste.memoria.VALE3.valorDeMercado
+  assert.equal(reg.ajusteManual.fatorQuantidade, 1000)
+  assert.match(reg.ajusteManual.motivo, /milhares/)
+  assert.equal(reg.capital.ordinarias, 0.1, 'a memória guarda a quantidade ORIGINAL da CVM, não a ajustada')
+
+  // outro ticker com o mesmo defeito NÃO é ajustado sozinho
+  assert.equal(calcular(insumosDe([fabricar('OUTR3', { acoes: 0.1 })]), cfg).resultado.exclusoes[0].codigo, 'capital_implausivel')
+  // ajuste errado não esconde o problema: continua excluída, e a mensagem diz que foi com ajuste
+  const errado = calcular(insumosDe([fabricar('VALE3', { acoes: 0.1 })]), { ...cfg, capital: { ajustesManuais: { VALE3: { fatorQuantidade: 2 } } } }).resultado
+  assert.equal(errado.exclusoes[0].codigo, 'capital_implausivel')
+  assert.match(errado.exclusoes[0].motivo, /MESMO com o ajuste manual de ×2/)
+  assert.equal(cfg.capital.ajustesManuais.VALE3.fatorQuantidade, 1000)
+})

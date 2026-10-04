@@ -1,6 +1,6 @@
 # Metodologia da triagem "Top 15 ações mais baratas"
 
-**Versão da metodologia: 1.0.1** · Decisão de origem: D49 · Parâmetros: `config/acoes-baratas.json` (fonte única) · Código: `scripts/acoes-baratas-calculo.mjs` (cálculo puro), `scripts/acoes-baratas-cvm.mjs` (leitura da CVM), `scripts/atualizar-acoes-baratas.mjs` (orquestração e gravação da auditoria), `scripts/acoes-baratas-verificar.mjs` (verificação independente).
+**Versão da metodologia: 1.0.2** · Decisão de origem: D49 · Parâmetros: `config/acoes-baratas.json` (fonte única) · Código: `scripts/acoes-baratas-calculo.mjs` (cálculo puro), `scripts/acoes-baratas-cvm.mjs` (leitura da CVM), `scripts/atualizar-acoes-baratas.mjs` (orquestração e gravação da auditoria), `scripts/acoes-baratas-verificar.mjs` (verificação independente).
 
 > **Regra de ouro deste documento.** Tudo o que está aqui deve poder ser conferido contra o código e contra a pasta `auditoria/acoes-baratas/<data>/`. Se o código mudar, a versão em `config/acoes-baratas.json` sobe, o histórico de versões (final deste arquivo) ganha uma linha, e este texto é atualizado no mesmo commit.
 
@@ -91,7 +91,7 @@ Consolidado (`con`) quando existe a conta 3.05 no documento mais recente; senão
 
 ### 5.2 Valor de mercado
 
-`Valor de mercado = Σ por classe (ações em circulação × preço da classe)`, com ações em circulação = capital integralizado − tesouraria, por classe (ordinárias e preferenciais, da composição do capital do mesmo documento; se não houver, o registro mais recente até a data de corte). Preço da classe ON = último fechamento do código terminado em 3; da classe PN = o código preferencial (4, 5 ou 6) mais negociado. Se a classe tem ações mas não tem preço recente, usa-se o preço da ação de referência e a empresa é marcada `preco_da_classe_de_referencia`. A quantidade de ações é lida em **unidades** (formulário "Dados da Empresa").
+`Valor de mercado = Σ por classe (ações em circulação × preço da classe)`, com ações em circulação = capital integralizado − tesouraria, por classe (ordinárias e preferenciais, da composição do capital do mesmo documento; se não houver, o registro mais recente até a data de corte). Preço da classe ON = último fechamento do código terminado em 3; da classe PN = o código preferencial (4, 5 ou 6) mais negociado. Se a classe tem ações mas não tem preço recente, usa-se o preço da ação de referência e a empresa é marcada `preco_da_classe_de_referencia`. A quantidade de ações é lida em **unidades** (formulário "Dados da Empresa"). Há companhias que a informam em milhares (caso da **VALE3**, verificado na primeira execução real): para elas existe o **ajuste manual de unidade** `capital.ajustesManuais` da config, um por ticker, com o motivo. Nunca é automático; fica na memória de cálculo (com a quantidade original da CVM) e a verificação de P/VP plausível roda **depois** do ajuste.
 
 ### 5.3 EV, EBIT ajustado e demais derivados
 
@@ -262,5 +262,6 @@ Opcional: `TOP15_SAL` (qualquer texto aleatório) reforça o hash do IP. Com as 
 
 | Versão | Data | Mudança |
 |---|---|---|
+| 1.0.2 | 2026-10-04 | VALE3 informa a quantidade de ações em milhares (4.072.366 em vez de ~4,07 bilhões) e era excluída por capital implausível. Criado o ajuste manual e registrado de unidade (`capital.ajustesManuais`), aplicado só à VALE3 (×1000). |
 | 1.0.1 | 2026-10-04 | Primeira execução real: (1) corrige o EBITDA (a depreciação da DVA vem negativa e era subtraída), que inflava a dívida líquida/EBITDA e o filtro de qualidade correspondente; a nota e a ordem do ranking não mudam; (2) exclui a holding GOAU4; (3) a exclusão por capital implausível passa a mostrar os números usados. |
 | 1.0.0 | 2026-10-04 | Versão inicial: universo, filtros, indicador composto (PL/VM, FCO/EV, EBIT ajustado/EV), ranking por média de ranks percentuais, filtros de qualidade opcionais (ROIC, dívida líquida/EBITDA, FCO, cobertura de juros, consistência de 5 exercícios), trilha de auditoria e verificação independente. |

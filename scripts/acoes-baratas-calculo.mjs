@@ -366,7 +366,13 @@ export function calcularFundamentos(emp, preco, cfg, dataCorte) {
     .sort((a, b) => (a.dtRefer < b.dtRefer ? 1 : -1))
     .find((k) => k.dtRefer === ultimo.dtRefer && k.doc === ultimo.doc) ?? [...(c.capital ?? [])].filter((k) => k.dtRefer <= dataCorte).sort((a, b) => (a.dtRefer < b.dtRefer ? 1 : -1))[0]
   if (!cap) return excluir('dados_contabeis', 'sem_capital', 'Composição do capital (quantidade de ações) não encontrada.')
-  const vm = valorDeMercado(cap, preco)
+  // Ajuste MANUAL e registrado de unidade (config: capital.ajustesManuais). Existe porque algumas companhias informam a
+  // quantidade de ações em milhares no formulário da CVM (caso VALE3). Só vale para o ticker listado, fica escrito na
+  // memória de cálculo, e a verificação de plausibilidade abaixo continua valendo DEPOIS do ajuste.
+  const ajuste = cfg.capital?.ajustesManuais?.[emp.ticker]
+  const fator = ajuste?.fatorQuantidade ?? 1
+  const capUsado = fator === 1 ? cap : { ...cap, ordinarias: cap.ordinarias * fator, preferenciais: cap.preferenciais * fator, tesouroOrd: cap.tesouroOrd * fator, tesouroPref: cap.tesouroPref * fator }
+  const vm = valorDeMercado(capUsado, preco)
   if (vm.erro) return excluir('dados_contabeis', 'capital_invalido', vm.erro)
 
   const plTotal = S('patrimonioLiquido')
@@ -378,7 +384,7 @@ export function calcularFundamentos(emp, preco, cfg, dataCorte) {
   if (pvpOk === false) {
     const mi = (n) => `R$ ${(n / 1e6).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} mi`
     const acoes = vm.classes.map((k) => `${k.classe} ${k.quantidade.toLocaleString('pt-BR')} ações × R$ ${k.preco.toLocaleString('pt-BR')}`).join(' + ')
-    return excluir('dados_contabeis', 'capital_implausivel', `P/VP implícito de ${arred(pvp, 4)} (valor de mercado ${mi(vm.valor)} ÷ PL dos controladores ${mi(plControladores)}; ${acoes}) fora da faixa ${cfg.verificacoes.pvpMinimoPlausivel} a ${cfg.verificacoes.pvpMaximoPlausivel}: quantidade de ações ou unidade do capital sob suspeita.`, { pvp, valorDeMercado: reais(vm.valor), plControladores: reais(plControladores), capital: { ordinarias: cap.ordinarias, preferenciais: cap.preferenciais, tesouroOrd: cap.tesouroOrd, tesouroPref: cap.tesouroPref } })
+    return excluir('dados_contabeis', 'capital_implausivel', `P/VP implícito de ${arred(pvp, 4)} (valor de mercado ${mi(vm.valor)} ÷ PL dos controladores ${mi(plControladores)}; ${acoes}) fora da faixa ${cfg.verificacoes.pvpMinimoPlausivel} a ${cfg.verificacoes.pvpMaximoPlausivel}${fator !== 1 ? ` MESMO com o ajuste manual de ×${fator}` : ''}: quantidade de ações ou unidade do capital sob suspeita.`, { pvp, valorDeMercado: reais(vm.valor), plControladores: reais(plControladores), capital: { ordinarias: cap.ordinarias, preferenciais: cap.preferenciais, tesouroOrd: cap.tesouroOrd, tesouroPref: cap.tesouroPref } })
   }
 
   // EBIT ajustado
@@ -457,7 +463,7 @@ export function calcularFundamentos(emp, preco, cfg, dataCorte) {
   const memoria = {
     demonstracao: { doc: ultimo.doc, dtRefer: ultimo.dtRefer, dtReceb: ultimo.dtReceb ?? null, versao: ultimo.versao, linkDoc: ultimo.linkDoc ?? null, consolidacao: cons === 'con' ? 'consolidada' : 'individual' },
     verificacoes,
-    valorDeMercado: { metodo: vm.metodo, formula: vm.formula, valor: reais(vm.valor), classes: vm.classes, capital: { doc: cap.doc, dtRefer: cap.dtRefer, versao: cap.versao, ordinarias: cap.ordinarias, preferenciais: cap.preferenciais, tesouroOrd: cap.tesouroOrd, tesouroPref: cap.tesouroPref } },
+    valorDeMercado: { metodo: vm.metodo, formula: vm.formula, valor: reais(vm.valor), classes: vm.classes, capital: { doc: cap.doc, dtRefer: cap.dtRefer, versao: cap.versao, ordinarias: cap.ordinarias, preferenciais: cap.preferenciais, tesouroOrd: cap.tesouroOrd, tesouroPref: cap.tesouroPref }, ajusteManual: ajuste ? { fatorQuantidade: fator, motivo: ajuste.motivo ?? null, observacao: 'quantidades do capital multiplicadas pelo fator antes do cálculo do valor de mercado' } : null },
     fluxos12m: Object.fromEntries(Object.entries(itens).map(([k, r]) => [k, { cd: CONTAS[k].cd, valor: reais(r.valor), formula: r.formula, componentes: r.componentes }])),
     saldos: Object.fromEntries(Object.entries(saldos).map(([k, r]) => [k, { cd: CONTAS_BALANCO[k].cd, valor: reais(r.valor), formula: r.formula, componentes: r.componentes }])),
     derivados: {
