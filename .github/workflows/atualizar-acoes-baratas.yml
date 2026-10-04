@@ -1,0 +1,92 @@
+# Triagem "Top 15 ações mais baratas" (decisão D49).
+#
+# Baixa os dados abertos da CVM (DFP, ITR, FCA), junta com o histórico de preços da B3 que o job de
+# Ações já mantém, calcula o ranking e grava a TRILHA DE AUDITORIA em auditoria/acoes-baratas/<data>/
+# (manifesto com sha256 das fontes, insumos congelados, memória de cálculo por empresa, exclusões).
+# Em seguida refaz o cálculo a partir dos insumos gravados (--verificar) e só então publica.
+#
+# Roda no dia 2 de cada mês (os preços do mês anterior já estão fechados) e sob demanda. Os
+# demonstrativos mudam só em março, maio, agosto e novembro; o resto do tempo a mudança é de preço.
+#
+# O ranking só chega ao app se config/acoes-baratas.json → publicacao.aprovadoPeloResponsavel for true E
+# o resultado passar na trava de sanidade (publicacao.sanidade): ranking com tamanho mínimo e pouca perda
+# por falta de dados. Se a trava barrar, a auditoria fica disponível como artefato do workflow.
+# Com false, o job continua gravando a auditoria completa (para o responsável revisar) e o app mostra
+# "em validação".
+#
+# Se qualquer etapa falhar (layout da CVM mudou, poucos dados, verificação divergente), o job termina
+# com erro SEM publicar e o GitHub envia e-mail.
+
+name: Atualizar Top 15 Ações Baratas
+
+on:
+  schedule:
+    - cron: '0 5 2 * *' # dia 2, 05h UTC = 02h de Brasília
+  workflow_dispatch:
+    inputs:
+      data_corte:
+        description: 'Data de corte contábil AAAA-MM-DD (vazio = último pregão do histórico)'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+concurrency:
+  group: acoes-baratas # nunca duas execuções ao mesmo tempo
+  cancel-in-progress: false
+
+jobs:
+  atualizar:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Testes da metodologia (cálculo, extração e auditoria)
+        run: node --test scripts/acoes-baratas.test.mjs
+
+      - name: Baixar a CVM, calcular e gravar a auditoria
+        env:
+          DATA_CORTE: ${{ github.event.inputs.data_corte }}
+        run: |
+          if [ -n "$DATA_CORTE" ]; then
+            node scripts/atualizar-acoes-baratas.mjs --data-corte="$DATA_CORTE"
+          else
+            node scripts/atualizar-acoes-baratas.mjs
+          fi
+
+      - name: Guardar a auditoria desta execução (mesmo se algo falhar)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: auditoria-acoes-baratas
+          path: auditoria/acoes-baratas
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Verificar a auditoria (refaz o cálculo só com os insumos gravados)
+        run: node scripts/acoes-baratas-verificar.mjs ultima
+
+      - name: Conferir se o site compila com os dados novos
+        run: |
+          npm ci
+          npm run build
+
+      - name: Publicar (commit) se houver mudança
+        run: |
+          if [ -z "$(git status --porcelain auditoria/acoes-baratas webapp-src/src/data/acoesBaratas.json)" ]; then
+            echo "Sem mudanças."
+            exit 0
+          fi
+          git config user.name "${{ vars.COMMIT_AUTOR_NOME || 'github-actions[bot]' }}"
+          git config user.email "${{ vars.COMMIT_AUTOR_EMAIL || '41898283+github-actions[bot]@users.noreply.github.com' }}"
+          git add auditoria/acoes-baratas webapp-src/src/data/acoesBaratas.json
+          git commit -m "dados: Top 15 ações baratas ($(date -u +%Y-%m-%d))"
+          git pull --rebase
+          git push
