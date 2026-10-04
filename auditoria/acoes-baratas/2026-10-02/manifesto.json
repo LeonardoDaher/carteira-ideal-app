@@ -1,31 +1,31 @@
 {
   "esquema": 1,
-  "versaoMetodologia": "1.0.0",
-  "geradoEm": "2026-10-04T20:26:49.675Z",
+  "versaoMetodologia": "1.0.1",
+  "geradoEm": "2026-10-04T21:17:29.477Z",
   "dataPrecos": "2026-10-02",
   "dataCorte": "2026-10-02",
   "ambiente": {
     "node": "v22.23.3",
     "plataforma": "linux",
-    "commit": "714651ca171c351330b929e2340237416426ccea",
-    "execucao": "37232066355"
+    "commit": "61be65c50ecfd0439c7c282c175663408d832fe3",
+    "execucao": "37235445049"
   },
   "codigo": {
-    "calculoSha256": "8f4a06ad99e86b3e3bb5ad462e79527e157ffd4ef69d6ccf197c5484f89ff26b",
+    "calculoSha256": "d183f952f65b6c5f7f67f437efa09ee51c68b5c066bb5908c9a1de18dd0a4b7c",
     "extracaoSha256": "be9ea6013a1bcb8a043f2572e1135c0b2ac3225415abc2e94a688080b350dbfc"
   },
   "hashes": {
-    "config": "a1f6c47956e29e109730e9bdf59d204135dede36055fe1c3aa84ef2f663b1b84",
+    "config": "bbfc2a1de55a57b78f2fe21a35e09e5f1e82823db19fe06ed37fd68e4a32996d",
     "insumos": "dee019ca2acb083c0428f62e95581c5781a302f895b8f58d74d7dd6f9d5b42dd",
-    "resultado": "617f2c1e128aa31957e25ec57f3ebca2d1f91157e3719e09a18b63418c517f8a",
-    "memoria": "49336a2bfbc662fa8335cd3d4ce632ec1936a7944c9c02b9efda1e122149aed4",
+    "resultado": "7cbeaa810a3f7a7e9347b845fc11dd0a1545e0dd86266aa1a943858c435947c9",
+    "memoria": "d36c284a6280e3286b45ad914ae9bf71d35b9f86bb3d74c37d18d0a7aa64ae80",
     "arquivos": {
       "insumos.json.gz": "a4979a8da662b5e1b2529aba28d5518a8e9fdfa192bf21c82036fb84da581874",
-      "config.json": "980f87b58638bf5ae99ecf7768f33898cad6a85d768696d71ad625d9cabf9731",
-      "resultado.json": "1aecfca62ec57b2b2dda08c4c9645e644d678b2128af7948e919704da4afc3c8",
-      "memoria-de-calculo.json.gz": "c0903e44c11b060c06a2dceb606f59c9de9b7372fec0985f445b42078ef1b39c",
-      "ranking.csv": "9957692b48ab0b6a1843a816952548c50ab6d6ca5d6f07c9b7999bff79a88e28",
-      "exclusoes.csv": "50a7a0486a295900eef86cedccc24135c36b6b3b8573bb5abc926bfd33811fb8",
+      "config.json": "6d3171dc7f7246e552e82e40ef00f64164d445b9342dfc1893b04710d64ad17f",
+      "resultado.json": "edc7e03d1aa0ebb72f09dfbd6a4846f7fa94cbd72c8cf302589e560a89a25984",
+      "memoria-de-calculo.json.gz": "caaf7304782087cc72be28b32257a7502141882aa488e598c493dd8abaecd433",
+      "ranking.csv": "ffb44bf3bdbf62e195daa0e89db795732ec02e83ac7900266235a9b50ed6d6fa",
+      "exclusoes.csv": "84f25f0bd2795b1921d479062ffef6ddeee4aba16eb68abfb7af9ecbc8978725",
       "mapeamento-ticker-cnpj.csv": "c1a24f33a6b4f47eccc92c37fa0d0f11efbbe3a37b7fb8d8032bccbf1295bdd0"
     }
   },
@@ -36,7 +36,7 @@
       "arquivo": "fca_cia_aberta_2026.zip",
       "bytes": 361734,
       "sha256": "21d4bb18fb6923cf2253c2a1d76496ef71366287fbde5ca725d76f303a2069b8",
-      "baixadoEm": "2026-10-04T20:26:12.396Z"
+      "baixadoEm": "2026-10-04T21:16:58.548Z"
     },
     {
       "papel": "DFP 2021",
@@ -44,7 +44,7 @@
       "arquivo": "dfp_cia_aberta_2021.zip",
       "bytes": 13283026,
       "sha256": "64b8693b709538a0357c5179ae02231cb380d0000956ee57a873a21d4efda2e4",
-      "baixadoEm": "2026-10-04T20:26:14.144Z"
+      "baixadoEm": "2026-10-04T21:17:00.393Z"
     },
     {
       "papel": "DFP 2022",
@@ -52,7 +52,7 @@
       "arquivo": "dfp_cia_aberta_2022.zip",
       "bytes": 13448916,
       "sha256": "b9ac4eed33ef64346c826ef25aa7a59b6098822dcac04c131e52305e29e3e4ae",
-      "baixadoEm": "2026-10-04T20:26:16.974Z"
+      "baixadoEm": "2026-10-04T21:17:02.852Z"
     },
     {
       "papel": "DFP 2023",
@@ -60,7 +60,7 @@
       "arquivo": "dfp_cia_aberta_2023.zip",
       "bytes": 13563376,
       "sha256": "be508606d186cda7ee86dcf461993b392e1151dd1a01d9290f8b627d7d4b5cbb",
-      "baixadoEm": "2026-10-04T20:26:19.539Z"
+      "baixadoEm": "2026-10-04T21:17:05.039Z"
     },
     {
       "papel": "DFP 2024",
@@ -68,7 +68,7 @@
       "arquivo": "dfp_cia_aberta_2024.zip",
       "bytes": 13396369,
       "sha256": "fea8592888271d4b7cab04328b2b5c586a6c44adb2399d74b61bfa822400dcf3",
-      "baixadoEm": "2026-10-04T20:26:22.338Z"
+      "baixadoEm": "2026-10-04T21:17:07.433Z"
     },
     {
       "papel": "DFP 2025",
@@ -76,7 +76,7 @@
       "arquivo": "dfp_cia_aberta_2025.zip",
       "bytes": 12784140,
       "sha256": "d7aec54e7c67998e4cd3ef94c463ab247f09a6baaa2254878d1e431f28130e2a",
-      "baixadoEm": "2026-10-04T20:26:24.932Z"
+      "baixadoEm": "2026-10-04T21:17:10.218Z"
     },
     {
       "papel": "DFP 2026",
@@ -84,7 +84,7 @@
       "arquivo": "dfp_cia_aberta_2026.zip",
       "bytes": 243348,
       "sha256": "7eab96451f58476d37b52653dabdd4fd423feb0870b97d44df5925feb42cdd93",
-      "baixadoEm": "2026-10-04T20:26:26.610Z"
+      "baixadoEm": "2026-10-04T21:17:11.818Z"
     },
     {
       "papel": "ITR 2025",
@@ -92,7 +92,7 @@
       "arquivo": "itr_cia_aberta_2025.zip",
       "bytes": 31660219,
       "sha256": "efe754841bed9eac2a3138c92a187060842c1746845e9471749be5c91819dc51",
-      "baixadoEm": "2026-10-04T20:26:28.684Z"
+      "baixadoEm": "2026-10-04T21:17:14.262Z"
     },
     {
       "papel": "ITR 2026",
@@ -100,7 +100,7 @@
       "arquivo": "itr_cia_aberta_2026.zip",
       "bytes": 19634453,
       "sha256": "0e1ef74291d2143e7bb55247b01c8bbd94995d995536f70f0d19de1d79d7e38c",
-      "baixadoEm": "2026-10-04T20:26:38.443Z"
+      "baixadoEm": "2026-10-04T21:17:20.449Z"
     },
     {
       "papel": "Histórico de preços da B3 (Boletim BVBG.086)",
@@ -168,49 +168,49 @@
   ],
   "contagens": {
     "universo": 226,
-    "noRanking": 69,
-    "exclusoes": 157,
+    "noRanking": 68,
+    "exclusoes": 158,
     "etapas": [
       {
         "id": "universo",
         "descricao": "Setor fora do escopo (bancos, seguros, bolsa/holdings) ou empresa sem CNPJ mapeado",
         "entram": 226,
-        "saem": 55
+        "saem": 56
       },
       {
         "id": "liquidez",
         "descricao": "Liquidez média diária do emissor abaixo de R$ 3.000.000 (21 pregões)",
-        "entram": 171,
+        "entram": 170,
         "saem": 48
       },
       {
         "id": "volatilidade",
         "descricao": "Decil mais volátil do universo (volatilidade anualizada de 252 pregões acima do percentil 90)",
-        "entram": 123,
+        "entram": 122,
         "saem": 16
       },
       {
         "id": "dados_contabeis",
         "descricao": "Demonstrações da CVM completas, atuais e coerentes (balanço fecha, DRE fecha, descrição das contas, capital plausível)",
-        "entram": 107,
+        "entram": 106,
         "saem": 31
       },
       {
         "id": "lucro",
         "descricao": "Sem lucro nos últimos 12 meses (4 trimestres)",
-        "entram": 76,
+        "entram": 75,
         "saem": 7
       },
       {
         "id": "indicador",
         "descricao": "EV ou valor de mercado não positivos (rendimentos indefinidos)",
-        "entram": 69,
+        "entram": 68,
         "saem": 0
       },
       {
         "id": "ranking",
         "descricao": "Indicador composto (ranks) e ordenação decrescente",
-        "entram": 69,
+        "entram": 68,
         "saem": 0
       }
     ]
