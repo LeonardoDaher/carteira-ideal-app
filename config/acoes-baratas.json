@@ -1,0 +1,101 @@
+{
+  "_leia": "Metodologia da triagem 'Top 15 ações mais baratas' (D49). ESTE ARQUIVO É A FONTE ÚNICA DOS PARÂMETROS: o script, o app e o documento docs/09-metodologia-acoes-baratas.md leem/citam estes valores. Qualquer mudança aqui exige subir 'versaoMetodologia' e registrar o motivo em 'historicoDeVersoes'. O hash SHA-256 deste arquivo vai no manifesto de cada execução.",
+  "versaoMetodologia": "1.0.0",
+  "historicoDeVersoes": [
+    {
+      "versao": "1.0.0",
+      "data": "2026-10-04",
+      "mudanca": "Versão inicial: filtros, indicador composto (PL/VM, FCO/EV, EBIT/EV), ranking por média de ranks percentuais, filtros de qualidade opcionais (ROIC, dívida líquida/EBITDA, FCO, cobertura de juros e consistência de 5 exercícios)."
+    }
+  ],
+  "publicacao": {
+    "aprovadoPeloResponsavel": true,
+    "aprovacao": {
+      "por": "responsável pelo projeto",
+      "data": "2026-10-04",
+      "forma": "autorização expressa no chat de desenvolvimento",
+      "parecerIndependente": false
+    },
+    "sanidade": {
+      "_leia": "Trava automática SÓ para a publicação: se o resultado vier claramente quebrado (típico de erro de leitura da CVM ou de mapeamento de CNPJ), o job grava a auditoria, FALHA e não atualiza o app. Não substitui a conferência manual.",
+      "minimoNoRanking": 40,
+      "maximoFracaoSemDados": 0.35
+    },
+    "_leia": "Trava regulatória. Com aprovadoPeloResponsavel=false, o job calcula e grava a auditoria completa, mas o app NÃO recebe o ranking (mostra 'em validação'). Aprovado em 04/10/2026 pelo responsável (que o classifica como análise estritamente contábil de informações públicas, não recomendação). Sem parecer independente de terceiros."
+  },
+  "tamanhoDaLista": 15,
+  "dataCorteContabil": null,
+  "universo": {
+    "_leia": "Empresas do cadastro curado config/acoes.json (um código por empresa). Setores abaixo saem do ranking porque EV, EBIT e FCO não medem o negócio de instituições financeiras e seguradoras.",
+    "setoresExcluidos": [
+      "Bancos",
+      "Seguros e previdência",
+      "Bolsa, holdings e serviços financeiros"
+    ]
+  },
+  "filtros": {
+    "liquidezMinimaDiariaReais": 3000000,
+    "sessoesLiquidez": 21,
+    "lucroLtmPositivo": true,
+    "sessoesVolatilidade": 252,
+    "minimoRetornosVolatilidade": 126,
+    "percentilVolatilidadeExcluir": 90,
+    "idadeMaximaDemonstracaoDias": 200
+  },
+  "indicador": {
+    "componentes": [
+      "plSobreValorDeMercado",
+      "fcoSobreEv",
+      "ebitAjustadoSobreEv"
+    ],
+    "metodoComposicao": "ranks",
+    "_metodoComposicao_opcoes": "ranks = média dos ranks percentuais (padrão, robusto a outliers); zscore_winsorizado = média dos z-scores após cortar em [p1,p99]",
+    "winsorizacao": {
+      "inferior": 0.01,
+      "superior": 0.99
+    },
+    "ebitAjustado": {
+      "removerEquivalenciaPatrimonial": true,
+      "removerRecuperabilidadeDeAtivos": true,
+      "removerOutrasReceitasDespesasOperacionais": true
+    },
+    "ev": {
+      "incluirMinoritarios": true,
+      "caixaInclui": [
+        "1.01.01",
+        "1.01.02"
+      ],
+      "dividaInclui": [
+        "2.01.04",
+        "2.02.01"
+      ]
+    }
+  },
+  "qualidade": {
+    "_leia": "Filtros OPCIONAIS, aplicados DEPOIS do ranking (não alteram a nota de ninguém, só retiram nomes da lista). O app deixa o usuário ligar/desligar cada um; os limites abaixo são parte da metodologia e aparecem na tela.",
+    "roic": {
+      "minimo": 0.1,
+      "aliquotaImpostoNopat": 0.34
+    },
+    "dividaLiquidaSobreEbitda": {
+      "maximo": 3.0
+    },
+    "fcoPositivo": true,
+    "coberturaJuros": {
+      "minimo": 3.0,
+      "_leia": "EBIT ajustado 12m ÷ |despesas financeiras 12m (CVM 3.06.02)|. Sem despesa financeira = passa. Conta ausente = reprova (cautela)."
+    },
+    "consistencia": {
+      "exercicios": 5,
+      "minimoComLucro": 4,
+      "minimoComFcoPositivo": 4,
+      "_leia": "Nos últimos N exercícios encerrados (DFP consecutivos até a data de corte): lucro líquido (3.11.01, senão 3.11) positivo e FCO (6.01) positivo em pelo menos o mínimo de anos. Menos de N exercícios disponíveis = reprova."
+    }
+  },
+  "verificacoes": {
+    "toleranciaBalancoPct": 0.5,
+    "toleranciaDrePct": 0.5,
+    "pvpMinimoPlausivel": 0.02,
+    "pvpMaximoPlausivel": 100
+  }
+}

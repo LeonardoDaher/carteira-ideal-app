@@ -113,7 +113,7 @@ describe('SimuleAcoes', () => {
     expect(screen.getByText('Os dados das ações ainda não foram carregados.')).toBeDefined()
   })
 
-  it('volta ao Simule Ativos, sem barra de abas, e não faz ranking nem mostra múltiplos (D19)', () => {
+  it('volta ao Simule Ativos, sem barra de abas, e a aba do simulador não faz ranking nem mostra múltiplos (D19; o Top 15 é a exceção da D49)', () => {
     const { container } = render(<SimuleAcoes ctx={ctx} snapshot={snapshot} />)
     expect(screen.getByRole('link', { name: '← Simule Ativos' }).getAttribute('href')).toBe('./?tela=simuleAtivos')
     expect(container.querySelector('.tabbar')).toBeNull()

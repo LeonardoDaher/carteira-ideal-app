@@ -7,6 +7,7 @@ import { formatarData, formatarVolume } from '../domain/rendaFii'
 import { VoltarInicio } from '../ui/VoltarInicio'
 import { rolarParaResultado } from '../ui/rolarParaResultado'
 import { AvisoEducacional } from '../ui/AvisoEducacional'
+import { Top15Baratas } from './Top15Baratas'
 import type { AppCtx } from '../state/useAppState'
 
 function reais(valor: number) {
@@ -21,9 +22,12 @@ function inteiro(valor: number) {
 type Selecao = { origem: 'lista'; acao: Acao; setor: string } | { origem: 'busca'; acao: AcaoBusca }
 
 /**
- * Aba "Simule Ações" (D43). Tela estritamente descritiva: as principais empresas de cada setor da
- * B3 (com a contagem de setores e de empresas), em ordem de volume dentro do setor, e a busca para
- * qualquer outro código. Sem ranking, sem múltiplos de avaliação, sem projeção de retorno.
+ * Aba "Simule Ações" (D43), com duas caixinhas (D49).
+ *  - Simulador: tela estritamente descritiva. As principais empresas de cada setor da B3 (com a
+ *    contagem de setores e de empresas), em ordem de volume dentro do setor, e a busca para qualquer
+ *    outro código. Sem ranking, sem múltiplos de avaliação, sem projeção de retorno (D19).
+ *  - Top 15 mais baratas: EXCEÇÃO declarada à D19. Triagem quantitativa com metodologia pública e
+ *    trilha de auditoria; só aparece com ranking depois da aprovação do responsável (D49).
  */
 export function SimuleAcoes({
   snapshot = SNAPSHOT_ACOES,
@@ -40,6 +44,8 @@ export function SimuleAcoes({
   const [selecao, setSelecao] = useState<Selecao | undefined>(primeira && primeiraSetor ? { origem: 'lista', acao: primeira, setor: primeiraSetor.setor } : undefined)
   const [valorLivre, setValorLivre] = useState('')
   const [valorEscolhido, setValorEscolhido] = useState<number>(VALORES_PADRAO[1])
+  // Duas caixinhas (D49): o simulador de sempre e a triagem "Top 15 mais baratas".
+  const [aba, setAba] = useState<'simulador' | 'top15'>('simulador')
 
   const levarAoCartao = () => rolarParaResultado('cartao-acao')
 
@@ -70,7 +76,33 @@ export function SimuleAcoes({
         </div>
       </div>
 
-      {!selecao ? (
+      <div role="tablist" aria-label="O que você quer ver" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+        {(
+          [
+            { id: 'simulador', emoji: '🧮', titulo: 'Simulador', descricao: 'Quantas ações o valor compra' },
+            { id: 'top15', emoji: '🏷️', titulo: 'Top 15 mais baratas', descricao: 'Triagem de valor, com auditoria' },
+          ] as const
+        ).map((c) => (
+          <button
+            key={c.id}
+            role="tab"
+            id={`aba-acoes-${c.id}`}
+            aria-selected={aba === c.id}
+            aria-controls="painel-acoes"
+            className={`vehicle-card ${aba === c.id ? 'selected' : ''}`}
+            onClick={() => setAba(c.id)}
+          >
+            <span aria-hidden="true" style={{ fontSize: 24, lineHeight: 1 }}>{c.emoji}</span>
+            <span style={{ fontSize: 14 }}>{c.titulo}</span>
+            <span style={{ fontSize: 11.5, fontWeight: 400, opacity: 0.85 }}>{c.descricao}</span>
+          </button>
+        ))}
+      </div>
+
+      <div id="painel-acoes" role="tabpanel" aria-labelledby={`aba-acoes-${aba}`} className="col" style={{ gap: 'inherit' }}>
+      {aba === 'top15' ? (
+        <Top15Baratas />
+      ) : !selecao ? (
         <div className="card col" style={{ gap: 6 }} role="status">
           <span style={{ fontWeight: 700 }}>Os dados das ações ainda não foram carregados.</span>
           <span className="muted small justify">
@@ -146,25 +178,30 @@ export function SimuleAcoes({
         </div>
       )}
 
-      <div className="card-outline small justify" style={{ lineHeight: 1.5 }} role="note">
-        <strong>Como o IR funciona nas ações.</strong>{' '}
-        <span className="muted">
-          Na venda em operações comuns, quem vende até R$ 20 mil no mês em ações não paga Imposto de Renda sobre o lucro. Acima
-          disso, o lucro paga 15%; no day trade, 20%, sem isenção. O imposto é calculado e pago pelo próprio investidor por DARF.
-          Os dividendos são isentos para a maioria das pessoas, mas passou a haver retenção de 10% quando uma mesma empresa paga
-          mais de R$ 50 mil por mês à pessoa física. Essas regras estão em discussão no Congresso e podem mudar: confirme a regra
-          vigente com um contador antes de declarar.
-        </span>
-      </div>
+      {aba === 'simulador' && (
+        <>
+        <div className="card-outline small justify" style={{ lineHeight: 1.5 }} role="note">
+          <strong>Como o IR funciona nas ações.</strong>{' '}
+          <span className="muted">
+            Na venda em operações comuns, quem vende até R$ 20 mil no mês em ações não paga Imposto de Renda sobre o lucro. Acima
+            disso, o lucro paga 15%; no day trade, 20%, sem isenção. O imposto é calculado e pago pelo próprio investidor por DARF.
+            Os dividendos são isentos para a maioria das pessoas, mas passou a haver retenção de 10% quando uma mesma empresa paga
+            mais de R$ 50 mil por mês à pessoa física. Essas regras estão em discussão no Congresso e podem mudar: confirme a regra
+            vigente com um contador antes de declarar.
+          </span>
+        </div>
 
-      <div className="card-outline small muted justify" style={{ lineHeight: 1.5 }} role="note">
-        <strong>Rentabilidade obtida no passado não representa garantia de rentabilidade futura.</strong> O preço de uma ação
-        sobe e desce todos os dias, e é possível perder parte ou todo o dinheiro aplicado. A variação de 3 meses e a faixa de 52
-        semanas mostram só o preço, sem os dividendos recebidos; desdobramentos e bonificações podem distorcê-las. A lista e a
-        busca não são recomendação: o critério de ordem é só o volume negociado.
-        {snapshot.geradoEm
-          ? ` Preços e volumes oficiais da B3 (Boletim de Preços); setores e nomes do cadastro do Carteira Ideal. Atualizados em ${formatarData(snapshot.geradoEm)}.`
-          : ''}
+        <div className="card-outline small muted justify" style={{ lineHeight: 1.5 }} role="note">
+          <strong>Rentabilidade obtida no passado não representa garantia de rentabilidade futura.</strong> O preço de uma ação
+          sobe e desce todos os dias, e é possível perder parte ou todo o dinheiro aplicado. A variação de 3 meses e a faixa de 52
+          semanas mostram só o preço, sem os dividendos recebidos; desdobramentos e bonificações podem distorcê-las. A lista e a
+          busca não são recomendação: o critério de ordem é só o volume negociado.
+          {snapshot.geradoEm
+            ? ` Preços e volumes oficiais da B3 (Boletim de Preços); setores e nomes do cadastro do Carteira Ideal. Atualizados em ${formatarData(snapshot.geradoEm)}.`
+            : ''}
+        </div>
+        </>
+      )}
       </div>
 
       <AvisoEducacional />

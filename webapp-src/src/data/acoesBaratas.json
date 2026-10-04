@@ -1,0 +1,43 @@
+{
+  "publicado": false,
+  "versaoMetodologia": "1.0.0",
+  "geradoEm": null,
+  "dataPrecos": null,
+  "dataCorte": null,
+  "pastaAuditoria": null,
+  "hashResultado": null,
+  "hashInsumos": null,
+  "hashConfig": null,
+  "tamanhoDaLista": 15,
+  "universo": 0,
+  "parametros": {
+    "liquidezMinimaDiariaReais": 3000000,
+    "sessoesLiquidez": 21,
+    "percentilVolatilidadeExcluir": 90,
+    "sessoesVolatilidade": 252,
+    "metodoComposicao": "ranks",
+    "componentes": [
+      "plSobreValorDeMercado",
+      "fcoSobreEv",
+      "ebitAjustadoSobreEv"
+    ],
+    "setoresExcluidos": [
+      "Bancos",
+      "Seguros e previdência",
+      "Bolsa, holdings e serviços financeiros"
+    ]
+  },
+  "qualidade": {
+    "roicMinimo": 0.1,
+    "aliquotaImpostoNopat": 0.34,
+    "dlEbitdaMaximo": 3,
+    "fcoPositivo": true,
+    "coberturaJurosMinima": 3,
+    "exerciciosConsistencia": 5,
+    "minimoComLucro": 4,
+    "minimoComFco": 4
+  },
+  "etapas": [],
+  "ranking": [],
+  "exclusoes": []
+}

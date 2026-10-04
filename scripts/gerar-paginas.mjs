@@ -249,7 +249,7 @@ export function montarPagina(pg) {
     <meta property="og:locale" content="pt_BR" />
     <meta property="og:title" content="${esc(pg.titulo)}" />
     <meta property="og:description" content="${esc(pg.descricao)}" />
-    <meta property="og:image" content="${DOMINIO}/assets/og-image.png?v=3" />
+    <meta property="og:image" content="${DOMINIO}/assets/og-image.png?v=2" />
     <meta property="og:url" content="${url}" />
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
@@ -981,7 +981,7 @@ function paginaMetodologia() {
 <li><strong>Financiar, alugar ou consórcio:</strong> não usa cadastro de produtos. Parte das taxas que você informa e, como sugestão inicial, da projeção de longo prazo de Selic e IPCA do Boletim Focus, do Banco Central.</li>
 <li><strong>Imposto de Renda e custódia:</strong> regras vigentes na data da última revisão, que mudam com a legislação.</li>
 </ul>
-<p>Os simuladores de ativos <strong>descrevem</strong> dados: ordenam por vencimento ou por liquidez, agrupam por setor ou categoria e não fazem ranking, valor justo nem recomendação de compra.</p>
+<p>Os simuladores de ativos <strong>descrevem</strong> dados: ordenam por vencimento ou por liquidez, agrupam por setor ou categoria e não fazem valor justo nem recomendação de compra. A única exceção é a caixa <strong>Top 15 mais baratas</strong>, dentro do Simule Ações: uma triagem estritamente contábil, que aplica uma fórmula única e igual para todos às demonstrações financeiras que as próprias empresas divulgam à CVM e ordena as empresas por rendimentos contábeis. Ela não considera o perfil de ninguém, não estima valor justo e não é recomendação de compra. A metodologia fica documentada e cada atualização guarda a trilha de auditoria dos dados e do cálculo.</p>
 <p>O comparativo <a href="/financiar-alugar-ou-consorcio/">Comprar à vista, financiar, consórcio ou alugar</a> é diferente: é uma conta que ordena os <strong>caminhos</strong> (comprar à vista, financiar, consórcio e alugar) pelo patrimônio líquido final, com as taxas que você informa. Ele nunca ordena bancos, administradoras ou produtos, e o resultado muda quando as premissas mudam. O comparativo de <a href="/carro-a-vista-financiar-consorcio-ou-sem-carro/">carro</a> segue a mesma regra: ordena os caminhos pelo custo de mobilidade e pelo patrimônio final, que são a mesma conta vista de dois lados, e nunca ordena bancos, administradoras, locadoras, aplicativos ou produtos. O de <a href="/moto-a-vista-financiar-consorcio-ou-sem-moto/">moto</a> também.</p>`,
       ),
       secao(

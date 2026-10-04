@@ -1,0 +1,3 @@
+{
+  "_leia": "Correções MANUAIS de ticker → CNPJ para a triagem Top 15 (D49). Só preencha quando o mapeamento automático (FCA da CVM) estiver ausente ou errado: o job grava auditoria/acoes-baratas/<data>/mapeamento-ticker-cnpj.csv mostrando, para cada código do cadastro, o CNPJ usado e a origem. Formato: \"PETR4\": \"33.000.167/0001-01\". A correção manual vence o FCA e aparece como origem 'manual' no CSV. Cada entrada deve vir com a fonte (ex.: consulta no site da CVM) no commit."
+}

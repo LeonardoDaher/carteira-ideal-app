@@ -1,42 +1,53 @@
 O QUE É
-D49: logo no amarelo claro da imagem que você enviou. SÓ A COR mudou.
-1) Aro e seta em amarelo #ffe04a (antes dourado #efb70a).
-2) O desenho é exatamente o mesmo de antes (mesma seta, mesma ponta, mesmo aro, mesmo miolo escuro).
-3) Trocada em todos os lugares: topo das telas do app, logo grande da landing, páginas de SEO, privacidade e painel (todas usam
-   assets/logo-mark.svg), ícone da aba do navegador, ícones do app instalado (Android e iPhone) e a logo da imagem de compartilhamento
-   (og-image). O endereço da imagem de compartilhamento passou para ?v=3, para WhatsApp e redes buscarem a nova.
+D49: Top 15 ações mais baratas, dentro do Simule Ações, com metodologia auditável. A tela do Simule Ações passa a ter DUAS CAIXINHAS no topo:
+"Simulador" (o de sempre, abre por padrão) e "Top 15 mais baratas".
 
-NÃO MUDOU: o desenho da logo, o amarelo dos botões e destaques (#e8cb00), tamanhos e posições da logo, textos, cálculos e layout.
+PUBLICAÇÃO APROVADA (04/10/2026) - E O QUE ISSO SIGNIFICA NA PRÁTICA
+   config/acoes-baratas.json  →  publicacao.aprovadoPeloResponsavel = true (aprovação registrada no arquivo; parecer independente: não há).
+   Até a 1ª execução do workflow, a caixa mostra "Top 15 mais baratas: em validação" (o JSON de dados vem vazio).
+   A 1ª execução BEM-SUCEDIDA JÁ ATUALIZA O APP (commit + deploy). Rede de proteção: TRAVA DE SANIDADE (publicacao.sanidade): se houver menos
+   de 40 empresas no ranking ou mais de 35% do escopo sem dados utilizáveis, o job FALHA, grava a auditoria como artefato do workflow (30 dias)
+   e NÃO mexe no app. Ajuste esses limites depois de ver a 1ª execução real.
+   Para DESLIGAR: aprovadoPeloResponsavel = false e rodar o workflow (o app volta a "em validação").
+   Texto público: a frase da página de Metodologia ("simuladores de ativos não fazem ranking") foi ajustada em scripts/gerar-paginas.mjs para
+   descrever o Top 15 como exceção contábil. Releia-a: é texto jurídico seu. Um teste falha se a frase antiga voltar com a flag ligada.
 
-ARQUIVOS (em relação ao que está hoje no GitHub, versão D48)
-   + LEIA-ME-D49.txt
-   ~ assets/logo-mark.svg
-   ~ assets/favicon.svg
-   ~ assets/apple-touch-icon.png
-   ~ assets/og-image.png
-   ~ docs/07-registro-de-decisoes.md
-   ~ gerar-paginas.mjs
-   ~ index.html
-   ~ scripts/gerar-paginas.mjs
-   ~ webapp-src/index.html
-   ~ webapp-src/public/favicon.svg
-   ~ webapp-src/public/icon-192.png
-   ~ webapp-src/public/icon-512.png
-   ~ webapp-src/public/icon-maskable-512.png
-   ~ webapp-src/src/ui/Marca.tsx
-   Obs.: gerar-paginas.mjs na raiz é a cópia solta que já vinha no pacote; foi mantida igual a scripts/gerar-paginas.mjs.
+NUNCA RODOU COM DADOS REAIS DA CVM
+   Foi desenvolvido contra arquivos de teste no layout documentado. Se a CVM tiver nomes de coluna diferentes, o job PARA com mensagem clara
+   (não produz número errado). A primeira execução real (Actions → "Atualizar Top 15 Ações Baratas" → Run workflow) é parte da validação.
 
-COMO SUBIR - no GitHub: Add file > Upload files
-1. EXTRAIA o zip no computador. Abra a pasta "D49-subir" e arraste o CONTEÚDO (as pastas assets, docs, scripts e webapp-src e os arquivos
-   soltos), não a pasta em si.
-2. Num ÚNICO envio (são 15 arquivos). Espere a lista carregar e confira que mostra 15.
-3. Mensagem do commit: "D49: logo no amarelo claro em todo o app" e clique no botão verde "Commit changes".
-4. Confira na aba Code se apareceu o commit novo.
+COMO FUNCIONA
+1) Dados 100% gratuitos: CVM (DFP, ITR, composição do capital, FCA) + o histórico de preços da B3 que o job de Ações já mantém.
+2) Filtros: liquidez (R$ 3 mi/dia), lucro 12m positivo, 10% mais voláteis fora, bancos/seguros/bolsa fora, demonstrações coerentes e atuais.
+3) Indicador: média dos ranks de PL/valor de mercado, FCO/EV e EBIT ajustado/EV. Ordena e mostra as 15 primeiras.
+4) Filtros de qualidade OPCIONAIS na tela (não mudam a nota): ROIC ≥ 10%, dívida líquida/EBITDA ≤ 3,0x, caixa operacional positivo,
+   cobertura de juros ≥ 3,0x, consistência (lucro e caixa positivos em 4 dos últimos 5 exercícios).
+5) Cada empresa tem "Memória de cálculo" na tela, com link para o documento original na CVM.
 
-DEPOIS DO DEPLOY
-1. Abra a landing e o app: a logo deve estar no amarelo claro. Se aparecer a antiga, recarregue sem cache (Ctrl+Shift+R).
-2. A aba do navegador pode demorar a trocar o ícone (o navegador guarda o favicon por um tempo).
-3. Quem já instalou o app no celular pode continuar vendo o ícone antigo até o sistema atualizar; no iPhone, só reinstalando o atalho.
+AUDITORIA (o requisito central)
+   Cada execução grava auditoria/acoes-baratas/AAAA-MM-DD/: manifesto (sha256 de cada arquivo baixado, da config, do código), insumos congelados,
+   memória de cálculo por empresa, exclusões com motivo, ranking.csv.
+   Verificar sem internet:  npm run verificar-acoes-baratas
+   (o verificador depende só de scripts/acoes-baratas-calculo.mjs e do Node; terceiros podem auditar uma pasta com 2 arquivos).
+   Conferência manual contra a CVM: auditoria/acoes-baratas/conferencia-manual-modelo.md
 
-VERIFICAÇÃO: 1258 testes do app e 184 dos scripts passando; typecheck, lint e build sem erros. Landing e app abertos no navegador
-deste ambiente depois do build, com a logo nova.
+ARQUIVOS NOVOS
+   config/acoes-baratas.json, config/acoes-baratas-cnpj.json
+   scripts/acoes-baratas-calculo.mjs, acoes-baratas-cvm.mjs, atualizar-acoes-baratas.mjs, acoes-baratas-verificar.mjs, acoes-baratas.test.mjs
+   scripts/fixtures/gerar-fixtures-cvm.py + scripts/fixtures/cvm/*.zip
+   .github/workflows/atualizar-acoes-baratas.yml
+   auditoria/acoes-baratas/README.md, conferencia-manual-modelo.md
+   docs/09-metodologia-acoes-baratas.md  (+ D49 em docs/07-registro-de-decisoes.md, linha no docs/README.md)
+   webapp-src/src/domain/acoesBaratas.ts (+ .test.ts), data/acoesBaratas.json, data/snapshotAcoesBaratas.ts
+   webapp-src/src/screens/Top15Baratas.tsx (+ .test.tsx)
+ARQUIVOS ALTERADOS
+   scripts/gerar-paginas.mjs (1 frase da Metodologia)
+   webapp-src/src/screens/SimuleAcoes.tsx (duas caixinhas; o simulador não mudou), SimuleAcoes.test.tsx (só o título de um teste), package.json (2 scripts)
+
+NÃO MUDOU: motor de perfil, questionário, API, Meu Mês, Meus Ativos, os outros simuladores e a landing.
+NOTA: o repositório tem uma cópia defasada de 07-registro-de-decisoes.md na raiz (sem a D48). O vigente é o de docs/.
+
+DECISÕES QUE FICARAM COM VOCÊ
+   (a) Limites de qualidade (ROIC 10%, dívida líquida/EBITDA 3,0x, cobertura 3,0x, 4 de 5 anos) são escolhas minhas de partida, não regras de mercado.
+   (b) O universo é o cadastro do app (config/acoes.json), não a bolsa inteira.
+   (c) Parecer independente (recomendado pela D19) segue em aberto, como risco aceito por você; e a releitura do texto público ajustado.

@@ -1,0 +1,580 @@
+import assert from 'node:assert/strict'
+import fs from 'node:fs'
+import os from 'node:os'
+import path from 'node:path'
+import test from 'node:test'
+import zlib from 'node:zlib'
+import { spawnSync } from 'node:child_process'
+import { fileURLToPath } from 'node:url'
+import {
+  calcular, calcularFundamentos, canonico, diasEntre, diaAnterior, hashDoResultado, ltmDaConta, percentilPosto, quantil,
+  ranksPercentuais, valorDeMercado, volatilidadeAnualizada, zscoresWinsorizados, CONTAS,
+} from './acoes-baratas-calculo.mjs'
+import { dividirLinha, extrairZip, fatorEscala, indiceDasColunas, mapaTickerCnpj, numeroCvm, resolverCnpjs } from './acoes-baratas-cvm.mjs'
+import { agruparPorCnpj, concluir, extrairPreco, montarInsumos, montarSnapshotApp, verificar, verificarSanidade } from './atualizar-acoes-baratas.mjs'
+
+const AQUI = path.dirname(fileURLToPath(import.meta.url))
+const RAIZ = path.resolve(AQUI, '..')
+const FIX = path.join(AQUI, 'fixtures', 'cvm')
+const cfg = JSON.parse(fs.readFileSync(path.join(RAIZ, 'config', 'acoes-baratas.json'), 'utf8'))
+const perto = (a, b, tol = 1e-9) => assert.ok(Math.abs(a - b) <= tol * Math.max(1, Math.abs(b)), `${a} ≠ ${b}`)
+
+// ---------------------------------------------------------------------------------------
+// Utilidades numéricas
+// ---------------------------------------------------------------------------------------
+
+test('datas: diferença em dias e dia anterior', () => {
+  assert.equal(diasEntre('2025-01-01', '2025-12-31'), 364)
+  assert.equal(diasEntre('2026-06-30', '2026-09-30'), 92)
+  assert.equal(diaAnterior('2026-01-01'), '2025-12-31')
+  assert.equal(diaAnterior('2024-03-01'), '2024-02-29')
+})
+
+test('ranks percentuais: maior valor = 1, menor = 0, empates recebem a média', () => {
+  assert.deepEqual(ranksPercentuais([10, 30, 20]), [0, 1, 0.5])
+  assert.deepEqual(ranksPercentuais([5, 5, 9]), [0.25, 0.25, 1])
+  assert.deepEqual(ranksPercentuais([7]), [1])
+  assert.deepEqual(ranksPercentuais([]), [])
+})
+
+test('quantil (interpolação linear) e percentil por posto', () => {
+  perto(quantil([1, 2, 3, 4, 5], 0.5), 3)
+  perto(quantil([1, 2, 3, 4], 0.5), 2.5)
+  perto(quantil([10, 20], 0.01), 10.1)
+  assert.equal(percentilPosto([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 0.9), 9)
+  assert.equal(percentilPosto([5], 0.9), 5)
+})
+
+test('z-score winsorizado: outlier extremo é cortado antes da padronização', () => {
+  const v = [1, 2, 3, 4, 5, 6, 7, 8, 9, 1000]
+  const z = zscoresWinsorizados(v, 0.1, 0.9)
+  const bruto = zscoresWinsorizados(v, 0, 1)
+  assert.ok(z[9] < bruto[9], 'cortado, o outlier pesa menos que sem winsorização')
+  perto(z.reduce((s, x) => s + x, 0), 0, 1e-9)
+  const teto = quantil(v, 0.9)
+  const piso = quantil(v, 0.1)
+  const cortados = v.map((x) => Math.min(teto, Math.max(piso, x)))
+  const media = cortados.reduce((a, b) => a + b, 0) / 10
+  const dp = Math.sqrt(cortados.reduce((a, b) => a + (b - media) ** 2, 0) / 10)
+  perto(z[9], (teto - media) / dp)
+  assert.deepEqual(zscoresWinsorizados([4, 4, 4], 0.01, 0.99), [0, 0, 0])
+})
+
+test('volatilidade anualizada: série constante = 0; alternância ±1% bate com a conta manual', () => {
+  assert.equal(volatilidadeAnualizada([10, 10, 10, 10]).volatilidade, 0)
+  const s = [100]
+  for (let i = 1; i <= 100; i++) s.push(s[i - 1] * (i % 2 ? 1.01 : 1 / 1.01))
+  const { volatilidade, retornos } = volatilidadeAnualizada(s)
+  assert.equal(retornos, 100)
+  const r = Math.log(1.01)
+  // retornos alternam +r e −r (média 0): desvio amostral = r·sqrt(100/99)
+  perto(volatilidade, r * Math.sqrt(100 / 99) * Math.sqrt(252), 1e-9)
+})
+
+// ---------------------------------------------------------------------------------------
+// Leitura de CSV da CVM
+// ---------------------------------------------------------------------------------------
+
+test('CSV: divisão com aspas, números e escala', () => {
+  assert.deepEqual(dividirLinha('a;"b;c";d'), ['a', 'b;c', 'd'])
+  assert.equal(numeroCvm('1234.50'), 1234.5)
+  assert.equal(numeroCvm('1.234,50'), 1234.5)
+  assert.equal(numeroCvm(''), null)
+  assert.equal(fatorEscala('MIL'), 1000)
+  assert.equal(fatorEscala('UNIDADE'), 1)
+  assert.throws(() => fatorEscala('MILHÃO'), /desconhecida/)
+})
+
+test('CSV: cabeçalho fora do esperado FALHA com mensagem clara (nunca em silêncio)', () => {
+  assert.throws(() => indiceDasColunas('A;B;C', { x: 'CD_CONTA' }, 'arq.csv'), /Layout inesperado em arq\.csv: faltam as colunas x/)
+  const i = indiceDasColunas('\uFEFFCNPJ_CIA;VL_CONTA', { c: 'cnpj_cia', v: /^VL_/ }, 'a')
+  assert.deepEqual(i, { c: 0, v: 1 })
+})
+
+// ---------------------------------------------------------------------------------------
+// Cenário ALFA, calculado à mão (R$ milhões → ver scripts/fixtures/gerar-fixtures-cvm.py)
+//   LTM = DFP 2025 + ITR 1S26 acumulado − ITR 1S25 acumulado
+//   EBIT 1.500+900−700=1.700 · equiv. 200+120−90=230 · outras rec. 100+60−40=120 · outras desp. −50−30+20=−60
+//   EBIT ajustado = 1.700 − 230 − (120 − 60) = 1.410 · FCO 1.400+800−650=1.550 · D&A 400+210−190=420
+//   caixa 1.000+500 · dívida 700+3.300 → DL 2.500 · PL 9.000 · minoritários 400 → PL ctrl 8.600
+//   valor de mercado = 490M ON × R$ 8 + 500M PN × R$ 7 = 7.420 · EV = 7.420 + 2.500 + 400 = 10.320
+// ---------------------------------------------------------------------------------------
+
+const CNPJ_ALFA = '11.111.111/0001-11'
+const precoAlfa = {
+  ref: { ticker: 'ALFA4', fechamento: 7, data: '2026-09-30' },
+  classes: [{ classe: 'ON', ticker: 'ALFA3', fechamento: 8, data: '2026-09-30' }, { classe: 'PN', ticker: 'ALFA4', fechamento: 7, data: '2026-09-30' }],
+}
+
+async function contabilAlfa() {
+  const cnpjs = new Set(['11111111000111'])
+  const dfp = await extrairZip(path.join(FIX, 'dfp_cia_aberta_2025.zip'), 'DFP', cnpjs)
+  const itr = await extrairZip(path.join(FIX, 'itr_cia_aberta_2026.zip'), 'ITR', cnpjs)
+  const historicas = []
+  for (const ano of [2021, 2022, 2023, 2024]) historicas.push(await extrairZip(path.join(FIX, `dfp_cia_aberta_${ano}.zip`), 'DFP', cnpjs, { somenteHistorico: true }))
+  return { dfp, itr, historicas, contabil: agruparPorCnpj([dfp, itr, ...historicas]).get('11111111000111') }
+}
+
+test('extração: pega só a versão vigente, só a empresa pedida, descarta moeda estrangeira', async () => {
+  const { dfp, itr } = await contabilAlfa()
+  assert.equal(dfp.docs.length, 1)
+  assert.equal(dfp.docs[0].versao, 2, 'a versão 1 foi reapresentada')
+  assert.ok(!dfp.linhas.some((l) => l.cd === '3.05' && l.valor === 9999e3 * 1000), 'valor da versão antiga não pode entrar')
+  assert.ok(dfp.linhas.every((l) => l.cnpj === '11111111000111'))
+  assert.equal(dfp.estatisticas.moedaDiferente, 1)
+  const ebitDfp = dfp.linhas.filter((l) => l.dem === 'DRE' && l.cd === '3.05')
+  assert.deepEqual(ebitDfp.map((l) => [l.cons, l.valor]).sort(), [['con', 1.5e9], ['ind', 777e6]])
+  assert.equal(itr.docs.length, 2)
+  assert.equal(itr.capital.length, 1)
+  assert.equal(itr.linhas.find((l) => l.dem === 'DFC' && l.ordem === 'ULTIMO').valor, 800e6, 'escala MIL aplicada')
+  assert.equal(itr.linhas.find((l) => l.dem === 'BPP' && l.cd === '2.03').ds, 'Patrimônio Líquido Consolidado', 'ISO-8859-1 decodificado')
+})
+
+test('extração histórica: só lucro e FCO, só a coluna ÚLTIMO (o comparativo reapresentado é ignorado)', async () => {
+  const { historicas } = await contabilAlfa()
+  const h = historicas[0] // exercício 2021
+  assert.deepEqual([...new Set(h.linhas.map((l) => `${l.dem}|${l.cd}`))].sort(), ['DFC|6.01', 'DRE|3.11', 'DRE|3.11.01'])
+  assert.ok(h.linhas.every((l) => l.ordem === 'ULTIMO'))
+  assert.ok(!h.linhas.some((l) => l.valor === 99999e3), 'comparativo PENÚLTIMO não pode entrar')
+})
+
+test('LTM: ITR usa exercício anterior + acumulado − acumulado do ano anterior (ignora o trimestre isolado)', async () => {
+  const { contabil } = await contabilAlfa()
+  const ultimo = { doc: 'ITR', dtRefer: '2026-06-30' }
+  const ebit = ltmDaConta(contabil.linhas, ultimo, 'con', CONTAS.ebit)
+  assert.equal(ebit.valor, 1700e6)
+  assert.equal(ebit.componentes.length, 3)
+  assert.deepEqual(ebit.componentes.map((c) => c.papel), ['exercicio_anterior (+)', 'acumulado_atual (+)', 'acumulado_ano_anterior (−)'])
+  assert.match(ebit.formula, /2025-12-31 \+ acumulado 2026-01-01→2026-06-30 − acumulado 2025-01-01→2025-06-30/)
+  assert.equal(ltmDaConta(contabil.linhas, ultimo, 'con', CONTAS.fco).valor, 1550e6)
+  assert.equal(ltmDaConta(contabil.linhas, ultimo, 'con', CONTAS.depreciacao).valor, 420e6)
+  // último documento = DFP → o próprio exercício
+  assert.equal(ltmDaConta(contabil.linhas, { doc: 'DFP', dtRefer: '2025-12-31' }, 'con', CONTAS.ebit).valor, 1500e6)
+})
+
+test('LTM: falta de dado obrigatório vira erro explícito; conta opcional ausente vale zero', async () => {
+  const { contabil } = await contabilAlfa()
+  const semDfp = contabil.linhas.filter((l) => l.doc !== 'DFP')
+  const r = ltmDaConta(semDfp, { doc: 'ITR', dtRefer: '2026-06-30' }, 'con', CONTAS.ebit)
+  assert.match(r.erro, /falta a DFP do exercício encerrado em 2025-12-31/)
+  const opc = ltmDaConta(contabil.linhas, { doc: 'DFP', dtRefer: '2025-12-31' }, 'con', CONTAS.recuperabilidade)
+  assert.equal(opc.valor, 0)
+})
+
+test('indicadores da ALFA batem com a conta feita à mão', async () => {
+  const { contabil } = await contabilAlfa()
+  const emp = { ticker: 'ALFA4', contabil }
+  const r = calcularFundamentos(emp, precoAlfa, cfg, '2026-09-30')
+  assert.ok(!r.excluida, JSON.stringify(r.excluida))
+  const m = r.metricas
+  assert.equal(m.mktcap, 7420e6)
+  assert.equal(m.ev, 10320e6)
+  assert.equal(m.ebitAjustado, 1410e6)
+  assert.equal(m.fcoLtm, 1550e6)
+  assert.equal(m.lucroLtm, 1000e6, 'lucro dos controladores: 850+530−380')
+  assert.equal(m.plControladores, 8600e6)
+  perto(m.plSobreValorDeMercado, 8600 / 7420)
+  perto(m.fcoSobreEv, 1550 / 10320)
+  perto(m.ebitAjustadoSobreEv, 1410 / 10320)
+  perto(m.pvp, 7420 / 8600, 1e-4)
+  perto(m.roic, (1410 * 0.66) / 11500, 1e-5)
+  perto(m.dlEbitda, 2500 / 1830, 1e-4)
+  assert.deepEqual([m.passaRoic, m.passaDlEbitda, m.passaFco], [false, true, true])
+  // cobertura de juros: despesas financeiras 12m = −400 + (−200) − (−180) = −420 → 1.410 ÷ 420
+  perto(m.coberturaJuros, 1410 / 420, 1e-4)
+  assert.equal(r.memoria.indicadores.coberturaJuros.despesaFinanceira, 420e6)
+  assert.equal(m.passaCobertura, true)
+  // consistência: lucro dos controladores 2021..2025 = 700, −150, 800, 820, 850 (4 de 5); FCO sempre positivo (5 de 5)
+  assert.deepEqual([m.exerciciosAnalisados, m.exerciciosComLucro, m.exerciciosComFco, m.passaConsistencia], [5, 4, 5, true])
+  assert.deepEqual(r.memoria.consistencia.exercicios.map((e) => [e.exercicio.slice(0, 4), e.lucro]), [['2025', 850e6], ['2024', 820e6], ['2023', 800e6], ['2022', -150e6], ['2021', 700e6]])
+  assert.equal(r.memoria.demonstracao.consolidacao, 'consolidada')
+  assert.equal(r.memoria.demonstracao.linkDoc, 'https://exemplo.cvm/doc?id=3002')
+  assert.equal(r.memoria.valorDeMercado.metodo, 'por_classe')
+  assert.match(r.memoria.derivados.ebitAjustado.formula, /EBIT \(3\.05\) − equivalência patrimonial \(3\.04\.06\)/)
+  assert.ok(r.memoria.fluxos12m.ebit.componentes.every((c) => c.linkDoc), 'cada componente aponta o documento de origem')
+})
+
+test('valor de mercado: classe sem preço usa o da referência e é marcada como aproximada', () => {
+  const cap = { ordinarias: 100, preferenciais: 100, tesouroOrd: 0, tesouroPref: 0 }
+  const r = valorDeMercado(cap, { ref: { ticker: 'XXXX4', fechamento: 10, data: 'd' }, classes: [{ classe: 'PN', ticker: 'XXXX4', fechamento: 10, data: 'd' }] })
+  assert.equal(r.valor, 2000)
+  assert.equal(r.metodo, 'preco_da_classe_de_referencia')
+  assert.ok(r.classes.find((c) => c.classe === 'ON').aproximado)
+  assert.match(valorDeMercado({ ordinarias: 1, preferenciais: 0, tesouroOrd: 5, tesouroPref: 0 }, precoAlfa).erro, /tesouraria/)
+})
+
+test('mapeamento ticker → CNPJ: FCA vigente, correção manual e ambiguidade', async () => {
+  const mapa = await mapaTickerCnpj(path.join(FIX, 'fca_cia_aberta_2026.zip'))
+  const r = Object.fromEntries(resolverCnpjs(['ALFA3', 'ALFA4', 'GAMA3', 'AMBI3', 'ZZZZ3', 'BETA3'], mapa, { BETA3: '99999999000199' }).map((x) => [x.ticker, x]))
+  assert.equal(r.ALFA3.cnpj, CNPJ_ALFA)
+  assert.equal(r.ALFA4.origem, 'FCA (vigente)')
+  assert.equal(r.GAMA3.cnpj, '44.444.444/0001-44', 'o CNPJ com negociação encerrada perde')
+  assert.equal(r.AMBI3.cnpj, null)
+  assert.match(r.AMBI3.origem, /ambíguo/)
+  assert.equal(r.ZZZZ3.cnpj, null)
+  assert.equal(r.BETA3.cnpj, '99.999.999/0001-99', 'correção manual vence o FCA')
+})
+
+// ---------------------------------------------------------------------------------------
+// Universo sintético: filtros, ranking, determinismo
+// ---------------------------------------------------------------------------------------
+
+/** Empresa com DFP de 2025 e números controlados (R$). */
+function fabricar(ticker, o = {}) {
+  const R = '2025-12-31'
+  const cfgLinha = (dem, cd, ds, valor) => ({ doc: 'DFP', dtRefer: R, versao: 1, dem, cons: 'con', ordem: 'ULTIMO', dtIni: dem === 'BPA' || dem === 'BPP' ? null : '2025-01-01', dtFim: R, cd, ds, valor, linkDoc: `https://exemplo/${ticker}` })
+  const ebit = o.ebit ?? 100, fco = o.fco ?? 90, pl = o.pl ?? 800, lucro = o.lucro ?? 60
+  const linhas = [
+    ...(o.despFin === undefined ? [] : [cfgLinha('DRE', '3.06.02', 'Despesas Financeiras', o.despFin)]),
+    cfgLinha('DRE', '3.01', 'Receita', 1000), cfgLinha('DRE', '3.05', 'Resultado Antes do Resultado Financeiro e dos Tributos', ebit),
+    cfgLinha('DRE', '3.11', 'Lucro/Prejuízo do Período', lucro), cfgLinha('DFC', '6.01', 'Caixa Líquido das Atividades Operacionais', fco),
+    cfgLinha('BPA', '1', 'Ativo Total', o.ativo ?? 2000), cfgLinha('BPA', '1.01.01', 'Caixa e Equivalentes de Caixa', 100),
+    cfgLinha('BPP', '2', 'Passivo Total', 2000), cfgLinha('BPP', '2.03', 'Patrimônio Líquido', pl),
+    cfgLinha('BPP', '2.01.04', 'Empréstimos e Financiamentos', 50), cfgLinha('BPP', '2.02.01', 'Empréstimos e Financiamentos', 150),
+  ]
+  // Exercícios anteriores (padrão: 5 no total, todos com lucro e FCO positivos). `lucros`/`fcos` listam do mais antigo ao mais recente anterior.
+  const docs = [{ doc: 'DFP', dtRefer: R, versao: 1, dtReceb: '2026-03-01', linkDoc: `https://exemplo/${ticker}` }]
+  const anteriores = o.lucros ?? [10, 10, 10, 10]
+  anteriores.forEach((lucroAno, k) => {
+    const ano = 2024 - (anteriores.length - 1 - k) - (o.buraco && k < o.buraco ? 1 : 0)
+    const dt = `${ano}-12-31`
+    docs.push({ doc: 'DFP', dtRefer: dt, versao: 1, dtReceb: `${ano + 1}-03-01`, linkDoc: `https://exemplo/${ticker}/${ano}` })
+    for (const [dem, cd, ds, v] of [['DRE', '3.11', 'Lucro/Prejuízo do Período', lucroAno], ['DFC', '6.01', 'Caixa Líquido das Atividades Operacionais', (o.fcos ?? [])[k] ?? 20]]) {
+      linhas.push({ doc: 'DFP', dtRefer: dt, versao: 1, dem, cons: 'con', ordem: 'ULTIMO', dtIni: `${ano}-01-01`, dtFim: dt, cd, ds, valor: v, linkDoc: null })
+    }
+  })
+  const amp = o.amp ?? 0.01
+  const serie = Array.from({ length: 200 }, (_, i) => 10 * (1 + amp * (i % 2 ? 1 : -1)))
+  return {
+    ticker, nome: `Empresa ${ticker}`, setor: o.setor ?? 'Mineração', cnpj: o.cnpj === null ? null : `00.000.000/${ticker.charCodeAt(0)}${ticker.charCodeAt(1)}-00`,
+    preco: { ref: { ticker, fechamento: 10, data: '2026-09-30' }, classes: [{ classe: 'ON', ticker, fechamento: 10, data: '2026-09-30' }], volumeMedioEmissor: o.volume ?? 50e6, serieAjustada: serie, saltosNaoResolvidos: o.saltos ?? [] },
+    contabil: { docs, linhas, capital: [{ doc: 'DFP', dtRefer: R, versao: 1, ordinarias: o.acoes ?? 100, preferenciais: 0, tesouroOrd: 0, tesouroPref: 0 }] },
+  }
+}
+// DFP de 31/12/2025 fica "fresca" com corte em 31/03/2026 (90 dias; o limite é 200).
+const insumosDe = (empresas, dataCorte = '2026-03-31') => ({ esquema: 1, dataCorte, dataPrecos: '2026-09-30', empresas })
+
+test('ranking: nota = média dos ranks percentuais dos 3 rendimentos; ordem decrescente', () => {
+  // mktcap = 100 ações × R$ 10 = 1.000 → EV = 1.000 + (200 − 100) = 1.100. PL/VM = PL/1.000.
+  const A = fabricar('AAAA3', { pl: 900, fco: 150, ebit: 160 })   // melhor nos três
+  const B = fabricar('BBBB3', { pl: 800, fco: 100, ebit: 110 })
+  const C = fabricar('CCCC3', { pl: 700, fco: 50, ebit: 60 })
+  const { resultado, memoria } = calcular(insumosDe([C, A, B]), cfg)
+  assert.deepEqual(resultado.ranking.map((r) => r.ticker), ['AAAA3', 'BBBB3', 'CCCC3'])
+  assert.deepEqual(resultado.ranking.map((r) => r.nota), [1, 0.5, 0])
+  perto(resultado.ranking[0].fcoSobreEv, 150 / 1100, 1e-6)
+  perto(resultado.ranking[0].ebitAjustadoSobreEv, 160 / 1100, 1e-6)
+  assert.deepEqual(memoria.BBBB3.ranking.ranksPercentuais, { plSobreValorDeMercado: 0.5, fcoSobreEv: 0.5, ebitAjustadoSobreEv: 0.5 })
+  assert.equal(resultado.ranking[0].posicao, 1)
+})
+
+test('método z-score winsorizado também ordena corretamente (alternativa de composição)', () => {
+  const cfgZ = { ...cfg, indicador: { ...cfg.indicador, metodoComposicao: 'zscore_winsorizado' } }
+  const { resultado } = calcular(insumosDe([fabricar('CCCC3', { pl: 700, fco: 50, ebit: 60 }), fabricar('AAAA3', { pl: 900, fco: 150, ebit: 160 }), fabricar('BBBB3')]), cfgZ)
+  assert.deepEqual(resultado.ranking.map((r) => r.ticker), ['AAAA3', 'BBBB3', 'CCCC3'])
+})
+
+test('cada filtro exclui com etapa, código e motivo legíveis (nada some em silêncio)', () => {
+  const base = ['AAAA3', 'BBBB3', 'CCCC3'].map((t, i) => fabricar(t, { pl: 900 - i * 100, fco: 150 - i * 50, ebit: 160 - i * 50 }))
+  const ruins = [
+    fabricar('BANC3', { setor: 'Bancos' }),
+    fabricar('SEMC3', { cnpj: null }),
+    fabricar('LIQD3', { volume: 2_999_999 }),
+    fabricar('PREJ3', { lucro: -5 }),
+    fabricar('BALA3', { ativo: 2300 }),
+    fabricar('SALT3', { saltos: [{ data: '2026-05-04', de: 40, para: 10, fator: 4 }] }),
+    fabricar('PLAU3', { acoes: 1e9 }),
+    fabricar('EVNE3', { acoes: 1 }),
+  ]
+  const { resultado } = calcular(insumosDe([...base, ...ruins]), cfg)
+  const por = Object.fromEntries(resultado.exclusoes.map((e) => [e.ticker, e]))
+  assert.deepEqual(resultado.ranking.map((r) => r.ticker), ['AAAA3', 'BBBB3', 'CCCC3'])
+  assert.equal(por.BANC3.codigo, 'setor_excluido')
+  assert.equal(por.SEMC3.codigo, 'sem_cnpj')
+  assert.equal(por.LIQD3.codigo, 'liquidez_baixa')
+  assert.equal(por.SALT3.codigo, 'salto_de_preco')
+  assert.equal(por.BALA3.codigo, 'balanco_nao_fecha')
+  assert.equal(por.PLAU3.codigo, 'capital_implausivel')
+  assert.equal(por.PREJ3.codigo, 'prejuizo_12m')
+  assert.ok(por.EVNE3, 'EV/valor de mercado minúsculo deve sair por alguma regra')
+  for (const e of resultado.exclusoes) assert.ok(e.motivo.length > 10 && e.etapa, `${e.ticker} sem motivo`)
+  assert.equal(resultado.universo, base.length + ruins.length)
+  assert.equal(resultado.etapas[0].entram, resultado.universo)
+  // contabilidade das etapas: o que sai de uma etapa não entra na seguinte
+  for (let i = 1; i < resultado.etapas.length; i++) assert.equal(resultado.etapas[i].entram, resultado.etapas[i - 1].entram - resultado.etapas[i - 1].saem)
+})
+
+test('decil de maior volatilidade sai (10 empresas → a mais volátil)', () => {
+  const emps = Array.from({ length: 10 }, (_, k) => fabricar(`V${String.fromCharCode(65 + k)}VV3`, { amp: 0.005 * (k + 1) }))
+  const { resultado } = calcular(insumosDe(emps), cfg)
+  const vol = resultado.exclusoes.filter((e) => e.etapa === 'volatilidade')
+  assert.deepEqual(vol.map((e) => e.ticker), ['VJVV3'])
+  assert.equal(vol[0].codigo, 'volatilidade_alta')
+  assert.equal(resultado.ranking.length, 9)
+})
+
+test('demonstração defasada e histórico de preço curto saem com motivo', () => {
+  const velha = fabricar('VELH3')
+  velha.contabil.docs[0].dtRefer = '2025-12-31'
+  const { resultado } = calcular(insumosDe([velha], '2026-09-30'), cfg) // 273 dias > 200
+  assert.equal(resultado.exclusoes[0].codigo, 'demonstracao_defasada')
+  assert.match(resultado.exclusoes[0].motivo, /273 dias/)
+  const curta = fabricar('CURT3')
+  curta.preco.serieAjustada = curta.preco.serieAjustada.slice(0, 50)
+  assert.equal(calcular(insumosDe([curta]), cfg).resultado.exclusoes[0].codigo, 'historico_insuficiente')
+})
+
+test('filtros de qualidade: flags por empresa (ROIC, dívida líquida/EBITDA, FCO)', () => {
+  const boa = fabricar('BOAA3', { ebit: 300, fco: 200 })
+  const fcoNeg = fabricar('FCON3', { fco: -10 })
+  const { resultado } = calcular(insumosDe([boa, fcoNeg]), cfg)
+  const r = Object.fromEntries(resultado.ranking.map((x) => [x.ticker, x]))
+  // capital investido = PL 800 + dívida 200 − caixa 100 = 900 → ROIC = 300·0,66/900 = 22%
+  perto(r.BOAA3.roic, (300 * 0.66) / 900, 1e-5)
+  assert.equal(r.BOAA3.passaRoic, true)
+  assert.equal(r.FCON3.passaRoic, false) // 100·0,66/900 = 7,3% < 10%
+  assert.equal(r.FCON3.passaFco, false)
+  assert.equal(r.BOAA3.passaDlEbitda, false, 'sem DVA 7.04.01 não há EBITDA: o filtro reprova (conservador)')
+  assert.equal(r.BOAA3.dlEbitda, null)
+  assert.equal(r.BOAA3.passaConsistencia, true)
+  assert.equal(r.BOAA3.passaCobertura, false, 'fixture sem 3.06.02')
+})
+
+test('cobertura de juros: sem despesa financeira passa; conta ausente reprova; EBIT baixo reprova', () => {
+  const r = (o) => calcular(insumosDe([fabricar('COBE3', o)]), cfg).resultado.ranking[0]
+  // EBIT ajustado 100: despesa 20 → 5,0x passa; despesa 50 → 2,0x reprova; despesa 0 → sem despesa passa
+  const ok = r({ despFin: -20 })
+  assert.equal(ok.coberturaJuros, 5)
+  assert.equal(ok.passaCobertura, true)
+  assert.equal(r({ despFin: -50 }).coberturaJuros, 2)
+  assert.equal(r({ despFin: -50 }).passaCobertura, false)
+  const zero = r({ despFin: 0 })
+  assert.deepEqual([zero.coberturaJuros, zero.semDespesaFinanceira, zero.passaCobertura], [null, true, true])
+  const ausente = r({})
+  assert.deepEqual([ausente.coberturaJuros, ausente.semDespesaFinanceira, ausente.passaCobertura], [null, false, false], 'sem a conta 3.06.02 não dá para afirmar: reprova por cautela')
+  assert.equal(r({ despFin: -10, ebit: -40 }).passaCobertura, false, 'EBIT ajustado negativo nunca passa')
+  assert.equal(r({ despFin: -33.4 }).passaCobertura, false, '2,99x < 3,0x')
+  assert.equal(r({ despFin: -33.3 }).passaCobertura, true, '3,003x ≥ 3,0x')
+})
+
+test('consistência de 5 exercícios: conta lucro e FCO positivos nos últimos 5 DFP consecutivos', () => {
+  const r = (o) => calcular(insumosDe([fabricar('CONS3', o)]), cfg)
+  // atual (lucro 60, FCO 90) + 4 anteriores positivos → 5 de 5
+  const cheio = r({}).resultado.ranking[0]
+  assert.deepEqual([cheio.exerciciosAnalisados, cheio.exerciciosComLucro, cheio.exerciciosComFco, cheio.passaConsistencia], [5, 5, 5, true])
+  // um prejuízo em 5: 4 de 5 → passa; dois prejuízos: 3 de 5 → reprova
+  assert.equal(r({ lucros: [10, -5, 10, 10] }).resultado.ranking[0].passaConsistencia, true)
+  const dois = r({ lucros: [-1, -5, 10, 10] }).resultado.ranking[0]
+  assert.deepEqual([dois.exerciciosComLucro, dois.passaConsistencia], [3, false])
+  // FCO negativo em dois exercícios reprova mesmo com lucro
+  const fco = r({ fcos: [-1, -1, 20, 20] }).resultado.ranking[0]
+  assert.deepEqual([fco.exerciciosComLucro, fco.exerciciosComFco, fco.passaConsistencia], [5, 3, false])
+  // menos de 5 exercícios (empresa nova): reprova por cautela, mas segue no ranking
+  const nova = r({ lucros: [10, 10] }).resultado.ranking[0]
+  assert.deepEqual([nova.exerciciosAnalisados, nova.passaConsistencia], [3, false])
+  // buraco na série (falta o exercício de 2023): a cadeia para antes do buraco, não "pula" ano
+  const furo = r({ buraco: 2 }).resultado.ranking[0]
+  assert.ok(furo.exerciciosAnalisados < 5 && furo.passaConsistencia === false)
+  // memória de cálculo lista cada exercício, com o link do documento
+  const m = r({}).memoria.CONS3.consistencia
+  assert.equal(m.exercicios.length, 5)
+  assert.equal(m.exercicios[0].exercicio, '2025-12-31')
+  assert.ok(m.exercicios.every((e) => e.linkDoc))
+})
+
+test('determinismo: ordem de entrada não altera o hash; qualquer mudança de insumo altera', () => {
+  const emps = ['AAAA3', 'BBBB3', 'CCCC3', 'DDDD3'].map((t, i) => fabricar(t, { pl: 900 - i * 50, fco: 150 - i * 20, ebit: 160 - i * 20 }))
+  const h1 = hashDoResultado(calcular(insumosDe(emps), cfg).resultado)
+  const h2 = hashDoResultado(calcular(insumosDe([...emps].reverse()), cfg).resultado)
+  assert.equal(h1, h2)
+  const alterado = JSON.parse(JSON.stringify(emps))
+  alterado[0].contabil.linhas.find((l) => l.cd === '3.05').valor += 1
+  assert.notEqual(hashDoResultado(calcular(insumosDe(alterado), cfg).resultado), h1)
+  assert.equal(canonico({ b: 1, a: [2, { d: 1, c: 2 }] }), canonico({ a: [2, { c: 2, d: 1 }], b: 1 }))
+})
+
+// ---------------------------------------------------------------------------------------
+// Preços a partir do histórico da B3
+// ---------------------------------------------------------------------------------------
+
+test('preço: classes pelo prefixo, liquidez do emissor soma as classes, desdobramento ajusta a série', () => {
+  const dias = Array.from({ length: 30 }, (_, i) => `2026-09-${String(i + 1).padStart(2, '0')}`)
+  const v = (p, vol) => [p, p, p, vol]
+  const historico = {
+    pregoes: dias,
+    ativos: {
+      ALFA3: dias.map(() => v(8, 1_000_000)),
+      ALFA4: dias.map((_, i) => (i === 29 ? null : v(7, 2_000_000))),
+      ALFA11: dias.map(() => v(30, 9e9)), // unit: fora
+      ZETA3: dias.map((_, i) => v(i < 15 ? 40 : 10, 5_000_000)),
+    },
+  }
+  const c = { ...cfg, filtros: { ...cfg.filtros, sessoesLiquidez: 10 } }
+  const p = extrairPreco(historico, 'ALFA4', { desdobramentos: {} }, c)
+  assert.equal(p.ref.fechamento, 7)
+  assert.equal(p.ref.data, '2026-09-29')
+  assert.deepEqual(p.classes.map((x) => [x.classe, x.ticker, x.fechamento]), [['ON', 'ALFA3', 8], ['PN', 'ALFA4', 7]])
+  // últimos 10 pregões: ALFA3 10×1M; ALFA4 9×2M (um dia sem negócio) → 28M / 10
+  assert.equal(p.volumeMedioEmissor, 2_800_000)
+  const z = extrairPreco(historico, 'ZETA3', { desdobramentos: {} }, c)
+  assert.equal(z.saltosNaoResolvidos.length, 1, 'queda de 75% sem evento confirmado')
+  const z2 = extrairPreco(historico, 'ZETA3', { desdobramentos: { ZETA3: [{ data: '2026-09-16', fator: 4 }] } }, c)
+  assert.equal(z2.saltosNaoResolvidos.length, 0, 'com o desdobramento 4:1 confirmado a série fica contínua')
+  assert.ok(z2.serieAjustada.every((x) => Math.abs(x - 10) < 1e-9))
+  assert.equal(extrairPreco(historico, 'NADA3', { desdobramentos: {} }, c).ref, null)
+})
+
+// ---------------------------------------------------------------------------------------
+// Auditoria ponta a ponta: grava, verifica, detecta adulteração
+// ---------------------------------------------------------------------------------------
+
+function raizTemporaria() {
+  const raiz = fs.mkdtempSync(path.join(os.tmpdir(), 'ab-teste-'))
+  fs.mkdirSync(path.join(raiz, 'scripts'), { recursive: true })
+  for (const a of ['acoes-baratas-calculo.mjs', 'acoes-baratas-cvm.mjs']) fs.copyFileSync(path.join(AQUI, a), path.join(raiz, 'scripts', a))
+  fs.mkdirSync(path.join(raiz, 'webapp-src', 'src', 'data'), { recursive: true })
+  return raiz
+}
+
+test('auditoria: gera a pasta, a verificação refaz o cálculo e confere; adulterar um byte é detectado', () => {
+  const raiz = raizTemporaria()
+  const emps = ['AAAA3', 'BBBB3', 'CCCC3'].map((t, i) => fabricar(t, { pl: 900 - i * 100, fco: 150 - i * 50, ebit: 160 - i * 50 }))
+  const empresas = emps.map((e) => ({ ticker: e.ticker, nome: e.nome, setor: e.setor }))
+  const mapeamento = emps.map((e) => ({ ticker: e.ticker, cnpj: e.cnpj, origem: 'teste' }))
+  const insumos = insumosDe(emps)
+  const logs = []
+  const cfgTravado = { ...cfg, publicacao: { ...cfg.publicacao, aprovadoPeloResponsavel: false } }
+  const r = concluir({ raiz, cfg: cfgTravado, empresas, mapeamento, insumos, log: (m) => logs.push(m), agora: new Date('2026-10-04T12:00:00Z') })
+  assert.equal(r.publicado, false, 'sem aprovação do responsável, nada é publicado no app')
+
+  const pasta = path.join(raiz, 'auditoria', 'acoes-baratas', '2026-09-30')
+  for (const a of ['manifesto.json', 'insumos.json.gz', 'config.json', 'resultado.json', 'memoria-de-calculo.json.gz', 'ranking.csv', 'exclusoes.csv', 'mapeamento-ticker-cnpj.csv', 'LEIA-ME.md']) assert.ok(fs.existsSync(path.join(pasta, a)), a)
+  const manifesto = JSON.parse(fs.readFileSync(path.join(pasta, 'manifesto.json'), 'utf8'))
+  assert.equal(manifesto.versaoMetodologia, cfg.versaoMetodologia)
+  assert.match(manifesto.hashes.resultado, /^[0-9a-f]{64}$/)
+  assert.match(manifesto.codigo.calculoSha256, /^[0-9a-f]{64}$/)
+
+  // app: sem aprovação, só o cabeçalho
+  const snap = JSON.parse(fs.readFileSync(path.join(raiz, 'webapp-src', 'src', 'data', 'acoesBaratas.json'), 'utf8'))
+  assert.equal(snap.publicado, false)
+  assert.deepEqual(snap.ranking, [])
+  assert.equal(snap.hashResultado, manifesto.hashes.resultado)
+
+  const v = verificar(pasta, raiz)
+  assert.equal(v.ok, true, JSON.stringify(v.mensagens.filter((m) => !m.ok)))
+  assert.ok(v.mensagens.some((m) => /resultado recalculado/.test(m.m)))
+
+  // memória de cálculo legível e completa
+  const memoria = JSON.parse(zlib.gunzipSync(fs.readFileSync(path.join(pasta, 'memoria-de-calculo.json.gz'))))
+  assert.ok(memoria.AAAA3.derivados.ev.formula && memoria.AAAA3.ranking.posicao === 1)
+
+  // segunda execução idêntica: nada a regravar
+  concluir({ raiz, cfg: cfgTravado, empresas, mapeamento, insumos, log: (m) => logs.push(m), agora: new Date('2026-10-05T12:00:00Z') })
+  assert.ok(logs.some((m) => /Sem mudança/.test(m)))
+  assert.equal(JSON.parse(fs.readFileSync(path.join(pasta, 'manifesto.json'), 'utf8')).geradoEm, manifesto.geradoEm)
+
+  // adulteração dos insumos: muda 1 valor e regrava o arquivo
+  const ins = JSON.parse(zlib.gunzipSync(fs.readFileSync(path.join(pasta, 'insumos.json.gz'))))
+  ins.empresas[0].contabil.linhas.find((l) => l.cd === '3.05').valor += 1
+  fs.writeFileSync(path.join(pasta, 'insumos.json.gz'), zlib.gzipSync(JSON.stringify(ins)))
+  const v2 = verificar(pasta, raiz)
+  assert.equal(v2.ok, false)
+  assert.ok(v2.mensagens.some((m) => !m.ok && /insumos/.test(m.m)))
+})
+
+test('publicação: com a aprovação do responsável o app recebe o ranking; sem ela, nunca', () => {
+  const manifesto = { geradoEm: 'x', hashes: { resultado: 'r', insumos: 'i', config: 'c' } }
+  const { resultado } = calcular(insumosDe(['AAAA3', 'BBBB3'].map((t) => fabricar(t))), cfg)
+  const com = montarSnapshotApp({ resultado, cfg, manifesto, pasta: 'p', publicado: true })
+  const sem = montarSnapshotApp({ resultado, cfg, manifesto, pasta: 'p', publicado: false })
+  assert.equal(com.ranking.length, 2)
+  assert.equal(sem.ranking.length, 0)
+  assert.equal(sem.exclusoes.length, 0)
+  assert.equal(com.qualidade.roicMinimo, cfg.qualidade.roic.minimo)
+})
+
+test('end-to-end: fixtures no layout CVM → insumos → ranking (ALFA fica com os números à mão)', async () => {
+  const { contabil } = await contabilAlfa()
+  const alfa = { ticker: 'ALFA4', nome: 'Alfa', setor: 'Mineração', cnpj: CNPJ_ALFA, preco: { ...precoAlfa, volumeMedioEmissor: 40e6, serieAjustada: Array.from({ length: 200 }, (_, i) => 7 * (1 + 0.01 * (i % 2 ? 1 : -1))), saltosNaoResolvidos: [] }, contabil }
+  const { resultado, memoria } = calcular(insumosDe([alfa], '2026-09-30'), cfg)
+  assert.equal(resultado.ranking.length, 1, JSON.stringify(resultado.exclusoes))
+  assert.equal(resultado.ranking[0].ev, 10320e6)
+  assert.equal(memoria.ALFA4.demonstracao.doc, 'ITR')
+})
+
+test('trava de coerência (D49): com a publicação aprovada, o texto público não pode negar o ranking', () => {
+  if (cfg.publicacao.aprovadoPeloResponsavel !== true) return // enquanto travado, nada a conferir
+  const paginas = fs.readFileSync(path.join(AQUI, 'gerar-paginas.mjs'), 'utf8')
+  const negaRanking = paginas.split('\n').filter((l) => /simuladores de ativos/.test(l) && /não fazem ranking/.test(l))
+  assert.deepEqual(negaRanking, [], 'A página de Metodologia diz que os simuladores de ativos "não fazem ranking". Revise o texto (scripts/gerar-paginas.mjs) antes de publicar o Top 15.')
+  assert.ok(fs.existsSync(path.join(RAIZ, 'docs', '09-metodologia-acoes-baratas.md')), 'a metodologia precisa estar documentada')
+})
+
+test('verificador independente: roda com SÓ dois scripts + a pasta da execução, como processo separado', () => {
+  const raiz = raizTemporaria()
+  const emps = ['AAAA3', 'BBBB3'].map((t, i) => fabricar(t, { pl: 900 - i * 100, fco: 150 - i * 50, ebit: 160 - i * 50 }))
+  const empresas = emps.map((e) => ({ ticker: e.ticker, nome: e.nome, setor: e.setor }))
+  const mapeamento = emps.map((e) => ({ ticker: e.ticker, cnpj: e.cnpj, origem: 'teste' }))
+  const cfgSemPublicar = { ...cfg, publicacao: { ...cfg.publicacao, aprovadoPeloResponsavel: false } }
+  concluir({ raiz, cfg: cfgSemPublicar, empresas, mapeamento, insumos: insumosDe(emps), log: () => {}, agora: new Date('2026-10-04T12:00:00Z') })
+
+  // ambiente de terceiro: nenhum outro script (sem leitor da CVM, sem orquestrador, sem node_modules)
+  const terceiro = fs.mkdtempSync(path.join(os.tmpdir(), 'terceiro-'))
+  fs.mkdirSync(path.join(terceiro, 'scripts'))
+  for (const a of ['acoes-baratas-calculo.mjs', 'acoes-baratas-verificar.mjs']) fs.copyFileSync(path.join(AQUI, a), path.join(terceiro, 'scripts', a))
+  const pasta = path.join(terceiro, 'execucao')
+  fs.cpSync(path.join(raiz, 'auditoria', 'acoes-baratas', '2026-09-30'), pasta, { recursive: true })
+  assert.deepEqual(fs.readdirSync(path.join(terceiro, 'scripts')).sort(), ['acoes-baratas-calculo.mjs', 'acoes-baratas-verificar.mjs'])
+
+  const roda = () => spawnSync(process.execPath, [path.join(terceiro, 'scripts', 'acoes-baratas-verificar.mjs'), pasta], { encoding: 'utf8' })
+  const ok = roda()
+  assert.equal(ok.status, 0, ok.stdout + ok.stderr)
+  assert.match(ok.stdout, /VERIFICAÇÃO: OK/)
+  assert.match(ok.stdout, /resultado recalculado/)
+
+  // adulteração do resultado publicado (ranking.csv) é pega pelo sha256 do manifesto
+  fs.appendFileSync(path.join(pasta, 'ranking.csv'), 'linha extra\r\n')
+  const ruim = roda()
+  assert.equal(ruim.status, 1)
+  assert.match(ruim.stdout, /ranking\.csv: sha256 DIVERGE/)
+  assert.match(ruim.stdout, /VERIFICAÇÃO: FALHOU/)
+  assert.equal(spawnSync(process.execPath, [path.join(terceiro, 'scripts', 'acoes-baratas-verificar.mjs')], { encoding: 'utf8' }).status, 2, 'sem argumento: uso')
+})
+
+test('trava de sanidade: barra a publicação de resultado inverossímil, mas deixa a auditoria para diagnóstico', () => {
+  const san = { minimoNoRanking: 3, maximoFracaoSemDados: 0.35 }
+  const cfgSan = { ...cfg, publicacao: { ...cfg.publicacao, aprovadoPeloResponsavel: true, sanidade: san } }
+  const boas = ['AAAA3', 'BBBB3', 'CCCC3', 'DDDD3'].map((t, i) => fabricar(t, { pl: 900 - i * 50, fco: 150 - i * 20, ebit: 160 - i * 20 }))
+
+  // resultado saudável: publica
+  const raiz1 = raizTemporaria()
+  const mk = (emps) => ({ empresas: emps.map((e) => ({ ticker: e.ticker, nome: e.nome, setor: e.setor })), mapeamento: emps.map((e) => ({ ticker: e.ticker, cnpj: e.cnpj, origem: 'teste' })), insumos: insumosDe(emps) })
+  const ok = concluir({ raiz: raiz1, cfg: cfgSan, ...mk(boas), log: () => {} })
+  assert.equal(ok.publicado, true)
+  assert.equal(JSON.parse(fs.readFileSync(path.join(raiz1, 'webapp-src/src/data/acoesBaratas.json'), 'utf8')).ranking.length, 4)
+
+  // metade do cadastro sem CNPJ (erro típico de mapeamento): barra, grava a auditoria, NÃO toca no app
+  const raiz2 = raizTemporaria()
+  const semCnpj = ['EEEE3', 'FFFF3', 'GGGG3', 'HHHH3'].map((t) => fabricar(t, { cnpj: null }))
+  assert.throws(() => concluir({ raiz: raiz2, cfg: cfgSan, ...mk([...boas, ...semCnpj]), log: () => {} }), /Publicação barrada pela trava de sanidade.*4 de 8 empresas no escopo sem dados utilizáveis \(50%; máximo 35%\)/)
+  assert.ok(fs.existsSync(path.join(raiz2, 'auditoria/acoes-baratas/2026-09-30/exclusoes.csv')), 'auditoria gravada para diagnóstico')
+  assert.ok(!fs.existsSync(path.join(raiz2, 'webapp-src/src/data/acoesBaratas.json')), 'o app não foi alterado')
+
+  // ranking pequeno demais
+  const raiz3 = raizTemporaria()
+  assert.throws(() => concluir({ raiz: raiz3, cfg: cfgSan, ...mk(boas.slice(0, 2)), log: () => {} }), /só 2 empresas no ranking \(mínimo 3\)/)
+
+  // bancos fora do escopo NÃO contam como "sem dados"; e a trava só vale para publicar
+  const bancos = ['BAN1', 'BAN2', 'BAN3', 'BAN4'].map((t) => fabricar(`${t}3`, { setor: 'Bancos' }))
+  const { resultado } = calcular(insumosDe([...boas, ...bancos]), cfg)
+  assert.deepEqual(verificarSanidade(resultado, cfgSan), [])
+  const travado = { ...cfgSan, publicacao: { ...cfgSan.publicacao, aprovadoPeloResponsavel: false } }
+  assert.doesNotThrow(() => concluir({ raiz: raizTemporaria(), cfg: travado, ...mk(boas.slice(0, 1)), log: () => {} }))
+})
+
+test('configuração distribuída: aprovação registrada e trava de sanidade presente', () => {
+  assert.equal(cfg.publicacao.aprovadoPeloResponsavel, true)
+  assert.equal(cfg.publicacao.aprovacao.data, '2026-10-04')
+  assert.equal(cfg.publicacao.aprovacao.parecerIndependente, false, 'registro honesto: não há parecer de terceiros')
+  assert.ok(cfg.publicacao.sanidade.minimoNoRanking >= 30 && cfg.publicacao.sanidade.maximoFracaoSemDados <= 0.5)
+})
