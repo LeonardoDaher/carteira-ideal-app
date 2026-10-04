@@ -1,31 +1,31 @@
 {
   "esquema": 1,
-  "versaoMetodologia": "1.0.1",
-  "geradoEm": "2026-10-04T21:17:29.477Z",
+  "versaoMetodologia": "1.0.2",
+  "geradoEm": "2026-10-04T22:37:22.033Z",
   "dataPrecos": "2026-10-02",
   "dataCorte": "2026-10-02",
   "ambiente": {
     "node": "v22.23.3",
     "plataforma": "linux",
-    "commit": "61be65c50ecfd0439c7c282c175663408d832fe3",
-    "execucao": "37235445049"
+    "commit": "a10f8f637ae999ee4d647166018d3fceee6c1520",
+    "execucao": "37240651242"
   },
   "codigo": {
-    "calculoSha256": "d183f952f65b6c5f7f67f437efa09ee51c68b5c066bb5908c9a1de18dd0a4b7c",
+    "calculoSha256": "90e9faa595442518c043cacdef600845d07fbe894489a2193e679f129280c287",
     "extracaoSha256": "be9ea6013a1bcb8a043f2572e1135c0b2ac3225415abc2e94a688080b350dbfc"
   },
   "hashes": {
-    "config": "bbfc2a1de55a57b78f2fe21a35e09e5f1e82823db19fe06ed37fd68e4a32996d",
+    "config": "668d5ff3a4d2d1438fe14d8995c1e82e13fbaf0afb8f58a6a12a6dd6156584dc",
     "insumos": "dee019ca2acb083c0428f62e95581c5781a302f895b8f58d74d7dd6f9d5b42dd",
-    "resultado": "7cbeaa810a3f7a7e9347b845fc11dd0a1545e0dd86266aa1a943858c435947c9",
-    "memoria": "d36c284a6280e3286b45ad914ae9bf71d35b9f86bb3d74c37d18d0a7aa64ae80",
+    "resultado": "4456eac401831c31f8a064bd66f6bbd322385dfca77f9d9b8d881ffea11194e8",
+    "memoria": "867cad47fb1fce450b4539734dc84713cc6551ef53ebc2a7e3e1cddf406b1a1e",
     "arquivos": {
       "insumos.json.gz": "a4979a8da662b5e1b2529aba28d5518a8e9fdfa192bf21c82036fb84da581874",
-      "config.json": "6d3171dc7f7246e552e82e40ef00f64164d445b9342dfc1893b04710d64ad17f",
-      "resultado.json": "edc7e03d1aa0ebb72f09dfbd6a4846f7fa94cbd72c8cf302589e560a89a25984",
-      "memoria-de-calculo.json.gz": "caaf7304782087cc72be28b32257a7502141882aa488e598c493dd8abaecd433",
-      "ranking.csv": "ffb44bf3bdbf62e195daa0e89db795732ec02e83ac7900266235a9b50ed6d6fa",
-      "exclusoes.csv": "84f25f0bd2795b1921d479062ffef6ddeee4aba16eb68abfb7af9ecbc8978725",
+      "config.json": "25af3b0c05490b5c5558a9d63ee2e5b46f8b1bd46e7382428a826aad29434754",
+      "resultado.json": "b34e603d32cccb2adf229478f37d46fc46f74e4fd360251d6b4562736a0cc176",
+      "memoria-de-calculo.json.gz": "7b6877e5f1a3edf64d05c61d1abf4e9d9770dca1aad7ac3dacf92565716182c4",
+      "ranking.csv": "cfb2d7e0183bbc29fd9c10138e7c4a57b38c6cdd76bf45c830a71265594af940",
+      "exclusoes.csv": "498c850a5bc8597a5b8b918e87200efc9c22e84f85a35197a8c85de336c0b207",
       "mapeamento-ticker-cnpj.csv": "c1a24f33a6b4f47eccc92c37fa0d0f11efbbe3a37b7fb8d8032bccbf1295bdd0"
     }
   },
@@ -36,7 +36,7 @@
       "arquivo": "fca_cia_aberta_2026.zip",
       "bytes": 361734,
       "sha256": "21d4bb18fb6923cf2253c2a1d76496ef71366287fbde5ca725d76f303a2069b8",
-      "baixadoEm": "2026-10-04T21:16:58.548Z"
+      "baixadoEm": "2026-10-04T22:36:38.207Z"
     },
     {
       "papel": "DFP 2021",
@@ -44,7 +44,7 @@
       "arquivo": "dfp_cia_aberta_2021.zip",
       "bytes": 13283026,
       "sha256": "64b8693b709538a0357c5179ae02231cb380d0000956ee57a873a21d4efda2e4",
-      "baixadoEm": "2026-10-04T21:17:00.393Z"
+      "baixadoEm": "2026-10-04T22:36:40.226Z"
     },
     {
       "papel": "DFP 2022",
@@ -52,7 +52,7 @@
       "arquivo": "dfp_cia_aberta_2022.zip",
       "bytes": 13448916,
       "sha256": "b9ac4eed33ef64346c826ef25aa7a59b6098822dcac04c131e52305e29e3e4ae",
-      "baixadoEm": "2026-10-04T21:17:02.852Z"
+      "baixadoEm": "2026-10-04T22:36:43.379Z"
     },
     {
       "papel": "DFP 2023",
@@ -60,7 +60,7 @@
       "arquivo": "dfp_cia_aberta_2023.zip",
       "bytes": 13563376,
       "sha256": "be508606d186cda7ee86dcf461993b392e1151dd1a01d9290f8b627d7d4b5cbb",
-      "baixadoEm": "2026-10-04T21:17:05.039Z"
+      "baixadoEm": "2026-10-04T22:36:46.247Z"
     },
     {
       "papel": "DFP 2024",
@@ -68,7 +68,7 @@
       "arquivo": "dfp_cia_aberta_2024.zip",
       "bytes": 13396369,
       "sha256": "fea8592888271d4b7cab04328b2b5c586a6c44adb2399d74b61bfa822400dcf3",
-      "baixadoEm": "2026-10-04T21:17:07.433Z"
+      "baixadoEm": "2026-10-04T22:36:52.101Z"
     },
     {
       "papel": "DFP 2025",
@@ -76,7 +76,7 @@
       "arquivo": "dfp_cia_aberta_2025.zip",
       "bytes": 12784140,
       "sha256": "d7aec54e7c67998e4cd3ef94c463ab247f09a6baaa2254878d1e431f28130e2a",
-      "baixadoEm": "2026-10-04T21:17:10.218Z"
+      "baixadoEm": "2026-10-04T22:36:55.585Z"
     },
     {
       "papel": "DFP 2026",
@@ -84,7 +84,7 @@
       "arquivo": "dfp_cia_aberta_2026.zip",
       "bytes": 243348,
       "sha256": "7eab96451f58476d37b52653dabdd4fd423feb0870b97d44df5925feb42cdd93",
-      "baixadoEm": "2026-10-04T21:17:11.818Z"
+      "baixadoEm": "2026-10-04T22:36:57.491Z"
     },
     {
       "papel": "ITR 2025",
@@ -92,7 +92,7 @@
       "arquivo": "itr_cia_aberta_2025.zip",
       "bytes": 31660219,
       "sha256": "efe754841bed9eac2a3138c92a187060842c1746845e9471749be5c91819dc51",
-      "baixadoEm": "2026-10-04T21:17:14.262Z"
+      "baixadoEm": "2026-10-04T22:37:00.341Z"
     },
     {
       "papel": "ITR 2026",
@@ -100,7 +100,7 @@
       "arquivo": "itr_cia_aberta_2026.zip",
       "bytes": 19634453,
       "sha256": "0e1ef74291d2143e7bb55247b01c8bbd94995d995536f70f0d19de1d79d7e38c",
-      "baixadoEm": "2026-10-04T21:17:20.449Z"
+      "baixadoEm": "2026-10-04T22:37:10.680Z"
     },
     {
       "papel": "Histórico de preços da B3 (Boletim BVBG.086)",
@@ -168,8 +168,8 @@
   ],
   "contagens": {
     "universo": 226,
-    "noRanking": 68,
-    "exclusoes": 158,
+    "noRanking": 69,
+    "exclusoes": 157,
     "etapas": [
       {
         "id": "universo",
@@ -193,24 +193,24 @@
         "id": "dados_contabeis",
         "descricao": "Demonstrações da CVM completas, atuais e coerentes (balanço fecha, DRE fecha, descrição das contas, capital plausível)",
         "entram": 106,
-        "saem": 31
+        "saem": 30
       },
       {
         "id": "lucro",
         "descricao": "Sem lucro nos últimos 12 meses (4 trimestres)",
-        "entram": 75,
+        "entram": 76,
         "saem": 7
       },
       {
         "id": "indicador",
         "descricao": "EV ou valor de mercado não positivos (rendimentos indefinidos)",
-        "entram": 68,
+        "entram": 69,
         "saem": 0
       },
       {
         "id": "ranking",
         "descricao": "Indicador composto (ranks) e ordenação decrescente",
-        "entram": 68,
+        "entram": 69,
         "saem": 0
       }
     ]
