@@ -80,13 +80,13 @@ jobs:
 
       - name: Publicar (commit) se houver mudança
         run: |
-          if [ -z "$(git status --porcelain auditoria/acoes-baratas webapp-src/src/data/acoesBaratas.json)" ]; then
+          if [ -z "$(git status --porcelain auditoria/acoes-baratas webapp-src/src/data/acoesBaratas.json dados-privados)" ]; then
             echo "Sem mudanças."
             exit 0
           fi
           git config user.name "${{ vars.COMMIT_AUTOR_NOME || 'github-actions[bot]' }}"
           git config user.email "${{ vars.COMMIT_AUTOR_EMAIL || '41898283+github-actions[bot]@users.noreply.github.com' }}"
-          git add auditoria/acoes-baratas webapp-src/src/data/acoesBaratas.json
+          git add auditoria/acoes-baratas webapp-src/src/data/acoesBaratas.json dados-privados/acoes-baratas.json
           git commit -m "dados: Top 15 ações baratas ($(date -u +%Y-%m-%d))"
           git pull --rebase
           git push
