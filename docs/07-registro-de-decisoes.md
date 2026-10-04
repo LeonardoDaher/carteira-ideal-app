@@ -1071,3 +1071,26 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 **Limite conhecido.** Se a Vale passar a informar em unidades, o ajuste a multiplicará por 1000 e o P/VP implícito ficará acima de 100: a trava a excluirá e a mensagem mostrará "MESMO com o ajuste manual". Aí basta remover a linha. As demonstrações dela (PL de ~R$ 196,6 bi) parecem corretas e em reais; só a contagem de ações estava em outra unidade.
 
 **Testes.** Scripts: 234 → 235 (ajuste só para o ticker listado, registro na memória, trava depois do ajuste). Mutação (ignorar o ajuste, aplicá-lo a qualquer ticker, não registrá-lo) detectada.
+
+## D53 (04/10/2026): Conferência de MGLU3 e SEER3 com fontes públicas: uma verificação nova e um erro ainda sem causa
+
+**Contexto.** O responsável enviou a "Memória de cálculo" de MGLU3 e SEER3. Os valores foram comparados com fontes públicas de indicadores e com notícias de resultado (Dados de Mercado, iValor, Investidor Ativos/ADVFN, HG Brasil, Analítica, InfoMoney). Essas fontes calculam por conta própria, então valores próximos confirmam a leitura e diferenças grandes indicam problema; elas não substituem a conferência no documento da CVM.
+
+| Item | Nosso | Fonte pública | Veredito |
+|---|---|---|---|
+| MGLU3, lucro por exercício (2021 a 2025) | 3 de 5 positivos | +590,7 · −499,0 · −979,1 · +448,7 · +204,6 mi = 3 de 5 | Confere |
+| MGLU3, lucro de 12 meses | R$ 89 mi | R$ 88,5 mi (2T26) | Confere |
+| MGLU3, caixa operacional | R$ 16,4 bi (12m) | R$ 15,7 bi em 2025 e R$ 15,8 bi em 2024; financiamento −R$ 15 bi | Confere com o reportado |
+| SEER3, valor de mercado | R$ 1,9 bi (128,7 mi ações × R$ 14,60) | ações 128,72 mi | Confere |
+| SEER3, caixa operacional | R$ 443 mi | ~R$ 425 mi (P/FCO 3,53 a R$ 1,5 bi) | Confere |
+| SEER3, patrimônio | R$ 1,5 bi | P/VP ~1,0 a 1,2 a R$ 1,5 bi | Confere |
+| SEER3, lucro por exercício | **0 de 5** | +52,5 (2021) · −222,2 · −28,0 · −1,2 · +214,4 (2025) = **2 de 5** | **Não confere** |
+| SEER3, lucro de 12 meses | **R$ 57 mi** | TTM R$ 246,7 mi (data da fonte desconhecida; o 2T26 pode diferir) | **Suspeito** |
+
+**MGLU3: a leitura está certa, o indicador é que não serve.** O FCO de R$ 16,4 bi é o que a empresa reporta (apresentação contábil de recebíveis e financiamento a clientes dentro do fluxo operacional, com o espelho no financiamento). Ele fazia o caixa operacional/EV chegar a 180% e colocava a empresa em 3º lugar por um efeito sem significado econômico. **Decisão:** nova verificação de integridade `fco_incoerente`: FCO de 12 meses acima de 3x o EBITDA (ou o EBIT ajustado, sem EBITDA) exclui a empresa, com o motivo e os números na tela "Por que ficou de fora?". Limite em `verificacoes.fcoMaximoSobreEbitda` (3,0); com os números do print as demais 14 empresas ficam entre 0,2x e 1,9x, longe do limite. Mutação detectada.
+
+**SEER3: erro nosso, causa não identificada.** Tudo o que se pôde conferir (ações, valor de mercado, patrimônio, caixa operacional) bate; o lucro, não, e "0 de 5" é impossível com 2021 e 2025 positivos. Para a MGLU3 o mesmo caminho de cálculo do lucro bateu exatamente, o que aponta algo específico da demonstração da Ser e não do método. Hipóteses a verificar: a conta 3.11.01 (atribuído aos controladores) pode divergir da 3.11 (consolidado) na demonstração da Ser, ou o lançamento do lucro nos exercícios antigos usar outra estrutura de contas. **Em vez de chutar a correção, a tela passou a mostrar a prova:** "Como chegamos aos 12 meses" (exercício + acumulado atual − acumulado do ano anterior, para lucro, caixa operacional e EBIT, com período e documento de cada parcela), o lucro consolidado e o dos controladores lado a lado, e o lucro e o caixa de cada exercício. Na próxima execução, a Memória de cálculo da SEER3 mostrará onde o número se desvia. Até lá, "exercícios com lucro" da SEER3 não deve ser usado.
+
+**Também documentado.** A seção 10 da metodologia ganhou a limitação sobre a apresentação do fluxo de caixa (item 13). Versão 1.0.2 → 1.0.3.
+
+**Testes.** Scripts: 235 → 237 (fco_incoerente nos limites, nas duas referências e com os números reais; composição dos 12 meses fechando com o total e histórico por exercício). App: 1.289 → 1.290 (a nova seção da memória de cálculo).

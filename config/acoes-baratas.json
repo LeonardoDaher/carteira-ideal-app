@@ -1,6 +1,6 @@
 {
   "_leia": "Metodologia da triagem 'Top 15 ações mais baratas' (D49). ESTE ARQUIVO É A FONTE ÚNICA DOS PARÂMETROS: o script, o app e o documento docs/09-metodologia-acoes-baratas.md leem/citam estes valores. Qualquer mudança aqui exige subir 'versaoMetodologia' e registrar o motivo em 'historicoDeVersoes'. O hash SHA-256 deste arquivo vai no manifesto de cada execução.",
-  "versaoMetodologia": "1.0.2",
+  "versaoMetodologia": "1.0.3",
   "historicoDeVersoes": [
     {
       "versao": "1.0.0",
@@ -16,6 +16,11 @@
       "versao": "1.0.2",
       "data": "2026-10-04",
       "mudanca": "VALE3 informa a quantidade de ações em milhares no formulário da CVM (4.072.366 em vez de ~4,07 bilhões), o que a derrubava na verificação de capital. Criado o ajuste manual e registrado de unidade (capital.ajustesManuais), aplicado só a VALE3 (×1000); a verificação de plausibilidade continua valendo depois do ajuste."
+    },
+    {
+      "versao": "1.0.3",
+      "data": "2026-10-04",
+      "mudanca": "Conferência com fontes públicas (MGLU3 e SEER3). (1) Nova verificação de integridade: o caixa operacional de 12 meses não pode passar de 3x o EBITDA (ou o EBIT ajustado, sem EBITDA); a Magalu reporta ~R$ 15,7 bi de FCO com ~R$ 15 bi negativos no financiamento (apresentação contábil de recebíveis e financiamento a clientes), o que fazia o indicador FCO/EV chegar a 180% sem significado econômico; empresa nessa situação sai com o motivo e os números. (2) A memória de cálculo na tela passa a mostrar como cada valor de 12 meses foi montado (exercício + acumulado atual − acumulado do ano anterior) e o lucro e o caixa de cada exercício, para permitir a conferência contra o documento da CVM."
     }
   ],
   "publicacao": {
@@ -123,6 +128,7 @@
     "toleranciaBalancoPct": 0.5,
     "toleranciaDrePct": 0.5,
     "pvpMinimoPlausivel": 0.02,
-    "pvpMaximoPlausivel": 100
+    "pvpMaximoPlausivel": 100,
+    "fcoMaximoSobreEbitda": 3.0
   }
 }

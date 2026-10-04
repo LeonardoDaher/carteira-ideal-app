@@ -4,9 +4,9 @@ import { SNAPSHOT_ACOES_BARATAS } from '../data/snapshotAcoesBaratas'
 import { CHAVE_CODIGO_TOP15, buscarTop15, formatarCodigo, limparCodigoDigitado, mensagemDaFalha } from '../domain/acessoTop15'
 import type { RespostaTop15 } from '../domain/acessoTop15'
 import {
-  CONTAGEM_POR_ETAPA, SEM_FILTROS, buscarExclusao, formatarMultiplo, formatarPercentual, formatarReaisCompacto, selecionarTop,
+  CONTAGEM_POR_ETAPA, SEM_FILTROS, buscarExclusao, descreverComponente, formatarMultiplo, formatarPercentual, formatarReaisCompacto, selecionarTop,
 } from '../domain/acoesBaratas'
-import type { FiltrosQualidade, ItemRanking, SnapshotAcoesBaratas } from '../domain/acoesBaratas'
+import type { ComposicaoLtm, FiltrosQualidade, ItemRanking, SnapshotAcoesBaratas } from '../domain/acoesBaratas'
 import { formatarData } from '../domain/rendaFii'
 
 function reais(valor: number) {
@@ -298,6 +298,7 @@ function CartaoRanking({ item: r, ordem, comFiltro }: { item: ItemRanking; ordem
           <Linha rotulo="Volatilidade anual" valor={formatarPercentual(r.volatilidade)} />
           <Linha rotulo="Demonstração usada" valor={`${r.demonstracao.doc} de ${formatarData(r.demonstracao.dtRefer)}`} nota={r.demonstracao.dtReceb ? `recebida pela CVM em ${formatarData(r.demonstracao.dtReceb)}` : undefined} />
         </div>
+        {r.composicaoLtm && <ComoChegamos item={r} />}
         {r.demonstracao.linkDoc && (
           <a className="tiny" href={r.demonstracao.linkDoc} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', marginTop: 6 }}>
             Abrir o documento original na CVM ↗
@@ -305,6 +306,54 @@ function CartaoRanking({ item: r, ordem, comFiltro }: { item: ItemRanking; ordem
         )}
       </details>
     </li>
+  )
+}
+
+/** Mostra de onde veio cada valor de 12 meses, para conferir contra a demonstração original. */
+function ComoChegamos({ item: r }: { item: ItemRanking }) {
+  const blocos: { titulo: string; c: ComposicaoLtm }[] = [
+    { titulo: `Lucro líquido (conta ${r.composicaoLtm?.lucro.conta ?? ''})`, c: r.composicaoLtm!.lucro },
+    { titulo: 'Caixa operacional', c: r.composicaoLtm!.fco },
+    { titulo: 'EBIT (antes dos ajustes)', c: r.composicaoLtm!.ebit },
+  ]
+  return (
+    <div className="col" style={{ gap: 8, marginTop: 10 }} data-testid={`como-chegamos-${r.ticker}`}>
+      <span className="small" style={{ fontWeight: 700 }}>Como chegamos aos 12 meses</span>
+      {blocos.map(({ titulo, c }) => (
+        <div key={titulo} className="col" style={{ gap: 0 }}>
+          <span className="tiny" style={{ fontWeight: 600 }}>{titulo}</span>
+          {c.componentes.map((k) => {
+            const d = descreverComponente(k, formatarData)
+            return (
+              <div key={`${k.papel}-${k.ate}`} className="tabela-bdr tiny">
+                <span className="muted">{d.sinal} {d.texto} ({k.doc})</span>
+                <span style={{ fontWeight: 600 }}>{formatarReaisCompacto(k.valor)}</span>
+              </div>
+            )
+          })}
+          <div className="tabela-bdr tiny">
+            <span className="muted">= últimos 12 meses</span>
+            <span style={{ fontWeight: 700 }}>{formatarReaisCompacto(c.valor)}</span>
+          </div>
+        </div>
+      ))}
+      {r.composicaoLtm!.lucro.consolidado != null && r.composicaoLtm!.lucro.controladores != null && (
+        <span className="tiny muted">
+          Lucro de 12 meses: consolidado (3.11) {formatarReaisCompacto(r.composicaoLtm!.lucro.consolidado)} · dos controladores (3.11.01) {formatarReaisCompacto(r.composicaoLtm!.lucro.controladores)}
+        </span>
+      )}
+      {r.historico && r.historico.length > 0 && (
+        <div className="col" style={{ gap: 0 }}>
+          <span className="tiny" style={{ fontWeight: 600 }}>Por exercício encerrado (lucro · caixa operacional)</span>
+          {r.historico.map((h) => (
+            <div key={h.exercicio} className="tabela-bdr tiny">
+              <span className="muted">{h.exercicio.slice(0, 4)}</span>
+              <span style={{ fontWeight: 600 }}>{formatarReaisCompacto(h.lucro)} · {formatarReaisCompacto(h.fco)}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   )
 }
 

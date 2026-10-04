@@ -1,6 +1,6 @@
 # Metodologia da triagem "Top 15 ações mais baratas"
 
-**Versão da metodologia: 1.0.2** · Decisão de origem: D49 · Parâmetros: `config/acoes-baratas.json` (fonte única) · Código: `scripts/acoes-baratas-calculo.mjs` (cálculo puro), `scripts/acoes-baratas-cvm.mjs` (leitura da CVM), `scripts/atualizar-acoes-baratas.mjs` (orquestração e gravação da auditoria), `scripts/acoes-baratas-verificar.mjs` (verificação independente).
+**Versão da metodologia: 1.0.3** · Decisão de origem: D49 · Parâmetros: `config/acoes-baratas.json` (fonte única) · Código: `scripts/acoes-baratas-calculo.mjs` (cálculo puro), `scripts/acoes-baratas-cvm.mjs` (leitura da CVM), `scripts/atualizar-acoes-baratas.mjs` (orquestração e gravação da auditoria), `scripts/acoes-baratas-verificar.mjs` (verificação independente).
 
 > **Regra de ouro deste documento.** Tudo o que está aqui deve poder ser conferido contra o código e contra a pasta `auditoria/acoes-baratas/<data>/`. Se o código mudar, a versão em `config/acoes-baratas.json` sobe, o histórico de versões (final deste arquivo) ganha uma linha, e este texto é atualizado no mesmo commit.
 
@@ -132,6 +132,7 @@ Falhou, a empresa sai na etapa `dados_contabeis` com código e motivo em `exclus
 | Descrição da conta | A descrição da CVM bate com a esperada (ex.: 3.05 contém "resultado antes do resultado financeiro") | `dados_incompletos_ou_incoerentes` |
 | Capital plausível | P/VP implícito entre 0,02 e 100 (quando o PL de controladores é positivo) | `capital_implausivel` |
 | Tesouraria | Tesouraria não pode exceder o capital da classe | `capital_invalido` |
+| Caixa operacional coerente | FCO de 12 meses não pode passar de 3x o EBITDA (ou o EBIT ajustado, se não houver EBITDA), quando a referência é positiva. FCO muito acima do resultado operacional costuma ser financiamento (recebíveis, crédito a clientes) apresentado no fluxo operacional | `fco_incoerente` |
 | Conta obrigatória | Receita, EBIT, lucro, FCO, ativo total, passivo total, caixa e PL presentes | `dados_incompletos_ou_incoerentes` |
 
 ## 8. Filtros de qualidade (opcionais)
@@ -208,9 +209,10 @@ Qualquer alteração de parâmetro, de conta ou de fórmula: (1) muda `config/ac
 10. **Universo = cadastro do app** (uma classe por empresa). Empresas fora do cadastro não são avaliadas.
 11. **Não há backtest.** Esta versão não afirma nada sobre desempenho passado do método, e a tela não faz nenhuma promessa de retorno. Qualquer afirmação de desempenho exigiria um backtest com dados *point-in-time*.
 12. **Holdings que consolidam empresa listada** repetem o mesmo negócio (caso Gerdau/Metalúrgica Gerdau, tratado em `universo.excluirTickers`). Outros casos só são vistos lendo o ranking; a lista é manual.
-13. **IFRS 16 (arrendamentos) e varejo.** Os pagamentos de aluguel ficam no fluxo de financiamento, não no FCO, e o passivo de arrendamento pode ficar fora da dívida usada no EV. Isso tende a **inflar FCO/EV de varejistas e empresas com muitas lojas ou frota alugada**. Na primeira execução real, 4 das 15 primeiras eram desse perfil, com FCO/EV de 8% a 180%. É hipótese a confirmar na memória de cálculo de cada uma, e candidata a correção na v1.1 (somar o passivo de arrendamento à dívida e/ou descontar o aluguel pago do FCO).
-14. **Cobertura de juros.** A conta 3.06.02 inclui variação cambial e custo de derivativos de várias empresas, o que reduz a cobertura (valores de 0,5x a 2x apareceram até em empresas com caixa líquido).
-15. **Dados da CVM podem ter erros de divulgação** que passam pelas verificações; a pasta de auditoria permite localizá-los depois.
+13. **Apresentação do fluxo de caixa.** Há empresas cujo FCO reportado inclui fluxos de financiamento (caso verificado: a Magalu reporta ~R$ 15,7 bi de FCO em 2025 com ~R$ 15 bi negativos no financiamento). A verificação `fco_incoerente` barra os casos extremos (> 3x o EBITDA), mas distorções menores passam; o FCO/EV deve ser lido com essa cautela.
+14. **IFRS 16 (arrendamentos) e varejo.** Os pagamentos de aluguel ficam no fluxo de financiamento, não no FCO, e o passivo de arrendamento pode ficar fora da dívida usada no EV. Isso tende a **inflar FCO/EV de varejistas e empresas com muitas lojas ou frota alugada**. Na primeira execução real, 4 das 15 primeiras eram desse perfil, com FCO/EV de 8% a 180%. É hipótese a confirmar na memória de cálculo de cada uma, e candidata a correção na v1.1 (somar o passivo de arrendamento à dívida e/ou descontar o aluguel pago do FCO).
+15. **Cobertura de juros.** A conta 3.06.02 inclui variação cambial e custo de derivativos de várias empresas, o que reduz a cobertura (valores de 0,5x a 2x apareceram até em empresas com caixa líquido).
+16. **Dados da CVM podem ter erros de divulgação** que passam pelas verificações; a pasta de auditoria permite localizá-los depois.
 
 ## 11. Publicação: aprovação, trava de sanidade e o que ainda é recomendado
 
@@ -262,6 +264,7 @@ Opcional: `TOP15_SAL` (qualquer texto aleatório) reforça o hash do IP. Com as 
 
 | Versão | Data | Mudança |
 |---|---|---|
+| 1.0.3 | 2026-10-04 | Conferência com fontes públicas: nova verificação `fco_incoerente` (FCO > 3x o EBITDA), a partir do caso MGLU3; a memória de cálculo na tela passa a mostrar a composição dos 12 meses e o lucro e o caixa de cada exercício. |
 | 1.0.2 | 2026-10-04 | VALE3 informa a quantidade de ações em milhares (4.072.366 em vez de ~4,07 bilhões) e era excluída por capital implausível. Criado o ajuste manual e registrado de unidade (`capital.ajustesManuais`), aplicado só à VALE3 (×1000). |
 | 1.0.1 | 2026-10-04 | Primeira execução real: (1) corrige o EBITDA (a depreciação da DVA vem negativa e era subtraída), que inflava a dívida líquida/EBITDA e o filtro de qualidade correspondente; a nota e a ordem do ranking não mudam; (2) exclui a holding GOAU4; (3) a exclusão por capital implausível passa a mostrar os números usados. |
 | 1.0.0 | 2026-10-04 | Versão inicial: universo, filtros, indicador composto (PL/VM, FCO/EV, EBIT ajustado/EV), ranking por média de ranks percentuais, filtros de qualidade opcionais (ROIC, dívida líquida/EBITDA, FCO, cobertura de juros, consistência de 5 exercícios), trilha de auditoria e verificação independente. |

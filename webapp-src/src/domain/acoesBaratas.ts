@@ -14,6 +14,31 @@ export interface DemonstracaoUsada {
   linkDoc: string | null
 }
 
+/** Um pedaço do valor de 12 meses: exercício, acumulado do ano atual ou acumulado do ano anterior (este último subtrai). */
+export interface ComponenteLtm {
+  papel: string
+  de: string | null
+  ate: string
+  doc: string
+  valor: number
+}
+
+export interface ComposicaoLtm {
+  valor: number
+  componentes: ComponenteLtm[]
+  /** Só no lucro: conta CVM usada e os dois valores de 12 meses (consolidado e dos controladores). */
+  conta?: string
+  consolidado?: number
+  controladores?: number | null
+}
+
+export interface ExercicioHistorico {
+  exercicio: string
+  conta: string
+  lucro: number
+  fco: number
+}
+
 export interface ItemRanking {
   posicao: number
   ticker: string
@@ -47,6 +72,8 @@ export interface ItemRanking {
   exerciciosComLucro: number
   exerciciosComFco: number
   passaConsistencia: boolean
+  composicaoLtm?: { ebit: ComposicaoLtm; fco: ComposicaoLtm; lucro: ComposicaoLtm }
+  historico?: ExercicioHistorico[]
   volatilidade: number | null
   volumeMedio: number | null
   demonstracao: DemonstracaoUsada
@@ -172,4 +199,11 @@ export const CONTAGEM_POR_ETAPA: Record<string, string> = {
   dados_contabeis: 'Demonstrações incompletas, defasadas ou incoerentes',
   lucro: 'Sem lucro nos últimos 12 meses',
   indicador: 'Rendimento sobre EV indefinido',
+}
+
+/** Como ler um componente do valor de 12 meses: sinal e descrição curta. */
+export function descreverComponente(c: ComponenteLtm, formatarData: (iso: string) => string): { sinal: '+' | '−'; texto: string } {
+  const sinal = c.papel.includes('(−)') ? '−' : '+'
+  if (c.papel.startsWith('exercicio')) return { sinal, texto: `exercício encerrado em ${formatarData(c.ate)}` }
+  return { sinal, texto: `acumulado de ${c.de ? formatarData(c.de) : '—'} a ${formatarData(c.ate)}` }
 }

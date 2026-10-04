@@ -683,3 +683,47 @@ test('ajuste manual de unidade do capital (VALE3 informa ações em milhares): s
   assert.match(errado.exclusoes[0].motivo, /MESMO com o ajuste manual de ×2/)
   assert.equal(cfg.capital.ajustesManuais.VALE3.fatorQuantidade, 1000)
 })
+
+test('caixa operacional incoerente (caso real MGLU3): FCO > 3x o EBITDA vira exclusão com motivo e números; no limite ainda passa', () => {
+  // EBIT 100 + depreciação 30 = EBITDA 130 → limite 3x = 390
+  const r = (fco, extra = {}) => calcular(insumosDe([fabricar('FCOI3', { da: -30, fco, ...extra })]), cfg).resultado
+  const barrada = r(1000)
+  assert.equal(barrada.ranking.length, 0)
+  assert.deepEqual([barrada.exclusoes[0].etapa, barrada.exclusoes[0].codigo], ['dados_contabeis', 'fco_incoerente'])
+  assert.match(barrada.exclusoes[0].motivo, /7,7x o EBITDA de R\$ 0 mi/)  // 1000/130, em R$ (valores do teste são pequenos)
+  assert.match(barrada.exclusoes[0].motivo, /financiamento/)
+  assert.equal(r(390).ranking.length, 1, 'exatamente 3,0x ainda passa')
+  assert.equal(r(391).ranking.length, 0)
+  // sem DVA não há EBITDA: usa o EBIT ajustado como referência (100 → limite 300)
+  const semDva = (fco) => calcular(insumosDe([fabricar('FCOI3', { fco })]), cfg).resultado
+  assert.equal(semDva(300).ranking.length, 1)
+  assert.match(semDva(301).exclusoes[0].motivo, /3,0x o EBIT ajustado/)
+  // FCO normal (parecido com o EBITDA) e FCO negativo não são barrados por esta regra
+  assert.equal(r(130).ranking.length, 1)
+  assert.equal(r(-50).ranking.length, 1)
+
+  // os números do print da MGLU3: FCO R$ 16,4 bi, EBIT ajustado R$ 1,5 bi, D&A da ordem de R$ 1,1 bi → ~6x
+  assert.ok(16.4 / (1.5 + 1.1) > cfg.verificacoes.fcoMaximoSobreEbitda)
+  // e as 14 empresas que apareceram saudáveis no print têm FCO/EBIT de até ~1,9x, longe do limite
+  for (const razao of [21.1 / 23.1, 45.8 / 29.8, 35.0 / 18.7, 15.9 / 19.1, 8.3 / 22.8]) assert.ok(razao < cfg.verificacoes.fcoMaximoSobreEbitda)
+})
+
+test('composição dos 12 meses e histórico por exercício chegam ao ranking, para conferir contra o documento da CVM', async () => {
+  const { contabil } = await contabilAlfa()
+  const alfa = { ticker: 'ALFA4', nome: 'Alfa', setor: 'Mineração', cnpj: CNPJ_ALFA, preco: { ...precoAlfa, volumeMedioEmissor: 40e6, serieAjustada: Array.from({ length: 200 }, (_, i) => 7 * (1 + 0.01 * (i % 2 ? 1 : -1))), saltosNaoResolvidos: [] }, contabil }
+  const r = calcular(insumosDe([alfa], '2026-09-30'), cfg).resultado.ranking[0]
+  // FCO: exercício 2025 (1.400) + acumulado 1S26 (800) − acumulado 1S25 (650) = 1.550
+  const fco = r.composicaoLtm.fco
+  assert.equal(fco.valor, 1550e6)
+  assert.deepEqual(fco.componentes.map((c) => [c.papel, c.valor, c.de, c.ate]), [
+    ['exercicio_anterior (+)', 1400e6, '2025-01-01', '2025-12-31'],
+    ['acumulado_atual (+)', 800e6, '2026-01-01', '2026-06-30'],
+    ['acumulado_ano_anterior (−)', 650e6, '2025-01-01', '2025-06-30'],
+  ])
+  assert.equal(fco.componentes.reduce((s, c) => s + (c.papel.includes('(−)') ? -c.valor : c.valor), 0), fco.valor, 'a soma dos componentes fecha com o total')
+  assert.equal(r.composicaoLtm.lucro.conta, '3.11.01')
+  assert.equal(r.composicaoLtm.lucro.valor, 1000e6)
+  assert.equal(r.composicaoLtm.lucro.consolidado, 1060e6, 'consolidado (3.11): 900 + 560 − 400')
+  assert.equal(r.composicaoLtm.lucro.controladores, 1000e6, 'controladores (3.11.01): 850 + 530 − 380')
+  assert.deepEqual(r.historico.map((h) => [h.exercicio.slice(0, 4), h.lucro]), [['2025', 850e6], ['2024', 820e6], ['2023', 800e6], ['2022', -150e6], ['2021', 700e6]])
+})

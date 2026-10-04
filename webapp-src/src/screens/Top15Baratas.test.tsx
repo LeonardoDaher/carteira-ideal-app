@@ -85,6 +85,32 @@ describe('Top15Baratas', () => {
     expect(link.getAttribute('rel')).toContain('noopener')
   })
 
+  it('"Como chegamos aos 12 meses": mostra exercício + acumulado − acumulado e o lucro de cada exercício', () => {
+    const comp = (valor: number, partes: [string, number][]) => ({
+      valor,
+      componentes: partes.map(([papel, v]) => ({ papel, de: papel.startsWith('exercicio') ? '2025-01-01' : papel.includes('atual') ? '2026-01-01' : '2025-01-01', ate: papel.startsWith('exercicio') ? '2025-12-31' : papel.includes('atual') ? '2026-06-30' : '2025-06-30', doc: papel.startsWith('exercicio') ? 'DFP' : 'ITR', valor: v })),
+    })
+    const r = item('SEER3', 1, {
+      composicaoLtm: {
+        lucro: { ...comp(57e6, [['exercicio_anterior (+)', 214e6], ['acumulado_atual (+)', 10e6], ['acumulado_ano_anterior (−)', 167e6]]), conta: '3.11.01', consolidado: 60e6, controladores: 57e6 },
+        fco: comp(443e6, [['exercicio_anterior (+)', 400e6], ['acumulado_atual (+)', 200e6], ['acumulado_ano_anterior (−)', 157e6]]),
+        ebit: comp(521e6, [['exercicio_anterior (+)', 450e6], ['acumulado_atual (+)', 260e6], ['acumulado_ano_anterior (−)', 189e6]]),
+      },
+      historico: [{ exercicio: '2025-12-31', conta: '3.11.01', lucro: 214e6, fco: 400e6 }, { exercicio: '2024-12-31', conta: '3.11.01', lucro: -1e6, fco: 300e6 }],
+    })
+    render(<Top15Baratas snapshot={snapshot({ ranking: [r] })} />)
+    const bloco = within(screen.getByTestId('como-chegamos-SEER3'))
+    expect(bloco.getByText('Lucro líquido (conta 3.11.01)')).toBeTruthy()
+    expect(bloco.getAllByText(/\+ exercício encerrado em 31\/12\/2025 \(DFP\)/).length).toBe(3)
+    expect(bloco.getAllByText(/\+ acumulado de 01\/01\/2026 a 30\/06\/2026 \(ITR\)/).length).toBe(3)
+    expect(bloco.getAllByText(/− acumulado de 01\/01\/2025 a 30\/06\/2025 \(ITR\)/).length).toBe(3)
+    expect(bloco.getAllByText('= últimos 12 meses').length).toBe(3)
+    expect(bloco.getByText(/consolidado \(3\.11\) R\$ 60 mi · dos controladores \(3\.11\.01\) R\$ 57 mi/)).toBeTruthy()
+    expect(bloco.getByText('2025')).toBeTruthy()
+    expect(bloco.getByText('R$ 214 mi · R$ 400 mi')).toBeTruthy()
+    expect(bloco.getByText('−R$ 1 mi · R$ 300 mi')).toBeTruthy()
+  })
+
   it('"por que ficou de fora" explica o motivo da exclusão', () => {
     render(<Top15Baratas snapshot={snapshot()} />)
     fireEvent.change(screen.getByLabelText('Buscar empresa fora da triagem'), { target: { value: 'mglu' } })

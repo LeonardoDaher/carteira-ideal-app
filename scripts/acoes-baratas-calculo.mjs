@@ -58,6 +58,7 @@ export function contasNecessarias() {
 
 export const arred = (n, casas = 6) => (n == null || !Number.isFinite(n) ? null : Math.round(n * 10 ** casas) / 10 ** casas)
 const reais = (n) => (n == null ? null : Math.round(n * 100) / 100)
+const milhoes = (n) => `R$ ${(n / 1e6).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} mi`
 
 export function semAcento(texto) {
   return String(texto ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
@@ -308,6 +309,14 @@ function excluir(etapa, codigo, motivo, detalhe) {
   return { excluida: { etapa, codigo, motivo, detalhe: detalhe ?? null } }
 }
 
+/** Como um valor de 12 meses foi montado: cada componente com período e valor (para conferir no documento da CVM). */
+function composicao(item, valor) {
+  return {
+    valor: reais(valor),
+    componentes: (item.componentes ?? []).map((c) => ({ papel: c.papel, de: c.dtIni ?? null, ate: c.dtFim, doc: c.doc, valor: reais(c.valor) })),
+  }
+}
+
 /** Fundamentos e indicadores de UMA empresa. Devolve { excluida } ou { metricas, memoria }. */
 export function calcularFundamentos(emp, preco, cfg, dataCorte) {
   const c = emp.contabil
@@ -382,7 +391,7 @@ export function calcularFundamentos(emp, preco, cfg, dataCorte) {
   const pvpOk = pvp === null ? null : pvp >= cfg.verificacoes.pvpMinimoPlausivel && pvp <= cfg.verificacoes.pvpMaximoPlausivel
   verificacoes.push({ id: 'pvp_plausivel', ok: pvpOk, detalhe: pvp === null ? 'PL de controladores ≤ 0: teste não se aplica.' : `P/VP implícito = ${arred(pvp, 2)} (faixa aceita ${cfg.verificacoes.pvpMinimoPlausivel} a ${cfg.verificacoes.pvpMaximoPlausivel}).` })
   if (pvpOk === false) {
-    const mi = (n) => `R$ ${(n / 1e6).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} mi`
+    const mi = milhoes
     const acoes = vm.classes.map((k) => `${k.classe} ${k.quantidade.toLocaleString('pt-BR')} ações × R$ ${k.preco.toLocaleString('pt-BR')}`).join(' + ')
     return excluir('dados_contabeis', 'capital_implausivel', `P/VP implícito de ${arred(pvp, 4)} (valor de mercado ${mi(vm.valor)} ÷ PL dos controladores ${mi(plControladores)}; ${acoes}) fora da faixa ${cfg.verificacoes.pvpMinimoPlausivel} a ${cfg.verificacoes.pvpMaximoPlausivel}${fator !== 1 ? ` MESMO com o ajuste manual de ×${fator}` : ''}: quantidade de ações ou unidade do capital sob suspeita.`, { pvp, valorDeMercado: reais(vm.valor), plControladores: reais(plControladores), capital: { ordinarias: cap.ordinarias, preferenciais: cap.preferenciais, tesouroOrd: cap.tesouroOrd, tesouroPref: cap.tesouroPref } })
   }
@@ -419,6 +428,15 @@ export function calcularFundamentos(emp, preco, cfg, dataCorte) {
   let dlEbitda = null
   if (ebitda !== null) dlEbitda = ebitda > 0 ? dividaLiquida / ebitda : dividaLiquida <= 0 ? -Infinity : null
   const dlEbitdaPublicado = dlEbitda === -Infinity ? null : dlEbitda
+
+  // Integridade do caixa operacional: FCO muito acima do resultado operacional costuma ser reclassificação de
+  // financiamento (recebíveis, financiamento a clientes) dentro do fluxo operacional, não geração de caixa.
+  const limiteFco = cfg.verificacoes.fcoMaximoSobreEbitda
+  const referenciaFco = ebitda !== null ? ebitda : ebitAj
+  if (limiteFco && referenciaFco > 0 && fco > limiteFco * referenciaFco) {
+    const base = ebitda !== null ? 'EBITDA' : 'EBIT ajustado'
+    return excluir('dados_contabeis', 'fco_incoerente', `Caixa operacional de ${milhoes(fco)} em 12 meses é ${(fco / referenciaFco).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}x o ${base} de ${milhoes(referenciaFco)} (limite ${limiteFco.toLocaleString('pt-BR', { minimumFractionDigits: 1 })}x). Costuma indicar financiamento (recebíveis, crédito a clientes) apresentado no fluxo operacional; o indicador caixa operacional/EV não seria confiável.`, { fco: reais(fco), referencia: reais(referenciaFco), base, razao: arred(fco / referenciaFco, 2) })
+  }
   const caixaLiquido = dividaLiquida <= 0
 
   const q = cfg.qualidade
@@ -458,6 +476,12 @@ export function calcularFundamentos(emp, preco, cfg, dataCorte) {
     exerciciosComLucro: consistencia.comLucro,
     exerciciosComFco: consistencia.comFco,
     passaConsistencia: consistencia.passa,
+    composicaoLtm: {
+      ebit: composicao(itens.ebit, V('ebit')),
+      fco: composicao(itens.fco, V('fco')),
+      lucro: { conta: lucroConta, ...composicao(itens[lucroConta === '3.11.01' ? 'lucroControladores' : 'lucroConsolidado'], lucro), consolidado: reais(V('lucroConsolidado')), controladores: itens.lucroControladores.componentes.length ? reais(V('lucroControladores')) : null },
+    },
+    historico: consistencia.exercicios.map((e) => ({ exercicio: e.exercicio, conta: e.contaLucro, lucro: reais(e.lucro), fco: reais(e.fco) })),
   }
 
   const memoria = {
@@ -633,6 +657,8 @@ export function calcular(insumos, cfg) {
       exerciciosComLucro: m.exerciciosComLucro,
       exerciciosComFco: m.exerciciosComFco,
       passaConsistencia: m.passaConsistencia,
+      composicaoLtm: m.composicaoLtm,
+      historico: m.historico,
       volatilidade: memoria[emp.ticker].volatilidade?.anualizada ?? null,
       volumeMedio: memoria[emp.ticker].liquidez?.volumeMedioEmissor ?? null,
       demonstracao: { doc: memoria[emp.ticker].demonstracao.doc, dtRefer: memoria[emp.ticker].demonstracao.dtRefer, dtReceb: memoria[emp.ticker].demonstracao.dtReceb, linkDoc: memoria[emp.ticker].demonstracao.linkDoc },

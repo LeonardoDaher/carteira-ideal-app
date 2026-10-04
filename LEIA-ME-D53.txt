@@ -1,0 +1,17 @@
+D53: conferência de MGLU3 e SEER3 contra fontes públicas (metodologia 1.0.3). Detalhes e tabela de conferência: docs/07-registro-de-decisoes.md, D53.
+
+RESUMO
+ - MGLU3: lucro e caixa operacional BATEM com o que a empresa reporta. O problema é o indicador: o caixa operacional dela inclui financiamento (R$ 15,7 bi,
+   espelhado no financiamento). Nova verificação "fco_incoerente" (caixa operacional > 3x o EBITDA): a MGLU3 passa a aparecer em "Por que ficou de fora?".
+ - SEER3: o lucro NÃO bate com as fontes (0 de 5 anos; as fontes dão 2 de 5). Ainda não sei a causa; NÃO usar "exercícios com lucro" da SEER3 por enquanto.
+ - A "Memória de cálculo" agora tem o bloco "Como chegamos aos 12 meses" e o lucro/caixa de cada exercício. É por ele que acho a causa da SEER3.
+
+SUBA TODOS OS ARQUIVOS DO ZIP e depois: Actions → Atualizar Top 15 Ações Baratas → Run workflow → esperar ✅ e o deploy ficar Ready.
+
+DEPOIS, ME MANDE:
+ 1) Print da Memória de cálculo da SEER3, agora com o bloco "Como chegamos aos 12 meses" e a lista "Por exercício encerrado" abertos.
+ 2) Print de "Por que uma empresa ficou de fora?" pesquisando MGLU3 (deve mostrar o motivo do caixa operacional).
+
+ARQUIVOS: config/acoes-baratas.json, scripts/acoes-baratas-calculo.mjs, scripts/acoes-baratas.test.mjs,
+          webapp-src/src/domain/acoesBaratas.ts, webapp-src/src/screens/Top15Baratas.tsx, webapp-src/src/screens/Top15Baratas.test.tsx,
+          docs/07-registro-de-decisoes.md, docs/09-metodologia-acoes-baratas.md
