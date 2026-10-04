@@ -1,0 +1,42 @@
+O QUE É
+D49: logo no amarelo claro da imagem que você enviou. SÓ A COR mudou.
+1) Aro e seta em amarelo #ffe04a (antes dourado #efb70a).
+2) O desenho é exatamente o mesmo de antes (mesma seta, mesma ponta, mesmo aro, mesmo miolo escuro).
+3) Trocada em todos os lugares: topo das telas do app, logo grande da landing, páginas de SEO, privacidade e painel (todas usam
+   assets/logo-mark.svg), ícone da aba do navegador, ícones do app instalado (Android e iPhone) e a logo da imagem de compartilhamento
+   (og-image). O endereço da imagem de compartilhamento passou para ?v=3, para WhatsApp e redes buscarem a nova.
+
+NÃO MUDOU: o desenho da logo, o amarelo dos botões e destaques (#e8cb00), tamanhos e posições da logo, textos, cálculos e layout.
+
+ARQUIVOS (em relação ao que está hoje no GitHub, versão D48)
+   + LEIA-ME-D49.txt
+   ~ assets/logo-mark.svg
+   ~ assets/favicon.svg
+   ~ assets/apple-touch-icon.png
+   ~ assets/og-image.png
+   ~ docs/07-registro-de-decisoes.md
+   ~ gerar-paginas.mjs
+   ~ index.html
+   ~ scripts/gerar-paginas.mjs
+   ~ webapp-src/index.html
+   ~ webapp-src/public/favicon.svg
+   ~ webapp-src/public/icon-192.png
+   ~ webapp-src/public/icon-512.png
+   ~ webapp-src/public/icon-maskable-512.png
+   ~ webapp-src/src/ui/Marca.tsx
+   Obs.: gerar-paginas.mjs na raiz é a cópia solta que já vinha no pacote; foi mantida igual a scripts/gerar-paginas.mjs.
+
+COMO SUBIR - no GitHub: Add file > Upload files
+1. EXTRAIA o zip no computador. Abra a pasta "D49-subir" e arraste o CONTEÚDO (as pastas assets, docs, scripts e webapp-src e os arquivos
+   soltos), não a pasta em si.
+2. Num ÚNICO envio (são 15 arquivos). Espere a lista carregar e confira que mostra 15.
+3. Mensagem do commit: "D49: logo no amarelo claro em todo o app" e clique no botão verde "Commit changes".
+4. Confira na aba Code se apareceu o commit novo.
+
+DEPOIS DO DEPLOY
+1. Abra a landing e o app: a logo deve estar no amarelo claro. Se aparecer a antiga, recarregue sem cache (Ctrl+Shift+R).
+2. A aba do navegador pode demorar a trocar o ícone (o navegador guarda o favicon por um tempo).
+3. Quem já instalou o app no celular pode continuar vendo o ícone antigo até o sistema atualizar; no iPhone, só reinstalando o atalho.
+
+VERIFICAÇÃO: 1258 testes do app e 184 dos scripts passando; typecheck, lint e build sem erros. Landing e app abertos no navegador
+deste ambiente depois do build, com a logo nova.

@@ -999,3 +999,11 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 **Testes.** 1.230 → 1.258 no app (motor da moto, tela da moto, hub e estado) e 182 → 184 nos scripts (página de SEO da moto; contagem de páginas 34 → 35).
 
 **Consequência.** O Simule Bens tem os três bens previstos. O próximo passo natural não é um novo bem, e sim fechar as pendências de fonte (série do Banco Central, FIPE) e decidir sobre a moto de trabalho.
+
+## D49 — Logo no amarelo claro (04/10/2026)
+
+**Pedido.** Trocar a cor da logo do Carteira Ideal, em todos os lugares do app e do site, pelo amarelo da imagem enviada pelo responsável. Só a cor: o desenho (aro, seta e ponta) continua exatamente o mesmo.
+
+**O que mudou.** Aro e seta passam de dourado #efb70a para amarelo #ffe04a (cor medida na imagem de referência). Arquivos: `assets/logo-mark.svg`, `assets/favicon.svg`, `webapp-src/public/favicon.svg`, `webapp-src/src/ui/Marca.tsx`, os ícones PNG (`assets/apple-touch-icon.png`, `webapp-src/public/icon-192.png`, `icon-512.png`, `icon-maskable-512.png`) e a logo dentro de `assets/og-image.png`. A versão da imagem de compartilhamento passou de `?v=2` para `?v=3` para as redes sociais buscarem a nova.
+
+**Não mudou.** O desenho da logo e o miolo escuro do círculo. O amarelo dos botões e destaques do app continua #e8cb00 (decisão do responsável: só a logo usa o #ffe04a). Tamanho e posição da logo em cada tela, textos e layout.

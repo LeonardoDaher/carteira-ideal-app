@@ -249,7 +249,7 @@ export function montarPagina(pg) {
     <meta property="og:locale" content="pt_BR" />
     <meta property="og:title" content="${esc(pg.titulo)}" />
     <meta property="og:description" content="${esc(pg.descricao)}" />
-    <meta property="og:image" content="${DOMINIO}/assets/og-image.png?v=2" />
+    <meta property="og:image" content="${DOMINIO}/assets/og-image.png?v=3" />
     <meta property="og:url" content="${url}" />
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
