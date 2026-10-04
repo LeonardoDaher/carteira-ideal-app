@@ -1,27 +1,27 @@
 {
   "esquema": 1,
   "versaoMetodologia": "1.0.0",
-  "geradoEm": "2026-10-04T19:27:18.051Z",
+  "geradoEm": "2026-10-04T20:26:49.675Z",
   "dataPrecos": "2026-10-02",
   "dataCorte": "2026-10-02",
   "ambiente": {
     "node": "v22.23.3",
     "plataforma": "linux",
-    "commit": "5ea216383bfb56c7ee385aada9f4df13f5a5a6ab",
-    "execucao": "37228280722"
+    "commit": "714651ca171c351330b929e2340237416426ccea",
+    "execucao": "37232066355"
   },
   "codigo": {
     "calculoSha256": "8f4a06ad99e86b3e3bb5ad462e79527e157ffd4ef69d6ccf197c5484f89ff26b",
     "extracaoSha256": "be9ea6013a1bcb8a043f2572e1135c0b2ac3225415abc2e94a688080b350dbfc"
   },
   "hashes": {
-    "config": "190b0719db5580ed3304907a8f3404e261af359461330ce4f268d2b968493ff4",
+    "config": "a1f6c47956e29e109730e9bdf59d204135dede36055fe1c3aa84ef2f663b1b84",
     "insumos": "dee019ca2acb083c0428f62e95581c5781a302f895b8f58d74d7dd6f9d5b42dd",
     "resultado": "617f2c1e128aa31957e25ec57f3ebca2d1f91157e3719e09a18b63418c517f8a",
     "memoria": "49336a2bfbc662fa8335cd3d4ce632ec1936a7944c9c02b9efda1e122149aed4",
     "arquivos": {
       "insumos.json.gz": "a4979a8da662b5e1b2529aba28d5518a8e9fdfa192bf21c82036fb84da581874",
-      "config.json": "b24e6cda5d38c90c6b21f9f37481baf59db09b439fa62a800c457147a4530d94",
+      "config.json": "980f87b58638bf5ae99ecf7768f33898cad6a85d768696d71ad625d9cabf9731",
       "resultado.json": "1aecfca62ec57b2b2dda08c4c9645e644d678b2128af7948e919704da4afc3c8",
       "memoria-de-calculo.json.gz": "c0903e44c11b060c06a2dceb606f59c9de9b7372fec0985f445b42078ef1b39c",
       "ranking.csv": "9957692b48ab0b6a1843a816952548c50ab6d6ca5d6f07c9b7999bff79a88e28",
@@ -36,7 +36,7 @@
       "arquivo": "fca_cia_aberta_2026.zip",
       "bytes": 361734,
       "sha256": "21d4bb18fb6923cf2253c2a1d76496ef71366287fbde5ca725d76f303a2069b8",
-      "baixadoEm": "2026-10-04T19:26:43.566Z"
+      "baixadoEm": "2026-10-04T20:26:12.396Z"
     },
     {
       "papel": "DFP 2021",
@@ -44,7 +44,7 @@
       "arquivo": "dfp_cia_aberta_2021.zip",
       "bytes": 13283026,
       "sha256": "64b8693b709538a0357c5179ae02231cb380d0000956ee57a873a21d4efda2e4",
-      "baixadoEm": "2026-10-04T19:26:44.802Z"
+      "baixadoEm": "2026-10-04T20:26:14.144Z"
     },
     {
       "papel": "DFP 2022",
@@ -52,7 +52,7 @@
       "arquivo": "dfp_cia_aberta_2022.zip",
       "bytes": 13448916,
       "sha256": "b9ac4eed33ef64346c826ef25aa7a59b6098822dcac04c131e52305e29e3e4ae",
-      "baixadoEm": "2026-10-04T19:26:47.313Z"
+      "baixadoEm": "2026-10-04T20:26:16.974Z"
     },
     {
       "papel": "DFP 2023",
@@ -60,7 +60,7 @@
       "arquivo": "dfp_cia_aberta_2023.zip",
       "bytes": 13563376,
       "sha256": "be508606d186cda7ee86dcf461993b392e1151dd1a01d9290f8b627d7d4b5cbb",
-      "baixadoEm": "2026-10-04T19:26:49.916Z"
+      "baixadoEm": "2026-10-04T20:26:19.539Z"
     },
     {
       "papel": "DFP 2024",
@@ -68,7 +68,7 @@
       "arquivo": "dfp_cia_aberta_2024.zip",
       "bytes": 13396369,
       "sha256": "fea8592888271d4b7cab04328b2b5c586a6c44adb2399d74b61bfa822400dcf3",
-      "baixadoEm": "2026-10-04T19:26:52.361Z"
+      "baixadoEm": "2026-10-04T20:26:22.338Z"
     },
     {
       "papel": "DFP 2025",
@@ -76,7 +76,7 @@
       "arquivo": "dfp_cia_aberta_2025.zip",
       "bytes": 12784140,
       "sha256": "d7aec54e7c67998e4cd3ef94c463ab247f09a6baaa2254878d1e431f28130e2a",
-      "baixadoEm": "2026-10-04T19:26:55.032Z"
+      "baixadoEm": "2026-10-04T20:26:24.932Z"
     },
     {
       "papel": "DFP 2026",
@@ -84,7 +84,7 @@
       "arquivo": "dfp_cia_aberta_2026.zip",
       "bytes": 243348,
       "sha256": "7eab96451f58476d37b52653dabdd4fd423feb0870b97d44df5925feb42cdd93",
-      "baixadoEm": "2026-10-04T19:26:58.148Z"
+      "baixadoEm": "2026-10-04T20:26:26.610Z"
     },
     {
       "papel": "ITR 2025",
@@ -92,7 +92,7 @@
       "arquivo": "itr_cia_aberta_2025.zip",
       "bytes": 31660219,
       "sha256": "efe754841bed9eac2a3138c92a187060842c1746845e9471749be5c91819dc51",
-      "baixadoEm": "2026-10-04T19:27:00.103Z"
+      "baixadoEm": "2026-10-04T20:26:28.684Z"
     },
     {
       "papel": "ITR 2026",
@@ -100,7 +100,7 @@
       "arquivo": "itr_cia_aberta_2026.zip",
       "bytes": 19634453,
       "sha256": "0e1ef74291d2143e7bb55247b01c8bbd94995d995536f70f0d19de1d79d7e38c",
-      "baixadoEm": "2026-10-04T19:27:07.217Z"
+      "baixadoEm": "2026-10-04T20:26:38.443Z"
     },
     {
       "papel": "Histórico de preços da B3 (Boletim BVBG.086)",
