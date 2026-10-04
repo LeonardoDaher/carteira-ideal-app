@@ -36,6 +36,7 @@ ARQUIVOS NOVOS
    webapp-src/src/domain/acessoTop15.ts (+ .test.ts)
 ARQUIVOS ALTERADOS
    vercel.json (bloco "functions"), package.json (script codigo-top15), config/acoes-baratas.json (publicacao.acesso),
+
    scripts/atualizar-acoes-baratas.mjs, scripts/acoes-baratas.test.mjs, .github/workflows/atualizar-acoes-baratas.yml (commita dados-privados),
    webapp-src/src/screens/Top15Baratas.tsx (+ .test.tsx), webapp-src/src/domain/acoesBaratas.ts,
    docs/07-registro-de-decisoes.md (D50), docs/09-metodologia-acoes-baratas.md (seção 11.1), LEIA-ME-D49.txt
