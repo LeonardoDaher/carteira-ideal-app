@@ -246,9 +246,14 @@ export function escolherConsolidacao(linhas, ultimo) {
  */
 export function consistenciaHistorica(c, cons, dataCorte, cfgConsistencia) {
   const N = cfgConsistencia.exercicios
-  const dfps = c.docs
+  const todasDfps = c.docs
     .filter((d) => d.doc === 'DFP' && d.dtRefer <= dataCorte && (!d.dtReceb || d.dtReceb <= dataCorte))
     .sort((a, b) => (a.dtRefer < b.dtRefer ? 1 : -1))
+  // Só vale DFP cuja data-base é o fim do exercício da empresa (o mês e o dia da mais recente). A CVM traz, para alguns emissores,
+  // uma "DFP" com data-base no meio do ano (TEND3: 31/03/2023, entre as de 2022 e 2023), que quebrava a cadeia de exercícios.
+  const fimDoExercicio = todasDfps[0]?.dtRefer.slice(5)
+  const dfps = todasDfps.filter((d) => d.dtRefer.slice(5) === fimDoExercicio)
+  const ignoradas = todasDfps.filter((d) => d.dtRefer.slice(5) !== fimDoExercicio)
   const cadeia = []
   let lacuna = null
   for (const d of dfps) {
@@ -261,22 +266,87 @@ export function consistenciaHistorica(c, cons, dataCorte, cfgConsistencia) {
     if (cadeia.length === N) break
   }
   const exercicios = []
-  const descartados = []
+  const descartados = ignoradas.map((d) => ({ exercicio: d.dtRefer, motivo: `DFP com data-base fora do fim do exercício (${fimDoExercicio?.slice(3)}/${fimDoExercicio?.slice(0, 2)}): ignorada` }))
   for (const d of cadeia) {
-    const acha = (cd, dem) => maisLonga(c.linhas.filter((l) => l.doc === 'DFP' && l.dtRefer === d.dtRefer && l.cons === cons && l.ordem === 'ULTIMO' && l.dem === dem && l.cd === cd))
-    const controladores = acha('3.11.01', 'DRE')
-    const lucro = acha('3.11', 'DRE') ?? controladores // consolidado primeiro (ver o comentário do lucro de 12 meses)
-    const fco = acha('6.01', 'DFC')
+    const ler = (consX) => {
+      const acha = (cd, dem) => maisLonga(c.linhas.filter((l) => l.doc === 'DFP' && l.dtRefer === d.dtRefer && l.cons === consX && l.ordem === 'ULTIMO' && l.dem === dem && l.cd === cd))
+      const controladores = acha('3.11.01', 'DRE')
+      return { controladores, lucro: acha('3.11', 'DRE') ?? controladores, fco: acha('6.01', 'DFC') } // consolidado primeiro (ver o comentário do lucro de 12 meses)
+    }
+    // A individual substitui a consolidada em dois casos, ambos registrados no exercício:
+    //  (a) a DFP NÃO TEM demonstração consolidada (empresa sem controladas: TIMS3, PGMN3, TTEN3 em 2021; SBSP3 em 2021 e 2022); a
+    //      individual é a única demonstração e é igual à consolidada quando não há controladas;
+    //  (b) a coluna ÚLTIMO consolidada veio ZERADA (TIMS3 em 2024 e 2025: lucro 0 e FCO 0 ao mesmo tempo, enquanto a PENÚLTIMO e a
+    //      individual estão preenchidas); lucro e caixa operacional exatamente zero juntos é falta de dado, não resultado.
+    // Se a DFP tem a consolidada preenchida, só ela conta (nunca se troca por conveniência).
+    const dfpTemCons = c.linhas.some((l) => l.doc === 'DFP' && l.dtRefer === d.dtRefer && l.cons === cons)
+    let consDoExercicio = cons
+    let { controladores, lucro, fco } = ler(cons)
+    let motivoTroca = null
+    const zerada = (x) => x.lucro && x.fco && x.lucro.valor === 0 && x.fco.valor === 0
+    if (cons !== 'ind') {
+      const ind = ler('ind')
+      if (!dfpTemCons) motivoTroca = 'DFP sem demonstração consolidada: usada a individual'
+      else if (zerada({ lucro, fco }) && ind.lucro && ind.fco && !zerada(ind)) motivoTroca = 'demonstração consolidada zerada na DFP (lucro e caixa operacional iguais a zero): usada a individual'
+      if (motivoTroca) { consDoExercicio = 'ind'; ({ controladores, lucro, fco } = ind) }
+    }
     if (!lucro || !fco || duracao(lucro) < 360) {
       descartados.push({ exercicio: d.dtRefer, motivo: !lucro ? 'DFP sem a conta de lucro (3.11 ou 3.11.01)' : !fco ? 'DFP sem a conta de caixa operacional (6.01)' : `exercício com ${duracao(lucro)} dias` })
       continue
     }
-    exercicios.push({ exercicio: d.dtRefer, versao: d.versao, linkDoc: d.linkDoc ?? null, contaLucro: lucro.cd, lucro: lucro.valor, lucroControladores: controladores ? controladores.valor : null, fco: fco.valor })
+    exercicios.push({ exercicio: d.dtRefer, versao: d.versao, linkDoc: d.linkDoc ?? null, contaLucro: lucro.cd, lucro: lucro.valor, lucroControladores: controladores ? controladores.valor : null, fco: fco.valor, ...(motivoTroca ? { consolidacao: consDoExercicio, observacao: motivoTroca } : {}) })
   }
   const comLucro = exercicios.filter((e) => e.lucro > 0).length
   const comFco = exercicios.filter((e) => e.fco > 0).length
   const passa = exercicios.length >= N && comLucro >= cfgConsistencia.minimoComLucro && comFco >= cfgConsistencia.minimoComFcoPositivo
   return { exigidos: N, disponiveis: exercicios.length, comLucro, comFco, passa, exercicios, descartados, lacuna, dfpsEncontrados: dfps.length }
+}
+
+// ---------------------------------------------------------------------------------------
+// Sanidade da composição do capital (erros de preenchimento do emissor na CVM)
+// ---------------------------------------------------------------------------------------
+
+const quantidadeTotal = (k) => k.ordinarias + k.preferenciais
+
+/**
+ * Corrige dois erros de preenchimento da composição do capital, SÓ com evidência nos documentos anteriores da própria empresa
+ * (`anteriores`: do mais recente para o mais antigo, já sem o documento em uso). Cada correção é devolvida em `correcoes`
+ * e vai para a memória de cálculo e para os alertas; sem evidência, o capital segue como veio.
+ *
+ *  1. QUANTIDADE ×10, ×100 ou ×1000 (caso LAVV3: 1.954.343.520 ações no ITR de 30/06/2026 contra 195.434.352 em todos os
+ *     documentos anteriores). Só vale se os dois documentos anteriores concordam entre si e se NÃO há desdobramento/grupamento
+ *     conhecido, nem salto de preço sem explicação, que justifique a mudança. A quantidade é dividida pelo fator.
+ *  2. TESOURARIA EM OUTRA UNIDADE (caso TEND3: capital 122.578 em milhares e tesouraria 65.148 em unidades no mesmo ITR, o que
+ *     tirava 53% das ações). Só vale se a tesouraria passa de 30% das ações, se dividida por 1.000 fica abaixo de 10% e se no
+ *     documento anterior ela era menor que 10%. A tesouraria é dividida por 1.000.
+ */
+export function sanearCapital(cap, anteriores, preco) {
+  const correcoes = []
+  let k = { ...cap }
+  const ant = anteriores[0]
+  const ant2 = anteriores[1]
+
+  if (ant && quantidadeTotal(ant) > 0 && quantidadeTotal(k) > 0 && (!ant2 || quantidadeTotal(ant2) === quantidadeTotal(ant))) {
+    const razao = quantidadeTotal(k) / quantidadeTotal(ant)
+    const fator = [10, 100, 1000].find((f) => Math.abs(razao / f - 1) <= 0.01)
+    const evento = (preco?.desdobramentos ?? []).some((e) => e && e.data > ant.dtRefer)
+    const saltoSemExplicacao = (preco?.saltosNaoResolvidos ?? []).length > 0
+    if (fator && !evento && !saltoSemExplicacao) {
+      correcoes.push({ codigo: 'quantidade_divergente', fator, de: quantidadeTotal(k), para: quantidadeTotal(k) / fator, referencia: `${ant.doc} de ${ant.dtRefer}`, observacao: `quantidade de ações ${fator}× maior que a de todos os documentos anteriores, sem desdobramento nem salto de preço que a explique: tratada como erro de preenchimento e dividida por ${fator}` })
+      k = { ...k, ordinarias: k.ordinarias / fator, preferenciais: k.preferenciais / fator, tesouroOrd: k.tesouroOrd / fator, tesouroPref: k.tesouroPref / fator }
+    }
+  }
+
+  for (const [qtd, tes] of [['ordinarias', 'tesouroOrd'], ['preferenciais', 'tesouroPref']]) {
+    const q = k[qtd]
+    const t = k[tes]
+    const fracaoAnterior = ant && ant[qtd] > 0 ? ant[tes] / ant[qtd] : null
+    if (q > 0 && t / q > 0.3 && t / 1000 / q < 0.1 && fracaoAnterior !== null && fracaoAnterior < 0.1) {
+      correcoes.push({ codigo: 'tesouraria_em_outra_unidade', classe: qtd === 'ordinarias' ? 'ON' : 'PN', de: t, para: t / 1000, referencia: `${ant.doc} de ${ant.dtRefer}`, observacao: `tesouraria de ${t} para ${q} ações (${Math.round((t / q) * 100)}%), contra ${Math.round(fracaoAnterior * 100)}% no documento anterior: tratada como informada em unidades (o capital está em milhares) e dividida por 1.000` })
+      k = { ...k, [tes]: t / 1000 }
+    }
+  }
+  return { cap: k, correcoes }
 }
 
 // ---------------------------------------------------------------------------------------
@@ -388,11 +458,11 @@ export function calcularFundamentos(emp, preco, cfg, dataCorte) {
   } else verificacoes.push({ id: 'dre_fecha', ok: null, detalhe: 'Não aplicável: DRE sem 3.06/3.07.' })
 
   // Capital e valor de mercado
-  const cap = [...(c.capital ?? [])]
-    .filter((k) => k.dtRefer <= dataCorte)
-    .sort((a, b) => (a.dtRefer < b.dtRefer ? 1 : -1))
-    .find((k) => k.dtRefer === ultimo.dtRefer && k.doc === ultimo.doc) ?? [...(c.capital ?? [])].filter((k) => k.dtRefer <= dataCorte).sort((a, b) => (a.dtRefer < b.dtRefer ? 1 : -1))[0]
-  if (!cap) return excluir('dados_contabeis', 'sem_capital', 'Composição do capital (quantidade de ações) não encontrada.')
+  const capitaisAteCorte = [...(c.capital ?? [])].filter((k) => k.dtRefer <= dataCorte).sort((a, b) => (a.dtRefer < b.dtRefer ? 1 : -1))
+  const capBruto = capitaisAteCorte.find((k) => k.dtRefer === ultimo.dtRefer && k.doc === ultimo.doc) ?? capitaisAteCorte[0]
+  if (!capBruto) return excluir('dados_contabeis', 'sem_capital', 'Composição do capital (quantidade de ações) não encontrada.')
+  // Erros de preenchimento do emissor no formulário da CVM (TEND3, LAVV3): corrige só com evidência nos documentos anteriores.
+  const { cap, correcoes: correcoesCapital } = sanearCapital(capBruto, capitaisAteCorte.filter((k) => k.dtRefer < capBruto.dtRefer), preco)
   const plTotal = S('patrimonioLiquido')
   const minoritarios = S('minoritarios')
   const plControladores = plTotal - minoritarios
@@ -535,7 +605,7 @@ export function calcularFundamentos(emp, preco, cfg, dataCorte) {
     exerciciosComFco: consistencia.comFco,
     passaConsistencia: consistencia.passa,
     ajusteUnidadeCapital: ajusteAutomatico ? `automático ×${fator}` : ajusteManual?.fatorQuantidade && ajusteManual.fatorQuantidade !== 1 ? `manual ×${fator}` : null,
-    alertas: [...(pvp !== null && pvp > (vv.pvpAlerta ?? Infinity) ? ['pvp_alto'] : []), ...(escolha.giro !== null && escolha.giro > (vv.giroAlerta ?? Infinity) ? ['giro_alto'] : [])],
+    alertas: [...(pvp !== null && pvp > (vv.pvpAlerta ?? Infinity) ? ['pvp_alto'] : []), ...(escolha.giro !== null && escolha.giro > (vv.giroAlerta ?? Infinity) ? ['giro_alto'] : []), ...correcoesCapital.map((x) => `capital_corrigido:${x.codigo}`)],
     acoesUsadas: vm.classes.reduce((x, k) => x + k.quantidade, 0),
     giroDiario: arred(escolha.giro, 5),
     capitalDocumento: `${cap.doc} de ${cap.dtRefer} (versão ${cap.versao})`,
@@ -554,7 +624,7 @@ export function calcularFundamentos(emp, preco, cfg, dataCorte) {
   const memoria = {
     demonstracao: { doc: ultimo.doc, dtRefer: ultimo.dtRefer, dtReceb: ultimo.dtReceb ?? null, versao: ultimo.versao, linkDoc: ultimo.linkDoc ?? null, consolidacao: cons === 'con' ? 'consolidada' : 'individual' },
     verificacoes,
-    valorDeMercado: { metodo: vm.metodo, formula: vm.formula, valor: reais(vm.valor), classes: vm.classes, capital: { doc: cap.doc, dtRefer: cap.dtRefer, versao: cap.versao, ordinarias: cap.ordinarias, preferenciais: cap.preferenciais, tesouroOrd: cap.tesouroOrd, tesouroPref: cap.tesouroPref }, ajusteManual: ajusteManual?.fatorQuantidade && ajusteManual.fatorQuantidade !== 1 ? { fatorQuantidade: fator, motivo: ajusteManual.motivo ?? null, observacao: 'quantidades do capital multiplicadas pelo fator antes do cálculo do valor de mercado' } : null, ajusteAutomatico: ajusteAutomatico ? { ...ajusteAutomatico, observacao: 'quantidade de ações informada em milhares na CVM: P/VP e giro diário eram impossíveis sem o ajuste e passaram a ser plausíveis com ele' } : null, fracaoSemPrecoProprio: arred(vm.fracaoAproximada, 4), ajusteDesdobramento: fatorDesdobramento !== 1 ? { fator: fatorDesdobramento, eventos: eventosDeCapital.map((e) => ({ data: e.data, fator: e.fator })), observacao: 'quantidade de ações do balanço multiplicada pelo fator de eventos posteriores à data-base' } : null },
+    valorDeMercado: { metodo: vm.metodo, formula: vm.formula, valor: reais(vm.valor), classes: vm.classes, capital: { doc: cap.doc, dtRefer: cap.dtRefer, versao: cap.versao, ordinarias: cap.ordinarias, preferenciais: cap.preferenciais, tesouroOrd: cap.tesouroOrd, tesouroPref: cap.tesouroPref, ...(correcoesCapital.length ? { informadoNaCvm: { ordinarias: capBruto.ordinarias, preferenciais: capBruto.preferenciais, tesouroOrd: capBruto.tesouroOrd, tesouroPref: capBruto.tesouroPref } } : {}) }, correcoesCapital, ajusteManual: ajusteManual?.fatorQuantidade && ajusteManual.fatorQuantidade !== 1 ? { fatorQuantidade: fator, motivo: ajusteManual.motivo ?? null, observacao: 'quantidades do capital multiplicadas pelo fator antes do cálculo do valor de mercado' } : null, ajusteAutomatico: ajusteAutomatico ? { ...ajusteAutomatico, observacao: 'quantidade de ações informada em milhares na CVM: P/VP e giro diário eram impossíveis sem o ajuste e passaram a ser plausíveis com ele' } : null, fracaoSemPrecoProprio: arred(vm.fracaoAproximada, 4), ajusteDesdobramento: fatorDesdobramento !== 1 ? { fator: fatorDesdobramento, eventos: eventosDeCapital.map((e) => ({ data: e.data, fator: e.fator })), observacao: 'quantidade de ações do balanço multiplicada pelo fator de eventos posteriores à data-base' } : null },
     fluxos12m: Object.fromEntries(Object.entries(itens).map(([k, r]) => [k, { cd: CONTAS[k].cd, valor: reais(r.valor), formula: r.formula, componentes: r.componentes }])),
     saldos: Object.fromEntries(Object.entries(saldos).map(([k, r]) => [k, { cd: CONTAS_BALANCO[k].cd, valor: reais(r.valor), formula: r.formula, componentes: r.componentes }])),
     derivados: {

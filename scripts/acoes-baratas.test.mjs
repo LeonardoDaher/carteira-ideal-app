@@ -8,7 +8,7 @@ import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import {
   calcular, calcularFundamentos, canonico, diasEntre, diaAnterior, hashDoResultado, ltmDaConta, percentilPosto, quantil,
-  ranksPercentuais, valorDeMercado, volatilidadeAnualizada, zscoresWinsorizados, CONTAS,
+  ranksPercentuais, sanearCapital, valorDeMercado, volatilidadeAnualizada, zscoresWinsorizados, CONTAS,
 } from './acoes-baratas-calculo.mjs'
 import { dividirLinha, extrairZip, fatorEscala, indiceDasColunas, mapaTickerCnpj, numeroCvm, resolverCnpjs } from './acoes-baratas-cvm.mjs'
 import { agruparPorCnpj, concluir, csvRanking, extrairPreco, mesclarDesdobramentos, montarInsumos, montarSnapshotApp, separarSnapshot, verificar, verificarSanidade } from './atualizar-acoes-baratas.mjs'
@@ -980,4 +980,109 @@ test('classe sem preço: o limite agora é 50% (AXIA3 21% e SHUL4 43% passam ava
   assert.deepEqual(r.ranking.map((x) => x.metodoValorDeMercado), ['preco_da_outra_classe', 'preco_da_outra_classe'])
   assert.equal(r.exclusoes[0].ticker, 'TFCO4')
   assert.equal(r.exclusoes[0].codigo, 'classe_sem_preco')
+})
+
+// ---------------------------------------------------------------------------------------
+// D57: erros de preenchimento do capital (TEND3, LAVV3) e exercícios antigos só com demonstração individual
+// ---------------------------------------------------------------------------------------
+
+const capitalDe = (doc, dtRefer, ordinarias, tesouroOrd = 0) => ({ doc, dtRefer, versao: 1, ordinarias, preferenciais: 0, tesouroOrd, tesouroPref: 0 })
+
+test('TEND3: tesouraria em unidades num capital em milhares não tira metade das ações (122.578 mil, tesouraria 65.148 unidades)', () => {
+  const e = real('TEND3', { acoes: 1 })
+  e.contabil.capital = [capitalDe('DFP', '2024-12-31', 122578), capitalDe('DFP', '2025-12-31', 122578, 65148)]
+  const r = calcular(insumosDe([e]), cfg)
+  const x = r.resultado.ranking[0]
+  assert.equal(x.ajusteUnidadeCapital, 'automático ×1000')
+  assert.equal(x.acoesUsadas, (122578 - 65.148) * 1000, 'tesouraria de 65,148 mil (e não 65 milhões) sai das 122,578 mi')
+  assert.ok(x.alertas.includes('capital_corrigido:tesouraria_em_outra_unidade'))
+  const reg = r.memoria.TEND3.valorDeMercado
+  assert.equal(reg.correcoesCapital[0].codigo, 'tesouraria_em_outra_unidade')
+  assert.equal(reg.capital.informadoNaCvm.tesouroOrd, 65148, 'a memória guarda o que a CVM informou')
+  // sem o documento anterior para comparar, nada é mexido (comportamento antigo)
+  const sozinho = real('TEND3', { acoes: 1 })
+  sozinho.contabil.capital = [capitalDe('DFP', '2025-12-31', 122578, 65148)]
+  assert.deepEqual(calcular(insumosDe([sozinho]), cfg).memoria.TEND3.valorDeMercado.correcoesCapital, [])
+  // tesouraria que já era grande no documento anterior é verdadeira: não mexe
+  const grande = real('TEND3', { acoes: 1 })
+  grande.contabil.capital = [capitalDe('DFP', '2024-12-31', 122578, 60000), capitalDe('DFP', '2025-12-31', 122578, 65148)]
+  assert.deepEqual(calcular(insumosDe([grande]), cfg).memoria.TEND3.valorDeMercado.correcoesCapital, [])
+})
+
+test('LAVV3: quantidade 10× maior que a de todos os documentos anteriores, sem desdobramento, é erro de preenchimento e é corrigida', () => {
+  const mk = (atual, ajuste = (e) => e) => {
+    const e = real('LAVV3', { acoes: 1 })
+    e.contabil.capital = [capitalDe('DFP', '2023-12-31', 1e9), capitalDe('DFP', '2024-12-31', 1e9), capitalDe('DFP', '2025-12-31', atual)]
+    return ajuste(e)
+  }
+  const r = calcular(insumosDe([mk(1e10)]), cfg)
+  assert.equal(r.resultado.ranking[0].acoesUsadas, 1e9)
+  assert.ok(r.resultado.ranking[0].alertas.includes('capital_corrigido:quantidade_divergente'))
+  assert.equal(r.memoria.LAVV3.valorDeMercado.correcoesCapital[0].fator, 10)
+  assert.equal(r.memoria.LAVV3.valorDeMercado.capital.informadoNaCvm.ordinarias, 1e10)
+  // desdobramento conhecido depois do documento anterior: a quantidade nova é verdadeira
+  const comEvento = mk(1e10, (e) => { e.preco.desdobramentos = [{ data: '2025-06-01', fator: 10 }]; return e })
+  assert.equal(calcular(insumosDe([comEvento]), cfg).resultado.ranking[0].acoesUsadas, 1e10)
+  // salto de preço sem explicação: a função não corrige (e a empresa já fica fora do ranking pela etapa de preço)
+  assert.deepEqual(sanearCapital(capitalDe('DFP', '2025-12-31', 1e10), [capitalDe('DFP', '2024-12-31', 1e9), capitalDe('DFP', '2023-12-31', 1e9)], { saltosNaoResolvidos: [{ data: '2025-06-01', fator: 10 }] }).correcoes, [])
+  // aumento de capital comum (×2, não potência de 10): não corrige
+  assert.equal(calcular(insumosDe([mk(2e9)]), cfg).resultado.ranking[0].acoesUsadas, 2e9)
+  // documentos anteriores discordando entre si: sem evidência firme, não corrige
+  const instavel = mk(1e10, (e) => { e.contabil.capital[0] = capitalDe('DFP', '2023-12-31', 5e8); return e })
+  assert.equal(calcular(insumosDe([instavel]), cfg).resultado.ranking[0].acoesUsadas, 1e10)
+})
+
+test('exercício antigo com DFP só individual (TIMS3, PGMN3, TTEN3 em 2021; SBSP3 em 2021 e 2022) conta para a consistência, com a observação', () => {
+  const emp = real('TIMS3', { acoes: 1e9 })
+  const dts = emp.contabil.docs.map((d) => d.dtRefer).sort()
+  // o exercício mais antigo passa a ter só linhas individuais
+  emp.contabil.linhas = emp.contabil.linhas.map((l) => (l.dtRefer === dts[0] ? { ...l, cons: 'ind' } : l))
+  const r = calcular(insumosDe([emp]), cfg)
+  const x = r.resultado.ranking[0]
+  assert.equal(x.exerciciosAnalisados, 5)
+  assert.deepEqual(x.historicoDescartes, [])
+  const antigo = r.memoria.TIMS3.consistencia.exercicios.find((e) => e.exercicio === dts[0])
+  assert.equal(antigo.consolidacao, 'ind')
+  assert.match(antigo.observacao, /individual/)
+  // se a DFP TEM a consolidada mas falta a conta de lucro nela, NÃO se troca pela individual (continua descartado)
+  const e2 = real('TIMS3', { acoes: 1e9 })
+  e2.contabil.linhas = e2.contabil.linhas.filter((l) => !(l.dtRefer === dts[0] && l.cd === '3.11'))
+  e2.contabil.linhas.push({ doc: 'DFP', dtRefer: dts[0], versao: 1, dem: 'DRE', cons: 'ind', ordem: 'ULTIMO', dtIni: `${dts[0].slice(0, 4)}-01-01`, dtFim: dts[0], cd: '3.11', ds: 'Lucro/Prejuízo do Período', valor: 5, linkDoc: null })
+  const x2 = calcular(insumosDe([e2]), cfg).resultado.ranking[0]
+  assert.equal(x2.exerciciosAnalisados, 4)
+  assert.equal(x2.historicoDescartes[0].exercicio, dts[0])
+})
+
+test('TIMS3: consolidada ZERADA na DFP (lucro 0 e FCO 0 juntos) com a individual preenchida usa a individual; zero isolado continua valendo', () => {
+  const emp = real('TIMS3', { acoes: 1e9, lucros: [10, 10, 10, 10] })
+  const dts = emp.contabil.docs.map((d) => d.dtRefer).sort()
+  const alvo = dts[2]
+  const linhasDe = (cons, lucro, fco) => ['DRE|3.11|Lucro/Prejuízo do Período', 'DFC|6.01|Caixa Líquido das Atividades Operacionais'].map((s, k) => {
+    const [dem, cd, ds] = s.split('|')
+    return { doc: 'DFP', dtRefer: alvo, versao: 1, dem, cons, ordem: 'ULTIMO', dtIni: `${alvo.slice(0, 4)}-01-01`, dtFim: alvo, cd, ds, valor: k === 0 ? lucro : fco, linkDoc: null }
+  })
+  emp.contabil.linhas = emp.contabil.linhas.filter((l) => !(l.dtRefer === alvo && (l.cd === '3.11' || l.cd === '6.01')))
+  emp.contabil.linhas.push(...linhasDe('con', 0, 0), ...linhasDe('ind', 77, 88))
+  const r = calcular(insumosDe([emp]), cfg)
+  const ex = r.memoria.TIMS3.consistencia.exercicios.find((e) => e.exercicio === alvo)
+  assert.deepEqual([ex.lucro, ex.fco, ex.consolidacao], [77, 88, 'ind'])
+  assert.match(ex.observacao, /zerada/)
+  assert.equal(r.resultado.ranking[0].exerciciosAnalisados, 5)
+  // lucro 0 mas FCO diferente de zero: é um resultado verdadeiro, fica a consolidada
+  emp.contabil.linhas = emp.contabil.linhas.filter((l) => !(l.dtRefer === alvo && l.cons === 'con' && (l.cd === '3.11' || l.cd === '6.01')))
+  emp.contabil.linhas.push(...linhasDe('con', 0, 55))
+  const ex2 = calcular(insumosDe([emp]), cfg).memoria.TIMS3.consistencia.exercicios.find((e) => e.exercicio === alvo)
+  assert.deepEqual([ex2.lucro, ex2.fco, ex2.consolidacao], [0, 55, undefined])
+})
+
+test('TEND3: DFP com data-base fora do fim do exercício (31/03/2023) é ignorada e não quebra a cadeia de exercícios', () => {
+  const emp = real('TEND3', { acoes: 1e9 })
+  const alvo = emp.contabil.docs.map((d) => d.dtRefer).sort()[2] // 2023-12-31
+  emp.contabil.docs.push({ doc: 'DFP', dtRefer: `${alvo.slice(0, 4)}-03-31`, versao: 1, dtReceb: `${alvo.slice(0, 4)}-05-03`, linkDoc: null })
+  const x = calcular(insumosDe([emp]), cfg).resultado.ranking[0]
+  assert.equal(x.exerciciosAnalisados, 5)
+  assert.equal(x.historicoLacuna, null)
+  assert.equal(x.historicoDescartes.length, 1)
+  assert.match(x.historicoDescartes[0].motivo, /fora do fim do exercício/)
+  assert.equal(x.historicoDescartes[0].exercicio, `${alvo.slice(0, 4)}-03-31`)
 })

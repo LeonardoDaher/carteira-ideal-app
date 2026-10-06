@@ -57,7 +57,15 @@ export function sha256Arquivo(caminho) {
 // Zip e CSV (streaming, ISO-8859-1, separador ';')
 // ---------------------------------------------------------------------------------------
 
-export const listarZip = (zip) => execFileSync('unzip', ['-Z1', zip], { encoding: 'utf8' }).split('\n').filter(Boolean)
+// No GitHub (Ubuntu) usa `unzip`; no Windows, que não o tem, usa o `tar` (bsdtar) nativo, que lê zip.
+const temUnzip = (() => { try { execFileSync('unzip', ['-v'], { stdio: 'ignore' }); return true } catch { return false } })()
+const comandoListarZip = (zip) => (temUnzip ? ['unzip', ['-Z1', zip]] : ['tar', ['-tf', zip]])
+const comandoLerEntrada = (zip, entrada) => (temUnzip ? ['unzip', ['-p', zip, entrada]] : ['tar', ['-xOf', zip, entrada]])
+
+export const listarZip = (zip) => {
+  const [cmd, args] = comandoListarZip(zip)
+  return execFileSync(cmd, args, { encoding: 'utf8', maxBuffer: 256 * 1024 * 1024 }).split(/\r?\n/).filter(Boolean)
+}
 
 /** Divide uma linha CSV com ';' respeitando aspas duplas. */
 export function dividirLinha(linha) {
@@ -77,7 +85,8 @@ export function dividirLinha(linha) {
 
 /** Itera as linhas de uma entrada do zip, sem carregar o arquivo inteiro na memória. */
 export async function* linhasDoZip(zip, entrada) {
-  const filho = spawn('unzip', ['-p', zip, entrada], { stdio: ['ignore', 'pipe', 'pipe'] })
+  const [cmd, args] = comandoLerEntrada(zip, entrada)
+  const filho = spawn(cmd, args, { stdio: ['ignore', 'pipe', 'pipe'] })
   filho.stdout.setEncoding('latin1')
   let erro = ''
   filho.stderr.on('data', (d) => (erro += d))
@@ -85,7 +94,7 @@ export async function* linhasDoZip(zip, entrada) {
   const rl = readline.createInterface({ input: filho.stdout, crlfDelay: Infinity })
   for await (const l of rl) if (l.length) yield l
   const codigo = await fim
-  if (codigo !== 0) throw new Error(`unzip falhou (${codigo}) em ${entrada}: ${erro.slice(0, 200)}`)
+  if (codigo !== 0) throw new Error(`${cmd} falhou (${codigo}) em ${entrada}: ${erro.slice(0, 200)}`)
 }
 
 /** Cabeçalho → índice por nome; exige as colunas (por regex quando passada como RegExp). */

@@ -1,0 +1,19 @@
+D57 (06/10/2026): TEND3, LAVV3 e exercícios antigos corrigidos, com causa comprovada em dado real da CVM (metodologia 1.0.7). Detalhes: docs/07-registro-de-decisoes.md, D57.
+
+Este pacote parte da D56 (metodologia 1.0.6) e substitui o D57 anterior, que nunca foi subido.
+
+RESUMO
+ - TEND3: a CVM traz o capital em milhares (122.578) e a tesouraria em unidades (65.148) no mesmo ITR. Tirava 53% das ações. Agora 122,5 mi, P/VP 2,33, sai do Top 15.
+ - LAVV3: o ITR de 30/06/2026 traz 10x as ações de todos os documentos anteriores (erro do emissor). Agora 195,4 mi, P/VP 1,74.
+ - TIMS3, PGMN3, TTEN3, SBSP3: a DFP antiga só tem a demonstração individual. Agora é lida. A TIMS3 tinha ainda a consolidada ZERADA em 2024 e 2025. Todas com 5 de 5 exercícios lidos.
+ - TEND3: uma "DFP" com data-base 31/03/2023 quebrava a série. Agora é ignorada e listada como não lida.
+ - Top 15 novo: QUAL3 CEAB3 LREN3 BRAV3 RECV3 JHSF3 MDIA3 COGN3 MYPK3 SEER3 AZZA3 PETR4 GGBR4 YDUQ3 POMO4.
+ - Não mexi em aprovadoPeloResponsavel, não gerei nem gravei código de acesso.
+
+SUBA OS ARQUIVOS DO ZIP e depois: Actions → Atualizar Top 15 Ações Baratas → Run workflow → esperar ✅ e o deploy ficar Ready.
+(O zip não leva os dados gerados: o workflow os refaz. A execução feita aqui, com os mesmos dados, deu o Top 15 acima.)
+
+SEU (cadastro, fora do pacote): config/acoes.json, trocar EMBR3 por EMBJ3 (CNPJ 07.689.002/0001-89) e rodar a carga inicial de Ações.
+
+ARQUIVOS: config/acoes-baratas.json, scripts/acoes-baratas-calculo.mjs, scripts/acoes-baratas-cvm.mjs, scripts/acoes-baratas.test.mjs,
+          docs/07-registro-de-decisoes.md, docs/09-metodologia-acoes-baratas.md, LEIA-ME-D57.txt
