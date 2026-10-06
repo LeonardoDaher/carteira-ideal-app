@@ -103,11 +103,18 @@ def fca():
               L('55.555.555/0001-55','AMBI A','AMBI3'), L('66.666.666/0001-66','AMBI B','AMBI3')]
     return {'fca_cia_aberta_valor_mobiliario_2026.csv': csv(cab, linhas)}
 
+def fca_2025():
+    # FCA do ano anterior: traz DELT3 (que o de 2026 NÃO traz) e o CNPJ ANTIGO da GAMA3, que não pode voltar por cima do novo
+    cab = 'CNPJ_Companhia;Nome_Empresarial;Versao;ID_Documento;Valor_Mobiliario;Sigla_Classe_Acao_Preferencial;Classe_Acao_Preferencial;Codigo_Negociacao;Composicao_BDR_Units;Mercado;Sigla_Entidade_Administradora;Entidade_Administradora;Data_Inicio_Negociacao;Data_Fim_Negociacao;Segmento;Data_Inicio_Listagem;Data_Fim_Listagem'.split(';')
+    L = lambda cnpj, nome, cod, fim='': [cnpj, nome, 1, 8, 'Ações Ordinárias', '', '', cod, '', 'Bolsa', 'B3', 'B3', '2010-01-01', fim, 'Novo Mercado', '2010-01-01', '']
+    linhas = [L('77.777.777/0001-77', 'DELTA S.A.', 'DELT3'), L('33.333.333/0001-33', 'GAMA ANTIGA', 'GAMA3'), L(ALFA, 'ALFA S.A.', 'ALFA3')]
+    return {'fca_cia_aberta_valor_mobiliario_2025.csv': csv(cab, linhas)}
+
 def zipar(nome, arquivos):
     with zipfile.ZipFile(os.path.join(AQUI, nome), 'w', zipfile.ZIP_DEFLATED) as z:
         for n, b in arquivos.items(): z.writestr(n, b)
 
 os.makedirs(AQUI, exist_ok=True)
 for _a, (_l, _f) in HIST.items(): zipar(f'dfp_cia_aberta_{_a}.zip', dfp_hist(_a, _l, _f))
-zipar('dfp_cia_aberta_2025.zip', dfp()); zipar('itr_cia_aberta_2026.zip', itr()); zipar('fca_cia_aberta_2026.zip', fca())
+zipar('dfp_cia_aberta_2025.zip', dfp()); zipar('itr_cia_aberta_2026.zip', itr()); zipar('fca_cia_aberta_2026.zip', fca()); zipar('fca_cia_aberta_2025.zip', fca_2025())
 print('fixtures geradas em', AQUI)

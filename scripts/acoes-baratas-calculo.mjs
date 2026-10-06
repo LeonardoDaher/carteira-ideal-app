@@ -262,10 +262,11 @@ export function consistenciaHistorica(c, cons, dataCorte, cfgConsistencia) {
   const exercicios = []
   for (const d of cadeia) {
     const acha = (cd, dem) => maisLonga(c.linhas.filter((l) => l.doc === 'DFP' && l.dtRefer === d.dtRefer && l.cons === cons && l.ordem === 'ULTIMO' && l.dem === dem && l.cd === cd))
-    const lucro = acha('3.11.01', 'DRE') ?? acha('3.11', 'DRE')
+    const controladores = acha('3.11.01', 'DRE')
+    const lucro = acha('3.11', 'DRE') ?? controladores // consolidado primeiro (ver o comentário do lucro de 12 meses)
     const fco = acha('6.01', 'DFC')
     if (!lucro || !fco || duracao(lucro) < 360) continue
-    exercicios.push({ exercicio: d.dtRefer, versao: d.versao, linkDoc: d.linkDoc ?? null, contaLucro: lucro.cd, lucro: lucro.valor, fco: fco.valor })
+    exercicios.push({ exercicio: d.dtRefer, versao: d.versao, linkDoc: d.linkDoc ?? null, contaLucro: lucro.cd, lucro: lucro.valor, lucroControladores: controladores ? controladores.valor : null, fco: fco.valor })
   }
   const comLucro = exercicios.filter((e) => e.lucro > 0).length
   const comFco = exercicios.filter((e) => e.fco > 0).length
@@ -282,21 +283,33 @@ export function valorDeMercado(capital, preco) {
   const pn = capital.preferenciais - capital.tesouroPref
   if (on < 0 || pn < 0) return { erro: `ações em tesouraria maiores que o capital (ON ${on}, PN ${pn})` }
   const porClasse = (classe) => preco.classes.find((c) => c.classe === classe)
+  // A ação de referência só serve de preço de classe se for ON/PN de verdade (final 3 a 6). Uma UNIT (final 11) vale
+  // várias ações juntas (ex.: 1 ON + 4 PN): usar o preço dela como o de uma PN superestima o valor de mercado.
+  const refEhClasse = /^[A-Z0-9]{4}[3-6]$/.test(preco.ref.ticker)
   const linhas = []
-  let aproximado = false
   for (const [classe, qtd] of [['ON', on], ['PN', pn]]) {
     if (qtd === 0) continue
-    const c = porClasse(classe)
-    const usado = c ?? { ticker: preco.ref.ticker, fechamento: preco.ref.fechamento, data: preco.ref.data }
-    if (!c) aproximado = true
-    linhas.push({ classe, quantidade: qtd, ticker: usado.ticker, preco: usado.fechamento, data: usado.data, aproximado: !c, valor: qtd * usado.fechamento })
+    let usado = porClasse(classe)
+    let origem = 'propria'
+    if (!usado) {
+      const outra = porClasse(classe === 'ON' ? 'PN' : 'ON')
+      if (outra) { usado = outra; origem = 'outra_classe' }
+      else if (refEhClasse) { usado = { ticker: preco.ref.ticker, fechamento: preco.ref.fechamento, data: preco.ref.data }; origem = 'referencia' }
+    }
+    if (!usado) return { erro: `sem preço recente para a classe ${classe} (${preco.ref.ticker} é uma unit, que não serve de preço de ação)` }
+    linhas.push({ classe, quantidade: qtd, ticker: usado.ticker, preco: usado.fechamento, data: usado.data, aproximado: origem !== 'propria', origemPreco: origem, valor: qtd * usado.fechamento })
   }
   if (!linhas.length) return { erro: 'sem ações em circulação no capital informado' }
-  const total = linhas.reduce((s, l) => s + l.valor, 0)
+  const total = linhas.reduce((x, l) => x + l.valor, 0)
+  const qtdTotal = linhas.reduce((x, l) => x + l.quantidade, 0)
+  const qtdAproximada = linhas.filter((l) => l.aproximado).reduce((x, l) => x + l.quantidade, 0)
+  const metodo = qtdAproximada === 0 ? 'por_classe' : linhas.some((l) => l.origemPreco === 'referencia') ? 'preco_da_classe_de_referencia' : 'preco_da_outra_classe'
+  const rotuloOrigem = { propria: '', outra_classe: ', preço da outra classe', referencia: ', preço da referência' }
   return {
     valor: total,
-    metodo: aproximado ? 'preco_da_classe_de_referencia' : 'por_classe',
-    formula: linhas.map((l) => `${l.classe}: ${l.quantidade} × R$ ${l.preco} (${l.ticker}${l.aproximado ? ', preço da referência' : ''})`).join(' + '),
+    metodo,
+    fracaoAproximada: qtdAproximada / qtdTotal,
+    formula: linhas.map((l) => `${l.classe}: ${l.quantidade} × R$ ${l.preco} (${l.ticker}${rotuloOrigem[l.origemPreco]})`).join(' + '),
     classes: linhas.map((l) => ({ ...l, valor: reais(l.valor) })),
   }
 }
@@ -375,25 +388,57 @@ export function calcularFundamentos(emp, preco, cfg, dataCorte) {
     .sort((a, b) => (a.dtRefer < b.dtRefer ? 1 : -1))
     .find((k) => k.dtRefer === ultimo.dtRefer && k.doc === ultimo.doc) ?? [...(c.capital ?? [])].filter((k) => k.dtRefer <= dataCorte).sort((a, b) => (a.dtRefer < b.dtRefer ? 1 : -1))[0]
   if (!cap) return excluir('dados_contabeis', 'sem_capital', 'Composição do capital (quantidade de ações) não encontrada.')
-  // Ajuste MANUAL e registrado de unidade (config: capital.ajustesManuais). Existe porque algumas companhias informam a
-  // quantidade de ações em milhares no formulário da CVM (caso VALE3). Só vale para o ticker listado, fica escrito na
-  // memória de cálculo, e a verificação de plausibilidade abaixo continua valendo DEPOIS do ajuste.
-  const ajuste = cfg.capital?.ajustesManuais?.[emp.ticker]
-  const fator = ajuste?.fatorQuantidade ?? 1
-  const capUsado = fator === 1 ? cap : { ...cap, ordinarias: cap.ordinarias * fator, preferenciais: cap.preferenciais * fator, tesouroOrd: cap.tesouroOrd * fator, tesouroPref: cap.tesouroPref * fator }
-  const vm = valorDeMercado(capUsado, preco)
-  if (vm.erro) return excluir('dados_contabeis', 'capital_invalido', vm.erro)
-
   const plTotal = S('patrimonioLiquido')
   const minoritarios = S('minoritarios')
   const plControladores = plTotal - minoritarios
-  const pvp = plControladores > 0 ? vm.valor / plControladores : null
-  const pvpOk = pvp === null ? null : pvp >= cfg.verificacoes.pvpMinimoPlausivel && pvp <= cfg.verificacoes.pvpMaximoPlausivel
-  verificacoes.push({ id: 'pvp_plausivel', ok: pvpOk, detalhe: pvp === null ? 'PL de controladores ≤ 0: teste não se aplica.' : `P/VP implícito = ${arred(pvp, 2)} (faixa aceita ${cfg.verificacoes.pvpMinimoPlausivel} a ${cfg.verificacoes.pvpMaximoPlausivel}).` })
+  const vv = cfg.verificacoes
+  const pvpDe = (valor) => (plControladores > 0 ? valor / plControladores : null)
+  const emFaixa = (pvpX) => pvpX === null || (pvpX >= vv.pvpMinimoPlausivel && pvpX <= vv.pvpMaximoPlausivel)
+  const escalar = (k, f) => (f === 1 ? k : { ...k, ordinarias: k.ordinarias * f, preferenciais: k.preferenciais * f, tesouroOrd: k.tesouroOrd * f, tesouroPref: k.tesouroPref * f })
+  const avaliar = (f) => {
+    const capF = escalar(cap, f)
+    const v = valorDeMercado(capF, preco)
+    if (v.erro) return { fator: f, erro: v.erro }
+    return { fator: f, cap: capF, vm: v, pvp: pvpDe(v.valor), giro: v.valor > 0 ? (preco.volumeMedioEmissor ?? 0) / v.valor : null }
+  }
+
+  // Unidade da quantidade de ações. Várias companhias informam a quantidade em MILHARES no formulário da CVM (na 1ª execução
+  // real, 31 de ~100 empresas, de Vale a Ambev). Dois caminhos, ambos registrados na memória de cálculo:
+  //  (a) MANUAL (config capital.ajustesManuais): vence sempre.
+  //  (b) AUTOMÁTICO, só com DOIS sinais independentes de que a quantidade está em milhares: o P/VP sai abaixo do mínimo
+  //      plausível E o giro diário (volume ÷ valor de mercado) sai impossível (> giroDiarioMaximo, ou seja, o emissor
+  //      negociaria mais que o próprio valor por dia); e, depois do ajuste, P/VP e giro ficam plausíveis. Empresa
+  //      barata de verdade (P/VP baixo com giro normal) não é tocada.
+  const ajusteManual = cfg.capital?.ajustesManuais?.[emp.ticker]
+  let escolha
+  let ajusteAutomatico = null
+  if (ajusteManual?.fatorQuantidade && ajusteManual.fatorQuantidade !== 1) {
+    escolha = avaliar(ajusteManual.fatorQuantidade)
+  } else {
+    escolha = avaliar(1)
+    const ua = vv.unidadeAutomatica
+    if (ua?.ativa && !escolha.erro && escolha.pvp !== null && escolha.pvp < vv.pvpMinimoPlausivel && escolha.giro > ua.giroDiarioMaximo) {
+      const alt = avaliar(ua.fator)
+      if (!alt.erro && alt.pvp !== null && emFaixa(alt.pvp) && alt.giro <= ua.giroDiarioMaximo) {
+        ajusteAutomatico = { fatorQuantidade: ua.fator, evidencias: { pvpSemAjuste: arred(escolha.pvp, 5), giroDiarioSemAjuste: arred(escolha.giro, 2), pvpComAjuste: arred(alt.pvp, 3), giroDiarioComAjuste: arred(alt.giro, 4) } }
+        escolha = alt
+      }
+    }
+  }
+  if (escolha.erro) return excluir('dados_contabeis', 'capital_invalido', escolha.erro)
+  const fator = escolha.fator
+  const vm = escolha.vm
+  const pvp = escolha.pvp
+  if (vm.fracaoAproximada > vv.maxFracaoSemPreco) {
+    const sem = vm.classes.filter((k) => k.aproximado).map((k) => `${k.classe} ${(k.quantidade / vm.classes.reduce((x, y) => x + y.quantidade, 0) * 100).toLocaleString('pt-BR', { maximumFractionDigits: 0 })}% das ações`).join(' e ')
+    return excluir('dados_contabeis', 'classe_sem_preco', `Valor de mercado incerto: ${sem} ${sem.includes(' e ') ? 'estão' : 'está'} sem preço de negociação recente e teria de ser avaliada pelo preço de outra classe, que pode ter direitos econômicos bem diferentes (limite ${Math.round(vv.maxFracaoSemPreco * 100)}% das ações).`, { fracaoAproximada: arred(vm.fracaoAproximada, 3), classes: vm.classes.map((k) => ({ classe: k.classe, quantidade: k.quantidade, origemPreco: k.origemPreco })) })
+  }
+  const pvpOk = pvp === null ? null : emFaixa(pvp)
+  verificacoes.push({ id: 'pvp_plausivel', ok: pvpOk, detalhe: pvp === null ? 'PL de controladores ≤ 0: teste não se aplica.' : `P/VP implícito = ${arred(pvp, 2)} (faixa aceita ${vv.pvpMinimoPlausivel} a ${vv.pvpMaximoPlausivel}).` })
   if (pvpOk === false) {
     const mi = milhoes
     const acoes = vm.classes.map((k) => `${k.classe} ${k.quantidade.toLocaleString('pt-BR')} ações × R$ ${k.preco.toLocaleString('pt-BR')}`).join(' + ')
-    return excluir('dados_contabeis', 'capital_implausivel', `P/VP implícito de ${arred(pvp, 4)} (valor de mercado ${mi(vm.valor)} ÷ PL dos controladores ${mi(plControladores)}; ${acoes}) fora da faixa ${cfg.verificacoes.pvpMinimoPlausivel} a ${cfg.verificacoes.pvpMaximoPlausivel}${fator !== 1 ? ` MESMO com o ajuste manual de ×${fator}` : ''}: quantidade de ações ou unidade do capital sob suspeita.`, { pvp, valorDeMercado: reais(vm.valor), plControladores: reais(plControladores), capital: { ordinarias: cap.ordinarias, preferenciais: cap.preferenciais, tesouroOrd: cap.tesouroOrd, tesouroPref: cap.tesouroPref } })
+    return excluir('dados_contabeis', 'capital_implausivel', `P/VP implícito de ${arred(pvp, 4)} (valor de mercado ${mi(vm.valor)} ÷ PL dos controladores ${mi(plControladores)}; ${acoes}) fora da faixa ${vv.pvpMinimoPlausivel} a ${vv.pvpMaximoPlausivel}${fator !== 1 ? ` MESMO com o ajuste de ×${fator}` : ''}: quantidade de ações ou unidade do capital sob suspeita.`, { pvp, valorDeMercado: reais(vm.valor), plControladores: reais(plControladores), giroDiario: arred(escolha.giro, 4), capital: { ordinarias: cap.ordinarias, preferenciais: cap.preferenciais, tesouroOrd: cap.tesouroOrd, tesouroPref: cap.tesouroPref } })
   }
 
   // EBIT ajustado
@@ -414,8 +459,11 @@ export function calcularFundamentos(emp, preco, cfg, dataCorte) {
   const dividaLiquida = dividaBruta - caixa
   const ev = vm.valor + dividaLiquida + (cfg.indicador.ev.incluirMinoritarios ? minoritarios : 0)
 
-  const lucro = itens.lucroControladores.componentes.length ? V('lucroControladores') : V('lucroConsolidado')
-  const lucroConta = itens.lucroControladores.componentes.length ? '3.11.01' : '3.11'
+  // Lucro de referência = CONSOLIDADO (3.11): é obrigatório e coerente com o EBIT, o FCO e o EV, que também são consolidados.
+  // O dos controladores (3.11.01) é só informativo: na 1ª execução real a DFP da SER3 trazia 3.11.01 = 0 em TODOS os
+  // exercícios (até no de prejuízo de R$ 222 mi), enquanto os ITR traziam valores normais.
+  const lucro = V('lucroConsolidado')
+  const lucroConta = '3.11'
 
   const fco = V('fco')
   const capitalInvestido = plTotal + dividaBruta - caixa
@@ -476,24 +524,26 @@ export function calcularFundamentos(emp, preco, cfg, dataCorte) {
     exerciciosComLucro: consistencia.comLucro,
     exerciciosComFco: consistencia.comFco,
     passaConsistencia: consistencia.passa,
+    ajusteUnidadeCapital: ajusteAutomatico ? `automático ×${fator}` : ajusteManual?.fatorQuantidade && ajusteManual.fatorQuantidade !== 1 ? `manual ×${fator}` : null,
+    alertas: [...(pvp !== null && pvp > (vv.pvpAlerta ?? Infinity) ? ['pvp_alto'] : [])],
     composicaoLtm: {
       ebit: composicao(itens.ebit, V('ebit')),
       fco: composicao(itens.fco, V('fco')),
-      lucro: { conta: lucroConta, ...composicao(itens[lucroConta === '3.11.01' ? 'lucroControladores' : 'lucroConsolidado'], lucro), consolidado: reais(V('lucroConsolidado')), controladores: itens.lucroControladores.componentes.length ? reais(V('lucroControladores')) : null },
+      lucro: { conta: lucroConta, ...composicao(itens.lucroConsolidado, lucro), consolidado: reais(V('lucroConsolidado')), controladores: itens.lucroControladores.componentes.length ? reais(V('lucroControladores')) : null },
     },
-    historico: consistencia.exercicios.map((e) => ({ exercicio: e.exercicio, conta: e.contaLucro, lucro: reais(e.lucro), fco: reais(e.fco) })),
+    historico: consistencia.exercicios.map((e) => ({ exercicio: e.exercicio, conta: e.contaLucro, lucro: reais(e.lucro), lucroControladores: e.lucroControladores === null ? null : reais(e.lucroControladores), fco: reais(e.fco) })),
   }
 
   const memoria = {
     demonstracao: { doc: ultimo.doc, dtRefer: ultimo.dtRefer, dtReceb: ultimo.dtReceb ?? null, versao: ultimo.versao, linkDoc: ultimo.linkDoc ?? null, consolidacao: cons === 'con' ? 'consolidada' : 'individual' },
     verificacoes,
-    valorDeMercado: { metodo: vm.metodo, formula: vm.formula, valor: reais(vm.valor), classes: vm.classes, capital: { doc: cap.doc, dtRefer: cap.dtRefer, versao: cap.versao, ordinarias: cap.ordinarias, preferenciais: cap.preferenciais, tesouroOrd: cap.tesouroOrd, tesouroPref: cap.tesouroPref }, ajusteManual: ajuste ? { fatorQuantidade: fator, motivo: ajuste.motivo ?? null, observacao: 'quantidades do capital multiplicadas pelo fator antes do cálculo do valor de mercado' } : null },
+    valorDeMercado: { metodo: vm.metodo, formula: vm.formula, valor: reais(vm.valor), classes: vm.classes, capital: { doc: cap.doc, dtRefer: cap.dtRefer, versao: cap.versao, ordinarias: cap.ordinarias, preferenciais: cap.preferenciais, tesouroOrd: cap.tesouroOrd, tesouroPref: cap.tesouroPref }, ajusteManual: ajusteManual?.fatorQuantidade && ajusteManual.fatorQuantidade !== 1 ? { fatorQuantidade: fator, motivo: ajusteManual.motivo ?? null, observacao: 'quantidades do capital multiplicadas pelo fator antes do cálculo do valor de mercado' } : null, ajusteAutomatico: ajusteAutomatico ? { ...ajusteAutomatico, observacao: 'quantidade de ações informada em milhares na CVM: P/VP e giro diário eram impossíveis sem o ajuste e passaram a ser plausíveis com ele' } : null, fracaoSemPrecoProprio: arred(vm.fracaoAproximada, 4) },
     fluxos12m: Object.fromEntries(Object.entries(itens).map(([k, r]) => [k, { cd: CONTAS[k].cd, valor: reais(r.valor), formula: r.formula, componentes: r.componentes }])),
     saldos: Object.fromEntries(Object.entries(saldos).map(([k, r]) => [k, { cd: CONTAS_BALANCO[k].cd, valor: reais(r.valor), formula: r.formula, componentes: r.componentes }])),
     derivados: {
       plControladores: { formula: 'PL total (2.03) − participação de não controladores (2.03.09)', valor: reais(plControladores) },
       ebitAjustado: { formula: `EBIT (3.05) ${parcelas.map(([n, v]) => `${v >= 0 ? '+' : '−'} ${n}`).join(' ')}`, parcelas: parcelas.map(([nome, valor]) => ({ nome, valor: reais(valor) })), valor: reais(ebitAj) },
-      lucroLtm: { conta: lucroConta, valor: reais(lucro) },
+      lucroLtm: { conta: lucroConta, valor: reais(lucro), observacao: 'lucro consolidado (3.11); o dos controladores (3.11.01) é só informativo' },
       dividaBruta: { formula: 'Empréstimos e financiamentos CP (2.01.04) + LP (2.02.01)', valor: reais(dividaBruta) },
       caixa: { formula: 'Caixa e equivalentes (1.01.01) + aplicações financeiras (1.01.02)', valor: reais(caixa) },
       dividaLiquida: { formula: 'dívida bruta − caixa', valor: reais(dividaLiquida) },
@@ -513,7 +563,7 @@ export function calcularFundamentos(emp, preco, cfg, dataCorte) {
     consistencia: {
       regra: `últimos ${consistencia.exigidos} exercícios: lucro positivo em ≥ ${q.consistencia.minimoComLucro} e FCO positivo em ≥ ${q.consistencia.minimoComFcoPositivo}`,
       disponiveis: consistencia.disponiveis, comLucro: consistencia.comLucro, comFco: consistencia.comFco, passa: consistencia.passa,
-      exercicios: consistencia.exercicios.map((e) => ({ ...e, lucro: reais(e.lucro), fco: reais(e.fco) })),
+      exercicios: consistencia.exercicios.map((e) => ({ ...e, lucro: reais(e.lucro), lucroControladores: e.lucroControladores === null ? null : reais(e.lucroControladores), fco: reais(e.fco) })),
     },
   }
   return { metricas, memoria }
@@ -568,7 +618,7 @@ export function calcular(insumos, cfg) {
     const duplicada = cfg.universo.excluirTickers?.[emp.ticker]
     if (duplicada) return { codigo: 'duplicidade_economica', motivo: duplicada }
     if (!emp.cnpj) return { codigo: 'sem_cnpj', motivo: 'Código não mapeado para um CNPJ da CVM (conferir config/acoes-baratas-cnpj.json).' }
-    if (!emp.preco?.ref) return { codigo: 'sem_preco', motivo: 'Sem preço de fechamento no histórico da B3.' }
+    if (!emp.preco?.ref) return { codigo: 'sem_preco', motivo: emp.preco?.motivoSemPreco ? `Sem preço recente: ${emp.preco.motivoSemPreco}.` : 'Sem preço de fechamento no histórico da B3.' }
     return null
   })
 
@@ -659,6 +709,8 @@ export function calcular(insumos, cfg) {
       passaConsistencia: m.passaConsistencia,
       composicaoLtm: m.composicaoLtm,
       historico: m.historico,
+      ajusteUnidadeCapital: m.ajusteUnidadeCapital,
+      alertas: m.alertas,
       volatilidade: memoria[emp.ticker].volatilidade?.anualizada ?? null,
       volumeMedio: memoria[emp.ticker].liquidez?.volumeMedioEmissor ?? null,
       demonstracao: { doc: memoria[emp.ticker].demonstracao.doc, dtRefer: memoria[emp.ticker].demonstracao.dtRefer, dtReceb: memoria[emp.ticker].demonstracao.dtReceb, linkDoc: memoria[emp.ticker].demonstracao.linkDoc },

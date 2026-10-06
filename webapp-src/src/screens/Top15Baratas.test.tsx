@@ -96,11 +96,11 @@ describe('Top15Baratas', () => {
         fco: comp(443e6, [['exercicio_anterior (+)', 400e6], ['acumulado_atual (+)', 200e6], ['acumulado_ano_anterior (−)', 157e6]]),
         ebit: comp(521e6, [['exercicio_anterior (+)', 450e6], ['acumulado_atual (+)', 260e6], ['acumulado_ano_anterior (−)', 189e6]]),
       },
-      historico: [{ exercicio: '2025-12-31', conta: '3.11.01', lucro: 214e6, fco: 400e6 }, { exercicio: '2024-12-31', conta: '3.11.01', lucro: -1e6, fco: 300e6 }],
+      historico: [{ exercicio: '2025-12-31', conta: '3.11', lucro: 214e6, lucroControladores: 0, fco: 400e6 }, { exercicio: '2024-12-31', conta: '3.11', lucro: -1e6, lucroControladores: -1e6, fco: 300e6 }],
     })
     render(<Top15Baratas snapshot={snapshot({ ranking: [r] })} />)
     const bloco = within(screen.getByTestId('como-chegamos-SEER3'))
-    expect(bloco.getByText('Lucro líquido (conta 3.11.01)')).toBeTruthy()
+    expect(bloco.getByText('Lucro líquido consolidado (conta 3.11.01)')).toBeTruthy()
     expect(bloco.getAllByText(/\+ exercício encerrado em 31\/12\/2025 \(DFP\)/).length).toBe(3)
     expect(bloco.getAllByText(/\+ acumulado de 01\/01\/2026 a 30\/06\/2026 \(ITR\)/).length).toBe(3)
     expect(bloco.getAllByText(/− acumulado de 01\/01\/2025 a 30\/06\/2025 \(ITR\)/).length).toBe(3)
@@ -108,7 +108,21 @@ describe('Top15Baratas', () => {
     expect(bloco.getByText(/consolidado \(3\.11\) R\$ 60 mi · dos controladores \(3\.11\.01\) R\$ 57 mi/)).toBeTruthy()
     expect(bloco.getByText('2025')).toBeTruthy()
     expect(bloco.getByText('R$ 214 mi · R$ 400 mi')).toBeTruthy()
+    expect(bloco.getByText('dos controladores (3.11.01): R$ 0')).toBeTruthy()
+    expect(bloco.queryAllByText(/dos controladores \(3\.11\.01\):/).length).toBe(1) // 2024 é igual ao consolidado: não repete
     expect(bloco.getByText('−R$ 1 mi · R$ 300 mi')).toBeTruthy()
+  })
+
+  it('quantidade de ações ajustada (milhares na CVM) e P/VP alto aparecem com explicação', () => {
+    const s = snapshot({ ranking: [item('AMBV3', 1, { ajusteUnidadeCapital: 'automático ×1000' }), item('ALER3', 2, { alertas: ['pvp_alto'] }), item('NORM3', 3, { metodoValorDeMercado: 'preco_da_outra_classe' })] })
+    render(<Top15Baratas snapshot={s} />)
+    const amb = within(screen.getByTestId('top15-AMBV3'))
+    expect(amb.getByText('ajustada (automático ×1000)')).toBeTruthy()
+    expect(amb.getByText(/a CVM traz a quantidade em milhares/)).toBeTruthy()
+    expect(screen.getByTestId('alerta-pvp-ALER3').textContent).toContain('P/VP acima de 10')
+    expect(screen.queryByTestId('alerta-pvp-AMBV3')).toBeNull()
+    expect(within(screen.getByTestId('top15-NORM3')).getByText(/avaliada pelo preço de outra classe/)).toBeTruthy()
+    expect(within(screen.getByTestId('top15-ALER3')).queryByText(/Quantidade de ações/)).toBeNull()
   })
 
   it('"por que ficou de fora" explica o motivo da exclusão', () => {

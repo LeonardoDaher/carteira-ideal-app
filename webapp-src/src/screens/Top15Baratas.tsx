@@ -282,10 +282,19 @@ function CartaoRanking({ item: r, ordem, comFiltro }: { item: ItemRanking; ordem
         {r.semDespesaFinanceira ? 'sem despesa financeira' : formatarMultiplo(r.coberturaJuros)} · lucro positivo em {r.exerciciosComLucro} de {r.exerciciosAnalisados} exercícios · nota {r.nota.toLocaleString('pt-BR', { minimumFractionDigits: 3, maximumFractionDigits: 3 })}
       </div>
 
+      {r.alertas?.includes('pvp_alto') && (
+        <div className="tiny" role="note" data-testid={`alerta-pvp-${r.ticker}`} style={{ opacity: 0.9 }}>
+          ⚠ P/VP acima de 10: se isso não for o esperado para esta empresa, a quantidade de ações lida na CVM pode estar errada. Confira antes de usar.
+        </div>
+      )}
+
       <details>
         <summary className="small" style={{ cursor: 'pointer', fontWeight: 600 }}>Memória de cálculo</summary>
         <div className="col" style={{ gap: 0, marginTop: 6 }}>
-          <Linha rotulo="Valor de mercado" valor={formatarReaisCompacto(r.mktcap)} nota={r.metodoValorDeMercado === 'por_classe' ? 'ações de cada classe × preço da classe' : 'inclui classe sem preço recente, avaliada pelo preço da ação de referência'} />
+          <Linha rotulo="Valor de mercado" valor={formatarReaisCompacto(r.mktcap)} nota={r.metodoValorDeMercado === 'por_classe' ? 'ações de cada classe × preço da classe' : 'inclui classe sem negociação recente, avaliada pelo preço de outra classe'} />
+          {r.ajusteUnidadeCapital && (
+            <Linha rotulo="Quantidade de ações" valor={`ajustada (${r.ajusteUnidadeCapital})`} nota="a CVM traz a quantidade em milhares; sem o ajuste, P/VP e giro diário ficariam impossíveis" />
+          )}
           <Linha rotulo="Patrimônio líquido (controladores)" valor={formatarReaisCompacto(patrimonio)} />
           <Linha rotulo="EV (valor da empresa)" valor={formatarReaisCompacto(r.ev)} nota="valor de mercado + dívida líquida + minoritários" />
           <Linha rotulo="EBIT ajustado, 12 meses" valor={formatarReaisCompacto(r.ebitAjustado)} nota="sem equivalência patrimonial, baixas de ativos e outras receitas/despesas operacionais" />
@@ -312,7 +321,7 @@ function CartaoRanking({ item: r, ordem, comFiltro }: { item: ItemRanking; ordem
 /** Mostra de onde veio cada valor de 12 meses, para conferir contra a demonstração original. */
 function ComoChegamos({ item: r }: { item: ItemRanking }) {
   const blocos: { titulo: string; c: ComposicaoLtm }[] = [
-    { titulo: `Lucro líquido (conta ${r.composicaoLtm?.lucro.conta ?? ''})`, c: r.composicaoLtm!.lucro },
+    { titulo: `Lucro líquido consolidado (conta ${r.composicaoLtm?.lucro.conta ?? '3.11'})`, c: r.composicaoLtm!.lucro },
     { titulo: 'Caixa operacional', c: r.composicaoLtm!.fco },
     { titulo: 'EBIT (antes dos ajustes)', c: r.composicaoLtm!.ebit },
   ]
@@ -344,10 +353,15 @@ function ComoChegamos({ item: r }: { item: ItemRanking }) {
       )}
       {r.historico && r.historico.length > 0 && (
         <div className="col" style={{ gap: 0 }}>
-          <span className="tiny" style={{ fontWeight: 600 }}>Por exercício encerrado (lucro · caixa operacional)</span>
+          <span className="tiny" style={{ fontWeight: 600 }}>Por exercício encerrado (lucro consolidado · caixa operacional)</span>
           {r.historico.map((h) => (
             <div key={h.exercicio} className="tabela-bdr tiny">
-              <span className="muted">{h.exercicio.slice(0, 4)}</span>
+              <span className="col" style={{ gap: 0 }}>
+                <span className="muted">{h.exercicio.slice(0, 4)}</span>
+                {h.lucroControladores != null && h.lucroControladores !== h.lucro && (
+                  <span className="muted">dos controladores (3.11.01): {formatarReaisCompacto(h.lucroControladores)}</span>
+                )}
+              </span>
               <span style={{ fontWeight: 600 }}>{formatarReaisCompacto(h.lucro)} · {formatarReaisCompacto(h.fco)}</span>
             </div>
           ))}

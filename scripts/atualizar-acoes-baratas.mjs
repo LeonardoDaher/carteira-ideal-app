@@ -43,6 +43,20 @@ const lerGz = (arquivo) => JSON.parse(zlib.gunzipSync(fs.readFileSync(arquivo)).
 
 const classeDe = (ticker) => (ticker.endsWith('3') ? 'ON' : 'PN')
 
+/** Junta desdobramentos de várias fontes (config/acoes.json e config/acoes-baratas.json) sem duplicar a mesma data. */
+export function mesclarDesdobramentos(...fontes) {
+  const saida = {}
+  for (const f of fontes) {
+    for (const [ticker, eventos] of Object.entries(f ?? {})) {
+      if (ticker.startsWith('_') || !Array.isArray(eventos)) continue
+      const lista = (saida[ticker] ??= [])
+      for (const e of eventos) if (e && !lista.some((x) => x.data === e.data)) lista.push(e)
+      lista.sort((a, b) => (a.data < b.data ? -1 : 1))
+    }
+  }
+  return saida
+}
+
 /** Empresas do cadastro curado, na ordem do arquivo. */
 export function empresasDoCadastro(configAcoes) {
   const lista = []
@@ -74,8 +88,10 @@ export function extrairPreco(historico, ticker, configAcoes, cfg, maxIdadeDias =
   const fechamentos = ajustada.slice(-(janela + 1)).filter(Boolean).map((v) => Math.round(v[0] * 1e6) / 1e6)
 
   const prefixo = ticker.slice(0, 4)
+  // Classes = só ON/PN de verdade (cinco caracteres, final 3 a 6). A UNIT (final 11) NÃO é classe: vale várias ações juntas.
   const irmaos = Object.keys(ativos).filter((t) => t.length === 5 && t.startsWith(prefixo) && /[3-6]$/.test(t)).sort()
-  if (!irmaos.includes(ticker)) irmaos.push(ticker)
+  // Já o VOLUME do emissor soma tudo o que negocia, inclusive a unit (é onde costuma estar a liquidez).
+  const paraVolume = [...new Set([...irmaos, ticker])]
 
   const classes = []
   for (const t of irmaos) {
@@ -95,7 +111,7 @@ export function extrairPreco(historico, ticker, configAcoes, cfg, maxIdadeDias =
 
   const sessoes = Math.min(cfg.filtros.sessoesLiquidez, total)
   let soma = 0
-  for (const t of irmaos) {
+  for (const t of paraVolume) {
     const s = ativos[t]
     for (let j = 0; j < sessoes; j++) {
       const v = s[s.length - 1 - j]
@@ -106,7 +122,7 @@ export function extrairPreco(historico, ticker, configAcoes, cfg, maxIdadeDias =
   return {
     ref: { ticker, fechamento: Math.round(ajustada[iu][0] * 1e4) / 1e4, data: datas[iu] },
     classes: [...porClasse.values()].map(({ volume, ...resto }) => resto),
-    tickersDoEmissor: irmaos,
+    tickersDoEmissor: paraVolume,
     volumeMedioEmissor: Math.round(soma / sessoes),
     serieAjustada: fechamentos,
     saltosNaoResolvidos: saltos,
@@ -163,8 +179,8 @@ const csv = (cabecalho, linhas) => '\uFEFF' + [cabecalho.join(';'), ...linhas.ma
 
 export function csvRanking(resultado) {
   return csv(
-    ['posicao', 'ticker', 'nome', 'setor', 'cotacao', 'data_cotacao', 'nota', 'PL/VM', 'FCO/EV', 'EBIT_aj/EV', 'P/VP', 'mktcap_R$', 'ev_R$', 'ebit_aj_12m_R$', 'fco_12m_R$', 'lucro_12m_R$', 'roic', 'dl/ebitda', 'cobertura_juros', 'exercicios_lucro', 'exercicios_fco', 'exercicios_analisados', 'passa_roic', 'passa_dl_ebitda', 'passa_fco', 'passa_cobertura', 'passa_consistencia', 'volatilidade', 'volume_medio_R$', 'demonstracao', 'data_base', 'link_documento'],
-    resultado.ranking.map((r) => [r.posicao, r.ticker, csvTxt(r.nome), csvTxt(r.setor), csvNum(r.cotacao), r.dataCotacao, csvNum(r.nota), csvNum(r.plSobreValorDeMercado), csvNum(r.fcoSobreEv), csvNum(r.ebitAjustadoSobreEv), csvNum(r.pvp), csvNum(r.mktcap), csvNum(r.ev), csvNum(r.ebitAjustado), csvNum(r.fcoLtm), csvNum(r.lucroLtm), csvNum(r.roic), csvNum(r.dlEbitda), csvNum(r.coberturaJuros), r.exerciciosComLucro, r.exerciciosComFco, r.exerciciosAnalisados, r.passaRoic ? 'S' : 'N', r.passaDlEbitda ? 'S' : 'N', r.passaFco ? 'S' : 'N', r.passaCobertura ? 'S' : 'N', r.passaConsistencia ? 'S' : 'N', csvNum(r.volatilidade), csvNum(r.volumeMedio), r.demonstracao.doc, r.demonstracao.dtRefer, csvTxt(r.demonstracao.linkDoc)]),
+    ['posicao', 'ticker', 'nome', 'setor', 'cotacao', 'data_cotacao', 'nota', 'PL/VM', 'FCO/EV', 'EBIT_aj/EV', 'P/VP', 'mktcap_R$', 'ev_R$', 'ebit_aj_12m_R$', 'fco_12m_R$', 'lucro_12m_R$', 'roic', 'dl/ebitda', 'cobertura_juros', 'exercicios_lucro', 'exercicios_fco', 'exercicios_analisados', 'passa_roic', 'passa_dl_ebitda', 'passa_fco', 'passa_cobertura', 'passa_consistencia', 'volatilidade', 'volume_medio_R$', 'metodo_valor_mercado', 'ajuste_unidade_capital', 'alertas', 'demonstracao', 'data_base', 'link_documento'],
+    resultado.ranking.map((r) => [r.posicao, r.ticker, csvTxt(r.nome), csvTxt(r.setor), csvNum(r.cotacao), r.dataCotacao, csvNum(r.nota), csvNum(r.plSobreValorDeMercado), csvNum(r.fcoSobreEv), csvNum(r.ebitAjustadoSobreEv), csvNum(r.pvp), csvNum(r.mktcap), csvNum(r.ev), csvNum(r.ebitAjustado), csvNum(r.fcoLtm), csvNum(r.lucroLtm), csvNum(r.roic), csvNum(r.dlEbitda), csvNum(r.coberturaJuros), r.exerciciosComLucro, r.exerciciosComFco, r.exerciciosAnalisados, r.passaRoic ? 'S' : 'N', r.passaDlEbitda ? 'S' : 'N', r.passaFco ? 'S' : 'N', r.passaCobertura ? 'S' : 'N', r.passaConsistencia ? 'S' : 'N', csvNum(r.volatilidade), csvNum(r.volumeMedio), r.metodoValorDeMercado, csvTxt(r.ajusteUnidadeCapital ?? ''), csvTxt((r.alertas ?? []).join(',')), r.demonstracao.doc, r.demonstracao.dtRefer, csvTxt(r.demonstracao.linkDoc)]),
   )
 }
 
@@ -290,10 +306,15 @@ export async function executar({ raiz = RAIZ_PADRAO, dadosLocais = null, dataCor
   }
 
   // 1) Mapeamento ticker → CNPJ (FCA do ano; se ainda não existe, o do ano anterior)
-  let zipFca = await obter('FCA (valores mobiliários)', urlFca(ano), `fca_cia_aberta_${ano}.zip`)
-  if (!zipFca) zipFca = await obter('FCA (valores mobiliários)', urlFca(ano - 1), `fca_cia_aberta_${ano - 1}.zip`)
-  if (!zipFca) throw new Error('FCA da CVM indisponível: sem ele não há como ligar código de negociação a CNPJ.')
-  const mapaFca = await mapaTickerCnpj(zipFca)
+  // FCA do ano e do ano anterior: a empresa que ainda não entregou o do ano corrente (ou mudou de código) é achada no anterior.
+  // O mais recente vale; o anterior só preenche os códigos que o recente não traz.
+  const zipsFca = []
+  for (const a of [ano, ano - 1]) {
+    const z = await obter('FCA (valores mobiliários)', urlFca(a), `fca_cia_aberta_${a}.zip`)
+    if (z) zipsFca.push(z)
+  }
+  if (!zipsFca.length) throw new Error('FCA da CVM indisponível: sem ele não há como ligar código de negociação a CNPJ.')
+  const mapaFca = await mapaTickerCnpj(zipsFca)
   const mapeamento = resolverCnpjs(empresas.map((e) => e.ticker), mapaFca, manualCnpj)
   const cnpjs = new Set(mapeamento.filter((m) => m.cnpj).map((m) => cnpjDigitos(m.cnpj)))
   log(`  CNPJ resolvido para ${cnpjs.size} de ${empresas.length} empresas`)
@@ -316,7 +337,8 @@ export async function executar({ raiz = RAIZ_PADRAO, dadosLocais = null, dataCor
   if (!extracoes.some((e) => e.linhas.length)) throw new Error('Nenhuma linha de demonstração extraída: layout da CVM mudou ou o mapeamento de CNPJ falhou.')
   const contabeis = agruparPorCnpj(extracoes)
 
-  const insumos = montarInsumos({ empresas, historico, configAcoes, cfg, mapeamento, contabeis, dataCorte: corte })
+  const configPrecos = { ...configAcoes, desdobramentos: mesclarDesdobramentos(configAcoes.desdobramentos, cfg.desdobramentos) }
+  const insumos = montarInsumos({ empresas, historico, configAcoes: configPrecos, cfg, mapeamento, contabeis, dataCorte: corte })
   return concluir({ raiz, cfg, empresas, mapeamento, insumos, fontes, estatisticas, log })
 }
 

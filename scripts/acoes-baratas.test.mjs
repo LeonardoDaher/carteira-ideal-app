@@ -11,7 +11,7 @@ import {
   ranksPercentuais, valorDeMercado, volatilidadeAnualizada, zscoresWinsorizados, CONTAS,
 } from './acoes-baratas-calculo.mjs'
 import { dividirLinha, extrairZip, fatorEscala, indiceDasColunas, mapaTickerCnpj, numeroCvm, resolverCnpjs } from './acoes-baratas-cvm.mjs'
-import { agruparPorCnpj, concluir, extrairPreco, montarInsumos, montarSnapshotApp, separarSnapshot, verificar, verificarSanidade } from './atualizar-acoes-baratas.mjs'
+import { agruparPorCnpj, concluir, csvRanking, extrairPreco, mesclarDesdobramentos, montarInsumos, montarSnapshotApp, separarSnapshot, verificar, verificarSanidade } from './atualizar-acoes-baratas.mjs'
 
 const AQUI = path.dirname(fileURLToPath(import.meta.url))
 const RAIZ = path.resolve(AQUI, '..')
@@ -172,7 +172,7 @@ test('indicadores da ALFA batem com a conta feita à mão', async () => {
   assert.equal(m.ev, 10320e6)
   assert.equal(m.ebitAjustado, 1410e6)
   assert.equal(m.fcoLtm, 1550e6)
-  assert.equal(m.lucroLtm, 1000e6, 'lucro dos controladores: 850+530−380')
+  assert.equal(m.lucroLtm, 1060e6, 'lucro CONSOLIDADO (3.11): 900+560−400')
   assert.equal(m.plControladores, 8600e6)
   perto(m.plSobreValorDeMercado, 8600 / 7420)
   perto(m.fcoSobreEv, 1550 / 10320)
@@ -187,7 +187,8 @@ test('indicadores da ALFA batem com a conta feita à mão', async () => {
   assert.equal(m.passaCobertura, true)
   // consistência: lucro dos controladores 2021..2025 = 700, −150, 800, 820, 850 (4 de 5); FCO sempre positivo (5 de 5)
   assert.deepEqual([m.exerciciosAnalisados, m.exerciciosComLucro, m.exerciciosComFco, m.passaConsistencia], [5, 4, 5, true])
-  assert.deepEqual(r.memoria.consistencia.exercicios.map((e) => [e.exercicio.slice(0, 4), e.lucro]), [['2025', 850e6], ['2024', 820e6], ['2023', 800e6], ['2022', -150e6], ['2021', 700e6]])
+  assert.deepEqual(r.memoria.consistencia.exercicios.map((e) => [e.exercicio.slice(0, 4), e.lucro]), [['2025', 900e6], ['2024', 870e6], ['2023', 850e6], ['2022', -100e6], ['2021', 750e6]])
+  assert.deepEqual(r.memoria.consistencia.exercicios.map((e) => e.lucroControladores), [850e6, 820e6, 800e6, -150e6, 700e6], 'o dos controladores fica registrado, como informação')
   assert.equal(r.memoria.demonstracao.consolidacao, 'consolidada')
   assert.equal(r.memoria.demonstracao.linkDoc, 'https://exemplo.cvm/doc?id=3002')
   assert.equal(r.memoria.valorDeMercado.metodo, 'por_classe')
@@ -195,13 +196,44 @@ test('indicadores da ALFA batem com a conta feita à mão', async () => {
   assert.ok(r.memoria.fluxos12m.ebit.componentes.every((c) => c.linkDoc), 'cada componente aponta o documento de origem')
 })
 
-test('valor de mercado: classe sem preço usa o da referência e é marcada como aproximada', () => {
+test('valor de mercado: classe sem preço usa o da OUTRA classe e é marcada como aproximada', () => {
   const cap = { ordinarias: 100, preferenciais: 100, tesouroOrd: 0, tesouroPref: 0 }
   const r = valorDeMercado(cap, { ref: { ticker: 'XXXX4', fechamento: 10, data: 'd' }, classes: [{ classe: 'PN', ticker: 'XXXX4', fechamento: 10, data: 'd' }] })
   assert.equal(r.valor, 2000)
-  assert.equal(r.metodo, 'preco_da_classe_de_referencia')
-  assert.ok(r.classes.find((c) => c.classe === 'ON').aproximado)
+  assert.equal(r.metodo, 'preco_da_outra_classe')
+  assert.equal(r.fracaoAproximada, 0.5)
+  const on = r.classes.find((c) => c.classe === 'ON')
+  assert.deepEqual([on.aproximado, on.origemPreco, on.ticker], [true, 'outra_classe', 'XXXX4'])
   assert.match(valorDeMercado({ ordinarias: 1, preferenciais: 0, tesouroOrd: 5, tesouroPref: 0 }, precoAlfa).erro, /tesouraria/)
+})
+
+test('UNIT (final 11) nunca é preço de classe: a Taesa tinha a PN a R$ 42,85 (preço da unit) contra a ON a R$ 14,03', () => {
+  const cap = { ordinarias: 590, preferenciais: 443, tesouroOrd: 0, tesouroPref: 0 }
+  // Antes do conserto, TAEE11 entrava como "PN" e valia 443 × 42,85. Agora a PN é avaliada pelo preço da PN (TAEE4).
+  const certo = valorDeMercado(cap, { ref: { ticker: 'TAEE11', fechamento: 42.85, data: 'd' }, classes: [{ classe: 'ON', ticker: 'TAEE3', fechamento: 14.03, data: 'd' }, { classe: 'PN', ticker: 'TAEE4', fechamento: 14.2, data: 'd' }] })
+  assert.equal(certo.metodo, 'por_classe')
+  perto(certo.valor, 590 * 14.03 + 443 * 14.2)
+  // se a PN não negociou, vale o preço da ON (aproximado); nunca o da unit
+  const semPn = valorDeMercado(cap, { ref: { ticker: 'TAEE11', fechamento: 42.85, data: 'd' }, classes: [{ classe: 'ON', ticker: 'TAEE3', fechamento: 14.03, data: 'd' }] })
+  perto(semPn.valor, (590 + 443) * 14.03)
+  assert.equal(semPn.classes.find((c) => c.classe === 'PN').origemPreco, 'outra_classe')
+  // sem preço de NENHUMA classe e referência sendo unit: não há como avaliar
+  const nada = valorDeMercado(cap, { ref: { ticker: 'TAEE11', fechamento: 42.85, data: 'd' }, classes: [] })
+  assert.match(nada.erro, /TAEE11 é uma unit/)
+  // referência que É classe (final 3 a 6) e é a única com preço: serve
+  assert.equal(valorDeMercado(cap, { ref: { ticker: 'XXXX3', fechamento: 10, data: 'd' }, classes: [] }).classes.every((c) => c.origemPreco === 'referencia'), true)
+})
+
+test('extração de preço: a unit conta no volume do emissor, mas não vira classe', () => {
+  const dias = Array.from({ length: 30 }, (_, i) => `2026-09-${String(i + 1).padStart(2, '0')}`)
+  const v = (p, vol) => [p, p, p, vol]
+  const historico = { pregoes: dias, ativos: {
+    SAPR3: dias.map(() => v(14, 1_000_000)), SAPR4: dias.map(() => v(11, 2_000_000)), SAPR11: dias.map(() => v(52, 20_000_000)) } }
+  const c = { ...cfg, filtros: { ...cfg.filtros, sessoesLiquidez: 10 } }
+  const p = extrairPreco(historico, 'SAPR11', { desdobramentos: {} }, c)
+  assert.deepEqual(p.classes.map((x) => [x.classe, x.ticker, x.fechamento]), [['ON', 'SAPR3', 14], ['PN', 'SAPR4', 11]], 'SAPR11 não é classe')
+  assert.equal(p.ref.ticker, 'SAPR11')
+  assert.equal(p.volumeMedioEmissor, 23_000_000, 'volume = ON + PN + unit (a unit é onde está a liquidez)')
 })
 
 test('mapeamento ticker → CNPJ: FCA vigente, correção manual e ambiguidade', async () => {
@@ -680,7 +712,7 @@ test('ajuste manual de unidade do capital (VALE3 informa ações em milhares): s
   // ajuste errado não esconde o problema: continua excluída, e a mensagem diz que foi com ajuste
   const errado = calcular(insumosDe([fabricar('VALE3', { acoes: 0.1 })]), { ...cfg, capital: { ajustesManuais: { VALE3: { fatorQuantidade: 2 } } } }).resultado
   assert.equal(errado.exclusoes[0].codigo, 'capital_implausivel')
-  assert.match(errado.exclusoes[0].motivo, /MESMO com o ajuste manual de ×2/)
+  assert.match(errado.exclusoes[0].motivo, /MESMO com o ajuste de ×2/)
   assert.equal(cfg.capital.ajustesManuais.VALE3.fatorQuantidade, 1000)
 })
 
@@ -721,9 +753,151 @@ test('composição dos 12 meses e histórico por exercício chegam ao ranking, p
     ['acumulado_ano_anterior (−)', 650e6, '2025-01-01', '2025-06-30'],
   ])
   assert.equal(fco.componentes.reduce((s, c) => s + (c.papel.includes('(−)') ? -c.valor : c.valor), 0), fco.valor, 'a soma dos componentes fecha com o total')
-  assert.equal(r.composicaoLtm.lucro.conta, '3.11.01')
-  assert.equal(r.composicaoLtm.lucro.valor, 1000e6)
+  assert.equal(r.composicaoLtm.lucro.conta, '3.11')
+  assert.equal(r.composicaoLtm.lucro.valor, 1060e6)
   assert.equal(r.composicaoLtm.lucro.consolidado, 1060e6, 'consolidado (3.11): 900 + 560 − 400')
   assert.equal(r.composicaoLtm.lucro.controladores, 1000e6, 'controladores (3.11.01): 850 + 530 − 380')
-  assert.deepEqual(r.historico.map((h) => [h.exercicio.slice(0, 4), h.lucro]), [['2025', 850e6], ['2024', 820e6], ['2023', 800e6], ['2022', -150e6], ['2021', 700e6]])
+  assert.deepEqual(r.historico.map((h) => [h.exercicio.slice(0, 4), h.lucro]), [['2025', 900e6], ['2024', 870e6], ['2023', 850e6], ['2022', -100e6], ['2021', 750e6]])
+})
+
+test('caso real SEER3: DFP com lucro dos controladores (3.11.01) ZERO em todos os anos não pode apagar o lucro consolidado (3.11)', () => {
+  const emp = fabricar('SEER3', { lucros: [-20, 50, -5, 30] }) // consolidado por exercício; atual (2025) = 60
+  // a DFP da Ser trazia 3.11.01 = 0 em todos os exercícios, até no de prejuízo
+  for (const d of emp.contabil.docs) {
+    emp.contabil.linhas.push({ doc: 'DFP', dtRefer: d.dtRefer, versao: 1, dem: 'DRE', cons: 'con', ordem: 'ULTIMO', dtIni: `${d.dtRefer.slice(0, 4)}-01-01`, dtFim: d.dtRefer, cd: '3.11.01', ds: 'Atribuído a Sócios da Empresa Controladora', valor: 0, linkDoc: null })
+  }
+  const r = calcular(insumosDe([emp]), cfg)
+  const e = r.resultado.ranking[0]
+  assert.equal(e.lucroLtm, 60, 'lucro de 12 meses = consolidado (3.11), não o 0 da 3.11.01')
+  // consolidado: 2025 +60, 2024 +30, 2023 −5, 2022 +50, 2021 −20 → 3 de 5 (antes do conserto: 0 de 5)
+  assert.deepEqual([e.exerciciosAnalisados, e.exerciciosComLucro], [5, 3])
+  assert.deepEqual(e.historico.map((h) => [h.exercicio.slice(0, 4), h.lucro, h.lucroControladores]), [['2025', 60, 0], ['2024', 30, 0], ['2023', -5, 0], ['2022', 50, 0], ['2021', -20, 0]])
+  assert.equal(e.composicaoLtm.lucro.conta, '3.11')
+  assert.equal(e.composicaoLtm.lucro.controladores, 0, 'o zero dos controladores continua visível, para quem quiser conferir')
+})
+
+// Cenário em escala "de verdade" (R$): PL de R$ 8 bi, volume diário de R$ 50 mi.
+const real = (ticker, o = {}) => fabricar(ticker, { pl: 8e9, ebit: 1e9, fco: 9e8, lucro: 6e8, volume: 5e7, ...o })
+
+test('unidade AUTOMÁTICA (caso Ambev/Renner/Cemig...): quantidade em milhares é detectada por dois sinais e fica registrada', () => {
+  // 1 milhão "de ações" (na verdade 1 milhão de milhares = 1 bi) × R$ 10 = R$ 10 mi; P/VP = 0,00125; giro = 5 (500%/dia: impossível)
+  const r = calcular(insumosDe([real('AMBV3', { acoes: 1e6 })]), cfg)
+  assert.equal(r.resultado.ranking.length, 1, JSON.stringify(r.resultado.exclusoes))
+  const e = r.resultado.ranking[0]
+  assert.equal(e.ajusteUnidadeCapital, 'automático ×1000')
+  assert.equal(e.mktcap, 1e10)
+  perto(e.pvp, 1.25, 1e-3)
+  const reg = r.memoria.AMBV3.valorDeMercado
+  assert.equal(reg.ajusteAutomatico.fatorQuantidade, 1000)
+  assert.deepEqual(reg.ajusteAutomatico.evidencias, { pvpSemAjuste: 0.00125, giroDiarioSemAjuste: 5, pvpComAjuste: 1.25, giroDiarioComAjuste: 0.005 })
+  assert.equal(reg.capital.ordinarias, 1e6, 'a memória guarda a quantidade ORIGINAL da CVM')
+  assert.equal(reg.ajusteManual, null)
+})
+
+test('unidade automática NÃO mexe em empresa barata de verdade (P/VP baixo, giro normal) nem quando o ajuste não resolve', () => {
+  // distressed: P/VP 0,0125 (< 0,02) mas giro 0,2 (<= 0,25): só um sinal → não ajusta → excluída com os números
+  const barata = calcular(insumosDe([real('DIST3', { pl: 2e10, acoes: 2.5e7 })]), cfg).resultado
+  assert.equal(barata.exclusoes[0].codigo, 'capital_implausivel')
+  assert.ok(!/MESMO com o ajuste/.test(barata.exclusoes[0].motivo))
+  // dois sinais acusam, mas ×1000 também não fica plausível (giro continuaria impossível): não ajusta
+  const pequena = calcular(insumosDe([real('PEQU3', { acoes: 1e6, volume: 5e11 })]), cfg).resultado
+  assert.equal(pequena.exclusoes[0].codigo, 'capital_implausivel')
+  // empresa normal (P/VP 1,25): nada a ajustar
+  const normal = calcular(insumosDe([real('NORM3', { acoes: 1e9 })]), cfg)
+  assert.equal(normal.resultado.ranking[0].ajusteUnidadeCapital, null)
+  // chave de segurança desligada
+  const off = calcular(insumosDe([real('AMBV3', { acoes: 1e6 })]), { ...cfg, verificacoes: { ...cfg.verificacoes, unidadeAutomatica: { ...cfg.verificacoes.unidadeAutomatica, ativa: false } } }).resultado
+  assert.equal(off.exclusoes[0].codigo, 'capital_implausivel')
+  // o ajuste manual vence o automático (e aparece como manual)
+  const manual = calcular(insumosDe([real('VALE3', { acoes: 1e6 })]), cfg).resultado.ranking[0]
+  assert.equal(manual.ajusteUnidadeCapital, 'manual ×1000')
+})
+
+test('unidade automática: o ajuste não esconde um erro de ESCALA do outro lado (P/VP depois do ajuste > 100 continua excluindo)', () => {
+  // quantidade em unidades corretas mas P/VP absurdo para cima: não é caso de milhares
+  const r = calcular(insumosDe([real('ALTO3', { acoes: 5e11 })]), cfg).resultado
+  assert.equal(r.exclusoes[0].codigo, 'capital_implausivel')
+})
+
+test('classe sem preço com mais de 10% das ações (caso TFCO4: ON = 93% das ações, sem preço próprio) sai com o motivo', () => {
+  // ON 877 mi e PN 65 mi; só a PN negocia. A ON seria avaliada pelo preço da PN, mas tem direito econômico muito menor.
+  const emp = real('TFCO4', { acoes: 877e6 })
+  emp.contabil.capital[0] = { ...emp.contabil.capital[0], ordinarias: 877e6, preferenciais: 65e6 }
+  emp.preco.ref = { ticker: 'TFCO4', fechamento: 13.4, data: '2026-09-30' }
+  emp.preco.classes = [{ classe: 'PN', ticker: 'TFCO4', fechamento: 13.4, data: '2026-09-30' }]
+  const r = calcular(insumosDe([emp]), cfg).resultado
+  assert.equal(r.ranking.length, 0)
+  assert.equal(r.exclusoes[0].codigo, 'classe_sem_preco')
+  assert.match(r.exclusoes[0].motivo, /ON 93% das ações está sem preço/)
+  // classe pequena sem preço (FRAS3: PN 1%) segue, avaliada pelo preço da outra classe
+  const peq = real('FRAS3', { acoes: 1e9 })
+  peq.contabil.capital[0] = { ...peq.contabil.capital[0], ordinarias: 1e9, preferenciais: 1e7 }
+  peq.preco.classes = [{ classe: 'ON', ticker: 'FRAS3', fechamento: 10, data: '2026-09-30' }]
+  const ok = calcular(insumosDe([peq]), cfg)
+  assert.equal(ok.resultado.ranking.length, 1)
+  assert.equal(ok.resultado.ranking[0].metodoValorDeMercado, 'preco_da_outra_classe')
+})
+
+test('alerta de P/VP muito alto (caso LAVV3: ações lidas 10x acima do real dão P/VP 15,5): aparece no ranking sem excluir', () => {
+  const r = calcular(insumosDe([real('ALER3', { acoes: 1.5e10 }), real('NORM3', { acoes: 1e9 })]), cfg).resultado
+  const por = Object.fromEntries(r.ranking.map((x) => [x.ticker, x]))
+  assert.deepEqual(por.ALER3.alertas, ['pvp_alto'])
+  assert.deepEqual(por.NORM3.alertas, [])
+  assert.equal(cfg.verificacoes.pvpAlerta, 10)
+})
+
+test('sem preço: o motivo real aparece (último negócio antigo), não uma frase genérica', () => {
+  const emp = fabricar('PARA3')
+  emp.preco = { ref: null, motivoSemPreco: 'último negócio em 2026-08-01, há mais de 10 dias do último pregão (2026-10-02)' }
+  const ex = calcular(insumosDe([emp]), cfg).resultado.exclusoes[0]
+  assert.equal(ex.codigo, 'sem_preco')
+  assert.match(ex.motivo, /último negócio em 2026-08-01/)
+})
+
+test('desdobramentos confirmados (SBSP3, SIMH3, ORVR3) estão na config e fecham a série de preços', () => {
+  const d = cfg.desdobramentos
+  assert.deepEqual([d.SBSP3[0].data, d.SBSP3[0].fator, d.SIMH3[0].data, d.SIMH3[0].fator, d.ORVR3[0].data, d.ORVR3[0].fator], ['2026-04-29', 5, '2026-02-18', 0.5, '2026-08-11', 4])
+  const dias = Array.from({ length: 30 }, (_, i) => `2026-09-${String(i + 1).padStart(2, '0')}`)
+  const salto = (fator) => ({ pregoes: dias, ativos: { ZZZZ3: dias.map((_, i) => { const p = i < 15 ? 40 : 40 / fator; return [p, p, p, 1e6] }) } })
+  const merged = mesclarDesdobramentos({}, { ZZZZ3: [{ data: '2026-09-16', fator: 4 }] })
+  assert.equal(extrairPreco(salto(4), 'ZZZZ3', { desdobramentos: merged }, cfg).saltosNaoResolvidos.length, 0)
+  assert.equal(extrairPreco(salto(4), 'ZZZZ3', { desdobramentos: {} }, cfg).saltosNaoResolvidos.length, 1)
+  // grupamento 2:1 (fator 0,5): o preço sobe para o dobro
+  const grup = { pregoes: dias, ativos: { ZZZZ3: dias.map((_, i) => { const p = i < 15 ? 10 : 20; return [p, p, p, 1e6] }) } }
+  assert.equal(extrairPreco(grup, 'ZZZZ3', { desdobramentos: { ZZZZ3: [{ data: '2026-09-16', fator: 0.5 }] } }, cfg).saltosNaoResolvidos.length, 0)
+})
+
+test('mesclarDesdobramentos: soma as duas fontes sem duplicar a mesma data e ignora chaves de comentário', () => {
+  const m = mesclarDesdobramentos({ AAAA3: [{ data: '2026-01-02', fator: 2 }], _leia: 'x' }, { AAAA3: [{ data: '2026-01-02', fator: 2, fonte: 'y' }, { data: '2026-03-04', fator: 5 }], BBBB3: [{ data: '2026-05-06', fator: 0.5 }], _leia: 'z' })
+  assert.deepEqual(m.AAAA3.map((e) => e.data), ['2026-01-02', '2026-03-04'])
+  assert.deepEqual(m.BBBB3, [{ data: '2026-05-06', fator: 0.5 }])
+  assert.equal(m._leia, undefined)
+})
+
+test('FCA de dois anos: o recente vale; o anterior só preenche o que falta e nunca traz de volta um CNPJ antigo', async () => {
+  const f26 = path.join(FIX, 'fca_cia_aberta_2026.zip')
+  const f25 = path.join(FIX, 'fca_cia_aberta_2025.zip')
+  const so26 = await mapaTickerCnpj(f26)
+  assert.equal(resolverCnpjs(['DELT3'], so26)[0].cnpj, null, 'só com o FCA de 2026, DELT3 não é achada (caso real dos sem_cnpj)')
+  const mapa = await mapaTickerCnpj([f26, f25])
+  const r = Object.fromEntries(resolverCnpjs(['DELT3', 'GAMA3', 'ALFA3', 'AMBI3'], mapa).map((x) => [x.ticker, x]))
+  assert.equal(r.DELT3.cnpj, '77.777.777/0001-77', 'achada no FCA do ano anterior')
+  assert.equal(r.GAMA3.cnpj, '44.444.444/0001-44', 'o CNPJ NOVO do FCA recente vence o antigo do FCA anterior')
+  assert.equal(r.ALFA3.cnpj, CNPJ_ALFA)
+  assert.equal(r.AMBI3.cnpj, null, 'ambiguidade continua sendo recusada')
+  assert.equal((await mapaTickerCnpj(f26)).size, so26.size, 'aceitar um caminho único continua funcionando')
+})
+
+test('CSV do ranking traz as colunas novas: método do valor de mercado, ajuste de unidade e alertas', () => {
+  const { resultado } = calcular(insumosDe([real('AMBV3', { acoes: 1e6 }), real('ALER3', { acoes: 1.5e10 })]), cfg)
+  const csvTxt = csvRanking(resultado)
+  const cab = csvTxt.split('\r\n')[0].replace('\uFEFF', '').split(';')
+  assert.ok(['metodo_valor_mercado', 'ajuste_unidade_capital', 'alertas'].every((c) => cab.includes(c)))
+  const linhas = csvTxt.split('\r\n').slice(1).filter(Boolean).map((l) => l.split(';'))
+  const col = (n, l) => l[cab.indexOf(n)]
+  const amb = linhas.find((l) => l[1] === 'AMBV3')
+  assert.equal(col('ajuste_unidade_capital', amb), '"automático ×1000"')
+  assert.equal(col('metodo_valor_mercado', amb), 'por_classe')
+  assert.equal(col('alertas', linhas.find((l) => l[1] === 'ALER3')), '"pvp_alto"')
+  assert.ok(linhas.every((l) => l.length === cab.length), 'todas as linhas têm o mesmo número de colunas do cabeçalho')
 })

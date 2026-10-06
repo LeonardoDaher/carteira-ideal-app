@@ -1,6 +1,6 @@
 # Metodologia da triagem "Top 15 ações mais baratas"
 
-**Versão da metodologia: 1.0.3** · Decisão de origem: D49 · Parâmetros: `config/acoes-baratas.json` (fonte única) · Código: `scripts/acoes-baratas-calculo.mjs` (cálculo puro), `scripts/acoes-baratas-cvm.mjs` (leitura da CVM), `scripts/atualizar-acoes-baratas.mjs` (orquestração e gravação da auditoria), `scripts/acoes-baratas-verificar.mjs` (verificação independente).
+**Versão da metodologia: 1.0.5** · Decisão de origem: D49 · Parâmetros: `config/acoes-baratas.json` (fonte única) · Código: `scripts/acoes-baratas-calculo.mjs` (cálculo puro), `scripts/acoes-baratas-cvm.mjs` (leitura da CVM), `scripts/atualizar-acoes-baratas.mjs` (orquestração e gravação da auditoria), `scripts/acoes-baratas-verificar.mjs` (verificação independente).
 
 > **Regra de ouro deste documento.** Tudo o que está aqui deve poder ser conferido contra o código e contra a pasta `auditoria/acoes-baratas/<data>/`. Se o código mudar, a versão em `config/acoes-baratas.json` sobe, o histórico de versões (final deste arquivo) ganha uma linha, e este texto é atualizado no mesmo commit.
 
@@ -25,7 +25,7 @@ Não é recomendação de investimento, não estima valor justo e não diz que u
 | Preços e volumes | B3, Boletim de Preços (BVBG.086) | `historico/acoes.json` (mantido pelo job diário de Ações) | último pregão no manifesto |
 | Setor e nome | Cadastro curado do projeto | `config/acoes.json` | hash da config |
 
-Anos baixados (com a data de corte no ano *A*): DFP de *A−5* a *A* (5 exercícios para a consistência, seção 8.5, mais o corrente), ITR de *A−1* e *A*, FCA de *A* (ou *A−1* se o do ano ainda não existir). Os DFP mais antigos que *A−2* são lidos só para lucro e caixa operacional (contas 3.11, 3.11.01 e 6.01, coluna ÚLTIMO).
+Anos baixados (com a data de corte no ano *A*): DFP de *A−5* a *A* (5 exercícios para a consistência, seção 8.5, mais o corrente), ITR de *A−1* e *A*, FCA de *A* e de *A−1* (o mais recente vale; o anterior só preenche os códigos que o recente não traz, para achar a empresa que ainda não entregou o FCA do ano ou mudou de código). Os DFP mais antigos que *A−2* são lidos só para lucro e caixa operacional (contas 3.11, 3.11.01 e 6.01, coluna ÚLTIMO).
 
 **Escala e moeda.** `ESCALA_MOEDA` = MIL multiplica por 1.000; UNIDADE por 1; qualquer outra faz o job falhar. Linhas com `MOEDA` diferente de REAL são descartadas e contadas no manifesto (a empresa sai por dados incompletos se faltar conta por isso).
 
@@ -49,7 +49,7 @@ Cada empresa é atribuída à **primeira** etapa que a reprova (a ordem muda a c
 |---|---|---|
 | `liquidez` | Média diária de negociação do **emissor** (soma de todas as classes ON/PN do mesmo prefixo de 4 letras, dia sem negócio conta zero) abaixo do mínimo sai | `filtros.liquidezMinimaDiariaReais` = R$ 3.000.000; `sessoesLiquidez` = 21 |
 | `volatilidade` | Volatilidade anualizada = desvio-padrão **amostral** dos retornos logarítmicos diários dos últimos 252 pregões × √252, sobre fechamentos ajustados por desdobramento. O corte é o percentil 90 (método *nearest-rank*) de **todas** as empresas do cadastro com série válida, inclusive as de setores excluídos. Sai quem tem volatilidade **estritamente acima** do corte | `percentilVolatilidadeExcluir` = 90; `minimoRetornosVolatilidade` = 126 |
-| `volatilidade` (preço) | Salto de preço (queda ≥ 45% ou alta ≥ 80% entre dois fechamentos) sem desdobramento confirmado em `config/acoes.json → desdobramentos` torna a série não confiável; a empresa sai com a data do salto | — |
+| `volatilidade` (preço) | Salto de preço (queda ≥ 45% ou alta ≥ 80% entre dois fechamentos) sem desdobramento ou grupamento confirmado torna a série não confiável; a empresa sai com a data do salto. Confirmações valem se estiverem em `config/acoes.json → desdobramentos` **ou** em `config/acoes-baratas.json → desdobramentos` (somadas, sem duplicar a mesma data); fator > 1 = desdobramento, < 1 = grupamento. Confirmados na 1ª execução real: SBSP3 (1:5, 29/04/2026), SIMH3 (grupamento 2:1, 18/02/2026), ORVR3 (1:4, 11/08/2026) | — |
 | `volatilidade` (histórico) | Menos de 126 retornos diários disponíveis: sai ("histórico insuficiente"). Isso retira IPOs recentes | `minimoRetornosVolatilidade` |
 | `dados_contabeis` | Demonstração incompleta, defasada ou incoerente (seção 7) | `idadeMaximaDemonstracaoDias` = 200 |
 | `lucro` | Lucro líquido dos últimos 12 meses não positivo sai | `lucroLtmPositivo` |
@@ -70,8 +70,8 @@ Consolidado (`con`) quando existe a conta 3.05 no documento mais recente; senão
 | Resultado financeiro | 3.06 | DRE | fluxo, opcional | verificação de coerência |
 | Despesas financeiras | 3.06.02 | DRE | fluxo, opcional | cobertura de juros |
 | Resultado antes dos tributos | 3.07 | DRE | fluxo, opcional | verificação de coerência |
-| Lucro consolidado | 3.11 | DRE | fluxo | usado se não houver 3.11.01 |
-| Lucro dos controladores | 3.11.01 | DRE | fluxo, opcional | preferido |
+| **Lucro consolidado** | **3.11** | DRE | fluxo | **lucro de referência** dos filtros de lucro de 12 meses e de consistência |
+| Lucro dos controladores | 3.11.01 | DRE | fluxo, opcional | **só informativo**: na primeira execução real a DFP da SER3 trazia 3.11.01 = 0 em todos os exercícios, até no de prejuízo, enquanto os ITR traziam valores normais |
 | **Caixa das atividades operacionais (FCO)** | **6.01** | DFC (MD ou MI) | fluxo | |
 | Depreciação e amortização | 7.04.01 | DVA | fluxo, opcional | EBITDA; sem ela o EBITDA é indisponível. **A DVA mostra as retenções com sinal negativo**, então usa-se o valor absoluto |
 | Ativo total / Passivo total | 1 / 2 | BPA / BPP | saldo | verificação de que o balanço fecha |
@@ -91,7 +91,18 @@ Consolidado (`con`) quando existe a conta 3.05 no documento mais recente; senão
 
 ### 5.2 Valor de mercado
 
-`Valor de mercado = Σ por classe (ações em circulação × preço da classe)`, com ações em circulação = capital integralizado − tesouraria, por classe (ordinárias e preferenciais, da composição do capital do mesmo documento; se não houver, o registro mais recente até a data de corte). Preço da classe ON = último fechamento do código terminado em 3; da classe PN = o código preferencial (4, 5 ou 6) mais negociado. Se a classe tem ações mas não tem preço recente, usa-se o preço da ação de referência e a empresa é marcada `preco_da_classe_de_referencia`. A quantidade de ações é lida em **unidades** (formulário "Dados da Empresa"). Há companhias que a informam em milhares (caso da **VALE3**, verificado na primeira execução real): para elas existe o **ajuste manual de unidade** `capital.ajustesManuais` da config, um por ticker, com o motivo. Nunca é automático; fica na memória de cálculo (com a quantidade original da CVM) e a verificação de P/VP plausível roda **depois** do ajuste.
+`Valor de mercado = Σ por classe (ações em circulação × preço da classe)`, com ações em circulação = capital integralizado − tesouraria, por classe (ordinárias e preferenciais, da composição do capital do mesmo documento; se não houver, o registro mais recente até a data de corte).
+
+**Preço de cada classe.** Classe ON = último fechamento do código terminado em 3. Classe PN = o código preferencial (final 4, 5 ou 6) mais negociado. **Unit (final 11) nunca é preço de classe**, porque vale várias ações juntas (ex.: 1 ON + 4 PN); na 1ª execução real a Taesa aparecia com a PN a R$ 42,85 (o preço da unit) contra a ON a R$ 14,03, e ALUP11, ENGI11, IGTI11 e SAPR11 tinham o valor de mercado superestimado. A unit conta só no **volume** do emissor.
+
+**Classe sem negociação recente.** Se uma classe tem ações mas não negociou nos últimos 10 dias, ela é avaliada pelo preço da **outra** classe e a empresa é marcada `preco_da_outra_classe`. Se essa classe aproximada passar de **10% das ações** (`verificacoes.maxFracaoSemPreco`), a empresa sai com o motivo `classe_sem_preco`, porque classes diferentes podem ter direitos econômicos muito diferentes (caso TFCO4: a ON, 93% das ações, não tem preço e vale cerca de 1/10 da PN). Se não há preço de nenhuma classe e a referência é uma unit, a empresa sai por `capital_invalido`.
+
+**Unidade da quantidade de ações.** O formulário da CVM não traz a unidade, e muitas companhias informam a quantidade **em milhares**. Na 1ª execução real, 31 de ~100 empresas (de Vale a Ambev, Renner, Cemig e Taesa) estavam nesse caso: P/VP implícito de 0,0003 a 0,0034 (com ×1000: 0,30 a 3,40). Dois caminhos, ambos registrados na memória de cálculo:
+
+1. **Manual** (`capital.ajustesManuais`, por ticker, com o motivo): vence sempre.
+2. **Automático** (`verificacoes.unidadeAutomatica`), **só com dois sinais independentes**: (a) o P/VP sem ajuste fica abaixo do mínimo plausível (0,02) **e** (b) o giro diário (volume médio do emissor ÷ valor de mercado) fica acima de 25% ao dia, isto é, o emissor negociaria por dia mais do que vale; **e** depois de multiplicar por 1.000 o P/VP volta à faixa e o giro a ≤ 25%. Empresa barata de verdade (P/VP baixo com giro normal) não é tocada; um ajuste que não deixa tudo plausível não é aplicado.
+
+Depois de qualquer ajuste, a verificação de P/VP plausível (seção 7) roda de novo. A memória guarda a quantidade original da CVM, o fator e as evidências (P/VP e giro antes e depois).
 
 ### 5.3 EV, EBIT ajustado e demais derivados
 
@@ -132,6 +143,7 @@ Falhou, a empresa sai na etapa `dados_contabeis` com código e motivo em `exclus
 | Descrição da conta | A descrição da CVM bate com a esperada (ex.: 3.05 contém "resultado antes do resultado financeiro") | `dados_incompletos_ou_incoerentes` |
 | Capital plausível | P/VP implícito entre 0,02 e 100 (quando o PL de controladores é positivo) | `capital_implausivel` |
 | Tesouraria | Tesouraria não pode exceder o capital da classe | `capital_invalido` |
+| Classe com preço | Classe com mais de 10% das ações sem negociação recente não é avaliada pelo preço de outra | `classe_sem_preco` |
 | Caixa operacional coerente | FCO de 12 meses não pode passar de 3x o EBITDA (ou o EBIT ajustado, se não houver EBITDA), quando a referência é positiva. FCO muito acima do resultado operacional costuma ser financiamento (recebíveis, crédito a clientes) apresentado no fluxo operacional | `fco_incoerente` |
 | Conta obrigatória | Receita, EBIT, lucro, FCO, ativo total, passivo total, caixa e PL presentes | `dados_incompletos_ou_incoerentes` |
 
@@ -145,7 +157,7 @@ Aplicados **depois** do ranking, ligados ou desligados pelo usuário na tela. **
 | 8.2 | **Dívida líquida / EBITDA** | Dívida líquida ÷ EBITDA | ≤ 3,0x | Dívida líquida ≤ 0 (caixa líquido): passa. EBITDA indisponível (sem 7.04.01) ou ≤ 0 com dívida: reprova |
 | 8.3 | **Caixa operacional positivo** | FCO 12m | > 0 | — |
 | 8.4 | **Cobertura de juros** | EBIT ajustado 12m ÷ |despesas financeiras 12m (3.06.02)| | ≥ 3,0x | Despesa financeira zero: passa. Conta 3.06.02 ausente: reprova (cautela). EBIT ajustado ≤ 0: reprova |
-| 8.5 | **Consistência de 5 exercícios** | Entre os 5 últimos DFP **consecutivos** (do mais recente para trás, intervalos de 360 a 372 dias, recebidos até a data de corte): lucro líquido (3.11.01, senão 3.11) positivo e FCO (6.01) positivo | Lucro positivo em ≥ 4 **e** FCO positivo em ≥ 4 | Menos de 5 exercícios disponíveis (empresa nova, buraco na série, conta ausente): reprova. Usa o valor ÚLTIMO de cada DFP, como foi divulgado naquele ano |
+| 8.5 | **Consistência de 5 exercícios** | Entre os 5 últimos DFP **consecutivos** (do mais recente para trás, intervalos de 360 a 372 dias, recebidos até a data de corte): lucro líquido **consolidado** (3.11) positivo e FCO (6.01) positivo | Lucro positivo em ≥ 4 **e** FCO positivo em ≥ 4 | Menos de 5 exercícios disponíveis (empresa nova, buraco na série, conta ausente): reprova. Usa o valor ÚLTIMO de cada DFP, como foi divulgado naquele ano |
 
 ## 9. Trilha de auditoria
 
@@ -181,7 +193,7 @@ Modelo para registrar a conferência: `auditoria/acoes-baratas/conferencia-manua
 
 1. Em `ranking.csv`, copie o `link_documento`; abra o documento original na CVM.
 2. Em `memoria-de-calculo.json.gz`, localize o ticker e leia `fluxos12m` e `saldos`: cada componente informa conta, descrição, período, versão e valor.
-3. Compare com o documento: EBIT (3.05), FCO (6.01), PL (2.03), caixa (1.01.01), dívida (2.01.04 e 2.02.01) e lucro (3.11.01). Valores em R$ mil no documento = valor da memória ÷ 1.000.
+3. Compare com o documento: EBIT (3.05), FCO (6.01), PL (2.03), caixa (1.01.01), dívida (2.01.04 e 2.02.01) e lucro consolidado (3.11). Valores em R$ mil no documento = valor da memória ÷ 1.000.
 4. Compare o preço de fechamento e a quantidade de ações (composição do capital) com a B3 e a CVM.
 5. Refaça em planilha: `FCO/EV`, `EBIT ajustado/EV` e `PL/VM` a partir da memória e confira com `ranking.csv`.
 
@@ -211,8 +223,11 @@ Qualquer alteração de parâmetro, de conta ou de fórmula: (1) muda `config/ac
 12. **Holdings que consolidam empresa listada** repetem o mesmo negócio (caso Gerdau/Metalúrgica Gerdau, tratado em `universo.excluirTickers`). Outros casos só são vistos lendo o ranking; a lista é manual.
 13. **Apresentação do fluxo de caixa.** Há empresas cujo FCO reportado inclui fluxos de financiamento (caso verificado: a Magalu reporta ~R$ 15,7 bi de FCO em 2025 com ~R$ 15 bi negativos no financiamento). A verificação `fco_incoerente` barra os casos extremos (> 3x o EBITDA), mas distorções menores passam; o FCO/EV deve ser lido com essa cautela.
 14. **IFRS 16 (arrendamentos) e varejo.** Os pagamentos de aluguel ficam no fluxo de financiamento, não no FCO, e o passivo de arrendamento pode ficar fora da dívida usada no EV. Isso tende a **inflar FCO/EV de varejistas e empresas com muitas lojas ou frota alugada**. Na primeira execução real, 4 das 15 primeiras eram desse perfil, com FCO/EV de 8% a 180%. É hipótese a confirmar na memória de cálculo de cada uma, e candidata a correção na v1.1 (somar o passivo de arrendamento à dívida e/ou descontar o aluguel pago do FCO).
-15. **Cobertura de juros.** A conta 3.06.02 inclui variação cambial e custo de derivativos de várias empresas, o que reduz a cobertura (valores de 0,5x a 2x apareceram até em empresas com caixa líquido).
-16. **Dados da CVM podem ter erros de divulgação** que passam pelas verificações; a pasta de auditoria permite localizá-los depois.
+15. **Classes com direitos econômicos diferentes** (caso TFCO4, onde a ON vale ~1/10 da PN). Hoje a empresa sai quando a classe sem preço passa de 10% das ações; não há como saber o peso econômico de cada classe só com os dados abertos da CVM.
+16. **Quantidade de ações incoerente que não aciona nenhuma trava.** Um erro de quantidade que mantenha o P/VP entre 0,02 e 100 passa (caso LAVV3 na 1ª execução: ações lidas 10x acima do real, P/VP de 15,5 em vez de ~1,5; a causa não foi identificada). Por isso a tela alerta P/VP acima de 10 (`verificacoes.pvpAlerta`), sem excluir.
+17. **Desdobramento após a data-base do balanço.** O valor de mercado multiplica a quantidade de ações do documento pelo preço de hoje; se houve desdobramento entre as duas datas, a quantidade pode estar defasada. Verificar o valor de mercado de quem desdobrou recentemente (ORVR3) e, se preciso, usar `capital.ajustesManuais`.
+18. **Cobertura de juros.** A conta 3.06.02 inclui variação cambial e custo de derivativos de várias empresas, o que reduz a cobertura (valores de 0,5x a 2x apareceram até em empresas com caixa líquido).
+19. **Dados da CVM podem ter erros de divulgação** que passam pelas verificações; a pasta de auditoria permite localizá-los depois.
 
 ## 11. Publicação: aprovação, trava de sanidade e o que ainda é recomendado
 
@@ -264,6 +279,8 @@ Opcional: `TOP15_SAL` (qualquer texto aleatório) reforça o hash do IP. Com as 
 
 | Versão | Data | Mudança |
 |---|---|---|
+| 1.0.5 | 2026-10-04 | Análise do ranking.csv e do exclusoes.csv da 1.0.3: detecção automática da unidade da quantidade de ações (31 de ~100 empresas informavam em milhares); unit nunca é preço de classe; classe sem preço com mais de 10% das ações exclui; desdobramentos de SBSP3, SIMH3 e ORVR3; alerta de P/VP > 10; FCA de dois anos; motivo real de "sem preço". |
+| 1.0.4 | 2026-10-04 | SEER3 mostrava lucro positivo em 0 de 5 exercícios (as fontes dão 2 de 5) e lucro de 12 meses de R$ 57 mi: a DFP da CVM trazia a conta 3.11.01 zerada em todos os exercícios. O lucro de referência dos filtros passa a ser o consolidado (3.11); o dos controladores fica só como informação. |
 | 1.0.3 | 2026-10-04 | Conferência com fontes públicas: nova verificação `fco_incoerente` (FCO > 3x o EBITDA), a partir do caso MGLU3; a memória de cálculo na tela passa a mostrar a composição dos 12 meses e o lucro e o caixa de cada exercício. |
 | 1.0.2 | 2026-10-04 | VALE3 informa a quantidade de ações em milhares (4.072.366 em vez de ~4,07 bilhões) e era excluída por capital implausível. Criado o ajuste manual e registrado de unidade (`capital.ajustesManuais`), aplicado só à VALE3 (×1000). |
 | 1.0.1 | 2026-10-04 | Primeira execução real: (1) corrige o EBITDA (a depreciação da DVA vem negativa e era subtraída), que inflava a dívida líquida/EBITDA e o filtro de qualidade correspondente; a nota e a ordem do ranking não mudam; (2) exclui a holding GOAU4; (3) a exclusão por capital implausível passa a mostrar os números usados. |

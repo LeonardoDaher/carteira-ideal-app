@@ -227,8 +227,8 @@ export async function extrairZip(zip, tipo, cnpjs, { log = () => {}, somenteHist
 // Mapeamento ticker → CNPJ (FCA, valores mobiliários) + correções manuais
 // ---------------------------------------------------------------------------------------
 
-/** Lê o FCA e devolve Map ticker → { cnpjs:Set, vigentes:Set } com todos os códigos de negociação. */
-export async function mapaTickerCnpj(zipFca) {
+/** Lê UM zip do FCA: Map ticker → { cnpjs:Set, vigentes:Set } com todos os códigos de negociação. */
+async function lerFca(zipFca) {
   const entrada = listarZip(zipFca).find((e) => /valor_mobiliario/i.test(path.basename(e)))
   if (!entrada) throw new Error(`${zipFca}: arquivo de valores mobiliários do FCA não encontrado.`)
   const mapa = new Map()
@@ -249,6 +249,18 @@ export async function mapaTickerCnpj(zipFca) {
       if (vigente) e.vigentes.add(cnpj)
       mapa.set(t, e)
     }
+  }
+  return mapa
+}
+
+/**
+ * Lê um ou mais zips do FCA, do MAIS RECENTE para o mais antigo. O recente vale; o antigo só preenche os códigos que o
+ * recente não traz (empresa que ainda não entregou o FCA do ano). Assim um CNPJ antigo nunca "volta" por cima de um novo.
+ */
+export async function mapaTickerCnpj(zips) {
+  const mapa = new Map()
+  for (const z of Array.isArray(zips) ? zips : [zips]) {
+    for (const [t, e] of await lerFca(z)) if (!mapa.has(t)) mapa.set(t, e)
   }
   return mapa
 }

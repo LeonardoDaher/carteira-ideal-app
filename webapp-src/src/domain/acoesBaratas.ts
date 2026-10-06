@@ -36,6 +36,8 @@ export interface ExercicioHistorico {
   exercicio: string
   conta: string
   lucro: number
+  /** Lucro atribuído aos controladores (3.11.01): só informativo; a CVM às vezes o traz zerado na DFP. */
+  lucroControladores?: number | null
   fco: number
 }
 
@@ -77,7 +79,11 @@ export interface ItemRanking {
   volatilidade: number | null
   volumeMedio: number | null
   demonstracao: DemonstracaoUsada
-  metodoValorDeMercado: 'por_classe' | 'preco_da_classe_de_referencia'
+  metodoValorDeMercado: 'por_classe' | 'preco_da_outra_classe' | 'preco_da_classe_de_referencia'
+  /** Quantidade de ações informada em milhares na CVM e ajustada ("automático ×1000" ou "manual ×1000"). */
+  ajusteUnidadeCapital?: string | null
+  /** Avisos de dado a conferir, ex.: "pvp_alto" (P/VP acima de 10). */
+  alertas?: string[]
 }
 
 export interface ExclusaoTriagem {

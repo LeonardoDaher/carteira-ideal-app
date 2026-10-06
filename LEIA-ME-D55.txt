@@ -1,0 +1,27 @@
+D55: análise do ranking.csv e do exclusoes.csv que você mandou (metodologia 1.0.5). Este pacote é ACUMULADO: já inclui a D54 (SEER3), que ainda não tinha
+rodado nesses arquivos. É só subir TUDO uma vez.
+
+O QUE ACHEI (resumo; tabela completa em docs/07-registro-de-decisoes.md, D55)
+ 1) 30 empresas fora por "capital implausível" (Ambev, Renner, Cemig, Taesa, Vibra, Natura, MRV, Cyrela, Yduqs...): a CVM traz a quantidade de ações em MILHARES.
+    Agora o cálculo detecta sozinho (só com dois sinais independentes) e registra o ajuste.
+ 2) Units (final 11) eram avaliadas como ação PN (Taesa: PN a R$ 42,85 = preço da unit). Afetava ALUP11, ENGI11, IGTI11 e SAPR11, que estavam NO ranking com valor de mercado inflado.
+ 3) O lucro zerado da D54 atinge SEER3, TIMS3, MLAS3 e VAMO3 (a TIMS3 tinha lucro de R$ 1,79 bi e aparecia com "0 de 4 anos").
+ 4) SBSP3, SIMH3 e ORVR3 estavam fora por "salto de preço": eram desdobramento 1:5, grupamento 2:1 e desdobramento 1:4. Confirmei cada um em fonte pública.
+ 5) TFCO4 e LAVV3 com P/VP 20 e 15 (reais: ~3,3 e ~1,5). TFCO4 agora sai por classe sem preço; LAVV3 ganhou um alerta (a causa de ela ter ações a 10x eu não achei).
+
+SUBA TODOS OS ARQUIVOS DO ZIP; depois Actions → Atualizar Top 15 Ações Baratas → Run workflow → esperar ✅ e o deploy Ready.
+
+DEPOIS, ME MANDE de novo (da pasta auditoria/acoes-baratas/2026-10-02, baixando cada arquivo):
+   ranking.csv, exclusoes.csv e mapeamento-ticker-cnpj.csv
+   Eu confiro: (a) quantas das 30 voltaram; (b) o valor de mercado de ORVR3 (deve ficar perto de R$ 9 a 10 bi); (c) SEER3 e TIMS3 com lucro por ano;
+   (d) por que ainda sobrar empresa sem CNPJ.
+
+PARA VOCÊ (cadastro): 30 códigos não negociam ou não têm CNPJ achado e podem ser mudança de código, fusão ou saída da bolsa:
+   sem CNPJ: AESB3 AMAR3 AZUL4 BRIT3 CMIN3 CRFB3 CSNA3 CTNM4 DMMO3 EMBR3 GUAR3 JBSS3 KRSA3 MBLY3 MBRF3 ODPV3 RDNI3 STBP3 ZAMP3
+   sem preço: CASN3 MWET4 NEOE3 NGRD3 ODER4 PETZ3 RPMG3 SHOW3 SRNA3 TEKA4 TKNO4
+   Vale revisar o config/acoes.json (remover o que saiu da bolsa; atualizar o código do que mudou).
+
+ARQUIVOS: config/acoes-baratas.json, scripts/acoes-baratas-calculo.mjs, scripts/acoes-baratas-cvm.mjs, scripts/atualizar-acoes-baratas.mjs,
+          scripts/acoes-baratas.test.mjs, scripts/fixtures/gerar-fixtures-cvm.py, scripts/fixtures/cvm/fca_cia_aberta_2025.zip,
+          webapp-src/src/domain/acoesBaratas.ts, webapp-src/src/screens/Top15Baratas.tsx, Top15Baratas.test.tsx, Top15Integracao.test.tsx,
+          docs/07-registro-de-decisoes.md, docs/09-metodologia-acoes-baratas.md
