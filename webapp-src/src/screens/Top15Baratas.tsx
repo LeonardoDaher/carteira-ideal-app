@@ -287,11 +287,19 @@ function CartaoRanking({ item: r, ordem, comFiltro }: { item: ItemRanking; ordem
           ⚠ P/VP acima de 10: se isso não for o esperado para esta empresa, a quantidade de ações lida na CVM pode estar errada. Confira antes de usar.
         </div>
       )}
+      {r.alertas?.includes('giro_alto') && (
+        <div className="tiny" role="note" data-testid={`alerta-giro-${r.ticker}`} style={{ opacity: 0.9 }}>
+          ⚠ O volume negociado por dia passa de 5% do valor de mercado calculado ({formatarPercentual(r.giroDiario ?? null, 1)}): se isso não for o esperado, a quantidade de ações lida na CVM pode estar abaixo da real e o valor de mercado, subestimado. Confira antes de usar.
+        </div>
+      )}
 
       <details>
         <summary className="small" style={{ cursor: 'pointer', fontWeight: 600 }}>Memória de cálculo</summary>
         <div className="col" style={{ gap: 0, marginTop: 6 }}>
           <Linha rotulo="Valor de mercado" valor={formatarReaisCompacto(r.mktcap)} nota={r.metodoValorDeMercado === 'por_classe' ? 'ações de cada classe × preço da classe' : 'inclui classe sem negociação recente, avaliada pelo preço de outra classe'} />
+          {r.acoesUsadas != null && (
+            <Linha rotulo="Ações em circulação usadas" valor={`${(r.acoesUsadas / 1e6).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} mi`} nota={`quantidade do ${r.capitalDocumento ?? 'balanço'}${r.ajusteDesdobramentoCapital ? `, ajustada por desdobramento/grupamento posterior (${r.ajusteDesdobramentoCapital})` : ''}`} />
+          )}
           {r.ajusteUnidadeCapital && (
             <Linha rotulo="Quantidade de ações" valor={`ajustada (${r.ajusteUnidadeCapital})`} nota="a CVM traz a quantidade em milhares; sem o ajuste, P/VP e giro diário ficariam impossíveis" />
           )}
@@ -350,6 +358,23 @@ function ComoChegamos({ item: r }: { item: ItemRanking }) {
         <span className="tiny muted">
           Lucro de 12 meses: consolidado (3.11) {formatarReaisCompacto(r.composicaoLtm!.lucro.consolidado)} · dos controladores (3.11.01) {formatarReaisCompacto(r.composicaoLtm!.lucro.controladores)}
         </span>
+      )}
+      {((r.historicoDescartes?.length ?? 0) > 0 || r.historicoLacuna) && (
+        <div className="col" style={{ gap: 0 }} data-testid={`nao-lidos-${r.ticker}`}>
+          <span className="tiny" style={{ fontWeight: 600 }}>Exercícios que não puderam ser lidos</span>
+          {r.historicoDescartes?.map((d) => (
+            <div key={d.exercicio} className="tabela-bdr tiny">
+              <span className="muted">{d.exercicio.slice(0, 4)}</span>
+              <span style={{ fontWeight: 600 }}>{d.motivo}</span>
+            </div>
+          ))}
+          {r.historicoLacuna && (
+            <div className="tabela-bdr tiny">
+              <span className="muted">Série de DFP interrompida</span>
+              <span style={{ fontWeight: 600 }}>nenhum DFP consecutivo entre {formatarData(r.historicoLacuna.entre[0])} e {formatarData(r.historicoLacuna.entre[1])}</span>
+            </div>
+          )}
+        </div>
       )}
       {r.historico && r.historico.length > 0 && (
         <div className="col" style={{ gap: 0 }}>

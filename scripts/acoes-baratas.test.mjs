@@ -716,28 +716,31 @@ test('ajuste manual de unidade do capital (VALE3 informa ações em milhares): s
   assert.equal(cfg.capital.ajustesManuais.VALE3.fatorQuantidade, 1000)
 })
 
-test('caixa operacional incoerente (caso real MGLU3): FCO > 3x o EBITDA vira exclusão com motivo e números; no limite ainda passa', () => {
-  // EBIT 100 + depreciação 30 = EBITDA 130 → limite 3x = 390
+test('caixa operacional incoerente (casos reais MGLU3, SAPR11 e MLAS3): FCO > 2x o EBITDA vira exclusão com motivo e números; no limite ainda passa', () => {
+  const L = cfg.verificacoes.fcoMaximoSobreEbitda
+  assert.equal(L, 2.0)
+  // EBIT 100 + depreciação 30 = EBITDA 130 → limite 2x = 260
   const r = (fco, extra = {}) => calcular(insumosDe([fabricar('FCOI3', { da: -30, fco, ...extra })]), cfg).resultado
   const barrada = r(1000)
   assert.equal(barrada.ranking.length, 0)
   assert.deepEqual([barrada.exclusoes[0].etapa, barrada.exclusoes[0].codigo], ['dados_contabeis', 'fco_incoerente'])
-  assert.match(barrada.exclusoes[0].motivo, /7,7x o EBITDA de R\$ 0 mi/)  // 1000/130, em R$ (valores do teste são pequenos)
+  assert.match(barrada.exclusoes[0].motivo, /7,7x o EBITDA de R\$ 0 mi \(limite 2,0x\)/)  // 1000/130
   assert.match(barrada.exclusoes[0].motivo, /financiamento/)
-  assert.equal(r(390).ranking.length, 1, 'exatamente 3,0x ainda passa')
-  assert.equal(r(391).ranking.length, 0)
-  // sem DVA não há EBITDA: usa o EBIT ajustado como referência (100 → limite 300)
+  assert.equal(r(260).ranking.length, 1, 'exatamente 2,0x ainda passa')
+  assert.equal(r(261).ranking.length, 0)
+  // sem DVA não há EBITDA: usa o EBIT ajustado como referência (100 → limite 200)
   const semDva = (fco) => calcular(insumosDe([fabricar('FCOI3', { fco })]), cfg).resultado
-  assert.equal(semDva(300).ranking.length, 1)
-  assert.match(semDva(301).exclusoes[0].motivo, /3,0x o EBIT ajustado/)
+  assert.equal(semDva(200).ranking.length, 1)
+  assert.match(semDva(201).exclusoes[0].motivo, /2,0x o EBIT ajustado/)
   // FCO normal (parecido com o EBITDA) e FCO negativo não são barrados por esta regra
   assert.equal(r(130).ranking.length, 1)
   assert.equal(r(-50).ranking.length, 1)
 
-  // os números do print da MGLU3: FCO R$ 16,4 bi, EBIT ajustado R$ 1,5 bi, D&A da ordem de R$ 1,1 bi → ~6x
-  assert.ok(16.4 / (1.5 + 1.1) > cfg.verificacoes.fcoMaximoSobreEbitda)
-  // e as 14 empresas que apareceram saudáveis no print têm FCO/EBIT de até ~1,9x, longe do limite
-  for (const razao of [21.1 / 23.1, 45.8 / 29.8, 35.0 / 18.7, 15.9 / 19.1, 8.3 / 22.8]) assert.ok(razao < cfg.verificacoes.fcoMaximoSobreEbitda)
+  // Casos reais (razão FCO/EBITDA): MGLU3 5,9x (financiamento no operacional); MLAS3 2,98x; SAPR11 2,16x (a Sanepar reporta
+  // R$ 7,06 bi de FCO em 2025 contra R$ 2,8 bi em 2024, por um precatório de R$ 4 bi: dado correto, mas não recorrente).
+  for (const razao of [5.9, 2.98, 2.16]) assert.ok(razao > L)
+  // As 92 empresas restantes da 1ª rodada completa ficaram até 1,5x (mediana 0,65x; p90 1,1x): longe do limite.
+  for (const razao of [1.5, 1.14, 1.12, 1.03, 0.65]) assert.ok(razao < L)
 })
 
 test('composição dos 12 meses e histórico por exercício chegam ao ranking, para conferir contra o documento da CVM', async () => {
@@ -900,4 +903,81 @@ test('CSV do ranking traz as colunas novas: método do valor de mercado, ajuste 
   assert.equal(col('metodo_valor_mercado', amb), 'por_classe')
   assert.equal(col('alertas', linhas.find((l) => l[1] === 'ALER3')), '"pvp_alto"')
   assert.ok(linhas.every((l) => l.length === cab.length), 'todas as linhas têm o mesmo número de colunas do cabeçalho')
+})
+
+test('desdobramento DEPOIS da data-base do balanço ajusta a quantidade de ações (caso ORVR3: balanço de 30/06, desdobramento 1:4 em 11/08)', () => {
+  // quantidade do balanço = a de antes do desdobramento; preço = o de depois (já dividido por 4)
+  const base = (acoes, eventos) => { const e = real('ORVR3', { acoes }); e.preco.desdobramentos = eventos; return e }
+  const evento = [{ data: '2026-02-05', fator: 4 }] // dtRefer do balanço do fabricar() = 2025-12-31; corte = 2026-03-31
+  const sem = calcular(insumosDe([base(2.5e8, [])]), cfg).resultado.ranking[0]
+  const com = calcular(insumosDe([base(2.5e8, evento)]), cfg)
+  perto(com.resultado.ranking[0].mktcap, sem.mktcap * 4, 1e-9)
+  assert.equal(com.resultado.ranking[0].ajusteDesdobramentoCapital, '×4')
+  assert.equal(com.resultado.ranking[0].acoesUsadas, 1e9)
+  const reg = com.memoria.ORVR3.valorDeMercado
+  assert.deepEqual(reg.ajusteDesdobramento, { fator: 4, eventos: [{ data: '2026-02-05', fator: 4 }], observacao: 'quantidade de ações do balanço multiplicada pelo fator de eventos posteriores à data-base' })
+  assert.equal(reg.capital.ordinarias, 2.5e8, 'a memória guarda a quantidade ORIGINAL do balanço')
+  // evento ANTES da data-base (a quantidade do balanço já é a de depois): não ajusta
+  assert.equal(calcular(insumosDe([base(2.5e8, [{ data: '2025-06-01', fator: 4 }])]), cfg).resultado.ranking[0].ajusteDesdobramentoCapital, null)
+  // evento depois da data de corte: ainda não aconteceu
+  assert.equal(calcular(insumosDe([base(2.5e8, [{ data: '2026-06-01', fator: 4 }])]), cfg).resultado.ranking[0].ajusteDesdobramentoCapital, null)
+  // grupamento 2:1 (fator 0,5) reduz a quantidade; eventos se multiplicam; marcação de "já ajustado" desliga
+  perto(calcular(insumosDe([base(2.5e8, [{ data: '2026-02-05', fator: 0.5 }])]), cfg).resultado.ranking[0].mktcap, sem.mktcap / 2, 1e-9)
+  perto(calcular(insumosDe([base(2.5e8, [{ data: '2026-01-10', fator: 2 }, { data: '2026-02-05', fator: 4 }])]), cfg).resultado.ranking[0].mktcap, sem.mktcap * 8, 1e-9)
+  assert.equal(calcular(insumosDe([base(2.5e8, [{ data: '2026-02-05', fator: 4, capitalJaAjustado: true }])]), cfg).resultado.ranking[0].ajusteDesdobramentoCapital, null)
+})
+
+test('desdobramento e unidade em milhares juntos (ORVR3 real: 137.324 mil ações pré-desdobramento viram 549,3 mi)', () => {
+  const e = real('ORVR3', { acoes: 137324 }) // quantidade em MILHARES e anterior ao desdobramento 1:4
+  e.preco.desdobramentos = [{ data: '2026-02-05', fator: 4 }]
+  const r = calcular(insumosDe([e]), cfg).resultado.ranking[0]
+  assert.equal(r.acoesUsadas, 137324 * 4 * 1000)
+  assert.equal(r.ajusteUnidadeCapital, 'automático ×1000')
+  assert.equal(r.ajusteDesdobramentoCapital, '×4')
+})
+
+test('alerta de giro diário alto (caso TEND3: valor de mercado subestimado, volume de 9% ao dia) e ações usadas visíveis', () => {
+  const r = calcular(insumosDe([real('TEND3', { acoes: 1e9, volume: 1e9 }), real('NORM3', { acoes: 1e9 })]), cfg).resultado
+  const por = Object.fromEntries(r.ranking.map((x) => [x.ticker, x]))
+  assert.ok(por.TEND3.alertas.includes('giro_alto'))
+  assert.ok(!por.NORM3.alertas.includes('giro_alto'))
+  assert.equal(por.NORM3.acoesUsadas, 1e9)
+  assert.match(por.NORM3.capitalDocumento, /^DFP de 2025-12-31 \(versão 1\)$/)
+  assert.equal(cfg.verificacoes.giroAlerta, 0.05)
+})
+
+test('exercícios que não puderam ser lidos na consistência aparecem com o motivo (para diagnosticar casos como TIMS3, TEND3 e SBSP3)', () => {
+  const emp = real('TIMS3', { acoes: 1e9 })
+  // tira o lucro de um DFP antigo e o FCO de outro
+  const dts = emp.contabil.docs.map((d) => d.dtRefer).sort()
+  emp.contabil.linhas = emp.contabil.linhas.filter((l) => !(l.dtRefer === dts[0] && l.cd === '3.11') && !(l.dtRefer === dts[1] && l.cd === '6.01'))
+  const r = calcular(insumosDe([emp]), cfg).resultado.ranking[0]
+  assert.equal(r.exerciciosAnalisados, 3)
+  assert.deepEqual(r.historicoDescartes.map((d) => [d.exercicio, d.motivo]), [[dts[0], 'DFP sem a conta de lucro (3.11 ou 3.11.01)'], [dts[1], 'DFP sem a conta de caixa operacional (6.01)']].sort((a, b) => (a[0] < b[0] ? 1 : -1)))
+  assert.equal(r.dfpsEncontrados, 5)
+  // buraco na série (falta um DFP): a lacuna fica registrada
+  const buraco = real('SBSP3', { acoes: 1e9, buraco: 2 })
+  const rb = calcular(insumosDe([buraco]), cfg).resultado.ranking[0]
+  assert.ok(rb.historicoLacuna && rb.historicoLacuna.dias > 372, JSON.stringify(rb.historicoLacuna))
+})
+
+test('CSNA3 e CMIN3 têm CNPJ manual verificado, com a fonte registrada', () => {
+  const manual = JSON.parse(fs.readFileSync(path.join(RAIZ, 'config', 'acoes-baratas-cnpj.json'), 'utf8'))
+  assert.equal(manual.CSNA3, '33.042.730/0001-04')
+  assert.equal(manual.CMIN3, '08.902.291/0001-15')
+  assert.ok(manual._fontes.CSNA3 && manual._fontes.CMIN3)
+  const r = Object.fromEntries(resolverCnpjs(['CSNA3', 'CMIN3', 'ZZZZ3'], new Map(), manual).map((x) => [x.ticker, x]))
+  assert.equal(r.CSNA3.cnpj, '33.042.730/0001-04')
+  assert.match(r.CMIN3.origem, /manual/)
+  assert.equal(r.ZZZZ3.cnpj, null, '_fontes não vira ticker')
+})
+
+test('classe sem preço: o limite agora é 50% (AXIA3 21% e SHUL4 43% passam avaliadas pela outra classe; TFCO4 93% continua fora)', () => {
+  assert.equal(cfg.verificacoes.maxFracaoSemPreco, 0.5)
+  const mk = (ticker, on, pn) => { const e = real(ticker, { acoes: on }); e.contabil.capital[0] = { ...e.contabil.capital[0], ordinarias: on, preferenciais: pn }; e.preco.classes = [{ classe: 'ON', ticker, fechamento: 10, data: '2026-09-30' }]; return e }
+  const r = calcular(insumosDe([mk('AXIA3', 8e8, 2.1e8), mk('SHUL4', 5.7e8, 4.3e8), mk('TFCO4', 7e7, 9.3e8)]), cfg).resultado
+  assert.deepEqual(r.ranking.map((x) => x.ticker).sort(), ['AXIA3', 'SHUL4'])
+  assert.deepEqual(r.ranking.map((x) => x.metodoValorDeMercado), ['preco_da_outra_classe', 'preco_da_outra_classe'])
+  assert.equal(r.exclusoes[0].ticker, 'TFCO4')
+  assert.equal(r.exclusoes[0].codigo, 'classe_sem_preco')
 })

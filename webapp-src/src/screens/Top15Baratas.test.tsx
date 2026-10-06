@@ -125,6 +125,34 @@ describe('Top15Baratas', () => {
     expect(within(screen.getByTestId('top15-ALER3')).queryByText(/Quantidade de ações/)).toBeNull()
   })
 
+  it('ações usadas e o balanço de origem, desdobramento ajustado, alerta de giro e exercícios não lidos aparecem na memória', () => {
+    const lista = snapshot({ ranking: [
+      item('TEND3', 1, { acoesUsadas: 57.43e6, capitalDocumento: 'ITR de 2026-06-30 (versão 1)', alertas: ['giro_alto'], giroDiario: 0.0904 }),
+      item('ORVR3', 2, { acoesUsadas: 549.3e6, ajusteDesdobramentoCapital: '×4', capitalDocumento: 'ITR de 2026-06-30 (versão 1)' }),
+      item('TIMS3', 3, { historicoDescartes: [{ exercicio: '2021-12-31', motivo: 'DFP sem a conta de lucro (3.11 ou 3.11.01)' }], historicoLacuna: { entre: ['2021-12-31', '2023-12-31'], dias: 730 }, composicaoLtm: undefined }),
+    ] })
+    render(<Top15Baratas snapshot={lista} />)
+    const tend = within(screen.getByTestId('top15-TEND3'))
+    expect(tend.getByText('57,4 mi')).toBeTruthy()
+    expect(tend.getByText(/quantidade do ITR de 2026-06-30 \(versão 1\)/)).toBeTruthy()
+    expect(screen.getByTestId('alerta-giro-TEND3').textContent).toContain('9,0%')
+    expect(screen.getByTestId('alerta-giro-TEND3').textContent).toContain('subestimado')
+    expect(within(screen.getByTestId('top15-ORVR3')).getByText(/ajustada por desdobramento\/grupamento posterior \(×4\)/)).toBeTruthy()
+    expect(screen.queryByTestId('alerta-giro-ORVR3')).toBeNull()
+    // TIMS3 sem composicaoLtm: o bloco "como chegamos" não existe, então os exercícios não lidos só aparecem quando há composição
+    expect(screen.queryByTestId('nao-lidos-TIMS3')).toBeNull()
+  })
+
+  it('exercícios que não puderam ser lidos (e a lacuna na série de DFP) aparecem com o motivo', () => {
+    const comp = { valor: 1, componentes: [] }
+    const r = item('TIMS3', 1, { composicaoLtm: { ebit: comp, fco: comp, lucro: { ...comp, conta: '3.11' } }, historicoDescartes: [{ exercicio: '2021-12-31', motivo: 'DFP sem a conta de lucro (3.11 ou 3.11.01)' }], historicoLacuna: { entre: ['2021-12-31', '2023-12-31'], dias: 730 } })
+    render(<Top15Baratas snapshot={snapshot({ ranking: [r] })} />)
+    const bloco = within(screen.getByTestId('nao-lidos-TIMS3'))
+    expect(bloco.getByText('Exercícios que não puderam ser lidos')).toBeTruthy()
+    expect(bloco.getByText('DFP sem a conta de lucro (3.11 ou 3.11.01)')).toBeTruthy()
+    expect(bloco.getByText(/nenhum DFP consecutivo entre 31\/12\/2021 e 31\/12\/2023/)).toBeTruthy()
+  })
+
   it('"por que ficou de fora" explica o motivo da exclusão', () => {
     render(<Top15Baratas snapshot={snapshot()} />)
     fireEvent.change(screen.getByLabelText('Buscar empresa fora da triagem'), { target: { value: 'mglu' } })

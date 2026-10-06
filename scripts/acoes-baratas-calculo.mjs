@@ -250,28 +250,33 @@ export function consistenciaHistorica(c, cons, dataCorte, cfgConsistencia) {
     .filter((d) => d.doc === 'DFP' && d.dtRefer <= dataCorte && (!d.dtReceb || d.dtReceb <= dataCorte))
     .sort((a, b) => (a.dtRefer < b.dtRefer ? 1 : -1))
   const cadeia = []
+  let lacuna = null
   for (const d of dfps) {
     if (cadeia.length === 0) cadeia.push(d)
     else {
       const gap = diasEntre(d.dtRefer, cadeia.at(-1).dtRefer)
       if (gap >= 360 && gap <= 372) cadeia.push(d)
-      else break // buraco na série: para aqui, não pula exercício
+      else { lacuna = { entre: [d.dtRefer, cadeia.at(-1).dtRefer], dias: gap }; break } // buraco na série: para aqui, não pula exercício
     }
     if (cadeia.length === N) break
   }
   const exercicios = []
+  const descartados = []
   for (const d of cadeia) {
     const acha = (cd, dem) => maisLonga(c.linhas.filter((l) => l.doc === 'DFP' && l.dtRefer === d.dtRefer && l.cons === cons && l.ordem === 'ULTIMO' && l.dem === dem && l.cd === cd))
     const controladores = acha('3.11.01', 'DRE')
     const lucro = acha('3.11', 'DRE') ?? controladores // consolidado primeiro (ver o comentário do lucro de 12 meses)
     const fco = acha('6.01', 'DFC')
-    if (!lucro || !fco || duracao(lucro) < 360) continue
+    if (!lucro || !fco || duracao(lucro) < 360) {
+      descartados.push({ exercicio: d.dtRefer, motivo: !lucro ? 'DFP sem a conta de lucro (3.11 ou 3.11.01)' : !fco ? 'DFP sem a conta de caixa operacional (6.01)' : `exercício com ${duracao(lucro)} dias` })
+      continue
+    }
     exercicios.push({ exercicio: d.dtRefer, versao: d.versao, linkDoc: d.linkDoc ?? null, contaLucro: lucro.cd, lucro: lucro.valor, lucroControladores: controladores ? controladores.valor : null, fco: fco.valor })
   }
   const comLucro = exercicios.filter((e) => e.lucro > 0).length
   const comFco = exercicios.filter((e) => e.fco > 0).length
   const passa = exercicios.length >= N && comLucro >= cfgConsistencia.minimoComLucro && comFco >= cfgConsistencia.minimoComFcoPositivo
-  return { exigidos: N, disponiveis: exercicios.length, comLucro, comFco, passa, exercicios }
+  return { exigidos: N, disponiveis: exercicios.length, comLucro, comFco, passa, exercicios, descartados, lacuna, dfpsEncontrados: dfps.length }
 }
 
 // ---------------------------------------------------------------------------------------
@@ -394,9 +399,14 @@ export function calcularFundamentos(emp, preco, cfg, dataCorte) {
   const vv = cfg.verificacoes
   const pvpDe = (valor) => (plControladores > 0 ? valor / plControladores : null)
   const emFaixa = (pvpX) => pvpX === null || (pvpX >= vv.pvpMinimoPlausivel && pvpX <= vv.pvpMaximoPlausivel)
+  // Desdobramento/grupamento DEPOIS da data-base do balanço: a quantidade de ações do documento é a de antes do evento, mas o
+  // preço de hoje é o de depois. Multiplica a quantidade pelo fator dos eventos entre a data-base e a data de corte (caso ORVR3:
+  // balanço de 30/06, desdobramento 1:4 em 11/08; sem isso o valor de mercado sairia 4x menor).
+  const eventosDeCapital = (preco.desdobramentos ?? []).filter((e) => e && e.fator > 0 && e.data > cap.dtRefer && e.data <= dataCorte && e.capitalJaAjustado !== true)
+  const fatorDesdobramento = eventosDeCapital.reduce((f, e) => f * e.fator, 1)
   const escalar = (k, f) => (f === 1 ? k : { ...k, ordinarias: k.ordinarias * f, preferenciais: k.preferenciais * f, tesouroOrd: k.tesouroOrd * f, tesouroPref: k.tesouroPref * f })
   const avaliar = (f) => {
-    const capF = escalar(cap, f)
+    const capF = escalar(escalar(cap, fatorDesdobramento), f)
     const v = valorDeMercado(capF, preco)
     if (v.erro) return { fator: f, erro: v.erro }
     return { fator: f, cap: capF, vm: v, pvp: pvpDe(v.valor), giro: v.valor > 0 ? (preco.volumeMedioEmissor ?? 0) / v.valor : null }
@@ -525,7 +535,14 @@ export function calcularFundamentos(emp, preco, cfg, dataCorte) {
     exerciciosComFco: consistencia.comFco,
     passaConsistencia: consistencia.passa,
     ajusteUnidadeCapital: ajusteAutomatico ? `automático ×${fator}` : ajusteManual?.fatorQuantidade && ajusteManual.fatorQuantidade !== 1 ? `manual ×${fator}` : null,
-    alertas: [...(pvp !== null && pvp > (vv.pvpAlerta ?? Infinity) ? ['pvp_alto'] : [])],
+    alertas: [...(pvp !== null && pvp > (vv.pvpAlerta ?? Infinity) ? ['pvp_alto'] : []), ...(escolha.giro !== null && escolha.giro > (vv.giroAlerta ?? Infinity) ? ['giro_alto'] : [])],
+    acoesUsadas: vm.classes.reduce((x, k) => x + k.quantidade, 0),
+    giroDiario: arred(escolha.giro, 5),
+    capitalDocumento: `${cap.doc} de ${cap.dtRefer} (versão ${cap.versao})`,
+    ajusteDesdobramentoCapital: fatorDesdobramento !== 1 ? `×${fatorDesdobramento}` : null,
+    historicoDescartes: consistencia.descartados,
+    historicoLacuna: consistencia.lacuna,
+    dfpsEncontrados: consistencia.dfpsEncontrados,
     composicaoLtm: {
       ebit: composicao(itens.ebit, V('ebit')),
       fco: composicao(itens.fco, V('fco')),
@@ -537,7 +554,7 @@ export function calcularFundamentos(emp, preco, cfg, dataCorte) {
   const memoria = {
     demonstracao: { doc: ultimo.doc, dtRefer: ultimo.dtRefer, dtReceb: ultimo.dtReceb ?? null, versao: ultimo.versao, linkDoc: ultimo.linkDoc ?? null, consolidacao: cons === 'con' ? 'consolidada' : 'individual' },
     verificacoes,
-    valorDeMercado: { metodo: vm.metodo, formula: vm.formula, valor: reais(vm.valor), classes: vm.classes, capital: { doc: cap.doc, dtRefer: cap.dtRefer, versao: cap.versao, ordinarias: cap.ordinarias, preferenciais: cap.preferenciais, tesouroOrd: cap.tesouroOrd, tesouroPref: cap.tesouroPref }, ajusteManual: ajusteManual?.fatorQuantidade && ajusteManual.fatorQuantidade !== 1 ? { fatorQuantidade: fator, motivo: ajusteManual.motivo ?? null, observacao: 'quantidades do capital multiplicadas pelo fator antes do cálculo do valor de mercado' } : null, ajusteAutomatico: ajusteAutomatico ? { ...ajusteAutomatico, observacao: 'quantidade de ações informada em milhares na CVM: P/VP e giro diário eram impossíveis sem o ajuste e passaram a ser plausíveis com ele' } : null, fracaoSemPrecoProprio: arred(vm.fracaoAproximada, 4) },
+    valorDeMercado: { metodo: vm.metodo, formula: vm.formula, valor: reais(vm.valor), classes: vm.classes, capital: { doc: cap.doc, dtRefer: cap.dtRefer, versao: cap.versao, ordinarias: cap.ordinarias, preferenciais: cap.preferenciais, tesouroOrd: cap.tesouroOrd, tesouroPref: cap.tesouroPref }, ajusteManual: ajusteManual?.fatorQuantidade && ajusteManual.fatorQuantidade !== 1 ? { fatorQuantidade: fator, motivo: ajusteManual.motivo ?? null, observacao: 'quantidades do capital multiplicadas pelo fator antes do cálculo do valor de mercado' } : null, ajusteAutomatico: ajusteAutomatico ? { ...ajusteAutomatico, observacao: 'quantidade de ações informada em milhares na CVM: P/VP e giro diário eram impossíveis sem o ajuste e passaram a ser plausíveis com ele' } : null, fracaoSemPrecoProprio: arred(vm.fracaoAproximada, 4), ajusteDesdobramento: fatorDesdobramento !== 1 ? { fator: fatorDesdobramento, eventos: eventosDeCapital.map((e) => ({ data: e.data, fator: e.fator })), observacao: 'quantidade de ações do balanço multiplicada pelo fator de eventos posteriores à data-base' } : null },
     fluxos12m: Object.fromEntries(Object.entries(itens).map(([k, r]) => [k, { cd: CONTAS[k].cd, valor: reais(r.valor), formula: r.formula, componentes: r.componentes }])),
     saldos: Object.fromEntries(Object.entries(saldos).map(([k, r]) => [k, { cd: CONTAS_BALANCO[k].cd, valor: reais(r.valor), formula: r.formula, componentes: r.componentes }])),
     derivados: {
@@ -710,7 +727,14 @@ export function calcular(insumos, cfg) {
       composicaoLtm: m.composicaoLtm,
       historico: m.historico,
       ajusteUnidadeCapital: m.ajusteUnidadeCapital,
+      ajusteDesdobramentoCapital: m.ajusteDesdobramentoCapital,
       alertas: m.alertas,
+      acoesUsadas: m.acoesUsadas,
+      giroDiario: m.giroDiario,
+      capitalDocumento: m.capitalDocumento,
+      historicoDescartes: m.historicoDescartes,
+      historicoLacuna: m.historicoLacuna,
+      dfpsEncontrados: m.dfpsEncontrados,
       volatilidade: memoria[emp.ticker].volatilidade?.anualizada ?? null,
       volumeMedio: memoria[emp.ticker].liquidez?.volumeMedioEmissor ?? null,
       demonstracao: { doc: memoria[emp.ticker].demonstracao.doc, dtRefer: memoria[emp.ticker].demonstracao.dtRefer, dtReceb: memoria[emp.ticker].demonstracao.dtReceb, linkDoc: memoria[emp.ticker].demonstracao.linkDoc },

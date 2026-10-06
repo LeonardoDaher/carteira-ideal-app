@@ -126,6 +126,8 @@ export function extrairPreco(historico, ticker, configAcoes, cfg, maxIdadeDias =
     volumeMedioEmissor: Math.round(soma / sessoes),
     serieAjustada: fechamentos,
     saltosNaoResolvidos: saltos,
+    // desdobramentos/grupamentos confirmados deste código: o cálculo usa os posteriores à data-base do balanço para ajustar a quantidade de ações
+    desdobramentos: (configAcoes.desdobramentos?.[ticker] ?? []).filter((e) => e && typeof e.data === 'string' && e.fator > 0).map((e) => ({ data: e.data, fator: e.fator })),
   }
 }
 
@@ -179,8 +181,8 @@ const csv = (cabecalho, linhas) => '\uFEFF' + [cabecalho.join(';'), ...linhas.ma
 
 export function csvRanking(resultado) {
   return csv(
-    ['posicao', 'ticker', 'nome', 'setor', 'cotacao', 'data_cotacao', 'nota', 'PL/VM', 'FCO/EV', 'EBIT_aj/EV', 'P/VP', 'mktcap_R$', 'ev_R$', 'ebit_aj_12m_R$', 'fco_12m_R$', 'lucro_12m_R$', 'roic', 'dl/ebitda', 'cobertura_juros', 'exercicios_lucro', 'exercicios_fco', 'exercicios_analisados', 'passa_roic', 'passa_dl_ebitda', 'passa_fco', 'passa_cobertura', 'passa_consistencia', 'volatilidade', 'volume_medio_R$', 'metodo_valor_mercado', 'ajuste_unidade_capital', 'alertas', 'demonstracao', 'data_base', 'link_documento'],
-    resultado.ranking.map((r) => [r.posicao, r.ticker, csvTxt(r.nome), csvTxt(r.setor), csvNum(r.cotacao), r.dataCotacao, csvNum(r.nota), csvNum(r.plSobreValorDeMercado), csvNum(r.fcoSobreEv), csvNum(r.ebitAjustadoSobreEv), csvNum(r.pvp), csvNum(r.mktcap), csvNum(r.ev), csvNum(r.ebitAjustado), csvNum(r.fcoLtm), csvNum(r.lucroLtm), csvNum(r.roic), csvNum(r.dlEbitda), csvNum(r.coberturaJuros), r.exerciciosComLucro, r.exerciciosComFco, r.exerciciosAnalisados, r.passaRoic ? 'S' : 'N', r.passaDlEbitda ? 'S' : 'N', r.passaFco ? 'S' : 'N', r.passaCobertura ? 'S' : 'N', r.passaConsistencia ? 'S' : 'N', csvNum(r.volatilidade), csvNum(r.volumeMedio), r.metodoValorDeMercado, csvTxt(r.ajusteUnidadeCapital ?? ''), csvTxt((r.alertas ?? []).join(',')), r.demonstracao.doc, r.demonstracao.dtRefer, csvTxt(r.demonstracao.linkDoc)]),
+    ['posicao', 'ticker', 'nome', 'setor', 'cotacao', 'data_cotacao', 'nota', 'PL/VM', 'FCO/EV', 'EBIT_aj/EV', 'P/VP', 'mktcap_R$', 'ev_R$', 'ebit_aj_12m_R$', 'fco_12m_R$', 'lucro_12m_R$', 'roic', 'dl/ebitda', 'cobertura_juros', 'exercicios_lucro', 'exercicios_fco', 'exercicios_analisados', 'passa_roic', 'passa_dl_ebitda', 'passa_fco', 'passa_cobertura', 'passa_consistencia', 'volatilidade', 'volume_medio_R$', 'metodo_valor_mercado', 'ajuste_unidade_capital', 'ajuste_desdobramento', 'acoes_usadas_mi', 'giro_diario', 'capital_documento', 'exercicios_nao_lidos', 'alertas', 'demonstracao', 'data_base', 'link_documento'],
+    resultado.ranking.map((r) => [r.posicao, r.ticker, csvTxt(r.nome), csvTxt(r.setor), csvNum(r.cotacao), r.dataCotacao, csvNum(r.nota), csvNum(r.plSobreValorDeMercado), csvNum(r.fcoSobreEv), csvNum(r.ebitAjustadoSobreEv), csvNum(r.pvp), csvNum(r.mktcap), csvNum(r.ev), csvNum(r.ebitAjustado), csvNum(r.fcoLtm), csvNum(r.lucroLtm), csvNum(r.roic), csvNum(r.dlEbitda), csvNum(r.coberturaJuros), r.exerciciosComLucro, r.exerciciosComFco, r.exerciciosAnalisados, r.passaRoic ? 'S' : 'N', r.passaDlEbitda ? 'S' : 'N', r.passaFco ? 'S' : 'N', r.passaCobertura ? 'S' : 'N', r.passaConsistencia ? 'S' : 'N', csvNum(r.volatilidade), csvNum(r.volumeMedio), r.metodoValorDeMercado, csvTxt(r.ajusteUnidadeCapital ?? ''), csvTxt(r.ajusteDesdobramentoCapital ?? ''), csvNum(r.acoesUsadas == null ? null : Math.round(r.acoesUsadas / 1e4) / 100), csvNum(r.giroDiario), csvTxt(r.capitalDocumento ?? ''), csvTxt((r.historicoDescartes ?? []).map((d) => `${d.exercicio.slice(0, 4)}: ${d.motivo}`).concat(r.historicoLacuna ? [`lacuna entre ${r.historicoLacuna.entre.join(' e ')}`] : []).join(' | ')), csvTxt((r.alertas ?? []).join(',')), r.demonstracao.doc, r.demonstracao.dtRefer, csvTxt(r.demonstracao.linkDoc)]),
   )
 }
 

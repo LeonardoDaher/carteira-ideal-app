@@ -82,8 +82,18 @@ export interface ItemRanking {
   metodoValorDeMercado: 'por_classe' | 'preco_da_outra_classe' | 'preco_da_classe_de_referencia'
   /** Quantidade de ações informada em milhares na CVM e ajustada ("automático ×1000" ou "manual ×1000"). */
   ajusteUnidadeCapital?: string | null
-  /** Avisos de dado a conferir, ex.: "pvp_alto" (P/VP acima de 10). */
+  /** Desdobramento/grupamento posterior à data-base do balanço, que ajustou a quantidade de ações (ex.: "×4"). */
+  ajusteDesdobramentoCapital?: string | null
+  /** Avisos de dado a conferir: "pvp_alto" (P/VP acima de 10) e "giro_alto" (volume diário acima de 5% do valor de mercado). */
   alertas?: string[]
+  /** Ações em circulação usadas no valor de mercado (já com os ajustes) e o documento da CVM de onde vieram. */
+  acoesUsadas?: number
+  giroDiario?: number | null
+  capitalDocumento?: string
+  /** Exercícios que não puderam entrar na consistência (e o motivo) e buraco na série de DFP. */
+  historicoDescartes?: { exercicio: string; motivo: string }[]
+  historicoLacuna?: { entre: [string, string]; dias: number } | null
+  dfpsEncontrados?: number
 }
 
 export interface ExclusaoTriagem {

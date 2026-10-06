@@ -1130,3 +1130,29 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 **Efeito esperado da próxima execução (estimativa, não verificada).** O ranking deve passar de 68 para algo em torno de 95 a 100 empresas, e o Top 15 pode mudar bastante, porque entram nomes grandes que estavam fora por um defeito de leitura.
 
 **Testes.** Scripts: 238 → 250 (12 novos: unit, unidade automática com os casos de borda, classe sem preço, alerta de P/VP, desdobramentos, FCA de dois anos, colunas do CSV). Mutação (9 defesas novas) detectada. App: 1.290 → 1.291.
+
+## D56 (05/10/2026): Segunda rodada completa (95 empresas): o que a D55 resolveu, o que sobrou e a regra do caixa operacional
+
+**Contexto.** Depois de subir a D55, o responsável enviou o `exclusoes.csv`, o `ranking.csv` e o `mapeamento-ticker-cnpj.csv` da execução com a metodologia 1.0.5. Mesma lição da D55: analisados inteiros e conferidos contra fontes públicas, em vez de empresa por empresa.
+
+**O que a D55 resolveu (confirmado nos arquivos).** O ranking passou de 68 para **95 empresas** (a estimativa era de 95 a 100). Não há mais nenhuma exclusão por `capital_implausivel` (eram 30) nem por `salto_de_preco` (eram 3). 24 empresas foram ajustadas automaticamente por quantidade em milhares, mais a Vale (manual). SAPR11 passou de P/VP 3,25 para **0,97** (fontes: 0,83 a 0,96; ações 1,51 bi), validando a correção das units. SEER3 mostra **2 de 5** exercícios com lucro, como nas fontes. MLAS3, VAMO3 e KLBN11 voltaram (lucro consolidado). O FCA de dois anos resolveu 7 CNPJs (de 19 para 12 sem CNPJ; os 7 viraram "sem preço", ou seja, não negociam mais ou quase não negociam). Conferência interna sem ressalva: nota, P/VP, `passa_*` e consistência todos coerentes.
+
+**Defeitos novos achados, e o que mudou.**
+
+1. **Caixa operacional não recorrente: SAPR11 (3º) e MLAS3 (6º).** O FCO de 12 meses da Sanepar é **R$ 6,94 bi para uma receita de ~R$ 7,4 bi** (94%). Está certo: ela reporta R$ 7,06 bi em 2025 contra R$ 2,8 bi em 2024, por um precatório de R$ 4 bi recebido. Mas não é geração recorrente, e distorcia FCO/EV (48%). O MLAS3 chegava a 2,98x o EBITDA, a 0,02 do limite de 3,0x. Na distribuição observada, a mediana de FCO/EBITDA é 0,65x e o p90 é 1,1x; só estes dois e o INTB3 (2,08x, a conferir) passam de 2x. **Decisão:** limite de 3,0x para **2,0x**. Efeito esperado: saem SAPR11, MLAS3 e INTB3 (esta última pode ser uma exclusão indevida; fica a avaliar). É escolha a partir da distribuição observada, não regra de mercado.
+
+2. **ORVR3: valor de mercado de R$ 2,7 bi contra ~R$ 10 bi.** O balanço de 30/06 traz a quantidade de ações **anterior** ao desdobramento 1:4 de 11/08, e o preço de hoje é o posterior. **Decisão:** desdobramento ou grupamento confirmado na config, posterior à data-base do balanço e até a data de corte, multiplica a quantidade de ações (ORVR3: 137.324 mil ×4 ×1000 = 549,3 mi, exatamente o capital divulgado após o desdobramento). Premissa: a quantidade do formulário é a da data-base (a evidência é a própria ORVR3). Marca `capitalJaAjustado: true` desliga o ajuste de um evento.
+
+3. **TEND3 (10ª): valor de mercado de R$ 1,68 bi contra ~R$ 3,4 bi.** A quantidade de ações na CVM é 57,4 mi; o real é 122,6 mi (várias fontes). Rende P/VP de 1,09 contra ~2,2, EBIT/EV de 42% e giro diário de 9% (o maior do ranking). **Causa não identificada.** O que mudou: (a) alerta quando o giro diário passa de 5% do valor de mercado; (b) a tela mostra as ações usadas e o balanço de onde vieram. A TEND3 também tem só 3 exercícios lidos (de 5).
+
+4. **Exercícios lidos a menos: TEND3 (3), SBSP3 (3), TIMS3 (4), PGMN3 (4), TTEN3 (4).** Para a TIMS3, que é lucrativa há anos, "2 de 4 com lucro" também está errado. **Causa não identificada.** A tela passou a listar os exercícios que **não puderam ser lidos**, com o motivo (sem conta de lucro, sem conta de caixa operacional, duração inválida) e a lacuna na série de DFP.
+
+5. **AXIA3 e SHUL4 fora por "classe sem preço".** O limite de 10% era rígido demais para classes com direitos parecidos. **Decisão:** 50% (TFCO4, 93%, segue fora). Entre 10% e 50% a aproximação pelo preço da outra classe erra pouco por cento; fica marcada `preco_da_outra_classe`.
+
+6. **CNPJ.** As 15 sem CNPJ são todas "não encontrado no FCA" (nenhuma ambígua): 3 são financeiras (BPAC11, DAYC4, APER3, sem efeito) e 12 não. **EMBR3 mudou para EMBJ3 em 03/11/2025** (cadastro desatualizado). CSNA3 e CMIN3 não aparecem no FCA de 2025 nem no de 2026 por motivo não identificado; entraram em `config/acoes-baratas-cnpj.json` com CNPJ verificado (CSN 33.042.730/0001-04 e CSN Mineração 08.902.291/0001-15, em mais de uma fonte, a segunda em documento da própria companhia na CVM), com a fonte registrada.
+
+**Exclusões revisadas e que parecem corretas.** Prejuízo em 12 meses (AURE3, CSAN3, HBSA3, LWSA3, MRVE3, NATU3, RAPT4, SIMH3, TUPY3, USIM5); volatilidade acima de 60,3% (14); `sem_preco` (18: Azul, Odontoprev, Petz, Serena, Zamp, RNI... parecem saídas da bolsa ou iliquidez extrema); setores fora do escopo (25); `fco_incoerente` (AGRO3, AMER3). O LWSA3 saiu por prejuízo de R$ 200 mi: antes aparecia lucrativo (R$ 25 mi) pelo defeito do lucro dos controladores.
+
+**Pendências, para o responsável.** (a) `config/acoes.json`: EMBR3 → EMBJ3 (e rodar a carga inicial de Ações para o histórico); revisar os 18 `sem_preco` e os 9 `sem_cnpj` restantes que não negociam mais (AESB3, AMAR3, BRIT3, CRFB3, DMMO3, KRSA3, MBLY3, MBRF3, STBP3). MBRF3 (fusão BRF + Marfrig) tem mudança de perímetro: o LTM misturaria perímetros e deve continuar fora. (b) Prints da Memória de cálculo da **TEND3** e da **TIMS3** depois desta atualização, para fechar os pontos 3 e 4. (c) LAVV3 (ações lidas 10x acima das fontes, P/VP 17,4): causa não identificada, só alerta.
+
+**Testes.** Scripts: 250 → 256; app: 1.291 → 1.293. Mutação (7 defesas novas) detectada.

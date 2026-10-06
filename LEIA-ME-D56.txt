@@ -1,0 +1,25 @@
+D56: segunda rodada completa (metodologia 1.0.6). Suba TODOS os arquivos e rode o workflow de novo.
+
+O QUE A D55 RESOLVEU (confirmado nos seus arquivos): ranking de 68 para 95 empresas; zero "capital implausível" (eram 30); zero "salto de preço" (eram 3);
+SAPR11 com P/VP 0,97 (fontes: 0,83 a 0,96); SEER3 com 2 de 5 anos de lucro (fontes: 2 de 5).
+
+O QUE ACHEI AGORA
+ 1) Sanepar (SAPR11, 3º lugar): o caixa operacional de 12 meses é R$ 6,94 bi para uma receita de R$ 7,4 bi. Está CERTO (ela reportou R$ 7,06 bi em 2025 por causa de um
+    precatório de R$ 4 bi), mas não é recorrente. Mesmo caso do Multilaser (MLAS3, 6º). Agora o limite é 2x o EBITDA (era 3x). Eles saem do ranking.
+ 2) ORVR3 (Orizon): valor de mercado de R$ 2,7 bi, o real é ~R$ 10 bi. O balanço de 30/06 tem as ações de ANTES do desdobramento de 11/08. Corrigido.
+ 3) TEND3 (Tenda, 10º lugar): a CVM traz 57,4 mi de ações e o real é 122,6 mi (valor de mercado 2x menor). NÃO achei a causa. Ganhou alerta e mostra as ações usadas.
+ 4) AXIA3 e SHUL4 saíam por "classe sem preço" com limite de 10%; o limite agora é 50% (TFCO4, 93%, continua fora).
+ 5) CSNA3 e CMIN3 não estão nos FCA da CVM: coloquei o CNPJ verificado em config/acoes-baratas-cnpj.json.
+ 6) A Embraer mudou o código de EMBR3 para EMBJ3 em 03/11/2025 (cadastro desatualizado).
+
+DEPOIS DE RODAR, ME MANDE (3 prints, da Memória de cálculo aberta):
+   a) TEND3, com "Ações em circulação usadas" e o alerta de giro;
+   b) TIMS3, com "Por exercício encerrado" e, se aparecer, "Exercícios que não puderam ser lidos";
+   c) ORVR3, para eu ver se o valor de mercado ficou perto de R$ 10 bi.
+   (Ou mande o ranking.csv de novo: ele agora tem colunas com as ações usadas, o balanço de origem e os exercícios não lidos.)
+
+PARA VOCÊ (cadastro, config/acoes.json): trocar EMBR3 por EMBJ3; revisar os que não negociam mais (AZUL4, ODPV3, PETZ3, SRNA3, ZAMP3, RDNI3, JBSS3...). MBRF3 (fusão BRF+Marfrig) fica fora de propósito.
+
+ARQUIVOS: config/acoes-baratas.json, config/acoes-baratas-cnpj.json, scripts/acoes-baratas-calculo.mjs, scripts/atualizar-acoes-baratas.mjs,
+          scripts/acoes-baratas.test.mjs, webapp-src/src/domain/acoesBaratas.ts, webapp-src/src/screens/Top15Baratas.tsx, Top15Baratas.test.tsx,
+          docs/07-registro-de-decisoes.md, docs/09-metodologia-acoes-baratas.md
