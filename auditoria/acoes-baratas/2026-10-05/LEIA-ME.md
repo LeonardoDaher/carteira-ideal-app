@@ -1,6 +1,6 @@
 # Auditoria da triagem "Top 15 ações mais baratas"
 
-Execução com preços de **2026-10-05** · metodologia **v1.0.6**.
+Execução com preços de **2026-10-05** · metodologia **v1.0.7**.
 
 ## O que tem aqui
 

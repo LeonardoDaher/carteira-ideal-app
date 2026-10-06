@@ -1,6 +1,6 @@
 {
   "_leia": "Metodologia da triagem 'Top 15 ações mais baratas' (D49). ESTE ARQUIVO É A FONTE ÚNICA DOS PARÂMETROS: o script, o app e o documento docs/09-metodologia-acoes-baratas.md leem/citam estes valores. Qualquer mudança aqui exige subir 'versaoMetodologia' e registrar o motivo em 'historicoDeVersoes'. O hash SHA-256 deste arquivo vai no manifesto de cada execução.",
-  "versaoMetodologia": "1.0.6",
+  "versaoMetodologia": "1.0.7",
   "historicoDeVersoes": [
     {
       "versao": "1.0.0",
@@ -36,6 +36,11 @@
       "versao": "1.0.6",
       "data": "2026-10-05",
       "mudanca": "Análise do ranking.csv da 1.0.5 (95 empresas). (1) Caixa operacional: limite de 3,0x para 2,0x o EBITDA. A Sanepar reporta R$ 7,06 bi de FCO em 2025 (R$ 2,8 bi em 2024) por um precatório de R$ 4 bi: dado correto, mas não recorrente (FCO/EBITDA 2,2x; o MLAS3 chegava a 2,98x; as demais empresas ficam em até 1,5x). (2) Desdobramento ou grupamento DEPOIS da data-base do balanço agora ajusta a quantidade de ações (caso ORVR3: balanço de 30/06 com a quantidade anterior ao desdobramento 1:4 de 11/08; valor de mercado saía 4x menor). (3) Classe sem preço: limite sobe de 10% para 50% das ações (AXIA3 e SHUL4 saíam por 21% e 43%; o TFCO4, 93%, continua fora). (4) Alerta de giro diário acima de 5% do valor de mercado (sinal de valor de mercado subestimado; caso TEND3, cuja quantidade de ações na CVM é menos da metade da real). (5) A memória de cálculo mostra as ações usadas e o balanço de onde vieram, e os exercícios que não puderam ser lidos na consistência. (6) CNPJ manual verificado para CSNA3 e CMIN3."
+    },
+    {
+      "versao": "1.0.7",
+      "data": "2026-10-06",
+      "mudanca": "Primeira execução com dado real da CVM dentro do ambiente de desenvolvimento (ranking.csv, exclusoes.csv e mapeamento-ticker-cnpj.csv analisados inteiros). (1) TEND3: o ITR de 30/06/2026 traz o capital em milhares (122.578) e a tesouraria em unidades (65.148), o que tirava 53% das ações (57,4 mi em vez de 122,5 mi); a tesouraria que passa de 30% das ações, que dividida por 1.000 fica abaixo de 10% e que no documento anterior era menor que 10% é tratada como informada em unidades. (2) LAVV3: a quantidade de ações do ITR de 30/06/2026 é exatamente 10x a de todos os documentos anteriores (1.954 mi contra 195,4 mi), sem desdobramento nem salto de preço; quantidade que muda por 10, 100 ou 1000 vezes sem evento que a explique, com os dois documentos anteriores concordando entre si, é dividida pelo fator. As duas correções ficam registradas na memória de cálculo (com o valor informado pela CVM) e em alertas 'capital_corrigido:...'. (3) Exercícios antigos não lidos: a DFP de empresa sem controladas só traz a demonstração individual (TIMS3, PGMN3, TTEN3 em 2021; SBSP3 em 2021 e 2022); sem nenhuma linha consolidada na DFP, vale a individual, com observação no exercício. (4) TIMS3 em 2024 e 2025: a coluna ÚLTIMO consolidada da DFP vem zerada (lucro 0 e caixa operacional 0 ao mesmo tempo) com a individual preenchida; nesse caso vale a individual. (5) TEND3: uma 'DFP' com data-base 31/03/2023 quebrava a cadeia de exercícios (lacuna de 275 dias); DFP com data-base diferente do fim do exercício é ignorada e listada como não lida. (6) Leitura de zip também no Windows (tar, quando não há unzip); sem efeito no GitHub."
     }
   ],
   "publicacao": {
