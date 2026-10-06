@@ -1,6 +1,6 @@
 {
   "_leia": "Metodologia da triagem 'Top 15 ações mais baratas' (D49). ESTE ARQUIVO É A FONTE ÚNICA DOS PARÂMETROS: o script, o app e o documento docs/09-metodologia-acoes-baratas.md leem/citam estes valores. Qualquer mudança aqui exige subir 'versaoMetodologia' e registrar o motivo em 'historicoDeVersoes'. O hash SHA-256 deste arquivo vai no manifesto de cada execução.",
-  "versaoMetodologia": "1.0.5",
+  "versaoMetodologia": "1.0.6",
   "historicoDeVersoes": [
     {
       "versao": "1.0.0",
@@ -31,6 +31,11 @@
       "versao": "1.0.5",
       "data": "2026-10-04",
       "mudanca": "Análise do ranking.csv e do exclusoes.csv da 1.0.3 (68 no ranking, 158 fora). (1) 30 empresas (Ambev, Renner, Cemig, Taesa, Vibra, Natura, MRV, Cyrela...) estavam fora por 'capital implausível' com o MESMO padrão: quantidade de ações informada em milhares na CVM (P/VP implícito de 0,0003 a 0,0034; com ×1000, de 0,30 a 3,40). Detecção automática da unidade, só com dois sinais independentes (P/VP abaixo do mínimo e giro diário impossível) e plausibilidade depois do ajuste. (2) Units (final 11) eram avaliadas como se fossem ações PN, superestimando o valor de mercado de ALUP11, ENGI11, IGTI11, SAPR11 e TAEE11 (ex.: PN a R$ 42,85 contra ON a R$ 14,03 na Taesa). Unit nunca é preço de classe. (3) Classe sem preço recente com mais de 10% das ações deixa de ser avaliada pelo preço de outra classe (caso TFCO4, cuja ON é 93% das ações e tem direito econômico menor): a empresa sai com o motivo. (4) Desdobramentos confirmados em fonte pública: SBSP3 1:5 em 29/04/2026, SIMH3 grupamento 2:1 em 18/02/2026, ORVR3 1:4 em 11/08/2026. (5) Alerta de P/VP acima de 10 na tela. (6) CNPJ pelo FCA de dois anos (união) e motivo real de 'sem preço'."
+    },
+    {
+      "versao": "1.0.6",
+      "data": "2026-10-05",
+      "mudanca": "Análise do ranking.csv da 1.0.5 (95 empresas). (1) Caixa operacional: limite de 3,0x para 2,0x o EBITDA. A Sanepar reporta R$ 7,06 bi de FCO em 2025 (R$ 2,8 bi em 2024) por um precatório de R$ 4 bi: dado correto, mas não recorrente (FCO/EBITDA 2,2x; o MLAS3 chegava a 2,98x; as demais empresas ficam em até 1,5x). (2) Desdobramento ou grupamento DEPOIS da data-base do balanço agora ajusta a quantidade de ações (caso ORVR3: balanço de 30/06 com a quantidade anterior ao desdobramento 1:4 de 11/08; valor de mercado saía 4x menor). (3) Classe sem preço: limite sobe de 10% para 50% das ações (AXIA3 e SHUL4 saíam por 21% e 43%; o TFCO4, 93%, continua fora). (4) Alerta de giro diário acima de 5% do valor de mercado (sinal de valor de mercado subestimado; caso TEND3, cuja quantidade de ações na CVM é menos da metade da real). (5) A memória de cálculo mostra as ações usadas e o balanço de onde vieram, e os exercícios que não puderam ser lidos na consistência. (6) CNPJ manual verificado para CSNA3 e CMIN3."
     }
   ],
   "publicacao": {
@@ -163,14 +168,15 @@
     "toleranciaDrePct": 0.5,
     "pvpMinimoPlausivel": 0.02,
     "pvpMaximoPlausivel": 100,
-    "fcoMaximoSobreEbitda": 3,
+    "fcoMaximoSobreEbitda": 2,
     "unidadeAutomatica": {
       "ativa": true,
       "fator": 1000,
       "giroDiarioMaximo": 0.25,
       "_leia": "Só aplica o fator se (1) o P/VP sem ajuste fica abaixo de pvpMinimoPlausivel E (2) o giro diário (volume médio do emissor ÷ valor de mercado) fica acima de giroDiarioMaximo, e depois do ajuste o P/VP fica na faixa e o giro volta a ser <= giroDiarioMaximo. Ajuste manual (capital.ajustesManuais) vence."
     },
-    "maxFracaoSemPreco": 0.1,
-    "pvpAlerta": 10
+    "maxFracaoSemPreco": 0.5,
+    "pvpAlerta": 10,
+    "giroAlerta": 0.05
   }
 }
