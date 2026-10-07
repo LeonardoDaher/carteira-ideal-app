@@ -23,7 +23,7 @@ const perto = (a, b, tol = 1e-9) => assert.ok(Math.abs(a - b) <= tol, `${a} ≠ 
 // ---------------------------------------------------------------------------------------
 
 test('configuração: versão, trava de publicação desligada e alertas coerentes com os filtros', () => {
-  assert.equal(cfg.versaoMetodologia, '1.1.0')
+  assert.equal(cfg.versaoMetodologia, '1.2.0')
   assert.equal(cfg.historicoDeVersoes.at(-1).versao, cfg.versaoMetodologia)
   assert.equal(cfg.publicacao.aprovadoPeloResponsavel, false, 'este job não publica nada: a aprovação só muda por decisão do responsável')
   assert.ok(cfg.filtros.papel.volumeMinimoDiario < cfg.filtros.tijolo.volumeMinimoDiario)
@@ -69,14 +69,14 @@ test('meses e ranks percentuais', () => {
 })
 
 test('filtros por grupo, na ordem: liquidez, patrimônio, cotistas, P/VP, DY implausível (papel), patrimônio em queda, alavancagem', () => {
-  const bom = { volumeMedio: 2e6, patrimonio: 1e9, cotistas: 20000, pvp: 0.9, dy12: 0.12, rentabPatrimonial12m: 0.01, alavancagem: 0.05 }
+  const bom = { volumeLiquidez: 2e6, patrimonio: 1e9, cotistas: 20000, pvp: 0.9, dy12: 0.12, rentabPatrimonial12m: 0.01, alavancagem: 0.05 }
   const cod = (o, g = 'tijolo') => motivoDeExclusao({ ...bom, ...o }, cfg.filtros[g])?.[0] ?? null
   assert.equal(cod({}), null)
   assert.equal(cod({}, 'papel'), null)
-  assert.equal(cod({ volumeMedio: 1e5 }), 'liquidez_baixa')
-  assert.equal(cod({ volumeMedio: 4e5 }, 'papel'), null, 'papel aceita liquidez menor que o tijolo')
-  assert.equal(cod({ volumeMedio: 4e5 }, 'tijolo'), 'liquidez_baixa')
-  assert.equal(cod({ volumeMedio: null }), 'liquidez_baixa')
+  assert.equal(cod({ volumeLiquidez: 1e5 }), 'liquidez_baixa')
+  assert.equal(cod({ volumeLiquidez: 4e5 }, 'papel'), null, 'papel aceita liquidez menor que o tijolo')
+  assert.equal(cod({ volumeLiquidez: 4e5 }, 'tijolo'), 'liquidez_baixa')
+  assert.equal(cod({ volumeLiquidez: null }), 'liquidez_baixa')
   assert.equal(cod({ patrimonio: 1e8 }), 'patrimonio_pequeno')
   assert.equal(cod({ cotistas: 500 }), 'poucos_cotistas')
   assert.equal(cod({ cotistas: null }), null, 'sem o dado de cotistas, o filtro não se aplica')
@@ -125,7 +125,7 @@ function fundo(ticker, o = {}) {
   const ativoPadrao = o.ativo ?? { Direitos_Bens_Imoveis: 900, Fundos_Renda_Fixa: 100, Total_Passivo: 2e7, Rendimentos_Distribuir: 1e6, Taxa_Administracao_Pagar: 1e6 }
   return {
     ticker, nome: `Fundo ${ticker}`, setor: 'Outros', segmento: 'Multicategoria', cnpj: o.cnpj === null ? null : `${ticker.charCodeAt(0)}${ticker.charCodeAt(1)}`.padStart(14, '0'), origemCnpj: 'ISIN teste',
-    cotacao: o.cotacao === undefined ? 80 : o.cotacao, dataCotacao: o.dataCotacao ?? '2026-09-25', volumeMedio: o.volume ?? 2e6,
+    cotacao: o.cotacao === undefined ? 80 : o.cotacao, dataCotacao: o.dataCotacao ?? '2026-09-25', volumeMedio: o.volume ?? 2e6, volumeMediano: o.mediano === undefined ? undefined : o.mediano,
     informes, ativos: Object.fromEntries(MESES.map((m) => [m, ativoPadrao])),
   }
 }
@@ -281,6 +281,30 @@ test('configuração de conferência: datas válidas, só alertas conhecidos, fo
   assert.equal(cfg.dados.mesesRecentes, 3)
 })
 
+test('liquidez pela MEDIANA do volume diário quando existe; sem ela vale a média, e a fonte fica registrada', () => {
+  // média R$ 2 mi (puxada por poucos dias de rali), mediana R$ 100 mil: o fundo é ilíquido no dia típico
+  const raliSo = fundo('RALI11', { volume: 2e6, mediano: 1e5 })
+  // média R$ 2 mi e mediana R$ 1,5 mi: líquido de verdade
+  const liquido = fundo('LIQD11', { volume: 2e6, mediano: 1.5e6 })
+  // job de FIIs antigo, sem mediana: vale a média
+  const semMediana = fundo('ANTG11', { volume: 2e6 })
+  const { resultado, memoria } = calcular(insumosDe([raliSo, liquido, semMediana]), cfg)
+  assert.deepEqual(resultado.tijolo.map((f) => f.ticker).sort(), ['ANTG11', 'LIQD11'])
+  const fora = resultado.exclusoes.find((e) => e.ticker === 'RALI11')
+  assert.deepEqual([fora.etapa, fora.codigo], ['tijolo', 'liquidez_baixa'])
+  assert.match(fora.motivo, /volume mediano de R\$ 100\.000/)
+  assert.deepEqual([resultado.liquidezPorMediana, resultado.liquidezPorMedia], [2, 1])
+  assert.deepEqual(resultado.tijolo.map((f) => [f.ticker, f.fonteLiquidez, f.volumeLiquidez]).sort(), [['ANTG11', 'média', 2e6], ['LIQD11', 'mediana', 1.5e6]])
+  assert.deepEqual([memoria.LIQD11.liquidez.fonte, memoria.ANTG11.liquidez.fonte], ['mediana', 'média'])
+  assert.equal(memoria.RALI11.liquidez.volumeMedio, 2e6)
+  // o papel aceita mediana menor que o tijolo (R$ 300 mil contra R$ 500 mil)
+  const papelMed = fundo('PAPM11', { ativo: papelAtivo, cotacao: 90, volume: 2e6, mediano: 4e5 })
+  const tijoloMed = fundo('TIJM11', { cotacao: 90, volume: 2e6, mediano: 4e5 })
+  const r = calcular(insumosDe([papelMed, tijoloMed]), cfg).resultado
+  assert.deepEqual(r.papel.map((f) => f.ticker), ['PAPM11'])
+  assert.deepEqual(r.exclusoes.filter((e) => e.codigo === 'liquidez_baixa').map((e) => e.ticker), ['TIJM11'])
+})
+
 test('DY em % em vez de fração: a escala vem da mediana da competência e o resultado é o mesmo', () => {
   const emFracao = calcular(insumosDe([fundo('ALFA11')]), cfg).resultado.tijolo[0]
   const emPercentual = (() => {
@@ -325,19 +349,21 @@ test('extração: última versão de cada informe, escala do DY, migração de C
   const complementoSemA = complemento.filter((l) => !(l.CNPJ_Fundo_Classe === A))
   const g = [geral(A, 'BRXXXXCTF001', 'ANTIGO'), geral(B, 'BRXXXXCTF001', 'NOVO'), geral('33.333.333/0001-33', 'BRZZZZCTF001')]
   const at = [...meses.map((m) => ativoLinha(B, m)), ativoLinha(B, '2026-08', { Versao: '2', Direitos_Bens_Imoveis: '800', CRI: '0', FII: '' })]
-  const snapshot = { geradoEm: '2026-09-25T01:00:00Z', fundos: [{ ticker: 'XXXX11', nome: 'Novo', setor: 'Shoppings', cotacao: 80, dataCotacao: '2026-09-25', volumeMedio: 2e6 }, { ticker: 'NADA11', cotacao: 10, dataCotacao: '2026-09-25', volumeMedio: 1 }] }
+  const snapshot = { geradoEm: '2026-09-25T01:00:00Z', fundos: [{ ticker: 'XXXX11', nome: 'Novo', setor: 'Shoppings', cotacao: 80, dataCotacao: '2026-09-25', volumeMedio: 2e6, volumeMediano: 1.5e6 }, { ticker: 'NADA11', cotacao: 10, dataCotacao: '2026-09-25', volumeMedio: 1 }] }
   const ins = montarInsumos({ complemento: complementoSemA, geral: g, ativo: at, snapshot, cfg, dataExecucao: '2026-10-06' })
   assert.equal(ins.dataCotacoes, '2026-09-25')
   assert.deepEqual(ins.contagemPorCompetencia, { '2026-06': 1, '2026-07': 1, '2026-08': 2, '2026-09': 1 })
   assert.equal(ins.medianaDyPorCompetencia['2026-08'], 0.008)
   const x = ins.fundos.find((f) => f.ticker === 'XXXX11')
   assert.equal(x.cnpj, B.replace(/\D/g, ''), 'com o CNPJ antigo sem informe, vale o novo (guardado só com dígitos)')
+  assert.deepEqual([x.volumeMedio, x.volumeMediano], [2e6, 1.5e6], 'a extração copia a média e a mediana do volume')
   assert.match(x.origemCnpj, /2 CNPJs/)
   assert.equal(x.informes['2026-08'].vp, 111, 'a reapresentação (versão 2) substitui a original')
   assert.equal(x.informes['2026-08'].versao, 2)
   assert.deepEqual(x.ativos['2026-08'], { Direitos_Bens_Imoveis: 800, Fundos_Renda_Fixa: 100, Total_Passivo: 20000000, Rendimentos_Distribuir: 1000000 }, 'versão 2; campos zerados ou vazios não são guardados')
   const n = ins.fundos.find((f) => f.ticker === 'NADA11')
   assert.equal(n.cnpj, null)
+  assert.equal(n.volumeMediano, null, 'job de FIIs antigo, sem mediana: null (o cálculo cai para a média)')
   assert.match(n.origemCnpj, /ISIN não encontrado/)
 })
 

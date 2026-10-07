@@ -173,7 +173,7 @@ const pc = (v, c = 1) => `${(v * 100).toFixed(c).replace('.', ',')}%`
 
 /** Motivo da exclusão pelo filtro do grupo, ou null. Ordem importa: o primeiro que reprova é o motivo registrado. */
 export function motivoDeExclusao(f, p) {
-  if (f.volumeMedio == null || f.volumeMedio < p.volumeMinimoDiario) return ['liquidez_baixa', `volume médio de R$ ${Math.round(f.volumeMedio ?? 0).toLocaleString('pt-BR')} por dia (mínimo ${p.volumeMinimoDiario.toLocaleString('pt-BR')})`]
+  if (f.volumeLiquidez == null || f.volumeLiquidez < p.volumeMinimoDiario) return ['liquidez_baixa', `volume ${f.fonteLiquidez === 'mediana' ? 'mediano' : 'médio'} de R$ ${Math.round(f.volumeLiquidez ?? 0).toLocaleString('pt-BR')} por dia (mínimo ${p.volumeMinimoDiario.toLocaleString('pt-BR')})`]
   if (f.patrimonio == null || f.patrimonio < p.patrimonioMinimo) return ['patrimonio_pequeno', `patrimônio de ${mi(f.patrimonio ?? 0)} (mínimo ${mi(p.patrimonioMinimo)})`]
   if (f.cotistas != null && f.cotistas < p.cotistasMinimos) return ['poucos_cotistas', `${f.cotistas} cotistas (mínimo ${p.cotistasMinimos})`]
   if (f.pvp == null || f.pvp < p.pvpMinimo) return ['pvp_suspeito', `P/VP de ${f.pvp == null ? 'indisponível' : f.pvp.toFixed(2).replace('.', ',')} (mínimo ${String(p.pvpMinimo).replace('.', ',')}: o mercado está precificando perda ou o dado está errado)`]
@@ -263,6 +263,9 @@ function linhaDoRanking(f) {
     cotistas: f.cotistas ?? null,
     alavancagem: arred(f.alavancagem, 4),
     volumeMedio: arred(f.volumeMedio, 0),
+    volumeMediano: arred(f.volumeMediano, 0),
+    volumeLiquidez: arred(f.volumeLiquidez, 0),
+    fonteLiquidez: f.fonteLiquidez ?? null,
     fatias: f.fatias ? { imoveis: arred(f.fatias.imoveis, 4), recebiveis: arred(f.fatias.recebiveis, 4), cotas: arred(f.fatias.cotas, 4) } : null,
     mesesComDados: f.mesesComDados,
     alertas: f.alertas ?? [],
@@ -297,14 +300,16 @@ export function calcular(insumos, cfg) {
   for (const f of atual) {
     const ind = indicadoresDoFundo(f, ref, divisor, cfg)
     if (ind.erro) { exclusoes.push(excl(f, 'dados', 'dados_insuficientes', ind.erro)); continue }
-    comIndicadores.push({ ...f, ...ind })
+    // Liquidez pela MEDIANA do volume diário quando o job de FIIs a traz (a média é puxada por poucos dias de negociação intensa e
+    // deixou passar SAPI11 e BROF11); sem ela, vale a média, e a fonte fica registrada em `fonteLiquidez`.
+    comIndicadores.push({ ...f, ...ind, volumeLiquidez: f.volumeMediano ?? f.volumeMedio ?? null, fonteLiquidez: f.volumeMediano != null ? 'mediana' : 'média' })
   }
   etapas.push({ etapa: 'dados do informe', entram: atual.length, ficam: comIndicadores.length })
 
   // 3) classificação e filtros por grupo
   const grupos = { tijolo: [], papel: [] }
   for (const f of comIndicadores) {
-    memoria[f.ticker] = { cnpj: f.cnpj, origemCnpj: f.origemCnpj ?? null, competencia: ref, classificacao: { tipo: f.tipo, fatias: f.fatias, valoresDoAtivo: f.valoresDoAtivo }, serie: f.serie, derivados: { pvp: { formula: 'cotação ÷ valor patrimonial da cota', cotacao: f.cotacao, vp: f.vp, valor: arred(f.pvp, 6) }, rendimento12m: { formula: 'soma(DY do mês × VP do mês) × 12 ÷ meses com dado', meses: f.mesesComDados, valor: arred(f.rendimento12m, 6) }, dy12: { formula: 'rendimento de 12 meses ÷ cotação', valor: arred(f.dy12, 6) }, rentabPatrimonial12m: { formula: 'produto(1 + rentabilidade patrimonial do mês) − 1', valor: arred(f.rentabPatrimonial12m, 6) }, alavancagem: { formula: '(passivo total − rendimentos a distribuir − taxas a pagar) ÷ valor do ativo', valor: arred(f.alavancagem, 6) } } }
+    memoria[f.ticker] = { cnpj: f.cnpj, origemCnpj: f.origemCnpj ?? null, competencia: ref, liquidez: { fonte: f.fonteLiquidez, volumeLiquidez: arred(f.volumeLiquidez, 0), volumeMedio: f.volumeMedio ?? null, volumeMediano: f.volumeMediano ?? null }, classificacao: { tipo: f.tipo, fatias: f.fatias, valoresDoAtivo: f.valoresDoAtivo }, serie: f.serie, derivados: { pvp: { formula: 'cotação ÷ valor patrimonial da cota', cotacao: f.cotacao, vp: f.vp, valor: arred(f.pvp, 6) }, rendimento12m: { formula: 'soma(DY do mês × VP do mês) × 12 ÷ meses com dado', meses: f.mesesComDados, valor: arred(f.rendimento12m, 6) }, dy12: { formula: 'rendimento de 12 meses ÷ cotação', valor: arred(f.dy12, 6) }, rentabPatrimonial12m: { formula: 'produto(1 + rentabilidade patrimonial do mês) − 1', valor: arred(f.rentabPatrimonial12m, 6) }, alavancagem: { formula: '(passivo total − rendimentos a distribuir − taxas a pagar) ÷ valor do ativo', valor: arred(f.alavancagem, 6) } } }
     if (f.tipo === 'tijolo' || f.tipo === 'papel') {
       const m = motivoDeExclusao(f, cfg.filtros[f.tipo])
       memoria[f.ticker].filtro = m ? { aprovado: false, codigo: m[0], motivo: m[1] } : { aprovado: true }
@@ -335,6 +340,8 @@ export function calcular(insumos, cfg) {
     dataExecucao: insumos.dataExecucao,
     competenciaReferencia: ref,
     universo: insumos.fundos.length,
+    liquidezPorMediana: comIndicadores.filter((f) => f.fonteLiquidez === 'mediana').length,
+    liquidezPorMedia: comIndicadores.filter((f) => f.fonteLiquidez === 'média').length,
     etapas,
     tijolo: tijolo.map(linhaDoRanking),
     papel: papel.map(linhaDoRanking),

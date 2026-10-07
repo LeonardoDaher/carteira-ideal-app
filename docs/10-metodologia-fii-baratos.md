@@ -1,6 +1,6 @@
 # Metodologia da triagem "FIIs baratos" (Tijolo e Papel)
 
-**Versão da metodologia: 1.1.0** · Decisão de origem: D59 (alertas e conferência manual: D60) · Parâmetros: `config/fii-baratos.json` (fonte única) · Código: `scripts/fii-baratos-calculo.mjs` (cálculo puro), `scripts/atualizar-fii-baratos.mjs` (leitura da CVM e gravação da auditoria), `scripts/fii-baratos-verificar.mjs` (verificação independente).
+**Versão da metodologia: 1.2.0** · Decisão de origem: D59 (alertas e conferência manual: D60) · Parâmetros: `config/fii-baratos.json` (fonte única) · Código: `scripts/fii-baratos-calculo.mjs` (cálculo puro), `scripts/atualizar-fii-baratos.mjs` (leitura da CVM e gravação da auditoria), `scripts/fii-baratos-verificar.mjs` (verificação independente).
 
 > **Estado: NÃO PUBLICADO.** Este job só grava a trilha de auditoria em `auditoria/fii-baratos/<data>/`. Não há tela no app, código de acesso nem arquivo lido pelo site. Publicar depende de decisão do responsável (seção 9).
 
@@ -13,7 +13,7 @@
 | Fonte | O que traz | Observação |
 |---|---|---|
 | **Informe Mensal de FII da CVM** (`inf_mensal_fii_AAAA.zip`: `complemento`, `geral`, `ativo_passivo`) | DY do mês, valor patrimonial da cota, rentabilidade patrimonial, patrimônio líquido, cotistas, valor do ativo; ISIN e segmento declarado; composição do ativo e do passivo | Anos A−1 e A. Cada arquivo baixado tem URL, tamanho e sha256 no manifesto |
-| **Cotação e volume médio** (`webapp-src/src/data/rendimentosFii.json`, do job de FIIs) | Cotação, data da cotação, volume médio diário, nome, setor | **Hoje é o job mensal (brapi), não um preço diário.** Mais velha que `dados.cotacaoMaxIdadeDias` (45) dias da execução: o fundo sai (`cotacao_defasada`) |
+| **Cotação e volume** (`webapp-src/src/data/rendimentosFii.json`, do job de FIIs) | Cotação, data da cotação, volume médio **e mediano** diário (21 pregões), nome, setor | **Hoje é o job mensal (brapi), não um preço diário.** Mais velha que `dados.cotacaoMaxIdadeDias` (45) dias da execução: o fundo sai (`cotacao_defasada`) |
 
 Os CSVs da CVM são ISO-8859-1. O leitor valida colunas obrigatórias e **falha com mensagem explícita** se o layout mudar.
 
@@ -57,7 +57,7 @@ Aplicados na ordem; o primeiro que reprova é o motivo registrado.
 
 | Filtro | Tijolo | Papel |
 |---|---|---|
-| Liquidez (volume médio diário) | ≥ R$ 500 mil | ≥ R$ 300 mil |
+| Liquidez (volume **mediano** diário, 21 pregões) | ≥ R$ 500 mil | ≥ R$ 300 mil |
 | Patrimônio líquido | ≥ R$ 200 mi | ≥ R$ 150 mi |
 | Cotistas (se informados) | ≥ 3.000 | ≥ 3.000 |
 | P/VP | ≥ 0,3 | **≥ 0,7** |
@@ -66,6 +66,8 @@ Aplicados na ordem; o primeiro que reprova é o motivo registrado.
 | Alavancagem | ≤ 40% | ≤ 40% |
 
 O papel tem liquidez e patrimônio mais folgados porque quase todo fundo de papel é menor (com os valores do tijolo sobram 13 fundos), e é mais rígido em P/VP e queda patrimonial porque desconto grande em fundo de crédito costuma ser **perda já precificada**, não pechincha.
+
+A liquidez usa a **mediana** do volume financeiro diário (R$, dias sem negócio contam zero) quando o job de FIIs a traz, e a média quando não (cada fundo registra a fonte em `liquidez_pela`). A média é puxada por poucos dias de negociação intensa: com as cotações de 07/10, SAPI11 e BROF11 passaram pelo filtro com volume médio acima do mínimo, mas negociam R$ 181 mil e R$ 354 mil por dia no Investidor10.
 
 ## 7. "A conferir", conferência manual e ranking
 
@@ -119,8 +121,9 @@ Confere o sha256 de cada arquivo, o hash canônico dos insumos e da config e **r
 9. **Limiares são escolhas** a partir da distribuição observada na primeira execução (competência 2026-08), não regras de mercado: liquidez, patrimônio, cotistas, alavancagem, P/VP mínimo, queda patrimonial, DY máximo e os alertas (P/VP, DY alto, razão recente e pico de rendimento).
 10. **Fundo que muda de CNPJ** (Resolução CVM 175) é ligado pelo ISIN; casos ambíguos aparecem em `origemCnpj`.
 11. **O informe da CVM tem meses atípicos** (DY zero num mês em que o fundo pagou, ou um pico que o site do fundo não mostra, como o R$ 8,52 de HGRE11 em janeiro/26). Por isso os indicadores de rendimento recente usam mediana e há o alerta de pico; ainda assim, um erro que se repita nos 12 meses não é detectável.
-13. **Valor patrimonial por cota: vale o do informe da CVM** (patrimônio líquido ÷ cotas emitidas), por decisão do responsável (D60): é a fonte oficial e reproduzível. Sites de dados (Investidor10) podem dividir pelas cotas **em circulação**, sem as que o fundo mantém em tesouraria depois de recomprar; o informe mensal não traz a quantidade em tesouraria. Caso observado: BBIG11, R$ 9,74 no informe (99,12 mi de cotas) contra R$ 10,72 no site (90,12 mi), com o mesmo patrimônio de R$ 965,9 mi (causa provável, não confirmada: cotas recompradas). Em fundo com recompra, o P/VP calculado fica **acima** do que um cotista de fato detém (o fundo é mais descontado do que o ranking mostra).
 12. **A conferência manual cobre só a base dos dados** (cota, valor patrimonial, rendimento). Não avalia vacância, qualidade dos imóveis, inadimplência nem risco de crédito.
+13. **Valor patrimonial por cota: vale o do informe da CVM** (patrimônio líquido ÷ cotas emitidas), por decisão do responsável (D60): é a fonte oficial e reproduzível. Sites de dados (Investidor10) podem dividir pelas cotas **em circulação**, sem as que o fundo mantém em tesouraria depois de recomprar; o informe mensal não traz a quantidade em tesouraria. Caso observado: BBIG11, R$ 9,74 no informe (99,12 mi de cotas) contra R$ 10,72 no site (90,12 mi), com o mesmo patrimônio de R$ 965,9 mi (causa provável, não confirmada: cotas recompradas). Em fundo com recompra, o P/VP calculado fica **acima** do que um cotista de fato detém (o fundo é mais descontado do que o ranking mostra).
+14. **Liquidez pelo job de FIIs:** o volume vem da brapi (último mês, 21 pregões) e a mediana só existe depois da primeira execução do job de FIIs com a mudança D61; antes disso o ranking cai para a média. Os mínimos (R$ 500 mil e R$ 300 mil) vieram de uma distribuição de MÉDIAS e podem precisar de revisão agora que se aplicam à mediana.
 
 ## 11. Testes automatizados
 
@@ -130,5 +133,6 @@ Confere o sha256 de cada arquivo, o hash canônico dos insumos e da config e **r
 
 | Versão | Data | Mudança |
 |---|---|---|
+| 1.2.0 | 2026-10-07 | Liquidez pela mediana do volume diário (o job de FIIs passa a gravar `volumeMediano`; a média continua), com a fonte registrada por fundo; mínimos inalterados. |
 | 1.1.0 | 2026-10-07 | Conferência dos 6 fundos de "a conferir" no Investidor10. Novos alertas `rendimento_em_queda` (mediana dos 3 últimos meses < 75% da mediana de 12 meses) e `rendimento_com_pico` (média > 125% da mediana), ambos por mediana; lista `conferencia` com validade de 90 dias e alertas liberados por fundo (BRCR11 e OUJP11); novas colunas nos CSVs. A primeira tentativa (média de 2 meses) foi descartada por falso positivo em GTWR11 e BRCO11. |
 | 1.0.0 | 2026-10-06 | Versão inicial, vinda do protótipo analisado com o informe real de 2026-08: classificação pelo ativo, ranking por grupo, filtros, lista "a conferir", trilha de auditoria e verificação independente. Sem publicação no app. |

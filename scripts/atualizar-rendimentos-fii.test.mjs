@@ -20,6 +20,7 @@ import {
   formatarSnapshot,
   setorDoFundo,
   volumeMedioDiario,
+  volumeMedianoDiario,
 } from './atualizar-rendimentos-fii.mjs'
 
 const GERAL = `CNPJ_Fundo_Classe;Data_Referencia;Versao;Nome_Fundo_Classe;Codigo_ISIN
@@ -401,5 +402,29 @@ describe('volumeMedioDiario', () => {
   it('sem histórico devolve null (não inventa liquidez)', () => {
     assert.equal(volumeMedioDiario(undefined), null)
     assert.equal(volumeMedioDiario([]), null)
+  })
+})
+
+describe('volumeMedianoDiario', () => {
+  const dia = (d, close, volume) => ({ date: d, close, volume })
+
+  it('a mediana mostra o dia típico: um dia de rali não faz de um fundo ilíquido um fundo líquido', () => {
+    // 20 dias a R$ 100 mil e um dia a R$ 10 mi: média ~R$ 566 mil, mediana R$ 100 mil
+    const hist = [...Array.from({ length: 20 }, (_, i) => dia(i + 1, 10, 10_000)), dia(21, 10, 1_000_000)]
+    assert.ok(volumeMedioDiario(hist) > 500_000)
+    assert.equal(volumeMedianoDiario(hist), 100_000)
+  })
+
+  it('dia sem negócio entra como zero, como na média, e a mediana de número par é a média dos dois do meio', () => {
+    assert.equal(volumeMedianoDiario([dia(1, 10, 300000), dia(2, 10, 0), dia(3, 10, 0)]), 0)
+    assert.equal(volumeMedianoDiario([dia(1, 10, 100000), dia(2, 10, 300000)]), 2_000_000)
+    // quantidade ímpar fora de ordem: a mediana é o do meio (R$ 2 mi), não o menor nem o maior
+    assert.equal(volumeMedianoDiario([dia(1, 10, 100000), dia(2, 10, 300000), dia(3, 10, 200000)]), 2_000_000)
+  })
+
+  it('usa só as sessões mais recentes, em ordem de data, e sem histórico devolve null', () => {
+    assert.equal(volumeMedianoDiario([dia(3, 10, 100), dia(1, 10, 999999999), dia(2, 10, 300)], 2), 2000)
+    assert.equal(volumeMedianoDiario(undefined), null)
+    assert.equal(volumeMedianoDiario([]), null)
   })
 })

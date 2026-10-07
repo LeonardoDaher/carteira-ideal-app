@@ -494,14 +494,32 @@ export function setorDoFundo({ nome = '', segmento = '', mandato = '', correcao 
  * sem negócio entram como zero, porque liquidez é justamente a frequência de negócios.
  */
 export function volumeMedioDiario(historico, sessoes = 21) {
+  const volumes = volumesDiarios(historico, sessoes)
+  if (!volumes) return null
+  return volumes.reduce((soma, v) => soma + v, 0) / volumes.length
+}
+
+/**
+ * Mediana do volume financeiro diário (R$) das mesmas sessões. A média é puxada por poucos dias de
+ * negociação intensa (um rali, um evento) e deixa passar fundo que quase não negocia; a mediana
+ * mostra o dia típico. Dias sem negócio contam como zero, como na média.
+ */
+export function volumeMedianoDiario(historico, sessoes = 21) {
+  const volumes = volumesDiarios(historico, sessoes)
+  if (!volumes) return null
+  const o = [...volumes].sort((a, b) => a - b)
+  const n = o.length
+  return n % 2 ? o[(n - 1) / 2] : (o[n / 2 - 1] + o[n / 2]) / 2
+}
+
+function volumesDiarios(historico, sessoes) {
   if (!Array.isArray(historico) || historico.length === 0) return null
   const dias = historico
     .filter((d) => d && typeof d.close === 'number')
     .sort((a, b) => (a.date ?? 0) - (b.date ?? 0))
     .slice(-sessoes)
   if (dias.length === 0) return null
-  const total = dias.reduce((soma, d) => soma + (Number(d.volume) > 0 ? Number(d.volume) * d.close : 0), 0)
-  return total / dias.length
+  return dias.map((d) => (Number(d.volume) > 0 ? Number(d.volume) * d.close : 0))
 }
 
 /**
@@ -596,6 +614,7 @@ async function buscarCotacao(ticker, token) {
     cotacao: Math.round(preco * 100) / 100,
     dataCotacao: data,
     volumeMedio: volumeMedioDiario(resultado.historicalDataPrice, SESSOES_LIQUIDEZ),
+    volumeMediano: volumeMedianoDiario(resultado.historicalDataPrice, SESSOES_LIQUIDEZ),
   }
 }
 
@@ -764,7 +783,7 @@ async function main() {
       continue
     }
 
-    const { cotacao, dataCotacao, volumeMedio } = cotacaoObtida
+    const { cotacao, dataCotacao, volumeMedio, volumeMediano } = cotacaoObtida
     if (!rendimentoPlausivel(escolhido.valorPorCota, cotacao)) {
       const pct = ((escolhido.valorPorCota / cotacao) * 100).toFixed(2)
       registrar('fora-da-faixa', `rendimento estimado de ${pct}% ao mês sobre a cota está fora da faixa plausível.`)
@@ -789,6 +808,7 @@ async function main() {
       nome: r.nome,
       setor: setorDoFundo({ nome: r.nome, segmento: r.segmento, mandato: r.mandato, correcao: setoresCorrigidos[r.ticker] }),
       volumeMedio: volumeMedio == null ? null : Math.round(volumeMedio / 1000) * 1000,
+      volumeMediano: volumeMediano == null ? null : Math.round(volumeMediano / 1000) * 1000,
       cotacao,
       dataCotacao,
       rendimentos: [escolhido],
