@@ -1,32 +1,32 @@
 {
   "esquema": 1,
-  "versaoMetodologia": "1.4.0",
-  "geradoEm": "2026-10-07T16:16:59.563Z",
+  "versaoMetodologia": "1.4.1",
+  "geradoEm": "2026-10-07T16:29:32.892Z",
   "dataExecucao": "2026-10-07",
   "dataCotacoes": "2026-10-07",
   "competenciaReferencia": "2026-08",
   "ambiente": {
     "node": "v22.23.3",
     "plataforma": "linux",
-    "commit": "95164df9a4662ef09cb58b39556d4a53ca33e9fe",
-    "execucao": "37650770096"
+    "commit": "07c044533dd296e64ca17cee65490c47bbd26f82",
+    "execucao": "37652415305"
   },
   "codigo": {
-    "calculoSha256": "b4961f5ad6ce836abe7f292896354e48e1f549c3e79b9fdefed593c63551a0aa",
-    "extracaoSha256": "0b399c68868852b296b1c1b78bb3fdb497c55c484f77fc8a16633d4b65e9bf5b"
+    "calculoSha256": "174646b22b60a79300b4ff6576c0d713e5974ad46c455317597f8b8bce644569",
+    "extracaoSha256": "715513455b602aac2b996178bcacf84443c5f0e8441f3820a5272b17c926928b"
   },
   "hashes": {
-    "config": "1c3b4d94ecc63d96ef2f79ab4fe73b5d45f57e7eadd294a5197a3b16f1c4f1c9",
-    "insumos": "d36216f01c5eed135af6e30c2563b8d6a27e7b35111d4ea9f5e6e54fbda1d2e2",
-    "resultado": "344c6f48c76ff9fab2f589aac7b095f646af3ac599f4550c781fd3cc8d86bdc1",
-    "memoria": "9e3888ee1e6fcdc8ce0af91d39f7cd558fda42becdce39621e53893992c9df09",
+    "config": "a411770104a77d80a2edad9d39fb8dd99bdf824edf7648c9cc9db126f573eddd",
+    "insumos": "b789eaec5563c4024ee62eef22c0c5aff88d86dc02e78da957d0dbc197765f30",
+    "resultado": "3b354ffce82ec28e1b15476f787de8c913218e75b361b6a0009d8c846f6ba240",
+    "memoria": "6c352a20f5586beedb94477aceade1d9897d1c3d4786ce024f5dfb3e5e01d479",
     "arquivos": {
-      "insumos.json.gz": "9a2b5a2f0efebcd3dcae4642c93823255ce5f5d2b6a748d2cf81b819bf37c71e",
-      "config.json": "2cf00d038fa66b8034dc62d883bee228d42fd438667914678d6d5ab63046a7d7",
-      "resultado.json": "61f7d9e1ca74203b73aabd97a29dbcafe7dc2dc509e7b92ae717e0ae26666ef5",
-      "memoria-de-calculo.json.gz": "0674d3b3a9cd887cab43067fa82fa16d7107fcd67628a8678dda2b0532d50d27",
-      "ranking-tijolo.csv": "95bb0959553d48e1994d42403368c8a428414951acfcaa9bb4851b8314f0a678",
-      "ranking-papel.csv": "1314d3fe2578df8f4e207a74c47445cc4b5bf6061ac2364adb3095ca6087e186",
+      "insumos.json.gz": "7b87e220a9bfad84f044364d9061c9f07ac2ff78f6986b50dcd3960bdd50a331",
+      "config.json": "b94ade37f0e0073da86ec767d760f9079badc2623eb08bbc91235534fd6082f5",
+      "resultado.json": "0eb52091e03e27b29f1c12e95b8617fb532c227ce20960b6021154fa492f6453",
+      "memoria-de-calculo.json.gz": "bd47cc920dcc03f51dd8dba21a53d554617ff98535d7f6a21f0eba6c18998a22",
+      "ranking-tijolo.csv": "56e5004725c55bd8951ce0e78a5cf929c90e0f36072981c8d084d6ae8677e61b",
+      "ranking-papel.csv": "e41b7f1a5b8980c6f5901ffd09394c11ee1c53adf1522eb24034a3cf5df1e094",
       "a-conferir.csv": "6ba4461f012ad6a2c2375012bbd84bd1abc1d0c07611e69feae0b3bf79a72b83",
       "exclusoes.csv": "b6de3525ee269a9a39082d9d61eb4a87a81c529c499c54c8aee3cee40be368fb"
     }
@@ -38,7 +38,7 @@
       "arquivo": "inf_mensal_fii_2025.zip",
       "bytes": 1522380,
       "sha256": "bdaa6ace919c348dbaf6ab59ff1c07ae9ec46a56661fbef9003a0b733da180d2",
-      "baixadoEm": "2026-10-07T16:16:58.282Z"
+      "baixadoEm": "2026-10-07T16:29:31.073Z"
     },
     {
       "papel": "Informe Mensal de FII 2026",
@@ -46,14 +46,14 @@
       "arquivo": "inf_mensal_fii_2026.zip",
       "bytes": 1133575,
       "sha256": "a743d72a40ec519b18c71c9018bf2576eb530f17473ee296fbcd8f3b4c8e915e",
-      "baixadoEm": "2026-10-07T16:16:58.422Z"
+      "baixadoEm": "2026-10-07T16:29:31.183Z"
     },
     {
       "papel": "Histórico de preço diário dos FIIs (B3, boletim BVBG.086)",
       "url": "historico/fiis.json (neste repositório)",
       "arquivo": "fiis.json",
-      "bytes": 316534,
-      "sha256": "ca8ad99dc08828f89974faa5027133e27189185d8868efc6154eb71cd278e704",
+      "bytes": 322210,
+      "sha256": "666f538aa07408dcbb2bfa7254f38655dd490f90040a17551c0d2b2902e91f2f",
       "pregoes": 60,
       "ultimoPregao": "2026-10-06"
     },

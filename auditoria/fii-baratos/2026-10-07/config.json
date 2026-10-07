@@ -1,6 +1,6 @@
 {
   "_leia": "Metodologia da triagem 'FIIs baratos' (Tijolo e Papel). ESTE ARQUIVO É A FONTE ÚNICA DOS PARÂMETROS: o script e o documento docs/10-metodologia-fii-baratos.md leem/citam estes valores. Qualquer mudança aqui exige subir 'versaoMetodologia' e registrar o motivo em 'historicoDeVersoes'. O hash SHA-256 deste arquivo vai no manifesto de cada execução.",
-  "versaoMetodologia": "1.4.0",
+  "versaoMetodologia": "1.4.1",
   "historicoDeVersoes": [
     {
       "versao": "1.0.0",
@@ -26,6 +26,11 @@
       "versao": "1.4.0",
       "data": "2026-10-07",
       "mudanca": "(1) Preço DIÁRIO: cotação e volume (média e mediana de 21 pregões) vêm do histórico diário da B3 (historico/fiis.json, boletim BVBG.086, mesmo módulo dos jobs de ações, BDRs e ETFs) quando existe, com o preço mensal do job de FIIs (brapi) como reserva; a fonte de cada fundo fica registrada (fonteCotacao). Cotação diária com mais de 7 dias sai (a mensal, 45). Novo parâmetro precoDiarioObrigatorio (false por enquanto): vira true quando o responsável decidir publicar. (2) Novo alerta salto_de_preco: variação de mais de 25% de um dia para o outro no fechamento nos últimos pregões (desdobramento, grupamento) manda o fundo para a conferência. (3) TGAR11 aceito no ranking por decisão do responsável (conferido, libera pvp_muito_baixo e dy_alto). OUJP11 continua fora: a conferência dele fica registrada, mas a mediana de volume de R$ 285 mil está abaixo do mínimo de R$ 300 mil."
+    },
+    {
+      "versao": "1.4.1",
+      "data": "2026-10-07",
+      "mudanca": "Na primeira execução com o preço diário da B3 (60 pregões carregados), 3 fundos líquidos ficaram fora do histórico porque o Boletim de Preços da B3 não os traz (CVBI11, MALL11 e BBPO11, com R$ 0,8 a 2,7 mi por dia na brapi): a triagem usava o preço MENSAL deles, e com o preço diário obrigatório (condição para publicar) CVBI11 (3º do papel) e BBPO11 (8º do tijolo) sairiam do ranking. O job de preço diário passa a completar, pela brapi, só os fundos líquidos que o boletim não traz (cerca de 3 requisições por dia), sem nunca sobrescrever um dia do boletim. A triagem registra a origem de cada preço: B3 (boletim diário) ou brapi (histórico diário completado). Nenhuma regra de cálculo mudou."
     }
   ],
   "tamanhoDaLista": 15,
