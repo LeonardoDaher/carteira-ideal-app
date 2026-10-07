@@ -1,34 +1,34 @@
 {
   "esquema": 1,
-  "versaoMetodologia": "1.0.0",
-  "geradoEm": "2026-10-07T10:39:25.511Z",
+  "versaoMetodologia": "1.1.0",
+  "geradoEm": "2026-10-07T11:29:35.961Z",
   "dataExecucao": "2026-10-07",
-  "dataCotacoes": "2026-09-25",
+  "dataCotacoes": "2026-10-07",
   "competenciaReferencia": "2026-08",
   "ambiente": {
     "node": "v22.23.3",
     "plataforma": "linux",
-    "commit": "52ab1db7eae5c740f6b4f6ff9c767642f9b7fda1",
-    "execucao": "37608818144"
+    "commit": "d3d40fb81a44f890b8177caa71b4ec7d7394f523",
+    "execucao": "37614405352"
   },
   "codigo": {
-    "calculoSha256": "3f39ab3888d21a4175989853909828aa09b8aff2c2f80cdba39fabd52a093f12",
-    "extracaoSha256": "e9cc2c4440bc9f81518da9a22921756299017fd062314f9c25a7a46757b1d535"
+    "calculoSha256": "921965011dfbe091edd07e9ad237b4ad09c4deef2c336323636de68cff49d95b",
+    "extracaoSha256": "22c4ffdb4af3f1a0dc9ccd93f0026fc250cf2a8d9916d081528672c89eb7f88b"
   },
   "hashes": {
-    "config": "1e77d45c78a8af7572c8dac1403a8716a7ea0da57988db0ef726c88cfd605d88",
-    "insumos": "23d05b03a158c2bbc73adc1a27dc9a3d33b85dcd52047a4692d7c432f1168cee",
-    "resultado": "ac225b2fb8dabfa2ab1ca0fd7440aaac8889c036a7dc679bfd79034c0e046479",
-    "memoria": "ee6ab99bd605672b96e289fb62a17412a7ae3723cd46df44e5392ededfcfb4c1",
+    "config": "996a8f94f6f29d80d6429a65ca22b58f0fd1f1b3c31f45a4f73e9d3c1d553c66",
+    "insumos": "66132a94b548b8b45698e3b5f59ac226d1f61989a758e3ae43a7af40a24b25ea",
+    "resultado": "c53fff993cd8138fb4b33c0b7d1d510285f2e085a08cad3e3aa81abe7d0ec0b7",
+    "memoria": "1cbe75b37d10157335b1145e288fcdeabb2bd0b0f41bda8ecab3957600d64300",
     "arquivos": {
-      "insumos.json.gz": "c911194eb23f6816ef8c3d25b24706341a0b70a1d90f5110898f61335f61c8e6",
-      "config.json": "f2207f1b51d4bd99dcb671bf0968b68b5deb59bab552b4be2edf8a605b587889",
-      "resultado.json": "0e738576285a0e7fc4acf2e136103b540e341454c9a49364226b3f58e8d62105",
-      "memoria-de-calculo.json.gz": "e66dc7b3342950ac0f01697ad8c9f134b98d285ad1d4ffe08dcc0d14a2ef1831",
-      "ranking-tijolo.csv": "44a79e3f781d2698318f68e725b93f28b597055063b623b5134c61ac8d548874",
-      "ranking-papel.csv": "d7f269c679c495f8f0ec32976fd0c844833eb22831b99933283df61c33a458f9",
-      "a-conferir.csv": "a1c9ba037e001464231b676d2bdcfeced54267d106b3fa0ad23b6ce949c5b82c",
-      "exclusoes.csv": "c658679640e5471f0a39779920d6880f7fc60edebfa33bbf3070c177be0de3fd"
+      "insumos.json.gz": "e7930e45f9e1dd036a4cfffbd6975cac66bf82478b8c7f56d26b43a688fd349a",
+      "config.json": "5e841d8a681925a212d35f5abf5a45433e2c74cb72db9a5aeeb242d3bf4b661b",
+      "resultado.json": "466e25bae2a281cb5ea8e144b48851448515a84067c9bdf3138511ae24af1b42",
+      "memoria-de-calculo.json.gz": "f94f33c48ce32c8bd5a52ab9dfe7d7a4570c2de17acd1536a936070413d0798c",
+      "ranking-tijolo.csv": "aceb6bad5ca013a298c4aec7707722cdcfaf548a648a4656c2dd7793a8bea3f5",
+      "ranking-papel.csv": "0524a289964c25300e0c0b047e7da94172d3be0667b22cffcf6fe56ae02a6aa8",
+      "a-conferir.csv": "4092b5c84b92b3a9ccfc491a42c782688be1a4aa27dca9af8bab6d88162cd07f",
+      "exclusoes.csv": "65c3b456ccca30c13acfab9040468cfc9309b46903a554822067fb0fb8de8768"
     }
   },
   "fontes": [
@@ -38,7 +38,7 @@
       "arquivo": "inf_mensal_fii_2025.zip",
       "bytes": 1522380,
       "sha256": "bdaa6ace919c348dbaf6ab59ff1c07ae9ec46a56661fbef9003a0b733da180d2",
-      "baixadoEm": "2026-10-07T10:39:23.470Z"
+      "baixadoEm": "2026-10-07T11:29:34.262Z"
     },
     {
       "papel": "Informe Mensal de FII 2026",
@@ -46,42 +46,42 @@
       "arquivo": "inf_mensal_fii_2026.zip",
       "bytes": 1133575,
       "sha256": "a743d72a40ec519b18c71c9018bf2576eb530f17473ee296fbcd8f3b4c8e915e",
-      "baixadoEm": "2026-10-07T10:39:23.546Z"
+      "baixadoEm": "2026-10-07T11:29:34.328Z"
     },
     {
       "papel": "Cotação e volume dos FIIs (job de FIIs)",
       "url": "webapp-src/src/data/rendimentosFii.json (neste repositório)",
-      "dataCotacoes": "2026-09-25"
+      "dataCotacoes": "2026-10-07"
     }
   ],
   "contagens": {
-    "universo": 219,
-    "tijolo": 32,
-    "papel": 15,
+    "universo": 218,
+    "tijolo": 29,
+    "papel": 19,
     "aConferir": 6,
-    "exclusoes": 166,
+    "exclusoes": 164,
     "etapas": [
       {
         "etapa": "universo e preço",
-        "entram": 219,
-        "ficam": 218
+        "entram": 218,
+        "ficam": 217
       },
       {
         "etapa": "dados do informe",
-        "entram": 218,
-        "ficam": 210
+        "entram": 217,
+        "ficam": 209
       },
       {
         "etapa": "classificação e filtros",
-        "entram": 210,
-        "tijolo": 37,
-        "papel": 16
+        "entram": 209,
+        "tijolo": 35,
+        "papel": 19
       },
       {
         "etapa": "a conferir",
         "aConferir": 6,
-        "tijolo": 32,
-        "papel": 15
+        "tijolo": 29,
+        "papel": 19
       }
     ]
   },
