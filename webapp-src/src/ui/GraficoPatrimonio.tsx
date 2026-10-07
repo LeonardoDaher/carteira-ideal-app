@@ -12,7 +12,13 @@ const B = 22
 const W = 340
 const H = 200
 
-const ROTAS_PADRAO: ChaveCenario[] = ['aluguel', 'financiamento', 'consorcio']
+/** Além dos quatro caminhos do imóvel, o carro e a moto têm a locação (D69). */
+export type ChaveGrafico = ChaveCenario | 'locacao'
+export type PontoGrafico = PontoMensal & { locacao?: number }
+const NOMES_PADRAO: Record<ChaveGrafico, string> = { ...NOMES_CENARIOS, locacao: 'Locação' }
+const valorDe = (p: PontoGrafico, c: ChaveGrafico) => p[c] ?? 0
+
+const ROTAS_PADRAO: ChaveGrafico[] = ['aluguel', 'financiamento', 'consorcio']
 
 /** Passo "redondo" (1, 2 ou 5 × 10^k) para o eixo vertical ter poucas linhas legíveis. */
 function passoRedondo(amplitude: number, linhas = 4) {
@@ -27,7 +33,7 @@ function passoRedondo(amplitude: number, linhas = 4) {
  * tracejado, pontilhado) além da cor: quem não distingue cores continua lendo o gráfico. Toque, arraste
  * ou use as setas do teclado para ver o valor de cada cenário em cada mês.
  */
-export function GraficoPatrimonio({ serie, rotas = ROTAS_PADRAO, nomes = NOMES_CENARIOS }: { serie: PontoMensal[]; rotas?: ChaveCenario[]; nomes?: Record<ChaveCenario, string> }) {
+export function GraficoPatrimonio({ serie, rotas = ROTAS_PADRAO, nomes = NOMES_PADRAO }: { serie: PontoGrafico[]; rotas?: ChaveGrafico[]; nomes?: Record<ChaveGrafico, string> }) {
   const CHAVES = rotas
   const [indice, setIndice] = useState<number | null>(null)
   const svgRef = useRef<SVGSVGElement>(null)
@@ -35,7 +41,7 @@ export function GraficoPatrimonio({ serie, rotas = ROTAS_PADRAO, nomes = NOMES_C
   const ultimo = serie.length - 1
 
   const dados = useMemo(() => {
-    const todos = serie.flatMap((p) => CHAVES.map((c) => p[c]))
+    const todos = serie.flatMap((p) => CHAVES.map((c) => valorDe(p, c)))
     const minimo = Math.min(0, ...todos)
     const maximo = Math.max(...todos, 1)
     const passo = passoRedondo(maximo - minimo)
@@ -43,7 +49,7 @@ export function GraficoPatrimonio({ serie, rotas = ROTAS_PADRAO, nomes = NOMES_C
     const yMax = Math.ceil(maximo / passo) * passo
     const x = (mes: number) => L + (mes / (ultimo || 1)) * (W - L - R)
     const y = (v: number) => T + ((yMax - v) / (yMax - yMin || 1)) * (H - T - B)
-    const caminho = (chave: ChaveCenario) => serie.map((p, k) => `${k === 0 ? 'M' : 'L'}${x(p.mes).toFixed(1)} ${y(p[chave]).toFixed(1)}`).join('')
+    const caminho = (chave: ChaveGrafico) => serie.map((p, k) => `${k === 0 ? 'M' : 'L'}${x(p.mes).toFixed(1)} ${y(valorDe(p, chave)).toFixed(1)}`).join('')
     const grade: number[] = []
     for (let v = yMin; v <= yMax + passo / 2; v += passo) grade.push(v)
     const anosTotal = ultimo / 12
@@ -52,8 +58,8 @@ export function GraficoPatrimonio({ serie, rotas = ROTAS_PADRAO, nomes = NOMES_C
     for (let a = 0; a <= anosTotal; a += passoAnos) anos.push(a)
     const fim = serie[ultimo]
     const resumo =
-      `Patrimônio líquido ao longo de ${anosTotal} anos. No fim: ` + CHAVES.map((c) => `${nomes[c]} ${reais(fim[c])}`).join(', ') + '.'
-    return { x, y, caminhos: Object.fromEntries(CHAVES.map((c) => [c, caminho(c)])) as Record<ChaveCenario, string>, grade, anos, resumo }
+      `Patrimônio líquido ao longo de ${anosTotal} anos. No fim: ` + CHAVES.map((c) => `${nomes[c]} ${reais(valorDe(fim, c))}`).join(', ') + '.'
+    return { x, y, caminhos: Object.fromEntries(CHAVES.map((c) => [c, caminho(c)])) as Record<ChaveGrafico, string>, grade, anos, resumo }
   }, [serie, ultimo, CHAVES, nomes])
 
   const { x, y } = dados
@@ -91,7 +97,7 @@ export function GraficoPatrimonio({ serie, rotas = ROTAS_PADRAO, nomes = NOMES_C
             <svg width="18" height="8" aria-hidden="true" className="grafico-pat-amostra">
               <line x1="1" x2="17" y1="4" y2="4" className={`grafico-pat-linha ${c}`} />
             </svg>
-            {nomes[c]} <strong>{reaisCompacto(atual[c])}</strong>
+            {nomes[c]} <strong>{reaisCompacto(valorDe(atual, c))}</strong>
           </span>
         ))}
       </div>
@@ -125,7 +131,7 @@ export function GraficoPatrimonio({ serie, rotas = ROTAS_PADRAO, nomes = NOMES_C
         <g aria-hidden="true">
           <line x1={x(atual.mes)} x2={x(atual.mes)} y1={T} y2={H - B} className="grafico-pat-guia" />
           {CHAVES.map((c) => (
-            <circle key={c} cx={x(atual.mes)} cy={y(atual[c])} r={3.6} className={`grafico-pat-ponto ${c}`} />
+            <circle key={c} cx={x(atual.mes)} cy={y(valorDe(atual, c))} r={3.6} className={`grafico-pat-ponto ${c}`} />
           ))}
         </g>
       </svg>

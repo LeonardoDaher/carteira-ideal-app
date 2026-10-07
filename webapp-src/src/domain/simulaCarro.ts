@@ -1,4 +1,4 @@
-// Comparativo de CARRO: comprar à vista, financiar, consórcio ou ficar sem carro (D47).
+// Comparativo de CARRO: comprar à vista, financiar, consórcio, alugar (locação) ou ficar sem carro (D47, D69).
 //
 // Mesmo molde do imóvel (simulaImovel.ts, D44 a D46), com a diferença que define tudo: o carro PERDE valor.
 // Por isso o resultado sai em duas leituras lado a lado, que são a mesma conta vista de dois ângulos:
@@ -44,14 +44,20 @@ export type TipoCarro = 'zeroKm' | 'seminovo'
 /** Qual bem o motor simula. O cálculo é o mesmo; muda só o vocabulário das mensagens (D48: moto reaproveita este motor). */
 export type Bem = 'carro' | 'moto'
 export type RegraLanceCarro = 'prazo' | 'parcela'
-export type ChaveCarro = 'avista' | 'financiamento' | 'consorcio' | 'semCarro'
+export type ChaveCarro = 'avista' | 'financiamento' | 'consorcio' | 'semCarro' | 'locacao'
 
 export const NOMES_CARRO: Record<ChaveCarro, string> = {
   financiamento: 'Financiar',
   consorcio: 'Consórcio',
   avista: 'Comprar à vista',
   semCarro: 'Sem carro',
+  locacao: 'Locação',
 }
+
+/** Ordem fixa dos caminhos na tela e no seletor. */
+export const TODOS_CAMINHOS_CARRO: ChaveCarro[] = ['avista', 'financiamento', 'consorcio', 'locacao', 'semCarro']
+/** Sem escolha (`caminhos` ausente ou null), valem os quatro caminhos que existiam antes da locação (D69): nada do que estava publicado muda. */
+export const CAMINHOS_ANTES_DA_LOCACAO: ChaveCarro[] = ['avista', 'financiamento', 'consorcio', 'semCarro']
 
 /** Nomes dos caminhos para cada bem: só "sem carro" vira "sem moto". */
 export function nomesRotas(bem: Bem): Record<ChaveCarro, string> {
@@ -128,9 +134,36 @@ export interface InputsCarro {
   /** Quanto custa se mover sem o carro (assinatura, locação, aplicativo), R$ por mês de hoje. */
   mobilidadeMensal: number
 
+  // Locação (D69): mensalidade com IPVA, seguro e manutenção incluídos; a pessoa paga o uso (combustível etc.)
+  /** Mensalidade da locação, R$ por mês de hoje. Já inclui IPVA, seguro e manutenção. */
+  locacaoMensal: number
+  /** Reajuste anual da mensalidade e do quilômetro excedente, % ao ano. */
+  locacaoReajusteAA: number
+  /** Caução paga no início e devolvida no fim, sem rendimento, R$. */
+  locacaoCaucao: number
+  /** Taxa de entrada ou de adesão paga no início e NÃO devolvida, R$. */
+  locacaoTaxaEntrada: number
+  /** Quilômetros por mês incluídos na mensalidade. */
+  locacaoKmIncluido: number
+  /** Quilômetros que a pessoa roda por mês. */
+  locacaoKmRodado: number
+  /** Preço do quilômetro excedente, R$ por km de hoje. */
+  locacaoKmExcedente: number
+  /** true = no último mês do horizonte a pessoa compra o veículo pelo valor combinado em contrato. */
+  locacaoComprarNoFim: boolean
+  /** Valor da compra no fim do contrato, R$ nominais (fixado em contrato). Usado só se `locacaoComprarNoFim`. */
+  locacaoValorCompra: number
+
   // Dinheiro disponível
   /** Quanto a pessoa tem hoje. `null` = só a entrada e os custos de aquisição do financiamento (modo padrão). */
   dinheiroDisponivel: number | null
+
+  // Caminhos a comparar (D69)
+  /**
+   * Quais caminhos entram na comparação (mínimo dois). Ausente ou `null` = os quatro de antes da locação
+   * (à vista, financiar, consórcio e sem o bem), exatamente o comportamento anterior à D69.
+   */
+  caminhos?: ChaveCarro[] | null
 }
 
 /** Valores de partida que dependem de o carro ser 0 km ou seminovo. São nossos e editáveis; a tabela FIPE é a fonte para o seu modelo. */
@@ -147,6 +180,7 @@ export interface PontoMensalCarro {
   financiamento: number
   consorcio: number
   semCarro: number
+  locacao: number
 }
 
 export interface CustosDono {
@@ -229,6 +263,19 @@ export interface DetalheSemCarro {
   mobilidadePaga: number
 }
 
+export interface DetalheLocacao {
+  mensalidadeInicial: number
+  mensalidadeFinal: number
+  mensalidadesPagas: number
+  kmExcedentePago: number
+  /** Uso por conta da pessoa (combustível, estacionamento, pedágio): a locação não o inclui. */
+  usoPago: number
+  taxaEntrada: number
+  /** Caução paga no início e devolvida no fim (não é custo). */
+  caucao: number
+  compra: { feita: boolean; valorCompra: number; transferencia: number; valorDeMercado: number }
+}
+
 export interface DetalheConsorcioCarro {
   parcelaInicial: number
   parcelaFinal: number
@@ -249,12 +296,19 @@ export interface PontoDeViradaCarro {
   avista: number | null
   financiamento: number | null
   consorcio: number | null
+  /**
+   * Mensalidade da locação (R$ de hoje) a partir da qual cada rota de ter o carro empata com alugar. Só existe com a locação na
+   * comparação; null em cada rota = a ordem não muda no intervalo.
+   */
+  contraLocacao?: { avista: number | null; financiamento: number | null; consorcio: number | null }
   /** Intervalo testado, em R$ por mês. */
   intervalo: [number, number]
 }
 
 export interface ResultadoCarro {
   rotas: ChaveCarro[]
+  /** Caminhos que a pessoa pediu para comparar (antes de tirar `avista` se o dinheiro não cobre). */
+  caminhosEscolhidos: ChaveCarro[]
   avista: { disponivel: boolean; necessario: number; falta: number }
   /** Menor custo líquido = maior patrimônio. */
   vencedor: ChaveCarro
@@ -273,6 +327,7 @@ export interface ResultadoCarro {
     financiamento: DetalheFinanciamentoCarro
     avista: DetalheAvistaCarro
     semCarro: DetalheSemCarro
+    locacao: DetalheLocacao
     consorcio: DetalheConsorcioCarro
     investimentos: Record<ChaveCarro, DetalheInvestimentosCarro>
     contabilidade: Record<ChaveCarro, ContabilidadeCarro>
@@ -319,7 +374,17 @@ export function inputsCarroPadrao(parcial: Partial<InputsCarro> = {}): InputsCar
     regraLance: 'prazo',
     mesContemplacao: 18,
     mobilidadeMensal: 1_800,
+    locacaoMensal: 3_000,
+    locacaoReajusteAA: 4.5,
+    locacaoCaucao: 3_000,
+    locacaoTaxaEntrada: 0,
+    locacaoKmIncluido: 2_000,
+    locacaoKmRodado: 1_000,
+    locacaoKmExcedente: 0.8,
+    locacaoComprarNoFim: false,
+    locacaoValorCompra: 50_000,
     dinheiroDisponivel: null,
+    caminhos: null,
     ...parcial,
   }
 }
@@ -363,6 +428,21 @@ export function validarInputsCarro(i: InputsCarro): string[] {
     if (!Number.isFinite(i.dinheiroDisponivel) || i.dinheiroDisponivel < 0) erros.push('O dinheiro disponível não pode ser negativo.')
     else if (i.dinheiroDisponivel < minimo - 0.005) {
       erros.push(`O dinheiro disponível precisa cobrir ao menos a entrada mais o emplacamento, o IOF e o gravame (${minimo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}).`)
+    }
+  }
+  if (i.locacaoMensal < 0 || i.locacaoCaucao < 0 || i.locacaoTaxaEntrada < 0 || i.locacaoKmExcedente < 0 || i.locacaoKmIncluido < 0 || i.locacaoKmRodado < 0) {
+    erros.push('Na locação, os valores não podem ser negativos.')
+  }
+  if (i.locacaoComprarNoFim && i.locacaoValorCompra <= 0) erros.push('Informe o valor da compra no fim da locação.')
+  if (i.caminhos != null) {
+    const validos = i.caminhos.every((c) => TODOS_CAMINHOS_CARRO.includes(c)) && new Set(i.caminhos).size === i.caminhos.length
+    if (!validos) erros.push('Há um caminho inválido na comparação.')
+    else if (i.caminhos.length < 2) erros.push('Escolha pelo menos dois caminhos para comparar.')
+    else if (i.valorCarro > 0 && i.caminhos.length === 2 && i.caminhos.includes('avista')) {
+      // À vista mais um só: se o dinheiro não cobre o veículo e o emplacamento, sobra um caminho único e não há o que comparar.
+      const necessario = i.valorCarro + (i.valorCarro * i.emplacamentoPct) / 100
+      const dinheiro = i.dinheiroDisponivel ?? i.entrada + custosAquisicaoFinanciamento(i).total
+      if (dinheiro < necessario - 0.005) erros.push(`Com o dinheiro informado não dá para comprar à vista: informe mais dinheiro disponível ou escolha outros caminhos.`)
     }
   }
   return erros
@@ -439,6 +519,13 @@ function simularNucleo(i: InputsCarro, leve = false): ResultadoCarro {
   const necessarioAvista = V + emplacV
   const avistaOk = C >= necessarioAvista - 0.005
 
+  // Caminhos da comparação (D69). Sem escolha, valem os quatro de antes da locação; à vista só concorre se o dinheiro cobre o
+  // veículo e o emplacamento, sem inventar dinheiro. A ordem é fixa, para o desempate do ranking não mudar.
+  const ordemMotor: ChaveCarro[] = ['financiamento', 'semCarro', 'consorcio', 'avista', 'locacao']
+  const escolhidosBrutos = i.caminhos == null ? CAMINHOS_ANTES_DA_LOCACAO : i.caminhos
+  const caminhosEscolhidos = ordemMotor.filter((c) => escolhidosBrutos.includes(c))
+  const rotas: ChaveCarro[] = caminhosEscolhidos.filter((c) => c !== 'avista' || avistaOk)
+
   // Custos de dono do mês `t` (calendário) para um carro comprado por `p0` no mês `m0`.
   const custosDonoMes = (p0: number, m0: number, t: number): CustosDono => {
     const idade = t - m0
@@ -480,13 +567,24 @@ function simularNucleo(i: InputsCarro, leve = false): ResultadoCarro {
   const fSem = new Fundo(C)
   const fCon = new Fundo(C)
   const fAv = new Fundo(C - necessarioAvista)
+  // Locação: a caução e a taxa de entrada saem do dinheiro no mês 0; a caução volta no fim (fora do fundo, sem rendimento).
+  const caucao = i.locacaoCaucao
+  const taxaEntradaLoc = i.locacaoTaxaEntrada
+  const fLoc = new Fundo(C - caucao - taxaEntradaLoc)
+  const compraLoc = i.locacaoComprarNoFim
   let saldoFin = financiado
   let juros = 0
   let amortPaga = 0
   let parcelasPagasFin = 0
   let somaOrcamento = 0
   let orc1 = { valor: 0, definidoPor: 'financiamento' as ChaveCarro }
-  let gasto1: Record<ChaveCarro, number> = { financiamento: 0, semCarro: 0, consorcio: 0, avista: 0 }
+  let gasto1: Record<ChaveCarro, number> = { financiamento: 0, semCarro: 0, consorcio: 0, avista: 0, locacao: 0 }
+  let pagoLoc = 0
+  let mensalidadesLoc = 0
+  let excedenteLoc = 0
+  let usoLoc = 0
+  let mensalidadeFinalLoc = i.locacaoMensal
+  let emplacLocFim = 0
   let mobilidadeFinal = i.mobilidadeMensal
   let parcelaFinalCon = 0
   let donoFin = zeroDono()
@@ -520,12 +618,14 @@ function simularNucleo(i: InputsCarro, leve = false): ResultadoCarro {
     // Antes da contemplação não há carro nem dívida na série: as parcelas pagas são custo.
     const con = mes >= M ? carroConEm(mes) - saldoCon + fCon.liquido(aliqIr) : fCon.liquido(aliqIr)
     const av = carroFinEm(mes) + fAv.liquido(aliqIr)
-    return { fin, sem, con, av }
+    // Locação: o fundo, a caução (um ativo que volta) e, depois da compra no fim, o veículo a preço de mercado.
+    const loc = fLoc.liquido(aliqIr) + caucao + (compraLoc && mes >= n ? carroFinEm(mes) : 0)
+    return { fin, sem, con, av, loc }
   }
 
   if (!leve) {
     const p0 = patrimonios(0)
-    serie.push({ mes: 0, financiamento: arred(p0.fin), semCarro: arred(p0.sem), consorcio: arred(p0.con), avista: arred(p0.av) })
+    serie.push({ mes: 0, financiamento: arred(p0.fin), semCarro: arred(p0.sem), consorcio: arred(p0.con), avista: arred(p0.av), locacao: arred(p0.loc) })
   }
 
   for (let t = 1; t <= n; t++) {
@@ -571,12 +671,25 @@ function simularNucleo(i: InputsCarro, leve = false): ResultadoCarro {
     // — Sem carro: a mobilidade informada —
     const outSem = mobilidade
 
-    // — Orçamento de referência: o maior desembolso entre os caminhos —
-    const ref = Math.max(outFin, outSem, outCon, outAv)
+    // — Locação: mensalidade (com IPVA, seguro e manutenção), quilômetro excedente e o uso, que é por conta de quem aluga —
+    const fatorLoc = degrau(i.locacaoReajusteAA, t)
+    const mensalidade = i.locacaoMensal * fatorLoc
+    const excedente = Math.max(0, i.locacaoKmRodado - i.locacaoKmIncluido) * i.locacaoKmExcedente * fatorLoc
+    const usoMes = i.usoMensal * degrau(i.inflacaoAA, t)
+    const outLoc = mensalidade + excedente + usoMes
+    mensalidadesLoc += mensalidade
+    excedenteLoc += excedente
+    usoLoc += usoMes
+    mensalidadeFinalLoc = mensalidade
+
+    // — Orçamento de referência: o maior desembolso entre os caminhos que estão sendo comparados —
+    const saida: Record<ChaveCarro, number> = { financiamento: outFin, semCarro: outSem, consorcio: outCon, avista: outAv, locacao: outLoc }
+    const ref = Math.max(...rotas.map((c) => saida[c]))
     somaOrcamento += ref
     if (t === 1) {
-      gasto1 = { financiamento: outFin, semCarro: outSem, consorcio: outCon, avista: outAv }
-      orc1 = { valor: ref, definidoPor: ref === outFin ? 'financiamento' : ref === outCon ? 'consorcio' : ref === outAv ? 'avista' : 'semCarro' }
+      gasto1 = { ...saida }
+      const quem = (['financiamento', 'consorcio', 'avista', 'locacao', 'semCarro'] as ChaveCarro[]).find((c) => rotas.includes(c) && saida[c] === ref)
+      orc1 = { valor: ref, definidoPor: quem ?? 'semCarro' }
     }
     if ((t - 1) % 12 === 0) orcamentoRef.push(arred(ref))
 
@@ -584,15 +697,24 @@ function simularNucleo(i: InputsCarro, leve = false): ResultadoCarro {
     pagoSem += outSem
     pagoCon += outCon
     pagoAv += outAv
+    pagoLoc += outLoc
 
     fFin.render(rm)
     fSem.render(rm)
     fCon.render(rm)
     fAv.render(rm)
+    fLoc.render(rm)
     fFin.aportar(ref - outFin)
     fSem.aportar(ref - outSem)
     fCon.aportar(ref - outCon)
     fAv.aportar(ref - outAv)
+    fLoc.aportar(ref - outLoc)
+
+    // — Locação, compra no fim: no último mês paga o valor do contrato e a transferência —
+    if (compraLoc && t === n) {
+      emplacLocFim = emplac(carroFinEm(n))
+      fLoc.retirar(i.locacaoValorCompra + emplacLocFim)
+    }
 
     // — Contemplação (fim do mês M) —
     if (t === M) {
@@ -616,7 +738,7 @@ function simularNucleo(i: InputsCarro, leve = false): ResultadoCarro {
 
     if (!leve) {
       const p = patrimonios(t)
-      serie.push({ mes: t, financiamento: arred(p.fin), semCarro: arred(p.sem), consorcio: arred(p.con), avista: arred(p.av) })
+      serie.push({ mes: t, financiamento: arred(p.fin), semCarro: arred(p.sem), consorcio: arred(p.con), avista: arred(p.av), locacao: arred(p.loc) })
     }
   }
 
@@ -624,6 +746,9 @@ function simularNucleo(i: InputsCarro, leve = false): ResultadoCarro {
     avisos.push(`No consórcio, o capital inicial não cobriu o lance, o emplacamento e a diferença entre a carta e o preço ${T.do} na contemplação. O resultado trata esse buraco como dinheiro tomado ao mesmo custo do rendimento: na prática, seria preciso mais capital.`)
   }
   if (fFin.saldo < 0 || fSem.saldo < 0) avisos.push('O capital inicial e os aportes não bastaram em algum cenário; confira os valores informados.')
+  if (rotas.includes('locacao') && fLoc.saldo < 0) {
+    avisos.push(`Na locação, o dinheiro aplicado não cobriu a caução, a taxa de entrada${compraLoc ? ' e a compra no fim' : ''}: o resultado trata esse buraco como dinheiro tomado ao mesmo custo do rendimento. Na prática, seria preciso mais capital.`)
+  }
   if (n > prazoFin) avisos.push('O horizonte é maior que o prazo do financiamento: depois de quitado, a pessoa deixa de pagar parcela e passa a investir essa folga.')
   if (n > 8) avisos.push(`Em horizontes longos ${T.ficaVelho}: a curva de depreciação, a manutenção e a necessidade de ${T.trocar} pesam mais, e esta conta não troca ${T.n === 'carro' ? 'o carro' : 'a moto'} no meio do caminho.`)
 
@@ -640,11 +765,12 @@ function simularNucleo(i: InputsCarro, leve = false): ResultadoCarro {
   const avCom = avSem - desagio(carroFim)
   const conCom = conSem - (carroConFim > 0 ? desagio(carroConFim) : 0)
   const semCom = semSem
+  const locSem = fLoc.liquido(aliqIr) + caucao + (compraLoc ? carroFim : 0)
+  const locCom = locSem - (compraLoc ? desagio(carroFim) : 0)
   const base: Record<ChaveCarro, number> = i.descontarCustosVenda
-    ? { financiamento: finCom, semCarro: semCom, consorcio: conCom, avista: avCom }
-    : { financiamento: finSem, semCarro: semSem, consorcio: conSem, avista: avSem }
+    ? { financiamento: finCom, semCarro: semCom, consorcio: conCom, avista: avCom, locacao: locCom }
+    : { financiamento: finSem, semCarro: semSem, consorcio: conSem, avista: avSem, locacao: locSem }
 
-  const rotas: ChaveCarro[] = avistaOk ? ['financiamento', 'semCarro', 'consorcio', 'avista'] : ['financiamento', 'semCarro', 'consorcio']
   const ranking = [...rotas].sort((a, b) => base[b] - base[a])
   const [primeiro, segundo] = ranking
 
@@ -660,6 +786,7 @@ function simularNucleo(i: InputsCarro, leve = false): ResultadoCarro {
   const custoAv = emplacV + donoAv.total
   const custoSem = pagoSem
   const custoCon = taxasConsorcio + mobilidadePagaCon + (M <= n ? emplacCon : 0) + donoCon.total + reajusteParcelas
+  const custoLoc = taxaEntradaLoc + pagoLoc + emplacLocFim
 
   const deprecFin = V - carroFim
   const deprecCon = carroConFim > 0 ? PM - carroConFim : 0
@@ -668,6 +795,7 @@ function simularNucleo(i: InputsCarro, leve = false): ResultadoCarro {
     avista: vendaDe(avSem, avCom),
     consorcio: vendaDe(conSem, conCom),
     semCarro: 0,
+    locacao: compraLoc ? vendaDe(locSem, locCom) : 0,
   }
 
   const montarCenario = (chave: ChaveCarro, dados: Omit<DetalheCenarioCarro, 'custoBruto' | 'custoBrutoMensal' | 'custoLiquido' | 'custoLiquidoMensal' | 'patrimonioFinal' | 'patrimonioFinalHoje'>): DetalheCenarioCarro => {
@@ -712,6 +840,15 @@ function simularNucleo(i: InputsCarro, leve = false): ResultadoCarro {
       custoDescricao: `todo o gasto mensal de mobilidade sem ${T.n} (assinatura, locação ou aplicativo)`,
       depreciacao: 0,
     }),
+    locacao: montarCenario('locacao', {
+      carro: compraLoc ? arred(carroFim) : 0,
+      saldoDevedor: 0,
+      fundoLiquido: arred(fLoc.liquido(aliqIr)),
+      totalPagoDeBolso: arred(taxaEntradaLoc + pagoLoc + (compraLoc ? i.locacaoValorCompra + emplacLocFim : 0)),
+      custoTotal: arred(custoLoc),
+      custoDescricao: `mensalidades (que já incluem IPVA, seguro e manutenção), quilômetro excedente, ${T.n === 'carro' ? 'combustível e demais gastos de uso' : 'combustível e demais gastos de uso'}, taxa de entrada${compraLoc ? ' e transferência na compra' : ''}`,
+      depreciacao: compraLoc ? arred(i.locacaoValorCompra - carroFim) : 0,
+    }),
     consorcio: montarCenario('consorcio', {
       carro: arred(carroConFim),
       saldoDevedor: arred(saldoCon),
@@ -739,6 +876,7 @@ function simularNucleo(i: InputsCarro, leve = false): ResultadoCarro {
     semCarro: resumoFundo(fSem, C, 'semCarro'),
     consorcio: resumoFundo(fCon, C, 'consorcio'),
     avista: resumoFundo(fAv, C - necessarioAvista, 'avista'),
+    locacao: resumoFundo(fLoc, C - caucao - taxaEntradaLoc, 'locacao'),
   }
   const montarConta = (chave: ChaveCarro, valorizacao: number): ContabilidadeCarro => {
     const inv = investimentos[chave]
@@ -761,20 +899,22 @@ function simularNucleo(i: InputsCarro, leve = false): ResultadoCarro {
     semCarro: montarConta('semCarro', 0),
     consorcio: montarConta('consorcio', carroConFim > 0 ? carroConFim - PM : 0),
     avista: montarConta('avista', carroFim - V),
+    locacao: montarConta('locacao', compraLoc ? carroFim - i.locacaoValorCompra : 0),
   }
   const emplacConPago = M <= n ? emplacCon : 0
   const adm = fracAdm > 0 ? i.taxaAdmTotalPct / (i.taxaAdmTotalPct + i.fundoReservaPct) : 0
 
   return {
     rotas,
+    caminhosEscolhidos,
     avista: { disponivel: avistaOk, necessario: arred(necessarioAvista), falta: arred(Math.max(0, necessarioAvista - C)) },
     vencedor: primeiro,
     nomeVencedor: nomes[primeiro],
     vantagemSobreSegundo: arred(base[primeiro] - base[segundo]),
     ranking,
     cenarios,
-    patrimonioSemCustosVenda: { financiamento: arred(finSem), semCarro: arred(semSem), consorcio: arred(conSem), avista: arred(avSem) },
-    patrimonioComCustosVenda: { financiamento: arred(finCom), semCarro: arred(semCom), consorcio: arred(conCom), avista: arred(avCom) },
+    patrimonioSemCustosVenda: { financiamento: arred(finSem), semCarro: arred(semSem), consorcio: arred(conSem), avista: arred(avSem), locacao: arred(locSem) },
+    patrimonioComCustosVenda: { financiamento: arred(finCom), semCarro: arred(semCom), consorcio: arred(conCom), avista: arred(avCom), locacao: arred(locCom) },
     serieMensal: serie,
     financiamento: {
       financiado: arred(financiado),
@@ -800,6 +940,16 @@ function simularNucleo(i: InputsCarro, leve = false): ResultadoCarro {
       },
       avista: { valorPago: arred(V), emplacamento: arred(emplacV), custosDono: arredDono(donoAv) },
       semCarro: { mobilidadeInicial: arred(i.mobilidadeMensal), mobilidadeFinal: arred(mobilidadeFinal), mobilidadePaga: arred(pagoSem) },
+      locacao: {
+        mensalidadeInicial: arred(i.locacaoMensal),
+        mensalidadeFinal: arred(mensalidadeFinalLoc),
+        mensalidadesPagas: arred(mensalidadesLoc),
+        kmExcedentePago: arred(excedenteLoc),
+        usoPago: arred(usoLoc),
+        taxaEntrada: arred(taxaEntradaLoc),
+        caucao: arred(caucao),
+        compra: { feita: compraLoc, valorCompra: compraLoc ? arred(i.locacaoValorCompra) : 0, transferencia: arred(emplacLocFim), valorDeMercado: compraLoc ? arred(carroFim) : 0 },
+      },
       consorcio: {
         parcelaInicial: arred(parcelaBase),
         parcelaFinal: arred(parcelaFinalCon),
@@ -850,21 +1000,32 @@ function raiz(f: (x: number) => number, a: number, b: number): number | null {
  */
 export function pontoDeViradaCarro(i: InputsCarro): PontoDeViradaCarro {
   const intervalo: [number, number] = [0, 15_000]
-  const dif = (qual: 'financiamento' | 'consorcio' | 'avista') => (mob: number) => {
-    const r = simularNucleo({ ...i, mobilidadeMensal: mob, descontarCustosVenda: false }, true)
-    return r.patrimonioSemCustosVenda[qual] - r.patrimonioSemCustosVenda.semCarro
+  const rotas = simularNucleo(i, true).rotas
+  const temSem = rotas.includes('semCarro')
+  const temLoc = rotas.includes('locacao')
+  type Dono = 'financiamento' | 'consorcio' | 'avista'
+  // Contra "sem o bem" a variável é o gasto mensal sem ele; contra a locação, a mensalidade da locação.
+  const dif = (qual: Dono, contra: 'semCarro' | 'locacao') => (valor: number) => {
+    const campo = contra === 'semCarro' ? { mobilidadeMensal: valor } : { locacaoMensal: valor }
+    const r = simularNucleo({ ...i, ...campo, descontarCustosVenda: false }, true)
+    return r.patrimonioSemCustosVenda[qual] - r.patrimonioSemCustosVenda[contra]
   }
-  const avistaPossivel = simularNucleo(i, true).avista.disponivel
+  const ponto = (qual: Dono, contra: 'semCarro' | 'locacao'): number | null => {
+    if (!rotas.includes(qual)) return null
+    return raiz(dif(qual, contra), intervalo[0], intervalo[1])
+  }
   return {
-    avista: avistaPossivel ? raiz(dif('avista'), intervalo[0], intervalo[1]) : null,
-    financiamento: raiz(dif('financiamento'), intervalo[0], intervalo[1]),
-    consorcio: raiz(dif('consorcio'), intervalo[0], intervalo[1]),
+    avista: temSem ? ponto('avista', 'semCarro') : null,
+    financiamento: temSem ? ponto('financiamento', 'semCarro') : null,
+    consorcio: temSem ? ponto('consorcio', 'semCarro') : null,
+    ...(temLoc ? { contraLocacao: { avista: ponto('avista', 'locacao'), financiamento: ponto('financiamento', 'locacao'), consorcio: ponto('consorcio', 'locacao') } } : {}),
     intervalo,
   }
 }
 
 /** A data da contemplação é a maior incerteza do consórcio: mostra o resultado em meses típicos. */
 export function sensibilidadeContemplacaoCarro(i: InputsCarro) {
+  if (!simularNucleo(i, true).rotas.includes('consorcio')) return []
   const limite = Math.min(i.prazoConsorcioMeses, Math.round(i.horizonteAnos * 12))
   const meses = [6, 12, 24, 36, 48, 60].filter((m) => m <= limite)
   return meses.map((mes) => {
@@ -909,6 +1070,7 @@ export function inputsCarroDoSnapshot(snapshot: SnapshotMercado): Partial<Inputs
   if (ipca != null) {
     saida.inflacaoAA = r2(ipca)
     saida.reajusteConsorcioAA = r2(ipca)
+    saida.locacaoReajusteAA = r2(ipca)
   }
   return saida
 }

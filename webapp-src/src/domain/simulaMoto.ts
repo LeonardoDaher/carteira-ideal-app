@@ -1,4 +1,4 @@
-// Comparativo de MOTO (D48): comprar à vista, financiar, consórcio ou ficar sem moto.
+// Comparativo de MOTO (D48, D69): comprar à vista, financiar, consórcio, alugar (locação) ou ficar sem moto.
 //
 // Não há motor novo. A moto REAPROVEITA o motor do carro (`simulaCarro.ts`): é o mesmo bem que perde valor, com a mesma regra do mesmo
 // dinheiro, a mesma contabilidade que fecha, as mesmas quatro rotas e as duas leituras lado a lado (custo e patrimônio). O que muda são
@@ -41,6 +41,13 @@ const BASE_MOTO: Partial<InputsCarro> = {
   prazoConsorcioMeses: 60,
   mesContemplacao: 12,
   mobilidadeMensal: 600,
+  // Locação de moto (D69): mensalidade com IPVA, seguro e manutenção; valores nossos e editáveis.
+  locacaoMensal: 900,
+  locacaoCaucao: 900,
+  locacaoKmIncluido: 1_500,
+  locacaoKmRodado: 800,
+  locacaoKmExcedente: 0.4,
+  locacaoValorCompra: 10_000,
 }
 
 /** Entradas padrão da moto: o motor do carro com os valores de partida da moto. Qualquer campo de `parcial` prevalece. */

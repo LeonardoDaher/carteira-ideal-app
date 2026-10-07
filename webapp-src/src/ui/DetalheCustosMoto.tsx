@@ -8,7 +8,7 @@ const NOMES = nomesRotas('moto')
 const pct = (v: number) => porcentagem(v, 0, 3)
 const anosTexto = (n: number) => `${n} ${n === 1 ? 'ano' : 'anos'}`
 const sinalReais = (v: number) => `${v >= 0 ? '+' : '−'} ${reais0(Math.abs(v))}`
-const contagem = (r: ResultadoCarro) => (r.rotas.length === 4 ? 'quatro' : 'três')
+const contagem = (r: ResultadoCarro) => ({ 2: 'dois', 3: 'três', 4: 'quatro', 5: 'cinco' })[r.rotas.length] ?? String(r.rotas.length)
 const soEntradaEAquisicao = (r: ResultadoCarro) =>
   Math.abs(r.capitalInicial - (r.detalhe.financiamento.entrada + r.detalhe.financiamento.emplacamento + r.detalhe.financiamento.iof + r.detalhe.financiamento.gravame)) < 0.01
 
@@ -44,7 +44,11 @@ function Fechamento({ r, chave }: { r: ResultadoCarro; chave: ChaveCarro }) {
     ['Dinheiro que você colocou (capital inicial + orçamento mensal)', reais0(c.totalColocado)],
     ['Custos que não voltam', `− ${reais0(c.custos)}`],
   ]
-  if (c.valorizacaoCarro) linhas.push(['Perda de valor da moto (depreciação)', `− ${reais0(Math.abs(c.valorizacaoCarro))}`])
+  if (c.valorizacaoCarro && chave === 'locacao') {
+    linhas.push(['Valor de mercado menos o preço da compra', `${c.valorizacaoCarro >= 0 ? '+' : '−'} ${reais0(Math.abs(c.valorizacaoCarro))}`])
+  } else if (c.valorizacaoCarro) {
+    linhas.push(['Perda de valor da moto moto (depreciação)', `− ${reais0(Math.abs(c.valorizacaoCarro))}`])
+  }
   linhas.push(['Rendimento dos investimentos', `+ ${reais0(c.rendimentoBruto)}`])
   linhas.push(['Imposto de Renda sobre o rendimento', `− ${reais0(c.irSobreRendimento)}`])
   if (c.custosDeVenda) linhas.push(['Deságio na revenda da moto', `− ${reais0(c.custosDeVenda)}`])
@@ -66,6 +70,7 @@ const QUEM_DEFINE: Record<ChaveCarro, string> = {
   semCarro: 'pelo gasto de mobilidade sem moto',
   consorcio: 'pelo consórcio, que paga parcela e a mobilidade sem moto ao mesmo tempo até a contemplação',
   avista: 'pela compra à vista',
+  locacao: 'pela locação (mensalidade, quilômetro excedente e uso)',
 }
 
 function Investimentos({ r, chave, quem, entrada }: { r: ResultadoCarro; chave: ChaveCarro; quem: string; entrada: InputsCarro }) {
@@ -78,7 +83,9 @@ function Investimentos({ r, chave, quem, entrada }: { r: ResultadoCarro; chave: 
       <Secao titulo="Investimentos" subtitulo={quem} />
       {v.capitalInicial > 0 && (
         <Item rotulo="Capital inicial aplicado" valor={v.capitalInicial} tipo="neutro">
-          {chave === 'avista' ? (
+          {chave === 'locacao' ? (
+            <>Sobra do seu dinheiro depois de pagar a caução ({reais0(entrada.locacaoCaucao)}) e a taxa de entrada ({reais0(entrada.locacaoTaxaEntrada)}): fica aplicada desde o primeiro dia.</>
+          ) : chave === 'avista' ? (
             <>Sobra do seu dinheiro depois de pagar a moto ({reais0(entrada.valorCarro)}) e o emplacamento ({reais0(f.emplacamento)}): fica aplicada desde o primeiro dia.</>
           ) : chave === 'financiamento' ? (
             <>Sobra do seu dinheiro depois de pagar a entrada ({reais0(entrada.entrada)}), o emplacamento, o IOF e o gravame ({reais0(f.emplacamento + f.iof + f.gravame)}): fica aplicada desde o primeiro dia.</>
@@ -103,7 +110,7 @@ function Investimentos({ r, chave, quem, entrada }: { r: ResultadoCarro; chave: 
       </Item>
       <Item rotulo="Total aplicado" valor={v.aportado} tipo="neutro">
         Capital inicial + aportes mensais.
-        {v.retirado ? ` Já saíram do investimento ${reais0(v.retirado)} (lance, emplacamento e complemento da carta).` : ''}
+        {v.retirado ? (chave === 'locacao' ? ` Já saíram do investimento ${reais0(v.retirado)} (valor da compra e transferência).` : ` Já saíram do investimento ${reais0(v.retirado)} (lance, emplacamento e complemento da carta).`) : ''}
       </Item>
       <Item rotulo="Rendimento bruto" valor={v.rendimentoBruto} tipo="patrimonio">
         O que o dinheiro aplicado rendeu na taxa que você informou, com juros sobre juros mês a mês.
@@ -218,12 +225,12 @@ export function ComoLerMoto({ r, entrada }: { r: ResultadoCarro; entrada: Inputs
 export function ParaOndeFoiMoto({ r, compacto: compactoBruto }: { r: ResultadoCarro; compacto: (v: number) => string }) {
   const compacto = (v: number) => compactoBruto(v).replace(/R\$\s?/, '')
   const chaves = r.rotas
-  const nomes: Record<ChaveCarro, string> = { financiamento: 'Financiar', semCarro: 'Sem moto', consorcio: 'Consórcio', avista: 'À vista' }
+  const nomes: Record<ChaveCarro, string> = { financiamento: 'Financiar', semCarro: 'Sem moto', consorcio: 'Consórcio', avista: 'À vista', locacao: 'Locação' }
   const c = r.detalhe.contabilidade
   const linhas: [string, (k: ChaveCarro) => string, boolean?][] = [
     ['Dinheiro colocado', (k) => compacto(c[k].totalColocado)],
     ['(−) Custos', (k) => compacto(c[k].custos)],
-    ['(−) Depreciação', (k) => (c[k].valorizacaoCarro ? compacto(Math.abs(c[k].valorizacaoCarro)) : '—')],
+    ['(−) Depreciação', (k) => (c[k].valorizacaoCarro ? (c[k].valorizacaoCarro < 0 ? compacto(Math.abs(c[k].valorizacaoCarro)) : `+${compacto(c[k].valorizacaoCarro)}`) : '—')],
     ['(+) Rendimento', (k) => compacto(c[k].rendimentoBruto)],
     ['(−) IR', (k) => compacto(c[k].irSobreRendimento)],
   ]
@@ -393,6 +400,75 @@ export function BlocoConsorcioMoto({ r, entrada }: { r: ResultadoCarro; entrada:
   )
 }
 
+export function BlocoLocacaoMoto({ r, entrada }: { r: ResultadoCarro; entrada: InputsCarro }) {
+  const d = r.detalhe.locacao
+  const c = r.cenarios.locacao
+  const kmExcedente = Math.max(0, entrada.locacaoKmRodado - entrada.locacaoKmIncluido)
+  return (
+    <details className="card-outline" open>
+      <summary style={{ fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>Locação: cada custo e cada taxa</summary>
+      <div className="col" style={{ gap: 4, marginTop: 10 }}>
+        <span className="small justify" style={{ lineHeight: 1.5 }}>
+          Você aluga a moto de uma locadora e paga uma mensalidade que já inclui IPVA, seguro e manutenção. O uso (combustível, estacionamento, pedágio) e o quilômetro que passar do limite ficam por sua conta.
+          O contrato vale por todo o período simulado ({anosTexto(entrada.horizonteAnos)}), renovado nas mesmas condições e reajustado uma vez por ano.{' '}
+          {d.compra.feita
+            ? `No último mês você compra a moto pelo valor combinado em contrato (${reais0(d.compra.valorCompra)}) e fica com a moto.`
+            : 'No fim você devolve o veículo e não fica com ele: não há patrimônio em veículo, só em investimentos.'}
+        </span>
+
+        <Secao titulo="Custos (dinheiro que não volta)" subtitulo={`Total: ${reais0(c.custoTotal)}`} />
+        <Item rotulo="Mensalidades" valor={d.mensalidadesPagas} tipo="custo">
+          Começa em {reais(d.mensalidadeInicial)} por mês e, reajustada {pct(entrada.locacaoReajusteAA)} ao ano, chega a {reais(d.mensalidadeFinal)}. Já inclui IPVA, seguro e manutenção, que quem aluga não paga à parte. Confira no
+          seu contrato o que a mensalidade realmente cobre (pneus, troca de óleo, veículo reserva) e o prazo mínimo.
+        </Item>
+        <Item rotulo="Quilômetro excedente" valor={d.kmExcedentePago} tipo="custo">
+          {kmExcedente > 0
+            ? `Você roda ${entrada.locacaoKmRodado.toLocaleString('pt-BR')} km por mês e o contrato inclui ${entrada.locacaoKmIncluido.toLocaleString('pt-BR')}: sobram ${kmExcedente.toLocaleString('pt-BR')} km por mês a ${reais(entrada.locacaoKmExcedente)} o quilômetro, reajustados junto com a mensalidade.`
+            : `Você roda ${entrada.locacaoKmRodado.toLocaleString('pt-BR')} km por mês e o contrato inclui ${entrada.locacaoKmIncluido.toLocaleString('pt-BR')}: dentro do limite, não há cobrança. Se rodar mais, cada quilômetro passa a custar ${reais(entrada.locacaoKmExcedente)}.`}
+        </Item>
+        <Item rotulo="Uso (combustível, estacionamento, pedágio)" valor={d.usoPago} tipo="custo">
+          {reais(entrada.usoMensal)} por mês de hoje, reajustados pela inflação. A locação não inclui o que você gasta para rodar, igual a quem tem a moto.
+        </Item>
+        {d.taxaEntrada > 0 && (
+          <Item rotulo="Taxa de entrada" valor={d.taxaEntrada} tipo="custo">Paga no início e não devolvida (adesão, vistoria, documentação).</Item>
+        )}
+        {d.compra.feita && (
+          <Item rotulo="Transferência na compra" valor={d.compra.transferencia} tipo="custo">
+            Documentação para passar a moto para o seu nome, no último mês: {pct(entrada.emplacamentoPct)} do valor de mercado.
+          </Item>
+        )}
+
+        <Secao titulo="Dinheiro que não é custo" subtitulo="Sai do seu bolso, mas volta ou vira patrimônio" />
+        {d.caucao > 0 && (
+          <Item rotulo="Caução" valor={d.caucao} tipo="neutro">
+            Paga no início e devolvida no fim do contrato, sem rendimento. Não é custo, mas é dinheiro parado: o que ele deixaria de render aparece no rendimento dos investimentos.
+          </Item>
+        )}
+        {d.compra.feita && (
+          <Item rotulo="Compra no fim do contrato" valor={d.compra.valorCompra} tipo="neutro">
+            Você paga {reais0(d.compra.valorCompra)} e a moto vale {reais0(d.compra.valorDeMercado)} no mercado nesse mês (o mesmo que valeria um veículo de igual idade comprado no primeiro dia).
+            {d.compra.valorDeMercado >= d.compra.valorCompra ? ' Pagar menos do que vale é um ganho de patrimônio.' : ' Pagar mais do que vale é uma perda de patrimônio: compare com o preço de um veículo igual no mercado antes de assinar.'}
+          </Item>
+        )}
+
+        <Investimentos r={r} entrada={entrada} chave="locacao" quem="Sobra do dinheiro depois da caução e da taxa de entrada e, todo mês, a diferença entre o orçamento de referência e o que a locação custa" />
+
+        <Secao titulo="O que sobra no fim" subtitulo="" />
+        <div className="tabela-simulacao">
+          {d.compra.feita && <div className="linha-simulacao"><span>Veículo a valor de mercado</span><span>{reais0(c.carro)}</span></div>}
+          {d.caucao > 0 && <div className="linha-simulacao"><span>Caução devolvida</span><span>+ {reais0(d.caucao)}</span></div>}
+          <div className="linha-simulacao"><span>Investimentos (líquidos de IR)</span><span>+ {reais0(c.fundoLiquido)}</span></div>
+        </div>
+        <Fechamento r={r} chave="locacao" />
+        <div className="tiny muted justify" style={{ lineHeight: 1.5, marginTop: 4 }}>
+          Aqui você não tem a perda de valor da moto, mas depende de o reajuste do contrato ficar perto do que você informou e de rodar dentro do limite. Esta conta não considera multa por devolução antecipada, avarias,
+          franquia de seguro nem a disponibilidade de um veículo igual no fim do contrato.
+        </div>
+      </div>
+    </details>
+  )
+}
+
 export function BlocoSemMoto({ r, entrada }: { r: ResultadoCarro; entrada: InputsCarro }) {
   const d = r.detalhe.semCarro
   return (
@@ -468,6 +544,15 @@ export function PremissasMoto({ i }: { i: InputsCarro }) {
         ['Reajuste da carta e das parcelas', `${pct(i.reajusteConsorcioAA)} ao ano`],
         ['Contemplação', `no ${i.mesContemplacao}º mês`],
         ['Lance', i.lance > 0 ? `${reais0(i.lance)}, abate ${i.regraLance === 'prazo' ? 'o prazo' : 'a parcela'}` : 'sem lance'],
+      ],
+    ],
+    [
+      'Locação',
+      [
+        ['Mensalidade', `${reais(i.locacaoMensal)} por mês de hoje (inclui IPVA, seguro e manutenção), reajustada ${pct(i.locacaoReajusteAA)} ao ano`],
+        ['Caução e taxa de entrada', `${reais0(i.locacaoCaucao)} (devolvida no fim) e ${reais0(i.locacaoTaxaEntrada)} (não devolvida)`],
+        ['Quilometragem', `${i.locacaoKmRodado.toLocaleString('pt-BR')} km por mês, ${i.locacaoKmIncluido.toLocaleString('pt-BR')} incluídos; excedente a ${reais(i.locacaoKmExcedente)} por km`],
+        ['Compra no fim', i.locacaoComprarNoFim ? `sim, por ${reais0(i.locacaoValorCompra)}` : 'não'],
       ],
     ],
     [

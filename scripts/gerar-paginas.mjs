@@ -25,9 +25,8 @@ export const DOMINIO = 'https://carteiraideal.app.br'
 export const REVISADO_EM = '2026-09-28'
 /** Páginas criadas ou reescritas na D44 (comparativo de imóvel): data própria, sem fingir que as demais foram revisadas. */
 const REVISADO_D44 = '2026-10-03'
-const REVISADO_D47 = '2026-10-03'
-const REVISADO_D48 = '2026-10-03'
 const REVISADO_D67 = '2026-10-07'
+const REVISADO_D69 = '2026-10-07'
 
 const AVISO = 'Conteúdo educacional. Não é recomendação de investimento.'
 
@@ -202,8 +201,8 @@ const LINKS_RODAPE = [
   ['Simulador de BDR', '/simulador-bdr/'],
   ['Simulador de ETF', '/simulador-etf/'],
   ['Comprar à vista, financiar, consórcio ou alugar', '/financiar-alugar-ou-consorcio/'],
-  ['Carro: à vista, financiar, consórcio ou sem carro', '/carro-a-vista-financiar-consorcio-ou-sem-carro/'],
-  ['Moto: à vista, financiar, consórcio ou sem moto', '/moto-a-vista-financiar-consorcio-ou-sem-moto/'],
+  ['Carro: à vista, financiar, consórcio, alugar ou sem carro', '/carro-a-vista-financiar-consorcio-ou-sem-carro/'],
+  ['Moto: à vista, financiar, consórcio, alugar ou sem moto', '/moto-a-vista-financiar-consorcio-ou-sem-moto/'],
   ['Meus Ativos', '/minha-carteira/'],
   ['Meu Mês', '/meu-mes/'],
   ['Aprender', '/aprender/'],
@@ -678,19 +677,19 @@ function paginaMeuMes(hubDividas) {
 function paginaCarro() {
   return {
     caminho: '/carro-a-vista-financiar-consorcio-ou-sem-carro/',
-    titulo: 'Carro: à vista, financiar, consórcio ou ficar sem carro',
-    descricao: 'Compare comprar um carro à vista, financiar, consórcio ou ficar sem carro e veja o custo de cada caminho e o patrimônio final, com cada custo explicado. Grátis.',
-    h1: 'Carro: comprar à vista, financiar, consórcio ou ficar sem carro?',
+    titulo: 'Carro: à vista, financiar, consórcio, alugar ou sem carro',
+    descricao: 'Compare comprar um carro à vista, financiar, consórcio, alugar ou ficar sem carro: custo de cada caminho e patrimônio final, com cada custo explicado. Grátis.',
+    h1: 'Carro: comprar à vista, financiar, consórcio, alugar ou ficar sem carro?',
     lead: 'Carro perde valor. Por isso, comparar só o patrimônio final não basta: a ferramenta mostra quanto cada caminho custa por mês e qual termina com o maior patrimônio, com o mesmo dinheiro em todos e cada custo e cada taxa explicados.',
     botoes: [{ texto: 'Abrir o comparativo de carro', href: '/app/?tela=simuleCarro' }],
     migalhas: [],
     schema: 'WebPage',
-    lastmod: REVISADO_D47,
+    lastmod: REVISADO_D69,
     corpo: [
       secao(
         'O que a ferramenta calcula',
         `<ul>
-<li><strong>O custo de mobilidade</strong> de cada caminho (comprar à vista, financiar, consórcio e ficar sem carro), no total e por mês: o custo líquido, que já desconta o que o seu dinheiro rendeu, e o custo bruto, que soma o que saiu do bolso sem voltar e a perda de valor do carro.</li>
+<li><strong>O custo de mobilidade</strong> de cada caminho (comprar à vista, financiar, consórcio, alugar e ficar sem carro), no total e por mês: o custo líquido, que já desconta o que o seu dinheiro rendeu, e o custo bruto, que soma o que saiu do bolso sem voltar e a perda de valor do carro.</li>
 <li><strong>O patrimônio líquido final</strong> de cada caminho: o carro a valor de mercado, mais os investimentos já descontado o Imposto de Renda, menos a dívida que ainda resta. É a mesma conta vista do outro lado: quem tem o menor custo tem o maior patrimônio.</li>
 <li><strong>Todos os custos e taxas</strong> de cada caminho, um por um: IPVA, seguro, manutenção, uso, emplacamento, IOF, gravame, juros, taxa de administração e fundo de reserva.</li>
 <li><strong>A evolução mês a mês</strong> do patrimônio de cada caminho, em gráfico.</li>
@@ -707,7 +706,7 @@ function paginaCarro() {
       secao(
         'Por que o carro pede outra conta',
         `<p>Um imóvel costuma valorizar; um carro perde valor todo ano, mais forte no primeiro. Essa perda é o maior custo de ter um carro e o único que não aparece em nenhum boleto. A ferramenta a trata como uma curva de depreciação em dois trechos, a taxa do primeiro ano e a dos anos seguintes, e a mostra como linha própria em cada caminho.</p>
-<p>Também não existe um equivalente simples de "alugar". O terceiro caminho é ficar sem carro e se mover por assinatura, locação ou aplicativo, com o gasto mensal total que você informar. É a premissa que mais pesa e a que você conhece melhor.</p>`,
+<p>A locação é um caminho próprio: mensalidade (que já inclui IPVA, seguro e manutenção), reajuste, caução, taxa de entrada, limite de quilometragem e, se quiser, a compra do carro no fim do contrato por um valor que você informa. O outro caminho é ficar sem carro e se mover por assinatura, aplicativo ou transporte público, com o gasto mensal total que você informar. É a premissa que mais pesa e a que você conhece melhor.</p>`,
       ),
       secao(
         'Os custos que a ferramenta mostra',
@@ -715,6 +714,7 @@ function paginaCarro() {
 <p><strong>Comprando à vista:</strong> emplacamento e os custos de quem tem o carro. Não há juros nem parcelas. O preço escondido é o rendimento que o dinheiro teria dado se não tivesse virado carro.</p>
 <p><strong>Os custos de quem tem o carro:</strong> IPVA, seguro, manutenção e revisões, que sobem com a idade, e o uso (combustível, estacionamento e pedágio).</p>
 <p><strong>No consórcio:</strong> taxa de administração, fundo de reserva, a mobilidade sem carro enquanto espera a contemplação, emplacamento na compra do carro e o reajuste anual das parcelas, que continua depois que a carta de crédito é usada.</p>
+<p><strong>Na locação:</strong> mensalidades reajustadas, quilômetro excedente, taxa de entrada, caução (devolvida no fim, sem rendimento) e, se houver compra no fim, o valor pago e a transferência. O capital que não foi usado fica investido.</p>
 <p><strong>Ficando sem carro:</strong> todo o gasto mensal de mobilidade informado, reajustado pela inflação. O capital e as sobras mensais ficam investidos, com o Imposto de Renda regressivo sobre o ganho.</p>`,
       ),
       secao(
@@ -738,7 +738,7 @@ function paginaCarro() {
       { p: 'Por que mostrar o custo e não só o patrimônio final?', r: 'Porque o carro perde valor. Comparar só o patrimônio final faz quase qualquer alternativa parecer melhor e ignora o que o carro entrega. O custo por mês mostra quanto cada caminho pesa no orçamento. Com o mesmo dinheiro em todos os caminhos, custo menor significa patrimônio maior: é a mesma conta vista de dois lados.' },
       { p: 'O que é o custo líquido e o custo bruto?', r: 'O custo bruto soma o que saiu do bolso e não voltou (juros, taxas, IPVA, seguro, manutenção, uso) mais a perda de valor do carro. O custo líquido é o dinheiro que você colocou menos o patrimônio que sobrou, já descontado o que o seu dinheiro rendeu.' },
       { p: 'O resultado é uma recomendação de comprar ou não comprar um carro?', r: 'Não. É uma conta matemática com premissas que podem não se confirmar. Se o seu gasto sem carro, a depreciação ou o rendimento forem diferentes, o resultado muda, e a ferramenta mostra em que ponto isso acontece.' },
-      { p: 'Como informo o que eu gastaria sem carro?', r: 'Em um único valor mensal, com tudo incluído: assinatura, locação, aplicativo e transporte público. A ferramenta o reajusta pela inflação e mostra o gasto mensal em que ter o carro passa a compensar.' },
+      { p: 'Como informo o que eu gastaria sem carro?', r: 'Em um único valor mensal, com tudo incluído: assinatura, aplicativo e transporte público. A locação tem campos próprios. A ferramenta o reajusta pela inflação e mostra o gasto mensal em que ter o carro passa a compensar.' },
       { p: 'E se eu tiver dinheiro para pagar o carro à vista?', r: 'Informe quanto você tem hoje. Se o valor cobrir o carro e o emplacamento, a compra à vista entra na comparação, e o que sobrar fica investido em todos os caminhos. Se não cobrir, a ferramenta diz quanto falta.' },
     ],
     relacionados: [
@@ -751,19 +751,19 @@ function paginaCarro() {
 function paginaMoto() {
   return {
     caminho: '/moto-a-vista-financiar-consorcio-ou-sem-moto/',
-    titulo: 'Moto: à vista, financiar, consórcio ou ficar sem moto',
-    descricao: 'Compare comprar uma moto à vista, financiar, consórcio ou ficar sem moto e veja o custo de cada caminho e o patrimônio final, com cada custo explicado. Grátis.',
-    h1: 'Moto: comprar à vista, financiar, consórcio ou ficar sem moto?',
+    titulo: 'Moto: à vista, financiar, consórcio, alugar ou sem moto',
+    descricao: 'Compare comprar uma moto à vista, financiar, consórcio, alugar ou ficar sem moto: custo de cada caminho e patrimônio final, com cada custo explicado. Grátis.',
+    h1: 'Moto: comprar à vista, financiar, consórcio, alugar ou ficar sem moto?',
     lead: 'Moto perde valor, tem seguro proporcionalmente caro e gasta com manutenção frequente. A ferramenta mostra quanto cada caminho custa por mês e qual termina com o maior patrimônio, com o mesmo dinheiro em todos e cada custo e cada taxa explicados.',
     botoes: [{ texto: 'Abrir o comparativo de moto', href: '/app/?tela=simuleMoto' }],
     migalhas: [],
     schema: 'WebPage',
-    lastmod: REVISADO_D48,
+    lastmod: REVISADO_D69,
     corpo: [
       secao(
         'O que a ferramenta calcula',
         `<ul>
-<li><strong>O custo de mobilidade</strong> de cada caminho (comprar à vista, financiar, consórcio e ficar sem moto), no total e por mês: o custo líquido, que já desconta o que o seu dinheiro rendeu, e o custo bruto, que soma o que saiu do bolso sem voltar e a perda de valor da moto.</li>
+<li><strong>O custo de mobilidade</strong> de cada caminho (comprar à vista, financiar, consórcio, alugar e ficar sem moto), no total e por mês: o custo líquido, que já desconta o que o seu dinheiro rendeu, e o custo bruto, que soma o que saiu do bolso sem voltar e a perda de valor da moto.</li>
 <li><strong>O patrimônio líquido final</strong> de cada caminho: a moto a valor de mercado, mais os investimentos já descontado o Imposto de Renda, menos a dívida que ainda resta. É a mesma conta vista do outro lado: quem tem o menor custo tem o maior patrimônio.</li>
 <li><strong>Todos os custos e taxas</strong> de cada caminho, um por um: IPVA, seguro, manutenção, uso, emplacamento, IOF, gravame, juros, taxa de administração e fundo de reserva.</li>
 <li><strong>A evolução mês a mês</strong> do patrimônio de cada caminho, em gráfico.</li>
@@ -780,7 +780,7 @@ function paginaMoto() {
       secao(
         'O que muda da moto em relação ao carro',
         `<p>A moto custa menos e, de baixa cilindrada, costuma perder valor mais devagar que um carro. Em compensação, o seguro pesa proporcionalmente mais, por causa do risco de roubo, a manutenção é mais frequente (corrente, pneus, óleo) e os juros do financiamento costumam ser maiores. Por isso a ferramenta usa valores de partida próprios para moto, que você pode trocar pelos seus.</p>
-<p>Como no comparativo de carro, não existe um equivalente simples de "alugar". O terceiro caminho é ficar sem moto e se mover por transporte público, aplicativo ou locação, com o gasto mensal total que você informar. É a premissa que mais pesa e a que você conhece melhor.</p>`,
+<p>A locação é um caminho próprio: mensalidade (que já inclui IPVA, seguro e manutenção), reajuste, caução, taxa de entrada, limite de quilometragem e, se quiser, a compra da moto no fim do contrato por um valor que você informa. O outro caminho é ficar sem moto e se mover por transporte público ou aplicativo, com o gasto mensal total que você informar. É a premissa que mais pesa e a que você conhece melhor.</p>`,
       ),
       secao(
         'Os custos que a ferramenta mostra',
@@ -788,6 +788,7 @@ function paginaMoto() {
 <p><strong>Comprando à vista:</strong> emplacamento e os custos de quem tem a moto. Não há juros nem parcelas. O preço escondido é o rendimento que o dinheiro teria dado se não tivesse virado moto.</p>
 <p><strong>Os custos de quem tem a moto:</strong> IPVA, seguro, manutenção e revisões, que sobem com a idade, e o uso (combustível, estacionamento e pedágio).</p>
 <p><strong>No consórcio:</strong> taxa de administração, fundo de reserva, a mobilidade sem moto enquanto espera a contemplação, emplacamento na compra da moto e o reajuste anual das parcelas, que continua depois que a carta de crédito é usada.</p>
+<p><strong>Na locação:</strong> mensalidades reajustadas, quilômetro excedente, taxa de entrada, caução (devolvida no fim, sem rendimento) e, se houver compra no fim, o valor pago e a transferência. O capital que não foi usado fica investido.</p>
 <p><strong>Ficando sem moto:</strong> todo o gasto mensal de mobilidade informado, reajustado pela inflação. O capital e as sobras mensais ficam investidos, com o Imposto de Renda regressivo sobre o ganho.</p>`,
       ),
       secao(
@@ -816,7 +817,7 @@ function paginaMoto() {
       { p: 'E se eu tiver dinheiro para pagar a moto à vista?', r: 'Informe quanto você tem hoje. Se o valor cobrir a moto e o emplacamento, a compra à vista entra na comparação, e o que sobrar fica investido em todos os caminhos. Se não cobrir, a ferramenta diz quanto falta.' },
     ],
     relacionados: [
-      { texto: 'Carro: à vista, financiar, consórcio ou ficar sem carro', href: '/carro-a-vista-financiar-consorcio-ou-sem-carro/' },
+      { texto: 'Carro: à vista, financiar, consórcio, alugar ou ficar sem carro', href: '/carro-a-vista-financiar-consorcio-ou-sem-carro/' },
       { texto: 'Comprar à vista, financiar, consórcio ou alugar um imóvel', href: '/financiar-alugar-ou-consorcio/' },
     ],
   }
@@ -1188,8 +1189,8 @@ function paginaAprender(dividasDisponivel) {
 <li><a href="/simulador-bdr/">Simulador de BDR</a></li>
 <li><a href="/simulador-etf/">Simulador de ETF</a></li>
 <li><a href=\"/financiar-alugar-ou-consorcio/\">Comprar à vista, financiar, consórcio ou alugar</a></li>
-<li><a href="/carro-a-vista-financiar-consorcio-ou-sem-carro/">Carro: à vista, financiar, consórcio ou ficar sem carro</a></li>
-<li><a href="/moto-a-vista-financiar-consorcio-ou-sem-moto/">Moto: à vista, financiar, consórcio ou ficar sem moto</a></li>
+<li><a href="/carro-a-vista-financiar-consorcio-ou-sem-carro/">Carro: à vista, financiar, consórcio, alugar ou ficar sem carro</a></li>
+<li><a href="/moto-a-vista-financiar-consorcio-ou-sem-moto/">Moto: à vista, financiar, consórcio, alugar ou ficar sem moto</a></li>
 </ul>`,
       ),
       secao('Livro infantil grátis', `<p>O livro <strong>Os Três Potes de Clara</strong>, de educação financeira infantil, está disponível de graça na tela Aprender do app.</p>`),

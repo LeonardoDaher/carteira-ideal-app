@@ -1339,3 +1339,22 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 **Página do imóvel (`scripts/gerar-paginas.mjs`).** A pergunta "A ferramenta indica qual banco ou qual consórcio escolher?" deixou de dizer "três caminhos" (agora "os caminhos que você escolher, dois, três ou os quatro"), a lista "O que a ferramenta calcula" ganhou a escolha dos caminhos (D67) e a data de revisão da página foi para 07/10/2026 (`REVISADO_D67`).
 
 **Pendência ligada.** A página de carro e a de moto ainda não têm o seletor de caminhos (só o imóvel, D67).
+
+
+## D69 (07/10/2026): locação como quinto caminho no carro e na moto, com o seletor de caminhos
+
+**Pedido do responsável.** Muita loja aluga carro e moto, às vezes com a possibilidade de comprar no fim. A pessoa pode querer pagar a locação, e não só ficar "sem carro/moto".
+
+**Decisão.** A **locação** é um quinto caminho próprio, separado de "sem carro/sem moto" (que segue sendo um gasto mensal total informado). O seletor "Quais caminhos comparar?" da D67 passa a valer também no carro e na moto (2 a 5 caminhos).
+
+**Premissas da locação (campos editáveis; valores de partida nossos, não de fonte oficial).** Mensalidade (já inclui IPVA, seguro e manutenção) com reajuste anual; caução (devolvida no fim, sem rendimento); taxa de entrada; quilômetros incluídos por mês, quilômetros que a pessoa roda e preço do quilômetro excedente (reajustado com a mensalidade); opção de **comprar no fim do contrato por valor residual informado** (mais transferência). Partida da moto: mensalidade 900, caução 900, 1.500 km incluídos, 800 rodados, excedente 0,40, compra 10.000.
+
+**Cálculo.** O capital inicial, menos caução e taxa, fica investido (classe `Fundo`, IR regressivo); a diferença para o orçamento de referência é investida todo mês. O **orçamento de referência** considera só os caminhos escolhidos (como na D67). Na compra no fim, sai do fundo o valor da compra mais a transferência, e o veículo entra no patrimônio a valor de mercado; a depreciação é valor da compra menos valor de mercado. A contabilidade fecha: patrimônio = colocado − custos + valorização + rendimento − IR − custos de venda.
+
+**Compatibilidade.** `caminhos` ausente ou `null` = os quatro caminhos de antes da locação (resultado idêntico ao anterior, coberto por teste de regressão). Na tela, a escolha começa com os cinco marcados. Ponto de virada: contra "sem o bem" (gasto mensal) e contra a locação (mensalidade).
+
+**Limites assumidos.** Contrato com a duração do horizonte; compra apenas no último mês; sem multa de rescisão, avaria, franquia nem troca de veículo.
+
+**Textos públicos.** Páginas de carro e moto (título, descrição, "o que calcula", custos, FAQ), cartões da landing e rodapé atualizados.
+
+**Testes.** Web 1.347 → 1.375; scripts 308. Teste de mutação no orçamento de referência (só os caminhos escolhidos): confirmado e arquivo restaurado.

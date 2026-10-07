@@ -1,0 +1,10 @@
+D69 (07/10/2026): locação como quinto caminho no carro e na moto + seletor de caminhos. Detalhes: docs/07-registro-de-decisoes.md (D69).
+
+ARQUIVOS (todos nos mesmos caminhos do repositório):
+ webapp-src/src/domain/simulaCarro.ts, simulaCarro.test.ts, simulaMoto.ts
+ webapp-src/src/screens/SimuleCarro.tsx, SimuleCarro.test.tsx, SimuleMoto.tsx, SimuleMoto.test.tsx
+ webapp-src/src/ui/DetalheCustosCarro.tsx, DetalheCustosMoto.tsx, GraficoPatrimonio.tsx
+ webapp-src/src/index.css
+ scripts/gerar-paginas.mjs, scripts/gerar-paginas.test.mjs, index.html
+ docs/07-registro-de-decisoes.md, LEIA-ME-D69.txt
+TESTES: web 1.375 passam (de webapp-src), scripts 308 passam, tsc limpo. O build do site (npm run build) não foi rodado.

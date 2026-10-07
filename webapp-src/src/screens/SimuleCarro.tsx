@@ -3,10 +3,11 @@ import { SNAPSHOT_MERCADO } from '../data/snapshotMercado'
 import { dataCurta, porcentagem, reais } from '../domain/mercadoOficial'
 import type { SnapshotMercado } from '../domain/mercadoOficial'
 import { reaisCompacto } from '../domain/simulaImovel'
-import type { ChaveCenario, PontoMensal } from '../domain/simulaImovel'
+import type { PontoMensal } from '../domain/simulaImovel'
 import {
   NOMES_CARRO,
   NOMES_TIPO,
+  TODOS_CAMINHOS_CARRO,
   aplicarTipoCarro,
   custosAquisicaoFinanciamento,
   inputsCarroDoSnapshot,
@@ -18,17 +19,17 @@ import type { ChaveCarro, InputsCarro, PontoDeViradaCarro, ResultadoCarro, TipoC
 import { CampoNumero } from '../ui/CampoNumero'
 import { CampoReais } from '../ui/CampoReais'
 import { reais0 } from '../ui/DetalheCustos'
-import { BlocoAvistaCarro, BlocoConsorcioCarro, BlocoFinanciarCarro, BlocoSemCarro, ComoLerCarro, ParaOndeFoiCarro, PremissasCarro } from '../ui/DetalheCustosCarro'
+import { BlocoAvistaCarro, BlocoConsorcioCarro, BlocoFinanciarCarro, BlocoLocacaoCarro, BlocoSemCarro, ComoLerCarro, ParaOndeFoiCarro, PremissasCarro } from '../ui/DetalheCustosCarro'
 import { GraficoPatrimonio } from '../ui/GraficoPatrimonio'
+import type { ChaveGrafico } from '../ui/GraficoPatrimonio'
 import { VoltarInicio } from '../ui/VoltarInicio'
 import type { AppCtx } from '../state/useAppState'
 
-const NOMES_CURTOS: Record<ChaveCarro, string> = { financiamento: 'Financiar', semCarro: 'Sem carro', consorcio: 'Consórcio', avista: 'À vista' }
-// O gráfico e as barras do imóvel já têm cor e traço por rota; "sem carro" ocupa o lugar do "aluguel" (a linha de quem não compra).
-const ESTILO_ROTA: Record<ChaveCarro, ChaveCenario> = { financiamento: 'financiamento', semCarro: 'aluguel', consorcio: 'consorcio', avista: 'avista' }
-const NOMES_GRAFICO: Record<ChaveCenario, string> = { financiamento: 'Financiar', aluguel: 'Sem carro', consorcio: 'Consórcio', avista: 'À vista' }
-const ROTAS_GRAFICO_3: ChaveCenario[] = ['aluguel', 'financiamento', 'consorcio']
-const ROTAS_GRAFICO_4: ChaveCenario[] = ['aluguel', 'financiamento', 'consorcio', 'avista']
+const NOMES_CURTOS: Record<ChaveCarro, string> = { financiamento: 'Financiar', semCarro: 'Sem carro', consorcio: 'Consórcio', avista: 'À vista', locacao: 'Locação' }
+// O gráfico e as barras do imóvel já têm cor e traço por rota; "sem carro" ocupa o lugar do "aluguel" (a linha de quem não compra) e a locação tem estilo próprio.
+const ESTILO_ROTA: Record<ChaveCarro, ChaveGrafico> = { financiamento: 'financiamento', semCarro: 'aluguel', consorcio: 'consorcio', avista: 'avista', locacao: 'locacao' }
+const NOMES_GRAFICO: Record<ChaveGrafico, string> = { financiamento: 'Financiar', aluguel: 'Sem carro', consorcio: 'Consórcio', avista: 'À vista', locacao: 'Locação' }
+const ORDEM_GRAFICO: ChaveGrafico[] = ['aluguel', 'financiamento', 'consorcio', 'avista', 'locacao']
 
 function resolver(entrada: InputsCarro): { resultado: ResultadoCarro | null; erros: string[] } {
   const erros = validarInputsCarro(entrada)
@@ -49,7 +50,7 @@ export function SimuleCarro({
   /** Permite injetar dados nos testes. No app, usa o arquivo gerado pelo job semanal. */
   snapshot?: SnapshotMercado
 }) {
-  const [entrada, setEntrada] = useState<InputsCarro>(() => inputsCarroPadrao(inputsCarroDoSnapshot(snapshot)))
+  const [entrada, setEntrada] = useState<InputsCarro>(() => inputsCarroPadrao({ ...inputsCarroDoSnapshot(snapshot), caminhos: TODOS_CAMINHOS_CARRO }))
   // Deferido: a digitação não espera os ~100 cálculos auxiliares (ponto de virada, contemplação).
   const adiada = useDeferredValue(entrada)
   const { resultado, erros } = useMemo(() => resolver(adiada), [adiada])
@@ -62,13 +63,22 @@ export function SimuleCarro({
   const minimo = entrada.entrada + aq.total
   const disponivel = entrada.dinheiroDisponivel ?? minimo
   const necessarioAvista = Math.round((entrada.valorCarro + (entrada.valorCarro * entrada.emplacamentoPct) / 100) * 100) / 100
+  // Caminhos marcados (D69). O mínimo é dois, porque comparar exige ao menos um contra o outro.
+  const marcados = entrada.caminhos ?? TODOS_CAMINHOS_CARRO
+  const alternar = (c: ChaveCarro) => {
+    const novo = marcados.includes(c) ? marcados.filter((x) => x !== c) : TODOS_CAMINHOS_CARRO.filter((x) => x === c || marcados.includes(x))
+    if (novo.length < 2) return
+    mudar('caminhos', novo)
+  }
+  const avistaMarcado = marcados.includes('avista')
+  const semDinheiroParaAvista = disponivel < necessarioAvista - 0.005
 
   return (
     <div className="screen">
       <VoltarInicio href="./?tela=simuleBens" rotulo="← Simule Bens" />
 
       <div className="col" style={{ gap: 4 }}>
-        <h1 style={{ fontSize: 21 }}>Comprar à vista, financiar, consórcio ou ficar sem carro?</h1>
+        <h1 style={{ fontSize: 21 }}>Comprar à vista, financiar, consórcio, alugar ou ficar sem carro?</h1>
         <div className="muted small justify">
           Informe o carro e as taxas e veja quanto cada caminho <strong>custa</strong> e qual termina com o <strong>maior patrimônio</strong> depois de alguns anos. Carro perde valor, então a conta mostra o custo
           de se mover, e não só o patrimônio. É uma conta matemática, que compara o dinheiro de bolso de cada caminho nas mesmas condições. Para incluir a compra à vista, informe quanto dinheiro você tem hoje.
@@ -79,6 +89,47 @@ export function SimuleCarro({
       <div className="desk-split">
         <div className="desk-main">
           <form className="imovel-form" onSubmit={(e) => e.preventDefault()} aria-label="Dados da simulação">
+            <div className="card-outline col" style={{ gap: 8 }} role="group" aria-label="Quais caminhos comparar?">
+              <span style={{ fontWeight: 700, fontSize: 14.5 }}>Quais caminhos comparar?</span>
+              <div className="row" style={{ gap: 6, flexWrap: 'wrap' }}>
+                {TODOS_CAMINHOS_CARRO.map((c) => {
+                  const ligado = marcados.includes(c)
+                  const ultimos = ligado && marcados.length <= 2
+                  return (
+                    <button
+                      key={c}
+                      type="button"
+                      className={`chip ${ligado ? 'selected' : ''}`}
+                      aria-pressed={ligado}
+                      aria-disabled={ultimos}
+                      title={ultimos ? 'É preciso manter pelo menos dois caminhos' : undefined}
+                      onClick={() => alternar(c)}
+                    >
+                      {ligado ? '✓ ' : ''}{NOMES_CARRO[c]}
+                    </button>
+                  )
+                })}
+                {marcados.length < TODOS_CAMINHOS_CARRO.length && (
+                  <button type="button" className="chip" onClick={() => mudar('caminhos', TODOS_CAMINHOS_CARRO)}>Comparar todos</button>
+                )}
+              </div>
+              <span className="tiny muted justify" style={{ lineHeight: 1.5 }}>
+                Marque dois ou mais. Para trocar um par (por exemplo, de locação × consórcio para locação × financiar), marque o novo e desmarque o outro. O orçamento mensal de referência passa a considerar só os caminhos marcados.
+              </span>
+              {avistaMarcado && semDinheiroParaAvista && marcados.length === 2 && (
+                <div className="col" style={{ gap: 6 }} role="note">
+                  <span className="small justify" style={{ lineHeight: 1.5 }}>
+                    Para comprar à vista seriam necessários {reais0(necessarioAvista)} e você informou {reais0(disponivel)}. Sem esse dinheiro, esse caminho fica de fora.
+                  </span>
+                  <div className="row">
+                    <button type="button" className="chip" onClick={() => mudar('dinheiroDisponivel', necessarioAvista)}>
+                      Usar {reais0(necessarioAvista)} como dinheiro disponível
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
             <details className="card-outline imovel-bloco" open>
               <summary>O carro e o prazo</summary>
               <div className="imovel-grade">
@@ -178,8 +229,8 @@ export function SimuleCarro({
               </div>
             </details>
 
-            <details className="card-outline imovel-bloco" open>
-              <summary>Financiamento</summary>
+            <details key={`financiamento-${marcados.includes('financiamento')}`} className="card-outline imovel-bloco" open={marcados.includes('financiamento')}>
+              <summary>Financiamento{!marcados.includes('financiamento') && ' (fora da comparação)'}</summary>
               <div className="imovel-grade">
                 <CampoNumero
                   rotulo="Juros da proposta"
@@ -194,8 +245,8 @@ export function SimuleCarro({
               </div>
             </details>
 
-            <details className="card-outline imovel-bloco" open>
-              <summary>Consórcio</summary>
+            <details key={`consorcio-${marcados.includes('consorcio')}`} className="card-outline imovel-bloco" open={marcados.includes('consorcio')}>
+              <summary>Consórcio{!marcados.includes('consorcio') && ' (fora da comparação)'}</summary>
               <div className="imovel-grade">
                 <CampoNumero rotulo="Taxa de administração total" valor={entrada.taxaAdmTotalPct} onMudar={(v) => mudar('taxaAdmTotalPct', v)} sufixo="%" dica="Soma de todo o prazo" />
                 <CampoNumero rotulo="Fundo de reserva" valor={entrada.fundoReservaPct} onMudar={(v) => mudar('fundoReservaPct', v)} sufixo="%" />
@@ -218,15 +269,45 @@ export function SimuleCarro({
               </div>
             </details>
 
-            <details className="card-outline imovel-bloco" open>
-              <summary>Sem carro</summary>
+            <details key={`locacao-${marcados.includes('locacao')}`} className="card-outline imovel-bloco" open={marcados.includes('locacao')}>
+              <summary>Locação{!marcados.includes('locacao') && ' (fora da comparação)'}</summary>
+              <div className="imovel-grade">
+                <CampoReais rotulo="Mensalidade da locação" valor={entrada.locacaoMensal} onMudar={(v) => mudar('locacaoMensal', v)} dica="Em R$ de hoje. Já inclui IPVA, seguro e manutenção. Use o valor da proposta" />
+                <CampoNumero rotulo="Reajuste anual" valor={entrada.locacaoReajusteAA} onMudar={(v) => mudar('locacaoReajusteAA', v)} sufixo="% ao ano" dica="Da mensalidade e do quilômetro excedente. IPCA ou IGP-M" />
+                <CampoReais rotulo="Caução" valor={entrada.locacaoCaucao} onMudar={(v) => mudar('locacaoCaucao', v)} dica="Paga no início e devolvida no fim, sem rendimento" />
+                <CampoReais rotulo="Taxa de entrada" valor={entrada.locacaoTaxaEntrada} onMudar={(v) => mudar('locacaoTaxaEntrada', v)} dica="Adesão ou vistoria. Não é devolvida" />
+                <CampoNumero rotulo="Quilômetros incluídos por mês" valor={entrada.locacaoKmIncluido} onMudar={(v) => mudar('locacaoKmIncluido', v)} sufixo="km" casas={0} />
+                <CampoNumero rotulo="Quilômetros que você roda por mês" valor={entrada.locacaoKmRodado} onMudar={(v) => mudar('locacaoKmRodado', v)} sufixo="km" casas={0} />
+                <div className="span2">
+                  <CampoReais rotulo="Preço do quilômetro excedente" valor={entrada.locacaoKmExcedente} onMudar={(v) => mudar('locacaoKmExcedente', v)} dica="Cobrado só sobre o que passar do limite, em R$ de hoje" />
+                </div>
+                <label className="span2 row small" style={{ gap: 8, alignItems: 'flex-start' }}>
+                  <input type="checkbox" checked={entrada.locacaoComprarNoFim} onChange={(e) => mudar('locacaoComprarNoFim', e.target.checked)} />
+                  <span>
+                    <strong>Comprar o carro no fim do contrato</strong> (último mês da comparação), pelo valor combinado. Desligado, você devolve o carro e não fica com ele.
+                  </span>
+                </label>
+                {entrada.locacaoComprarNoFim && (
+                  <div className="span2">
+                    <CampoReais rotulo="Valor da compra no fim" valor={entrada.locacaoValorCompra} onMudar={(v) => mudar('locacaoValorCompra', v)} dica="O valor fixado em contrato, em R$ do dia da compra, sem correção" />
+                  </div>
+                )}
+                <div className="span2 tiny muted justify" style={{ lineHeight: 1.5 }}>
+                  Os valores de partida desta seção são <strong>nossos</strong> (ordem de grandeza de mercado), não uma proposta real: troque pelos da locadora. O contrato vale por todo o período da comparação, renovado nas mesmas condições; para uma
+                  locação de 24 ou 36 meses, ajuste o horizonte. O uso (combustível etc.) continua por sua conta e vem do bloco de custos de dono.
+                </div>
+              </div>
+            </details>
+
+            <details key={`semCarro-${marcados.includes('semCarro')}`} className="card-outline imovel-bloco" open={marcados.includes('semCarro')}>
+              <summary>Sem carro{!marcados.includes('semCarro') && ' (fora da comparação)'}</summary>
               <div className="imovel-grade">
                 <div className="span2">
                   <CampoReais
                     rotulo="Quanto você gastaria por mês para se mover sem o carro"
                     valor={entrada.mobilidadeMensal}
                     onMudar={(v) => mudar('mobilidadeMensal', v)}
-                    dica="Valor total do mês, com tudo incluído: assinatura, locação, aplicativo e transporte público. Reajustado pela inflação"
+                    dica="Valor total do mês, com tudo incluído: aplicativo, táxi, transporte público e aluguel avulso. Para uma locação mensal com contrato, use o caminho Locação. Reajustado pela inflação"
                   />
                 </div>
                 <div className="span2 tiny muted justify" style={{ lineHeight: 1.5 }}>
@@ -272,26 +353,29 @@ export function SimuleCarro({
   )
 }
 
-const FRASES_VIRADA: Record<'avista' | 'financiamento' | 'consorcio', { titulo: string; sujeito: string }> = {
-  avista: { titulo: 'Comprar à vista × sem carro', sujeito: 'comprar à vista' },
-  financiamento: { titulo: 'Financiar × sem carro', sujeito: 'financiar' },
-  consorcio: { titulo: 'Consórcio × sem carro', sujeito: 'o consórcio' },
-}
+type Dono = 'avista' | 'financiamento' | 'consorcio'
+const SUJEITO_VIRADA: Record<Dono, string> = { avista: 'comprar à vista', financiamento: 'financiar', consorcio: 'o consórcio' }
+const TITULO_VIRADA: Record<Dono, string> = { avista: 'Comprar à vista', financiamento: 'Financiar', consorcio: 'Consórcio' }
 
-/** Uma linha do ponto de virada: o gasto mensal sem carro em que a rota e "ficar sem carro" empatam, ou quem fica sempre na frente. */
-function LinhaVirada({ quem, r, pv, mobilidade }: { quem: 'avista' | 'financiamento' | 'consorcio'; r: ResultadoCarro; pv: PontoDeViradaCarro; mobilidade: number }) {
-  const f = FRASES_VIRADA[quem]
-  const ponto = pv[quem]
-  const naFrente = r.patrimonioSemCustosVenda[quem] >= r.patrimonioSemCustosVenda.semCarro ? f.sujeito : 'ficar sem carro'
+/**
+ * Uma linha do ponto de virada: o gasto mensal em que a rota de ter o carro e a alternativa (ficar sem carro ou alugar) empatam, ou quem fica sempre na frente.
+ * Contra "sem carro" a variável é o gasto mensal sem carro; contra a locação, a mensalidade da locação.
+ */
+function LinhaVirada({ quem, contra, r, pv, valorInformado }: { quem: Dono; contra: 'semCarro' | 'locacao'; r: ResultadoCarro; pv: PontoDeViradaCarro; valorInformado: number }) {
+  const ponto = contra === 'semCarro' ? pv[quem] : (pv.contraLocacao?.[quem] ?? null)
+  const alternativa = contra === 'semCarro' ? 'ficar sem carro' : 'alugar'
+  const variavel = contra === 'semCarro' ? 'o seu gasto mensal sem carro' : 'a mensalidade da locação'
+  const titulo = `${TITULO_VIRADA[quem]} × ${contra === 'semCarro' ? 'sem carro' : 'locação'}`
+  const naFrente = r.patrimonioSemCustosVenda[quem] >= r.patrimonioSemCustosVenda[contra] ? SUJEITO_VIRADA[quem] : alternativa
   return (
     <div className="small justify" style={{ lineHeight: 1.5 }}>
       {ponto != null ? (
         <>
-          <strong>{f.titulo}:</strong> empatam se o seu gasto mensal sem carro for de {reais0(ponto)} (você informou {reais0(mobilidade)}). Acima disso, {f.sujeito} termina à frente; abaixo, ficar sem carro.
+          <strong>{titulo}:</strong> empatam se {variavel} for de {reais0(ponto)} (você informou {reais0(valorInformado)}). Acima disso, {SUJEITO_VIRADA[quem]} termina à frente; abaixo, {alternativa}.
         </>
       ) : (
         <>
-          <strong>{f.titulo}:</strong> entre {reais0(pv.intervalo[0])} e {reais0(pv.intervalo[1])} por mês sem carro, a ordem entre os dois não muda com as demais premissas: {naFrente} fica sempre à frente.
+          <strong>{titulo}:</strong> entre {reais0(pv.intervalo[0])} e {reais0(pv.intervalo[1])} por mês, a ordem entre os dois não muda com as demais premissas: {naFrente} fica sempre à frente.
         </>
       )}
     </div>
@@ -304,8 +388,11 @@ function Resultado({ r, entrada, onIncluirAvista }: { r: ResultadoCarro; entrada
   const maiorCusto = Math.max(...r.rotas.map((c) => Math.abs(r.cenarios[c].custoLiquidoMensal)), 1)
   const pv = r.pontoDeVirada
   const cen = r.cenarios
-  const serie: PontoMensal[] = useMemo(
-    () => r.serieMensal.map((p) => ({ mes: p.mes, avista: p.avista, financiamento: p.financiamento, consorcio: p.consorcio, aluguel: p.semCarro })),
+  const donos = (['avista', 'financiamento', 'consorcio'] as Dono[]).filter((q) => r.rotas.includes(q))
+  const temSem = r.rotas.includes('semCarro')
+  const temLoc = r.rotas.includes('locacao')
+  const serie: (PontoMensal & { locacao: number })[] = useMemo(
+    () => r.serieMensal.map((p) => ({ mes: p.mes, avista: p.avista, financiamento: p.financiamento, consorcio: p.consorcio, aluguel: p.semCarro, locacao: p.locacao })),
     [r.serieMensal],
   )
 
@@ -326,7 +413,7 @@ function Resultado({ r, entrada, onIncluirAvista }: { r: ResultadoCarro; entrada
         )}
       </div>
 
-      {!r.avista.disponivel && (
+      {!r.avista.disponivel && r.caminhosEscolhidos.includes('avista') && (
         <div className="card-outline col" style={{ gap: 8 }} role="note">
           <span className="small justify" style={{ lineHeight: 1.5 }}>
             <strong>Comprar à vista não entrou na comparação.</strong> Com {reais0(r.capitalInicial)} disponíveis você não paga o carro ({reais0(entrada.valorCarro)}) e o emplacamento: seriam necessários{' '}
@@ -390,7 +477,7 @@ function Resultado({ r, entrada, onIncluirAvista }: { r: ResultadoCarro; entrada
 
       <div className="card col" style={{ gap: 10 }}>
         <span style={{ fontWeight: 700, fontSize: 14.5 }}>Como o patrimônio evolui</span>
-        <GraficoPatrimonio serie={serie} rotas={r.rotas.includes('avista') ? ROTAS_GRAFICO_4 : ROTAS_GRAFICO_3} nomes={NOMES_GRAFICO} />
+        <GraficoPatrimonio serie={serie} rotas={ORDEM_GRAFICO.filter((g) => r.rotas.some((c) => ESTILO_ROTA[c] === g))} nomes={NOMES_GRAFICO} />
       </div>
 
       <div className="card col" style={{ gap: 10 }}>
@@ -399,18 +486,18 @@ function Resultado({ r, entrada, onIncluirAvista }: { r: ResultadoCarro; entrada
 
       <div className="col" style={{ gap: 10 }}>
         <span style={{ fontWeight: 700, fontSize: 14.5 }}>Cada custo e cada taxa, caminho por caminho</span>
-        {r.avista.disponivel && <BlocoAvistaCarro r={r} entrada={entrada} />}
-        <BlocoFinanciarCarro r={r} entrada={entrada} />
-        <BlocoConsorcioCarro r={r} entrada={entrada} />
-        <BlocoSemCarro r={r} entrada={entrada} />
+        {r.rotas.includes('avista') && <BlocoAvistaCarro r={r} entrada={entrada} />}
+        {r.rotas.includes('financiamento') && <BlocoFinanciarCarro r={r} entrada={entrada} />}
+        {r.rotas.includes('consorcio') && <BlocoConsorcioCarro r={r} entrada={entrada} />}
+        {r.rotas.includes('locacao') && <BlocoLocacaoCarro r={r} entrada={entrada} />}
+        {r.rotas.includes('semCarro') && <BlocoSemCarro r={r} entrada={entrada} />}
       </div>
 
-      {pv && (
+      {pv && (donos.length > 0 && (temSem || temLoc) || (r.sensibilidadeContemplacao?.length ?? 0) > 0) && (
         <div className="card col" style={{ gap: 8 }}>
           <span style={{ fontWeight: 700, fontSize: 14.5 }}>Em que ponto o resultado muda?</span>
-          {r.avista.disponivel && <LinhaVirada quem="avista" r={r} pv={pv} mobilidade={entrada.mobilidadeMensal} />}
-          <LinhaVirada quem="financiamento" r={r} pv={pv} mobilidade={entrada.mobilidadeMensal} />
-          <LinhaVirada quem="consorcio" r={r} pv={pv} mobilidade={entrada.mobilidadeMensal} />
+          {temSem && donos.map((q) => <LinhaVirada key={`sem-${q}`} quem={q} contra="semCarro" r={r} pv={pv} valorInformado={entrada.mobilidadeMensal} />)}
+          {temLoc && donos.map((q) => <LinhaVirada key={`loc-${q}`} quem={q} contra="locacao" r={r} pv={pv} valorInformado={entrada.locacaoMensal} />)}
 
           {r.sensibilidadeContemplacao && r.sensibilidadeContemplacao.length > 0 && (
             <>
@@ -445,7 +532,7 @@ function Resultado({ r, entrada, onIncluirAvista }: { r: ResultadoCarro; entrada
         <div className="col small muted justify" style={{ gap: 8, marginTop: 10, lineHeight: 1.5 }}>
           <span>
             <strong>Mesmo dinheiro em todos os caminhos.</strong> O dinheiro que você tem hoje fica aplicado desde o mês 0, menos o que cada caminho gasta na compra: a entrada, o emplacamento, o IOF e o gravame no financiamento;
-            o carro e o emplacamento à vista; nada, para quem fica sem carro e no consórcio até a contemplação. Todo mês, o maior desembolso entre os caminhos vira o orçamento de referência: quem paga menos investe a diferença.
+            o carro e o emplacamento à vista; nada, para quem fica sem carro e no consórcio até a contemplação. Todo mês, o maior desembolso entre os caminhos que você marcou vira o orçamento de referência: quem paga menos investe a diferença.
           </span>
           <span>
             <strong>Duas leituras da mesma conta.</strong> Como todos colocam o mesmo dinheiro, custo líquido = dinheiro colocado − patrimônio final. O custo bruto soma os custos que não voltam e a perda de valor do carro, antes do rendimento.
@@ -462,6 +549,10 @@ function Resultado({ r, entrada, onIncluirAvista }: { r: ResultadoCarro; entrada
           <span>
             <strong>Consórcio.</strong> Parcela = carta × (1 + taxa de administração + fundo de reserva) ÷ prazo, corrigida uma vez por ano. Até a contemplação você paga parcela e a mobilidade sem carro; no fim desse mês compra o carro
             equivalente pelo preço daquele mês (a diferença para a carta sai do seu dinheiro) e paga o emplacamento; depois tem os custos de dono e continua pagando a parcela.
+          </span>
+          <span>
+            <strong>Locação.</strong> Mensalidade que já inclui IPVA, seguro e manutenção, reajustada uma vez por ano, mais o quilômetro que passar do limite e o uso (combustível etc.), que é por sua conta. A caução sai do dinheiro no início e volta no fim, sem
+            rendimento; a taxa de entrada não volta. Com a compra no fim ligada, você paga o valor combinado no último mês, mais a transferência, e o veículo entra no patrimônio pelo valor de mercado.
           </span>
           <span>
             <strong>Sem carro.</strong> O gasto mensal informado, reajustado pela inflação. Quem tem o carro paga o uso por conta própria; esse valor já inclui tudo.

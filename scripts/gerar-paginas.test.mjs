@@ -287,7 +287,7 @@ test('a página do comparativo de moto explica os custos, assume o escopo (uso p
   assert.match(texto, /não é recomendação de financiamento, de consórcio ou de investimento/)
   assert.ok(pg.html.includes('href="/app/?tela=simuleMoto"'), 'o botão abre o comparativo no app')
   // fala de moto, não de carro: só a menção ao comparativo de carro nos links e na comparação
-  assert.doesNotMatch(texto.replace(/Carro: à vista, financiar, consórcio ou (?:ficar )?sem carro|comparativo de carro|em relação ao carro|que um carro/gi, ''), /\bcarro\b/i)
+  assert.doesNotMatch(texto.replace(/Carro: à vista, financiar, consórcio(?:,| ou) (?:alugar ou )?(?:ficar )?sem carro|comparativo de carro|em relação ao carro|que um carro/gi, ''), /\bcarro\b/i)
   assert.doesNotMatch(texto, /garantid[oa]|sem risco|melhor banco|melhor consórcio|Caixa|Itaú|Bradesco|Santander|Porto Seguro|Embracon|Localiza|Movida|Uber|99 ?Pop|Honda|Yamaha/i)
 })
 

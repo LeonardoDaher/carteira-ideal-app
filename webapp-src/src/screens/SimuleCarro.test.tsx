@@ -17,7 +17,7 @@ const SEM_CARRO = 'Quanto você gastaria por mês para se mover sem o carro'
 describe('SimuleCarro', () => {
   it('abre com um vencedor, as duas leituras (custo e patrimônio) e o aviso de que não indica produto', () => {
     render(<SimuleCarro snapshot={comFocus} />)
-    expect(screen.getByRole('heading', { name: 'Comprar à vista, financiar, consórcio ou ficar sem carro?' })).toBeTruthy()
+    expect(screen.getByRole('heading', { name: 'Comprar à vista, financiar, consórcio, alugar ou ficar sem carro?' })).toBeTruthy()
     expect(screen.getByText(/o caminho de menor custo, que também termina com o maior patrimônio, é:/)).toBeTruthy()
     for (const titulo of ['Custo de mobilidade por mês', 'Patrimônio líquido final']) {
       const cartao = screen.getByText(titulo).closest('.card') as HTMLElement
@@ -103,5 +103,98 @@ describe('SimuleCarro', () => {
     digitar('Valor do carro', '0')
     expect(await screen.findByRole('alert')).toBeTruthy()
     expect(screen.getByText('Informe o valor do carro.')).toBeTruthy()
+  })
+})
+
+
+describe('SimuleCarro: locação e escolha dos caminhos (D69)', () => {
+  const grupo = () => screen.getByRole('group', { name: 'Quais caminhos comparar?' })
+  const chip = (nome: string) => within(grupo()).getByRole('button', { name: new RegExp(`^(✓ )?${nome}$`) })
+  const ligado = (nome: string) => chip(nome).getAttribute('aria-pressed') === 'true'
+
+  it('abre com os cinco caminhos marcados e a locação no ranking, no gráfico e nos blocos', () => {
+    render(<SimuleCarro snapshot={comFocus} />)
+    for (const n of ['Comprar à vista', 'Financiar', 'Consórcio', 'Locação', 'Sem carro']) expect(ligado(n)).toBe(true)
+    const ranking = screen.getByText('Patrimônio líquido final').closest('.card') as HTMLElement
+    expect(within(ranking).getByText(/\dº Locação$/)).toBeTruthy()
+    expect(screen.getByText('Locação: cada custo e cada taxa')).toBeTruthy()
+    expect(screen.getByRole('img', { name: /Locação R\$/ })).toBeTruthy()
+    expect(screen.getByText('Financiar × locação:')).toBeTruthy()
+  })
+
+  it('comparar só locação × sem carro: ranking de dois, tabela de duas colunas e sem ponto de virada de quem tem o bem', () => {
+    render(<SimuleCarro snapshot={comFocus} />)
+    fireEvent.click(chip('Financiar'))
+    fireEvent.click(chip('Consórcio'))
+    const ranking = screen.getByText('Patrimônio líquido final').closest('.card') as HTMLElement
+    expect(within(ranking).queryByText(/3º/)).toBeNull()
+    expect(within(ranking).getByText(/\dº Locação$/)).toBeTruthy()
+    expect(within(ranking).getByText(/\dº Sem carro$/)).toBeTruthy()
+    const tabela = screen.getByRole('table', { name: 'Para onde foi o dinheiro em cada caminho' })
+    expect(within(tabela).getAllByRole('columnheader').map((c) => c.textContent).filter(Boolean)).toEqual(['Sem carro', 'Locação'])
+    expect(screen.queryByText('Financiar: cada custo e cada taxa')).toBeNull()
+    expect(screen.queryByText('Consórcio: cada custo e cada taxa')).toBeNull()
+    expect(screen.queryByText(/× locação:/)).toBeNull()
+    expect(screen.queryByText('Em que ponto o resultado muda?')).toBeNull()
+  })
+
+  it('financiar × locação mostra o ponto de virada na mensalidade, sem o caminho sem o bem', () => {
+    render(<SimuleCarro snapshot={comFocus} />)
+    fireEvent.click(chip('Comprar à vista'))
+    fireEvent.click(chip('Consórcio'))
+    fireEvent.click(chip('Sem carro'))
+    expect(screen.getByText('Financiar × locação:')).toBeTruthy()
+    expect(screen.queryByText(/× sem carro:/)).toBeNull()
+    expect(screen.getByText(/mensalidade da locação/)).toBeTruthy()
+  })
+
+  it('não deixa ficar com menos de dois caminhos, e "Comparar todos" volta ao conjunto completo', () => {
+    render(<SimuleCarro snapshot={comFocus} />)
+    fireEvent.click(chip('Comprar à vista'))
+    fireEvent.click(chip('Financiar'))
+    fireEvent.click(chip('Consórcio'))
+    fireEvent.click(chip('Locação')) // sobraria um só: não muda
+    expect(ligado('Locação')).toBe(true)
+    expect(ligado('Sem carro')).toBe(true)
+    fireEvent.click(within(grupo()).getByRole('button', { name: 'Comparar todos' }))
+    for (const n of ['Comprar à vista', 'Financiar', 'Consórcio', 'Locação', 'Sem carro']) expect(ligado(n)).toBe(true)
+  })
+
+  it('à vista × locação sem dinheiro explica o que falta e o atalho resolve', async () => {
+    render(<SimuleCarro snapshot={comFocus} />)
+    fireEvent.click(chip('Financiar'))
+    fireEvent.click(chip('Consórcio'))
+    fireEvent.click(chip('Sem carro'))
+    expect(screen.getByRole('alert').textContent).toMatch(/não dá para comprar à vista/)
+    fireEvent.click(within(grupo()).getByRole('button', { name: /como dinheiro disponível/ }))
+    expect(await screen.findByText('Locação: cada custo e cada taxa')).toBeTruthy()
+    expect(screen.queryByRole('alert')).toBeNull()
+  })
+
+  it('os campos da locação existem; comprar no fim mostra o valor da compra e o bloco explica a compra', async () => {
+    render(<SimuleCarro snapshot={comFocus} />)
+    for (const rotulo of ['Mensalidade da locação', 'Reajuste anual', 'Caução', 'Taxa de entrada', 'Quilômetros incluídos por mês', 'Quilômetros que você roda por mês', 'Preço do quilômetro excedente']) {
+      expect(screen.getByLabelText(rotulo)).toBeTruthy()
+    }
+    expect(screen.queryByLabelText('Valor da compra no fim')).toBeNull()
+    expect(screen.queryByText('Compra no fim do contrato')).toBeNull()
+    fireEvent.click(screen.getByRole('checkbox', { name: /no fim do contrato/ }))
+    expect(screen.getByLabelText('Valor da compra no fim')).toBeTruthy()
+    expect(await screen.findByText('Compra no fim do contrato')).toBeTruthy()
+    expect(screen.getByText('Transferência na compra')).toBeTruthy()
+  })
+
+  it('quilômetro acima do limite aparece como custo; dentro do limite, o bloco diz que não há cobrança', async () => {
+    render(<SimuleCarro snapshot={comFocus} />)
+    expect(screen.getByText(/dentro do limite, não há cobrança/)).toBeTruthy()
+    digitar('Quilômetros que você roda por mês', '3500')
+    expect(await screen.findByText(/sobram 1\.500 km por mês/)).toBeTruthy()
+  })
+
+  it('o bloco da locação cita IPVA, seguro e manutenção incluídos e a caução devolvida', () => {
+    render(<SimuleCarro snapshot={comFocus} />)
+    const bloco = screen.getByText('Locação: cada custo e cada taxa').closest('details') as HTMLElement
+    expect(within(bloco).getByText(/já inclui IPVA, seguro e manutenção/i, { exact: false, selector: 'span' })).toBeTruthy()
+    expect(within(bloco).getByText(/devolvida no fim do contrato, sem rendimento/)).toBeTruthy()
   })
 })
