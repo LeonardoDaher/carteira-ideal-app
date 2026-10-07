@@ -97,6 +97,13 @@ export interface InputsComparativo {
    * a rota "comprar à vista" entra na comparação.
    */
   dinheiroDisponivel: number | null
+
+  // Caminhos a comparar (D67)
+  /**
+   * Quais caminhos entram na comparação (mínimo dois). Ausente ou `null` = todos os que o dinheiro permite, exatamente o
+   * comportamento anterior à D67. O orçamento de referência (o maior desembolso mensal) considera só os caminhos escolhidos.
+   */
+  caminhos?: ChaveCenario[] | null
 }
 
 export type ChaveCenario = 'financiamento' | 'aluguel' | 'consorcio' | 'avista'
@@ -107,6 +114,9 @@ export const NOMES_CENARIOS: Record<ChaveCenario, string> = {
   consorcio: 'Consórcio',
   avista: 'Comprar à vista',
 }
+
+/** Ordem fixa dos caminhos, a mesma em todo o motor e na tela. */
+export const TODOS_CAMINHOS: ChaveCenario[] = ['avista', 'financiamento', 'consorcio', 'aluguel']
 
 export interface PontoMensal {
   mes: number
@@ -224,6 +234,8 @@ export interface DetalheAvista {
 export interface ResultadoComparativo {
   /** Rotas que entraram na comparação: as 3 de sempre, mais `avista` quando o dinheiro disponível cobre o imóvel e o ITBI. */
   rotas: ChaveCenario[]
+  /** Caminhos que a pessoa pediu para comparar (antes de tirar `avista` se o dinheiro não cobre). */
+  caminhosEscolhidos: ChaveCenario[]
   /** Se dá para comprar à vista com o dinheiro informado, quanto seria preciso e quanto falta. */
   avista: { disponivel: boolean; necessario: number; falta: number }
   vencedor: ChaveCenario
@@ -270,7 +282,19 @@ export interface ResultadoComparativo {
   sensibilidadeContemplacao?: { mes: number; patrimonio: number; vencedor: ChaveCenario }[]
 }
 
+/** Um par de caminhos e a valorização do imóvel em que eles empatam. */
+export interface ParVirada {
+  a: ChaveCenario
+  b: ChaveCenario
+  /** Valorização anual (%) do empate; null = a ordem não muda no intervalo testado. */
+  ponto: number | null
+  /** Quem fica na frente quando o imóvel valoriza mais que o ponto (ou em todo o intervalo, se não há ponto). */
+  acima: ChaveCenario
+}
+
 export interface PontoDeVirada {
+  /** Pares comparados: cada caminho contra o aluguel, se o aluguel está na comparação; senão, todos os pares entre os escolhidos. */
+  pares: ParVirada[]
   /** Valorização em que comprar à vista e alugar empatam; null = não muda no intervalo, ou à vista indisponível. */
   avistaVsAluguel: number | null
   /** Valorização anual do imóvel (%) em que financiar e alugar empatam; null = não muda no intervalo testado. */
@@ -314,6 +338,7 @@ export function inputsPadrao(parcial: Partial<InputsComparativo> = {}): InputsCo
     regraLance: 'prazo',
     mesContemplacao: 36,
     dinheiroDisponivel: null,
+    caminhos: null,
     ...parcial,
   }
 }
@@ -339,6 +364,17 @@ export function validarInputs(i: InputsComparativo): string[] {
     const minimo = i.entrada + (i.valorImovel * i.custosIniciaisPct) / 100
     if (!Number.isFinite(i.dinheiroDisponivel) || i.dinheiroDisponivel < 0) erros.push('O dinheiro disponível não pode ser negativo.')
     else if (i.dinheiroDisponivel < minimo - 0.005) erros.push(`O dinheiro disponível precisa cobrir ao menos a entrada mais o ITBI e o cartório (${minimo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}).`)
+  }
+  if (i.caminhos != null) {
+    const validos = i.caminhos.every((c) => TODOS_CAMINHOS.includes(c)) && new Set(i.caminhos).size === i.caminhos.length
+    if (!validos) erros.push('Há um caminho inválido na comparação.')
+    else if (i.caminhos.length < 2) erros.push('Escolha pelo menos dois caminhos para comparar.')
+    else if (i.valorImovel > 0 && i.caminhos.length === 2 && i.caminhos.includes('avista')) {
+      // À vista mais um só: se o dinheiro não cobre o imóvel e o ITBI, sobra um caminho único e não há o que comparar.
+      const custos = (i.valorImovel * i.custosIniciaisPct) / 100
+      const dinheiro = i.dinheiroDisponivel ?? i.entrada + custos
+      if (dinheiro < i.valorImovel + custos - 0.005) erros.push('Com o dinheiro informado não dá para comprar à vista: informe mais dinheiro disponível ou escolha outros caminhos.')
+    }
   }
   return erros
 }
@@ -446,6 +482,12 @@ function simularNucleo(i: InputsComparativo, leve = false): ResultadoComparativo
   const C = i.dinheiroDisponivel ?? K0
   const necessarioAvista = V + custosIniciais
   const avistaOk = C >= necessarioAvista - 0.005
+
+  // Caminhos da comparação (D67). Sem escolha, valem todos; à vista só concorre se o dinheiro cobre o imóvel e o ITBI,
+  // sem inventar dinheiro. A ordem é a de sempre, para o desempate do ranking não mudar.
+  const ordemMotor: ChaveCenario[] = ['financiamento', 'aluguel', 'consorcio', 'avista']
+  const caminhosEscolhidos = i.caminhos == null ? [...ordemMotor] : ordemMotor.filter((c) => i.caminhos!.includes(c))
+  const rotas: ChaveCenario[] = caminhosEscolhidos.filter((c) => c !== 'avista' || avistaOk)
 
   // Financiamento
   const financiado = V - i.entrada
@@ -573,12 +615,14 @@ function simularNucleo(i: InputsComparativo, leve = false): ResultadoComparativo
     const outAv = custosProp
     custosPropAv += custosProp
 
-    // — Orçamento de referência: o maior desembolso entre os cenários —
-    const ref = Math.max(outFin, aluguel, outCon, outAv)
+    // — Orçamento de referência: o maior desembolso entre os caminhos que estão sendo comparados —
+    const saida: Record<ChaveCenario, number> = { financiamento: outFin, aluguel, consorcio: outCon, avista: outAv }
+    const ref = Math.max(...rotas.map((c) => saida[c]))
     somaOrcamento += ref
     if (t === 1) {
-      gasto1 = { financiamento: outFin, aluguel, consorcio: outCon, avista: outAv }
-      orc1 = { valor: ref, definidoPor: ref === outFin ? 'financiamento' : ref === outCon ? 'consorcio' : 'aluguel' }
+      gasto1 = { ...saida }
+      const quem = (['financiamento', 'consorcio', 'aluguel', 'avista'] as ChaveCenario[]).find((c) => rotas.includes(c) && saida[c] === ref)
+      orc1 = { valor: ref, definidoPor: quem ?? 'aluguel' }
     }
     if ((t - 1) % 12 === 0) orcamentoRef.push(arred(ref))
 
@@ -655,8 +699,6 @@ function simularNucleo(i: InputsComparativo, leve = false): ResultadoComparativo
     ? { financiamento: finCom, aluguel: aluCom, consorcio: conCom, avista: avCom }
     : { financiamento: finSem, aluguel: aluSem, consorcio: conSem, avista: avSem }
 
-  // À vista só concorre se o dinheiro cobre o imóvel e o ITBI; senão a rota fica de fora, sem inventar dinheiro.
-  const rotas: ChaveCenario[] = avistaOk ? ['financiamento', 'aluguel', 'consorcio', 'avista'] : ['financiamento', 'aluguel', 'consorcio']
   const ranking = [...rotas].sort((a, b) => base[b] - base[a])
   const [primeiro, segundo] = ranking
 
@@ -788,6 +830,7 @@ function simularNucleo(i: InputsComparativo, leve = false): ResultadoComparativo
 
   return {
     rotas,
+    caminhosEscolhidos,
     avista: { disponivel: avistaOk, necessario: arred(necessarioAvista), falta: arred(Math.max(0, necessarioAvista - C)) },
     vencedor: primeiro,
     nomeVencedor: NOMES_CENARIOS[primeiro],
@@ -843,21 +886,39 @@ function raiz(f: (x: number) => number, a: number, b: number): number | null {
  */
 export function pontoDeVirada(i: InputsComparativo): PontoDeVirada {
   const intervalo: [number, number] = [-2, 20]
-  const dif = (qual: 'financiamento' | 'consorcio' | 'avista') => (v: number) => {
-    const r = simularNucleo({ ...i, valorizacaoImovelAA: v, descontarCustosVenda: false }, true)
-    return r.patrimonioSemCustosVenda[qual] - r.patrimonioSemCustosVenda.aluguel
+  const rotas = simularNucleo(i, true).rotas
+  // Com o aluguel na comparação, cada caminho é medido contra ele (como sempre foi). Sem aluguel, todos os pares entre os escolhidos.
+  const pares: [ChaveCenario, ChaveCenario][] = []
+  if (rotas.includes('aluguel')) {
+    for (const c of ['avista', 'financiamento', 'consorcio'] as ChaveCenario[]) if (rotas.includes(c)) pares.push([c, 'aluguel'])
+  } else {
+    const ordem = TODOS_CAMINHOS.filter((c) => rotas.includes(c))
+    for (let x = 0; x < ordem.length; x++) for (let y = x + 1; y < ordem.length; y++) pares.push([ordem[x], ordem[y]])
   }
-  const avistaPossivel = simularNucleo(i, true).avista.disponivel
+  const lista: ParVirada[] = pares.map(([a, b]) => {
+    const dif = (v: number) => {
+      const r = simularNucleo({ ...i, valorizacaoImovelAA: v, descontarCustosVenda: false }, true)
+      return r.patrimonioSemCustosVenda[a] - r.patrimonioSemCustosVenda[b]
+    }
+    const ponto = raiz(dif, intervalo[0], intervalo[1])
+    return { a, b, ponto, acima: dif(intervalo[1]) >= 0 ? a : b }
+  })
+  const de = (c: ChaveCenario) => {
+    const p = lista.find((l) => l.a === c && l.b === 'aluguel')
+    return p ? p.ponto : null
+  }
   return {
-    avistaVsAluguel: avistaPossivel ? raiz(dif('avista'), intervalo[0], intervalo[1]) : null,
-    financiamentoVsAluguel: raiz(dif('financiamento'), intervalo[0], intervalo[1]),
-    consorcioVsAluguel: raiz(dif('consorcio'), intervalo[0], intervalo[1]),
+    pares: lista,
+    avistaVsAluguel: de('avista'),
+    financiamentoVsAluguel: de('financiamento'),
+    consorcioVsAluguel: de('consorcio'),
     intervalo,
   }
 }
 
 /** A data da contemplação é a maior incerteza do consórcio: mostra o resultado em meses típicos. */
 export function sensibilidadeContemplacao(i: InputsComparativo) {
+  if (!simularNucleo(i, true).rotas.includes('consorcio')) return []
   const limite = Math.min(i.prazoConsorcioMeses, Math.round(i.horizonteAnos * 12))
   const meses = [12, 36, 60, 120, 180].filter((m) => m <= limite)
   return meses.map((mes) => {

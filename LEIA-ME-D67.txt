@@ -1,0 +1,17 @@
+D67 (07/10/2026): Simule Imóvel, a pessoa escolhe quais caminhos comparar (2 a 4). Detalhes: docs/07-registro-de-decisoes.md (D67).
+
+NÃO MEXE EM NADA DE API, VERCEL, CÓDIGOS DE ACESSO NEM NOS TOP 15. É só o Simule Imóvel (motor e tela).
+
+O QUE HÁ DE NOVO
+ 1. Bloco "Quais caminhos comparar?" no começo do formulário: Comprar à vista, Financiar, Consórcio, Alugar e investir. Mínimo de dois.
+ 2. O orçamento mensal de referência considera só os caminhos marcados (por isso à vista x consórcio não sente o financiamento).
+ 3. Ponto de virada: com o aluguel marcado, cada caminho contra o aluguel; sem o aluguel, os pares entre os marcados.
+ 4. Sem escolher nada, o resultado é idêntico ao de antes (testado número a número).
+
+ARQUIVOS (alterados): webapp-src/src/domain/simulaImovel.ts, simulaImovel.test.ts,
+                      webapp-src/src/screens/SimuleImovel.tsx, SimuleImovel.test.tsx,
+                      webapp-src/src/ui/DetalheCustos.tsx, docs/07-registro-de-decisoes.md, LEIA-ME-D67.txt
+(Cópias soltas na raiz do zip: SimuleImovel.tsx, SimuleImovel.test.tsx, simulaImovel.ts, simulaImovel.test.ts, DetalheCustos.tsx.)
+
+TESTES: web 1.322 -> 1.347, tsc limpo. Scripts: 308 passam.
+Depois de subir: abrir ./app/?tela=simuleImovel, desmarcar Financiar e Alugar, informar R$ 520.000 de dinheiro disponível e conferir à vista x consórcio.

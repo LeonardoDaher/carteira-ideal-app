@@ -4,13 +4,14 @@ import { dataCurta, porcentagem, reais } from '../domain/mercadoOficial'
 import type { SnapshotMercado } from '../domain/mercadoOficial'
 import {
   NOMES_CENARIOS,
+  TODOS_CAMINHOS,
   inputsDoSnapshot,
   inputsPadrao,
   reaisCompacto,
   simularComparativoImobiliario,
   validarInputs,
 } from '../domain/simulaImovel'
-import type { ChaveCenario, InputsComparativo, PontoDeVirada, ResultadoComparativo } from '../domain/simulaImovel'
+import type { ChaveCenario, InputsComparativo, ParVirada, PontoDeVirada, ResultadoComparativo } from '../domain/simulaImovel'
 import { CampoNumero } from '../ui/CampoNumero'
 import { CampoReais } from '../ui/CampoReais'
 import { BlocoAlugar, BlocoAvista, BlocoConsorcio, BlocoFinanciar, ComoLer, ParaOndeFoi, PremissasUsadas, reais0 } from '../ui/DetalheCustos'
@@ -51,6 +52,15 @@ export function SimuleImovel({
   const custosIniciais = (entrada.valorImovel * entrada.custosIniciaisPct) / 100
   const disponivel = entrada.dinheiroDisponivel ?? entrada.entrada + custosIniciais
   const necessarioAvista = Math.round((entrada.valorImovel + custosIniciais) * 100) / 100
+  // Caminhos marcados (D67): sem escolha, todos. O mínimo é dois, porque comparar exige ao menos um contra o outro.
+  const marcados = entrada.caminhos ?? TODOS_CAMINHOS
+  const alternar = (c: ChaveCenario) => {
+    const novo = marcados.includes(c) ? marcados.filter((x) => x !== c) : TODOS_CAMINHOS.filter((x) => x === c || marcados.includes(x))
+    if (novo.length < 2) return
+    mudar('caminhos', novo.length === TODOS_CAMINHOS.length ? null : novo)
+  }
+  const avistaMarcado = marcados.includes('avista')
+  const semDinheiroParaAvista = disponivel < necessarioAvista - 0.005
 
   return (
     <div className="screen">
@@ -69,6 +79,48 @@ export function SimuleImovel({
       <div className="desk-split">
         <div className="desk-main">
           <form className="imovel-form" onSubmit={(e) => e.preventDefault()} aria-label="Dados da simulação">
+            <div className="card-outline col" style={{ gap: 8 }} role="group" aria-label="Quais caminhos comparar?">
+              <span style={{ fontWeight: 700, fontSize: 14.5 }}>Quais caminhos comparar?</span>
+              <div className="row" style={{ gap: 6, flexWrap: 'wrap' }}>
+                {TODOS_CAMINHOS.map((c) => {
+                  const ligado = marcados.includes(c)
+                  const ultimos = ligado && marcados.length <= 2
+                  return (
+                    <button
+                      key={c}
+                      type="button"
+                      className={`chip ${ligado ? 'selected' : ''}`}
+                      aria-pressed={ligado}
+                      aria-disabled={ultimos}
+                      title={ultimos ? 'É preciso manter pelo menos dois caminhos' : undefined}
+                      onClick={() => alternar(c)}
+                    >
+                      {ligado ? '✓ ' : ''}{NOMES_CENARIOS[c]}
+                    </button>
+                  )
+                })}
+                {marcados.length < TODOS_CAMINHOS.length && (
+                  <button type="button" className="chip" onClick={() => mudar('caminhos', null)}>Comparar os quatro</button>
+                )}
+              </div>
+              <span className="tiny muted justify" style={{ lineHeight: 1.5 }}>
+                Marque dois, três ou os quatro. Para trocar um par (por exemplo, de à vista × consórcio para financiar × consórcio), marque o novo e desmarque o outro.
+                O orçamento mensal de referência passa a considerar só os caminhos marcados.
+              </span>
+              {avistaMarcado && semDinheiroParaAvista && marcados.length === 2 && (
+                <div className="col" style={{ gap: 6 }} role="note">
+                  <span className="small justify" style={{ lineHeight: 1.5 }}>
+                    Para comprar à vista seriam necessários {reais0(necessarioAvista)} e você informou {reais0(disponivel)}. Sem esse dinheiro, esse caminho fica de fora.
+                  </span>
+                  <div className="row">
+                    <button type="button" className="chip" onClick={() => mudar('dinheiroDisponivel', necessarioAvista)}>
+                      Usar {reais0(necessarioAvista)} como dinheiro disponível
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
             <details className="card-outline imovel-bloco" open>
               <summary>O imóvel e o prazo</summary>
               <div className="imovel-grade">
@@ -148,8 +200,8 @@ export function SimuleImovel({
               </div>
             </details>
 
-            <details className="card-outline imovel-bloco" open>
-              <summary>Financiamento</summary>
+            <details key={`financiamento-${marcados.includes('financiamento')}`} className="card-outline imovel-bloco" open={marcados.includes('financiamento')}>
+              <summary>Financiamento{!marcados.includes('financiamento') && ' (fora da comparação)'}</summary>
               <div className="imovel-grade">
                 <CampoNumero rotulo="Juros da proposta (nominal)" valor={entrada.jurosNominalAA} onMudar={(v) => mudar('jurosNominalAA', v)} sufixo="% ao ano" dica="Use a taxa que o banco ofereceu" />
                 <CampoNumero rotulo="Prazo" valor={entrada.prazoFinanciamentoAnos} onMudar={(v) => mudar('prazoFinanciamentoAnos', v)} sufixo="anos" casas={0} />
@@ -170,16 +222,16 @@ export function SimuleImovel({
               </div>
             </details>
 
-            <details className="card-outline imovel-bloco" open>
-              <summary>Aluguel</summary>
+            <details key={`aluguel-${marcados.includes('aluguel')}`} className="card-outline imovel-bloco" open={marcados.includes('aluguel')}>
+              <summary>Aluguel{!marcados.includes('aluguel') && ' (fora da comparação)'}</summary>
               <div className="imovel-grade">
                 <CampoReais rotulo="Aluguel mensal hoje" valor={entrada.aluguelMensal} onMudar={(v) => mudar('aluguelMensal', v)} />
                 <CampoNumero rotulo="Reajuste anual" valor={entrada.reajusteAluguelAA} onMudar={(v) => mudar('reajusteAluguelAA', v)} sufixo="% ao ano" dica="IPCA ou IGP-M" />
               </div>
             </details>
 
-            <details className="card-outline imovel-bloco" open>
-              <summary>Consórcio</summary>
+            <details key={`consorcio-${marcados.includes('consorcio')}`} className="card-outline imovel-bloco" open={marcados.includes('consorcio')}>
+              <summary>Consórcio{!marcados.includes('consorcio') && ' (fora da comparação)'}</summary>
               <div className="imovel-grade">
                 <CampoNumero rotulo="Taxa de administração total" valor={entrada.taxaAdmTotalPct} onMudar={(v) => mudar('taxaAdmTotalPct', v)} sufixo="%" dica="Soma de todo o prazo" />
                 <CampoNumero rotulo="Fundo de reserva" valor={entrada.fundoReservaPct} onMudar={(v) => mudar('fundoReservaPct', v)} sufixo="%" />
@@ -237,27 +289,25 @@ export function SimuleImovel({
   )
 }
 
-const FRASES_VIRADA: Record<'avista' | 'financiamento' | 'consorcio', { titulo: string; sujeito: string }> = {
-  avista: { titulo: 'Comprar à vista × alugar', sujeito: 'comprar à vista' },
-  financiamento: { titulo: 'Financiar × alugar', sujeito: 'financiar' },
-  consorcio: { titulo: 'Consórcio × alugar', sujeito: 'o consórcio' },
-}
+const TITULO_CURTO: Record<ChaveCenario, string> = { avista: 'Comprar à vista', financiamento: 'Financiar', consorcio: 'Consórcio', aluguel: 'Alugar' }
+const SUJEITO: Record<ChaveCenario, string> = { avista: 'comprar à vista', financiamento: 'financiar', consorcio: 'o consórcio', aluguel: 'alugar e investir' }
 
-/** Uma linha do ponto de virada: a valorização do imóvel em que a rota e o aluguel empatam, ou quem fica sempre na frente. */
-function LinhaVirada({ quem, r, pv, valorizacao }: { quem: 'avista' | 'financiamento' | 'consorcio'; r: ResultadoComparativo; pv: PontoDeVirada; valorizacao: number }) {
-  const f = FRASES_VIRADA[quem]
-  const ponto = quem === 'avista' ? pv.avistaVsAluguel : quem === 'financiamento' ? pv.financiamentoVsAluguel : pv.consorcioVsAluguel
-  const naFrente = r.patrimonioSemCustosVenda[quem] >= r.patrimonioSemCustosVenda.aluguel ? f.sujeito : 'alugar e investir'
+/** Uma linha do ponto de virada: a valorização do imóvel em que os dois caminhos empatam, ou quem fica sempre na frente. */
+function LinhaVirada({ par, r, pv, valorizacao }: { par: ParVirada; r: ResultadoComparativo; pv: PontoDeVirada; valorizacao: number }) {
+  const { a, b, ponto, acima } = par
+  const abaixo = acima === a ? b : a
+  const titulo = `${TITULO_CURTO[a]} × ${TITULO_CURTO[b].toLowerCase()}`
+  const naFrente = r.patrimonioSemCustosVenda[a] >= r.patrimonioSemCustosVenda[b] ? SUJEITO[a] : SUJEITO[b]
   return (
     <div className="small justify" style={{ lineHeight: 1.5 }}>
       {ponto != null ? (
         <>
-          <strong>{f.titulo}:</strong> empatam se o imóvel valorizar {porcentagem(ponto)} ao ano (você supôs {porcentagem(valorizacao)}). Acima disso, {f.sujeito} leva vantagem; abaixo,
-          alugar e investir.
+          <strong>{titulo}:</strong> empatam se o imóvel valorizar {porcentagem(ponto)} ao ano (você supôs {porcentagem(valorizacao)}). Acima disso, {SUJEITO[acima]} leva vantagem; abaixo,{' '}
+          {SUJEITO[abaixo]}.
         </>
       ) : (
         <>
-          <strong>{f.titulo}:</strong> entre {pv.intervalo[0]}% e {pv.intervalo[1]}% de valorização ao ano, a ordem entre os dois não muda com as demais premissas: {naFrente} fica sempre à frente.
+          <strong>{titulo}:</strong> entre {pv.intervalo[0]}% e {pv.intervalo[1]}% de valorização ao ano, a ordem entre os dois não muda com as demais premissas: {naFrente} fica sempre à frente.
         </>
       )}
     </div>
@@ -286,7 +336,7 @@ function Resultado({ r, entrada, onIncluirAvista }: { r: ResultadoComparativo; e
         )}
       </div>
 
-      {!r.avista.disponivel && (
+      {!r.avista.disponivel && r.caminhosEscolhidos.includes('avista') && (
         <div className="card-outline col" style={{ gap: 8 }} role="note">
           <span className="small justify" style={{ lineHeight: 1.5 }}>
             <strong>Comprar à vista não entrou na comparação.</strong> Com {reais0(r.capitalInicial)} disponíveis você não paga o imóvel ({reais0(entrada.valorImovel)}) e o ITBI e o
@@ -326,7 +376,7 @@ function Resultado({ r, entrada, onIncluirAvista }: { r: ResultadoComparativo; e
 
       <div className="card col" style={{ gap: 10 }}>
         <span style={{ fontWeight: 700, fontSize: 14.5 }}>Como o patrimônio evolui</span>
-        <GraficoPatrimonio serie={r.serieMensal} rotas={r.rotas.includes('avista') ? ['aluguel', 'financiamento', 'consorcio', 'avista'] : ['aluguel', 'financiamento', 'consorcio']} />
+        <GraficoPatrimonio serie={r.serieMensal} rotas={(['aluguel', 'financiamento', 'consorcio', 'avista'] as ChaveCenario[]).filter((c) => r.rotas.includes(c))} />
       </div>
 
       <div className="card col" style={{ gap: 10 }}>
@@ -335,18 +385,18 @@ function Resultado({ r, entrada, onIncluirAvista }: { r: ResultadoComparativo; e
 
       <div className="col" style={{ gap: 10 }}>
         <span style={{ fontWeight: 700, fontSize: 14.5 }}>Cada custo e cada taxa, caminho por caminho</span>
-        {r.avista.disponivel && <BlocoAvista r={r} entrada={entrada} />}
-        <BlocoFinanciar r={r} entrada={entrada} />
-        <BlocoConsorcio r={r} entrada={entrada} />
-        <BlocoAlugar r={r} entrada={entrada} />
+        {r.rotas.includes('avista') && <BlocoAvista r={r} entrada={entrada} />}
+        {r.rotas.includes('financiamento') && <BlocoFinanciar r={r} entrada={entrada} />}
+        {r.rotas.includes('consorcio') && <BlocoConsorcio r={r} entrada={entrada} />}
+        {r.rotas.includes('aluguel') && <BlocoAlugar r={r} entrada={entrada} />}
       </div>
 
       {pv && (
         <div className="card col" style={{ gap: 8 }}>
           <span style={{ fontWeight: 700, fontSize: 14.5 }}>Em que ponto o resultado muda?</span>
-          {r.avista.disponivel && <LinhaVirada quem="avista" r={r} pv={pv} valorizacao={entrada.valorizacaoImovelAA} />}
-          <LinhaVirada quem="financiamento" r={r} pv={pv} valorizacao={entrada.valorizacaoImovelAA} />
-          <LinhaVirada quem="consorcio" r={r} pv={pv} valorizacao={entrada.valorizacaoImovelAA} />
+          {pv.pares.map((par) => (
+            <LinhaVirada key={`${par.a}-${par.b}`} par={par} r={r} pv={pv} valorizacao={entrada.valorizacaoImovelAA} />
+          ))}
 
           {r.sensibilidadeContemplacao && r.sensibilidadeContemplacao.length > 0 && (
             <>
@@ -382,7 +432,7 @@ function Resultado({ r, entrada, onIncluirAvista }: { r: ResultadoComparativo; e
           <span>
             <strong>Mesmo dinheiro em todos os caminhos.</strong> O dinheiro que você tem hoje fica aplicado desde o mês 0, menos o que cada caminho
             gasta na compra: a entrada e o ITBI/cartório no financiamento; o imóvel e o ITBI à vista; nada, para quem aluga e no consórcio até a
-            contemplação. Todo mês, o maior desembolso entre os caminhos vira o orçamento de referência: quem paga menos investe a diferença. Assim,
+            contemplação. Todo mês, o maior desembolso entre os caminhos que você marcou vira o orçamento de referência: quem paga menos investe a diferença. Assim,
             nenhum caminho leva vantagem só por gastar menos.
           </span>
           <span>

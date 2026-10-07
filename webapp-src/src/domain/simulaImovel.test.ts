@@ -603,3 +603,114 @@ describe('comprar à vista: o que move o resultado', () => {
     for (const x of s) expect(ROTAS_4).toContain(x.vencedor)
   })
 })
+
+describe('escolha dos caminhos a comparar (D67)', () => {
+  const TODOS: ChaveCenario[] = ['avista', 'financiamento', 'consorcio', 'aluguel']
+  const pares: [string, ChaveCenario[]][] = [
+    ['à vista × consórcio', ['avista', 'consorcio']],
+    ['financiar × consórcio', ['financiamento', 'consorcio']],
+    ['à vista × financiar', ['avista', 'financiamento']],
+    ['alugar × consórcio', ['aluguel', 'consorcio']],
+    ['três caminhos sem o aluguel', ['avista', 'financiamento', 'consorcio']],
+  ]
+
+  it('sem escolha, ou marcando os quatro, o resultado é idêntico ao de antes (regressão número a número)', () => {
+    const a = simularComparativoImobiliario(COM_DINHEIRO)
+    const b = simularComparativoImobiliario({ ...COM_DINHEIRO, caminhos: TODOS })
+    expect(JSON.stringify(b)).toBe(JSON.stringify(a))
+    expect(a.rotas).toEqual(ROTAS_4)
+    // e sem dinheiro para o à vista, também
+    const c = simularComparativoImobiliario({})
+    const d = simularComparativoImobiliario({ caminhos: ['financiamento', 'aluguel', 'consorcio'] })
+    // a única diferença é o eco do que foi pedido; todo o resto, número a número, é igual
+    expect(JSON.stringify({ ...d, caminhosEscolhidos: 0 })).toBe(JSON.stringify({ ...c, caminhosEscolhidos: 0 }))
+  })
+
+  it.each(pares)('%s: só os escolhidos entram no ranking e no vencedor', (_nome, caminhos) => {
+    const r = simularComparativoImobiliario({ ...COM_DINHEIRO, caminhos })
+    expect([...r.rotas].sort()).toEqual([...caminhos].sort())
+    expect([...r.ranking].sort()).toEqual([...caminhos].sort())
+    expect(caminhos).toContain(r.vencedor)
+    const [p, s] = r.ranking
+    perto(r.vantagemSobreSegundo, r.cenarios[p].patrimonioFinal - r.cenarios[s].patrimonioFinal, 0.02)
+  })
+
+  it.each(pares)('%s: a contabilidade fecha para cada caminho escolhido', (_nome, caminhos) => {
+    for (const lancar of [0, 30_000]) {
+      const r = simularComparativoImobiliario({ ...COM_DINHEIRO, caminhos, lance: lancar })
+      for (const c of r.rotas) expect(Math.abs(r.detalhe.contabilidade[c].diferenca)).toBeLessThan(0.05)
+    }
+  })
+
+  it('o orçamento de referência considera só os caminhos escolhidos: à vista × consórcio não sente o financiamento', () => {
+    const base = simularComparativoImobiliario({ ...COM_DINHEIRO, caminhos: ['avista', 'consorcio'] })
+    // mudar tudo do financiamento não pode mexer em nada do par (o aluguel fica: o consórcio o paga até a contemplação)
+    const outro = simularComparativoImobiliario({ ...COM_DINHEIRO, caminhos: ['avista', 'consorcio'], jurosNominalAA: 25, entrada: 50_000, tarifaMensal: 900, sistema: 'PRICE' })
+    expect(outro.cenarios.avista.patrimonioFinal).toBe(base.cenarios.avista.patrimonioFinal)
+    expect(outro.cenarios.consorcio.patrimonioFinal).toBe(base.cenarios.consorcio.patrimonioFinal)
+    expect(outro.orcamentoReferencia).toEqual(base.orcamentoReferencia)
+    // e o orçamento do par é definido pelo consórcio (parcela + aluguel até a contemplação)
+    expect(base.detalhe.orcamentoInicial.definidoPor).toBe('consorcio')
+    perto(base.detalhe.orcamentoInicial.valor, base.detalhe.investimentos.consorcio.gastoPrimeiroMes)
+    expect(base.detalhe.investimentos.consorcio.primeiroAporte).toBe(0)
+  })
+
+  it('escolher menos caminhos não deixa o orçamento maior do que com todos', () => {
+    const todos = simularComparativoImobiliario(COM_DINHEIRO)
+    const par = simularComparativoImobiliario({ ...COM_DINHEIRO, caminhos: ['avista', 'aluguel'] })
+    expect(par.detalhe.orcamentoInicial.valor).toBeLessThanOrEqual(todos.detalhe.orcamentoInicial.valor)
+    expect(par.detalhe.orcamentoInicial.definidoPor).toBe('aluguel')
+  })
+
+  it('à vista marcado sem dinheiro suficiente fica de fora, mas continua como escolhido', () => {
+    const r = simularComparativoImobiliario({ caminhos: ['avista', 'financiamento', 'consorcio'] })
+    expect(r.caminhosEscolhidos).toContain('avista')
+    expect(r.rotas).toEqual(['financiamento', 'consorcio'])
+    expect(r.avista.disponivel).toBe(false)
+  })
+
+  it('validação: menos de dois caminhos, caminho inválido ou repetido e à vista sem dinheiro viram erro em português', () => {
+    expect(validarInputs(inputsPadrao({ caminhos: ['consorcio'] })).join(' ')).toMatch(/pelo menos dois caminhos/)
+    expect(validarInputs(inputsPadrao({ caminhos: [] })).join(' ')).toMatch(/pelo menos dois caminhos/)
+    expect(validarInputs(inputsPadrao({ caminhos: ['consorcio', 'consorcio'] })).join(' ')).toMatch(/caminho inválido/)
+    expect(validarInputs(inputsPadrao({ caminhos: ['consorcio', 'xis' as ChaveCenario] })).join(' ')).toMatch(/caminho inválido/)
+    expect(validarInputs(inputsPadrao({ caminhos: ['avista', 'consorcio'] })).join(' ')).toMatch(/não dá para comprar à vista/)
+    expect(validarInputs(inputsPadrao({ caminhos: ['avista', 'consorcio'], ...COM_DINHEIRO }))).toEqual([])
+    expect(() => simularComparativoImobiliario({ caminhos: ['aluguel'] })).toThrow(/pelo menos dois caminhos/)
+  })
+
+  it('ponto de virada: com o aluguel, cada escolhido contra ele; sem o aluguel, os pares entre os escolhidos', () => {
+    const com = pontoDeVirada(inputsPadrao({ ...COM_DINHEIRO, caminhos: ['financiamento', 'consorcio', 'aluguel'] }))
+    expect(com.pares.map((p) => `${p.a}×${p.b}`)).toEqual(['financiamento×aluguel', 'consorcio×aluguel'])
+    expect(com.avistaVsAluguel).toBeNull()
+    expect(com.financiamentoVsAluguel).not.toBeNull()
+    const sem = pontoDeVirada(inputsPadrao({ ...COM_DINHEIRO, caminhos: ['avista', 'financiamento', 'consorcio'] }))
+    expect(sem.pares.map((p) => `${p.a}×${p.b}`)).toEqual(['avista×financiamento', 'avista×consorcio', 'financiamento×consorcio'])
+    expect(sem.financiamentoVsAluguel).toBeNull()
+    // À vista e financiar são donos do mesmo imóvel desde o mês 0: a valorização não os separa
+    expect(sem.pares[0].ponto).toBeNull()
+    // À vista × consórcio: o consórcio só tem o imóvel depois da contemplação, então a valorização favorece o à vista
+    const avCon = sem.pares[1]
+    expect(avCon.acima).toBe('avista')
+  })
+
+  it('ponto de virada: o empate achado é mesmo um empate entre os dois caminhos', () => {
+    const i = inputsPadrao({ ...COM_DINHEIRO, caminhos: ['financiamento', 'consorcio'] })
+    const par = pontoDeVirada(i).pares[0]
+    if (par.ponto == null) return
+    // o ponto vem arredondado em centésimos: um pouco abaixo e um pouco acima, quem lidera tem que ser outro
+    const lider = (v: number) => {
+      const r = simularComparativoImobiliario({ ...i, valorizacaoImovelAA: v, descontarCustosVenda: false })
+      return r.patrimonioSemCustosVenda.financiamento >= r.patrimonioSemCustosVenda.consorcio ? 'financiamento' : 'consorcio'
+    }
+    expect(lider(par.ponto - 0.05)).not.toBe(lider(par.ponto + 0.05))
+    expect(lider(par.ponto + 0.05)).toBe(par.acima)
+  })
+
+  it('a sensibilidade à contemplação só existe quando o consórcio está na comparação', () => {
+    expect(simularComparativoImobiliario({ ...COM_DINHEIRO, caminhos: ['avista', 'financiamento'] }).sensibilidadeContemplacao).toEqual([])
+    const s = simularComparativoImobiliario({ ...COM_DINHEIRO, caminhos: ['avista', 'consorcio'] }).sensibilidadeContemplacao!
+    expect(s.length).toBeGreaterThan(0)
+    for (const x of s) expect(['avista', 'consorcio']).toContain(x.vencedor)
+  })
+})

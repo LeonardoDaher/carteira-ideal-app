@@ -334,3 +334,87 @@ describe('SimuleImovel: ordem do formulário e de onde vem o R$ 520.000', () => 
     expect(screen.getByText(/R\$\s10\.000 sobre o valor do imóvel, pagos em toda compra/)).toBeTruthy()
   })
 })
+
+describe('SimuleImovel: escolha dos caminhos a comparar (D67)', () => {
+  const grupo = () => screen.getByRole('group', { name: 'Quais caminhos comparar?' })
+  const chip = (nome: string) => within(grupo()).getByRole('button', { name: new RegExp(`^(✓ )?${nome}$`) })
+  const ligado = (nome: string) => chip(nome).getAttribute('aria-pressed') === 'true'
+  const comDinheiro = () => fireEvent.change(campo('Dinheiro disponível hoje'), { target: { value: '520.000' } })
+
+  it('abre com os quatro caminhos marcados e o resultado de sempre', () => {
+    render(<SimuleImovel snapshot={comFocus} />)
+    for (const n of ['Comprar à vista', 'Financiar', 'Consórcio', 'Alugar e investir']) expect(ligado(n)).toBe(true)
+    expect(within(grupo()).queryByRole('button', { name: 'Comparar os quatro' })).toBeNull()
+    const ranking = screen.getByText('Patrimônio líquido final').closest('.card') as HTMLElement
+    expect(within(ranking).getByText(/3º/)).toBeTruthy() // sem dinheiro para o à vista, são três
+  })
+
+  it('desmarcar dois caminhos compara só o par: ranking, tabela, blocos, gráfico e ponto de virada', async () => {
+    render(<SimuleImovel snapshot={comFocus} />)
+    comDinheiro()
+    fireEvent.click(chip('Financiar'))
+    fireEvent.click(chip('Alugar e investir'))
+    expect(ligado('Financiar')).toBe(false)
+    const ranking = (await screen.findByText('Patrimônio líquido final')).closest('.card') as HTMLElement
+    expect(within(ranking).getByText(/1º/)).toBeTruthy()
+    expect(within(ranking).getByText(/2º/)).toBeTruthy()
+    expect(within(ranking).queryByText(/3º/)).toBeNull()
+    expect(within(ranking).queryByText(/Financiar/)).toBeNull()
+    expect(screen.getByText(/Os dois caminhos usam o mesmo dinheiro/)).toBeTruthy()
+    const tabela = screen.getByRole('table', { name: 'Para onde foi o dinheiro em cada caminho' })
+    expect(within(tabela).getAllByRole('columnheader').map((c) => c.textContent).filter(Boolean)).toEqual(['Consórcio', 'À vista'])
+    expect(screen.getByText('Comprar à vista: cada custo e cada taxa')).toBeTruthy()
+    expect(screen.getByText('Consórcio: cada custo e cada taxa')).toBeTruthy()
+    expect(screen.queryByText('Financiar: cada custo e cada taxa')).toBeNull()
+    expect(screen.queryByText('Alugar: cada custo e cada taxa')).toBeNull()
+    expect(screen.getByText('Comprar à vista × consórcio:')).toBeTruthy()
+    expect(screen.queryByText(/× alugar:/)).toBeNull()
+    expect(screen.queryByRole('img', { name: /Financiar R\$/ })).toBeNull()
+  })
+
+  it('financiar × consórcio, sem à vista nem aluguel, também funciona', () => {
+    render(<SimuleImovel snapshot={comFocus} />)
+    fireEvent.click(chip('Comprar à vista'))
+    fireEvent.click(chip('Alugar e investir'))
+    const ranking = screen.getByText('Patrimônio líquido final').closest('.card') as HTMLElement
+    expect(within(ranking).queryByText(/3º/)).toBeNull()
+    expect(within(ranking).getByText(/\dº Financiar$/)).toBeTruthy()
+    expect(within(ranking).getByText(/\dº Consórcio$/)).toBeTruthy()
+    expect(screen.getByText(/Financiar × consórcio:/)).toBeTruthy()
+  })
+
+  it('não deixa ficar com menos de dois caminhos', () => {
+    render(<SimuleImovel snapshot={comFocus} />)
+    fireEvent.click(chip('Comprar à vista'))
+    fireEvent.click(chip('Alugar e investir'))
+    fireEvent.click(chip('Consórcio')) // sobraria um só: não muda
+    expect(ligado('Consórcio')).toBe(true)
+    expect(ligado('Financiar')).toBe(true)
+  })
+
+  it('"Comparar os quatro" volta ao conjunto completo', () => {
+    render(<SimuleImovel snapshot={comFocus} />)
+    fireEvent.click(chip('Financiar'))
+    fireEvent.click(chip('Consórcio'))
+    fireEvent.click(within(grupo()).getByRole('button', { name: 'Comparar os quatro' }))
+    for (const n of ['Comprar à vista', 'Financiar', 'Consórcio', 'Alugar e investir']) expect(ligado(n)).toBe(true)
+  })
+
+  it('à vista × consórcio sem dinheiro para o imóvel explica o que falta e o atalho resolve', async () => {
+    render(<SimuleImovel snapshot={comFocus} />)
+    fireEvent.click(chip('Financiar'))
+    fireEvent.click(chip('Alugar e investir'))
+    expect(screen.getByRole('alert').textContent).toMatch(/não dá para comprar à vista/)
+    fireEvent.click(within(grupo()).getByRole('button', { name: /Usar R\$\s520\.000 como dinheiro disponível/ }))
+    expect(await screen.findByText(/Os dois caminhos usam o mesmo dinheiro/)).toBeTruthy()
+    expect(screen.queryByRole('alert')).toBeNull()
+  })
+
+  it('os blocos dos caminhos de fora ficam recolhidos e avisam', () => {
+    render(<SimuleImovel snapshot={comFocus} />)
+    fireEvent.click(chip('Financiar'))
+    const bloco = screen.getByText('Financiamento (fora da comparação)').closest('details') as HTMLDetailsElement
+    expect(bloco.open).toBe(false)
+    expect((screen.getByText('Consórcio', { selector: 'summary' }).closest('details') as HTMLDetailsElement).open).toBe(true)
+  })
+})

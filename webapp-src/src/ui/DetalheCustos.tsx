@@ -6,7 +6,7 @@ import type { ChaveCenario, InputsComparativo, ResultadoComparativo } from '../d
 /** Reais inteiros, sem centavos: "R$ 1.234.567". Nos detalhes, centavos só atrapalham a leitura. */
 export const reais0 = (v: number) => reais(Math.round(v)).replace(/,00$/, '')
 
-const contagem = (r: ResultadoComparativo) => (r.rotas.length === 4 ? 'quatro' : 'três')
+const contagem = (r: ResultadoComparativo) => (r.rotas.length === 4 ? 'quatro' : r.rotas.length === 3 ? 'três' : 'dois')
 /** O dinheiro disponível é exatamente entrada + ITBI (o padrão antes da D46)? */
 const soEntradaEItbi = (r: ResultadoComparativo) => Math.abs(r.capitalInicial - (r.detalhe.financiamento.entrada + r.detalhe.financiamento.itbiCartorio)) < 0.01
 const sinalReais = (v: number) => `${v >= 0 ? '+' : '−'} ${reais0(Math.abs(v))}`
@@ -156,7 +156,7 @@ export function ComoLer({ r, entrada }: { r: ResultadoComparativo; entrada: Inpu
           {entrada.descontarCustosVenda ? ' Aqui já estão descontados a corretagem e o imposto da venda.' : ' Aqui não estão descontados a corretagem e o imposto da venda do imóvel (a opção está desligada).'}
         </span>
         <span>
-          <strong>Os {contagem(r)} caminhos usam o mesmo dinheiro.</strong> Todos partem do mesmo capital ({reais0(r.capitalInicial)},{' '}
+          <strong>{r.rotas.length === 2 ? 'Os dois caminhos usam' : `Os ${contagem(r)} caminhos usam`} o mesmo dinheiro.</strong> Todos partem do mesmo capital ({reais0(r.capitalInicial)},{' '}
           {soEntradaEItbi(r) ? 'que seria a entrada e o ITBI/cartório' : 'o dinheiro que você informou ter hoje'}) e gastam o
           mesmo orçamento por mês: a maior despesa entre eles, que no primeiro mês é de {reais0(r.orcamentoReferencia[0] ?? 0)}. Quem paga menos investe a diferença. Por isso a
           diferença no resultado vem só de <em>para onde o dinheiro foi</em>: virou patrimônio ou virou custo.

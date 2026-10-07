@@ -1310,3 +1310,21 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 **Efeito na publicação da D65.** O código de teste que estava em `TOP15_CODIGOS` deixa de abrir os FIIs. Para os FIIs voltarem a abrir é preciso criar `TOP15_FIIS_CODIGOS` na Vercel e fazer Redeploy. O código antigo salvo em aparelhos para os FIIs não existia em chave própria, então quem já tinha liberado os FIIs digita o novo código uma vez.
 
 **Testes.** Scripts: 307 → 308 (`top15-acesso.test.mjs` com o isolamento nos dois sentidos e o gerador por classe). Web: o portão com chave própria e o teste de que o código salvo das ações não abre os FIIs.
+
+## D67 (07/10/2026): Simule Imóvel, a pessoa escolhe quais caminhos comparar
+
+**Pedido do responsável.** Não obrigar a comparação dos quatro caminhos: poder comparar, por exemplo, **à vista × consórcio** ou **financiar × consórcio**, ou marcar os quatro.
+
+**Decisão.** Novo campo `caminhos` nas entradas do motor (`simulaImovel.ts`): lista de 2 a 4 entre `avista`, `financiamento`, `consorcio` e `aluguel`. **Ausente ou `null` = todos**, exatamente como antes: um teste compara o resultado inteiro, número a número, com o de antes (4 caminhos marcados = sem escolha). O mínimo é **dois**; menos que isso, ou caminho repetido ou desconhecido, vira erro em português.
+
+**O que mudou no cálculo (e por quê).** O **orçamento de referência** (o maior desembolso do mês, que quem gasta menos investe a diferença) passou a considerar **só os caminhos escolhidos**. Se ele continuasse considerando os quatro, a parcela do financiamento inflaria o orçamento e mudaria o resultado de à vista × consórcio, sem que o financiamento estivesse na comparação. Um teste muda juros, entrada, tarifa e sistema do financiamento e confirma que o par à vista × consórcio não se mexe (e foi verificado com teste de mutação: reintroduzido o orçamento de quatro caminhos, o teste falha). A contabilidade (`patrimônio = colocado − custos + valorização + rendimento − IR − custos de venda`) continua fechando em todos os pares testados, com e sem lance.
+
+**À vista sem dinheiro.** Continua valendo a regra da D46: sem dinheiro para o imóvel e o ITBI, a rota fica de fora e nunca se inventa dinheiro. O resultado traz `caminhosEscolhidos` (o que a pessoa pediu) e `rotas` (o que de fato entrou). Se sobrar menos de dois (por exemplo, à vista × consórcio sem o dinheiro), a tela mostra o erro, quanto falta e um botão para usar o valor necessário.
+
+**Ponto de virada.** Com o **aluguel** na comparação, cada caminho escolhido é medido contra ele (como sempre foi). **Sem o aluguel**, o ponto de virada passa a ser entre os pares dos escolhidos (ex.: financiar × consórcio). O resultado traz `pares` (com quem fica na frente acima do ponto); os campos antigos `avistaVsAluguel`, `financiamentoVsAluguel` e `consorcioVsAluguel` continuam existindo. Observação útil: **à vista × financiar não têm ponto de virada pela valorização**, porque os dois são donos do mesmo imóvel desde o mês 0; a tela diz que a ordem não muda. A tabela "E se a contemplação demorar?" só aparece com o consórcio na comparação.
+
+**Tela.** Bloco "Quais caminhos comparar?" no começo do formulário, com quatro botões (marcado = fundo amarelo, ✓ e `aria-pressed`), o botão "Comparar os quatro" quando há menos que quatro, e a regra de nunca ficar com menos de dois. Ranking, gráfico, "Para onde foi cada real", blocos de custos, decomposição da vantagem e ponto de virada mostram só os escolhidos. Os blocos de entrada dos caminhos de fora ficam **recolhidos** e marcados "(fora da comparação)" (não são ocultos, para não esconder um valor inválido). O texto diz "Os dois caminhos usam o mesmo dinheiro" quando são dois.
+
+**Não foi pedido e não foi feito.** Carro e moto (têm as mesmas quatro rotas, com "sem carro" no lugar do aluguel) e as páginas de SEO/Metodologia não ganharam o seletor; o estado da escolha não é guardado no aparelho. Fica como próximo passo natural, no mesmo molde.
+
+**Testes.** Web 1.322 → 1.347 (18 do motor, incluindo regressão 4 caminhos = antes, contabilidade em 5 combinações, independência do financiamento, validação, ponto de virada por pares; 7 de tela). `tsc -b` limpo. Scripts: 308 passam.
