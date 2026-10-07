@@ -18,6 +18,7 @@
     "atualizar-acoes-baratas": "node scripts/atualizar-acoes-baratas.mjs",
     "verificar-acoes-baratas": "node scripts/acoes-baratas-verificar.mjs ultima",
     "atualizar-fii-baratos": "node scripts/atualizar-fii-baratos.mjs",
+    "atualizar-fiis-historico": "node scripts/atualizar-fiis-historico.mjs",
     "verificar-fii-baratos": "node scripts/fii-baratos-verificar.mjs ultima",
     "codigo-top15":"node scripts/gerar-codigo-top15.mjs"
   },

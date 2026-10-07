@@ -191,6 +191,7 @@ export function alertasDoFundo(f, a) {
   if (f.dy12 != null && f.dy12 > a.dy12Alto) lista.push('dy_alto')
   if (f.razaoRendimentoRecente != null && f.razaoRendimentoRecente < a.rendimentoRecenteMinimoSobre12m) lista.push('rendimento_em_queda')
   if (f.picoDeRendimento != null && f.picoDeRendimento > a.picoDeRendimentoMaximo) lista.push('rendimento_com_pico')
+  if (f.saltoMaximo != null && f.saltoMaximo > a.saltoDePrecoDiario) lista.push('salto_de_preco')
   return lista
 }
 
@@ -236,6 +237,41 @@ export function ranquear(fundos) {
 // Cálculo completo
 // ---------------------------------------------------------------------------------------
 
+const FONTE_DIARIA = 'B3 (boletim diário)'
+const FONTE_MENSAL = 'brapi (job mensal de FIIs)'
+
+/**
+ * Cotação e volume de um fundo. Usa o histórico DIÁRIO da B3 (insumos.pregoesDiarios + fundo.precoDiario) quando ele tem pregões
+ * suficientes e o fundo negociou na janela; senão, o preço do job mensal de FIIs (brapi), a menos que `precoDiarioObrigatorio`
+ * (condição para publicar) exija o diário. Volume: dia sem negócio conta zero, como no job de FIIs.
+ * Também mede o maior salto de um dia para o outro no fechamento (desdobramento ou grupamento aparecem aqui).
+ */
+export function escolherPreco(f, insumos, d) {
+  const datas = insumos.pregoesDiarios ?? []
+  const serie = f.precoDiario
+  if (serie && datas.length >= d.minimoPregoesPrecoDiario && serie.some(Boolean)) {
+    let i = serie.length - 1
+    while (i >= 0 && !serie[i]) i--
+    const volumes = serie.map((v) => (v ? (v[1] > 0 ? v[1] : 0) : 0))
+    const ordenados = [...volumes].sort((a, b) => a - b)
+    const n = ordenados.length
+    const fechamentos = serie.filter(Boolean).map((v) => v[0])
+    let salto = 0
+    for (let k = 1; k < fechamentos.length; k++) salto = Math.max(salto, Math.abs(fechamentos[k] / fechamentos[k - 1] - 1))
+    return {
+      cotacao: serie[i][0],
+      dataCotacao: datas[i],
+      volumeMedio: volumes.reduce((s, v) => s + v, 0) / n,
+      volumeMediano: n % 2 ? ordenados[(n - 1) / 2] : (ordenados[n / 2 - 1] + ordenados[n / 2]) / 2,
+      fonte: FONTE_DIARIA,
+      saltoMaximo: salto,
+      sessoes: datas.length,
+    }
+  }
+  if (d.precoDiarioObrigatorio) return { erro: 'sem_preco_diario', motivo: `Sem preço diário da B3 (histórico com ${datas.length} pregões, mínimo ${d.minimoPregoesPrecoDiario}; ${serie ? 'o fundo não negociou na janela' : 'fundo fora do histórico'}).` }
+  return { cotacao: f.cotacao, dataCotacao: f.dataCotacao, volumeMedio: f.volumeMedio ?? null, volumeMediano: f.volumeMediano ?? null, fonte: FONTE_MENSAL, saltoMaximo: null, sessoes: null }
+}
+
 const excl = (f, etapa, codigo, motivo) => ({ ticker: f.ticker, nome: f.nome ?? null, setor: f.setor ?? null, etapa, codigo, motivo })
 
 function linhaDoRanking(f) {
@@ -266,6 +302,8 @@ function linhaDoRanking(f) {
     volumeMediano: arred(f.volumeMediano, 0),
     volumeLiquidez: arred(f.volumeLiquidez, 0),
     fonteLiquidez: f.fonteLiquidez ?? null,
+    fonteCotacao: f.fonteCotacao ?? null,
+    saltoMaximo: arred(f.saltoMaximo, 4),
     fatias: f.fatias ? { imoveis: arred(f.fatias.imoveis, 4), recebiveis: arred(f.fatias.recebiveis, 4), cotas: arred(f.fatias.cotas, 4) } : null,
     mesesComDados: f.mesesComDados,
     alertas: f.alertas ?? [],
@@ -288,10 +326,13 @@ export function calcular(insumos, cfg) {
   let atual = []
   for (const f of insumos.fundos) {
     if (!f.cnpj) { exclusoes.push(excl(f, 'universo', 'sem_cnpj', 'Código não encontrado pelo ISIN no informe da CVM.')); continue }
-    if (f.cotacao == null || !(f.cotacao > 0)) { exclusoes.push(excl(f, 'precos', 'sem_cotacao', 'Sem cotação no job de FIIs.')); continue }
-    const idade = f.dataCotacao ? diasEntre(f.dataCotacao, insumos.dataExecucao) : null
-    if (idade == null || idade > d.cotacaoMaxIdadeDias) { exclusoes.push(excl(f, 'precos', 'cotacao_defasada', `Cotação de ${f.dataCotacao ?? 'data desconhecida'}, ${idade ?? '?'} dias antes da execução (máximo ${d.cotacaoMaxIdadeDias}).`)); continue }
-    atual.push(f)
+    const p = escolherPreco(f, insumos, d)
+    if (p.erro) { exclusoes.push(excl(f, 'precos', p.erro, p.motivo)); continue }
+    if (p.cotacao == null || !(p.cotacao > 0)) { exclusoes.push(excl(f, 'precos', 'sem_cotacao', 'Sem cotação (nem no histórico diário da B3 nem no job de FIIs).')); continue }
+    const limite = p.fonte === FONTE_DIARIA ? d.cotacaoDiariaMaxIdadeDias : d.cotacaoMaxIdadeDias
+    const idade = p.dataCotacao ? diasEntre(p.dataCotacao, insumos.dataExecucao) : null
+    if (idade == null || idade > limite) { exclusoes.push(excl(f, 'precos', 'cotacao_defasada', `Cotação de ${p.dataCotacao ?? 'data desconhecida'} (${p.fonte}), ${idade ?? '?'} dias antes da execução (máximo ${limite}).`)); continue }
+    atual.push({ ...f, cotacao: p.cotacao, dataCotacao: p.dataCotacao, volumeMedio: p.volumeMedio, volumeMediano: p.volumeMediano, fonteCotacao: p.fonte, saltoMaximo: p.saltoMaximo, sessoesPreco: p.sessoes })
   }
   etapas.push({ etapa: 'universo e preço', entram: insumos.fundos.length, ficam: atual.length })
 
@@ -309,7 +350,7 @@ export function calcular(insumos, cfg) {
   // 3) classificação e filtros por grupo
   const grupos = { tijolo: [], papel: [] }
   for (const f of comIndicadores) {
-    memoria[f.ticker] = { cnpj: f.cnpj, origemCnpj: f.origemCnpj ?? null, competencia: ref, liquidez: { fonte: f.fonteLiquidez, volumeLiquidez: arred(f.volumeLiquidez, 0), volumeMedio: f.volumeMedio ?? null, volumeMediano: f.volumeMediano ?? null }, classificacao: { tipo: f.tipo, fatias: f.fatias, valoresDoAtivo: f.valoresDoAtivo }, serie: f.serie, derivados: { pvp: { formula: 'cotação ÷ valor patrimonial da cota', cotacao: f.cotacao, vp: f.vp, valor: arred(f.pvp, 6) }, rendimento12m: { formula: 'soma(DY do mês × VP do mês) × 12 ÷ meses com dado', meses: f.mesesComDados, valor: arred(f.rendimento12m, 6) }, dy12: { formula: 'rendimento de 12 meses ÷ cotação', valor: arred(f.dy12, 6) }, rentabPatrimonial12m: { formula: 'produto(1 + rentabilidade patrimonial do mês) − 1', valor: arred(f.rentabPatrimonial12m, 6) }, alavancagem: { formula: '(passivo total − rendimentos a distribuir − taxas a pagar) ÷ valor do ativo', valor: arred(f.alavancagem, 6) } } }
+    memoria[f.ticker] = { cnpj: f.cnpj, origemCnpj: f.origemCnpj ?? null, competencia: ref, preco: { fonte: f.fonteCotacao ?? null, cotacao: f.cotacao, dataCotacao: f.dataCotacao ?? null, pregoesNoHistorico: f.sessoesPreco ?? null, saltoMaximo: arred(f.saltoMaximo, 4) }, liquidez: { fonte: f.fonteLiquidez, volumeLiquidez: arred(f.volumeLiquidez, 0), volumeMedio: f.volumeMedio ?? null, volumeMediano: f.volumeMediano ?? null }, classificacao: { tipo: f.tipo, fatias: f.fatias, valoresDoAtivo: f.valoresDoAtivo }, serie: f.serie, derivados: { pvp: { formula: 'cotação ÷ valor patrimonial da cota', cotacao: f.cotacao, vp: f.vp, valor: arred(f.pvp, 6) }, rendimento12m: { formula: 'soma(DY do mês × VP do mês) × 12 ÷ meses com dado', meses: f.mesesComDados, valor: arred(f.rendimento12m, 6) }, dy12: { formula: 'rendimento de 12 meses ÷ cotação', valor: arred(f.dy12, 6) }, rentabPatrimonial12m: { formula: 'produto(1 + rentabilidade patrimonial do mês) − 1', valor: arred(f.rentabPatrimonial12m, 6) }, alavancagem: { formula: '(passivo total − rendimentos a distribuir − taxas a pagar) ÷ valor do ativo', valor: arred(f.alavancagem, 6) } } }
     if (f.tipo === 'tijolo' || f.tipo === 'papel') {
       const m = motivoDeExclusao(f, cfg.filtros[f.tipo])
       memoria[f.ticker].filtro = m ? { aprovado: false, codigo: m[0], motivo: m[1] } : { aprovado: true }
@@ -342,6 +383,9 @@ export function calcular(insumos, cfg) {
     universo: insumos.fundos.length,
     liquidezPorMediana: comIndicadores.filter((f) => f.fonteLiquidez === 'mediana').length,
     liquidezPorMedia: comIndicadores.filter((f) => f.fonteLiquidez === 'média').length,
+    precoDiarioEm: comIndicadores.filter((f) => f.fonteCotacao === FONTE_DIARIA).length,
+    precoMensalEm: comIndicadores.filter((f) => f.fonteCotacao === FONTE_MENSAL).length,
+    ultimoPregaoDiario: (insumos.pregoesDiarios ?? []).at(-1) ?? null,
     etapas,
     tijolo: tijolo.map(linhaDoRanking),
     papel: papel.map(linhaDoRanking),

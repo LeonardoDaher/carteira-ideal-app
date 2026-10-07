@@ -1,6 +1,6 @@
 # Metodologia da triagem "FIIs baratos" (Tijolo e Papel)
 
-**Versão da metodologia: 1.3.0** · Decisão de origem: D59 (alertas e conferência manual: D60) · Parâmetros: `config/fii-baratos.json` (fonte única) · Código: `scripts/fii-baratos-calculo.mjs` (cálculo puro), `scripts/atualizar-fii-baratos.mjs` (leitura da CVM e gravação da auditoria), `scripts/fii-baratos-verificar.mjs` (verificação independente).
+**Versão da metodologia: 1.4.0** · Decisão de origem: D59 (alertas e conferência manual: D60) · Parâmetros: `config/fii-baratos.json` (fonte única) · Código: `scripts/fii-baratos-calculo.mjs` (cálculo puro), `scripts/atualizar-fii-baratos.mjs` (leitura da CVM e gravação da auditoria), `scripts/fii-baratos-verificar.mjs` (verificação independente).
 
 > **Estado: NÃO PUBLICADO.** Este job só grava a trilha de auditoria em `auditoria/fii-baratos/<data>/`. Não há tela no app, código de acesso nem arquivo lido pelo site. Publicar depende de decisão do responsável (seção 9).
 
@@ -13,7 +13,8 @@
 | Fonte | O que traz | Observação |
 |---|---|---|
 | **Informe Mensal de FII da CVM** (`inf_mensal_fii_AAAA.zip`: `complemento`, `geral`, `ativo_passivo`) | DY do mês, valor patrimonial da cota, rentabilidade patrimonial, patrimônio líquido, cotistas, valor do ativo; ISIN e segmento declarado; composição do ativo e do passivo | Anos A−1 e A. Cada arquivo baixado tem URL, tamanho e sha256 no manifesto |
-| **Cotação e volume** (`webapp-src/src/data/rendimentosFii.json`, do job de FIIs) | Cotação, data da cotação, volume médio **e mediano** diário (21 pregões), nome, setor | **Hoje é o job mensal (brapi), não um preço diário.** Mais velha que `dados.cotacaoMaxIdadeDias` (45) dias da execução: o fundo sai (`cotacao_defasada`) |
+| **Preço diário** (`historico/fiis.json`, do job "Atualizar preço diário dos FIIs", `scripts/atualizar-fiis-historico.mjs`) | Fechamento, mínima, máxima e volume financeiro (R$) de cada pregão dos fundos do job de FIIs, a partir do **Boletim de Preços oficial da B3** (BVBG.086), sem chave e sem cota | **Fonte principal da cotação e da liquidez (1.4.0).** Usa os 21 últimos pregões; cotação com mais de `dados.cotacaoDiariaMaxIdadeDias` (7) dias da execução tira o fundo (`cotacao_defasada`) |
+| **Cotação e volume mensais** (`webapp-src/src/data/rendimentosFii.json`, do job mensal de FIIs, brapi) | Cotação, data, volume médio e mediano (21 pregões), nome, setor | **Reserva**: vale só para o fundo sem preço diário (fora do histórico, ou sem negócio na janela), a menos que `dados.precoDiarioObrigatorio` seja `true`. Mais velha que `dados.cotacaoMaxIdadeDias` (45) dias: o fundo sai |
 
 Os CSVs da CVM são ISO-8859-1. O leitor valida colunas obrigatórias e **falha com mensagem explícita** se o layout mudar.
 
@@ -78,6 +79,7 @@ A liquidez usa a **mediana** do volume financeiro diário (R$, dias sem negócio
 | `pvp_muito_baixo` | P/VP < 0,55 | Cota e valor patrimonial em bases diferentes (desdobramento) ou desconto real e grande |
 | `dy_alto` | DY de 12 meses > 18% | Distribuição não recorrente, ou risco de crédito alto no papel |
 | `rendimento_em_queda` | mediana dos 3 últimos meses < 0,75 × mediana dos 12 meses | Corte de rendimento: o DY de 12 meses mostra o passado (MFII11: R$ 0,91 → R$ 0,30 por mês; BBIG11: R$ 0,07 → R$ 0,03) |
+| `salto_de_preco` | variação de fechamento de mais de 25% de um dia para o outro nos 21 pregões do histórico diário | Cota que mudou de base (desdobramento ou grupamento): o P/VP deixa de fazer sentido |
 | `rendimento_com_pico` | média dos 12 meses > 1,25 × mediana | Pagamento extra, pico no informe ou rendimento de antes de um corte (HGRE11: R$ 8,52 num mês do informe, DY de 12 meses de 16,6% contra ~9,4% no Investidor10; KORE11: R$ 1,25 → R$ 0,60 em janeiro) |
 
 As duas últimas regras usam **mediana** de propósito. A primeira versão (média dos 2 últimos meses) marcou por engano GTWR11 e BRCO11, que pagam todo mês mas têm um mês com DY zero no informe da CVM; um mês zerado ou um pico isolado não pode decidir sozinho.
@@ -104,17 +106,20 @@ Confere o sha256 de cada arquivo, o hash canônico dos insumos e da config e **r
 
 **Trava de sanidade.** Se um grupo fica com menos de 15 (tijolo) ou 10 (papel) fundos, ou mais de 15% dos fundos ficam sem dado utilizável, o job grava a auditoria e **termina com erro** (o GitHub envia e-mail e a auditoria não é guardada no repositório; fica como artefato do workflow).
 
-## 9. Publicação (pendente, decisão do responsável)
+## 9. Publicação (pendente, decisão do responsável) e enquadramento proposto
 
-`config/fii-baratos.json → publicacao.aprovadoPeloResponsavel` é `false` e **este job não escreve nada no app**. Antes de publicar (tela, código de acesso, divulgação) é preciso decidir: (a) o **enquadramento regulatório** (a D22 tratou o ranking de ações como "triagem contábil" com risco aceito; ranking de FII pede a mesma decisão e, antes de divulgar em escala, o parecer independente da seção 3 de `docs/06`); (b) o **preço diário** (hoje é o do job mensal de FIIs, e o P/VP herda a defasagem); (c) a tela e o acesso, que seguiriam o desenho do Top 15 de ações (D50).
+`config/fii-baratos.json → publicacao.aprovadoPeloResponsavel` é `false` e **este job não escreve nada no app**. Para publicar (tela, código de acesso, divulgação) faltam decisões do responsável:
 
+1. **Enquadramento regulatório.** Há uma **proposta** em `config/fii-baratos.json → publicacao.enquadramento`, com o texto de aviso (`avisoProposto`) no tom do Top 15 de ações. Resumo: triagem objetiva por fórmula, igual para todos, com dados públicos, regras e parâmetros públicos e trilha de auditoria; não considera o perfil de ninguém, não indica compra nem venda, não projeta preço nem rendimento e não promete retorno. Pontos para decisão: (a) mesma base da D22 (análise jurídica interna sem objeção), mas FIIs têm risco próprio (o desconto no P/VP costuma ser risco de crédito ou vacância já precificado; o rendimento é estimado); (b) a D22 previu parecer independente antes de divulgar em escala ou de telas que mudem a natureza do conteúdo (ranking de ativos); (c) a lista "a conferir" e a de fundos conferidos envolvem juízo humano sobre o **dado**, nunca sobre o mérito do fundo; (d) a separação entre Tijolo e Papel é por regra objetiva (composição do ativo).
+2. **Preço diário.** **Construído na 1.4.0** (seção 2): o preço do dia vem do Boletim de Preços da B3, com histórico próprio. Falta ligar `dados.precoDiarioObrigatorio` (hoje `false`, para a triagem seguir funcionando com a reserva mensal durante a transição); ele deve virar `true` junto com a aprovação, para nenhum fundo publicado depender de preço mensal.
+3. **Tela e acesso**, que seguiriam o desenho do Top 15 de ações (D50): ranking em `dados-privados/`, código do mês validado no servidor, texto de aviso lido de `publicacao.avisoProposto`.
 ## 10. Limitações conhecidas
 
 1. **Faltam vacância e inadimplência.** Estão em outros arquivos da CVM (informes trimestral e anual), por imóvel e por devedor, e não entraram nesta versão. A rentabilidade patrimonial de 12 meses é um **indicador indireto** de perda de valor, não a medida direta.
 2. **O rendimento é estimativa** (DY × valor patrimonial). Em meses de emissão ou de fechamento de semestre pode distorcer (a D10 mediu desvios de até 57% num mês isolado); a média de 12 meses atenua, não elimina.
 3. **Valor patrimonial é contábil.** Para tijolo, o valor de mercado dos imóveis pode ser bem diferente; P/VP baixo não significa que o fundo vale mais do que o mercado diz.
 4. **P/VP baixo em papel** costuma ser risco de crédito precificado. O filtro de P/VP ≥ 0,7 e o de queda patrimonial ≥ −5% reduzem, mas não eliminam, esse risco.
-5. **Preço defasado** (job mensal; seção 9).
+5. **Preço.** Com o histórico diário da B3 o P/VP usa a cotação do último pregão (no máximo 7 dias de idade); a cotação é **sem ajuste** (desdobramento, grupamento): o alerta `salto_de_preco` aponta o sintoma. O valor patrimonial vem do informe mensal (de até ~2 meses atrás), então P/VP mistura um preço de hoje com um patrimônio do mês passado. Fundo fora do histórico diário cai no preço mensal da brapi (reserva), que pode ter semanas.
 6. **Cotas e valor patrimonial em bases diferentes** (desdobramento, grupamento) não são detectados automaticamente; o alerta de P/VP < 0,55 só aponta o sintoma.
 7. **Fundos fora do `rendimentosFii.json`** não são avaliados, e o universo depende do filtro de liquidez daquele job.
 8. **Não há backtest.** A metodologia não afirma nada sobre desempenho passado, e qualquer promessa de retorno está fora do escopo.
@@ -123,7 +128,7 @@ Confere o sha256 de cada arquivo, o hash canônico dos insumos e da config e **r
 11. **O informe da CVM tem meses atípicos** (DY zero num mês em que o fundo pagou, ou um pico que o site do fundo não mostra, como o R$ 8,52 de HGRE11 em janeiro/26). Por isso os indicadores de rendimento recente usam mediana e há o alerta de pico; ainda assim, um erro que se repita nos 12 meses não é detectável.
 12. **A conferência manual cobre só a base dos dados** (cota, valor patrimonial, rendimento). Não avalia vacância, qualidade dos imóveis, inadimplência nem risco de crédito.
 13. **Valor patrimonial por cota: vale o do informe da CVM** (patrimônio líquido ÷ cotas emitidas), por decisão do responsável (D60): é a fonte oficial e reproduzível. Sites de dados (Investidor10) podem dividir pelas cotas **em circulação**, sem as que o fundo mantém em tesouraria depois de recomprar; o informe mensal não traz a quantidade em tesouraria. Caso observado: BBIG11, R$ 9,74 no informe (99,12 mi de cotas) contra R$ 10,72 no site (90,12 mi), com o mesmo patrimônio de R$ 965,9 mi (causa provável, não confirmada: cotas recompradas). Em fundo com recompra, o P/VP calculado fica **acima** do que um cotista de fato detém (o fundo é mais descontado do que o ranking mostra).
-14. **Liquidez pelo job de FIIs:** o volume vem da brapi (último mês, 21 pregões) e a mediana só existe depois da primeira execução do job de FIIs com a mudança D61; antes disso o ranking cai para a média. O mínimo de R$ 300 mil foi escolhido com as medianas reais de 07/10 (84 fundos de tijolo e 22 de papel saíram por liquidez; só 4 de tijolo ficavam entre R$ 300 mil e R$ 500 mil, e 2 de papel a menos de R$ 15 mil do corte); como todo limiar, é uma escolha, não regra de mercado.
+14. **Liquidez:** com o histórico diário da B3 (1.4.0), a média e a mediana vêm dos 21 últimos pregões do boletim (volume financeiro em R$, dia sem negócio conta zero); sem ele, vêm do job mensal de FIIs (brapi), e sem a mediana, vale a média. O mínimo de R$ 300 mil foi escolhido com as medianas reais de 07/10 (84 fundos de tijolo e 22 de papel saíram por liquidez; só 4 de tijolo ficavam entre R$ 300 mil e R$ 500 mil, e 2 de papel a menos de R$ 15 mil do corte); como todo limiar, é uma escolha, não regra de mercado.
 
 ## 11. Testes automatizados
 
@@ -133,6 +138,7 @@ Confere o sha256 de cada arquivo, o hash canônico dos insumos e da config e **r
 
 | Versão | Data | Mudança |
 |---|---|---|
+| 1.4.0 | 2026-10-07 | Preço DIÁRIO da B3 (histórico próprio, `historico/fiis.json`) como fonte da cotação e do volume, com o preço mensal da brapi como reserva; alerta `salto_de_preco`; TGAR11 aceito no ranking por decisão do responsável (conferido); proposta de enquadramento e aviso em `publicacao`. |
 | 1.3.0 | 2026-10-07 | Mínimo de liquidez único de R$ 300 mil (mediana) nos dois grupos; o do tijolo cai de R$ 500 mil. Decisão do responsável, com as medianas reais de 07/10. |
 | 1.2.0 | 2026-10-07 | Liquidez pela mediana do volume diário (o job de FIIs passa a gravar `volumeMediano`; a média continua), com a fonte registrada por fundo; mínimos inalterados. |
 | 1.1.0 | 2026-10-07 | Conferência dos 6 fundos de "a conferir" no Investidor10. Novos alertas `rendimento_em_queda` (mediana dos 3 últimos meses < 75% da mediana de 12 meses) e `rendimento_com_pico` (média > 125% da mediana), ambos por mediana; lista `conferencia` com validade de 90 dias e alertas liberados por fundo (BRCR11 e OUJP11); novas colunas nos CSVs. A primeira tentativa (média de 2 meses) foi descartada por falso positivo em GTWR11 e BRCO11. |

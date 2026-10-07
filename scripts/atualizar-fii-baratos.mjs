@@ -19,6 +19,7 @@ import zlib from 'node:zlib'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { baixar, lerEntradaDoZip, listarZip, sha256Arquivo } from './acoes-baratas-cvm.mjs'
 import { competenciaDe, lerCsv, lerNumero, prefixoTickerDoIsin, somenteDigitos } from './atualizar-rendimentos-fii.mjs'
+import { ultimosPregoes } from './atualizar-fiis-historico.mjs'
 import { calcular, canonico, hashDoResultado, sha256, verificarSanidade } from './fii-baratos-calculo.mjs'
 import { executarCli, verificar } from './fii-baratos-verificar.mjs'
 
@@ -65,7 +66,7 @@ function ultimasVersoes(linhas, chaveCnpj = 'CNPJ_Fundo_Classe') {
  * Junta tudo que o cálculo precisa. Não decide nada: cada exclusão acontece em fii-baratos-calculo.mjs.
  * Entradas já lidas (linhas de CSV como objetos): complemento, geral e ativo_passivo do informe; snapshot = rendimentosFii.json.
  */
-export function montarInsumos({ complemento, geral, ativo, snapshot, cfg, dataExecucao }) {
+export function montarInsumos({ complemento, geral, ativo, snapshot, cfg, dataExecucao, historicoPrecos = null }) {
   const informes = ultimasVersoes(complemento)
   const ativos = ultimasVersoes(ativo)
 
@@ -98,7 +99,8 @@ export function montarInsumos({ complemento, geral, ativo, snapshot, cfg, dataEx
     // Migração pela Resolução 175: o ISIN passa para um CNPJ novo; vale o que tem o informe mais recente.
     const ordenados = candidatos.map((c) => ({ cnpj: c, ultima: ultimaCompDoCnpj(c) })).sort((a, b) => (a.ultima < b.ultima ? 1 : a.ultima > b.ultima ? -1 : a.cnpj < b.cnpj ? 1 : -1))
     const cnpj = ordenados[0]?.cnpj ?? null
-    const base = { ticker: f.ticker, nome: f.nome ?? null, setor: f.setor ?? null, cotacao: f.cotacao ?? null, dataCotacao: f.dataCotacao ?? null, volumeMedio: f.volumeMedio ?? null, volumeMediano: f.volumeMediano ?? null }
+    // Preço diário da B3: últimos pregões do histórico, alinhados com pregoesDiarios ([fechamento, volume em reais] ou null).
+    const base = { ticker: f.ticker, nome: f.nome ?? null, setor: f.setor ?? null, cotacao: f.cotacao ?? null, dataCotacao: f.dataCotacao ?? null, volumeMedio: f.volumeMedio ?? null, volumeMediano: f.volumeMediano ?? null, precoDiario: historicoPrecos ? ultimosPregoes(historicoPrecos, f.ticker.toUpperCase(), cfg.dados.pregoesPrecoDiario).serie : null }
     if (!cnpj) return { ...base, segmento: null, cnpj: null, origemCnpj: candidatos.length ? 'ISIN sem informe' : 'ISIN não encontrado no informe' }
     const infs = {}
     const ats = {}
@@ -118,7 +120,8 @@ export function montarInsumos({ complemento, geral, ativo, snapshot, cfg, dataEx
     }
   })
 
-  return { esquema: ESQUEMA, dataExecucao, dataCotacoes: (snapshot.geradoEm ?? '').slice(0, 10), contagemPorCompetencia, medianaDyPorCompetencia, fundos }
+  const pregoesDiarios = historicoPrecos ? (historicoPrecos.pregoes ?? []).slice(-cfg.dados.pregoesPrecoDiario) : []
+  return { esquema: ESQUEMA, dataExecucao, dataCotacoes: (snapshot.geradoEm ?? '').slice(0, 10), pregoesDiarios, contagemPorCompetencia, medianaDyPorCompetencia, fundos }
 }
 
 // ---------------------------------------------------------------------------------------
@@ -132,8 +135,8 @@ const pct = (v) => (v == null ? '' : csvNum(Math.round(v * 1e6) / 1e4))
 
 export function csvRanking(lista, { comPosicao = true } = {}) {
   return csv(
-    [comPosicao ? 'posicao' : 'grupo', 'ticker', 'nome', 'setor_declarado', 'cnpj', 'nota', 'P/VP', 'DY_12m_%', 'DY_recente_anualizado_%', 'rendimento_recente_sobre_12m', 'pico_de_rendimento', 'cotacao', 'data_cotacao', 'vp_cota', 'rendimento_12m_por_cota', 'rentab_patrimonial_12m_%', 'patrimonio_R$', 'cotistas', 'passivo_sobre_ativo_%', 'volume_medio_R$', 'volume_mediano_R$', 'liquidez_pela', 'fatia_imoveis_%', 'fatia_recebiveis_%', 'fatia_cotas_%', 'meses_com_dados', 'alertas', 'alertas_liberados', 'conferido'],
-    lista.map((f) => [comPosicao ? f.posicao : f.grupo, f.ticker, csvTxt(f.nome), csvTxt(f.setorDeclarado), f.cnpj, csvNum(f.nota), csvNum(f.pvp), pct(f.dy12), pct(f.dyRecente), csvNum(f.razaoRendimentoRecente), csvNum(f.picoDeRendimento), csvNum(f.cotacao), f.dataCotacao ?? '', csvNum(f.vp), csvNum(f.rendimento12m), pct(f.rentabPatrimonial12m), csvNum(f.patrimonio), f.cotistas ?? '', pct(f.alavancagem), csvNum(f.volumeMedio), csvNum(f.volumeMediano), f.fonteLiquidez ?? '', pct(f.fatias?.imoveis), pct(f.fatias?.recebiveis), pct(f.fatias?.cotas), f.mesesComDados, csvTxt((f.alertas ?? []).join(',')), csvTxt((f.alertasLiberados ?? []).join(',')), csvTxt(f.conferido ? `${f.conferido.em}: ${f.conferido.fonte}` : f.conferenciaVencida ? `conferência vencida (${f.conferenciaVencida})` : '')]),
+    [comPosicao ? 'posicao' : 'grupo', 'ticker', 'nome', 'setor_declarado', 'cnpj', 'nota', 'P/VP', 'DY_12m_%', 'DY_recente_anualizado_%', 'rendimento_recente_sobre_12m', 'pico_de_rendimento', 'cotacao', 'data_cotacao', 'vp_cota', 'rendimento_12m_por_cota', 'rentab_patrimonial_12m_%', 'patrimonio_R$', 'cotistas', 'passivo_sobre_ativo_%', 'volume_medio_R$', 'volume_mediano_R$', 'liquidez_pela', 'fonte_cotacao', 'salto_maximo_%', 'fatia_imoveis_%', 'fatia_recebiveis_%', 'fatia_cotas_%', 'meses_com_dados', 'alertas', 'alertas_liberados', 'conferido'],
+    lista.map((f) => [comPosicao ? f.posicao : f.grupo, f.ticker, csvTxt(f.nome), csvTxt(f.setorDeclarado), f.cnpj, csvNum(f.nota), csvNum(f.pvp), pct(f.dy12), pct(f.dyRecente), csvNum(f.razaoRendimentoRecente), csvNum(f.picoDeRendimento), csvNum(f.cotacao), f.dataCotacao ?? '', csvNum(f.vp), csvNum(f.rendimento12m), pct(f.rentabPatrimonial12m), csvNum(f.patrimonio), f.cotistas ?? '', pct(f.alavancagem), csvNum(f.volumeMedio), csvNum(f.volumeMediano), f.fonteLiquidez ?? '', f.fonteCotacao ?? '', pct(f.saltoMaximo), pct(f.fatias?.imoveis), pct(f.fatias?.recebiveis), pct(f.fatias?.cotas), f.mesesComDados, csvTxt((f.alertas ?? []).join(',')), csvTxt((f.alertasLiberados ?? []).join(',')), csvTxt(f.conferido ? `${f.conferido.em}: ${f.conferido.fonte}` : f.conferenciaVencida ? `conferência vencida (${f.conferenciaVencida})` : '')]),
   )
 }
 export const csvExclusoes = (resultado) => csv(['ticker', 'nome', 'setor', 'etapa', 'codigo', 'motivo'], resultado.exclusoes.map((e) => [e.ticker, csvTxt(e.nome), csvTxt(e.setor), e.etapa, e.codigo, csvTxt(e.motivo)]))
@@ -216,7 +219,16 @@ export async function executar({ raiz = RAIZ_PADRAO, dadosLocais = null, hoje = 
   }
   log(`  informe: ${complemento.length} linhas de complemento, ${geral.length} de cadastro, ${ativo.length} de ativo/passivo`)
 
-  const insumos = montarInsumos({ complemento, geral, ativo, snapshot, cfg, dataExecucao })
+  const arquivoPrecos = path.join(raiz, 'historico', 'fiis.json')
+  let historicoPrecos = null
+  if (fs.existsSync(arquivoPrecos)) {
+    historicoPrecos = lerJson(arquivoPrecos)
+    fontes.push({ papel: 'Histórico de preço diário dos FIIs (B3, boletim BVBG.086)', url: 'historico/fiis.json (neste repositório)', arquivo: 'fiis.json', bytes: fs.statSync(arquivoPrecos).size, sha256: sha256Arquivo(arquivoPrecos), pregoes: historicoPrecos.pregoes?.length ?? 0, ultimoPregao: historicoPrecos.pregoes?.at(-1) ?? null })
+    log(`  preço diário: ${historicoPrecos.pregoes?.length ?? 0} pregões, último de ${historicoPrecos.pregoes?.at(-1) ?? '?'}`)
+  } else {
+    log('  preço diário: historico/fiis.json não existe (rode a carga inicial de FIIs); vale o preço mensal do job de FIIs')
+  }
+  const insumos = montarInsumos({ complemento, geral, ativo, snapshot, cfg, dataExecucao, historicoPrecos })
   return concluir({ raiz, cfg, insumos, fontes, log })
 }
 
@@ -262,6 +274,7 @@ export function concluir({ raiz, cfg, insumos, fontes = [], log = console.log, a
   }
 
   const topo = (l) => l.slice(0, cfg.tamanhoDaLista).map((r) => r.ticker).join(' ')
+  log(`Preço: diário da B3 em ${resultado.precoDiarioEm} fundos, mensal (brapi) em ${resultado.precoMensalEm}; último pregão do histórico: ${resultado.ultimoPregaoDiario ?? 'nenhum'}`)
   log(`Liquidez: mediana em ${resultado.liquidezPorMediana} fundos, média em ${resultado.liquidezPorMedia} (sem mediana no job de FIIs)`)
   log(`Universo ${resultado.universo} · competência ${resultado.competenciaReferencia} · tijolo ${resultado.tijolo.length}, papel ${resultado.papel.length}, a conferir ${resultado.aConferir.length}, fora ${resultado.exclusoes.length}`)
   log(`Top ${cfg.tamanhoDaLista} TIJOLO: ${topo(resultado.tijolo)}`)

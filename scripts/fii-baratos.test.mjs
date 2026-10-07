@@ -23,9 +23,13 @@ const perto = (a, b, tol = 1e-9) => assert.ok(Math.abs(a - b) <= tol, `${a} ≠ 
 // ---------------------------------------------------------------------------------------
 
 test('configuração: versão, trava de publicação desligada e alertas coerentes com os filtros', () => {
-  assert.equal(cfg.versaoMetodologia, '1.3.0')
+  assert.equal(cfg.versaoMetodologia, '1.4.0')
   assert.equal(cfg.historicoDeVersoes.at(-1).versao, cfg.versaoMetodologia)
   assert.equal(cfg.publicacao.aprovadoPeloResponsavel, false, 'este job não publica nada: a aprovação só muda por decisão do responsável')
+  assert.match(cfg.publicacao.avisoProposto, /^Não é recomendação de investimento\./, 'aviso proposto no mesmo tom do Top 15 de ações')
+  assert.match(cfg.publicacao.enquadramento.status, /não aprovada/i)
+  assert.ok(cfg.publicacao.enquadramento.pontosParaDecisao.length >= 3)
+  assert.equal(cfg.dados.precoDiarioObrigatorio, false, 'vira true só quando o responsável decidir publicar')
   assert.equal(cfg.filtros.tijolo.volumeMinimoDiario, 300000, 'mínimo de liquidez único, por decisão do responsável (1.3.0)')
   assert.equal(cfg.filtros.papel.volumeMinimoDiario, cfg.filtros.tijolo.volumeMinimoDiario)
   assert.ok(cfg.filtros.papel.patrimonioMinimo < cfg.filtros.tijolo.patrimonioMinimo)
@@ -307,6 +311,94 @@ test('liquidez pela MEDIANA do volume diário quando existe; sem ela vale a méd
   assert.deepEqual(r.exclusoes.filter((e) => e.codigo === 'liquidez_baixa').map((e) => e.ticker).sort(), ['PAPL11', 'TIJL11'])
 })
 
+// ---------------------------------------------------------------------------------------
+// Preço diário da B3
+// ---------------------------------------------------------------------------------------
+
+/** 21 pregões (dias úteis) terminando em 2026-10-05, a véspera da execução dos insumos de teste. */
+const PREGOES = (() => {
+  const datas = []
+  const d = new Date('2026-10-05T12:00:00Z')
+  while (datas.length < 21) {
+    if (![0, 6].includes(d.getUTCDay())) datas.unshift(d.toISOString().slice(0, 10))
+    d.setUTCDate(d.getUTCDate() - 1)
+  }
+  return datas
+})()
+/** Série diária: R$ 80 e R$ 1 mi por dia, com ajustes pontuais por índice (-1 = último pregão). */
+const serieDiaria = (ajustes = {}) => PREGOES.map((_, i) => {
+  const chave = i - PREGOES.length
+  const a = ajustes[i] !== undefined ? ajustes[i] : ajustes[chave]
+  return a === undefined ? [80, 1e6] : a
+})
+const comDiario = (fundos, o = {}) => insumosDe(fundos, { pregoesDiarios: PREGOES, ...o })
+
+test('preço diário da B3: cotação do último pregão com negócio, data dele, volume médio e mediano (dia sem negócio conta zero) e a fonte registrada', () => {
+  // últimos 3 pregões sem negócio: a cotação é a do 18º pregão; 3 dias zerados em 21 (média 6/7 de R$ 1 mi), mediana R$ 1 mi
+  const f = fundo('DIAR11', { cotacao: 999, dataCotacao: '2026-09-25', volume: 5e6 })
+  f.precoDiario = serieDiaria({ '-1': null, '-2': null, '-3': null, [PREGOES.length - 4]: [82, 1e6] })
+  const { resultado, memoria } = calcular(comDiario([f]), cfg)
+  const x = resultado.tijolo[0]
+  assert.equal(x.fonteCotacao, 'B3 (boletim diário)')
+  assert.equal(x.cotacao, 82, 'a cotação mensal de R$ 999 é ignorada quando há preço diário')
+  assert.equal(x.dataCotacao, PREGOES.at(-4))
+  perto(x.volumeMedio, (18e6) / 21, 1)
+  assert.equal(x.volumeMediano, 1e6)
+  assert.equal(x.volumeLiquidez, 1e6, 'a liquidez usa a mediana do volume diário da B3')
+  perto(x.pvp, 82 / 100, 1e-4)
+  assert.deepEqual([resultado.precoDiarioEm, resultado.precoMensalEm, resultado.ultimoPregaoDiario], [1, 0, PREGOES.at(-1)])
+  assert.deepEqual([memoria.DIAR11.preco.fonte, memoria.DIAR11.preco.pregoesNoHistorico], ['B3 (boletim diário)', 21])
+})
+
+test('preço diário: sem histórico do fundo ou sem negócio na janela vale o preço mensal; a trava de publicação exige o diário', () => {
+  const semHistorico = fundo('MENS11') // precoDiario ausente: fundo fora do histórico
+  const semNegocio = fundo('PARA11'); semNegocio.precoDiario = PREGOES.map(() => null)
+  const normal = fundo('DIAR11'); normal.precoDiario = serieDiaria()
+  const r = calcular(comDiario([semHistorico, semNegocio, normal]), cfg).resultado
+  assert.deepEqual(Object.fromEntries(r.tijolo.map((f) => [f.ticker, f.fonteCotacao])), { MENS11: 'brapi (job mensal de FIIs)', PARA11: 'brapi (job mensal de FIIs)', DIAR11: 'B3 (boletim diário)' })
+  assert.deepEqual([r.precoDiarioEm, r.precoMensalEm], [1, 2])
+  // histórico com poucos pregões: não serve
+  const pouco = calcular(insumosDe([normal], { pregoesDiarios: PREGOES.slice(-5) }), cfg).resultado
+  assert.equal(pouco.tijolo[0].fonteCotacao, 'brapi (job mensal de FIIs)')
+  // preço diário obrigatório (condição para publicar): quem não o tem sai, dizendo por quê
+  const obrigatorio = { ...cfg, dados: { ...cfg.dados, precoDiarioObrigatorio: true } }
+  const o = calcular(comDiario([semHistorico, semNegocio, normal]), obrigatorio).resultado
+  assert.deepEqual(o.tijolo.map((f) => f.ticker), ['DIAR11'])
+  const fora = Object.fromEntries(o.exclusoes.map((e) => [e.ticker, e]))
+  assert.deepEqual([fora.MENS11.etapa, fora.MENS11.codigo], ['precos', 'sem_preco_diario'])
+  assert.match(fora.MENS11.motivo, /fundo fora do histórico/)
+  assert.match(fora.PARA11.motivo, /não negociou na janela/)
+})
+
+test('preço diário: cotação com mais de 7 dias sai (a mensal aceita 45); salto de preço de um dia para o outro vai para "a conferir"', () => {
+  // último negócio há 12 dias: o histórico diário diz que o fundo não negocia, e a cotação diária velha tira o fundo
+  const velho = fundo('VELH11')
+  velho.precoDiario = serieDiaria(Object.fromEntries(Array.from({ length: 8 }, (_, k) => [-1 - k, null])))
+  const r = calcular(comDiario([velho]), cfg).resultado
+  const e = r.exclusoes.find((x) => x.ticker === 'VELH11')
+  assert.deepEqual([e.etapa, e.codigo], ['precos', 'cotacao_defasada'])
+  assert.match(e.motivo, /B3 \(boletim diário\).*máximo 7/)
+  // desdobramento 1:3 no meio da janela: R$ 240 → R$ 80, salto de 67%
+  const split = fundo('SPLT11')
+  split.precoDiario = serieDiaria(Object.fromEntries(PREGOES.slice(0, 10).map((_, i) => [i, [240, 1e6]])))
+  const s = calcular(comDiario([split]), cfg).resultado
+  assert.deepEqual(s.aConferir.map((f) => [f.ticker, f.alertas]), [['SPLT11', ['salto_de_preco']]])
+  perto(s.aConferir[0].saltoMaximo, 2 / 3, 1e-3)
+  // oscilação normal de 3% ao dia não alerta
+  const calmo = fundo('CALM11')
+  calmo.precoDiario = serieDiaria({ '-5': [82.4, 1e6], '-4': [80, 1e6] })
+  assert.equal(calcular(comDiario([calmo]), cfg).resultado.aConferir.length, 0)
+  // tendência gradual (+5% ao dia, dobra em 15 pregões) não é salto: o que conta é a variação de um dia para o outro
+  const tendencia = fundo('TEND11')
+  tendencia.precoDiario = PREGOES.map((_, i) => [80 * 1.05 ** i, 1e6])
+  const tr = calcular(comDiario([tendencia]), cfg).resultado
+  assert.equal(tr.aConferir.some((f) => f.ticker === 'TEND11' && f.alertas.includes('salto_de_preco')), false)
+  const tendenciaFundo = [...tr.tijolo, ...tr.aConferir, ...tr.exclusoes].some((f) => f.ticker === 'TEND11')
+  assert.ok(tendenciaFundo)
+  assert.deepEqual(alertasDoFundo({ saltoMaximo: 0.25 }, cfg.alertas), [])
+  assert.deepEqual(alertasDoFundo({ saltoMaximo: 0.26 }, cfg.alertas), ['salto_de_preco'])
+})
+
 test('DY em % em vez de fração: a escala vem da mediana da competência e o resultado é o mesmo', () => {
   const emFracao = calcular(insumosDe([fundo('ALFA11')]), cfg).resultado.tijolo[0]
   const emPercentual = (() => {
@@ -352,13 +444,19 @@ test('extração: última versão de cada informe, escala do DY, migração de C
   const g = [geral(A, 'BRXXXXCTF001', 'ANTIGO'), geral(B, 'BRXXXXCTF001', 'NOVO'), geral('33.333.333/0001-33', 'BRZZZZCTF001')]
   const at = [...meses.map((m) => ativoLinha(B, m)), ativoLinha(B, '2026-08', { Versao: '2', Direitos_Bens_Imoveis: '800', CRI: '0', FII: '' })]
   const snapshot = { geradoEm: '2026-09-25T01:00:00Z', fundos: [{ ticker: 'XXXX11', nome: 'Novo', setor: 'Shoppings', cotacao: 80, dataCotacao: '2026-09-25', volumeMedio: 2e6, volumeMediano: 1.5e6 }, { ticker: 'NADA11', cotacao: 10, dataCotacao: '2026-09-25', volumeMedio: 1 }] }
-  const ins = montarInsumos({ complemento: complementoSemA, geral: g, ativo: at, snapshot, cfg, dataExecucao: '2026-10-06' })
+  // histórico diário da B3: 25 pregões (só os 21 últimos entram), XXXX11 sem negócio no último e NADA11 fora do histórico
+  const datasH = Array.from({ length: 25 }, (_, i) => `2026-09-${String(i + 1).padStart(2, '0')}`)
+  const historicoPrecos = { pregoes: datasH, nomes: {}, ativos: { XXXX11: datasH.map((_, i) => (i === 24 ? null : [80 + i, 79, 81 + i, 1e6 + i])) } }
+  const ins = montarInsumos({ complemento: complementoSemA, geral: g, ativo: at, snapshot, cfg, dataExecucao: '2026-10-06', historicoPrecos })
   assert.equal(ins.dataCotacoes, '2026-09-25')
   assert.deepEqual(ins.contagemPorCompetencia, { '2026-06': 1, '2026-07': 1, '2026-08': 2, '2026-09': 1 })
   assert.equal(ins.medianaDyPorCompetencia['2026-08'], 0.008)
   const x = ins.fundos.find((f) => f.ticker === 'XXXX11')
   assert.equal(x.cnpj, B.replace(/\D/g, ''), 'com o CNPJ antigo sem informe, vale o novo (guardado só com dígitos)')
   assert.deepEqual([x.volumeMedio, x.volumeMediano], [2e6, 1.5e6], 'a extração copia a média e a mediana do volume')
+  assert.deepEqual(ins.pregoesDiarios, datasH.slice(-21), 'só os 21 últimos pregões entram nos insumos')
+  assert.equal(x.precoDiario.length, 21)
+  assert.deepEqual(x.precoDiario.slice(-3), [[102, 1000022], [103, 1000023], null], 'cada pregão vira [fechamento, volume em reais]; dia sem negócio, null')
   assert.match(x.origemCnpj, /2 CNPJs/)
   assert.equal(x.informes['2026-08'].vp, 111, 'a reapresentação (versão 2) substitui a original')
   assert.equal(x.informes['2026-08'].versao, 2)
@@ -366,6 +464,7 @@ test('extração: última versão de cada informe, escala do DY, migração de C
   const n = ins.fundos.find((f) => f.ticker === 'NADA11')
   assert.equal(n.cnpj, null)
   assert.equal(n.volumeMediano, null, 'job de FIIs antigo, sem mediana: null (o cálculo cai para a média)')
+  assert.equal(n.precoDiario, null, 'fundo fora do histórico diário: sem série (o cálculo cai para o preço mensal)')
   assert.match(n.origemCnpj, /ISIN não encontrado/)
 })
 
