@@ -1,17 +1,17 @@
 import { useEffect, useId, useState } from 'react'
 import type { ReactNode } from 'react'
 import { storage } from '../data/storage'
-import { CHAVE_CODIGO_TOP15, formatarCodigo, limparCodigoDigitado, mensagemDaFalha } from '../domain/acessoTop15'
+import { formatarCodigo, limparCodigoDigitado, mensagemDaFalha } from '../domain/acessoTop15'
 import type { RespostaLista } from '../domain/acessoTop15'
 
 /**
  * Portão do código do mês (D50), usado pelo Top 15 de ações e pelo Top 15 de FIIs (D65). Pede o código; ele
  * fica salvo neste aparelho, e quando vence o servidor o recusa e a tela volta a pedir. Nenhum dado da lista
- * existe no navegador antes de o código ser aceito. O mesmo código e a mesma chave de armazenamento valem
- * para as duas listas: quem já liberou uma abre a outra sem digitar de novo.
+ * existe no navegador antes de o código ser aceito. Cada lista tem o SEU código e a SUA chave de armazenamento
+ * (D66): liberar as ações não libera os FIIs.
  */
 export function PortaoPorCodigo<T>({
-  titulo, oQueLibera, instagram, carregar, armazenamento, idDeTeste, renderizar,
+  titulo, oQueLibera, instagram, carregar, armazenamento, chaveArmazenamento, idDeTeste, renderizar,
 }: {
   /** Ex.: "Top 15 mais baratas: acesso por código". */
   titulo: string
@@ -20,6 +20,8 @@ export function PortaoPorCodigo<T>({
   instagram?: string | null
   carregar: (codigo: string) => Promise<RespostaLista<T>>
   armazenamento: Pick<typeof storage, 'getItem' | 'setItem' | 'removeItem'>
+  /** Onde o código desta lista fica salvo neste aparelho (uma chave por classe de ativos). */
+  chaveArmazenamento: string
   idDeTeste: string
   /** Desenha a lista liberada; `sair` apaga o código salvo e volta a pedir. */
   renderizar: (dados: T, sair: () => void) => ReactNode
@@ -35,11 +37,11 @@ export function PortaoPorCodigo<T>({
     setAviso(null)
     const r = await carregar(valor)
     if (r.ok) {
-      await armazenamento.setItem(CHAVE_CODIGO_TOP15, valor)
+      await armazenamento.setItem(chaveArmazenamento, valor)
       setCompleto(r.snapshot)
       return
     }
-    if (r.motivo === 'invalido') await armazenamento.removeItem(CHAVE_CODIGO_TOP15)
+    if (r.motivo === 'invalido') await armazenamento.removeItem(chaveArmazenamento)
     setAviso(doSalvo && r.motivo === 'invalido' ? 'O código salvo neste aparelho venceu. Digite o código mais recente.' : mensagemDaFalha(r))
     setFase('livre')
   }
@@ -47,23 +49,23 @@ export function PortaoPorCodigo<T>({
   useEffect(() => {
     let cancelado = false
     void (async () => {
-      const salvo = await armazenamento.getItem(CHAVE_CODIGO_TOP15)
+      const salvo = await armazenamento.getItem(chaveArmazenamento)
       if (cancelado) return
       if (!salvo) return setFase('livre')
       const r = await carregar(salvo)
       if (cancelado) return
       if (r.ok) return setCompleto(r.snapshot)
-      if (r.motivo === 'invalido') await armazenamento.removeItem(CHAVE_CODIGO_TOP15)
+      if (r.motivo === 'invalido') await armazenamento.removeItem(chaveArmazenamento)
       setAviso(r.motivo === 'invalido' ? 'O código salvo neste aparelho venceu. Digite o código mais recente.' : mensagemDaFalha(r))
       setFase('livre')
     })()
     return () => {
       cancelado = true
     }
-  }, [armazenamento, carregar])
+  }, [armazenamento, carregar, chaveArmazenamento])
 
   const sair = async () => {
-    await armazenamento.removeItem(CHAVE_CODIGO_TOP15)
+    await armazenamento.removeItem(chaveArmazenamento)
     setCompleto(null)
     setCodigo('')
     setFase('livre')

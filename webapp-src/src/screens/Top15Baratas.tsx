@@ -1,7 +1,7 @@
 import { useId, useState } from 'react'
 import { storage } from '../data/storage'
 import { SNAPSHOT_ACOES_BARATAS } from '../data/snapshotAcoesBaratas'
-import { buscarTop15 } from '../domain/acessoTop15'
+import { CHAVE_CODIGO_TOP15, buscarTop15 } from '../domain/acessoTop15'
 import type { RespostaTop15 } from '../domain/acessoTop15'
 import {
   CONTAGEM_POR_ETAPA, SEM_FILTROS, buscarExclusao, descreverComponente, formatarMultiplo, formatarPercentual, formatarReaisCompacto, selecionarTop,
@@ -49,7 +49,7 @@ function EmValidacao() {
 }
 
 /**
- * Pede o código do mês (D50). O portão é o mesmo do Top 15 de FIIs (ui/PortaoPorCodigo): o código fica salvo
+ * Pede o código do mês (D50). O portão é o mesmo do Top 15 de FIIs (ui/PortaoPorCodigo), mas cada lista tem o seu código (D66): o código fica salvo
  * neste aparelho e, quando vence, o servidor o recusa e a tela volta a pedir.
  */
 function PortaoDoCodigo({
@@ -66,6 +66,7 @@ function PortaoDoCodigo({
       instagram={cabecalho.instagram}
       carregar={carregar}
       armazenamento={armazenamento}
+      chaveArmazenamento={CHAVE_CODIGO_TOP15}
       idDeTeste="top15-codigo"
       renderizar={(completo, sair) => <ListaTop15 snapshot={completo} aoTrocarCodigo={sair} />}
     />

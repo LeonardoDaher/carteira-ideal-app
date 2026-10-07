@@ -277,7 +277,7 @@ O ranking **não vai no arquivo do app**. O job grava o cabeçalho em `webapp-sr
 
 Opcional: `TOP15_SAL` (qualquer texto aleatório) reforça o hash do IP. Com as variáveis de Redis do projeto presentes, o limite de tentativas é compartilhado entre os servidores; sem elas, vale um limite mais fraco por servidor.
 
-**Se o código vazar:** troque `TOP15_CODIGOS` por um código novo (só ele), faça Redeploy e divulgue o novo. O código antigo para de funcionar e, no aparelho de quem o tinha salvo, o app o apaga sozinho e volta a pedir.
+**Cada classe tem o seu código (D66):** este passo é só das ações. O Top 15 de FIIs usa a variável `TOP15_FIIS_CODIGOS` (código gerado com `npm run codigo-top15 -- --classe fiis`); um código não abre a lista do outro.`n`n**Se o código vazar:** troque `TOP15_CODIGOS` por um código novo (só ele), faça Redeploy e divulgue o novo. O código antigo para de funcionar e, no aparelho de quem o tinha salvo, o app o apaga sozinho e volta a pedir.
 
 **Para desligar a restrição** (modo aberto): `acesso.restritoPorCodigo: false` em `config/acoes-baratas.json` e rodar o workflow. **Para tirar a lista do ar:** `aprovadoPeloResponsavel: false` e rodar o workflow.
 

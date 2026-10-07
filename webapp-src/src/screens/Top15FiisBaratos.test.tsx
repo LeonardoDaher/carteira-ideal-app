@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { Top15FiisBaratos } from './Top15FiisBaratos'
 import { SimuleFii } from './SimuleFii'
 import type { ItemFii, SnapshotFiiBaratos } from '../domain/fiiBaratos'
-import { CHAVE_CODIGO_TOP15 } from '../domain/acessoTop15'
+import { CHAVE_CODIGO_TOP15, CHAVE_CODIGO_TOP15_FIIS } from '../domain/acessoTop15'
 import type { RespostaTop15Fiis } from '../domain/acessoTop15'
 import type { AppCtx } from '../state/useAppState'
 
@@ -188,7 +188,7 @@ describe('Top15FiisBaratos com acesso por código (D50 e D65)', () => {
     expect(screen.queryByTestId('top15-fiis')).toBeNull()
   })
 
-  it('código certo: libera a lista, salva o código (o MESMO das ações) e oferece trocar', async () => {
+  it('código certo: libera a lista, salva o código (em chave própria dos FIIs) e oferece trocar', async () => {
     const mem = memoria()
     const carregar = vi.fn(async (): Promise<RespostaTop15Fiis> => ({ ok: true, snapshot: completo() }))
     render(<Top15FiisBaratos snapshot={cabecalho()} carregar={carregar} armazenamento={mem} />)
@@ -198,32 +198,40 @@ describe('Top15FiisBaratos com acesso por código (D50 e D65)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Ver a lista' }))
     await screen.findByTestId('top15-fiis')
     expect(screen.getByTestId('top15-fiis-AAAA11')).toBeTruthy()
-    expect(mem.d.get(CHAVE_CODIGO_TOP15)).toBe('CIAAAABBBB')
+    expect(mem.d.get(CHAVE_CODIGO_TOP15_FIIS)).toBe('CIAAAABBBB')
     fireEvent.click(screen.getByRole('button', { name: 'Sair e trocar o código' }))
     await screen.findByTestId('top15-fiis-codigo')
-    expect(mem.d.has(CHAVE_CODIGO_TOP15)).toBe(false)
+    expect(mem.d.has(CHAVE_CODIGO_TOP15_FIIS)).toBe(false)
     expect(screen.queryByTestId('top15-fiis')).toBeNull()
   })
 
-  it('código já salvo (por exemplo, ao liberar o Top 15 de ações) abre a lista sozinho, sem pedir de novo', async () => {
+  it('o código salvo das AÇÕES não abre os FIIs (D66): a tela pede o código dos FIIs e não consulta o servidor com o outro', async () => {
     const carregar = vi.fn(async (): Promise<RespostaTop15Fiis> => ({ ok: true, snapshot: completo() }))
-    render(<Top15FiisBaratos snapshot={cabecalho()} carregar={carregar} armazenamento={memoria({ [CHAVE_CODIGO_TOP15]: 'CIAAAABBBB' })} />)
+    render(<Top15FiisBaratos snapshot={cabecalho()} carregar={carregar} armazenamento={memoria({ [CHAVE_CODIGO_TOP15]: 'CIACOESSSS' })} />)
+    await screen.findByTestId('top15-fiis-codigo')
+    expect(carregar).not.toHaveBeenCalled()
+    expect(screen.queryByTestId('top15-fiis')).toBeNull()
+  })
+
+  it('código dos FIIs já salvo abre a lista sozinho, sem pedir de novo', async () => {
+    const carregar = vi.fn(async (): Promise<RespostaTop15Fiis> => ({ ok: true, snapshot: completo() }))
+    render(<Top15FiisBaratos snapshot={cabecalho()} carregar={carregar} armazenamento={memoria({ [CHAVE_CODIGO_TOP15_FIIS]: 'CIAAAABBBB' })} />)
     await screen.findByTestId('top15-fiis')
     expect(carregar).toHaveBeenCalledWith('CIAAAABBBB')
     expect(screen.queryByTestId('top15-fiis-codigo')).toBeNull()
   })
 
   it('código salvo que venceu: apaga, avisa e volta a pedir; falha de rede com código salvo não apaga o código', async () => {
-    const mem = memoria({ [CHAVE_CODIGO_TOP15]: 'CIANTIGOXX' })
+    const mem = memoria({ [CHAVE_CODIGO_TOP15_FIIS]: 'CIANTIGOXX' })
     const { unmount } = render(<Top15FiisBaratos snapshot={cabecalho()} carregar={async () => ({ ok: false, motivo: 'invalido' })} armazenamento={mem} />)
     await screen.findByTestId('top15-fiis-codigo')
     expect(screen.getByRole('alert').textContent).toContain('venceu')
-    expect(mem.d.has(CHAVE_CODIGO_TOP15)).toBe(false)
+    expect(mem.d.has(CHAVE_CODIGO_TOP15_FIIS)).toBe(false)
     unmount()
-    const mem2 = memoria({ [CHAVE_CODIGO_TOP15]: 'CIBOMBOMXX' })
+    const mem2 = memoria({ [CHAVE_CODIGO_TOP15_FIIS]: 'CIBOMBOMXX' })
     render(<Top15FiisBaratos snapshot={cabecalho()} carregar={async () => ({ ok: false, motivo: 'rede' })} armazenamento={mem2} />)
     await screen.findByTestId('top15-fiis-codigo')
-    expect(mem2.d.get(CHAVE_CODIGO_TOP15)).toBe('CIBOMBOMXX')
+    expect(mem2.d.get(CHAVE_CODIGO_TOP15_FIIS)).toBe('CIBOMBOMXX')
     expect(screen.getByRole('alert').textContent).toContain('conectar')
   })
 })

@@ -1298,3 +1298,15 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 **Testes.** Scripts: 307 (inclui publicação: aprovado com código não expõe fundo no cabeçalho; não aprovado só cabeçalho; falha de sanidade deixa o app intacto; `api/top15-fiis` e `vercel.json`). Web: 1321 testes, `tsc -b` limpo.
 
 **Pendências do responsável.** (1) Antes de divulgar, trocar o `TOP15_CODIGOS` de teste da Vercel por um gerado com `npm run codigo-top15` (nunca enviar nem guardar o código). (2) Parecer independente de especialista (D22) antes de divulgar em escala. (3) Acompanhar RZAT11 e os fundos "em conferência"; a conferência manual vale 90 dias.
+
+## D66 (07/10/2026): um código de acesso por classe de ativos
+
+**Decisão.** O Top 15 de ações e o Top 15 de FIIs passam a ter **códigos diferentes**. O código das ações continua em `TOP15_CODIGOS`; o dos FIIs fica em **`TOP15_FIIS_CODIGOS`** (variável nova na Vercel, nunca no repositório). Um código **não abre** a lista do outro.
+
+**Como funciona.** `api/top15-fiis.ts` valida só contra `TOP15_FIIS_CODIGOS`; **sem a variável a porta fica fechada** (503), mesmo que `TOP15_CODIGOS` exista. No aparelho cada lista guarda o seu código em chave própria: ações em `carteiraideal.top15.codigo` (a mesma desde a D50, então quem já liberou as ações continua liberado) e FIIs em `carteiraideal.top15fiis.codigo`. O portão `PortaoPorCodigo` recebe a chave por parâmetro. O limite de tentativas erradas por IP continua **compartilhado** entre as duas portas (mesmo hash de IP), o que só dificulta o chute. A contagem mensal de acessos já era separada (`top15:acessos` e `top15fiis:acessos`).
+
+**Gerador.** `npm run codigo-top15 -- --classe acoes` ou `-- --classe fiis` sorteia o código e lembra em qual variável colocá-lo (o código nunca é gravado). Cada execução é independente.
+
+**Efeito na publicação da D65.** O código de teste que estava em `TOP15_CODIGOS` deixa de abrir os FIIs. Para os FIIs voltarem a abrir é preciso criar `TOP15_FIIS_CODIGOS` na Vercel e fazer Redeploy. O código antigo salvo em aparelhos para os FIIs não existia em chave própria, então quem já tinha liberado os FIIs digita o novo código uma vez.
+
+**Testes.** Scripts: 307 → 308 (`top15-acesso.test.mjs` com o isolamento nos dois sentidos e o gerador por classe). Web: o portão com chave própria e o teste de que o código salvo das ações não abre os FIIs.

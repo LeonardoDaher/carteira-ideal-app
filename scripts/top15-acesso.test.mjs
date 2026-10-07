@@ -3,7 +3,7 @@ import path from 'node:path'
 import test from 'node:test'
 import { fileURLToPath } from 'node:url'
 import { carregarTs } from './ts-loader.mjs'
-import { ALFABETO, gerarCodigo } from './gerar-codigo-top15.mjs'
+import { ALFABETO, VARIAVEL_POR_CLASSE, gerarCodigo, lerArgumentos } from './gerar-codigo-top15.mjs'
 
 const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const { modulos, limpar } = await carregarTs(path.join(RAIZ, 'api'), ['_top15.ts', 'top15.ts', 'top15-fiis.ts'])
@@ -156,18 +156,20 @@ test('wiring real (top15.ts): sem TOP15_CODIGOS no ambiente a porta responde 503
   assert.deepEqual([r.statusCode, r.corpo.motivo], [503, 'nao_configurado'])
 })
 
-test('FIIs (api/top15-fiis.ts): sem TOP15_CODIGOS a porta responde 503; com o código certo lê dados-privados/fii-baratos.json; código errado dá 401 sem dado algum', async () => {
+test('FIIs (api/top15-fiis.ts): sem TOP15_FIIS_CODIGOS a porta responde 503; com o código certo lê dados-privados/fii-baratos.json; código errado dá 401 sem dado algum', async () => {
   const fs = await import('node:fs')
   const os = await import('node:os')
   const h = modulos['top15-fiis.ts'].default
-  const anterior = { cwd: process.cwd(), codigos: process.env.TOP15_CODIGOS }
+  const anterior = { cwd: process.cwd(), codigos: process.env.TOP15_FIIS_CODIGOS, acoes: process.env.TOP15_CODIGOS }
   const pasta = fs.mkdtempSync(path.join(os.tmpdir(), 'top15-fiis-'))
   try {
-    delete process.env.TOP15_CODIGOS
-    const fechada = await chamar(h, { codigo: 'CI-ABCD-EFGH' })
+    delete process.env.TOP15_FIIS_CODIGOS
+    // o código das AÇÕES configurado não abre a porta dos FIIs: sem a variável própria ela fica fechada (D66)
+    process.env.TOP15_CODIGOS = 'CI-ACOE-SSSS'
+    const fechada = await chamar(h, { codigo: 'CI-ACOE-SSSS' })
     assert.deepEqual([fechada.statusCode, fechada.corpo.motivo], [503, 'nao_configurado'])
 
-    process.env.TOP15_CODIGOS = 'CI-ABCD-EFGH'
+    process.env.TOP15_FIIS_CODIGOS = 'CI-ABCD-EFGH'
     fs.mkdirSync(path.join(pasta, 'dados-privados'))
     process.chdir(pasta)
     // sem o arquivo ainda: 503 "indisponível" (e não 500)
@@ -184,6 +186,16 @@ test('FIIs (api/top15-fiis.ts): sem TOP15_CODIGOS a porta responde 503; com o c�
     assert.equal(ok.statusCode, 200)
     assert.deepEqual(ok.corpo, lista)
     assert.equal(ok.cabecalhos['cache-control'], 'private, no-store')
+    // isolamento (D66): o código das ações NÃO abre os FIIs, e o dos FIIs NÃO abre as ações
+    const doutra = await chamar(h, { codigo: 'CI-ACOE-SSSS' }, { ip: '198.51.100.5' })
+    assert.deepEqual([doutra.statusCode, doutra.corpo.motivo], [401, 'invalido'])
+    assert.ok(!JSON.stringify(doutra.corpo).includes('FIIT11'))
+    const acoes = modulos['top15.ts'].default
+    const dosFiisNasAcoes = await chamar(acoes, { codigo: 'CI-ABCD-EFGH' }, { ip: '198.51.100.6' })
+    assert.deepEqual([dosFiisNasAcoes.statusCode, dosFiisNasAcoes.corpo.motivo], [401, 'invalido'])
+    assert.ok(!JSON.stringify(dosFiisNasAcoes.corpo).includes('ACAO3'))
+    const certoNasAcoes = await chamar(acoes, { codigo: 'CI-ACOE-SSSS' }, { ip: '198.51.100.7' })
+    assert.equal(certoNasAcoes.statusCode, 200)
     // código errado: 401, nenhum dado
     const errado = await chamar(h, { codigo: 'CI-ZZZZ-ZZZZ' }, { ip: '198.51.100.4' })
     assert.deepEqual([errado.statusCode, errado.corpo.motivo], [401, 'invalido'])
@@ -192,8 +204,10 @@ test('FIIs (api/top15-fiis.ts): sem TOP15_CODIGOS a porta responde 503; com o c�
     assert.equal((await chamar(h, {}, { metodo: 'GET' })).statusCode, 405)
   } finally {
     process.chdir(anterior.cwd)
-    if (anterior.codigos === undefined) delete process.env.TOP15_CODIGOS
-    else process.env.TOP15_CODIGOS = anterior.codigos
+    if (anterior.codigos === undefined) delete process.env.TOP15_FIIS_CODIGOS
+    else process.env.TOP15_FIIS_CODIGOS = anterior.codigos
+    if (anterior.acoes === undefined) delete process.env.TOP15_CODIGOS
+    else process.env.TOP15_CODIGOS = anterior.acoes
     fs.rmSync(pasta, { recursive: true, force: true })
   }
 })
@@ -216,4 +230,15 @@ test('gerador de código: formato, alfabeto sem símbolos ambíguos, sem repeti�
     vistos.add(c)
   }
   assert.ok(vistos.size > 295, 'sorteio sem repetição prática')
+})
+
+test('gerador de código por classe (D66): --classe acoes|fiis aponta a variável certa, aceita a quantidade e recusa classe desconhecida', () => {
+  assert.deepEqual(VARIAVEL_POR_CLASSE, { acoes: 'TOP15_CODIGOS', fiis: 'TOP15_FIIS_CODIGOS' })
+  assert.deepEqual(lerArgumentos([]), { classe: undefined, quantidade: 1 })
+  assert.deepEqual(lerArgumentos(['--classe', 'fiis']), { classe: 'fiis', quantidade: 1 })
+  assert.deepEqual(lerArgumentos(['2', '--classe', 'acoes']), { classe: 'acoes', quantidade: 2 })
+  assert.deepEqual(lerArgumentos(['--classe', 'acoes', '9']), { classe: 'acoes', quantidade: 5 })
+  assert.throws(() => lerArgumentos(['--classe', 'etf']), /Classe inválida/)
+  assert.throws(() => lerArgumentos(['--classe']), /Classe inválida/)
+  assert.throws(() => lerArgumentos(['--classe', 'toString']), /Classe inválida/)
 })

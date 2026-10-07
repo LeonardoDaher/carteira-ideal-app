@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { storage } from '../data/storage'
 import { SNAPSHOT_FII_BARATOS } from '../data/snapshotFiiBaratos'
-import { buscarTop15Fiis } from '../domain/acessoTop15'
+import { CHAVE_CODIGO_TOP15_FIIS, buscarTop15Fiis } from '../domain/acessoTop15'
 import type { RespostaTop15Fiis } from '../domain/acessoTop15'
 import { buscarExclusao, formatarPercentual, formatarReaisCompacto } from '../domain/acoesBaratas'
 import { GRUPOS_FII, ROTULO_ALERTA, contarExclusoes, formatarPvp, formatarVolumeDiario, validadeDaConferencia } from '../domain/fiiBaratos'
@@ -50,6 +50,7 @@ export function Top15FiisBaratos({
         instagram={snapshot.instagram}
         carregar={carregar}
         armazenamento={armazenamento}
+        chaveArmazenamento={CHAVE_CODIGO_TOP15_FIIS}
         idDeTeste="top15-fiis-codigo"
         renderizar={(completo, sair) => <ListaFiis snapshot={completo} aoTrocarCodigo={sair} />}
       />

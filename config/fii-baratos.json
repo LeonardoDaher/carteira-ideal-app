@@ -155,7 +155,7 @@
       "data": "2026-10-07",
       "escopo": "Publicar o Top 15 de FIIs baratos (Tijolo e Papel) no app, SOMENTE com acesso por código do mês. Os pontos de enquadramento regulatório (parecer independente, D22) continuam com o responsável."
     },
-    "_leia": "Publicação (D65). Com aprovadoPeloResponsavel = false, o job só grava a trilha de auditoria e o app mostra \"em validação\". Com true E a trava de sanidade aprovada, o ranking chega ao app por acesso com CÓDIGO do mês (o mesmo TOP15_CODIGOS do Top 15 de ações): o arquivo público do app traz só o cabeçalho e a lista fica em dados-privados/fii-baratos.json, lida só por api/top15-fiis.ts depois de conferir o código. O texto de aviso mostrado na tela é publicacao.aviso (ou, se não houver, avisoProposto). enquadramento é a proposta registrada para o responsável.",
+    "_leia": "Publicação (D65). Com aprovadoPeloResponsavel = false, o job só grava a trilha de auditoria e o app mostra \"em validação\". Com true E a trava de sanidade aprovada, o ranking chega ao app por acesso com CÓDIGO do mês (o código próprio dos FIIs, TOP15_FIIS_CODIGOS, diferente do das ações (D66)): o arquivo público do app traz só o cabeçalho e a lista fica em dados-privados/fii-baratos.json, lida só por api/top15-fiis.ts depois de conferir o código. O texto de aviso mostrado na tela é publicacao.aviso (ou, se não houver, avisoProposto). enquadramento é a proposta registrada para o responsável.",
     "sanidade": {
       "minimoNoRankingTijolo": 15,
       "minimoNoRankingPapel": 10,

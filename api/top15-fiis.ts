@@ -1,8 +1,9 @@
 // POST /api/top15-fiis  { codigo }
 //
-// Devolve o Top 15 FIIs baratos (dados-privados/fii-baratos.json) a quem informar o código do mês, o MESMO
-// do Top 15 de ações (variável TOP15_CODIGOS da Vercel, nunca no repositório), com o mesmo limite de tentativas
-// por IP (o hash do IP é o mesmo, então errar aqui conta junto com errar em /api/top15). Toda a lógica está em
+// Devolve o Top 15 FIIs baratos (dados-privados/fii-baratos.json) a quem informar o código do mês DOS FIIs
+// (variável TOP15_FIIS_CODIGOS da Vercel, nunca no repositório; D66). Ele é DIFERENTE do código das ações
+// (TOP15_CODIGOS): um não abre o outro, e sem TOP15_FIIS_CODIGOS esta porta fica fechada. O limite de
+// tentativas por IP é o mesmo (o hash do IP é o mesmo, então errar aqui conta junto com errar em /api/top15). Toda a lógica está em
 // _top15.ts (testada em scripts/top15-acesso.test.mjs); aqui só se ligam as dependências reais.
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
@@ -23,7 +24,7 @@ async function lerDados(): Promise<unknown> {
 }
 
 export default criarHandler({
-  codigos: () => process.env.TOP15_CODIGOS,
+  codigos: () => process.env.TOP15_FIIS_CODIGOS,
   lerDados,
   limitador: metricasHabilitadas() ? limitadorComReserva(limitadorRedis(pipeline), reserva) : reserva,
   sal: process.env.TOP15_SAL ?? '',

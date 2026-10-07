@@ -4,10 +4,14 @@ import type { SnapshotFiiBaratos } from './fiiBaratos'
 /**
  * Acesso ao Top 15 por código mensal (D50). O ranking não vem no arquivo do app: o navegador pede à
  * função api/top15 (ações) ou api/top15-fiis (FIIs, D65) enviando o código, e ela só devolve a lista
- * se o código estiver certo. O MESMO código vale para os dois, e o app guarda um só.
+ * se o código estiver certo. Cada classe de ativos tem o SEU código (D66): ações em TOP15_CODIGOS, FIIs em
+ * TOP15_FIIS_CODIGOS, e o app guarda cada um em chave própria.
  */
 
+/** Código das ações (chave mantida desde a D50: quem já liberou as ações continua liberado). */
 export const CHAVE_CODIGO_TOP15 = 'carteiraideal.top15.codigo'
+/** Código dos FIIs. */
+export const CHAVE_CODIGO_TOP15_FIIS = 'carteiraideal.top15fiis.codigo'
 
 export type MotivoFalhaTop15 = 'invalido' | 'limite' | 'indisponivel' | 'nao_configurado' | 'rede' | 'resposta'
 

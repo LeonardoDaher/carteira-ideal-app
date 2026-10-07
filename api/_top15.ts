@@ -113,7 +113,7 @@ export function limitadorComReserva(principal: Limitador, reserva: Limitador): L
 export type EventoDeAcesso = 'ok' | 'falha' | 'bloqueado'
 
 export interface Dependencias {
-  /** Conteúdo bruto de TOP15_CODIGOS. */
+  /** Conteúdo bruto da variável de códigos da lista (TOP15_CODIGOS nas ações, TOP15_FIIS_CODIGOS nos FIIs). */
   codigos: () => string | undefined
   /** Conteúdo de dados-privados/acoes-baratas.json, ou null se não existir. */
   lerDados: () => Promise<unknown>
