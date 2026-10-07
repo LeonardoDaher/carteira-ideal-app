@@ -42,7 +42,6 @@
       "pvpMuitoBaixo": 0.55,
       "dy12Alto": 0.18,
       "rendimentoRecenteMinimoSobre12m": 0.75,
-      "_leia": "Fundo com P/VP abaixo de pvpMuitoBaixo (cota e valor patrimonial possivelmente em bases diferentes, como em desdobramento), DY de 12 meses acima de dy12Alto (distribuição não recorrente), mediana dos 'dados.mesesRecentes' últimos meses abaixo de rendimentoRecenteMinimoSobre12m da mediana dos 12 meses (corte de rendimento) ou média dos 12 meses acima de picoDeRendimentoMaximo vezes a mediana (o DY de 12 meses depende de poucos meses atípicos: pagamento extra, pico no informe ou rendimento de antes de um corte) NÃO entra no ranking: vai para 'a conferir', sem posição, até alguém confirmar o dado numa fonte pública (e registrar em 'conferencia'). As duas últimas regras usam MEDIANA de propósito: um mês com DY zero no informe (GTWR11, BRCO11) não pode decidir sozinho. Sai antes de calcular os ranks, para não distorcer a nota dos demais. Também vai para a conferência o fundo com salto de preço de um dia para o outro acima de saltoDePrecoDiario (25%) nos últimos pregões do histórico diário: cota que mudou de base (desdobramento ou grupamento) deixa o P/VP sem sentido.",
       "picoDeRendimentoMaximo": 1.25,
       "saltoDePrecoDiario": 0.25
     },
