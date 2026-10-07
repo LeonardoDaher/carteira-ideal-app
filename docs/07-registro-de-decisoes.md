@@ -1328,3 +1328,12 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 **Não foi pedido e não foi feito.** Carro e moto (têm as mesmas quatro rotas, com "sem carro" no lugar do aluguel) e as páginas de SEO/Metodologia não ganharam o seletor; o estado da escolha não é guardado no aparelho. Fica como próximo passo natural, no mesmo molde.
 
 **Testes.** Web 1.322 → 1.347 (18 do motor, incluindo regressão 4 caminhos = antes, contabilidade em 5 combinações, independência do financiamento, validação, ponto de virada por pares; 7 de tela). `tsc -b` limpo. Scripts: 308 passam.
+
+
+## D68 (07/10/2026): o cartão da landing passa a se chamar "Simule Bens"
+
+**Decisão.** O cartão que levava ao hub Simule Bens ainda tinha o título do imóvel ("Comprar à vista, financiar, consórcio ou alugar?"), pendência deixada na D47. Agora o título é **Simule Bens** e a descrição é "Imóvel, carro e moto: à vista, financiar, consórcio ou alugar? Veja qual caminho custa menos", no mesmo molde do cartão "Simule Ativos". O destino não mudou (`./app/?tela=simuleBens`). A descrição fala em "custa menos" porque, no carro e na moto, a leitura principal é o custo; no imóvel a tela mostra o patrimônio, que é a mesma conta vista do outro lado.
+
+**Não mudou.** O cartão "Comprar à vista, financiar, consórcio ou alugar?" da lista de ferramentas (seção de SEO da página inicial) continua apontando para a página do imóvel, que é onde ele deve levar.
+
+**Pendências ligadas.** A pergunta de SEO "A ferramenta indica qual banco ou qual consórcio escolher?" (em `gerar-paginas.mjs`) ainda diz "três caminhos"; depois da D46 e da D67 são de dois a quatro. A página do imóvel também não cita a escolha dos caminhos.
