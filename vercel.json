@@ -17,6 +17,9 @@
   "functions": {
     "api/top15.ts": {
       "includeFiles": "dados-privados/**"
+    },
+    "api/top15-fiis.ts": {
+      "includeFiles": "dados-privados/**"
     }
   }
 }

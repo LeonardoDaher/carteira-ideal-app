@@ -10,7 +10,10 @@
 //                 FIIs (webapp-src/src/data/rendimentosFii.json) → insumos.json.gz (linhas exatas usadas)
 //   2. CÁLCULO  : scripts/fii-baratos-calculo.mjs (puro) → resultado.json + memoria-de-calculo.json.gz
 //   3. REGISTRO : manifesto.json com sha256 de fontes, config, insumos, resultado e do código de cálculo
-// Este job NÃO publica nada no app (config/fii-baratos.json → publicacao). Se algo falhar, termina com erro.
+//   4. PUBLICAÇÃO: só leva o ranking ao app se config/fii-baratos.json → publicacao.aprovadoPeloResponsavel === true E a trava
+//                  de sanidade passar. Com acesso por código (padrão): cabeçalho em webapp-src/src/data/fiiBaratos.json e lista
+//                  completa em dados-privados/fii-baratos.json (só api/top15-fiis.ts lê, com o código do mês).
+// Se algo falhar, termina com erro SEM alterar o app.
 
 import fs from 'node:fs'
 import os from 'node:os'
@@ -268,7 +271,7 @@ export function concluir({ raiz, cfg, insumos, fontes = [], log = console.log, a
       hashes: { ...hashes, arquivos: arquivosHash },
       fontes: [...fontes, { papel: 'Cotação e volume dos FIIs (job de FIIs)', url: 'webapp-src/src/data/rendimentosFii.json (neste repositório)', dataCotacoes: insumos.dataCotacoes }],
       contagens: { universo: resultado.universo, tijolo: resultado.tijolo.length, papel: resultado.papel.length, aConferir: resultado.aConferir.length, exclusoes: resultado.exclusoes.length, etapas: resultado.etapas },
-      publicadoNoApp: false,
+      publicadoNoApp: cfg.publicacao?.aprovadoPeloResponsavel === true,
     })
     gravarJson(path.join(raiz, 'auditoria', 'fii-baratos', 'ultima.json'), { pasta: rel.replace(/\\/g, '/'), dataExecucao: insumos.dataExecucao, hashResultado: hashes.resultado, versaoMetodologia: cfg.versaoMetodologia })
   }
@@ -280,11 +283,75 @@ export function concluir({ raiz, cfg, insumos, fontes = [], log = console.log, a
   log(`Top ${cfg.tamanhoDaLista} TIJOLO: ${topo(resultado.tijolo)}`)
   log(`Top ${cfg.tamanhoDaLista} PAPEL: ${topo(resultado.papel)}`)
   log(`A conferir (fora do ranking): ${resultado.aConferir.map((f) => `${f.ticker}[${f.alertas.join(',')}]`).join(' ') || 'nenhum'}`)
-  log('App: NÃO publicado (este job só grava a trilha de auditoria).')
 
+  // Trava de sanidade ANTES de tocar no app: resultado inverossímil derruba o job e o app fica como estava.
   const problemas = verificarSanidade(resultado, cfg)
-  if (problemas.length) throw new Error(`Resultado barrado pela trava de sanidade: ${problemas.join('; ')}. A auditoria foi gravada em ${rel} para diagnóstico (veja exclusoes.csv).`)
-  return { resultado, hashes, pasta }
+  if (problemas.length) throw new Error(`Resultado barrado pela trava de sanidade: ${problemas.join('; ')}. A auditoria foi gravada em ${rel} para diagnóstico (veja exclusoes.csv); o app não foi alterado.`)
+
+  // Publicação (decisão D65): só com a aprovação do responsável. Sem ela, o app recebe só o cabeçalho (mostra "em validação").
+  const publicado = cfg.publicacao?.aprovadoPeloResponsavel === true
+  const manifesto = lerJson(path.join(pasta, 'manifesto.json'))
+  if (manifesto.publicadoNoApp !== publicado) gravarJson(path.join(pasta, 'manifesto.json'), { ...manifesto, publicadoNoApp: publicado })
+  const snapshot = montarSnapshotApp({ resultado, cfg, manifesto, pasta: rel.replace(/\\/g, '/'), publicado })
+  const { publico, privado } = separarSnapshot(snapshot)
+  fs.mkdirSync(path.join(raiz, 'webapp-src', 'src', 'data'), { recursive: true })
+  gravarJson(path.join(raiz, 'webapp-src', 'src', 'data', 'fiiBaratos.json'), publico)
+  fs.mkdirSync(path.join(raiz, 'dados-privados'), { recursive: true })
+  gravarJson(path.join(raiz, 'dados-privados', 'fii-baratos.json'), privado)
+  log(publicado ? (snapshot.acessoRestrito ? 'App: ranking PUBLICADO com acesso por código (lista em dados-privados/, servida por api/top15-fiis).' : 'App: ranking PUBLICADO (acesso aberto).') : 'App: ranking NÃO publicado (aprovadoPeloResponsavel = false). A auditoria completa foi gravada.')
+  return { resultado, hashes, pasta, publicado }
+}
+
+/**
+ * O que o app lê. Sem aprovação do responsável, vai só o cabeçalho (o app mostra "em validação").
+ * Com acesso por código (D50), o arquivo do app traz SÓ o cabeçalho e a lista vai para dados-privados/.
+ */
+export function montarSnapshotApp({ resultado, cfg, manifesto, pasta, publicado }) {
+  const acesso = cfg.publicacao?.acesso ?? {}
+  const f = cfg.filtros
+  return {
+    publicado,
+    acessoRestrito: acesso.restritoPorCodigo === true,
+    instagram: acesso.instagram ?? null,
+    versaoMetodologia: cfg.versaoMetodologia,
+    geradoEm: manifesto.geradoEm,
+    dataExecucao: resultado.dataExecucao,
+    dataCotacoes: resultado.dataCotacoes,
+    ultimoPregaoDiario: resultado.ultimoPregaoDiario ?? null,
+    competenciaReferencia: resultado.competenciaReferencia,
+    pastaAuditoria: pasta,
+    hashResultado: manifesto.hashes.resultado,
+    hashInsumos: manifesto.hashes.insumos,
+    hashConfig: manifesto.hashes.config,
+    tamanhoDaLista: cfg.tamanhoDaLista,
+    universo: resultado.universo,
+    aviso: cfg.publicacao?.aviso ?? cfg.publicacao?.avisoProposto ?? null,
+    parametros: {
+      filtros: { tijolo: f.tijolo, papel: f.papel },
+      classificacao: { fatiaMinimaDoTipo: cfg.classificacao.fatiaMinimaDoTipo },
+      alertas: cfg.alertas,
+      mesesHistorico: cfg.dados.mesesHistorico,
+      pregoesPrecoDiario: cfg.dados.pregoesPrecoDiario,
+      conferenciaValidadeDias: cfg.conferencia?.validadeDias ?? null,
+    },
+    contagens: { tijolo: resultado.tijolo.length, papel: resultado.papel.length, aConferir: resultado.aConferir.length, exclusoes: resultado.exclusoes.length },
+    tijolo: publicado ? resultado.tijolo : [],
+    papel: publicado ? resultado.papel : [],
+    aConferir: publicado ? resultado.aConferir : [],
+    exclusoes: publicado ? resultado.exclusoes : [],
+  }
+}
+
+/**
+ * Separa o snapshot em duas metades quando o acesso é por código:
+ *  - publico : vai no arquivo do app (cabeçalho, parâmetros, hashes). NENHUM código de fundo, NENHUM número de fundo.
+ *  - privado : lista completa, só lida por api/top15-fiis.ts depois de conferir o código.
+ * Sem acesso restrito, o arquivo do app leva tudo (modo aberto) e o privado fica vazio.
+ */
+export function separarSnapshot(completo) {
+  if (!completo.acessoRestrito) return { publico: completo, privado: { publicado: false } }
+  const publico = { ...completo, tijolo: [], papel: [], aConferir: [], exclusoes: [] }
+  return { publico, privado: completo.publicado ? completo : { publicado: false } }
 }
 
 // ---------------------------------------------------------------------------------------

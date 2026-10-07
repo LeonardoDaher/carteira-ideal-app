@@ -1,6 +1,6 @@
 {
   "_leia": "Metodologia da triagem 'FIIs baratos' (Tijolo e Papel). ESTE ARQUIVO É A FONTE ÚNICA DOS PARÂMETROS: o script e o documento docs/10-metodologia-fii-baratos.md leem/citam estes valores. Qualquer mudança aqui exige subir 'versaoMetodologia' e registrar o motivo em 'historicoDeVersoes'. O hash SHA-256 deste arquivo vai no manifesto de cada execução.",
-  "versaoMetodologia": "1.4.1",
+  "versaoMetodologia": "1.5.0",
   "historicoDeVersoes": [
     {
       "versao": "1.0.0",
@@ -31,6 +31,11 @@
       "versao": "1.4.1",
       "data": "2026-10-07",
       "mudanca": "Na primeira execução com o preço diário da B3 (60 pregões carregados), 3 fundos líquidos ficaram fora do histórico porque o Boletim de Preços da B3 não os traz (CVBI11, MALL11 e BBPO11, com R$ 0,8 a 2,7 mi por dia na brapi): a triagem usava o preço MENSAL deles, e com o preço diário obrigatório (condição para publicar) CVBI11 (3º do papel) e BBPO11 (8º do tijolo) sairiam do ranking. O job de preço diário passa a completar, pela brapi, só os fundos líquidos que o boletim não traz (cerca de 3 requisições por dia), sem nunca sobrescrever um dia do boletim. A triagem registra a origem de cada preço: B3 (boletim diário) ou brapi (histórico diário completado). Nenhuma regra de cálculo mudou."
+    },
+    {
+      "versao": "1.5.0",
+      "data": "2026-10-07",
+      "mudanca": "PUBLICAÇÃO (D65). O responsável aprovou publicar o Top 15 de FIIs baratos no app, atrás do código do mês (o mesmo do Top 15 de ações). aprovadoPeloResponsavel passa a true e precoDiarioObrigatorio a true (fundo sem preço diário sai da triagem). O arquivo público do app traz só o cabeçalho; a lista fica em dados-privados/fii-baratos.json e só é entregue por api/top15-fiis depois de conferir o código. Nenhuma regra de cálculo mudou."
     }
   ],
   "tamanhoDaLista": 15,
@@ -45,7 +50,7 @@
     "pregoesPrecoDiario": 21,
     "minimoPregoesPrecoDiario": 21,
     "cotacaoDiariaMaxIdadeDias": 7,
-    "precoDiarioObrigatorio": false
+    "precoDiarioObrigatorio": true
   },
   "classificacao": {
     "fatiaMinimaDoTipo": 0.6,
@@ -144,8 +149,13 @@
     "_leia": "Conferência manual de dado, feita pelo responsável ou por quem ele indicar, numa fonte pública. 'libera' lista SÓ os alertas que a conferência cobre: um alerta novo volta a segurar o fundo. Vale por validadeDias dias a partir de conferidoEm; depois volta para 'a conferir'. Conferir o dado não é recomendar o fundo: P/VP baixo e DY alto continuam podendo refletir risco real."
   },
   "publicacao": {
-    "aprovadoPeloResponsavel": false,
-    "_leia": "Este job NÃO publica nada no app: só grava a trilha de auditoria em auditoria/fii-baratos/<data>/. Antes de qualquer publicação (tela, código de acesso) o responsável precisa decidir o enquadramento regulatório (ver D22) e o preço diário (hoje a cotação vem do job mensal de FIIs). O texto de aviso proposto (avisoProposto) e o enquadramento (enquadramento) são rascunhos para revisão do responsável; a tela, se vier, deve ler o aviso daqui.",
+    "aprovadoPeloResponsavel": true,
+    "aprovacao": {
+      "por": "responsável pelo projeto (Leonardo Daher)",
+      "data": "2026-10-07",
+      "escopo": "Publicar o Top 15 de FIIs baratos (Tijolo e Papel) no app, SOMENTE com acesso por código do mês. Os pontos de enquadramento regulatório (parecer independente, D22) continuam com o responsável."
+    },
+    "_leia": "Publicação (D65). Com aprovadoPeloResponsavel = false, o job só grava a trilha de auditoria e o app mostra \"em validação\". Com true E a trava de sanidade aprovada, o ranking chega ao app por acesso com CÓDIGO do mês (o mesmo TOP15_CODIGOS do Top 15 de ações): o arquivo público do app traz só o cabeçalho e a lista fica em dados-privados/fii-baratos.json, lida só por api/top15-fiis.ts depois de conferir o código. O texto de aviso mostrado na tela é publicacao.aviso (ou, se não houver, avisoProposto). enquadramento é a proposta registrada para o responsável.",
     "sanidade": {
       "minimoNoRankingTijolo": 15,
       "minimoNoRankingPapel": 10,
@@ -153,7 +163,7 @@
       "_leia": "Se o resultado é claramente inverossímil (grupo pequeno demais ou muitos fundos sem dado utilizável), o job termina com erro depois de gravar a auditoria, para diagnóstico."
     },
     "enquadramento": {
-      "status": "PROPOSTA para decisão do responsável (não aprovada). Mudar aprovadoPeloResponsavel para true só depois de ele decidir.",
+      "status": "Publicação aprovada pelo responsável em 2026-10-07, com acesso por código. Parecer independente de especialista (D22) segue como item dele, antes de divulgar em escala.",
       "descricao": "Triagem objetiva por fórmula, igual para todos, com dados públicos (Informe Mensal da CVM e Boletim de Preços da B3), regras e parâmetros públicos e auditáveis (trilha de auditoria com insumos congelados e verificação independente). Não considera o perfil de ninguém, não indica compra nem venda, não projeta preço nem rendimento e não promete retorno.",
       "pontosParaDecisao": [
         "Mesma base da D22 para o Top 15 de ações (triagem contábil por fórmula, análise jurídica interna sem objeção), mas FIIs têm risco próprio: o desconto no P/VP costuma ser risco de crédito ou de vacância já precificado, e o rendimento é estimado a partir do DY do informe.",
@@ -162,6 +172,10 @@
         "O ranking separa Tijolo e Papel por regra objetiva (composição do ativo no informe), sem opinião sobre gestoras ou fundos específicos."
       ]
     },
-    "avisoProposto": "Não é recomendação de investimento. Esta lista é uma triagem automática por fórmula, igual para todos, e não considera o seu perfil, seus objetivos nem o preço que faria sentido pagar. Os números vêm do Informe Mensal da CVM e do Boletim de Preços da B3, são do passado, podem conter erros e defasagem de divulgação, e o rendimento por cota é uma estimativa. Fundos “baratos” incluem os que têm problemas reais (vacância, inadimplência, alavancagem, perda de valor): desconto grande no P/VP costuma ser risco que o mercado já está cobrando, não pechincha. Rentabilidade passada não garante rentabilidade futura, os rendimentos não são garantidos e fundos imobiliários podem causar perda de parte ou de todo o dinheiro aplicado. Converse com um profissional certificado antes de investir."
+    "avisoProposto": "Não é recomendação de investimento. Esta lista é uma triagem automática por fórmula, igual para todos, e não considera o seu perfil, seus objetivos nem o preço que faria sentido pagar. Os números vêm do Informe Mensal da CVM e do Boletim de Preços da B3, são do passado, podem conter erros e defasagem de divulgação, e o rendimento por cota é uma estimativa. Fundos “baratos” incluem os que têm problemas reais (vacância, inadimplência, alavancagem, perda de valor): desconto grande no P/VP costuma ser risco que o mercado já está cobrando, não pechincha. Rentabilidade passada não garante rentabilidade futura, os rendimentos não são garantidos e fundos imobiliários podem causar perda de parte ou de todo o dinheiro aplicado. Converse com um profissional certificado antes de investir.",
+    "acesso": {
+      "restritoPorCodigo": true,
+      "instagram": "acarteiraideal"
+    }
   }
 }

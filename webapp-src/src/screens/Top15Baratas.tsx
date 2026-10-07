@@ -1,13 +1,14 @@
-import { useEffect, useId, useState } from 'react'
+import { useId, useState } from 'react'
 import { storage } from '../data/storage'
 import { SNAPSHOT_ACOES_BARATAS } from '../data/snapshotAcoesBaratas'
-import { CHAVE_CODIGO_TOP15, buscarTop15, formatarCodigo, limparCodigoDigitado, mensagemDaFalha } from '../domain/acessoTop15'
+import { buscarTop15 } from '../domain/acessoTop15'
 import type { RespostaTop15 } from '../domain/acessoTop15'
 import {
   CONTAGEM_POR_ETAPA, SEM_FILTROS, buscarExclusao, descreverComponente, formatarMultiplo, formatarPercentual, formatarReaisCompacto, selecionarTop,
 } from '../domain/acoesBaratas'
 import type { ComposicaoLtm, FiltrosQualidade, ItemRanking, SnapshotAcoesBaratas } from '../domain/acoesBaratas'
 import { formatarData } from '../domain/rendaFii'
+import { PortaoPorCodigo } from '../ui/PortaoPorCodigo'
 
 function reais(valor: number) {
   return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -48,8 +49,8 @@ function EmValidacao() {
 }
 
 /**
- * Pede o código do mês. O código fica salvo neste aparelho; quando ele vence, o servidor o recusa
- * e a tela volta a pedir. Nenhum dado da lista existe no navegador antes de o código ser aceito.
+ * Pede o código do mês (D50). O portão é o mesmo do Top 15 de FIIs (ui/PortaoPorCodigo): o código fica salvo
+ * neste aparelho e, quando vence, o servidor o recusa e a tela volta a pedir.
  */
 function PortaoDoCodigo({
   cabecalho, carregar, armazenamento,
@@ -58,103 +59,18 @@ function PortaoDoCodigo({
   carregar: (codigo: string) => Promise<RespostaTop15>
   armazenamento: Pick<typeof storage, 'getItem' | 'setItem' | 'removeItem'>
 }) {
-  const [completo, setCompleto] = useState<SnapshotAcoesBaratas | null>(null)
-  const [fase, setFase] = useState<'verificando-salvo' | 'livre' | 'carregando'>('verificando-salvo')
-  const [aviso, setAviso] = useState<string | null>(null)
-  const [codigo, setCodigo] = useState('')
-  const idCampo = useId()
-
-  const tentar = async (valor: string, doSalvo: boolean) => {
-    setFase(doSalvo ? 'verificando-salvo' : 'carregando')
-    setAviso(null)
-    const r = await carregar(valor)
-    if (r.ok) {
-      await armazenamento.setItem(CHAVE_CODIGO_TOP15, valor)
-      setCompleto(r.snapshot)
-      return
-    }
-    if (r.motivo === 'invalido') await armazenamento.removeItem(CHAVE_CODIGO_TOP15)
-    setAviso(doSalvo && r.motivo === 'invalido' ? 'O código salvo neste aparelho venceu. Digite o código mais recente.' : mensagemDaFalha(r))
-    setFase('livre')
-  }
-
-  useEffect(() => {
-    let cancelado = false
-    void (async () => {
-      const salvo = await armazenamento.getItem(CHAVE_CODIGO_TOP15)
-      if (cancelado) return
-      if (!salvo) return setFase('livre')
-      const r = await carregar(salvo)
-      if (cancelado) return
-      if (r.ok) return setCompleto(r.snapshot)
-      if (r.motivo === 'invalido') await armazenamento.removeItem(CHAVE_CODIGO_TOP15)
-      setAviso(r.motivo === 'invalido' ? 'O código salvo neste aparelho venceu. Digite o código mais recente.' : mensagemDaFalha(r))
-      setFase('livre')
-    })()
-    return () => {
-      cancelado = true
-    }
-  }, [armazenamento, carregar])
-
-  const sair = async () => {
-    await armazenamento.removeItem(CHAVE_CODIGO_TOP15)
-    setCompleto(null)
-    setCodigo('')
-    setFase('livre')
-  }
-
-  if (completo) return <ListaTop15 snapshot={completo} aoTrocarCodigo={sair} />
-
-  if (fase === 'verificando-salvo') {
-    return <div className="card small muted" role="status">Verificando o código salvo neste aparelho…</div>
-  }
-
-  const instagram = cabecalho.instagram
-  const pronto = limparCodigoDigitado(codigo).length >= 8 && fase !== 'carregando'
   return (
-    <div className="card col" style={{ gap: 10 }} data-testid="top15-codigo">
-      <span style={{ fontWeight: 700 }}>Top 15 mais baratas: acesso por código</span>
-      <span className="muted small justify" style={{ lineHeight: 1.5 }}>
-        A lista é liberada com o código do mês
-        {instagram ? (
-          <>
-            , divulgado no Instagram{' '}
-            <a href={`https://www.instagram.com/${instagram}/`} target="_blank" rel="noopener noreferrer">@{instagram}</a>
-          </>
-        ) : null}
-        . Com ele você vê as 15 ações, os filtros de qualidade e a memória de cálculo de cada uma.
-      </span>
-      <form
-        className="col"
-        style={{ gap: 8 }}
-        onSubmit={(e) => {
-          e.preventDefault()
-          if (pronto) void tentar(limparCodigoDigitado(codigo), false)
-        }}
-      >
-        <label htmlFor={idCampo} className="small" style={{ fontWeight: 600 }}>Código do mês</label>
-        <input
-          id={idCampo}
-          className="busca-fii"
-          placeholder="CI-XXXX-XXXX"
-          autoCapitalize="characters"
-          autoComplete="off"
-          autoCorrect="off"
-          spellCheck={false}
-          enterKeyHint="go"
-          value={codigo}
-          onChange={(e) => setCodigo(formatarCodigo(e.target.value))}
-        />
-        <button type="submit" className="btn" disabled={!pronto}>
-          {fase === 'carregando' ? 'Verificando…' : 'Ver a lista'}
-        </button>
-      </form>
-      {aviso && <div className="card-outline small justify" role="alert">{aviso}</div>}
-      <span className="tiny muted">O código fica salvo neste aparelho. Quando ele mudar, o app pede o novo.</span>
-    </div>
+    <PortaoPorCodigo
+      titulo="Top 15 mais baratas: acesso por código"
+      oQueLibera="Com ele você vê as 15 ações, os filtros de qualidade e a memória de cálculo de cada uma."
+      instagram={cabecalho.instagram}
+      carregar={carregar}
+      armazenamento={armazenamento}
+      idDeTeste="top15-codigo"
+      renderizar={(completo, sair) => <ListaTop15 snapshot={completo} aoTrocarCodigo={sair} />}
+    />
   )
 }
-
 function ListaTop15({ snapshot, aoTrocarCodigo }: { snapshot: SnapshotAcoesBaratas; aoTrocarCodigo?: () => void }) {
   const [filtros, setFiltros] = useState<FiltrosQualidade>(SEM_FILTROS)
 

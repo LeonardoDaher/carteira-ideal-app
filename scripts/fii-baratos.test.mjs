@@ -15,21 +15,25 @@ import { verificar } from './fii-baratos-verificar.mjs'
 
 const AQUI = path.dirname(fileURLToPath(import.meta.url))
 const RAIZ = path.resolve(AQUI, '..')
-const cfg = JSON.parse(fs.readFileSync(path.join(RAIZ, 'config', 'fii-baratos.json'), 'utf8'))
+const cfgArquivo = JSON.parse(fs.readFileSync(path.join(RAIZ, 'config', 'fii-baratos.json'), 'utf8'))
+// Os testes de cálculo usam fundos fabricados SEM histórico diário e sem aprovação: partem do arquivo real, mas com a trava de
+// preço diário e a aprovação desligadas. O que o arquivo real diz (aprovado, preço diário obrigatório) é conferido no teste de configuração.
+const cfg = { ...cfgArquivo, dados: { ...cfgArquivo.dados, precoDiarioObrigatorio: false }, publicacao: { ...cfgArquivo.publicacao, aprovadoPeloResponsavel: false } }
 const perto = (a, b, tol = 1e-9) => assert.ok(Math.abs(a - b) <= tol, `${a} ≠ ${b}`)
 
 // ---------------------------------------------------------------------------------------
 // Funções puras
 // ---------------------------------------------------------------------------------------
 
-test('configuração: versão, trava de publicação desligada e alertas coerentes com os filtros', () => {
-  assert.equal(cfg.versaoMetodologia, '1.4.1')
-  assert.equal(cfg.historicoDeVersoes.at(-1).versao, cfg.versaoMetodologia)
-  assert.equal(cfg.publicacao.aprovadoPeloResponsavel, false, 'este job não publica nada: a aprovação só muda por decisão do responsável')
-  assert.match(cfg.publicacao.avisoProposto, /^Não é recomendação de investimento\./, 'aviso proposto no mesmo tom do Top 15 de ações')
-  assert.match(cfg.publicacao.enquadramento.status, /não aprovada/i)
-  assert.ok(cfg.publicacao.enquadramento.pontosParaDecisao.length >= 3)
-  assert.equal(cfg.dados.precoDiarioObrigatorio, false, 'vira true só quando o responsável decidir publicar')
+test('configuração: versão, publicação aprovada só com código e alertas coerentes com os filtros', () => {
+  assert.equal(cfgArquivo.versaoMetodologia, '1.5.0')
+  assert.equal(cfgArquivo.historicoDeVersoes.at(-1).versao, cfgArquivo.versaoMetodologia)
+  assert.equal(cfgArquivo.publicacao.aprovadoPeloResponsavel, true, 'aprovado pelo responsável em 2026-10-07 (D65)')
+  assert.equal(cfgArquivo.publicacao.aprovacao.data, '2026-10-07')
+  assert.equal(cfgArquivo.publicacao.acesso.restritoPorCodigo, true, 'a lista nunca vai a público sem o código do mês')
+  assert.match(cfgArquivo.publicacao.avisoProposto, /^Não é recomendação de investimento\./, 'aviso no mesmo tom do Top 15 de ações')
+  assert.ok(cfgArquivo.publicacao.enquadramento.pontosParaDecisao.length >= 3)
+  assert.equal(cfgArquivo.dados.precoDiarioObrigatorio, true, 'condição para publicar: sem preço diário o fundo sai')
   assert.equal(cfg.filtros.tijolo.volumeMinimoDiario, 300000, 'mínimo de liquidez único, por decisão do responsável (1.3.0)')
   assert.equal(cfg.filtros.papel.volumeMinimoDiario, cfg.filtros.tijolo.volumeMinimoDiario)
   assert.ok(cfg.filtros.papel.patrimonioMinimo < cfg.filtros.tijolo.patrimonioMinimo)
@@ -513,7 +517,11 @@ test('ciclo da auditoria: grava, verifica sozinha, detecta adulteração de arqu
   assert.deepEqual(arquivos, ['LEIA-ME.md', 'a-conferir.csv', 'config.json', 'exclusoes.csv', 'insumos.json.gz', 'manifesto.json', 'memoria-de-calculo.json.gz', 'ranking-papel.csv', 'ranking-tijolo.csv', 'resultado.json'])
   assert.deepEqual(JSON.parse(fs.readFileSync(path.join(raiz, 'auditoria', 'fii-baratos', 'ultima.json'), 'utf8')).pasta, 'auditoria/fii-baratos/2026-10-06')
   assert.ok(logs.some((l) => /NÃO publicado/.test(l)))
-  assert.ok(!fs.existsSync(path.join(raiz, 'webapp-src')), 'o job não escreve nada no app')
+  // sem aprovação do responsável, o app recebe só o cabeçalho "em validação" e o arquivo privado fica vazio
+  const publicoNaoAprovado = JSON.parse(fs.readFileSync(path.join(raiz, 'webapp-src', 'src', 'data', 'fiiBaratos.json'), 'utf8'))
+  assert.equal(publicoNaoAprovado.publicado, false)
+  assert.deepEqual([publicoNaoAprovado.tijolo, publicoNaoAprovado.papel, publicoNaoAprovado.aConferir, publicoNaoAprovado.exclusoes], [[], [], [], []])
+  assert.deepEqual(JSON.parse(fs.readFileSync(path.join(raiz, 'dados-privados', 'fii-baratos.json'), 'utf8')), { publicado: false })
   const manifesto = JSON.parse(fs.readFileSync(path.join(pasta, 'manifesto.json'), 'utf8'))
   assert.equal(manifesto.publicadoNoApp, false)
   assert.equal(manifesto.hashes.resultado, r.hashes.resultado)
@@ -557,6 +565,76 @@ test('ciclo da auditoria: grava, verifica sozinha, detecta adulteração de arqu
   concluir({ raiz, cfg: cfgFolgada, insumos, log: (m) => logs2.push(m), agora: new Date('2026-10-06T18:00:00Z') })
   assert.ok(logs2.some((l) => /Sem mudança/.test(l)))
   assert.equal(fs.statSync(path.join(pasta, 'manifesto.json')).mtimeMs, antes)
+})
+
+// ---------------------------------------------------------------------------------------
+// Publicação no app (D65)
+// ---------------------------------------------------------------------------------------
+
+const aprovado = (extra = {}) => ({ ...cfgFolgada, publicacao: { ...cfgFolgada.publicacao, aprovadoPeloResponsavel: true, ...extra } })
+const lerSaida = (raiz) => ({
+  publico: JSON.parse(fs.readFileSync(path.join(raiz, 'webapp-src', 'src', 'data', 'fiiBaratos.json'), 'utf8')),
+  privado: JSON.parse(fs.readFileSync(path.join(raiz, 'dados-privados', 'fii-baratos.json'), 'utf8')),
+})
+const insumosPublicacao = () => insumosDe([fundo('ALFA11'), fundo('BETA11', { cotacao: 70 }), fundo('PAPA11', { ativo: papelAtivo }), fundo('SUSP11', { cotacao: 40 })])
+
+test('publicação aprovada com acesso por código: o arquivo do app traz só o cabeçalho (nenhum fundo) e a lista completa vai para o arquivo privado', () => {
+  const raiz = raizTemporaria()
+  const r = concluir({ raiz, cfg: aprovado(), insumos: insumosPublicacao(), log: () => {} })
+  assert.equal(r.publicado, true)
+  const { publico, privado } = lerSaida(raiz)
+  const manifesto = JSON.parse(fs.readFileSync(path.join(raiz, 'auditoria', 'fii-baratos', '2026-10-06', 'manifesto.json'), 'utf8'))
+  assert.equal(manifesto.publicadoNoApp, true)
+  // cabeçalho público: nenhum código de fundo, nenhuma lista
+  assert.equal(publico.publicado, true)
+  assert.equal(publico.acessoRestrito, true)
+  assert.equal(publico.instagram, 'acarteiraideal')
+  assert.deepEqual([publico.tijolo, publico.papel, publico.aConferir, publico.exclusoes], [[], [], [], []])
+  assert.ok(!/ALFA11|BETA11|PAPA11|SUSP11/.test(JSON.stringify(publico)), 'o arquivo público não pode ter nenhum código de fundo')
+  assert.deepEqual(publico.contagens, { tijolo: 2, papel: 1, aConferir: 1, exclusoes: 0 })
+  assert.equal(publico.hashResultado, manifesto.hashes.resultado)
+  assert.equal(publico.hashInsumos, manifesto.hashes.insumos)
+  assert.equal(publico.pastaAuditoria, 'auditoria/fii-baratos/2026-10-06')
+  assert.equal(publico.aviso, cfg.publicacao.avisoProposto, 'o aviso mostrado na tela vem da configuração')
+  assert.equal(publico.competenciaReferencia, '2026-08')
+  assert.equal(publico.parametros.filtros.tijolo.volumeMinimoDiario, 300000)
+  // arquivo privado: a lista toda, com as posições e a origem do preço
+  assert.deepEqual(privado.tijolo.map((f) => f.ticker), ['BETA11', 'ALFA11'])
+  assert.deepEqual(privado.papel.map((f) => f.ticker), ['PAPA11'])
+  assert.deepEqual(privado.aConferir.map((f) => f.ticker), ['SUSP11'])
+  assert.equal(privado.tijolo[0].posicao, 1)
+  assert.equal(privado.hashResultado, publico.hashResultado)
+})
+
+test('publicação: sem acesso por código o arquivo do app leva tudo; sem aprovação, só o cabeçalho "em validação"', () => {
+  const aberto = raizTemporaria()
+  concluir({ raiz: aberto, cfg: aprovado({ acesso: { restritoPorCodigo: false } }), insumos: insumosPublicacao(), log: () => {} })
+  const a = lerSaida(aberto)
+  assert.equal(a.publico.acessoRestrito, false)
+  assert.equal(a.publico.tijolo.length, 2)
+  assert.deepEqual(a.privado, { publicado: false })
+  const fechado = raizTemporaria()
+  const r = concluir({ raiz: fechado, cfg: { ...aprovado(), publicacao: { ...aprovado().publicacao, aprovadoPeloResponsavel: false } }, insumos: insumosPublicacao(), log: () => {} })
+  assert.equal(r.publicado, false)
+  const f = lerSaida(fechado)
+  assert.equal(f.publico.publicado, false)
+  assert.deepEqual(f.publico.tijolo, [])
+  assert.deepEqual(f.privado, { publicado: false })
+})
+
+test('publicação: a trava de sanidade barra a publicação e o app fica exatamente como estava', () => {
+  const raiz = raizTemporaria()
+  const pub = path.join(raiz, 'webapp-src', 'src', 'data')
+  fs.mkdirSync(pub, { recursive: true })
+  fs.mkdirSync(path.join(raiz, 'dados-privados'), { recursive: true })
+  fs.writeFileSync(path.join(pub, 'fiiBaratos.json'), '{"sentinela":"publico"}')
+  fs.writeFileSync(path.join(raiz, 'dados-privados', 'fii-baratos.json'), '{"sentinela":"privado"}')
+  // 1 fundo só: abaixo dos mínimos de ranking da trava (config real, não a folgada)
+  const cfgReal = { ...cfg, publicacao: { ...cfg.publicacao, aprovadoPeloResponsavel: true } }
+  assert.throws(() => concluir({ raiz, cfg: cfgReal, insumos: insumosDe([fundo('ALFA11')]), log: () => {} }), /trava de sanidade.*o app não foi alterado/)
+  assert.equal(fs.readFileSync(path.join(pub, 'fiiBaratos.json'), 'utf8'), '{"sentinela":"publico"}')
+  assert.equal(fs.readFileSync(path.join(raiz, 'dados-privados', 'fii-baratos.json'), 'utf8'), '{"sentinela":"privado"}')
+  assert.ok(fs.existsSync(path.join(raiz, 'auditoria', 'fii-baratos', '2026-10-06', 'manifesto.json')), 'a auditoria fica gravada para diagnóstico')
 })
 
 test('trava de sanidade: o job termina com erro, mas a auditoria fica gravada para diagnóstico', () => {

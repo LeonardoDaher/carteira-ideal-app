@@ -1,15 +1,21 @@
 import type { SnapshotAcoesBaratas } from './acoesBaratas'
+import type { SnapshotFiiBaratos } from './fiiBaratos'
 
 /**
  * Acesso ao Top 15 por código mensal (D50). O ranking não vem no arquivo do app: o navegador pede à
- * função api/top15 enviando o código, e ela só devolve a lista se o código estiver certo.
+ * função api/top15 (ações) ou api/top15-fiis (FIIs, D65) enviando o código, e ela só devolve a lista
+ * se o código estiver certo. O MESMO código vale para os dois, e o app guarda um só.
  */
 
 export const CHAVE_CODIGO_TOP15 = 'carteiraideal.top15.codigo'
 
 export type MotivoFalhaTop15 = 'invalido' | 'limite' | 'indisponivel' | 'nao_configurado' | 'rede' | 'resposta'
 
-export type RespostaTop15 = { ok: true; snapshot: SnapshotAcoesBaratas } | { ok: false; motivo: MotivoFalhaTop15; espera?: number }
+/** Resposta de uma das listas protegidas por código. O campo se chama `snapshot` nas duas. */
+export type RespostaLista<T> = { ok: true; snapshot: T } | { ok: false; motivo: MotivoFalhaTop15; espera?: number }
+
+export type RespostaTop15 = RespostaLista<SnapshotAcoesBaratas>
+export type RespostaTop15Fiis = RespostaLista<SnapshotFiiBaratos>
 
 /** Só para conforto de quem digita: aceita minúsculas, espaços e com ou sem hífen. O servidor normaliza de novo. */
 export function limparCodigoDigitado(texto: string): string {
@@ -26,10 +32,10 @@ export function formatarCodigo(texto: string): string {
   return limpo
 }
 
-export async function buscarTop15(codigo: string, fetchImpl: typeof fetch = fetch): Promise<RespostaTop15> {
+async function pedirLista<T>(url: string, codigo: string, valida: (corpo: unknown) => corpo is T, fetchImpl: typeof fetch): Promise<RespostaLista<T>> {
   let resp: Response
   try {
-    resp = await fetchImpl('/api/top15', {
+    resp = await fetchImpl(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ codigo }),
@@ -45,14 +51,19 @@ export async function buscarTop15(codigo: string, fetchImpl: typeof fetch = fetc
     // corpo não era JSON
   }
 
-  if (resp.ok) {
-    const s = corpo as unknown as SnapshotAcoesBaratas | null
-    return s && s.publicado === true && Array.isArray(s.ranking) ? { ok: true, snapshot: s } : { ok: false, motivo: 'resposta' }
-  }
+  if (resp.ok) return valida(corpo) ? { ok: true, snapshot: corpo } : { ok: false, motivo: 'resposta' }
   if (resp.status === 401) return { ok: false, motivo: 'invalido' }
   if (resp.status === 429) return { ok: false, motivo: 'limite', espera: typeof corpo?.espera === 'number' ? corpo.espera : undefined }
   if (resp.status === 503) return { ok: false, motivo: corpo?.motivo === 'nao_configurado' ? 'nao_configurado' : 'indisponivel' }
   return { ok: false, motivo: 'resposta' }
+}
+
+export async function buscarTop15(codigo: string, fetchImpl: typeof fetch = fetch): Promise<RespostaTop15> {
+  return pedirLista('/api/top15', codigo, (s): s is SnapshotAcoesBaratas => !!s && (s as SnapshotAcoesBaratas).publicado === true && Array.isArray((s as SnapshotAcoesBaratas).ranking), fetchImpl)
+}
+
+export async function buscarTop15Fiis(codigo: string, fetchImpl: typeof fetch = fetch): Promise<RespostaTop15Fiis> {
+  return pedirLista('/api/top15-fiis', codigo, (s): s is SnapshotFiiBaratos => !!s && (s as SnapshotFiiBaratos).publicado === true && Array.isArray((s as SnapshotFiiBaratos).tijolo) && Array.isArray((s as SnapshotFiiBaratos).papel), fetchImpl)
 }
 
 export function mensagemDaFalha(r: { motivo: MotivoFalhaTop15; espera?: number }): string {

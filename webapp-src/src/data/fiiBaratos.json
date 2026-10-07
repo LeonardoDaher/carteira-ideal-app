@@ -1,0 +1,34 @@
+{
+  "publicado": false,
+  "acessoRestrito": true,
+  "instagram": "acarteiraideal",
+  "versaoMetodologia": "1.4.1",
+  "geradoEm": null,
+  "dataExecucao": null,
+  "dataCotacoes": null,
+  "ultimoPregaoDiario": null,
+  "competenciaReferencia": null,
+  "pastaAuditoria": null,
+  "hashResultado": null,
+  "hashInsumos": null,
+  "hashConfig": null,
+  "tamanhoDaLista": 15,
+  "universo": 0,
+  "aviso": null,
+  "parametros": {
+    "filtros": {
+      "tijolo": { "volumeMinimoDiario": 300000, "patrimonioMinimo": 200000000, "cotistasMinimos": 3000, "rentabPatrimonial12mMinima": -0.15, "alavancagemMaxima": 0.4, "pvpMinimo": 0.3 },
+      "papel": { "volumeMinimoDiario": 300000, "patrimonioMinimo": 150000000, "cotistasMinimos": 3000, "rentabPatrimonial12mMinima": -0.05, "alavancagemMaxima": 0.4, "pvpMinimo": 0.7, "dy12Maximo": 0.25 }
+    },
+    "classificacao": { "fatiaMinimaDoTipo": 0.6 },
+    "alertas": { "pvpMuitoBaixo": 0.55, "dy12Alto": 0.18, "rendimentoRecenteMinimoSobre12m": 0.75, "picoDeRendimentoMaximo": 1.25, "saltoDePrecoDiario": 0.25 },
+    "mesesHistorico": 12,
+    "pregoesPrecoDiario": 21,
+    "conferenciaValidadeDias": 90
+  },
+  "contagens": { "tijolo": 0, "papel": 0, "aConferir": 0, "exclusoes": 0 },
+  "tijolo": [],
+  "papel": [],
+  "aConferir": [],
+  "exclusoes": []
+}

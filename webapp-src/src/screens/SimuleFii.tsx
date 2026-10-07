@@ -21,6 +21,7 @@ import type { FundoFii, SnapshotRendimentosFii } from '../domain/rendaFii'
 import { VoltarInicio } from '../ui/VoltarInicio'
 import { rolarParaResultado } from '../ui/rolarParaResultado'
 import { AvisoEducacional } from '../ui/AvisoEducacional'
+import { Top15FiisBaratos } from './Top15FiisBaratos'
 import type { AppCtx } from '../state/useAppState'
 
 const SNAPSHOT_PADRAO = dadosRendimentos as SnapshotRendimentosFii
@@ -56,6 +57,7 @@ export function SimuleFii({
   const exibidos = grupos.flatMap((g) => g.fundos)
   const [tickerSelecionado, setTickerSelecionado] = useState<string | undefined>(exibidos[0]?.ticker)
   const [quantidadeLivre, setQuantidadeLivre] = useState('')
+  const [aba, setAba] = useState<'simulador' | 'top15'>('simulador')
 
   // A busca pode escolher um fundo fora da lista por setor: procura em todos.
   const fundo = snapshot.fundos.find((f) => f.ticker === tickerSelecionado) ?? exibidos[0]
@@ -79,6 +81,35 @@ export function SimuleFii({
         </div>
       </div>
 
+      {/* Duas caixinhas (D65): o simulador de sempre e a triagem "Top 15 FIIs baratos". */}
+      <div role="tablist" aria-label="O que você quer ver" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+        {(
+          [
+            { id: 'simulador', emoji: '🧮', titulo: 'Simulador', descricao: 'Quanto as cotas rendem por mês' },
+            { id: 'top15', emoji: '🏷️', titulo: 'Top 15 mais baratos', descricao: 'Tijolo e papel, com auditoria' },
+          ] as const
+        ).map((c) => (
+          <button
+            key={c.id}
+            role="tab"
+            id={`aba-fii-${c.id}`}
+            aria-selected={aba === c.id}
+            aria-controls="painel-fii-aba"
+            className={`vehicle-card ${aba === c.id ? 'selected' : ''}`}
+            onClick={() => setAba(c.id)}
+          >
+            <span aria-hidden="true" style={{ fontSize: 24, lineHeight: 1 }}>{c.emoji}</span>
+            <span style={{ fontSize: 14 }}>{c.titulo}</span>
+            <span style={{ fontSize: 11.5, fontWeight: 400, opacity: 0.85 }}>{c.descricao}</span>
+          </button>
+        ))}
+      </div>
+
+      <div id="painel-fii-aba" role="tabpanel" aria-labelledby={`aba-fii-${aba}`} className="col" style={{ gap: 'inherit' }}>
+      {aba === 'top15' ? (
+        <Top15FiisBaratos />
+      ) : (
+      <>
       {!fundo ? (
         <div className="card col" style={{ gap: 6 }} role="status">
           <span style={{ fontWeight: 700 }}>Os dados deste mês ainda não foram carregados.</span>
@@ -140,6 +171,9 @@ export function SimuleFii({
         um FII muda todo mês e pode diminuir ou ser suspenso. A cotação também oscila: o valor investido pode cair. Os
         rendimentos costumam ser isentos de IR para pessoa física quando o fundo e o investidor cumprem as condições
         previstas em lei. Estar na lista ou na busca não é uma indicação de compra: o critério da lista é só a liquidez.
+      </div>
+      </>
+      )}
       </div>
 
       <AvisoEducacional />

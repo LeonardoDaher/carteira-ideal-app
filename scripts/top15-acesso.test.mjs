@@ -6,7 +6,7 @@ import { carregarTs } from './ts-loader.mjs'
 import { ALFABETO, gerarCodigo } from './gerar-codigo-top15.mjs'
 
 const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
-const { modulos, limpar } = await carregarTs(path.join(RAIZ, 'api'), ['_top15.ts', 'top15.ts'])
+const { modulos, limpar } = await carregarTs(path.join(RAIZ, 'api'), ['_top15.ts', 'top15.ts', 'top15-fiis.ts'])
 test.after(() => limpar())
 const A = modulos['_top15.ts']
 
@@ -154,6 +154,54 @@ test('wiring real (top15.ts): sem TOP15_CODIGOS no ambiente a porta responde 503
   delete process.env.TOP15_CODIGOS
   const r = await chamar(modulos['top15.ts'].default, { codigo: 'CI-ABCD-EFGH' })
   assert.deepEqual([r.statusCode, r.corpo.motivo], [503, 'nao_configurado'])
+})
+
+test('FIIs (api/top15-fiis.ts): sem TOP15_CODIGOS a porta responde 503; com o código certo lê dados-privados/fii-baratos.json; código errado dá 401 sem dado algum', async () => {
+  const fs = await import('node:fs')
+  const os = await import('node:os')
+  const h = modulos['top15-fiis.ts'].default
+  const anterior = { cwd: process.cwd(), codigos: process.env.TOP15_CODIGOS }
+  const pasta = fs.mkdtempSync(path.join(os.tmpdir(), 'top15-fiis-'))
+  try {
+    delete process.env.TOP15_CODIGOS
+    const fechada = await chamar(h, { codigo: 'CI-ABCD-EFGH' })
+    assert.deepEqual([fechada.statusCode, fechada.corpo.motivo], [503, 'nao_configurado'])
+
+    process.env.TOP15_CODIGOS = 'CI-ABCD-EFGH'
+    fs.mkdirSync(path.join(pasta, 'dados-privados'))
+    process.chdir(pasta)
+    // sem o arquivo ainda: 503 "indisponível" (e não 500)
+    const semArquivo = await chamar(h, { codigo: 'CI-ABCD-EFGH' }, { ip: '198.51.100.1' })
+    assert.deepEqual([semArquivo.statusCode, semArquivo.corpo.motivo], [503, 'indisponivel'])
+    // arquivo do app ainda "em validação": 503
+    fs.writeFileSync(path.join(pasta, 'dados-privados', 'fii-baratos.json'), JSON.stringify({ publicado: false }))
+    assert.equal((await chamar(h, { codigo: 'CI-ABCD-EFGH' }, { ip: '198.51.100.2' })).statusCode, 503)
+    // publicado: código certo devolve a lista dos FIIs (e NÃO a das ações), sem cache
+    const lista = { publicado: true, tijolo: [{ ticker: 'FIIT11' }], papel: [{ ticker: 'FIIP11' }], aConferir: [], exclusoes: [] }
+    fs.writeFileSync(path.join(pasta, 'dados-privados', 'fii-baratos.json'), JSON.stringify(lista))
+    fs.writeFileSync(path.join(pasta, 'dados-privados', 'acoes-baratas.json'), JSON.stringify({ publicado: true, ranking: [{ ticker: 'ACAO3' }] }))
+    const ok = await chamar(h, { codigo: 'ci abcd efgh' }, { ip: '198.51.100.3' })
+    assert.equal(ok.statusCode, 200)
+    assert.deepEqual(ok.corpo, lista)
+    assert.equal(ok.cabecalhos['cache-control'], 'private, no-store')
+    // código errado: 401, nenhum dado
+    const errado = await chamar(h, { codigo: 'CI-ZZZZ-ZZZZ' }, { ip: '198.51.100.4' })
+    assert.deepEqual([errado.statusCode, errado.corpo.motivo], [401, 'invalido'])
+    assert.ok(!JSON.stringify(errado.corpo).includes('FIIT11'))
+    // método errado
+    assert.equal((await chamar(h, {}, { metodo: 'GET' })).statusCode, 405)
+  } finally {
+    process.chdir(anterior.cwd)
+    if (anterior.codigos === undefined) delete process.env.TOP15_CODIGOS
+    else process.env.TOP15_CODIGOS = anterior.codigos
+    fs.rmSync(pasta, { recursive: true, force: true })
+  }
+})
+
+test('vercel.json inclui dados-privados nas duas funções do Top 15 (ações e FIIs)', async () => {
+  const fs = await import('node:fs')
+  const v = JSON.parse(fs.readFileSync(path.join(RAIZ, 'vercel.json'), 'utf8'))
+  for (const f of ['api/top15.ts', 'api/top15-fiis.ts']) assert.equal(v.functions[f].includeFiles, 'dados-privados/**', f)
 })
 
 test('gerador de código: formato, alfabeto sem símbolos ambíguos, sem repetição e atende ao tamanho mínimo do servidor', () => {

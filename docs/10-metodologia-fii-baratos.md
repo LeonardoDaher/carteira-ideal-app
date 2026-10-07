@@ -107,9 +107,11 @@ Confere o sha256 de cada arquivo, o hash canônico dos insumos e da config e **r
 
 **Trava de sanidade.** Se um grupo fica com menos de 15 (tijolo) ou 10 (papel) fundos, ou mais de 15% dos fundos ficam sem dado utilizável, o job grava a auditoria e **termina com erro** (o GitHub envia e-mail e a auditoria não é guardada no repositório; fica como artefato do workflow).
 
-## 9. Publicação (pendente, decisão do responsável) e enquadramento proposto
+## 9. Publicação (D65, na 1.5.0) e enquadramento
 
-`config/fii-baratos.json → publicacao.aprovadoPeloResponsavel` é `false` e **este job não escreve nada no app**. Para publicar (tela, código de acesso, divulgação) faltam decisões do responsável:
+**Publicado em 07/10/2026, somente com código.** `publicacao.aprovadoPeloResponsavel` é `true` e `dados.precoDiarioObrigatorio` é `true`. Com a trava de sanidade aprovada, o job grava (a) `webapp-src/src/data/fiiBaratos.json`, o **cabeçalho público** (versão, datas, parâmetros, contagens, aviso e impressões digitais da auditoria, **sem nenhum fundo**) e (b) `dados-privados/fii-baratos.json`, a lista completa, entregue só por `api/top15-fiis.ts` depois de validar o código do mês (o mesmo `TOP15_CODIGOS` do Top 15 de ações, com o mesmo limite de tentativas). Na tela (aba "Top 15 mais baratos" do Simule FII) cada fundo mostra a memória de cálculo, a origem da cotação e, quando houver, a conferência manual com data e validade. Se a aprovação voltar a `false` ou a trava falhar, o app não é alterado (ou fica "em validação"). Pendente com o responsável: parecer independente de especialista (D22) antes de divulgar em escala.
+
+Itens que embasaram a decisão (histórico):
 
 1. **Enquadramento regulatório.** Há uma **proposta** em `config/fii-baratos.json → publicacao.enquadramento`, com o texto de aviso (`avisoProposto`) no tom do Top 15 de ações. Resumo: triagem objetiva por fórmula, igual para todos, com dados públicos, regras e parâmetros públicos e trilha de auditoria; não considera o perfil de ninguém, não indica compra nem venda, não projeta preço nem rendimento e não promete retorno. Pontos para decisão: (a) mesma base da D22 (análise jurídica interna sem objeção), mas FIIs têm risco próprio (o desconto no P/VP costuma ser risco de crédito ou vacância já precificado; o rendimento é estimado); (b) a D22 previu parecer independente antes de divulgar em escala ou de telas que mudem a natureza do conteúdo (ranking de ativos); (c) a lista "a conferir" e a de fundos conferidos envolvem juízo humano sobre o **dado**, nunca sobre o mérito do fundo; (d) a separação entre Tijolo e Papel é por regra objetiva (composição do ativo).
 2. **Preço diário.** **Construído na 1.4.0** (seção 2): o preço do dia vem do Boletim de Preços da B3, com histórico próprio. Falta ligar `dados.precoDiarioObrigatorio` (hoje `false`, para a triagem seguir funcionando com a reserva mensal durante a transição); ele deve virar `true` junto com a aprovação, para nenhum fundo publicado depender de preço mensal.
@@ -139,6 +141,7 @@ Confere o sha256 de cada arquivo, o hash canônico dos insumos e da config e **r
 
 | Versão | Data | Mudança |
 |---|---|---|
+| 1.5.0 | 2026-10-07 | Publicação (D65): aprovada pelo responsável, com acesso por código; preço diário obrigatório. Nenhuma regra de cálculo mudou. |
 | 1.4.1 | 2026-10-07 | Fundos líquidos que o boletim da B3 não traz (CVBI11, MALL11, BBPO11) têm o histórico diário completado pela brapi, com a origem registrada; sem isso o preço diário obrigatório os tiraria do ranking. Nenhuma regra de cálculo mudou. |
 | 1.4.0 | 2026-10-07 | Preço DIÁRIO da B3 (histórico próprio, `historico/fiis.json`) como fonte da cotação e do volume, com o preço mensal da brapi como reserva; alerta `salto_de_preco`; TGAR11 aceito no ranking por decisão do responsável (conferido); proposta de enquadramento e aviso em `publicacao`. |
 | 1.3.0 | 2026-10-07 | Mínimo de liquidez único de R$ 300 mil (mediana) nos dois grupos; o do tijolo cai de R$ 500 mil. Decisão do responsável, com as medianas reais de 07/10. |
