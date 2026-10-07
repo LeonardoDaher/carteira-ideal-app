@@ -67,6 +67,12 @@ export const listarZip = (zip) => {
   return execFileSync(cmd, args, { encoding: 'utf8', maxBuffer: 256 * 1024 * 1024 }).split(/\r?\n/).filter(Boolean)
 }
 
+/** Conteúdo inteiro de uma entrada do zip, como texto latin1 (arquivos pequenos; os grandes usam linhasDoZip). Usada também pelo job de FIIs. */
+export function lerEntradaDoZip(zip, entrada) {
+  const [cmd, args] = comandoLerEntrada(zip, entrada)
+  return execFileSync(cmd, args, { encoding: 'latin1', maxBuffer: 1 << 29 })
+}
+
 /** Divide uma linha CSV com ';' respeitando aspas duplas. */
 export function dividirLinha(linha) {
   if (!linha.includes('"')) return linha.split(';')

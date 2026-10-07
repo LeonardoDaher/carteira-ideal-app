@@ -1,0 +1,63 @@
+{
+  "_leia": "Metodologia da triagem 'FIIs baratos' (Tijolo e Papel). ESTE ARQUIVO É A FONTE ÚNICA DOS PARÂMETROS: o script e o documento docs/10-metodologia-fii-baratos.md leem/citam estes valores. Qualquer mudança aqui exige subir 'versaoMetodologia' e registrar o motivo em 'historicoDeVersoes'. O hash SHA-256 deste arquivo vai no manifesto de cada execução.",
+  "versaoMetodologia": "1.0.0",
+  "historicoDeVersoes": [
+    {
+      "versao": "1.0.0",
+      "data": "2026-10-06",
+      "mudanca": "Versão inicial, vinda do protótipo analisado com o Informe Mensal real da CVM (competência 2026-08). Classificação do fundo pelo que ele tem no ativo (Tijolo, Papel, Fundo de fundos, Misto), ranking separado por grupo pela média dos ranks de P/VP baixo e DY de 12 meses alto, filtros de liquidez, patrimônio, cotistas, alavancagem e rentabilidade patrimonial, e lista 'a conferir' para dado suspeito (P/VP muito baixo ou DY muito alto), que fica fora do ranking. Nada é publicado no app: o job só grava a trilha de auditoria."
+    }
+  ],
+  "tamanhoDaLista": 15,
+  "dados": {
+    "mesesHistorico": 12,
+    "minimoMesesComDados": 10,
+    "mesesGuardadosNosInsumos": 14,
+    "coberturaMinimaDaCompetencia": 0.8,
+    "cotacaoMaxIdadeDias": 45,
+    "_leia": "A competência de referência é a mais recente com pelo menos 'coberturaMinimaDaCompetencia' do número de fundos da competência com mais fundos (o mês corrente costuma vir com poucos informes). A cotação vem do job de FIIs (rendimentosFii.json); mais velha que 'cotacaoMaxIdadeDias' dias da execução, o fundo sai."
+  },
+  "classificacao": {
+    "fatiaMinimaDoTipo": 0.6,
+    "imoveis": ["Direitos_Bens_Imoveis", "Acoes_Sociedades_Atividades_FII", "Cotas_Sociedades_Atividades_FII"],
+    "recebiveis": ["CRI", "CRI_CRA", "LCI", "LCI_LCA", "LIG", "Letras_Hipotecarias", "FDIC", "Cedulas_Debentures", "Debentures", "Notas_Promissorias", "Certificados_Deposito_Valores_Mobiliarios", "Outros_Valores_Mobliarios"],
+    "cotas": ["FII", "Outras_Cotas_FI", "Fundo_Acoes", "FIP"],
+    "outros": ["Acoes", "Bonus_Subscricao", "CEPAC", "Titulos_Publicos", "Titulos_Privados", "Fundos_Renda_Fixa"],
+    "_leia": "O fundo é Tijolo se imóveis >= 60% do total investido, Papel se recebíveis >= 60%, Fundo de fundos se cotas >= 60%; senão Misto. Fundo de fundos e Misto não entram nos rankings. CRI e CRI_CRA (e LCI e LCI_LCA) são colunas de versões diferentes do informe e nunca vêm preenchidas juntas; somam-se."
+  },
+  "filtros": {
+    "tijolo": {
+      "volumeMinimoDiario": 500000,
+      "patrimonioMinimo": 200000000,
+      "cotistasMinimos": 3000,
+      "rentabPatrimonial12mMinima": -0.15,
+      "alavancagemMaxima": 0.4,
+      "pvpMinimo": 0.3
+    },
+    "papel": {
+      "volumeMinimoDiario": 300000,
+      "patrimonioMinimo": 150000000,
+      "cotistasMinimos": 3000,
+      "rentabPatrimonial12mMinima": -0.05,
+      "alavancagemMaxima": 0.4,
+      "pvpMinimo": 0.7,
+      "dy12Maximo": 0.25
+    },
+    "_leia": "Papel: liquidez e patrimônio mais folgados que o tijolo (quase todo fundo de papel é menor; com os valores do tijolo sobram 13 fundos). P/VP mínimo de 0,7 no papel: desconto grande em fundo de crédito costuma ser perda já precificada, não pechincha. Sem cotistas informados, o filtro de cotistas não se aplica."
+  },
+  "alertas": {
+    "pvpMuitoBaixo": 0.55,
+    "dy12Alto": 0.18,
+    "_leia": "Fundo com P/VP abaixo de pvpMuitoBaixo (cota e valor patrimonial possivelmente em bases diferentes, como em desdobramento) ou DY de 12 meses acima de dy12Alto (distribuição não recorrente) NÃO entra no ranking: vai para 'a conferir', sem posição, até alguém confirmar o dado numa fonte pública. Sai antes de calcular os ranks, para não distorcer a nota dos demais."
+  },
+  "publicacao": {
+    "aprovadoPeloResponsavel": false,
+    "_leia": "Este job NÃO publica nada no app: só grava a trilha de auditoria em auditoria/fii-baratos/<data>/. Antes de qualquer publicação (tela, código de acesso) o responsável precisa decidir o enquadramento regulatório (ver D22) e o preço diário (hoje a cotação vem do job mensal de FIIs).",
+    "sanidade": {
+      "minimoNoRankingTijolo": 15,
+      "minimoNoRankingPapel": 10,
+      "maximoFracaoSemDados": 0.15,
+      "_leia": "Se o resultado é claramente inverossímil (grupo pequeno demais ou muitos fundos sem dado utilizável), o job termina com erro depois de gravar a auditoria, para diagnóstico."
+    }
+  }
+}

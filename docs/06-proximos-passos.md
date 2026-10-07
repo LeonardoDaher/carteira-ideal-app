@@ -142,3 +142,14 @@ A mudança para a API tirou a metodologia do código visível. Ainda assim, vale
 - [ ] **Moto de trabalho** (entrega, mototáxi): o bem gera renda e a pergunta muda para "quanto a moto se paga". Exige fluxo de receita no motor; decidir se entra e como. Até lá, a página de SEO e a tela dizem que o escopo é uso pessoal.
 - [ ] **Moto e carro, pendências comuns:** validar valores de partida (depreciação, IPVA, seguro, manutenção, uso, juros) contra a tabela FIPE e cotações reais; os de moto são ainda menos fundamentados que os do carro.
 - [ ] **Cada bem novo:** página de SEO, registro de decisão, testes e **revisão do texto de aviso pelo responsável certificado**.
+
+## 12. FIIs baratos, Tijolo e Papel (decisão D59)
+
+- [x] **Job com trilha de auditoria** (`scripts/atualizar-fii-baratos.mjs`, workflow "Atualizar FIIs Baratos", dia 21 de cada mês), cálculo puro, verificação independente e testes. **Não publica nada no app.**
+- [ ] **Primeira execução no GitHub** (Actions → "Atualizar FIIs Baratos" → Run workflow): conferir que termina em ✅, que a verificação passa e que o Top 15 de tijolo e o de papel batem com o da D59 (a cotação do job de FIIs de 25/09 deve ser a mesma; se o job de FIIs rodou de novo, os números mudam um pouco).
+- [ ] **Conferir a lista "a conferir"** (`a-conferir.csv`): MFII11, TGAR11, BBIG11, BRCR11, TRBL11 e OUJP11 na primeira execução. Para cada um, ver numa fonte pública se a cota e o valor patrimonial estão na mesma base (desdobramento?) e se o DY de 12 meses inclui distribuição não recorrente.
+- [ ] **Conferir por amostragem** 2 ou 3 fundos do topo de cada grupo (cotação, P/VP, rendimento do mês) contra uma fonte pública; roteiro em `docs/10`, seção 8.
+- [ ] **Decisões do responsável antes de qualquer publicação:** enquadramento regulatório (mesma conversa da D22; ranking de FII pede o parecer independente antes de divulgar em escala) e **preço diário** (hoje a cotação é a do job mensal de FIIs).
+- [ ] **Vacância e inadimplência:** trazer dos informes trimestral e anual da CVM (hoje só a rentabilidade patrimonial de 12 meses serve de indicador indireto).
+- [ ] **Revisar os limiares** (liquidez, patrimônio, cotistas, alavancagem, P/VP mínimo, queda patrimonial, DY máximo e os dois alertas) depois de duas ou três competências: hoje vêm de uma única observação (2026-08).
+- [ ] **Se for publicar:** tela, código de acesso e página de metodologia seguem o desenho do Top 15 de ações (D50); texto de aviso revisado pelo responsável certificado.

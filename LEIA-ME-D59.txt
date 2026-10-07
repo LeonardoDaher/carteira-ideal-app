@@ -1,0 +1,26 @@
+D59 (06/10/2026): triagem "FIIs baratos" (Tijolo e Papel) como job com trilha de auditoria. Detalhes: docs/07-registro-de-decisoes.md (D59) e docs/10-metodologia-fii-baratos.md.
+
+ISTO NÃO PUBLICA NADA NO APP. É só a trilha de auditoria (pasta auditoria/fii-baratos/<data>/), para você revisar. Sem tela, sem código de acesso.
+
+RESUMO
+ - Classifica cada FII pelo que ele TEM no ativo (Tijolo, Papel, Fundo de fundos, Misto) e faz um ranking por grupo: média dos ranks de P/VP baixo e DY de 12 meses alto.
+ - Fundo com P/VP < 0,55 ou DY de 12 meses > 18% NÃO entra no ranking: vai para a lista "a conferir" (a-conferir.csv).
+ - Mesmo desenho do Top 15 de ações: insumos congelados, memória de cálculo por fundo, manifesto com hashes, verificação independente (npm run verificar-fii-baratos).
+ - Workflow novo: "Atualizar FIIs Baratos" (dia 21 de cada mês, um dia depois do job de rendimentos de FIIs, e sob demanda).
+ - Não mexi em aprovadoPeloResponsavel das ações, nem gerei ou gravei código de acesso.
+
+COMO SUBIR
+ 1. Suba os arquivos do zip no GitHub (Add file > Upload files, arrastando o CONTEÚDO do zip extraído; inclui a pasta .github).
+    ATENÇÃO: o GitHub pelo navegador às vezes não aceita a pasta oculta .github. Se não aceitar, crie o arquivo
+    .github/workflows/atualizar-fii-baratos.yml pelo botão "Add file > Create new file" colando o conteúdo.
+ 2. Actions > "Atualizar FIIs Baratos" > Run workflow > esperar ✅.
+ 3. Me mande: a linha final do log da etapa "Baixar o informe da CVM, calcular e gravar a auditoria" (Top 15 de tijolo, de papel e a lista "a conferir").
+
+DEPOIS (seu)
+ - Conferir os fundos da lista "a conferir" (MFII11, TGAR11, BBIG11, BRCR11, TRBL11, OUJP11 na primeira execução) em uma fonte pública.
+ - Conferir 2 ou 3 fundos do topo de cada grupo (cotação, P/VP, rendimento do mês).
+ - Decidir, antes de publicar qualquer coisa: enquadramento regulatório e preço diário (hoje a cotação vem do job mensal de FIIs, de 25/09).
+
+ARQUIVOS (novos): config/fii-baratos.json, scripts/fii-baratos-calculo.mjs, scripts/atualizar-fii-baratos.mjs, scripts/fii-baratos-verificar.mjs,
+                  scripts/fii-baratos.test.mjs, .github/workflows/atualizar-fii-baratos.yml, docs/10-metodologia-fii-baratos.md, LEIA-ME-D59.txt
+ARQUIVOS (alterados): package.json, scripts/acoes-baratas-cvm.mjs (só ganhou a função lerEntradaDoZip), docs/06-proximos-passos.md, docs/07-registro-de-decisoes.md
