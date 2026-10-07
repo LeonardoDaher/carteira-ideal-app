@@ -1,0 +1,16 @@
+D62 (07/10/2026): FIIs baratos, metodologia 1.3.0: mínimo de liquidez único de R$ 300 mil (mediana) nos dois grupos. Detalhes: docs/07-registro-de-decisoes.md (D62) e docs/10-metodologia-fii-baratos.md.
+
+AINDA NÃO PUBLICA NADA NO APP (só a trilha de auditoria em auditoria/fii-baratos/<data>/).
+
+O QUE MUDOU
+ - config/fii-baratos.json: filtros.tijolo.volumeMinimoDiario de 500000 para 300000 (o papel já era 300000). Decisão sua, com as medianas reais de 07/10.
+ - Efeito esperado: TRBL11 (R$ 471 mil), RCRB11 (466 mil), RZAT11 (429 mil) e BROF11 (334 mil) voltam a passar pelos demais filtros e alertas. OUJP11 (285 mil) e GAME11 (286 mil) continuam fora.
+ - Nenhuma outra regra mudou. Não mexi em aprovadoPeloResponsavel, não gerei nem gravei código de acesso.
+
+SUBA OS ARQUIVOS DO ZIP (Add file > Upload files, arrastando o CONTEÚDO do zip extraído) e depois:
+ 1) Actions > "Atualizar FIIs Baratos" > Run workflow > esperar ✅
+    (não precisa rodar "Atualizar rendimentos de FIIs" de novo: a mediana de hoje já está gravada; rode de novo só se quiser cotações mais novas)
+ 2) Me mande o log da etapa "Baixar o informe da CVM, calcular e gravar a auditoria".
+
+ARQUIVOS (alterados): config/fii-baratos.json, scripts/fii-baratos.test.mjs, docs/06-proximos-passos.md, docs/07-registro-de-decisoes.md,
+                      docs/10-metodologia-fii-baratos.md, LEIA-ME-D62.txt

@@ -23,10 +23,11 @@ const perto = (a, b, tol = 1e-9) => assert.ok(Math.abs(a - b) <= tol, `${a} ≠ 
 // ---------------------------------------------------------------------------------------
 
 test('configuração: versão, trava de publicação desligada e alertas coerentes com os filtros', () => {
-  assert.equal(cfg.versaoMetodologia, '1.2.0')
+  assert.equal(cfg.versaoMetodologia, '1.3.0')
   assert.equal(cfg.historicoDeVersoes.at(-1).versao, cfg.versaoMetodologia)
   assert.equal(cfg.publicacao.aprovadoPeloResponsavel, false, 'este job não publica nada: a aprovação só muda por decisão do responsável')
-  assert.ok(cfg.filtros.papel.volumeMinimoDiario < cfg.filtros.tijolo.volumeMinimoDiario)
+  assert.equal(cfg.filtros.tijolo.volumeMinimoDiario, 300000, 'mínimo de liquidez único, por decisão do responsável (1.3.0)')
+  assert.equal(cfg.filtros.papel.volumeMinimoDiario, cfg.filtros.tijolo.volumeMinimoDiario)
   assert.ok(cfg.filtros.papel.patrimonioMinimo < cfg.filtros.tijolo.patrimonioMinimo)
   assert.ok(cfg.filtros.papel.pvpMinimo > cfg.alertas.pvpMuitoBaixo, 'papel com P/VP baixo já sai pelo filtro, antes do alerta')
   assert.equal(cfg.tamanhoDaLista, 15)
@@ -74,8 +75,10 @@ test('filtros por grupo, na ordem: liquidez, patrimônio, cotistas, P/VP, DY imp
   assert.equal(cod({}), null)
   assert.equal(cod({}, 'papel'), null)
   assert.equal(cod({ volumeLiquidez: 1e5 }), 'liquidez_baixa')
-  assert.equal(cod({ volumeLiquidez: 4e5 }, 'papel'), null, 'papel aceita liquidez menor que o tijolo')
-  assert.equal(cod({ volumeLiquidez: 4e5 }, 'tijolo'), 'liquidez_baixa')
+  for (const g of ['tijolo', 'papel']) {
+    assert.equal(cod({ volumeLiquidez: 3e5 }, g), null, 'exatamente R$ 300 mil passa nos dois grupos')
+    assert.equal(cod({ volumeLiquidez: 2.99e5 }, g), 'liquidez_baixa')
+  }
   assert.equal(cod({ volumeLiquidez: null }), 'liquidez_baixa')
   assert.equal(cod({ patrimonio: 1e8 }), 'patrimonio_pequeno')
   assert.equal(cod({ cotistas: 500 }), 'poucos_cotistas')
@@ -297,12 +300,11 @@ test('liquidez pela MEDIANA do volume diário quando existe; sem ela vale a méd
   assert.deepEqual(resultado.tijolo.map((f) => [f.ticker, f.fonteLiquidez, f.volumeLiquidez]).sort(), [['ANTG11', 'média', 2e6], ['LIQD11', 'mediana', 1.5e6]])
   assert.deepEqual([memoria.LIQD11.liquidez.fonte, memoria.ANTG11.liquidez.fonte], ['mediana', 'média'])
   assert.equal(memoria.RALI11.liquidez.volumeMedio, 2e6)
-  // o papel aceita mediana menor que o tijolo (R$ 300 mil contra R$ 500 mil)
-  const papelMed = fundo('PAPM11', { ativo: papelAtivo, cotacao: 90, volume: 2e6, mediano: 4e5 })
-  const tijoloMed = fundo('TIJM11', { cotacao: 90, volume: 2e6, mediano: 4e5 })
-  const r = calcular(insumosDe([papelMed, tijoloMed]), cfg).resultado
+  // o mesmo mínimo (R$ 300 mil de mediana) vale para tijolo e papel: 4e5 passa nos dois, 2e5 sai nos dois
+  const r = calcular(insumosDe([fundo('PAPM11', { ativo: papelAtivo, cotacao: 90, volume: 2e6, mediano: 4e5 }), fundo('TIJM11', { cotacao: 90, volume: 2e6, mediano: 4e5 }), fundo('PAPL11', { ativo: papelAtivo, cotacao: 90, volume: 2e6, mediano: 2e5 }), fundo('TIJL11', { cotacao: 90, volume: 2e6, mediano: 2e5 })]), cfg).resultado
   assert.deepEqual(r.papel.map((f) => f.ticker), ['PAPM11'])
-  assert.deepEqual(r.exclusoes.filter((e) => e.codigo === 'liquidez_baixa').map((e) => e.ticker), ['TIJM11'])
+  assert.deepEqual(r.tijolo.map((f) => f.ticker), ['TIJM11'])
+  assert.deepEqual(r.exclusoes.filter((e) => e.codigo === 'liquidez_baixa').map((e) => e.ticker).sort(), ['PAPL11', 'TIJL11'])
 })
 
 test('DY em % em vez de fração: a escala vem da mediana da competência e o resultado é o mesmo', () => {
