@@ -23,7 +23,7 @@ const perto = (a, b, tol = 1e-9) => assert.ok(Math.abs(a - b) <= tol, `${a} ≠ 
 // ---------------------------------------------------------------------------------------
 
 test('configuração: versão, trava de publicação desligada e alertas coerentes com os filtros', () => {
-  assert.equal(cfg.versaoMetodologia, '1.0.0')
+  assert.equal(cfg.versaoMetodologia, '1.1.0')
   assert.equal(cfg.historicoDeVersoes.at(-1).versao, cfg.versaoMetodologia)
   assert.equal(cfg.publicacao.aprovadoPeloResponsavel, false, 'este job não publica nada: a aprovação só muda por decisão do responsável')
   assert.ok(cfg.filtros.papel.volumeMinimoDiario < cfg.filtros.tijolo.volumeMinimoDiario)
@@ -188,6 +188,97 @@ test('cada exclusão tem etapa, código e motivo: sem CNPJ, cotação defasada, 
   // OUTR11 (cotação 75, DY 0,9%) é mais barato e rende mais que BOMT11 (cotação 85, DY 0,8%)
   assert.equal(resultado.tijolo[0].ticker, 'OUTR11')
   assert.equal(resultado.tijolo[0].nota, 1)
+})
+
+test('rendimento em queda e pico de rendimento: MEDIANA dos 3 últimos meses contra a de 12 meses, e média contra mediana de 12 meses', () => {
+  const comDy = (porMes, base = {}) => {
+    const f = fundo('QUED11', base)
+    for (const [i, dy] of Object.entries(porMes)) { const m = MESES.at(Number(i)); f.informes[m] = { ...f.informes[m], dy } }
+    return f
+  }
+  const roda = (f) => calcular(insumosDe([f]), cfg).resultado
+  // corte: 9 meses a R$ 0,80 e 3 meses a R$ 0,20: mediana de 12 meses 0,80, recente 0,20, razão 0,25
+  const corte = roda(comDy({ '-3': 0.002, '-2': 0.002, '-1': 0.002 }))
+  assert.deepEqual(corte.aConferir.map((f) => [f.ticker, f.alertas]), [['QUED11', ['rendimento_em_queda']]])
+  perto(corte.aConferir[0].razaoRendimentoRecente, 0.25, 1e-4)
+  perto(corte.aConferir[0].dyRecente, (0.2 * 12) / 80, 1e-5)
+  assert.equal(corte.tijolo.length, 0)
+  // UM mês com DY zero no informe (caso GTWR11 e BRCO11, que pagam todo mês): a mediana não se deixa enganar
+  const mesZerado = roda(comDy({ '-2': 0 }))
+  assert.equal(mesZerado.aConferir.length, 0)
+  assert.equal(mesZerado.tijolo.length, 1)
+  // dois meses zerados dos 3 recentes: aí a mediana recente cai de verdade
+  assert.deepEqual(roda(comDy({ '-2': 0, '-1': 0 })).aConferir.map((f) => f.alertas), [['rendimento_em_queda']])
+  // pico: dois meses a R$ 2,80 (pagamento extra ou pico no informe) com os outros a R$ 0,80: média 1,13, mediana 0,80 (caso HGRE11)
+  const pico = roda(comDy({ '-8': 0.028, '-3': 0.028 }))
+  assert.deepEqual(pico.aConferir.map((f) => [f.ticker, f.alertas]), [['QUED11', ['rendimento_com_pico']]])
+  perto(pico.aConferir[0].picoDeRendimento, (10 * 0.8 + 2 * 2.8) / 12 / 0.8, 1e-4)
+  // um único mês de pico (média 0,97 ÷ mediana 0,80 = 1,21) ainda está abaixo do limite
+  assert.equal(roda(comDy({ '-8': 0.028 })).aConferir.length, 0)
+  // rendimento subindo: sem alerta
+  assert.equal(roda(comDy({ '-3': 0.012, '-2': 0.012, '-1': 0.012 })).tijolo.length, 1)
+  // sem os 3 meses recentes com dado, a razão não existe e não há alerta de queda
+  const faltaUm = roda(fundo('QUED11', { semMeses: [MESES.at(-2)] }))
+  assert.equal(faltaUm.tijolo.length, 1)
+  assert.equal(faltaUm.tijolo[0].razaoRendimentoRecente, null)
+  assert.equal(faltaUm.tijolo[0].dyRecente, null)
+  // sem o informe da própria competência de referência o fundo sai por dados
+  assert.ok(roda(fundo('QUED11', { semMeses: [MESES.at(-1)] })).exclusoes.some((e) => e.ticker === 'QUED11' && e.codigo === 'dados_insuficientes'))
+  // limites exatos: "abaixo de 0,75" e "acima de 1,25"
+  assert.deepEqual(alertasDoFundo({ razaoRendimentoRecente: 0.75 }, cfg.alertas), [])
+  assert.deepEqual(alertasDoFundo({ razaoRendimentoRecente: 0.74 }, cfg.alertas), ['rendimento_em_queda'])
+  assert.deepEqual(alertasDoFundo({ picoDeRendimento: 1.25 }, cfg.alertas), [])
+  assert.deepEqual(alertasDoFundo({ picoDeRendimento: 1.26 }, cfg.alertas), ['rendimento_com_pico'])
+})
+test('conferência manual: libera só os alertas listados, vale por 90 dias, e alerta novo ou conferência vencida devolvem o fundo para "a conferir"', () => {
+  const suspeito = () => fundo('SUSP11', { cotacao: 40 }) // P/VP 0,4 e DY de 24%: pvp_muito_baixo e dy_alto
+  const conf = (libera, conferidoEm = '2026-10-06') => ({ ...cfg, conferencia: { validadeDias: 90, fundos: { SUSP11: { conferidoEm, fonte: 'Investidor10', libera, nota: 'dado conferido' } } } })
+  const roda = (c, insumos = insumosDe([suspeito(), fundo('OUTR11', { cotacao: 85 })])) => calcular(insumos, c)
+
+  // sem conferência: fica fora
+  assert.deepEqual(roda(cfg).resultado.aConferir.map((f) => f.ticker), ['SUSP11'])
+  // conferência que cobre só um dos dois alertas: continua fora, com o alerta que falta
+  const parcial = roda(conf(['pvp_muito_baixo'])).resultado
+  assert.deepEqual(parcial.aConferir.map((f) => [f.ticker, f.alertas]), [['SUSP11', ['dy_alto']]])
+  // conferência que cobre os dois: entra no ranking, marcado, com fonte e data
+  const { resultado, memoria } = roda(conf(['pvp_muito_baixo', 'dy_alto']))
+  assert.equal(resultado.aConferir.length, 0)
+  const s = resultado.tijolo.find((f) => f.ticker === 'SUSP11')
+  assert.deepEqual(s.alertas, [])
+  assert.deepEqual(s.alertasLiberados, ['pvp_muito_baixo', 'dy_alto'])
+  assert.deepEqual(s.conferido, { em: '2026-10-06', fonte: 'Investidor10', nota: 'dado conferido' })
+  assert.equal(memoria.SUSP11.conferencia.fonte, 'Investidor10')
+  assert.match(memoria.SUSP11.conferencia.regra, /libera só os alertas listados/)
+  assert.equal(resultado.tijolo.length, 2, 'o fundo conferido participa do ranking como qualquer outro')
+  // validade: 90 dias contam a partir de conferidoEm (dataExecucao = 2026-10-06 nos insumos de teste)
+  const emDia = (data) => roda(conf(['pvp_muito_baixo', 'dy_alto'], data)).resultado
+  assert.equal(emDia('2026-07-08').aConferir.length, 0, 'exatamente 90 dias: ainda vale')
+  const vencida = emDia('2026-07-07')
+  assert.deepEqual(vencida.aConferir.map((f) => [f.ticker, f.conferenciaVencida]), [['SUSP11', '2026-07-07']], '91 dias: volta para "a conferir", dizendo que a conferência venceu')
+  assert.equal(emDia('2026-12-01').aConferir.length, 1, 'conferência datada do futuro não vale')
+  // um alerta novo (rendimento em queda) que a conferência não cobre segura o fundo de novo
+  const f = suspeito()
+  for (const m of MESES.slice(-3)) f.informes[m] = { ...f.informes[m], dy: 0.001 }
+  const novo = roda(conf(['pvp_muito_baixo', 'dy_alto']), insumosDe([f])).resultado
+  assert.ok(novo.aConferir[0].alertas.includes('rendimento_em_queda'))
+  assert.ok(!novo.aConferir[0].alertas.includes('pvp_muito_baixo'), 'o que a conferência cobre não é repetido como pendente')
+  // fundo sem alerta com conferência: nada muda
+  assert.equal(roda(conf(['pvp_muito_baixo'])).resultado.tijolo.find((x) => x.ticker === 'OUTR11').conferido, undefined)
+})
+
+test('configuração de conferência: datas válidas, só alertas conhecidos, fonte e nota preenchidas', () => {
+  const conhecidos = ['pvp_muito_baixo', 'dy_alto', 'rendimento_em_queda', 'rendimento_com_pico']
+  assert.equal(cfg.conferencia.validadeDias, 90)
+  assert.ok(Object.keys(cfg.conferencia.fundos).length >= 1)
+  for (const [ticker, c] of Object.entries(cfg.conferencia.fundos)) {
+    assert.match(c.conferidoEm, /^\d{4}-\d{2}-\d{2}$/, ticker)
+    assert.ok(!Number.isNaN(Date.parse(c.conferidoEm)), ticker)
+    assert.ok(c.libera.length > 0 && c.libera.every((a) => conhecidos.includes(a)), `${ticker}: alertas desconhecidos`)
+    assert.ok(c.fonte && c.nota, `${ticker}: falta fonte ou nota`)
+  }
+  assert.equal(cfg.alertas.rendimentoRecenteMinimoSobre12m, 0.75)
+  assert.equal(cfg.alertas.picoDeRendimentoMaximo, 1.25)
+  assert.equal(cfg.dados.mesesRecentes, 3)
 })
 
 test('DY em % em vez de fração: a escala vem da mediana da competência e o resultado é o mesmo', () => {

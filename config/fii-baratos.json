@@ -1,11 +1,16 @@
 {
   "_leia": "Metodologia da triagem 'FIIs baratos' (Tijolo e Papel). ESTE ARQUIVO É A FONTE ÚNICA DOS PARÂMETROS: o script e o documento docs/10-metodologia-fii-baratos.md leem/citam estes valores. Qualquer mudança aqui exige subir 'versaoMetodologia' e registrar o motivo em 'historicoDeVersoes'. O hash SHA-256 deste arquivo vai no manifesto de cada execução.",
-  "versaoMetodologia": "1.0.0",
+  "versaoMetodologia": "1.1.0",
   "historicoDeVersoes": [
     {
       "versao": "1.0.0",
       "data": "2026-10-06",
       "mudanca": "Versão inicial, vinda do protótipo analisado com o Informe Mensal real da CVM (competência 2026-08). Classificação do fundo pelo que ele tem no ativo (Tijolo, Papel, Fundo de fundos, Misto), ranking separado por grupo pela média dos ranks de P/VP baixo e DY de 12 meses alto, filtros de liquidez, patrimônio, cotistas, alavancagem e rentabilidade patrimonial, e lista 'a conferir' para dado suspeito (P/VP muito baixo ou DY muito alto), que fica fora do ranking. Nada é publicado no app: o job só grava a trilha de auditoria."
+    },
+    {
+      "versao": "1.1.0",
+      "data": "2026-10-07",
+      "mudanca": "Conferência dos 6 fundos da lista 'a conferir' no Investidor10 (MFII11, TGAR11, BBIG11, BRCR11, TRBL11, OUJP11): nenhum tinha cota e valor patrimonial em bases diferentes (valor patrimonial, patrimônio e rendimento de 12 meses bateram com a CVM), mas 3 (MFII11, BBIG11, TRBL11) tinham DY de 12 meses inflado por corte de rendimento ou pagamento extra (MFII11: R$ 0,91 para R$ 0,30 por mês; BBIG11: R$ 0,07 para R$ 0,03; TRBL11: R$ 2,68 em julho e R$ 0,44 depois). (1) Novo alerta 'rendimento_em_queda': mediana dos 3 últimos meses abaixo de 75% da mediana dos 12 meses (MFII11 0,29; BBIG11 0,43; TRBL11 0,68; fundos de rendimento estável ficam acima de 0,85). A primeira tentativa, com a MÉDIA dos 2 últimos meses, marcou por engano GTWR11 e BRCO11 (que pagam todo mês, mas têm um mês com DY zero no informe) e foi trocada pela mediana. (2) Novo alerta 'rendimento_com_pico': média dos 12 meses acima de 1,25 vez a mediana, o que pegou HGRE11 (pico de R$ 8,52 no informe de janeiro/26, DY de 12 meses de 16,6% contra ~9,4% no Investidor10) e KORE11 (rendimento cortado de R$ 1,25 para R$ 0,60 em janeiro, DY de 14,7% contra ~10,8% atual). Fundo com qualquer alerta vai para 'a conferir'. (3) Nova lista 'conferencia' em config: fundo conferido manualmente, com data, fonte e QUAIS alertas a conferência libera, entra no ranking marcado como conferido; vale por 90 dias; alerta novo ou conferência vencida devolve o fundo para 'a conferir'. Liberados nesta versão: BRCR11 (pvp_muito_baixo) e OUJP11 (dy_alto). (4) O ranking passa a mostrar o DY recente (mediana dos 3 últimos meses, anualizada), a razão contra a mediana de 12 meses e o pico de rendimento."
     }
   ],
   "tamanhoDaLista": 15,
@@ -13,16 +18,46 @@
     "mesesHistorico": 12,
     "minimoMesesComDados": 10,
     "mesesGuardadosNosInsumos": 14,
+    "mesesRecentes": 3,
     "coberturaMinimaDaCompetencia": 0.8,
     "cotacaoMaxIdadeDias": 45,
     "_leia": "A competência de referência é a mais recente com pelo menos 'coberturaMinimaDaCompetencia' do número de fundos da competência com mais fundos (o mês corrente costuma vir com poucos informes). A cotação vem do job de FIIs (rendimentosFii.json); mais velha que 'cotacaoMaxIdadeDias' dias da execução, o fundo sai."
   },
   "classificacao": {
     "fatiaMinimaDoTipo": 0.6,
-    "imoveis": ["Direitos_Bens_Imoveis", "Acoes_Sociedades_Atividades_FII", "Cotas_Sociedades_Atividades_FII"],
-    "recebiveis": ["CRI", "CRI_CRA", "LCI", "LCI_LCA", "LIG", "Letras_Hipotecarias", "FDIC", "Cedulas_Debentures", "Debentures", "Notas_Promissorias", "Certificados_Deposito_Valores_Mobiliarios", "Outros_Valores_Mobliarios"],
-    "cotas": ["FII", "Outras_Cotas_FI", "Fundo_Acoes", "FIP"],
-    "outros": ["Acoes", "Bonus_Subscricao", "CEPAC", "Titulos_Publicos", "Titulos_Privados", "Fundos_Renda_Fixa"],
+    "imoveis": [
+      "Direitos_Bens_Imoveis",
+      "Acoes_Sociedades_Atividades_FII",
+      "Cotas_Sociedades_Atividades_FII"
+    ],
+    "recebiveis": [
+      "CRI",
+      "CRI_CRA",
+      "LCI",
+      "LCI_LCA",
+      "LIG",
+      "Letras_Hipotecarias",
+      "FDIC",
+      "Cedulas_Debentures",
+      "Debentures",
+      "Notas_Promissorias",
+      "Certificados_Deposito_Valores_Mobiliarios",
+      "Outros_Valores_Mobliarios"
+    ],
+    "cotas": [
+      "FII",
+      "Outras_Cotas_FI",
+      "Fundo_Acoes",
+      "FIP"
+    ],
+    "outros": [
+      "Acoes",
+      "Bonus_Subscricao",
+      "CEPAC",
+      "Titulos_Publicos",
+      "Titulos_Privados",
+      "Fundos_Renda_Fixa"
+    ],
     "_leia": "O fundo é Tijolo se imóveis >= 60% do total investido, Papel se recebíveis >= 60%, Fundo de fundos se cotas >= 60%; senão Misto. Fundo de fundos e Misto não entram nos rankings. CRI e CRI_CRA (e LCI e LCI_LCA) são colunas de versões diferentes do informe e nunca vêm preenchidas juntas; somam-se."
   },
   "filtros": {
@@ -48,7 +83,31 @@
   "alertas": {
     "pvpMuitoBaixo": 0.55,
     "dy12Alto": 0.18,
-    "_leia": "Fundo com P/VP abaixo de pvpMuitoBaixo (cota e valor patrimonial possivelmente em bases diferentes, como em desdobramento) ou DY de 12 meses acima de dy12Alto (distribuição não recorrente) NÃO entra no ranking: vai para 'a conferir', sem posição, até alguém confirmar o dado numa fonte pública. Sai antes de calcular os ranks, para não distorcer a nota dos demais."
+    "rendimentoRecenteMinimoSobre12m": 0.75,
+    "_leia": "Fundo com P/VP abaixo de pvpMuitoBaixo (cota e valor patrimonial possivelmente em bases diferentes, como em desdobramento), DY de 12 meses acima de dy12Alto (distribuição não recorrente), mediana dos 'dados.mesesRecentes' últimos meses abaixo de rendimentoRecenteMinimoSobre12m da mediana dos 12 meses (corte de rendimento) ou média dos 12 meses acima de picoDeRendimentoMaximo vezes a mediana (o DY de 12 meses depende de poucos meses atípicos: pagamento extra, pico no informe ou rendimento de antes de um corte) NÃO entra no ranking: vai para 'a conferir', sem posição, até alguém confirmar o dado numa fonte pública (e registrar em 'conferencia'). As duas últimas regras usam MEDIANA de propósito: um mês com DY zero no informe (GTWR11, BRCO11) não pode decidir sozinho. Sai antes de calcular os ranks, para não distorcer a nota dos demais.",
+    "picoDeRendimentoMaximo": 1.25
+  },
+  "conferencia": {
+    "validadeDias": 90,
+    "fundos": {
+      "BRCR11": {
+        "conferidoEm": "2026-10-07",
+        "fonte": "Investidor10 (investidor10.com.br/fiis/brcr11), comparado com o informe da CVM",
+        "libera": [
+          "pvp_muito_baixo"
+        ],
+        "nota": "Valor patrimonial por cota (R$ 80,78 × 80,71 da CVM) e patrimônio (R$ 2,15 bi) batem; cota e valor patrimonial na mesma base. Rendimento fixo em R$ 0,41 por mês nos últimos 10 meses. Desconto real, com vacância de 10,4% no site. A conferência cobre a BASE DOS DADOS, não a qualidade dos imóveis."
+      },
+      "OUJP11": {
+        "conferidoEm": "2026-10-07",
+        "fonte": "Investidor10 (investidor10.com.br/fiis/oujp11), comparado com o informe da CVM",
+        "libera": [
+          "dy_alto"
+        ],
+        "nota": "Valor patrimonial por cota (R$ 97,10) e patrimônio (R$ 315,8 mi) batem. DY alto recorrente: R$ 1,03 a R$ 1,58 por mês nos últimos 10 meses, sem corte. Fundo de papel de alto retorno: o risco é de crédito, que esta conferência NÃO avalia."
+      }
+    },
+    "_leia": "Conferência manual de dado, feita pelo responsável ou por quem ele indicar, numa fonte pública. 'libera' lista SÓ os alertas que a conferência cobre: um alerta novo volta a segurar o fundo. Vale por validadeDias dias a partir de conferidoEm; depois volta para 'a conferir'. Conferir o dado não é recomendar o fundo: P/VP baixo e DY alto continuam podendo refletir risco real."
   },
   "publicacao": {
     "aprovadoPeloResponsavel": false,

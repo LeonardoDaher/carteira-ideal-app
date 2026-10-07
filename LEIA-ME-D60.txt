@@ -1,0 +1,21 @@
+D60 (07/10/2026): FIIs baratos, metodologia 1.1.0: conferência dos 6 fundos suspeitos, alertas de rendimento e conferência manual registrada. Detalhes: docs/07-registro-de-decisoes.md (D60) e docs/10-metodologia-fii-baratos.md.
+
+AINDA NÃO PUBLICA NADA NO APP (só a trilha de auditoria em auditoria/fii-baratos/<data>/).
+
+RESUMO
+ - Conferi no Investidor10 os 6 fundos de "a conferir": nenhum tinha cota e valor patrimonial em bases diferentes. O problema era o DY de 12 meses inflado por corte de rendimento (MFII11, BBIG11) ou pagamento extra (TRBL11).
+ - Novos alertas, por MEDIANA: rendimento_em_queda (3 últimos meses < 75% do normal) e rendimento_com_pico (média > 125% da mediana). O segundo pegou HGRE11 e KORE11, que estavam no Top 15 do Tijolo com DY inflado.
+ - Nova lista config/fii-baratos.json > conferencia: fundo conferido por você, com data, fonte e alertas liberados; vale 90 dias. Liberados: BRCR11 e OUJP11 (OUJP11 é papel de alto retorno: o risco de crédito NÃO foi avaliado).
+ - TGAR11 continua em "a conferir": fundo de desenvolvimento, decisão sua.
+ - Não mexi em aprovadoPeloResponsavel, não gerei nem gravei código de acesso.
+
+SUBA OS ARQUIVOS DO ZIP (Add file > Upload files, arrastando o CONTEÚDO do zip extraído) e depois, NA ORDEM:
+ 1) Actions > "Atualizar rendimentos de FIIs" > Run workflow > esperar ✅   (renova as cotações: as de hoje têm 12 dias e os FIIs subiram bastante)
+ 2) Actions > "Atualizar FIIs Baratos" > Run workflow > esperar ✅
+ 3) Me mande a linha final do log (Top 15 de tijolo, de papel e "a conferir").
+    Os números vão mudar em relação aos da D60 porque as cotações serão novas; é esperado.
+
+SE ALGUM FUNDO NOVO APARECER EM "A CONFERIR": confira numa fonte pública e, se estiver tudo certo, me peça para registrar em conferencia (ou edite o config: conferidoEm, fonte, nota e a lista "libera").
+
+ARQUIVOS (alterados): config/fii-baratos.json, scripts/fii-baratos-calculo.mjs, scripts/atualizar-fii-baratos.mjs, scripts/fii-baratos.test.mjs,
+                      docs/06-proximos-passos.md, docs/07-registro-de-decisoes.md, docs/10-metodologia-fii-baratos.md, LEIA-ME-D60.txt

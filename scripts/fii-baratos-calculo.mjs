@@ -128,6 +128,18 @@ export function indicadoresDoFundo(fundo, ref, divisorPorCompetencia, cfg) {
   const comPat = serie.filter((s) => s.rentabPatrimonial != null)
   const rentabPatrimonial12m = comPat.length >= d.minimoMesesComDados ? comPat.reduce((p, x) => p * (1 + x.rentabPatrimonial), 1) - 1 : null
 
+  // O DY de 12 meses esconde corte de rendimento e pagamento extra. Dois indicadores, ambos por MEDIANA (um mês zerado ou um
+  // pico isolado no informe não pode decidir sozinho; na primeira versão, com média de 2 meses, GTWR11 e BRCO11, que pagam todo
+  // mês, foram marcados por um mês com DY zero no informe):
+  //  - razão recente: mediana dos últimos `mesesRecentes` meses (todos com dado) ÷ mediana dos 12 meses. Pega o corte (MFII11, BBIG11, TRBL11).
+  //  - pico: média ÷ mediana dos 12 meses. Alto = o DY de 12 meses depende de poucos meses atípicos (HGRE11, KORE11).
+  const medianaDe = (v) => { const o = [...v].sort((a, b) => a - b); const n = o.length; return n % 2 ? o[(n - 1) / 2] : (o[n / 2 - 1] + o[n / 2]) / 2 }
+  const rendimentos = comRend.map((x) => x.rendimentoPorCota)
+  const mediana12m = medianaDe(rendimentos)
+  const recentes = serie.filter((s) => meses.slice(-d.mesesRecentes).includes(s.competencia) && s.rendimentoPorCota != null).map((s) => s.rendimentoPorCota)
+  const medianaRecente = recentes.length === d.mesesRecentes ? medianaDe(recentes) : null
+  const razaoRendimentoRecente = medianaRecente != null && mediana12m > 0 ? medianaRecente / mediana12m : null
+  const picoDeRendimento = mediana12m > 0 ? somaRend / comRend.length / mediana12m : null
   const vp = linhaRef.vp
   const ativoRef = fundo.ativos?.[ref]
   const passivoOneroso = ativoRef ? Math.max((ativoRef.Total_Passivo ?? 0) - (ativoRef.Rendimentos_Distribuir ?? 0) - (ativoRef.Taxa_Administracao_Pagar ?? 0) - (ativoRef.Taxa_Performance_Pagar ?? 0), 0) : null
@@ -137,6 +149,9 @@ export function indicadoresDoFundo(fundo, ref, divisorPorCompetencia, cfg) {
     pvp: vp > 0 ? fundo.cotacao / vp : null,
     rendimento12m,
     dy12: fundo.cotacao > 0 ? rendimento12m / fundo.cotacao : null,
+    dyRecente: fundo.cotacao > 0 && medianaRecente != null ? (medianaRecente * 12) / fundo.cotacao : null,
+    razaoRendimentoRecente,
+    picoDeRendimento,
     mesesComDados: comRend.length,
     rentabPatrimonial12m,
     patrimonio: linhaRef.pl ?? null,
@@ -169,22 +184,41 @@ export function motivoDeExclusao(f, p) {
   return null
 }
 
-/** Sinais de dado a conferir (cota fora de base, distribuição não recorrente). */
+/** Sinais de dado a conferir (cota fora de base, distribuição não recorrente, rendimento em queda). */
 export function alertasDoFundo(f, a) {
   const lista = []
   if (f.pvp != null && f.pvp < a.pvpMuitoBaixo) lista.push('pvp_muito_baixo')
   if (f.dy12 != null && f.dy12 > a.dy12Alto) lista.push('dy_alto')
+  if (f.razaoRendimentoRecente != null && f.razaoRendimentoRecente < a.rendimentoRecenteMinimoSobre12m) lista.push('rendimento_em_queda')
+  if (f.picoDeRendimento != null && f.picoDeRendimento > a.picoDeRendimentoMaximo) lista.push('rendimento_com_pico')
   return lista
 }
 
-/** Fundo com alerta sai ANTES de calcular os ranks e vai para "a conferir". */
-export function separarAConferir(fundos, a) {
+/**
+ * Conferência manual vigente de um fundo (config.conferencia): quem conferiu, quando, em que fonte e QUAIS alertas ela libera.
+ * Vale por `validadeDias` dias a partir de `conferidoEm`; depois disso o fundo volta para "a conferir".
+ */
+export function conferenciaVigente(ticker, conferencia, dataExecucao) {
+  const c = conferencia?.fundos?.[ticker]
+  if (!c) return null
+  const idade = diasEntre(c.conferidoEm, dataExecucao)
+  return { ...c, vigente: idade >= 0 && idade <= (conferencia.validadeDias ?? 0), idadeDias: idade }
+}
+
+/**
+ * Fundo com alerta sai ANTES de calcular os ranks e vai para "a conferir", EXCETO se há conferência vigente que libera
+ * TODOS os alertas dele. Alerta novo (que a conferência não cobre) volta a segurar o fundo; conferência vencida também.
+ */
+export function separarAConferir(fundos, a, conferencia = null, dataExecucao = null) {
   const limpos = []
   const aConferir = []
   for (const f of fundos) {
     const alertas = alertasDoFundo(f, a)
-    if (alertas.length) aConferir.push({ ...f, alertas })
-    else limpos.push(f)
+    if (!alertas.length) { limpos.push(f); continue }
+    const c = dataExecucao ? conferenciaVigente(f.ticker, conferencia, dataExecucao) : null
+    const pendentes = alertas.filter((x) => !(c?.vigente && (c.libera ?? []).includes(x)))
+    if (pendentes.length) aConferir.push({ ...f, alertas: pendentes, ...(c && !c.vigente ? { conferenciaVencida: c.conferidoEm } : {}) })
+    else limpos.push({ ...f, alertasLiberados: alertas, conferido: { em: c.conferidoEm, fonte: c.fonte, nota: c.nota ?? null } })
   }
   return { limpos, aConferir }
 }
@@ -217,6 +251,9 @@ function linhaDoRanking(f) {
     rankDy: arred(f.rankDy),
     pvp: arred(f.pvp, 4),
     dy12: arred(f.dy12, 5),
+    dyRecente: arred(f.dyRecente, 5),
+    razaoRendimentoRecente: arred(f.razaoRendimentoRecente, 4),
+    picoDeRendimento: arred(f.picoDeRendimento, 4),
     cotacao: arred(f.cotacao, 4),
     dataCotacao: f.dataCotacao ?? null,
     vp: arred(f.vp, 4),
@@ -229,6 +266,8 @@ function linhaDoRanking(f) {
     fatias: f.fatias ? { imoveis: arred(f.fatias.imoveis, 4), recebiveis: arred(f.fatias.recebiveis, 4), cotas: arred(f.fatias.cotas, 4) } : null,
     mesesComDados: f.mesesComDados,
     alertas: f.alertas ?? [],
+    ...(f.alertasLiberados ? { alertasLiberados: f.alertasLiberados, conferido: f.conferido } : {}),
+    ...(f.conferenciaVencida ? { conferenciaVencida: f.conferenciaVencida } : {}),
     ...(f.grupo ? { grupo: f.grupo } : {}),
   }
 }
@@ -279,14 +318,15 @@ export function calcular(insumos, cfg) {
   etapas.push({ etapa: 'classificação e filtros', entram: comIndicadores.length, tijolo: grupos.tijolo.length, papel: grupos.papel.length })
 
   // 4) "a conferir" e ranking
-  const t = separarAConferir(grupos.tijolo, cfg.alertas)
-  const p = separarAConferir(grupos.papel, cfg.alertas)
+  const t = separarAConferir(grupos.tijolo, cfg.alertas, cfg.conferencia, insumos.dataExecucao)
+  const p = separarAConferir(grupos.papel, cfg.alertas, cfg.conferencia, insumos.dataExecucao)
   const aConferir = [...t.aConferir.map((f) => ({ ...f, grupo: 'tijolo' })), ...p.aConferir.map((f) => ({ ...f, grupo: 'papel' }))].sort((a, b) => (a.grupo === b.grupo ? (a.ticker < b.ticker ? -1 : 1) : a.grupo < b.grupo ? -1 : 1))
   const tijolo = ranquear(t.limpos)
   const papel = ranquear(p.limpos)
   etapas.push({ etapa: 'a conferir', aConferir: aConferir.length, tijolo: tijolo.length, papel: papel.length })
   for (const f of [...tijolo, ...papel]) memoria[f.ticker].ranking = { posicao: f.posicao, nota: arred(f.nota), rankPvp: arred(f.rankPvp), rankDy: arred(f.rankDy), formula: 'média dos ranks percentuais de P/VP (menor = melhor) e DY de 12 meses (maior = melhor), dentro do grupo' }
-  for (const f of aConferir) memoria[f.ticker].aConferir = { grupo: f.grupo, alertas: f.alertas }
+  for (const f of aConferir) memoria[f.ticker].aConferir = { grupo: f.grupo, alertas: f.alertas, ...(f.conferenciaVencida ? { conferenciaVencida: f.conferenciaVencida } : {}) }
+  for (const f of [...tijolo, ...papel]) if (f.conferido) memoria[f.ticker].conferencia = { alertasLiberados: f.alertasLiberados, ...f.conferido, regra: 'conferência manual vigente em config/fii-baratos.json → conferencia; libera só os alertas listados e vale por conferencia.validadeDias dias' }
 
   const resultado = {
     esquema: 1,
