@@ -161,3 +161,5 @@ A mudança para a API tirou a metodologia do código visível. Ainda assim, vale
 - [ ] **Enquadramento dos FIIs (D63):** revisar `publicacao.enquadramento` e o `avisoProposto` em `config/fii-baratos.json`; decidir o parecer independente da D22 antes de divulgar em escala. Só então mudar `aprovadoPeloResponsavel`.
 - [ ] **RZAT11:** observar o rendimento irregular quando o informe de setembro entrar (hoje razão de 0,85, limite de 0,75).
 - [ ] **Se for publicar a tela dos FIIs:** seguir o desenho do Top 15 de ações (D50), com o aviso lido de `publicacao.avisoProposto`.
+- [ ] **Preço diário dos FIIs (D64):** conferir nos próximos dias úteis que "Atualizar preço diário dos FIIs" roda sozinho (22h15) e que os 3 fundos completados pela brapi (CVBI11, MALL11, BBPO11) continuam recebendo pregão novo. Descobrir por que a B3 não os traz no boletim.
+- [ ] **Acesso do assistente ao GitHub (D64):** revisar se mantém; para revogar, `gh auth logout` ou github.com/settings/applications.

@@ -100,7 +100,7 @@ export function montarInsumos({ complemento, geral, ativo, snapshot, cfg, dataEx
     const ordenados = candidatos.map((c) => ({ cnpj: c, ultima: ultimaCompDoCnpj(c) })).sort((a, b) => (a.ultima < b.ultima ? 1 : a.ultima > b.ultima ? -1 : a.cnpj < b.cnpj ? 1 : -1))
     const cnpj = ordenados[0]?.cnpj ?? null
     // Preço diário da B3: últimos pregões do histórico, alinhados com pregoesDiarios ([fechamento, volume em reais] ou null).
-    const base = { ticker: f.ticker, nome: f.nome ?? null, setor: f.setor ?? null, cotacao: f.cotacao ?? null, dataCotacao: f.dataCotacao ?? null, volumeMedio: f.volumeMedio ?? null, volumeMediano: f.volumeMediano ?? null, precoDiario: historicoPrecos ? ultimosPregoes(historicoPrecos, f.ticker.toUpperCase(), cfg.dados.pregoesPrecoDiario).serie : null }
+    const base = { ticker: f.ticker, nome: f.nome ?? null, setor: f.setor ?? null, cotacao: f.cotacao ?? null, dataCotacao: f.dataCotacao ?? null, volumeMedio: f.volumeMedio ?? null, volumeMediano: f.volumeMediano ?? null, precoDiario: historicoPrecos ? ultimosPregoes(historicoPrecos, f.ticker.toUpperCase(), cfg.dados.pregoesPrecoDiario).serie : null, precoDiarioFonte: (historicoPrecos?.complementadosPelaBrapi ?? []).includes(f.ticker.toUpperCase()) ? 'brapi' : 'B3' }
     if (!cnpj) return { ...base, segmento: null, cnpj: null, origemCnpj: candidatos.length ? 'ISIN sem informe' : 'ISIN não encontrado no informe' }
     const infs = {}
     const ats = {}
@@ -274,7 +274,7 @@ export function concluir({ raiz, cfg, insumos, fontes = [], log = console.log, a
   }
 
   const topo = (l) => l.slice(0, cfg.tamanhoDaLista).map((r) => r.ticker).join(' ')
-  log(`Preço: diário da B3 em ${resultado.precoDiarioEm} fundos, mensal (brapi) em ${resultado.precoMensalEm}; último pregão do histórico: ${resultado.ultimoPregaoDiario ?? 'nenhum'}`)
+  log(`Preço: diário em ${resultado.precoDiarioEm} fundos (${resultado.precoDiarioViaBrapiEm} completados pela brapi), mensal (brapi) em ${resultado.precoMensalEm}; último pregão do histórico: ${resultado.ultimoPregaoDiario ?? 'nenhum'}`)
   log(`Liquidez: mediana em ${resultado.liquidezPorMediana} fundos, média em ${resultado.liquidezPorMedia} (sem mediana no job de FIIs)`)
   log(`Universo ${resultado.universo} · competência ${resultado.competenciaReferencia} · tijolo ${resultado.tijolo.length}, papel ${resultado.papel.length}, a conferir ${resultado.aConferir.length}, fora ${resultado.exclusoes.length}`)
   log(`Top ${cfg.tamanhoDaLista} TIJOLO: ${topo(resultado.tijolo)}`)

@@ -238,7 +238,9 @@ export function ranquear(fundos) {
 // ---------------------------------------------------------------------------------------
 
 const FONTE_DIARIA = 'B3 (boletim diário)'
+const FONTE_DIARIA_BRAPI = 'brapi (histórico diário)' // fundo líquido que o boletim da B3 não traz: dias completados pelas barras diárias da brapi
 const FONTE_MENSAL = 'brapi (job mensal de FIIs)'
+const ehFonteDiaria = (fonte) => fonte === FONTE_DIARIA || fonte === FONTE_DIARIA_BRAPI
 
 /**
  * Cotação e volume de um fundo. Usa o histórico DIÁRIO da B3 (insumos.pregoesDiarios + fundo.precoDiario) quando ele tem pregões
@@ -263,7 +265,7 @@ export function escolherPreco(f, insumos, d) {
       dataCotacao: datas[i],
       volumeMedio: volumes.reduce((s, v) => s + v, 0) / n,
       volumeMediano: n % 2 ? ordenados[(n - 1) / 2] : (ordenados[n / 2 - 1] + ordenados[n / 2]) / 2,
-      fonte: FONTE_DIARIA,
+      fonte: f.precoDiarioFonte === 'brapi' ? FONTE_DIARIA_BRAPI : FONTE_DIARIA,
       saltoMaximo: salto,
       sessoes: datas.length,
     }
@@ -329,7 +331,7 @@ export function calcular(insumos, cfg) {
     const p = escolherPreco(f, insumos, d)
     if (p.erro) { exclusoes.push(excl(f, 'precos', p.erro, p.motivo)); continue }
     if (p.cotacao == null || !(p.cotacao > 0)) { exclusoes.push(excl(f, 'precos', 'sem_cotacao', 'Sem cotação (nem no histórico diário da B3 nem no job de FIIs).')); continue }
-    const limite = p.fonte === FONTE_DIARIA ? d.cotacaoDiariaMaxIdadeDias : d.cotacaoMaxIdadeDias
+    const limite = ehFonteDiaria(p.fonte) ? d.cotacaoDiariaMaxIdadeDias : d.cotacaoMaxIdadeDias
     const idade = p.dataCotacao ? diasEntre(p.dataCotacao, insumos.dataExecucao) : null
     if (idade == null || idade > limite) { exclusoes.push(excl(f, 'precos', 'cotacao_defasada', `Cotação de ${p.dataCotacao ?? 'data desconhecida'} (${p.fonte}), ${idade ?? '?'} dias antes da execução (máximo ${limite}).`)); continue }
     atual.push({ ...f, cotacao: p.cotacao, dataCotacao: p.dataCotacao, volumeMedio: p.volumeMedio, volumeMediano: p.volumeMediano, fonteCotacao: p.fonte, saltoMaximo: p.saltoMaximo, sessoesPreco: p.sessoes })
@@ -383,7 +385,8 @@ export function calcular(insumos, cfg) {
     universo: insumos.fundos.length,
     liquidezPorMediana: comIndicadores.filter((f) => f.fonteLiquidez === 'mediana').length,
     liquidezPorMedia: comIndicadores.filter((f) => f.fonteLiquidez === 'média').length,
-    precoDiarioEm: comIndicadores.filter((f) => f.fonteCotacao === FONTE_DIARIA).length,
+    precoDiarioEm: comIndicadores.filter((f) => ehFonteDiaria(f.fonteCotacao)).length,
+    precoDiarioViaBrapiEm: comIndicadores.filter((f) => f.fonteCotacao === FONTE_DIARIA_BRAPI).length,
     precoMensalEm: comIndicadores.filter((f) => f.fonteCotacao === FONTE_MENSAL).length,
     ultimoPregaoDiario: (insumos.pregoesDiarios ?? []).at(-1) ?? null,
     etapas,

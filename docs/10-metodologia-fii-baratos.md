@@ -1,6 +1,6 @@
 # Metodologia da triagem "FIIs baratos" (Tijolo e Papel)
 
-**Versão da metodologia: 1.4.0** · Decisão de origem: D59 (alertas e conferência manual: D60) · Parâmetros: `config/fii-baratos.json` (fonte única) · Código: `scripts/fii-baratos-calculo.mjs` (cálculo puro), `scripts/atualizar-fii-baratos.mjs` (leitura da CVM e gravação da auditoria), `scripts/fii-baratos-verificar.mjs` (verificação independente).
+**Versão da metodologia: 1.4.1** · Decisão de origem: D59 (alertas e conferência manual: D60) · Parâmetros: `config/fii-baratos.json` (fonte única) · Código: `scripts/fii-baratos-calculo.mjs` (cálculo puro), `scripts/atualizar-fii-baratos.mjs` (leitura da CVM e gravação da auditoria), `scripts/fii-baratos-verificar.mjs` (verificação independente).
 
 > **Estado: NÃO PUBLICADO.** Este job só grava a trilha de auditoria em `auditoria/fii-baratos/<data>/`. Não há tela no app, código de acesso nem arquivo lido pelo site. Publicar depende de decisão do responsável (seção 9).
 
@@ -14,6 +14,7 @@
 |---|---|---|
 | **Informe Mensal de FII da CVM** (`inf_mensal_fii_AAAA.zip`: `complemento`, `geral`, `ativo_passivo`) | DY do mês, valor patrimonial da cota, rentabilidade patrimonial, patrimônio líquido, cotistas, valor do ativo; ISIN e segmento declarado; composição do ativo e do passivo | Anos A−1 e A. Cada arquivo baixado tem URL, tamanho e sha256 no manifesto |
 | **Preço diário** (`historico/fiis.json`, do job "Atualizar preço diário dos FIIs", `scripts/atualizar-fiis-historico.mjs`) | Fechamento, mínima, máxima e volume financeiro (R$) de cada pregão dos fundos do job de FIIs, a partir do **Boletim de Preços oficial da B3** (BVBG.086), sem chave e sem cota | **Fonte principal da cotação e da liquidez (1.4.0).** Usa os 21 últimos pregões; cotação com mais de `dados.cotacaoDiariaMaxIdadeDias` (7) dias da execução tira o fundo (`cotacao_defasada`) |
+| **Complemento pela brapi** (`config/fiis-preco.json → reservaBrapi`) | Barras diárias da brapi (fechamento, mínima, máxima e volume em cotas × fechamento) | O Boletim da B3 **não traz alguns fundos líquidos** (em 06/10/2026: CVBI11, MALL11 e BBPO11, com R$ 0,8 a 2,7 mi por dia). Só para os fundos com mediana de volume mensal acima de R$ 300 mil e sem negócio no boletim na janela, o histórico é completado pela brapi (cerca de 3 requisições por dia). Nunca sobrescreve um dia do boletim. Origem registrada em `fonte_cotacao`: "brapi (histórico diário)" |
 | **Cotação e volume mensais** (`webapp-src/src/data/rendimentosFii.json`, do job mensal de FIIs, brapi) | Cotação, data, volume médio e mediano (21 pregões), nome, setor | **Reserva**: vale só para o fundo sem preço diário (fora do histórico, ou sem negócio na janela), a menos que `dados.precoDiarioObrigatorio` seja `true`. Mais velha que `dados.cotacaoMaxIdadeDias` (45) dias: o fundo sai |
 
 Os CSVs da CVM são ISO-8859-1. O leitor valida colunas obrigatórias e **falha com mensagem explícita** se o layout mudar.
@@ -138,6 +139,7 @@ Confere o sha256 de cada arquivo, o hash canônico dos insumos e da config e **r
 
 | Versão | Data | Mudança |
 |---|---|---|
+| 1.4.1 | 2026-10-07 | Fundos líquidos que o boletim da B3 não traz (CVBI11, MALL11, BBPO11) têm o histórico diário completado pela brapi, com a origem registrada; sem isso o preço diário obrigatório os tiraria do ranking. Nenhuma regra de cálculo mudou. |
 | 1.4.0 | 2026-10-07 | Preço DIÁRIO da B3 (histórico próprio, `historico/fiis.json`) como fonte da cotação e do volume, com o preço mensal da brapi como reserva; alerta `salto_de_preco`; TGAR11 aceito no ranking por decisão do responsável (conferido); proposta de enquadramento e aviso em `publicacao`. |
 | 1.3.0 | 2026-10-07 | Mínimo de liquidez único de R$ 300 mil (mediana) nos dois grupos; o do tijolo cai de R$ 500 mil. Decisão do responsável, com as medianas reais de 07/10. |
 | 1.2.0 | 2026-10-07 | Liquidez pela mediana do volume diário (o job de FIIs passa a gravar `volumeMediano`; a média continua), com a fonte registrada por fundo; mínimos inalterados. |

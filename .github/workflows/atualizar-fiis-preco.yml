@@ -7,6 +7,9 @@
 # Segunda a sexta às 22h15 de Brasília (01h15 UTC do dia seguinte): a última versão do boletim do dia sai por
 # volta das 20h30. Não coincide com os outros jobs (ETFs 22h, BDRs 22h30).
 #
+# A brapi (BRAPI_TOKEN) só completa os poucos fundos líquidos que o boletim da B3 não traz (cerca de 3 requisições
+# por dia).
+#
 # Antes da primeira execução diária, rode UMA VEZ o workflow "Carga inicial de FIIs (preço diário)".
 #
 # Se o script encontrar algo errado (boletim com data inesperada, poucos fundos no boletim, B3 fora do ar), o
@@ -43,6 +46,8 @@ jobs:
         run: node --test scripts/atualizar-fiis-historico.test.mjs
 
       - name: Buscar o boletim da B3 e atualizar historico/fiis.json
+        env:
+          BRAPI_TOKEN: ${{ secrets.BRAPI_TOKEN }}
         run: node scripts/atualizar-fiis-historico.mjs
 
       - name: Publicar (commit) se houver mudança

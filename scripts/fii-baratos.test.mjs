@@ -23,7 +23,7 @@ const perto = (a, b, tol = 1e-9) => assert.ok(Math.abs(a - b) <= tol, `${a} ≠ 
 // ---------------------------------------------------------------------------------------
 
 test('configuração: versão, trava de publicação desligada e alertas coerentes com os filtros', () => {
-  assert.equal(cfg.versaoMetodologia, '1.4.0')
+  assert.equal(cfg.versaoMetodologia, '1.4.1')
   assert.equal(cfg.historicoDeVersoes.at(-1).versao, cfg.versaoMetodologia)
   assert.equal(cfg.publicacao.aprovadoPeloResponsavel, false, 'este job não publica nada: a aprovação só muda por decisão do responsável')
   assert.match(cfg.publicacao.avisoProposto, /^Não é recomendação de investimento\./, 'aviso proposto no mesmo tom do Top 15 de ações')
@@ -370,6 +370,26 @@ test('preço diário: sem histórico do fundo ou sem negócio na janela vale o p
   assert.match(fora.PARA11.motivo, /não negociou na janela/)
 })
 
+test('preço diário completado pela brapi (fundo líquido que o boletim da B3 não traz): conta como diário, com a origem registrada, e passa na trava de preço obrigatório', () => {
+  const f = fundo('SUMI11', { cotacao: 999, dataCotacao: '2026-08-01' })
+  f.precoDiario = serieDiaria()
+  f.precoDiarioFonte = 'brapi'
+  const normal = fundo('BOLE11')
+  normal.precoDiario = serieDiaria()
+  normal.precoDiarioFonte = 'B3'
+  const obrigatorio = { ...cfg, dados: { ...cfg.dados, precoDiarioObrigatorio: true } }
+  const r = calcular(comDiario([f, normal]), obrigatorio).resultado
+  assert.deepEqual(Object.fromEntries(r.tijolo.map((x) => [x.ticker, x.fonteCotacao])), { SUMI11: 'brapi (histórico diário)', BOLE11: 'B3 (boletim diário)' })
+  assert.deepEqual([r.precoDiarioEm, r.precoDiarioViaBrapiEm, r.precoMensalEm], [2, 1, 0])
+  assert.equal(r.tijolo.find((x) => x.ticker === 'SUMI11').cotacao, 80, 'a cotação mensal velha é ignorada')
+  // o limite de idade é o do preço diário (7 dias), também para a origem brapi
+  const velho = fundo('VELH11')
+  velho.precoDiario = serieDiaria(Object.fromEntries(Array.from({ length: 8 }, (_, k) => [-1 - k, null])))
+  velho.precoDiarioFonte = 'brapi'
+  const e = calcular(comDiario([velho]), cfg).resultado.exclusoes.find((x) => x.ticker === 'VELH11')
+  assert.match(e.motivo, /brapi \(histórico diário\).*máximo 7/)
+})
+
 test('preço diário: cotação com mais de 7 dias sai (a mensal aceita 45); salto de preço de um dia para o outro vai para "a conferir"', () => {
   // último negócio há 12 dias: o histórico diário diz que o fundo não negocia, e a cotação diária velha tira o fundo
   const velho = fundo('VELH11')
@@ -446,7 +466,7 @@ test('extração: última versão de cada informe, escala do DY, migração de C
   const snapshot = { geradoEm: '2026-09-25T01:00:00Z', fundos: [{ ticker: 'XXXX11', nome: 'Novo', setor: 'Shoppings', cotacao: 80, dataCotacao: '2026-09-25', volumeMedio: 2e6, volumeMediano: 1.5e6 }, { ticker: 'NADA11', cotacao: 10, dataCotacao: '2026-09-25', volumeMedio: 1 }] }
   // histórico diário da B3: 25 pregões (só os 21 últimos entram), XXXX11 sem negócio no último e NADA11 fora do histórico
   const datasH = Array.from({ length: 25 }, (_, i) => `2026-09-${String(i + 1).padStart(2, '0')}`)
-  const historicoPrecos = { pregoes: datasH, nomes: {}, ativos: { XXXX11: datasH.map((_, i) => (i === 24 ? null : [80 + i, 79, 81 + i, 1e6 + i])) } }
+  const historicoPrecos = { pregoes: datasH, nomes: {}, complementadosPelaBrapi: ['NADA11'], ativos: { XXXX11: datasH.map((_, i) => (i === 24 ? null : [80 + i, 79, 81 + i, 1e6 + i])) } }
   const ins = montarInsumos({ complemento: complementoSemA, geral: g, ativo: at, snapshot, cfg, dataExecucao: '2026-10-06', historicoPrecos })
   assert.equal(ins.dataCotacoes, '2026-09-25')
   assert.deepEqual(ins.contagemPorCompetencia, { '2026-06': 1, '2026-07': 1, '2026-08': 2, '2026-09': 1 })
@@ -465,6 +485,8 @@ test('extração: última versão de cada informe, escala do DY, migração de C
   assert.equal(n.cnpj, null)
   assert.equal(n.volumeMediano, null, 'job de FIIs antigo, sem mediana: null (o cálculo cai para a média)')
   assert.equal(n.precoDiario, null, 'fundo fora do histórico diário: sem série (o cálculo cai para o preço mensal)')
+  assert.equal(x.precoDiarioFonte, 'B3', 'fundo do boletim da B3')
+  assert.equal(n.precoDiarioFonte, 'brapi', 'fundo listado em complementadosPelaBrapi no histórico')
   assert.match(n.origemCnpj, /ISIN não encontrado/)
 })
 

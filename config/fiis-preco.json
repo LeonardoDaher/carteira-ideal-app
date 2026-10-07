@@ -1,10 +1,17 @@
 {
-  "_leia": "Histórico de preço DIÁRIO dos FIIs (decisão D63), a partir do Boletim de Preços oficial da B3 (BVBG.086), sem chave e sem cota. Alimenta a triagem 'FIIs baratos' com cotação e volume do dia, no lugar do preço mensal do job de FIIs (brapi). O universo é a lista de fundos de webapp-src/src/data/rendimentosFii.json (job mensal de FIIs); fundos novos entram no histórico depois da próxima execução desse job. Antes da primeira execução diária, rode UMA VEZ o workflow 'Carga inicial de FIIs (preço diário)'.",
+  "_leia": "Histórico de preço DIÁRIO dos FIIs (decisão D63), a partir do Boletim de Preços oficial da B3 (BVBG.086), sem chave e sem cota. Alimenta a triagem 'FIIs baratos' com cotação e volume do dia, no lugar do preço mensal do job de FIIs (brapi). O universo é a lista de fundos de webapp-src/src/data/rendimentosFii.json (job mensal de FIIs); fundos novos entram no histórico depois da próxima execução desse job. Antes da primeira execução diária, rode UMA VEZ o workflow 'Carga inicial de FIIs (preço diário)'. Complemento pela brapi (reservaBrapi): o boletim da B3 não traz alguns fundos líquidos (em 06/10/2026: CVBI11, MALL11 e BBPO11, com R$ 0,8 a 2,7 mi por dia); para os que têm mediana de volume mensal da brapi acima de volumeMinimoBrapi e nenhum negócio no boletim na janela recente, o histórico é completado com as barras diárias da brapi (BRAPI_TOKEN, no máximo maxRequisicoes requisições por execução). Nunca sobrescreve um dia que o boletim trouxe; os fundos completados ficam listados em complementadosPelaBrapi no historico/fiis.json.",
   "horarioCorteBoletim": "21:00",
   "diasProcuraBoletim": 5,
   "pausaEntreDownloadsMs": 1000,
   "maxPregoesGuardados": 80,
   "minimoPregoesParaUsar": 21,
   "minimoFiisNoBoletim": 120,
-  "tickersExtras": []
+  "tickersExtras": [],
+  "reservaBrapi": {
+    "ativa": true,
+    "volumeMinimoBrapi": 300000,
+    "janela": "3mo",
+    "maxRequisicoes": 20,
+    "pausaMs": 300
+  }
 }

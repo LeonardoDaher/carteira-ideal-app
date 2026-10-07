@@ -4,7 +4,7 @@ import path from 'node:path'
 import test from 'node:test'
 import { fileURLToPath } from 'node:url'
 import { datasAProcessar, historicoVazio, incorporarPregao } from './atualizar-etfs.mjs'
-import { formatarHistorico, universoDosFiis, ultimosPregoes } from './atualizar-fiis-historico.mjs'
+import { barrasDaBrapi, candidatosReserva, complementarComBrapi, formatarHistorico, preencherComBarras, universoDosFiis, ultimosPregoes } from './atualizar-fiis-historico.mjs'
 
 const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const cfg = JSON.parse(fs.readFileSync(path.join(RAIZ, 'config', 'fiis-preco.json'), 'utf8'))
@@ -72,6 +72,106 @@ test('arquivo do histórico: JSON válido, um fundo por linha, ordenado, e lido 
   assert.ok(linhas.findIndex((l) => l.includes('"AAAA11": [')) < linhas.findIndex((l) => l.includes('"BBBB11": [')), 'ordenado por código')
   assert.match(texto, /^\{\n {2}"_leia":/)
   assert.ok(texto.endsWith('}\n'))
+})
+
+// ---------------------------------------------------------------------------------------
+// Complemento pela brapi (fundos líquidos que o boletim da B3 não traz)
+// ---------------------------------------------------------------------------------------
+
+const unix = (data) => Date.parse(`${data}T13:00:00Z`) / 1000 // 10h em Brasília
+const corpoBrapi = (barras) => ({ results: [{ historicalDataPrice: barras }] })
+
+test('configuração da reserva brapi: ativa, com piso de liquidez e limite de requisições por execução', () => {
+  assert.equal(cfg.reservaBrapi.ativa, true)
+  assert.ok(cfg.reservaBrapi.volumeMinimoBrapi >= 100_000)
+  assert.ok(cfg.reservaBrapi.maxRequisicoes > 0 && cfg.reservaBrapi.maxRequisicoes <= 50, 'poucas requisições por dia: a cota da brapi é compartilhada com o job mensal de FIIs')
+})
+
+test('candidatos: só fundo líquido na brapi que o histórico do boletim não tem (ou sem negócio na janela)', () => {
+  const universo = new Map([['BOLE11', 'no boletim'], ['SUMI11', 'fora do boletim'], ['ILIQ11', 'fora e ilíquido'], ['PARA11', 'no histórico, sem negócio']])
+  let h = historicoVazio()
+  h = incorporarPregao(h, '2026-10-05', new Map([instrumento('BOLE11', 10, 1000)]), universo)
+  h = incorporarPregao(h, '2026-10-06', new Map([instrumento('BOLE11', 10, 1000)]), universo)
+  const snapshot = { fundos: [{ ticker: 'BOLE11', volumeMediano: 5e6 }, { ticker: 'SUMI11', volumeMediano: 2e6 }, { ticker: 'ILIQ11', volumeMediano: 10_000 }, { ticker: 'PARA11', volumeMediano: 900_000 }, { ticker: 'sem11', volumeMedio: 400_000 }] }
+  assert.deepEqual(candidatosReserva(h, snapshot, { volumeMinimo: 300_000 }), ['SUMI11', 'PARA11', 'SEM11'])
+})
+
+test('barras da brapi: só as com preço, volume em reais (cotas × fechamento) e data em Brasília', () => {
+  const barras = barrasDaBrapi(corpoBrapi([
+    { date: unix('2026-10-05'), close: 10, low: 9.5, high: 10.5, volume: 1000 },
+    { date: unix('2026-10-06'), close: 11, volume: 0 },
+    { date: unix('2026-10-07'), close: null, volume: 5 },
+    { date: 'x', close: 10, volume: 1 },
+  ]))
+  assert.deepEqual(barras, [
+    { data: '2026-10-05', fechamento: 10, minima: 9.5, maxima: 10.5, volume: 10_000 },
+    { data: '2026-10-06', fechamento: 11, minima: 11, maxima: 11, volume: 0 },
+  ])
+  assert.deepEqual(barrasDaBrapi({}), [])
+  assert.deepEqual(barrasDaBrapi(undefined), [])
+})
+
+test('preencher: completa só os dias sem dado e com negócio; nunca sobrescreve o que o boletim trouxe nem inventa pregão', () => {
+  const universo = new Map([['BOLE11', 'x'], ['SUMI11', 'y']])
+  let h = historicoVazio()
+  for (const d of ['2026-10-01', '2026-10-02', '2026-10-05']) h = incorporarPregao(h, d, new Map([instrumento('BOLE11', 10, 1000), ...(d === '2026-10-05' ? [instrumento('SUMI11', 77, 500)] : [])]), universo)
+  const barras = [
+    { data: '2026-10-01', fechamento: 50, minima: 49, maxima: 51, volume: 2e6 },
+    { data: '2026-10-02', fechamento: 51, minima: 50, maxima: 52, volume: 0 }, // sem negócio: continua null
+    { data: '2026-10-03', fechamento: 52, minima: 51, maxima: 53, volume: 1e6 }, // sábado: não é pregão do histórico
+    { data: '2026-10-05', fechamento: 99, minima: 98, maxima: 100, volume: 3e6 }, // o boletim já trouxe este dia
+  ]
+  const r = preencherComBarras(h, 'SUMI11', barras)
+  assert.equal(r.preenchidos, 1)
+  assert.deepEqual(r.historico.ativos.SUMI11, [[50, 49, 51, 2e6], null, [77, 76, 78, 500]])
+  assert.deepEqual(h.ativos.SUMI11, [null, null, [77, 76, 78, 500]], 'o histórico original não é alterado')
+  // fundo totalmente fora do histórico entra com a série alinhada
+  const novo = preencherComBarras(h, 'FORA11', [{ data: '2026-10-02', fechamento: 8, minima: 8, maxima: 8, volume: 1e5 }])
+  assert.deepEqual(novo.historico.ativos.FORA11, [null, [8, 8, 8, 1e5], null])
+  assert.equal(preencherComBarras(h, 'FORA11', []).preenchidos, 0)
+})
+
+test('complementar: pede à brapi só os candidatos, respeita o limite, e falha de rede, 429 e falta de token nunca derrubam o job', async () => {
+  const universo = new Map([['AAAA11', 'a'], ['BBBB11', 'b'], ['CCCC11', 'c']])
+  let h = historicoVazio()
+  h = incorporarPregao(h, '2026-10-05', new Map(), universo)
+  h = incorporarPregao(h, '2026-10-06', new Map(), universo)
+  const urls = []
+  const resposta = (corpo, status = 200) => ({ ok: status === 200, status, json: async () => corpo })
+  const fetchOk = async (url, opcoes) => {
+    urls.push(url)
+    assert.match(opcoes.headers.Authorization, /^Bearer segredo$/)
+    return resposta(corpoBrapi([{ date: unix('2026-10-06'), close: 20, low: 19, high: 21, volume: 100 }]))
+  }
+  const logs = []
+  const base = { historico: h, token: 'segredo', pausaMs: 0, log: (m) => logs.push(m) }
+  const r = await complementarComBrapi({ ...base, candidatos: ['AAAA11', 'BBBB11'], fetchImpl: fetchOk })
+  assert.deepEqual(r.completados, ['AAAA11', 'BBBB11'])
+  assert.equal(r.requisicoes, 2)
+  assert.match(urls[0], /^https:\/\/brapi\.dev\/api\/quote\/AAAA11\?range=3mo&interval=1d$/)
+  assert.deepEqual(r.historico.ativos.AAAA11, [null, [20, 19, 21, 2000]])
+  // limite de requisições por execução
+  const lim = await complementarComBrapi({ ...base, candidatos: ['AAAA11', 'BBBB11', 'CCCC11'], maxRequisicoes: 2, fetchImpl: fetchOk })
+  assert.equal(lim.requisicoes, 2)
+  assert.ok(logs.some((l) => /além do limite de 2/.test(l)))
+  // 429: para sem continuar; erro de rede: segue com o próximo; sem token: nem tenta
+  let chamadas = 0
+  const r429 = await complementarComBrapi({ ...base, candidatos: ['AAAA11', 'BBBB11'], fetchImpl: async () => (chamadas++, resposta({}, 429)) })
+  assert.deepEqual([r429.completados, chamadas], [[], 1])
+  const rRede = await complementarComBrapi({ ...base, candidatos: ['AAAA11', 'BBBB11'], fetchImpl: async (u) => { if (u.includes('AAAA11')) throw new Error('rede'); return resposta(corpoBrapi([{ date: unix('2026-10-06'), close: 5, volume: 10 }])) } })
+  assert.deepEqual(rRede.completados, ['BBBB11'])
+  const rSemToken = await complementarComBrapi({ ...base, token: undefined, candidatos: ['AAAA11'], fetchImpl: async () => { throw new Error('não deveria chamar') } })
+  assert.deepEqual([rSemToken.completados, rSemToken.requisicoes], [[], 0])
+  assert.ok(logs.some((l) => /BRAPI_TOKEN não definido/.test(l)))
+  assert.equal((await complementarComBrapi({ ...base, candidatos: [], fetchImpl: fetchOk })).requisicoes, 0)
+})
+
+test('arquivo do histórico guarda a lista dos fundos complementados pela brapi (ordenada, sem repetição)', () => {
+  const h = historicoVazio()
+  const lido = JSON.parse(formatarHistorico(h, ['MALL11', 'BBPO11', 'MALL11']))
+  assert.deepEqual(lido.complementadosPelaBrapi, ['BBPO11', 'MALL11'])
+  assert.deepEqual(JSON.parse(formatarHistorico(h)).complementadosPelaBrapi, [])
+  assert.deepEqual(JSON.parse(formatarHistorico({ ...h, complementadosPelaBrapi: ['XXXX11'] })).complementadosPelaBrapi, ['XXXX11'])
 })
 
 test('datas a processar: no dia a dia, só as que faltam, da mais antiga para a mais nova; na carga inicial, as mais novas primeiro', () => {

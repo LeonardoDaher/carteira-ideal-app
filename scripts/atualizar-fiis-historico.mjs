@@ -15,7 +15,7 @@ import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
-import { baixarBoletim, datasCandidatas, lerBoletim } from './b3-boletim.mjs'
+import { baixarBoletim, dataEmBrasilia, datasCandidatas, lerBoletim } from './b3-boletim.mjs'
 import { datasAProcessar, historicoVazio, incorporarPregao } from './atualizar-etfs.mjs'
 
 const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
@@ -36,7 +36,7 @@ export function universoDosFiis(snapshot, extras = []) {
 }
 
 /** Histórico em texto: um fundo por linha, para o arquivo ficar legível no GitHub. */
-export function formatarHistorico(historico) {
+export function formatarHistorico(historico, complementados = historico.complementadosPelaBrapi ?? []) {
   const linhas = Object.keys(historico.ativos)
     .sort()
     .map((t) => `    ${JSON.stringify(t)}: ${JSON.stringify(historico.ativos[t])}`)
@@ -45,8 +45,9 @@ export function formatarHistorico(historico) {
     .map((t) => `    ${JSON.stringify(t)}: ${JSON.stringify(historico.nomes[t])}`)
   return [
     '{',
-    '  "_leia": "Histórico de preço diário dos FIIs (decisão D63), gerado por scripts/atualizar-fiis-historico.mjs a partir do Boletim de Preços da B3. Cada fundo tem um valor por pregão, alinhado com \\"pregoes\\": [fechamento, mínima, máxima, volume em reais] ou null (não negociou). Não editar à mão.",',
+    '  "_leia": "Histórico de preço diário dos FIIs (decisão D63), gerado por scripts/atualizar-fiis-historico.mjs a partir do Boletim de Preços da B3. Cada fundo tem um valor por pregão, alinhado com \\"pregoes\\": [fechamento, mínima, máxima, volume em reais] ou null (não negociou). Os fundos de \\"complementadosPelaBrapi\\" não vêm no boletim da B3 e têm os dias completados pelas barras diárias da brapi. Não editar à mão.",',
     `  "pregoes": ${JSON.stringify(historico.pregoes)},`,
+    `  "complementadosPelaBrapi": ${JSON.stringify([...new Set(complementados)].sort())},`,
     `  "nomes": {\n${nomes.join(',\n')}\n  },`,
     `  "ativos": {\n${linhas.join(',\n')}\n  }`,
     '}',
@@ -66,6 +67,84 @@ export function ultimosPregoes(historico, ticker, n) {
   if (!serieCompleta) return { datas, serie: null }
   const serie = serieCompleta.slice(Math.max(0, serieCompleta.length - datas.length)).map((v) => (v && v[0] > 0 ? [v[0], v[3] ?? 0] : null))
   return { datas, serie }
+}
+
+// ---------------------------------------------------------------------------------------
+// Complemento pela brapi, SÓ para fundos líquidos que a B3 não traz no boletim
+// ---------------------------------------------------------------------------------------
+// O Boletim de Preços da B3 (BVBG.086) não tem alguns fundos que negociam normalmente (em 06/10/2026: CVBI11,
+// MALL11 e BBPO11, com R$ 0,8 a 2,7 mi por dia na brapi). Para esses, e só para esses, o histórico é completado
+// com as barras diárias da brapi (poucas requisições por dia). Nunca sobrescreve um dia que o boletim trouxe.
+
+/** Fundos para completar: líquidos na brapi (mediana mensal) e sem negócio no boletim na janela recente. */
+export function candidatosReserva(historico, snapshot, { volumeMinimo = 300_000, janela = 21 } = {}) {
+  const lista = []
+  for (const f of snapshot?.fundos ?? []) {
+    const t = String(f.ticker ?? '').toUpperCase()
+    if (!t || !((f.volumeMediano ?? f.volumeMedio ?? 0) >= volumeMinimo)) continue
+    const serie = historico?.ativos?.[t]
+    const recente = serie ? serie.slice(Math.max(0, serie.length - janela)) : []
+    if (!recente.some(Boolean)) lista.push(t)
+  }
+  return lista
+}
+
+/** Barras diárias da resposta da brapi: [{ data, fechamento, minima, maxima, volume (R$) }], só as com preço e volume. */
+export function barrasDaBrapi(corpo) {
+  const bruto = corpo?.results?.[0]?.historicalDataPrice
+  if (!Array.isArray(bruto)) return []
+  const saida = []
+  for (const b of bruto) {
+    if (!b || typeof b.close !== 'number' || !(b.close > 0) || typeof b.date !== 'number') continue
+    const volume = Number(b.volume) > 0 ? Number(b.volume) * b.close : 0
+    saida.push({ data: dataEmBrasilia(new Date(b.date * 1000)), fechamento: b.close, minima: typeof b.low === 'number' && b.low > 0 ? b.low : b.close, maxima: typeof b.high === 'number' && b.high > 0 ? b.high : b.close, volume })
+  }
+  return saida
+}
+
+/** Preenche os dias SEM dado do fundo no histórico com as barras da brapi. Devolve { historico, preenchidos }. */
+export function preencherComBarras(historico, ticker, barras) {
+  const indice = new Map(historico.pregoes.map((d, i) => [d, i]))
+  const serie = historico.ativos[ticker] ? [...historico.ativos[ticker]] : historico.pregoes.map(() => null)
+  let preenchidos = 0
+  for (const b of barras) {
+    const i = indice.get(b.data)
+    if (i === undefined || serie[i]) continue // dia que não é pregão do histórico, ou que o boletim já trouxe
+    if (!(b.volume > 0)) continue // sem negócio: continua null, como no boletim
+    serie[i] = [b.fechamento, b.minima, b.maxima, Math.round(b.volume * 100) / 100]
+    preenchidos++
+  }
+  if (!preenchidos) return { historico, preenchidos: 0 }
+  return { historico: { ...historico, ativos: { ...historico.ativos, [ticker]: serie } }, preenchidos }
+}
+
+/** Busca as barras na brapi e completa o histórico dos candidatos. Falha de rede nunca derruba o job. */
+export async function complementarComBrapi({ historico, candidatos, token, janela = '3mo', maxRequisicoes = 20, pausaMs = 300, fetchImpl = fetch, log = console.log }) {
+  let atual = historico
+  const completados = []
+  if (!candidatos.length) return { historico: atual, completados, requisicoes: 0 }
+  if (!token) {
+    log(`[aviso] BRAPI_TOKEN não definido: ${candidatos.length} fundo(s) líquido(s) fora do boletim ficam sem preço diário (${candidatos.join(', ')}).`)
+    return { historico: atual, completados, requisicoes: 0 }
+  }
+  let requisicoes = 0
+  for (const ticker of candidatos.slice(0, maxRequisicoes)) {
+    try {
+      const resposta = await fetchImpl(`https://brapi.dev/api/quote/${encodeURIComponent(ticker)}?range=${janela}&interval=1d`, { headers: { Authorization: `Bearer ${token}` } })
+      requisicoes++
+      if (resposta.status === 429) { log('[aviso] brapi atingiu o limite de requisições: o complemento para aqui.'); break }
+      if (!resposta.ok) { log(`[aviso] brapi respondeu ${resposta.status} para ${ticker}: sem complemento.`); continue }
+      const r = preencherComBarras(atual, ticker, barrasDaBrapi(await resposta.json()))
+      atual = r.historico
+      if (r.preenchidos > 0) { completados.push(ticker); log(`[info] ${ticker}: ${r.preenchidos} pregões completados pela brapi (fora do boletim da B3).`) }
+      else log(`[aviso] ${ticker}: a brapi não trouxe nenhum pregão com negócio na janela.`)
+    } catch (erro) {
+      log(`[aviso] brapi indisponível para ${ticker} (${erro.message}): sem complemento.`)
+    }
+    if (pausaMs > 0) await new Promise((r) => setTimeout(r, pausaMs))
+  }
+  if (candidatos.length > maxRequisicoes) log(`[aviso] ${candidatos.length - maxRequisicoes} candidato(s) além do limite de ${maxRequisicoes} requisições por execução.`)
+  return { historico: atual, completados, requisicoes }
 }
 
 // ---------------------------------------------------------------------------------------
@@ -89,7 +168,7 @@ function argumentoCarga(argv, maximo) {
   return Number.isInteger(n) && n > 0 ? Math.min(n, maximo) : maximo
 }
 
-export async function main({ argv = process.argv, agora = new Date(), raiz = RAIZ } = {}) {
+export async function main({ argv = process.argv, agora = new Date(), raiz = RAIZ, fetchImpl = fetch } = {}) {
   const config = JSON.parse(fs.readFileSync(path.join(raiz, 'config', 'fiis-preco.json'), 'utf8'))
   const arquivoHistorico = path.join(raiz, 'historico', 'fiis.json')
   const snapshot = JSON.parse(fs.readFileSync(path.join(raiz, 'webapp-src', 'src', 'data', 'rendimentosFii.json'), 'utf8'))
@@ -98,6 +177,7 @@ export async function main({ argv = process.argv, agora = new Date(), raiz = RAI
 
   const carga = argumentoCarga(argv, config.maxPregoesGuardados)
   let historico = lerJson(arquivoHistorico, historicoVazio())
+  const complementados = new Set(historico.complementadosPelaBrapi ?? []) // incorporarPregao devolve só pregoes/nomes/ativos
   const quantidade = carga > 0 ? Math.ceil(carga * 1.1) + 10 : config.diasProcuraBoletim
   const candidatas = datasCandidatas(agora, quantidade, config.horarioCorteBoletim)
   const faltam = datasAProcessar(candidatas, historico.pregoes, carga > 0)
@@ -146,7 +226,7 @@ export async function main({ argv = process.argv, agora = new Date(), raiz = RAI
       if (carga > 0) {
         if (novos % 20 === 0) {
           fs.mkdirSync(path.dirname(arquivoHistorico), { recursive: true })
-          fs.writeFileSync(arquivoHistorico, formatarHistorico(historico))
+          fs.writeFileSync(arquivoHistorico, formatarHistorico(historico, [...complementados]))
           console.log(`[info] Histórico parcial gravado: ${historico.pregoes.length} pregões.`)
         }
         await esperar(config.pausaEntreDownloadsMs ?? 1000)
@@ -156,12 +236,23 @@ export async function main({ argv = process.argv, agora = new Date(), raiz = RAI
     fs.rmSync(pastaTemp, { recursive: true, force: true })
   }
 
-  if (novos === 0) {
+  // Complemento pela brapi: fundos líquidos que a B3 não traz (e os já complementados, para o dia novo também ser preenchido)
+  let preenchimentos = 0
+  const reserva = config.reservaBrapi ?? { ativa: false }
+  if (reserva.ativa) {
+    const candidatos = [...new Set([...complementados, ...candidatosReserva(historico, snapshot, { volumeMinimo: reserva.volumeMinimoBrapi, janela: config.minimoPregoesParaUsar })])]
+    const r = await complementarComBrapi({ historico, candidatos, token: process.env.BRAPI_TOKEN, janela: reserva.janela, maxRequisicoes: reserva.maxRequisicoes, pausaMs: reserva.pausaMs, fetchImpl })
+    historico = r.historico
+    for (const t of r.completados) complementados.add(t)
+    preenchimentos = r.completados.length
+  }
+
+  if (novos === 0 && preenchimentos === 0) {
     console.log(`Sem pregão novo desde ${historico.pregoes.at(-1) ?? 'nenhum'}${semPregao ? ' (feriado ou fim de semana)' : ''}: arquivo mantido.`)
     return { novos, historico }
   }
   fs.mkdirSync(path.dirname(arquivoHistorico), { recursive: true })
-  fs.writeFileSync(arquivoHistorico, formatarHistorico(historico))
+  fs.writeFileSync(arquivoHistorico, formatarHistorico(historico, [...complementados]))
   const ultimo = historico.pregoes.at(-1)
   const diasDesdePregao = (agora.getTime() - Date.parse(`${ultimo}T21:00:00Z`)) / 86_400_000
   console.log(`historico/fiis.json atualizado: ${historico.pregoes.length} pregões (${novos} novos), último de ${ultimo}, ${Object.keys(historico.ativos).length} fundos com preço.`)

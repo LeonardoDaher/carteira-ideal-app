@@ -38,6 +38,8 @@ jobs:
           cache: npm
 
       - name: Baixar os boletins e montar o histórico
+        env:
+          BRAPI_TOKEN: ${{ secrets.BRAPI_TOKEN }}
         run: node scripts/atualizar-fiis-historico.mjs --carga-inicial=${{ github.event.inputs.pregoes }}
 
       - name: Publicar (commit) o que foi carregado
