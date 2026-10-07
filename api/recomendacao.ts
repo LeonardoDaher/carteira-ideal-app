@@ -8,11 +8,22 @@
 // Isso significa que quem inspecionar o bundle JS publicado no navegador não encontra
 // mais as matrizes de alocação, os pesos das perguntas ou a regra de veto — só encontra
 // uma chamada de rede para este endpoint.
+//
+// Limite de chamadas por IP (api/_limite.ts): 60 a cada 15 minutos, para que ninguém reconstrua
+// as matrizes chamando a API milhares de vezes. Falha aberta: erro na contagem nunca bloqueia.
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { gerarRecomendacao } from '../webapp-src/src/domain/engine.js'
 import { validarPayload } from './_validacao.js'
+import { chaveDeChamadas, contadorComReserva, contadorEmMemoria, contadorRedis, JANELA_CHAMADAS_SEGUNDOS, passouDoLimite } from './_limite.js'
+import type { Contador } from './_limite.js'
+import { metricasHabilitadas, pipeline } from './_redis.js'
+import { ipDe } from './_top15.js'
 
-export default function handler(req: VercelRequest, res: VercelResponse) {
+const reserva = contadorEmMemoria()
+const contador: Contador = metricasHabilitadas() ? contadorComReserva(contadorRedis(pipeline), reserva) : reserva
+const sal = process.env.TOP15_SAL ?? ''
+
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   // CORS básico: ajuste ALLOWED_ORIGIN nas variáveis de ambiente da Vercel se o front
   // for servido de um domínio diferente do da própria função (ex.: apps mobile via WebView).
   res.setHeader('Access-Control-Allow-Origin', process.env.ALLOWED_ORIGIN ?? '*')
@@ -26,6 +37,12 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
 
   if (req.method !== 'POST') {
     res.status(405).json({ erro: 'Método não permitido. Use POST.' })
+    return
+  }
+
+  if (await passouDoLimite(contador, chaveDeChamadas(ipDe(req.headers, req.socket?.remoteAddress), sal))) {
+    res.setHeader('Retry-After', String(JANELA_CHAMADAS_SEGUNDOS))
+    res.status(429).json({ erro: 'Muitas consultas em pouco tempo. Aguarde alguns minutos e tente novamente.' })
     return
   }
 

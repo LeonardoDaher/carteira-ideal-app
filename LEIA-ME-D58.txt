@@ -1,0 +1,22 @@
+D58 (06/10/2026): privacidade do Top 15, limite de chamadas da API do motor de perfil e Embraer como EMBJ3. Detalhes: docs/07-registro-de-decisoes.md, D58.
+
+RESUMO
+ - privacidade/index.html: nova seção 5A (código do Top 15 não é guardado no servidor; tentativas contadas por hash do IP por até 15 minutos; contagem mensal agregada). Data: 06/10/2026.
+   Leia o texto antes de publicar: é seu, como responsável.
+ - api/recomendacao.ts + api/_limite.ts: 60 chamadas por IP a cada 15 minutos (resposta 429 acima disso). Só hash do IP, falha aberta.
+ - config/acoes.json: EMBR3 trocado por EMBJ3 (CNPJ 07.689.002/0001-89).
+ - Não mexi em aprovadoPeloResponsavel, não gerei nem gravei código de acesso.
+
+SUBA OS ARQUIVOS DO ZIP e espere o deploy da Vercel ficar Ready.
+
+DEPOIS, NA ORDEM:
+ 1) Actions → "Carga inicial de Ações" → Run workflow → esperar ✅ (busca o histórico do EMBJ3; hoje ele tem 21 pregões e sai do Top 15 por histórico insuficiente).
+ 2) Actions → "Atualizar Top 15 Ações Baratas" → Run workflow → esperar ✅.
+ 3) Conferir o motor de perfil: abrir https://carteiraideal.app.br/app/ e fazer o questionário uma vez (deve funcionar normalmente).
+
+AINDA SEU, ANTES DE DIVULGAR O CÓDIGO DO TOP 15
+ - Trocar o código de teste: npm run codigo-top15 (gera um código novo; coloque em TOP15_CODIGOS na Vercel. Não envie o código para mim nem o grave em arquivo).
+ - Conferir 2 ou 3 empresas do Top 15 contra uma fonte pública.
+
+ARQUIVOS: api/_limite.ts, api/recomendacao.ts, scripts/recomendacao-limite.test.mjs, privacidade/index.html, config/acoes.json,
+          docs/06-proximos-passos.md, docs/07-registro-de-decisoes.md, LEIA-ME-D58.txt

@@ -35,7 +35,7 @@
       <nav class="migalhas" aria-label="Você está aqui"><a href="/">Início</a><span aria-hidden="true"> › </span><a href="/privacidade/">Política de Privacidade</a></nav>
       <article>
         <h1>Política de Privacidade</h1>
-        <p class="byline">Última atualização: 1 de outubro de 2026</p>
+        <p class="byline">Última atualização: 6 de outubro de 2026</p>
         <p class="lead">Resumo em uma frase: não pedimos cadastro, não vendemos dados e só contamos o uso de forma anônima e agregada para saber se o projeto está ajudando as pessoas.</p>
 
         <section>
@@ -73,11 +73,18 @@
         </section>
 
         <section>
+          <h2>5A. Acesso ao Top 15 e limites de uso</h2>
+          <p>O &ldquo;Top 15 ações mais baratas&rdquo; só abre com um código do mês. Quando você digita o código, ele é enviado ao endereço <code>/api/top15</code> apenas para ser conferido, e <strong>não é guardado em nosso servidor</strong>. O app salva o código só no seu aparelho (localStorage), para você não precisar digitá-lo de novo; ele pode ser apagado por você a qualquer momento e deixa de valer quando o código do mês muda.</p>
+          <p>Para impedir tentativas em massa de adivinhar o código, e chamadas em massa à API que calcula a carteira de referência (<code>/api/recomendacao</code>), contamos as tentativas por endereço IP. Guardamos <strong>apenas um hash irreversível do IP, e não o IP em si, e por no máximo 15 minutos</strong>. No Top 15, a contagem vale só para códigos errados; em <code>/api/recomendacao</code>, para qualquer chamada (o limite é de 60 a cada 15 minutos, bem acima do uso normal). Acima do limite, o servidor recusa temporariamente novas chamadas daquele endereço.</p>
+          <p>Também somamos, por mês, quantos acessos ao Top 15 foram aceitos, recusados por código errado ou bloqueados pelo limite. É só um número agregado, sem identificar ninguém.</p>
+        </section>
+
+        <section>
           <h2>6. Cookies e serviços de terceiros</h2>
           <p>O Carteira Ideal não usa cookies de publicidade nem de rastreamento próprio. Alguns serviços de terceiros participam do funcionamento do site:</p>
           <ul>
             <li><strong>Vercel</strong>: hospedagem do site e das funções do servidor, além do Web Analytics.</li>
-            <li><strong>Upstash</strong>: banco de dados onde ficam os contadores das métricas anônimas (região de São Paulo, Brasil).</li>
+            <li><strong>Upstash</strong>: banco de dados onde ficam os contadores das métricas anônimas e os contadores temporários de limite de uso descritos na seção 5A (região de São Paulo, Brasil).</li>
             <li><strong>YouTube</strong>: as videoaulas são exibidas por meio de vídeos incorporados do YouTube. Ao reproduzi-las, o YouTube pode tratar dados e usar cookies conforme a política de privacidade do Google. Os links para as nossas páginas no Instagram e no YouTube também levam a serviços de terceiros.</li>
             <li><strong>Fontes públicas de dados de mercado</strong> (como B3 e Banco Central): usadas para atualizar informações do app, sem envio de dados seus.</li>
           </ul>
@@ -91,7 +98,7 @@
 
         <section>
           <h2>8. Por quanto tempo guardamos</h2>
-          <p>As respostas do questionário e os dados do Meu Mês e de Meus Ativos ficam no seu aparelho até você apagá-los. Os contadores anônimos são mantidos enquanto forem úteis para as estatísticas do projeto e podem ser apagados a qualquer momento. Como não ficam ligados a uma pessoa identificada, em geral não é possível localizar &ldquo;os dados de uma pessoa&rdquo; nesses contadores.</p>
+          <p>As respostas do questionário e os dados do Meu Mês e de Meus Ativos ficam no seu aparelho até você apagá-los. Os contadores anônimos são mantidos enquanto forem úteis para as estatísticas do projeto e podem ser apagados a qualquer momento. Os contadores de limite de uso (seção 5A) somem sozinhos em 15 minutos. Como não ficam ligados a uma pessoa identificada, em geral não é possível localizar &ldquo;os dados de uma pessoa&rdquo; nesses contadores.</p>
         </section>
 
         <section>
