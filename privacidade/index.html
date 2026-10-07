@@ -35,7 +35,7 @@
       <nav class="migalhas" aria-label="Você está aqui"><a href="/">Início</a><span aria-hidden="true"> › </span><a href="/privacidade/">Política de Privacidade</a></nav>
       <article>
         <h1>Política de Privacidade</h1>
-        <p class="byline">Última atualização: 6 de outubro de 2026</p>
+        <p class="byline">Última atualização: 7 de outubro de 2026</p>
         <p class="lead">Resumo em uma frase: não pedimos cadastro, não vendemos dados e só contamos o uso de forma anônima e agregada para saber se o projeto está ajudando as pessoas.</p>
 
         <section>
@@ -74,9 +74,9 @@
 
         <section>
           <h2>5A. Acesso ao Top 15 e limites de uso</h2>
-          <p>O &ldquo;Top 15 ações mais baratas&rdquo; só abre com um código do mês. Quando você digita o código, ele é enviado ao endereço <code>/api/top15</code> apenas para ser conferido, e <strong>não é guardado em nosso servidor</strong>. O app salva o código só no seu aparelho (localStorage), para você não precisar digitá-lo de novo; ele pode ser apagado por você a qualquer momento e deixa de valer quando o código do mês muda.</p>
-          <p>Para impedir tentativas em massa de adivinhar o código, e chamadas em massa à API que calcula a carteira de referência (<code>/api/recomendacao</code>), contamos as tentativas por endereço IP. Guardamos <strong>apenas um hash irreversível do IP, e não o IP em si, e por no máximo 15 minutos</strong>. No Top 15, a contagem vale só para códigos errados; em <code>/api/recomendacao</code>, para qualquer chamada (o limite é de 60 a cada 15 minutos, bem acima do uso normal). Acima do limite, o servidor recusa temporariamente novas chamadas daquele endereço.</p>
-          <p>Também somamos, por mês, quantos acessos ao Top 15 foram aceitos, recusados por código errado ou bloqueados pelo limite. É só um número agregado, sem identificar ninguém.</p>
+          <p>O &ldquo;Top 15 ações mais baratas&rdquo; e o &ldquo;Top 15 FIIs&rdquo; só abrem com um código do mês, e cada lista tem o seu código. Quando você digita o código, ele é enviado ao endereço <code>/api/top15</code> (ações) ou <code>/api/top15-fiis</code> (FIIs) apenas para ser conferido, e <strong>não é guardado em nosso servidor</strong>. O app salva cada código só no seu aparelho (localStorage), para você não precisar digitá-lo de novo; ele pode ser apagado por você a qualquer momento e deixa de valer quando o código do mês muda.</p>
+          <p>Para impedir tentativas em massa de adivinhar o código, e chamadas em massa à API que calcula a carteira de referência (<code>/api/recomendacao</code>), contamos as tentativas por endereço IP. Guardamos <strong>apenas um hash irreversível do IP, e não o IP em si, e por no máximo 15 minutos</strong>. Nos Top 15 (ações e FIIs), a contagem vale só para códigos errados; em <code>/api/recomendacao</code>, para qualquer chamada (o limite é de 60 a cada 15 minutos, bem acima do uso normal). Acima do limite, o servidor recusa temporariamente novas chamadas daquele endereço.</p>
+          <p>Também somamos, por mês, quantos acessos aos Top 15 foram aceitos, recusados por código errado ou bloqueados pelo limite. É só um número agregado, sem identificar ninguém.</p>
         </section>
 
         <section>
