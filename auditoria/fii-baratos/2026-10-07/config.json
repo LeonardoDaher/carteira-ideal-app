@@ -1,6 +1,6 @@
 {
   "_leia": "Metodologia da triagem 'FIIs baratos' (Tijolo e Papel). ESTE ARQUIVO É A FONTE ÚNICA DOS PARÂMETROS: o script e o documento docs/10-metodologia-fii-baratos.md leem/citam estes valores. Qualquer mudança aqui exige subir 'versaoMetodologia' e registrar o motivo em 'historicoDeVersoes'. O hash SHA-256 deste arquivo vai no manifesto de cada execução.",
-  "versaoMetodologia": "1.1.0",
+  "versaoMetodologia": "1.2.0",
   "historicoDeVersoes": [
     {
       "versao": "1.0.0",
@@ -11,6 +11,11 @@
       "versao": "1.1.0",
       "data": "2026-10-07",
       "mudanca": "Conferência dos 6 fundos da lista 'a conferir' no Investidor10 (MFII11, TGAR11, BBIG11, BRCR11, TRBL11, OUJP11): nenhum tinha cota e valor patrimonial em bases diferentes (valor patrimonial, patrimônio e rendimento de 12 meses bateram com a CVM), mas 3 (MFII11, BBIG11, TRBL11) tinham DY de 12 meses inflado por corte de rendimento ou pagamento extra (MFII11: R$ 0,91 para R$ 0,30 por mês; BBIG11: R$ 0,07 para R$ 0,03; TRBL11: R$ 2,68 em julho e R$ 0,44 depois). (1) Novo alerta 'rendimento_em_queda': mediana dos 3 últimos meses abaixo de 75% da mediana dos 12 meses (MFII11 0,29; BBIG11 0,43; TRBL11 0,68; fundos de rendimento estável ficam acima de 0,85). A primeira tentativa, com a MÉDIA dos 2 últimos meses, marcou por engano GTWR11 e BRCO11 (que pagam todo mês, mas têm um mês com DY zero no informe) e foi trocada pela mediana. (2) Novo alerta 'rendimento_com_pico': média dos 12 meses acima de 1,25 vez a mediana, o que pegou HGRE11 (pico de R$ 8,52 no informe de janeiro/26, DY de 12 meses de 16,6% contra ~9,4% no Investidor10) e KORE11 (rendimento cortado de R$ 1,25 para R$ 0,60 em janeiro, DY de 14,7% contra ~10,8% atual). Fundo com qualquer alerta vai para 'a conferir'. (3) Nova lista 'conferencia' em config: fundo conferido manualmente, com data, fonte e QUAIS alertas a conferência libera, entra no ranking marcado como conferido; vale por 90 dias; alerta novo ou conferência vencida devolve o fundo para 'a conferir'. Liberados nesta versão: BRCR11 (pvp_muito_baixo) e OUJP11 (dy_alto). (4) O ranking passa a mostrar o DY recente (mediana dos 3 últimos meses, anualizada), a razão contra a mediana de 12 meses e o pico de rendimento."
+    },
+    {
+      "versao": "1.2.0",
+      "data": "2026-10-07",
+      "mudanca": "Liquidez pela MEDIANA do volume financeiro diário (21 pregões) em vez da média. Com as cotações de 07/10, o ranking trouxe SAPI11 (papel, 3º) e BROF11 (tijolo, 6º) com volume médio acima dos mínimos do job, mas o Investidor10 mostrava R$ 181 mil e R$ 354 mil por dia (mínimos: R$ 300 mil no papel e R$ 500 mil no tijolo): a média é puxada por poucos dias de negociação intensa (o rali do dia anterior). O job de FIIs passa a gravar também 'volumeMediano' (a média continua igual); o ranking usa a mediana quando existe e a média quando o job de FIIs ainda não a trouxe, e registra a fonte de cada fundo ('liquidez_pela' nos CSVs e liquidez na memória de cálculo). Os mínimos de R$ 500 mil e R$ 300 mil continuam os mesmos, agora aplicados ao dia típico; revisar depois de ver o efeito real."
     }
   ],
   "tamanhoDaLista": 15,
@@ -78,7 +83,7 @@
       "pvpMinimo": 0.7,
       "dy12Maximo": 0.25
     },
-    "_leia": "Papel: liquidez e patrimônio mais folgados que o tijolo (quase todo fundo de papel é menor; com os valores do tijolo sobram 13 fundos). P/VP mínimo de 0,7 no papel: desconto grande em fundo de crédito costuma ser perda já precificada, não pechincha. Sem cotistas informados, o filtro de cotistas não se aplica."
+    "_leia": "Papel: liquidez e patrimônio mais folgados que o tijolo (quase todo fundo de papel é menor; com os valores do tijolo sobram 13 fundos). P/VP mínimo de 0,7 no papel: desconto grande em fundo de crédito costuma ser perda já precificada, não pechincha. Sem cotistas informados, o filtro de cotistas não se aplica. Liquidez: mediana do volume financeiro diário dos últimos 21 pregões (dias sem negócio contam zero), quando o job de FIIs a traz (campo volumeMediano); sem ela, a média (campo volumeMedio), e a fonte fica registrada por fundo."
   },
   "alertas": {
     "pvpMuitoBaixo": 0.55,

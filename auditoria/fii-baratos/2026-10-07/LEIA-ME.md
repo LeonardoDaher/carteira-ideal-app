@@ -1,6 +1,6 @@
 # Auditoria da triagem "FIIs baratos" (Tijolo e Papel)
 
-Execução com cotações de **2026-10-07** · Informe Mensal da CVM de **2026-08** · metodologia **v1.1.0**.
+Execução com cotações de **2026-10-07** · Informe Mensal da CVM de **2026-08** · metodologia **v1.2.0**.
 
 **Esta triagem NÃO está publicada no app.** É uma trilha de auditoria para o responsável revisar (ver `config/fii-baratos.json → publicacao`).
 
