@@ -1,30 +1,30 @@
 {
   "esquema": 1,
-  "versaoMetodologia": "1.4.1",
+  "versaoMetodologia": "1.5.0",
   "dataCotacoes": "2026-10-07",
   "dataExecucao": "2026-10-07",
   "competenciaReferencia": "2026-08",
   "universo": 218,
-  "liquidezPorMediana": 203,
-  "liquidezPorMedia": 1,
+  "liquidezPorMediana": 183,
+  "liquidezPorMedia": 0,
   "precoDiarioEm": 183,
   "precoDiarioViaBrapiEm": 3,
-  "precoMensalEm": 21,
+  "precoMensalEm": 0,
   "ultimoPregaoDiario": "2026-10-06",
   "etapas": [
     {
       "etapa": "universo e preço",
       "entram": 218,
-      "ficam": 212
+      "ficam": 186
     },
     {
       "etapa": "dados do informe",
-      "entram": 212,
-      "ficam": 204
+      "entram": 186,
+      "ficam": 183
     },
     {
       "etapa": "classificação e filtros",
-      "entram": 204,
+      "entram": 183,
       "tijolo": 36,
       "papel": 16
     },
@@ -2002,12 +2002,60 @@
   ],
   "exclusoes": [
     {
+      "ticker": "BIPE11",
+      "nome": "BRIO REAL ESTATE V - FII",
+      "setor": "Residencial",
+      "etapa": "precos",
+      "codigo": "sem_preco_diario",
+      "motivo": "Sem preço diário da B3 (histórico com 21 pregões, mínimo 21; o fundo não negociou na janela)."
+    },
+    {
+      "ticker": "BRLA11",
+      "nome": "RAIZZ RENDA LOG FII",
+      "setor": "Logística",
+      "etapa": "precos",
+      "codigo": "sem_preco_diario",
+      "motivo": "Sem preço diário da B3 (histórico com 21 pregões, mínimo 21; fundo fora do histórico)."
+    },
+    {
+      "ticker": "BTSG11",
+      "nome": "BTSP I FUNDO DE INVESTIMENTO IMOBILIÁRIO",
+      "setor": "Logística",
+      "etapa": "precos",
+      "codigo": "sem_preco_diario",
+      "motivo": "Sem preço diário da B3 (histórico com 21 pregões, mínimo 21; fundo fora do histórico)."
+    },
+    {
       "ticker": "BTSI11",
       "nome": "BTSP II FUNDO DE INVESTIMENTO IMOBILIÁRI",
       "setor": "Outros",
       "etapa": "precos",
       "codigo": "cotacao_defasada",
       "motivo": "Cotação de 2026-09-17 (B3 (boletim diário)), 20 dias antes da execução (máximo 7)."
+    },
+    {
+      "ticker": "BTWR11",
+      "nome": "BTOWERS FUNDO INVESTIMENTO IMOBILIARIO",
+      "setor": "Escritórios",
+      "etapa": "precos",
+      "codigo": "sem_preco_diario",
+      "motivo": "Sem preço diário da B3 (histórico com 21 pregões, mínimo 21; o fundo não negociou na janela)."
+    },
+    {
+      "ticker": "BVAR11",
+      "nome": "FUNDO DE INVESTIMENTO IMOBILIÁRIO BRASIL VAREJO",
+      "setor": "Varejo e renda urbana",
+      "etapa": "precos",
+      "codigo": "sem_preco_diario",
+      "motivo": "Sem preço diário da B3 (histórico com 21 pregões, mínimo 21; o fundo não negociou na janela)."
+    },
+    {
+      "ticker": "DOVL11",
+      "nome": "DOVEL FII",
+      "setor": "Papel (CRI)",
+      "etapa": "precos",
+      "codigo": "sem_preco_diario",
+      "motivo": "Sem preço diário da B3 (histórico com 21 pregões, mínimo 21; fundo fora do histórico)."
     },
     {
       "ticker": "EDFO11",
@@ -2018,12 +2066,68 @@
       "motivo": "Cotação de 2026-09-28 (B3 (boletim diário)), 9 dias antes da execução (máximo 7)."
     },
     {
+      "ticker": "HBRH11",
+      "nome": "V2 MULTI RENDA FII RESP LIMITADA",
+      "setor": "Híbrido",
+      "etapa": "precos",
+      "codigo": "sem_preco_diario",
+      "motivo": "Sem preço diário da B3 (histórico com 21 pregões, mínimo 21; fundo fora do histórico)."
+    },
+    {
+      "ticker": "HCHG11",
+      "nome": "FII HECTARE RECEBÍVEIS HIGH GRADE",
+      "setor": "Papel (CRI)",
+      "etapa": "precos",
+      "codigo": "sem_preco_diario",
+      "motivo": "Sem preço diário da B3 (histórico com 21 pregões, mínimo 21; o fundo não negociou na janela)."
+    },
+    {
       "ticker": "HUCG11",
       "nome": "F.I.I HOSPITAL UNIMED CAMPINA GRANDE RESPONS.LIMITADA",
       "setor": "Saúde",
       "etapa": "precos",
       "codigo": "cotacao_defasada",
       "motivo": "Cotação de 2026-09-29 (B3 (boletim diário)), 8 dias antes da execução (máximo 7)."
+    },
+    {
+      "ticker": "INRD11",
+      "nome": "INTER RESIDENCE FII",
+      "setor": "Residencial",
+      "etapa": "precos",
+      "codigo": "sem_preco_diario",
+      "motivo": "Sem preço diário da B3 (histórico com 21 pregões, mínimo 21; o fundo não negociou na janela)."
+    },
+    {
+      "ticker": "ITIP11",
+      "nome": "INTER TEVA ÍNDICE DE PAPEL FII",
+      "setor": "Papel (CRI)",
+      "etapa": "precos",
+      "codigo": "sem_preco_diario",
+      "motivo": "Sem preço diário da B3 (histórico com 21 pregões, mínimo 21; o fundo não negociou na janela)."
+    },
+    {
+      "ticker": "KEVE11",
+      "nome": "EVEN II KINEA FII RESPONSABILIDADE LIMITADA",
+      "setor": "Residencial",
+      "etapa": "precos",
+      "codigo": "sem_preco_diario",
+      "motivo": "Sem preço diário da B3 (histórico com 21 pregões, mínimo 21; o fundo não negociou na janela)."
+    },
+    {
+      "ticker": "KFEN11",
+      "nome": "KINEA FÊNIX FII RESPONSABILIDADE LIMITADA",
+      "setor": "Híbrido",
+      "etapa": "precos",
+      "codigo": "sem_preco_diario",
+      "motivo": "Sem preço diário da B3 (histórico com 21 pregões, mínimo 21; fundo fora do histórico)."
+    },
+    {
+      "ticker": "LKDV11",
+      "nome": "DEVELOPMENT V1 FII",
+      "setor": "Híbrido",
+      "etapa": "precos",
+      "codigo": "sem_preco_diario",
+      "motivo": "Sem preço diário da B3 (histórico com 21 pregões, mínimo 21; fundo fora do histórico)."
     },
     {
       "ticker": "OCRE11",
@@ -2042,6 +2146,22 @@
       "motivo": "Cotação de 2026-09-23 (B3 (boletim diário)), 14 dias antes da execução (máximo 7)."
     },
     {
+      "ticker": "PMFO11",
+      "nome": "SPECIALE REAL ESTATE FOF FII",
+      "setor": "Fundo de fundos",
+      "etapa": "precos",
+      "codigo": "sem_preco_diario",
+      "motivo": "Sem preço diário da B3 (histórico com 21 pregões, mínimo 21; o fundo não negociou na janela)."
+    },
+    {
+      "ticker": "PNRC11",
+      "nome": "PANORAMA REAL ESTATE CREDITO FII",
+      "setor": "Híbrido",
+      "etapa": "precos",
+      "codigo": "sem_preco_diario",
+      "motivo": "Sem preço diário da B3 (histórico com 21 pregões, mínimo 21; fundo fora do histórico)."
+    },
+    {
       "ticker": "PSEC11",
       "nome": "PATRIA SECURITIES FII - RESPONSABILIDADE LIMITADA",
       "setor": "Fundo de fundos",
@@ -2050,41 +2170,97 @@
       "motivo": "Código não encontrado pelo ISIN no informe da CVM."
     },
     {
-      "ticker": "BIPE11",
-      "nome": "BRIO REAL ESTATE V - FII",
-      "setor": "Residencial",
-      "etapa": "dados",
-      "codigo": "dados_insuficientes",
-      "motivo": "só 1 meses com rendimento nos últimos 12"
+      "ticker": "QAGR11",
+      "nome": "PATRIA AGRO FII RL",
+      "setor": "Outros",
+      "etapa": "precos",
+      "codigo": "sem_preco_diario",
+      "motivo": "Sem preço diário da B3 (histórico com 21 pregões, mínimo 21; fundo fora do histórico)."
     },
     {
-      "ticker": "HBRH11",
-      "nome": "V2 MULTI RENDA FII RESP LIMITADA",
+      "ticker": "RELG11",
+      "nome": "FUNDO DE INVESTIMENTO IMOBILIÁRIO REC LOGÍSTICA",
       "setor": "Híbrido",
-      "etapa": "dados",
-      "codigo": "dados_insuficientes",
-      "motivo": "só 4 meses com rendimento nos últimos 12"
+      "etapa": "precos",
+      "codigo": "sem_preco_diario",
+      "motivo": "Sem preço diário da B3 (histórico com 21 pregões, mínimo 21; o fundo não negociou na janela)."
     },
     {
-      "ticker": "HCHG11",
-      "nome": "FII HECTARE RECEBÍVEIS HIGH GRADE",
-      "setor": "Papel (CRI)",
-      "etapa": "dados",
-      "codigo": "dados_insuficientes",
-      "motivo": "sem informe na competência de referência"
+      "ticker": "RFOF11",
+      "nome": "FII RB CAPITAL I FOF",
+      "setor": "Fundo de fundos",
+      "etapa": "precos",
+      "codigo": "sem_preco_diario",
+      "motivo": "Sem preço diário da B3 (histórico com 21 pregões, mínimo 21; fundo fora do histórico)."
+    },
+    {
+      "ticker": "RRCI11",
+      "nome": "XLPR FII RESPONSABILIDADE LIMITADA",
+      "setor": "Outros",
+      "etapa": "precos",
+      "codigo": "sem_preco_diario",
+      "motivo": "Sem preço diário da B3 (histórico com 21 pregões, mínimo 21; fundo fora do histórico)."
+    },
+    {
+      "ticker": "SEED11",
+      "nome": "HEDGE SEED FUNDO DE INVESTIMENTO IMOBILIÁRIO",
+      "setor": "Híbrido",
+      "etapa": "precos",
+      "codigo": "sem_preco_diario",
+      "motivo": "Sem preço diário da B3 (histórico com 21 pregões, mínimo 21; fundo fora do histórico)."
+    },
+    {
+      "ticker": "SPDE11",
+      "nome": "WHG FINVEST SP REALTY FII",
+      "setor": "Residencial",
+      "etapa": "precos",
+      "codigo": "sem_preco_diario",
+      "motivo": "Sem preço diário da B3 (histórico com 21 pregões, mínimo 21; fundo fora do histórico)."
+    },
+    {
+      "ticker": "STRX11",
+      "nome": "STARX FII RESPONSABILIDADE LIMITADA",
+      "setor": "Shoppings",
+      "etapa": "precos",
+      "codigo": "sem_preco_diario",
+      "motivo": "Sem preço diário da B3 (histórico com 21 pregões, mínimo 21; fundo fora do histórico)."
+    },
+    {
+      "ticker": "VERE11",
+      "nome": "FUNDO DE INVESTIMENTO IMOBILIÁRIO VEREDA",
+      "setor": "Híbrido",
+      "etapa": "precos",
+      "codigo": "sem_preco_diario",
+      "motivo": "Sem preço diário da B3 (histórico com 21 pregões, mínimo 21; fundo fora do histórico)."
+    },
+    {
+      "ticker": "VPSI11",
+      "nome": "FUNDO DE INVESTIMENTO IMOBILIARIO POLO SHOPPING INDAIATUBA",
+      "setor": "Shoppings",
+      "etapa": "precos",
+      "codigo": "sem_preco_diario",
+      "motivo": "Sem preço diário da B3 (histórico com 21 pregões, mínimo 21; o fundo não negociou na janela)."
+    },
+    {
+      "ticker": "VTPL11",
+      "nome": "PLUS FII",
+      "setor": "Outros",
+      "etapa": "precos",
+      "codigo": "sem_preco_diario",
+      "motivo": "Sem preço diário da B3 (histórico com 21 pregões, mínimo 21; fundo fora do histórico)."
+    },
+    {
+      "ticker": "XPIN11",
+      "nome": "INVISTA INDUSTRIAL FII",
+      "setor": "Logística",
+      "etapa": "precos",
+      "codigo": "sem_preco_diario",
+      "motivo": "Sem preço diário da B3 (histórico com 21 pregões, mínimo 21; fundo fora do histórico)."
     },
     {
       "ticker": "MIDW11",
       "nome": "MIDWAY MALL FUNDO DE INVESTIMENTO IMOBILIÁRIO RL",
       "setor": "Shoppings",
-      "etapa": "dados",
-      "codigo": "dados_insuficientes",
-      "motivo": "só 9 meses com rendimento nos últimos 12"
-    },
-    {
-      "ticker": "PNRC11",
-      "nome": "PANORAMA REAL ESTATE CREDITO FII",
-      "setor": "Híbrido",
       "etapa": "dados",
       "codigo": "dados_insuficientes",
       "motivo": "só 9 meses com rendimento nos últimos 12"
@@ -2096,14 +2272,6 @@
       "etapa": "dados",
       "codigo": "dados_insuficientes",
       "motivo": "só 5 meses com rendimento nos últimos 12"
-    },
-    {
-      "ticker": "RFOF11",
-      "nome": "FII RB CAPITAL I FOF",
-      "setor": "Fundo de fundos",
-      "etapa": "dados",
-      "codigo": "dados_insuficientes",
-      "motivo": "só 7 meses com rendimento nos últimos 12"
     },
     {
       "ticker": "RMBS11",
@@ -2242,44 +2410,12 @@
       "motivo": "volume mediano de R$ 24.288 por dia (mínimo 300.000)"
     },
     {
-      "ticker": "BRLA11",
-      "nome": "RAIZZ RENDA LOG FII",
-      "setor": "Logística",
-      "etapa": "tijolo",
-      "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 7.000 por dia (mínimo 300.000)"
-    },
-    {
       "ticker": "BTRU11",
       "nome": "BTG RENDA URB FII",
       "setor": "Outros",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
       "motivo": "volume mediano de R$ 275.813 por dia (mínimo 300.000)"
-    },
-    {
-      "ticker": "BTSG11",
-      "nome": "BTSP I FUNDO DE INVESTIMENTO IMOBILIÁRIO",
-      "setor": "Logística",
-      "etapa": "tijolo",
-      "codigo": "liquidez_baixa",
-      "motivo": "volume médio de R$ 0 por dia (mínimo 300.000)"
-    },
-    {
-      "ticker": "BTWR11",
-      "nome": "BTOWERS FUNDO INVESTIMENTO IMOBILIARIO",
-      "setor": "Escritórios",
-      "etapa": "tijolo",
-      "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 0 por dia (mínimo 300.000)"
-    },
-    {
-      "ticker": "BVAR11",
-      "nome": "FUNDO DE INVESTIMENTO IMOBILIÁRIO BRASIL VAREJO",
-      "setor": "Varejo e renda urbana",
-      "etapa": "tijolo",
-      "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 0 por dia (mínimo 300.000)"
     },
     {
       "ticker": "CACR11",
@@ -2400,14 +2536,6 @@
       "etapa": "papel",
       "codigo": "pvp_suspeito",
       "motivo": "P/VP de 0,18 (mínimo 0,7: o mercado está precificando perda ou o dado está errado)"
-    },
-    {
-      "ticker": "DOVL11",
-      "nome": "DOVEL FII",
-      "setor": "Papel (CRI)",
-      "etapa": "tijolo",
-      "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 0 por dia (mínimo 300.000)"
     },
     {
       "ticker": "DPRO11",
@@ -2650,22 +2778,6 @@
       "motivo": "volume mediano de R$ 128.851 por dia (mínimo 300.000)"
     },
     {
-      "ticker": "INRD11",
-      "nome": "INTER RESIDENCE FII",
-      "setor": "Residencial",
-      "etapa": "tijolo",
-      "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 0 por dia (mínimo 300.000)"
-    },
-    {
-      "ticker": "ITIP11",
-      "nome": "INTER TEVA ÍNDICE DE PAPEL FII",
-      "setor": "Papel (CRI)",
-      "etapa": "classificacao",
-      "codigo": "fundo_de_fundos",
-      "motivo": "imóveis 0%, recebíveis 0%, cotas 100%"
-    },
-    {
       "ticker": "ITIT11",
       "nome": "INTER TEVA ÍNDICE DE TIJOLO FII",
       "setor": "Outros",
@@ -2730,22 +2842,6 @@
       "motivo": "volume mediano de R$ 228.172 por dia (mínimo 300.000)"
     },
     {
-      "ticker": "KEVE11",
-      "nome": "EVEN II KINEA FII RESPONSABILIDADE LIMITADA",
-      "setor": "Residencial",
-      "etapa": "classificacao",
-      "codigo": "misto",
-      "motivo": "imóveis 0%, recebíveis 42%, cotas 0%"
-    },
-    {
-      "ticker": "KFEN11",
-      "nome": "KINEA FÊNIX FII RESPONSABILIDADE LIMITADA",
-      "setor": "Híbrido",
-      "etapa": "papel",
-      "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 0 por dia (mínimo 300.000)"
-    },
-    {
       "ticker": "KFOF11",
       "nome": "FUNDO DE FUNDOS DE INVESTIMENTO IMOBILIÁRIO KINEA FII",
       "setor": "Fundo de fundos",
@@ -2784,14 +2880,6 @@
       "etapa": "classificacao",
       "codigo": "misto",
       "motivo": "imóveis 56%, recebíveis 42%, cotas 0%"
-    },
-    {
-      "ticker": "LKDV11",
-      "nome": "DEVELOPMENT V1 FII",
-      "setor": "Híbrido",
-      "etapa": "tijolo",
-      "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 0 por dia (mínimo 300.000)"
     },
     {
       "ticker": "MAXR11",
@@ -2866,14 +2954,6 @@
       "motivo": "volume mediano de R$ 0 por dia (mínimo 300.000)"
     },
     {
-      "ticker": "PMFO11",
-      "nome": "SPECIALE REAL ESTATE FOF FII",
-      "setor": "Fundo de fundos",
-      "etapa": "classificacao",
-      "codigo": "fundo_de_fundos",
-      "motivo": "imóveis 0%, recebíveis 2%, cotas 97%"
-    },
-    {
       "ticker": "PMIS11",
       "nome": "PARAMIS HEDGE FUND FUNDO DE INVESTIMENTO IMOBILIÁRIO - FII",
       "setor": "Papel (CRI)",
@@ -2896,14 +2976,6 @@
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
       "motivo": "volume mediano de R$ 168.548 por dia (mínimo 300.000)"
-    },
-    {
-      "ticker": "QAGR11",
-      "nome": "PATRIA AGRO FII RL",
-      "setor": "Outros",
-      "etapa": "tijolo",
-      "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 125.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "RBFM11",
@@ -2978,14 +3050,6 @@
       "motivo": "volume mediano de R$ 213.615 por dia (mínimo 300.000)"
     },
     {
-      "ticker": "RELG11",
-      "nome": "FUNDO DE INVESTIMENTO IMOBILIÁRIO REC LOGÍSTICA",
-      "setor": "Híbrido",
-      "etapa": "classificacao",
-      "codigo": "fundo_de_fundos",
-      "motivo": "imóveis 0%, recebíveis 0%, cotas 84%"
-    },
-    {
       "ticker": "RENV11",
       "nome": "CPV ENERGIA FUNDO DE INVESTIMENTO IMOBILIÁRIO RESP LIMITADA",
       "setor": "Papel (CRI)",
@@ -3010,28 +3074,12 @@
       "motivo": "DY de 12 meses de 289,3% (máximo 25%: distribuição não recorrente ou dado errado)"
     },
     {
-      "ticker": "RRCI11",
-      "nome": "XLPR FII RESPONSABILIDADE LIMITADA",
-      "setor": "Outros",
-      "etapa": "classificacao",
-      "codigo": "fundo_de_fundos",
-      "motivo": "imóveis 0%, recebíveis 10%, cotas 89%"
-    },
-    {
       "ticker": "SAPI11",
       "nome": "SAM - SANTANDER PAPEIS IMOBILIARIOS FII RL",
       "setor": "Papel (CRI)",
       "etapa": "papel",
       "codigo": "liquidez_baixa",
       "motivo": "volume mediano de R$ 230.696 por dia (mínimo 300.000)"
-    },
-    {
-      "ticker": "SEED11",
-      "nome": "HEDGE SEED FUNDO DE INVESTIMENTO IMOBILIÁRIO",
-      "setor": "Híbrido",
-      "etapa": "classificacao",
-      "codigo": "fundo_de_fundos",
-      "motivo": "imóveis 0%, recebíveis 7%, cotas 93%"
     },
     {
       "ticker": "SEQR11",
@@ -3064,22 +3112,6 @@
       "etapa": "classificacao",
       "codigo": "misto",
       "motivo": "imóveis 5%, recebíveis 0%, cotas 40%"
-    },
-    {
-      "ticker": "SPDE11",
-      "nome": "WHG FINVEST SP REALTY FII",
-      "setor": "Residencial",
-      "etapa": "tijolo",
-      "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 0 por dia (mínimo 300.000)"
-    },
-    {
-      "ticker": "STRX11",
-      "nome": "STARX FII RESPONSABILIDADE LIMITADA",
-      "setor": "Shoppings",
-      "etapa": "tijolo",
-      "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 0 por dia (mínimo 300.000)"
     },
     {
       "ticker": "TELM11",
@@ -3194,14 +3226,6 @@
       "motivo": "volume mediano de R$ 53.387 por dia (mínimo 300.000)"
     },
     {
-      "ticker": "VERE11",
-      "nome": "FUNDO DE INVESTIMENTO IMOBILIÁRIO VEREDA",
-      "setor": "Híbrido",
-      "etapa": "tijolo",
-      "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 0 por dia (mínimo 300.000)"
-    },
-    {
       "ticker": "VGHF11",
       "nome": "VALORA HEDGE FII",
       "setor": "Híbrido",
@@ -3242,14 +3266,6 @@
       "motivo": "volume mediano de R$ 829 por dia (mínimo 300.000)"
     },
     {
-      "ticker": "VPSI11",
-      "nome": "FUNDO DE INVESTIMENTO IMOBILIARIO POLO SHOPPING INDAIATUBA",
-      "setor": "Shoppings",
-      "etapa": "tijolo",
-      "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 0 por dia (mínimo 300.000)"
-    },
-    {
       "ticker": "VRTM11",
       "nome": "FATOR VERITA MULTIESTRATÉGIA FII",
       "setor": "Papel (CRI)",
@@ -3274,14 +3290,6 @@
       "motivo": "volume mediano de R$ 67.629 por dia (mínimo 300.000)"
     },
     {
-      "ticker": "VTPL11",
-      "nome": "PLUS FII",
-      "setor": "Outros",
-      "etapa": "tijolo",
-      "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 0 por dia (mínimo 300.000)"
-    },
-    {
       "ticker": "VVRI11",
       "nome": "V2 RENDA IMOB FII RL",
       "setor": "Híbrido",
@@ -3296,14 +3304,6 @@
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
       "motivo": "volume mediano de R$ 850 por dia (mínimo 300.000)"
-    },
-    {
-      "ticker": "XPIN11",
-      "nome": "INVISTA INDUSTRIAL FII",
-      "setor": "Logística",
-      "etapa": "classificacao",
-      "codigo": "fundo_de_fundos",
-      "motivo": "imóveis 0%, recebíveis 0%, cotas 100%"
     },
     {
       "ticker": "XPSF11",
