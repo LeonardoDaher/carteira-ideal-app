@@ -27,6 +27,7 @@ export const REVISADO_EM = '2026-09-28'
 const REVISADO_D44 = '2026-10-03'
 const REVISADO_D47 = '2026-10-03'
 const REVISADO_D48 = '2026-10-03'
+const REVISADO_D67 = '2026-10-07'
 
 const AVISO = 'Conteúdo educacional. Não é recomendação de investimento.'
 
@@ -512,7 +513,7 @@ function paginaImovel() {
     botoes: [{ texto: 'Abrir o comparativo', href: '/app/?tela=simuleImovel' }],
     migalhas: [],
     schema: 'WebPage',
-    lastmod: REVISADO_D44,
+    lastmod: REVISADO_D67,
     corpo: [
       secao(
         'O que a ferramenta calcula',
@@ -523,6 +524,7 @@ function paginaImovel() {
 <li><strong>A evolução mês a mês</strong> do patrimônio de cada caminho, em gráfico.</li>
 <li><strong>O ponto de virada</strong>: a valorização do imóvel em que o resultado muda de lado, e como o consórcio se comporta se a contemplação demorar.</li>
 <li><strong>Comprar à vista</strong> entra na comparação quando o dinheiro que você informa cobre o imóvel e o ITBI. Se não cobrir, a ferramenta diz quanto falta.</li>
+<li><strong>Você escolhe quais caminhos comparar</strong>: por exemplo, só comprar à vista e consórcio, ou só financiar e consórcio. O mínimo é dois, e a conta usa só os caminhos marcados.</li>
 </ul>
 <p>A conta é matemática, feita com as taxas que você informa. A ferramenta não indica banco, administradora de consórcio nem produto, e a comparação não é recomendação de financiamento, de consórcio ou de investimento.</p>`,
       ),
@@ -555,7 +557,7 @@ function paginaImovel() {
     ].join('\n'),
     faq: [
       { p: 'O comparativo de financiamento, aluguel e consórcio é gratuito?', r: 'Sim, é gratuito e não pede cadastro. Os valores que você digita ficam só no seu aparelho.' },
-      { p: 'A ferramenta indica qual banco ou qual consórcio escolher?', r: 'Não. Ela compara três caminhos com as taxas que você informar, de qualquer banco ou administradora, e mostra qual deixa o maior patrimônio. Não indica instituição nem produto.' },
+      { p: 'A ferramenta indica qual banco ou qual consórcio escolher?', r: 'Não. Ela compara os caminhos que você escolher (dois, três ou os quatro) com as taxas que você informar, de qualquer banco ou administradora, e mostra qual deixa o maior patrimônio. Não indica instituição nem produto.' },
       { p: 'O resultado é uma recomendação de financiar, alugar ou entrar num consórcio?', r: 'Não. É uma conta matemática com premissas de taxa e de valorização que podem não se confirmar. Se as premissas mudam, o vencedor pode mudar, e a ferramenta mostra em que ponto isso acontece.' },
       { p: 'O que é patrimônio líquido neste comparativo?', r: 'É o que você teria no fim do período se vendesse o imóvel pelo preço de mercado, pagasse o que ainda deve e resgatasse os investimentos, já descontado o Imposto de Renda.' },
       { p: 'E se eu tiver dinheiro para pagar o imóvel à vista?', r: 'Informe quanto você tem hoje. Se o valor cobrir o imóvel e o ITBI, a compra à vista entra na comparação, e o que sobrar fica investido em todos os caminhos. Se não cobrir, a ferramenta diz quanto falta.' },

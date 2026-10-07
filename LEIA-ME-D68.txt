@@ -1,1 +1,9 @@
-D68: cartão da landing agora é 'Simule Bens' (index.html). Ver docs/07 (D68).
+D68 (07/10/2026): "Simule Bens" na página inicial. Detalhes: docs/07-registro-de-decisoes.md (D68).
+
+ 1. Botão do topo da landing: agora "Simule Bens" (index.html).
+ 2. Seção "Ferramentas gratuitas": o cartão do imóvel virou três cartões (imóvel, carro, moto), cada um para a sua página (index.html).
+ 3. Página do imóvel: texto sobre a escolha dos caminhos e FAQ sem "três caminhos" (scripts/gerar-paginas.mjs). Lastmod da página: 2026-10-07.
+
+ARQUIVOS (alterados): index.html, scripts/gerar-paginas.mjs, docs/07-registro-de-decisoes.md, LEIA-ME-D68.txt
+ATENÇÃO: o gerar-paginas.mjs solto na raiz do zip é uma cópia ANTIGA e difere do de scripts/. Use o de scripts/.
+TESTES: scripts 308 passam. O build do site (npm run build) não foi rodado.

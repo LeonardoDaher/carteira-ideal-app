@@ -1334,6 +1334,8 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 
 **Decisão.** O cartão que levava ao hub Simule Bens ainda tinha o título do imóvel ("Comprar à vista, financiar, consórcio ou alugar?"), pendência deixada na D47. Agora o título é **Simule Bens** e a descrição é "Imóvel, carro e moto: à vista, financiar, consórcio ou alugar? Veja qual caminho custa menos", no mesmo molde do cartão "Simule Ativos". O destino não mudou (`./app/?tela=simuleBens`). A descrição fala em "custa menos" porque, no carro e na moto, a leitura principal é o custo; no imóvel a tela mostra o patrimônio, que é a mesma conta vista do outro lado.
 
-**Não mudou.** O cartão "Comprar à vista, financiar, consórcio ou alugar?" da lista de ferramentas (seção de SEO da página inicial) continua apontando para a página do imóvel, que é onde ele deve levar.
+**Seção "Ferramentas gratuitas" da página inicial (SEO).** O cartão único do imóvel virou **três cartões "Simule Bens"**: imóvel, carro e moto, cada um levando à sua página (`/financiar-alugar-ou-consorcio/`, `/carro-a-vista-financiar-consorcio-ou-sem-carro/` e `/moto-a-vista-financiar-consorcio-ou-sem-moto/`). Antes, carro e moto só apareciam no rodapé. Não foi criada página-hub estática de "Simule Bens"; o hub continua só no app.
 
-**Pendências ligadas.** A pergunta de SEO "A ferramenta indica qual banco ou qual consórcio escolher?" (em `gerar-paginas.mjs`) ainda diz "três caminhos"; depois da D46 e da D67 são de dois a quatro. A página do imóvel também não cita a escolha dos caminhos.
+**Página do imóvel (`scripts/gerar-paginas.mjs`).** A pergunta "A ferramenta indica qual banco ou qual consórcio escolher?" deixou de dizer "três caminhos" (agora "os caminhos que você escolher, dois, três ou os quatro"), a lista "O que a ferramenta calcula" ganhou a escolha dos caminhos (D67) e a data de revisão da página foi para 07/10/2026 (`REVISADO_D67`).
+
+**Pendência ligada.** A página de carro e a de moto ainda não têm o seletor de caminhos (só o imóvel, D67).
