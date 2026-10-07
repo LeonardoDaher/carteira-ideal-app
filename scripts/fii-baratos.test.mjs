@@ -591,6 +591,9 @@ test('publicação aprovada com acesso por código: o arquivo do app traz só o 
   assert.equal(publico.instagram, 'acarteiraideal')
   assert.deepEqual([publico.tijolo, publico.papel, publico.aConferir, publico.exclusoes], [[], [], [], []])
   assert.ok(!/ALFA11|BETA11|PAPA11|SUSP11/.test(JSON.stringify(publico)), 'o arquivo público não pode ter nenhum código de fundo')
+  // as notas internas do config ("_leia") citam fundos como exemplo (GTWR11, BRCO11): não podem ir ao cabeçalho público
+  assert.ok(!JSON.stringify(publico).includes('"_leia"'), 'notas internas ficam fora do arquivo público')
+  assert.ok(!/\b[A-Z]{4}\d{2}\b/.test(JSON.stringify(publico)), 'nenhum código de fundo (4 letras + número) no arquivo público')
   assert.deepEqual(publico.contagens, { tijolo: 2, papel: 1, aConferir: 1, exclusoes: 0 })
   assert.equal(publico.hashResultado, manifesto.hashes.resultado)
   assert.equal(publico.hashInsumos, manifesto.hashes.insumos)

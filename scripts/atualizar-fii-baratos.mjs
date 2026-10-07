@@ -306,6 +306,13 @@ export function concluir({ raiz, cfg, insumos, fontes = [], log = console.log, a
  * O que o app lê. Sem aprovação do responsável, vai só o cabeçalho (o app mostra "em validação").
  * Com acesso por código (D50), o arquivo do app traz SÓ o cabeçalho e a lista vai para dados-privados/.
  */
+/** Remove, em qualquer nível, as chaves que começam com "_" (notas internas do config, como "_leia"). */
+function semNotas(valor) {
+  if (Array.isArray(valor)) return valor.map(semNotas)
+  if (valor && typeof valor === 'object') return Object.fromEntries(Object.entries(valor).filter(([k]) => !k.startsWith('_')).map(([k, v]) => [k, semNotas(v)]))
+  return valor
+}
+
 export function montarSnapshotApp({ resultado, cfg, manifesto, pasta, publicado }) {
   const acesso = cfg.publicacao?.acesso ?? {}
   const f = cfg.filtros
@@ -327,9 +334,10 @@ export function montarSnapshotApp({ resultado, cfg, manifesto, pasta, publicado 
     universo: resultado.universo,
     aviso: cfg.publicacao?.aviso ?? cfg.publicacao?.avisoProposto ?? null,
     parametros: {
-      filtros: { tijolo: f.tijolo, papel: f.papel },
+      // Sem os campos "_leia" (notas internas que citam fundos como exemplo): o cabeçalho público não pode trazer código de fundo.
+      filtros: semNotas({ tijolo: f.tijolo, papel: f.papel }),
       classificacao: { fatiaMinimaDoTipo: cfg.classificacao.fatiaMinimaDoTipo },
-      alertas: cfg.alertas,
+      alertas: semNotas(cfg.alertas),
       mesesHistorico: cfg.dados.mesesHistorico,
       pregoesPrecoDiario: cfg.dados.pregoesPrecoDiario,
       conferenciaValidadeDias: cfg.conferencia?.validadeDias ?? null,
