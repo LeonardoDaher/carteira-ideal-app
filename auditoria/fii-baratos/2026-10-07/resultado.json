@@ -1,6 +1,6 @@
 {
   "esquema": 1,
-  "versaoMetodologia": "1.2.0",
+  "versaoMetodologia": "1.3.0",
   "dataCotacoes": "2026-10-07",
   "dataExecucao": "2026-10-07",
   "competenciaReferencia": "2026-08",
@@ -21,13 +21,13 @@
     {
       "etapa": "classificação e filtros",
       "entram": 209,
-      "tijolo": 32,
+      "tijolo": 36,
       "papel": 16
     },
     {
       "etapa": "a conferir",
-      "aConferir": 5,
-      "tijolo": 27,
+      "aConferir": 6,
+      "tijolo": 30,
       "papel": 16
     }
   ],
@@ -39,9 +39,9 @@
       "setorDeclarado": "Outros",
       "cnpj": "56805391000176",
       "tipo": "tijolo",
-      "nota": 0.923077,
-      "rankPvp": 0.846154,
-      "rankDy": 1,
+      "nota": 0.896552,
+      "rankPvp": 0.827586,
+      "rankDy": 0.965517,
       "pvp": 0.6783,
       "dy12": 0.15183,
       "dyRecente": 0.14038,
@@ -74,9 +74,9 @@
       "setorDeclarado": "Multicategoria",
       "cnpj": "08924783000101",
       "tipo": "tijolo",
-      "nota": 0.846154,
+      "nota": 0.844828,
       "rankPvp": 1,
-      "rankDy": 0.692308,
+      "rankDy": 0.689655,
       "pvp": 0.5469,
       "dy12": 0.10312,
       "dyRecente": 0.10546,
@@ -117,9 +117,9 @@
       "setorDeclarado": "Escritórios",
       "cnpj": "23740527000158",
       "tipo": "tijolo",
-      "nota": 0.807692,
-      "rankPvp": 0.769231,
-      "rankDy": 0.846154,
+      "nota": 0.775862,
+      "rankPvp": 0.724138,
+      "rankDy": 0.827586,
       "pvp": 0.7861,
       "dy12": 0.11314,
       "dyRecente": 0.13553,
@@ -152,9 +152,9 @@
       "setorDeclarado": "Multicategoria",
       "cnpj": "33046142000149",
       "tipo": "tijolo",
-      "nota": 0.788462,
-      "rankPvp": 0.807692,
-      "rankDy": 0.769231,
+      "nota": 0.758621,
+      "rankPvp": 0.758621,
+      "rankDy": 0.758621,
       "pvp": 0.7641,
       "dy12": 0.10981,
       "dyRecente": 0.09935,
@@ -187,9 +187,9 @@
       "setorDeclarado": "Varejo",
       "cnpj": "15576907000170",
       "tipo": "tijolo",
-      "nota": 0.788462,
-      "rankPvp": 0.692308,
-      "rankDy": 0.884615,
+      "nota": 0.758621,
+      "rankPvp": 0.655172,
+      "rankDy": 0.862069,
       "pvp": 0.8303,
       "dy12": 0.12268,
       "dyRecente": 0.12201,
@@ -217,14 +217,49 @@
     },
     {
       "posicao": 6,
+      "ticker": "BROF11",
+      "nome": "BRPR CORPORATE FII",
+      "setorDeclarado": "Multicategoria",
+      "cnpj": "48978859000104",
+      "tipo": "tijolo",
+      "nota": 0.741379,
+      "rankPvp": 0.965517,
+      "rankDy": 0.517241,
+      "pvp": 0.5834,
+      "dy12": 0.09882,
+      "dyRecente": 0.08156,
+      "razaoRendimentoRecente": 0.7687,
+      "picoDeRendimento": 0.9314,
+      "cotacao": 63.3,
+      "dataCotacao": "2026-10-06",
+      "vp": 108.5079,
+      "rendimento12m": 6.2552,
+      "rentabPatrimonial12m": 0.00131,
+      "patrimonio": 1259864444.85,
+      "cotistas": 10691,
+      "alavancagem": 0.1319,
+      "volumeMedio": 651000,
+      "volumeMediano": 334000,
+      "volumeLiquidez": 334000,
+      "fonteLiquidez": "mediana",
+      "fatias": {
+        "imoveis": 0.8279,
+        "recebiveis": 0,
+        "cotas": 0.1659
+      },
+      "mesesComDados": 12,
+      "alertas": []
+    },
+    {
+      "posicao": 7,
       "ticker": "BBPO11",
       "nome": "TIVIO RENDA IMOBILIÁRIA",
       "setorDeclarado": "Escritórios",
       "cnpj": "14410722000129",
       "tipo": "tijolo",
-      "nota": 0.769231,
-      "rankPvp": 0.576923,
-      "rankDy": 0.961538,
+      "nota": 0.741379,
+      "rankPvp": 0.551724,
+      "rankDy": 0.931034,
       "pvp": 0.8742,
       "dy12": 0.14285,
       "dyRecente": 0.14311,
@@ -251,15 +286,50 @@
       "alertas": []
     },
     {
-      "posicao": 7,
+      "posicao": 8,
+      "ticker": "RZAT11",
+      "nome": "RIZA ARCTIUM FII RL",
+      "setorDeclarado": "Multicategoria",
+      "cnpj": "28267696000136",
+      "tipo": "tijolo",
+      "nota": 0.741379,
+      "rankPvp": 0.482759,
+      "rankDy": 1,
+      "pvp": 0.8838,
+      "dy12": 0.15745,
+      "dyRecente": 0.12943,
+      "razaoRendimentoRecente": 0.8469,
+      "picoDeRendimento": 1.0303,
+      "cotacao": 89.75,
+      "dataCotacao": "2026-10-06",
+      "vp": 101.5547,
+      "rendimento12m": 14.1313,
+      "rentabPatrimonial12m": 0.02661,
+      "patrimonio": 430088334.12,
+      "cotistas": 34274,
+      "alavancagem": 0.0888,
+      "volumeMedio": 437000,
+      "volumeMediano": 429000,
+      "volumeLiquidez": 429000,
+      "fonteLiquidez": "mediana",
+      "fatias": {
+        "imoveis": 0.7474,
+        "recebiveis": 0.0916,
+        "cotas": 0.0501
+      },
+      "mesesComDados": 12,
+      "alertas": []
+    },
+    {
+      "posicao": 9,
       "ticker": "RZTR11",
       "nome": "FUNDO DE INVESTIMENTO IMOBILIÁRIO RIZA TERRAX",
       "setorDeclarado": "Outros",
       "cnpj": "36501128000186",
       "tipo": "tijolo",
-      "nota": 0.730769,
-      "rankPvp": 0.538462,
-      "rankDy": 0.923077,
+      "nota": 0.706897,
+      "rankPvp": 0.517241,
+      "rankDy": 0.896552,
       "pvp": 0.8768,
       "dy12": 0.13536,
       "dyRecente": 0.12539,
@@ -286,15 +356,15 @@
       "alertas": []
     },
     {
-      "posicao": 8,
+      "posicao": 10,
       "ticker": "HSLG11",
       "nome": "HSI LOGÍSTICA FUNDO DE INVESTIMENTO IMOBILIÁRIO",
       "setorDeclarado": "Logística",
       "cnpj": "32903621000171",
       "tipo": "tijolo",
-      "nota": 0.673077,
-      "rankPvp": 0.730769,
-      "rankDy": 0.615385,
+      "nota": 0.655172,
+      "rankPvp": 0.689655,
+      "rankDy": 0.62069,
       "pvp": 0.7906,
       "dy12": 0.09989,
       "dyRecente": 0.10333,
@@ -321,15 +391,50 @@
       "alertas": []
     },
     {
-      "posicao": 9,
+      "posicao": 11,
+      "ticker": "RCRB11",
+      "nome": "FUNDO DE INV. IMOBILIÁRIO RIO BRAVO RENDA CORPORATIVA",
+      "setorDeclarado": "Escritórios",
+      "cnpj": "03683056000186",
+      "tipo": "tijolo",
+      "nota": 0.603448,
+      "rankPvp": 0.793103,
+      "rankDy": 0.413793,
+      "pvp": 0.7178,
+      "dy12": 0.0932,
+      "dyRecente": 0.11369,
+      "razaoRendimentoRecente": 1.2138,
+      "picoDeRendimento": 0.9951,
+      "cotacao": 137,
+      "dataCotacao": "2026-10-06",
+      "vp": 190.8696,
+      "rendimento12m": 12.7682,
+      "rentabPatrimonial12m": -0.03011,
+      "patrimonio": 704441374.2,
+      "cotistas": 23884,
+      "alavancagem": 0.1063,
+      "volumeMedio": 589000,
+      "volumeMediano": 466000,
+      "volumeLiquidez": 466000,
+      "fonteLiquidez": "mediana",
+      "fatias": {
+        "imoveis": 0.9438,
+        "recebiveis": 0,
+        "cotas": 0.006
+      },
+      "mesesComDados": 12,
+      "alertas": []
+    },
+    {
+      "posicao": 12,
       "ticker": "FATN11",
       "nome": "BRC RENDA CORPORATIVA FII - RESPONSABILIDADE LIMITADA",
       "setorDeclarado": "Multicategoria",
       "cnpj": "30567216000102",
       "tipo": "tijolo",
-      "nota": 0.634615,
-      "rankPvp": 0.461538,
-      "rankDy": 0.807692,
+      "nota": 0.603448,
+      "rankPvp": 0.413793,
+      "rankDy": 0.793103,
       "pvp": 0.9019,
       "dy12": 0.11278,
       "dyRecente": 0.11122,
@@ -356,15 +461,15 @@
       "alertas": []
     },
     {
-      "posicao": 10,
+      "posicao": 13,
       "ticker": "RBRP11",
       "nome": "FUNDO DE INVESTIMENTO IMOBILIARIO PÁTRIA PROPERTIES",
       "setorDeclarado": "Outros",
       "cnpj": "21408063000151",
       "tipo": "tijolo",
-      "nota": 0.596154,
-      "rankPvp": 0.884615,
-      "rankDy": 0.307692,
+      "nota": 0.568966,
+      "rankPvp": 0.862069,
+      "rankDy": 0.275862,
       "pvp": 0.6739,
       "dy12": 0.08873,
       "dyRecente": 0.07944,
@@ -391,15 +496,15 @@
       "alertas": []
     },
     {
-      "posicao": 11,
+      "posicao": 14,
       "ticker": "JSRE11",
       "nome": "JS REAL ESTATE MULTIGESTÃO FUNDO DE INVESTIMENTO IMOBILIÁRIO",
       "setorDeclarado": "Multicategoria",
       "cnpj": "13371132000171",
       "tipo": "tijolo",
-      "nota": 0.576923,
-      "rankPvp": 0.923077,
-      "rankDy": 0.230769,
+      "nota": 0.551724,
+      "rankPvp": 0.896552,
+      "rankDy": 0.206897,
       "pvp": 0.6605,
       "dy12": 0.08653,
       "dyRecente": 0.08942,
@@ -426,15 +531,15 @@
       "alertas": []
     },
     {
-      "posicao": 12,
+      "posicao": 15,
       "ticker": "MALL11",
       "nome": "PATRIA MALLS FUNDO DE INVESTIMENTO IMOBILIÁRIO",
       "setorDeclarado": "Shoppings",
       "cnpj": "26499833000132",
       "tipo": "tijolo",
-      "nota": 0.576923,
-      "rankPvp": 0.423077,
-      "rankDy": 0.730769,
+      "nota": 0.551724,
+      "rankPvp": 0.37931,
+      "rankDy": 0.724138,
       "pvp": 0.9134,
       "dy12": 0.1038,
       "dyRecente": 0.11046,
@@ -461,15 +566,15 @@
       "alertas": []
     },
     {
-      "posicao": 13,
+      "posicao": 16,
       "ticker": "PVBI11",
       "nome": "VBI PRIME FII RL",
       "setorDeclarado": "Escritórios",
       "cnpj": "35652102000176",
       "tipo": "tijolo",
-      "nota": 0.538462,
-      "rankPvp": 0.961538,
-      "rankDy": 0.115385,
+      "nota": 0.517241,
+      "rankPvp": 0.931034,
+      "rankDy": 0.103448,
       "pvp": 0.6586,
       "dy12": 0.07389,
       "dyRecente": 0.07206,
@@ -496,15 +601,15 @@
       "alertas": []
     },
     {
-      "posicao": 14,
+      "posicao": 17,
       "ticker": "LVBI11",
       "nome": "VBI LOGISTICO FII RL",
       "setorDeclarado": "Logística",
       "cnpj": "30629603000118",
       "tipo": "tijolo",
-      "nota": 0.519231,
-      "rankPvp": 0.653846,
-      "rankDy": 0.384615,
+      "nota": 0.482759,
+      "rankPvp": 0.62069,
+      "rankDy": 0.344828,
       "pvp": 0.8413,
       "dy12": 0.08954,
       "dyRecente": 0.09616,
@@ -531,15 +636,15 @@
       "alertas": []
     },
     {
-      "posicao": 15,
+      "posicao": 18,
       "ticker": "HSML11",
       "nome": "HSI - MALLS FII RESP. LIMITADA",
       "setorDeclarado": "Shoppings",
       "cnpj": "32892018000131",
       "tipo": "tijolo",
-      "nota": 0.480769,
-      "rankPvp": 0.5,
-      "rankDy": 0.461538,
+      "nota": 0.448276,
+      "rankPvp": 0.448276,
+      "rankDy": 0.448276,
       "pvp": 0.8949,
       "dy12": 0.09617,
       "dyRecente": 0.10077,
@@ -566,15 +671,15 @@
       "alertas": []
     },
     {
-      "posicao": 16,
+      "posicao": 19,
       "ticker": "HGBS11",
       "nome": "HEDGE BRASIL SHOPPING FUNDO DE INVESTIMENTO IMOBILIÁRIO",
       "setorDeclarado": "Shoppings",
       "cnpj": "08431747000106",
       "tipo": "tijolo",
-      "nota": 0.442308,
-      "rankPvp": 0.230769,
-      "rankDy": 0.653846,
+      "nota": 0.431034,
+      "rankPvp": 0.206897,
+      "rankDy": 0.655172,
       "pvp": 0.9415,
       "dy12": 0.1021,
       "dyRecente": 0.10701,
@@ -601,15 +706,15 @@
       "alertas": []
     },
     {
-      "posicao": 17,
+      "posicao": 20,
       "ticker": "HGRU11",
       "nome": "PÁTRIA RENDA URBANA - FUNDO DE INVESTIMENTO IMOBILIÁRIO",
       "setorDeclarado": "Outros",
       "cnpj": "29641226000153",
       "tipo": "tijolo",
-      "nota": 0.423077,
-      "rankPvp": 0.269231,
-      "rankDy": 0.576923,
+      "nota": 0.413793,
+      "rankPvp": 0.241379,
+      "rankDy": 0.586207,
       "pvp": 0.9334,
       "dy12": 0.09957,
       "dyRecente": 0.09514,
@@ -636,15 +741,15 @@
       "alertas": []
     },
     {
-      "posicao": 18,
+      "posicao": 21,
       "ticker": "XPLG11",
       "nome": "XP LOG FII RL",
       "setorDeclarado": "Logística",
       "cnpj": "26502794000185",
       "tipo": "tijolo",
-      "nota": 0.365385,
-      "rankPvp": 0.192308,
-      "rankDy": 0.538462,
+      "nota": 0.362069,
+      "rankPvp": 0.172414,
+      "rankDy": 0.551724,
       "pvp": 0.9466,
       "dy12": 0.09897,
       "dyRecente": 0.09913,
@@ -671,15 +776,15 @@
       "alertas": []
     },
     {
-      "posicao": 19,
+      "posicao": 22,
       "ticker": "GGRC11",
       "nome": "ZAGROS RENDA IMOBILIÁRIA FII RESPONSABIL",
       "setorDeclarado": "Multicategoria",
       "cnpj": "26614291000100",
       "tipo": "tijolo",
-      "nota": 0.346154,
-      "rankPvp": 0.615385,
-      "rankDy": 0.076923,
+      "nota": 0.327586,
+      "rankPvp": 0.586207,
+      "rankDy": 0.068966,
       "pvp": 0.8493,
       "dy12": 0.07206,
       "dyRecente": 0.1574,
@@ -706,15 +811,15 @@
       "alertas": []
     },
     {
-      "posicao": 20,
+      "posicao": 23,
       "ticker": "VILG11",
       "nome": "VINCI LOGISTICA FUNDO DE INVESTIMENTO IMOBILIARIO",
       "setorDeclarado": "Logística",
       "cnpj": "24853044000122",
       "tipo": "tijolo",
-      "nota": 0.307692,
-      "rankPvp": 0.346154,
-      "rankDy": 0.269231,
+      "nota": 0.275862,
+      "rankPvp": 0.310345,
+      "rankDy": 0.241379,
       "pvp": 0.9246,
       "dy12": 0.08785,
       "dyRecente": 0.09735,
@@ -741,15 +846,15 @@
       "alertas": []
     },
     {
-      "posicao": 21,
+      "posicao": 24,
       "ticker": "ALZR11",
       "nome": "ALIANZA TRUST FII RL",
       "setorDeclarado": "Multicategoria",
       "cnpj": "28737771000185",
       "tipo": "tijolo",
-      "nota": 0.288462,
-      "rankPvp": 0.076923,
-      "rankDy": 0.5,
+      "nota": 0.275862,
+      "rankPvp": 0.068966,
+      "rankDy": 0.482759,
       "pvp": 0.9703,
       "dy12": 0.09641,
       "dyRecente": 0.10168,
@@ -776,15 +881,15 @@
       "alertas": []
     },
     {
-      "posicao": 22,
+      "posicao": 25,
       "ticker": "BTLG11",
       "nome": "BTGP LOGISTICA FII",
       "setorDeclarado": "Multicategoria",
       "cnpj": "11839593000109",
       "tipo": "tijolo",
-      "nota": 0.269231,
-      "rankPvp": 0.115385,
-      "rankDy": 0.423077,
+      "nota": 0.241379,
+      "rankPvp": 0.103448,
+      "rankDy": 0.37931,
       "pvp": 0.9609,
       "dy12": 0.09032,
       "dyRecente": 0.10728,
@@ -811,15 +916,15 @@
       "alertas": []
     },
     {
-      "posicao": 23,
+      "posicao": 26,
       "ticker": "HGLG11",
       "nome": "PÁTRIA LOG - FUNDO DE INVESTIMENTO IMOBILIÁRIO",
       "setorDeclarado": "Multicategoria",
       "cnpj": "11728688000147",
       "tipo": "tijolo",
-      "nota": 0.25,
-      "rankPvp": 0.307692,
-      "rankDy": 0.192308,
+      "nota": 0.224138,
+      "rankPvp": 0.275862,
+      "rankDy": 0.172414,
       "pvp": 0.928,
       "dy12": 0.08566,
       "dyRecente": 0.09087,
@@ -846,15 +951,15 @@
       "alertas": []
     },
     {
-      "posicao": 24,
+      "posicao": 27,
       "ticker": "AIEC11",
       "nome": "ARCH EDIFICIOS CORPORATIVOS FII",
       "setorDeclarado": "Escritórios",
       "cnpj": "35765826000126",
       "tipo": "tijolo",
-      "nota": 0.211538,
-      "rankPvp": 0.384615,
-      "rankDy": 0.038462,
+      "nota": 0.189655,
+      "rankPvp": 0.344828,
+      "rankDy": 0.034483,
       "pvp": 0.9176,
       "dy12": 0.06011,
       "dyRecente": 0.06557,
@@ -881,15 +986,15 @@
       "alertas": []
     },
     {
-      "posicao": 25,
+      "posicao": 28,
       "ticker": "BRCO11",
       "nome": "BRESCO LOGISTICA FUNDO DE INVESTIMENTO IMOBILIÁRIO",
       "setorDeclarado": "Logística",
       "cnpj": "20748515000181",
       "tipo": "tijolo",
-      "nota": 0.192308,
-      "rankPvp": 0.038462,
-      "rankDy": 0.346154,
+      "nota": 0.172414,
+      "rankPvp": 0.034483,
+      "rankDy": 0.310345,
       "pvp": 0.976,
       "dy12": 0.08953,
       "dyRecente": 0.09741,
@@ -916,14 +1021,14 @@
       "alertas": []
     },
     {
-      "posicao": 26,
+      "posicao": 29,
       "ticker": "XPML11",
       "nome": "XP MALLS FII",
       "setorDeclarado": "Shoppings",
       "cnpj": "28757546000100",
       "tipo": "tijolo",
-      "nota": 0.076923,
-      "rankPvp": 0.153846,
+      "nota": 0.068966,
+      "rankPvp": 0.137931,
       "rankDy": 0,
       "pvp": 0.958,
       "dy12": 0.03075,
@@ -951,15 +1056,15 @@
       "alertas": []
     },
     {
-      "posicao": 27,
+      "posicao": 30,
       "ticker": "KNRI11",
       "nome": "KINEA RENDA IMOBILIARIA FII RESPONSABILIDADE LIMITADA",
       "setorDeclarado": "Multicategoria",
       "cnpj": "12005956000165",
       "tipo": "tijolo",
-      "nota": 0.076923,
+      "nota": 0.068966,
       "rankPvp": 0,
-      "rankDy": 0.153846,
+      "rankDy": 0.137931,
       "pvp": 1.0092,
       "dy12": 0.07943,
       "dyRecente": 0.08006,
@@ -1741,6 +1846,45 @@
         "dy_alto"
       ],
       "grupo": "tijolo"
+    },
+    {
+      "posicao": null,
+      "ticker": "TRBL11",
+      "nome": "TELLUS RIO BRAVO RENDA LOGISTICA FII DE RESP LTDA",
+      "setorDeclarado": "Logística",
+      "cnpj": "16671412000193",
+      "tipo": "tijolo",
+      "nota": null,
+      "rankPvp": null,
+      "rankDy": null,
+      "pvp": 0.6628,
+      "dy12": 0.19071,
+      "dyRecente": 0.10391,
+      "razaoRendimentoRecente": 0.6803,
+      "picoDeRendimento": 1.2486,
+      "cotacao": 50.8,
+      "dataCotacao": "2026-10-06",
+      "vp": 76.6474,
+      "rendimento12m": 9.6882,
+      "rentabPatrimonial12m": -0.11035,
+      "patrimonio": 593181403.25,
+      "cotistas": 40285,
+      "alavancagem": 0.1389,
+      "volumeMedio": 539000,
+      "volumeMediano": 471000,
+      "volumeLiquidez": 471000,
+      "fonteLiquidez": "mediana",
+      "fatias": {
+        "imoveis": 0.9724,
+        "recebiveis": 0,
+        "cotas": 0
+      },
+      "mesesComDados": 12,
+      "alertas": [
+        "dy_alto",
+        "rendimento_em_queda"
+      ],
+      "grupo": "tijolo"
     }
   ],
   "exclusoes": [
@@ -1822,7 +1966,7 @@
       "setor": "Shoppings",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 34.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 34.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "AJFI11",
@@ -1830,7 +1974,7 @@
       "setor": "Papel (CRI)",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 138.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 138.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "APXM11",
@@ -1838,7 +1982,7 @@
       "setor": "Shoppings",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 27.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 27.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "AROA11",
@@ -1846,7 +1990,7 @@
       "setor": "Híbrido",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 7.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 7.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "ARRI11",
@@ -1862,7 +2006,7 @@
       "setor": "Shoppings",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 0 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 0 por dia (mínimo 300.000)"
     },
     {
       "ticker": "AZPL11",
@@ -1886,7 +2030,7 @@
       "setor": "Outros",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 79.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 79.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "BCIA11",
@@ -1918,7 +2062,7 @@
       "setor": "Escritórios",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 4.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 4.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "BLMG11",
@@ -1934,7 +2078,7 @@
       "setor": "Escritórios",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 47.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 47.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "BNFS11",
@@ -1942,7 +2086,7 @@
       "setor": "Varejo e renda urbana",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 24.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 24.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "BRLA11",
@@ -1950,15 +2094,7 @@
       "setor": "Logística",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 7.000 por dia (mínimo 500.000)"
-    },
-    {
-      "ticker": "BROF11",
-      "nome": "BRPR CORPORATE FII",
-      "setor": "Híbrido",
-      "etapa": "tijolo",
-      "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 334.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 7.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "BTRU11",
@@ -1966,7 +2102,7 @@
       "setor": "Outros",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 277.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 277.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "BTSG11",
@@ -1974,7 +2110,7 @@
       "setor": "Logística",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume médio de R$ 0 por dia (mínimo 500.000)"
+      "motivo": "volume médio de R$ 0 por dia (mínimo 300.000)"
     },
     {
       "ticker": "BTSI11",
@@ -1982,7 +2118,7 @@
       "setor": "Outros",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 0 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 0 por dia (mínimo 300.000)"
     },
     {
       "ticker": "BTWR11",
@@ -1990,7 +2126,7 @@
       "setor": "Escritórios",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 0 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 0 por dia (mínimo 300.000)"
     },
     {
       "ticker": "BVAR11",
@@ -1998,7 +2134,7 @@
       "setor": "Varejo e renda urbana",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 0 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 0 por dia (mínimo 300.000)"
     },
     {
       "ticker": "CACR11",
@@ -2014,7 +2150,7 @@
       "setor": "Escritórios",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 7.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 7.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "CJCT11",
@@ -2022,7 +2158,7 @@
       "setor": "Escritórios",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 1.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 1.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "CPLG11",
@@ -2046,7 +2182,7 @@
       "setor": "Híbrido",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 39.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 39.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "CRFF11",
@@ -2062,7 +2198,7 @@
       "setor": "Varejo e renda urbana",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 77.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 77.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "CXCE11",
@@ -2070,7 +2206,7 @@
       "setor": "Escritórios",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 22.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 22.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "CXCI11",
@@ -2086,7 +2222,7 @@
       "setor": "Híbrido",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 70.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 70.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "CXRI11",
@@ -2102,7 +2238,7 @@
       "setor": "Logística",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 12.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 12.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "DAMT11",
@@ -2110,7 +2246,7 @@
       "setor": "Shoppings",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 0 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 0 por dia (mínimo 300.000)"
     },
     {
       "ticker": "DEVA11",
@@ -2126,7 +2262,7 @@
       "setor": "Papel (CRI)",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 0 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 0 por dia (mínimo 300.000)"
     },
     {
       "ticker": "DPRO11",
@@ -2134,7 +2270,7 @@
       "setor": "Híbrido",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 0 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 0 por dia (mínimo 300.000)"
     },
     {
       "ticker": "DVFF11",
@@ -2150,7 +2286,7 @@
       "setor": "Residencial",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 4.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 4.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "EIRA11",
@@ -2166,7 +2302,7 @@
       "setor": "Híbrido",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 10.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 10.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "EURO11",
@@ -2174,7 +2310,7 @@
       "setor": "Logística",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 50.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 50.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "FIGS11",
@@ -2182,7 +2318,7 @@
       "setor": "Shoppings",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 257.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 257.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "FIIB11",
@@ -2190,7 +2326,7 @@
       "setor": "Logística",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 148.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 148.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "FISC11",
@@ -2198,7 +2334,7 @@
       "setor": "Escritórios",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 2.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 2.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "FLCR11",
@@ -2214,7 +2350,7 @@
       "setor": "Escritórios",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 28.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 28.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "FLRP11",
@@ -2222,7 +2358,7 @@
       "setor": "Shoppings",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 8.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 8.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "FVPQ11",
@@ -2230,7 +2366,7 @@
       "setor": "Shoppings",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 12.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 12.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "GAME11",
@@ -2270,7 +2406,7 @@
       "setor": "Logística",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 170.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 170.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "HAAA11",
@@ -2278,7 +2414,7 @@
       "setor": "Escritórios",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 1.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 1.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "HCTR11",
@@ -2318,7 +2454,7 @@
       "setor": "Escritórios",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 0 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 0 por dia (mínimo 300.000)"
     },
     {
       "ticker": "HLOG11",
@@ -2326,7 +2462,7 @@
       "setor": "Logística",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 44.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 44.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "HPDP11",
@@ -2334,7 +2470,7 @@
       "setor": "Shoppings",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 2.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 2.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "HREC11",
@@ -2350,7 +2486,7 @@
       "setor": "Hotéis",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 252.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 252.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "HUCG11",
@@ -2358,7 +2494,7 @@
       "setor": "Saúde",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 0 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 0 por dia (mínimo 300.000)"
     },
     {
       "ticker": "IBBP11",
@@ -2366,7 +2502,7 @@
       "setor": "Logística",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 24.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 24.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "ICRI11",
@@ -2382,7 +2518,7 @@
       "setor": "Logística",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 131.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 131.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "INRD11",
@@ -2390,7 +2526,7 @@
       "setor": "Residencial",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 0 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 0 por dia (mínimo 300.000)"
     },
     {
       "ticker": "ITIP11",
@@ -2438,7 +2574,7 @@
       "setor": "Híbrido",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 12.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 12.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "JPPA11",
@@ -2510,7 +2646,7 @@
       "setor": "Shoppings",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 37.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 37.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "LIFE11",
@@ -2526,7 +2662,7 @@
       "setor": "Híbrido",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 0 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 0 por dia (mínimo 300.000)"
     },
     {
       "ticker": "MAXR11",
@@ -2534,7 +2670,7 @@
       "setor": "Híbrido",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 35.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 35.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "MCLO11",
@@ -2542,7 +2678,7 @@
       "setor": "Papel (CRI)",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 5.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 5.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "NEWL11",
@@ -2550,7 +2686,7 @@
       "setor": "Híbrido",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 68.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 68.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "NEWU11",
@@ -2558,7 +2694,7 @@
       "setor": "Híbrido",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 3.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 3.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "NVHO11",
@@ -2566,7 +2702,7 @@
       "setor": "Saúde",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 0 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 0 por dia (mínimo 300.000)"
     },
     {
       "ticker": "OCRE11",
@@ -2598,7 +2734,7 @@
       "setor": "Outros",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 15.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 15.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "PDBM11",
@@ -2606,7 +2742,7 @@
       "setor": "Outros",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 0 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 0 por dia (mínimo 300.000)"
     },
     {
       "ticker": "PEMA11",
@@ -2638,7 +2774,7 @@
       "setor": "Logística",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 0 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 0 por dia (mínimo 300.000)"
     },
     {
       "ticker": "PQDP11",
@@ -2646,7 +2782,7 @@
       "setor": "Shoppings",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 169.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 169.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "QAGR11",
@@ -2654,7 +2790,7 @@
       "setor": "Outros",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 125.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 125.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "RBFM11",
@@ -2686,7 +2822,7 @@
       "setor": "Outros",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 4.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 4.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "RBRD11",
@@ -2694,7 +2830,7 @@
       "setor": "Híbrido",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 37.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 37.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "RBRL11",
@@ -2710,15 +2846,7 @@
       "setor": "Residencial",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 6.000 por dia (mínimo 500.000)"
-    },
-    {
-      "ticker": "RCRB11",
-      "nome": "FUNDO DE INV. IMOBILIÁRIO RIO BRAVO RENDA CORPORATIVA",
-      "setor": "Escritórios",
-      "etapa": "tijolo",
-      "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 466.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 6.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "RECM11",
@@ -2734,7 +2862,7 @@
       "setor": "Híbrido",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 213.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 213.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "RELG11",
@@ -2750,7 +2878,7 @@
       "setor": "Papel (CRI)",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 5.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 5.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "RNGO11",
@@ -2758,7 +2886,7 @@
       "setor": "Escritórios",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 19.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 19.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "RPRI11",
@@ -2775,14 +2903,6 @@
       "etapa": "classificacao",
       "codigo": "fundo_de_fundos",
       "motivo": "imóveis 0%, recebíveis 10%, cotas 89%"
-    },
-    {
-      "ticker": "RZAT11",
-      "nome": "RIZA ARCTIUM FII RL",
-      "setor": "Híbrido",
-      "etapa": "tijolo",
-      "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 429.000 por dia (mínimo 500.000)"
     },
     {
       "ticker": "SAPI11",
@@ -2806,7 +2926,7 @@
       "setor": "Logística",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 119.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 119.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "SHPH11",
@@ -2814,7 +2934,7 @@
       "setor": "Shoppings",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 50.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 50.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "SHPP11",
@@ -2822,7 +2942,7 @@
       "setor": "Híbrido",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 29.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 29.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "SNEL11",
@@ -2838,7 +2958,7 @@
       "setor": "Residencial",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 0 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 0 por dia (mínimo 300.000)"
     },
     {
       "ticker": "STRX11",
@@ -2846,7 +2966,7 @@
       "setor": "Shoppings",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 0 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 0 por dia (mínimo 300.000)"
     },
     {
       "ticker": "TELM11",
@@ -2870,7 +2990,7 @@
       "setor": "Saúde",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 21.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 21.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "TMPS11",
@@ -2889,20 +3009,12 @@
       "motivo": "imóveis 23%, recebíveis 44%, cotas 32%"
     },
     {
-      "ticker": "TRBL11",
-      "nome": "TELLUS RIO BRAVO RENDA LOGISTICA FII DE RESP LTDA",
-      "setor": "Logística",
-      "etapa": "tijolo",
-      "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 471.000 por dia (mínimo 500.000)"
-    },
-    {
       "ticker": "TRNT11",
       "nome": "TORRE NORTE FII",
       "setor": "Escritórios",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 25.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 25.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "TRXB11",
@@ -2910,7 +3022,7 @@
       "setor": "Híbrido",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 7.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 7.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "TRXF11",
@@ -2966,7 +3078,7 @@
       "setor": "Logística",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 54.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 54.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "VERE11",
@@ -2974,7 +3086,7 @@
       "setor": "Híbrido",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 0 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 0 por dia (mínimo 300.000)"
     },
     {
       "ticker": "VGHF11",
@@ -2990,7 +3102,7 @@
       "setor": "Papel (CRI)",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 141.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 141.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "VINO11",
@@ -2998,7 +3110,7 @@
       "setor": "Híbrido",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 293.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 293.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "VISC11",
@@ -3022,7 +3134,7 @@
       "setor": "Shoppings",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 0 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 0 por dia (mínimo 300.000)"
     },
     {
       "ticker": "VRTM11",
@@ -3038,7 +3150,7 @@
       "setor": "Shoppings",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 44.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 44.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "VSLH11",
@@ -3054,7 +3166,7 @@
       "setor": "Outros",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 0 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 0 por dia (mínimo 300.000)"
     },
     {
       "ticker": "VVRI11",
@@ -3070,7 +3182,7 @@
       "setor": "Shoppings",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 1.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 1.000 por dia (mínimo 300.000)"
     },
     {
       "ticker": "XPIN11",
@@ -3102,7 +3214,7 @@
       "setor": "Híbrido",
       "etapa": "tijolo",
       "codigo": "liquidez_baixa",
-      "motivo": "volume mediano de R$ 35.000 por dia (mínimo 500.000)"
+      "motivo": "volume mediano de R$ 35.000 por dia (mínimo 300.000)"
     }
   ]
 }

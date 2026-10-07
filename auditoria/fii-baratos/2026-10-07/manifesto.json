@@ -1,34 +1,34 @@
 {
   "esquema": 1,
-  "versaoMetodologia": "1.2.0",
-  "geradoEm": "2026-10-07T12:03:09.540Z",
+  "versaoMetodologia": "1.3.0",
+  "geradoEm": "2026-10-07T15:32:24.637Z",
   "dataExecucao": "2026-10-07",
   "dataCotacoes": "2026-10-07",
   "competenciaReferencia": "2026-08",
   "ambiente": {
     "node": "v22.23.3",
     "plataforma": "linux",
-    "commit": "c417a032429213cf23f016f92ac001df192dcd15",
-    "execucao": "37618245617"
+    "commit": "613f9d334a74e241afa44cb69b5741fac4687206",
+    "execucao": "37644682061"
   },
   "codigo": {
     "calculoSha256": "1b5eea4c765df4d047b58f8c80bed7aec912c3c6083560178251a4e1f663b241",
     "extracaoSha256": "ac75d093f0d2542062fe3ae9d72d07be6056ddfc01bc802bfad787d4a4291afb"
   },
   "hashes": {
-    "config": "ac095db544a27430f4ee0ccc82179255c1488feb88e6d01cdd5bfef1f9f38b3d",
+    "config": "db326bb134eb0e105a915b8e6660aa348ba7b3369db00ba5992fd30e719750df",
     "insumos": "263f50beff5a81fd9b7108f0b8006a8f4c0313854c0460636144e5eb8a8fd708",
-    "resultado": "31a15cb7501166e54fb2000ae5e479b465eadeb8e33a2c0a1b55f1b29f317c80",
-    "memoria": "a6f2c9cff44ac49a90f198758ea46b5303637a82c96eea7e46a0195996ccd362",
+    "resultado": "dca9ff15f80e138320f610502284d7768e1fe2ffbc84642ea932b102f7fe0fd0",
+    "memoria": "a20f40c4bde0c4759449d12897f425149c52c8e7e5f4a75d954f8581d300d2d2",
     "arquivos": {
       "insumos.json.gz": "6da9a97862984ba168a2e578e17d6adc6d9189471350e6b07b53e19adaacf7c7",
-      "config.json": "041895b66a743499cf5636d1198625b91b26bd91dda0bb9a3f69507730225e30",
-      "resultado.json": "2905e3059a34da4aa8412fd8323a091d5beb1a141c0c17323e1074c4e7a91ab0",
-      "memoria-de-calculo.json.gz": "a74e58df63b775101f0758c3fd6e56cfcb2d45a9d42a562200c59305b51325cf",
-      "ranking-tijolo.csv": "c649159bbc25bbfcc9ffdcbd344282a3a21a34b1f3cb493f2438036bf8cf01d4",
+      "config.json": "a371c0c19b116247406e1c52ced5aaee91c6d23815b129c4dcfc6a76e638c01d",
+      "resultado.json": "dafdcb694bf0361dcaa13c8f0c8d05a5fba685747a090b17d8b516530640491a",
+      "memoria-de-calculo.json.gz": "f7e2f8c0fb803578a8d823258cb3b96152c7e9dbd2b8e3557cfcd3612c69a855",
+      "ranking-tijolo.csv": "6203b299695a3dccca9bc4ed0b8d20ebf459e6321061941b9e62ecc56d3eb1b8",
       "ranking-papel.csv": "a3a0ff0589633b682bb6c75db7cf87fdaf8ed32d4298a546fd7fdcbd8d67bcc0",
-      "a-conferir.csv": "42a84aa4078f5912321d2b489730819995f0c811fce0957b78abc01b2ac82a65",
-      "exclusoes.csv": "08ff2748ec910b45a27793e36b0253bebfcac773c7bc2953d655c01ba6c71ee9"
+      "a-conferir.csv": "9e05ed3ae18eb30bb1150ed27c557891f1e6ab6331e3d00b057308186e283a5b",
+      "exclusoes.csv": "3a099f339a9835038047c989299d9c8d16633966a9fbe2f215f7a598e373725a"
     }
   },
   "fontes": [
@@ -38,7 +38,7 @@
       "arquivo": "inf_mensal_fii_2025.zip",
       "bytes": 1522380,
       "sha256": "bdaa6ace919c348dbaf6ab59ff1c07ae9ec46a56661fbef9003a0b733da180d2",
-      "baixadoEm": "2026-10-07T12:03:07.796Z"
+      "baixadoEm": "2026-10-07T15:32:23.247Z"
     },
     {
       "papel": "Informe Mensal de FII 2026",
@@ -46,7 +46,7 @@
       "arquivo": "inf_mensal_fii_2026.zip",
       "bytes": 1133575,
       "sha256": "a743d72a40ec519b18c71c9018bf2576eb530f17473ee296fbcd8f3b4c8e915e",
-      "baixadoEm": "2026-10-07T12:03:07.880Z"
+      "baixadoEm": "2026-10-07T15:32:23.362Z"
     },
     {
       "papel": "Cotação e volume dos FIIs (job de FIIs)",
@@ -56,10 +56,10 @@
   ],
   "contagens": {
     "universo": 218,
-    "tijolo": 27,
+    "tijolo": 30,
     "papel": 16,
-    "aConferir": 5,
-    "exclusoes": 170,
+    "aConferir": 6,
+    "exclusoes": 166,
     "etapas": [
       {
         "etapa": "universo e preço",
@@ -74,13 +74,13 @@
       {
         "etapa": "classificação e filtros",
         "entram": 209,
-        "tijolo": 32,
+        "tijolo": 36,
         "papel": 16
       },
       {
         "etapa": "a conferir",
-        "aConferir": 5,
-        "tijolo": 27,
+        "aConferir": 6,
+        "tijolo": 30,
         "papel": 16
       }
     ]

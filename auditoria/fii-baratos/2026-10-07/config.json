@@ -1,6 +1,6 @@
 {
   "_leia": "Metodologia da triagem 'FIIs baratos' (Tijolo e Papel). ESTE ARQUIVO É A FONTE ÚNICA DOS PARÂMETROS: o script e o documento docs/10-metodologia-fii-baratos.md leem/citam estes valores. Qualquer mudança aqui exige subir 'versaoMetodologia' e registrar o motivo em 'historicoDeVersoes'. O hash SHA-256 deste arquivo vai no manifesto de cada execução.",
-  "versaoMetodologia": "1.2.0",
+  "versaoMetodologia": "1.3.0",
   "historicoDeVersoes": [
     {
       "versao": "1.0.0",
@@ -16,6 +16,11 @@
       "versao": "1.2.0",
       "data": "2026-10-07",
       "mudanca": "Liquidez pela MEDIANA do volume financeiro diário (21 pregões) em vez da média. Com as cotações de 07/10, o ranking trouxe SAPI11 (papel, 3º) e BROF11 (tijolo, 6º) com volume médio acima dos mínimos do job, mas o Investidor10 mostrava R$ 181 mil e R$ 354 mil por dia (mínimos: R$ 300 mil no papel e R$ 500 mil no tijolo): a média é puxada por poucos dias de negociação intensa (o rali do dia anterior). O job de FIIs passa a gravar também 'volumeMediano' (a média continua igual); o ranking usa a mediana quando existe e a média quando o job de FIIs ainda não a trouxe, e registra a fonte de cada fundo ('liquidez_pela' nos CSVs e liquidez na memória de cálculo). Os mínimos de R$ 500 mil e R$ 300 mil continuam os mesmos, agora aplicados ao dia típico; revisar depois de ver o efeito real."
+    },
+    {
+      "versao": "1.3.0",
+      "data": "2026-10-07",
+      "mudanca": "Mínimo de liquidez único de R$ 300 mil por dia (mediana) nos dois grupos: o do tijolo cai de R$ 500 mil para R$ 300 mil e o do papel continua R$ 300 mil. Com a mediana aplicada (execução de 07/10), 84 fundos de tijolo e 22 de papel saíram por liquidez; só 4 de tijolo ficaram numa faixa discutível entre R$ 300 mil e R$ 500 mil (TRBL11 R$ 471 mil, RCRB11 R$ 466 mil, RZAT11 R$ 429 mil, BROF11 R$ 334 mil) e 2 de papel a menos de R$ 15 mil do corte (OUJP11 R$ 285 mil, GAME11 R$ 286 mil). A diferença entre os mínimos só existia para fechar 15 fundos no papel quando o corte se aplicava à média. Decisão do responsável. Esses 4 fundos de tijolo voltam a passar pelos demais filtros e alertas."
     }
   ],
   "tamanhoDaLista": 15,
@@ -67,7 +72,7 @@
   },
   "filtros": {
     "tijolo": {
-      "volumeMinimoDiario": 500000,
+      "volumeMinimoDiario": 300000,
       "patrimonioMinimo": 200000000,
       "cotistasMinimos": 3000,
       "rentabPatrimonial12mMinima": -0.15,
@@ -83,7 +88,7 @@
       "pvpMinimo": 0.7,
       "dy12Maximo": 0.25
     },
-    "_leia": "Papel: liquidez e patrimônio mais folgados que o tijolo (quase todo fundo de papel é menor; com os valores do tijolo sobram 13 fundos). P/VP mínimo de 0,7 no papel: desconto grande em fundo de crédito costuma ser perda já precificada, não pechincha. Sem cotistas informados, o filtro de cotistas não se aplica. Liquidez: mediana do volume financeiro diário dos últimos 21 pregões (dias sem negócio contam zero), quando o job de FIIs a traz (campo volumeMediano); sem ela, a média (campo volumeMedio), e a fonte fica registrada por fundo."
+    "_leia": "Liquidez: mediana do volume financeiro diário dos últimos 21 pregões (dias sem negócio contam zero), quando o job de FIIs a traz (campo volumeMediano); sem ela, a média (campo volumeMedio), e a fonte fica registrada por fundo. Mínimo de R$ 300 mil por dia nos dois grupos (na 1.3.0; antes era R$ 500 mil no tijolo). Papel: patrimônio mais folgado que o tijolo (quase todo fundo de papel é menor). P/VP mínimo de 0,7 no papel: desconto grande em fundo de crédito costuma ser perda já precificada, não pechincha. Sem cotistas informados, o filtro de cotistas não se aplica."
   },
   "alertas": {
     "pvpMuitoBaixo": 0.55,
