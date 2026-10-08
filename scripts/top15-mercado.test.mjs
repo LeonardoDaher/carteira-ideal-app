@@ -421,9 +421,11 @@ test('semNotas remove as chaves _ em qualquer nível', () => {
 // Configuração real
 // ---------------------------------------------------------------------------------------
 
-test('configuração: versões, publicação travada até a decisão do responsável, ETF aberto e BDR com código próprio', () => {
+test('configuração: versões, publicação aprovada pelo responsável em 08/10/2026, ETF aberto e BDR com código próprio', () => {
   for (const cfg of [cfgEtfsArquivo, cfgBdrsArquivo]) {
-    assert.equal(cfg.versaoMetodologia, '1.0.0')
+    assert.equal(cfg.versaoMetodologia, '1.1.0')
+    assert.equal(cfg.publicacao.aprovadoPeloResponsavel, true, 'aprovado pelo responsável (D70)')
+    assert.equal(cfg.publicacao.aprovacao.data, '2026-10-08')
     assert.equal(cfg.historicoDeVersoes.at(-1).versao, cfg.versaoMetodologia)
     assert.equal(cfg.tamanhoDaLista, 15)
     assert.match(cfg.publicacao.avisoProposto, /^Não é recomendação de investimento\./)

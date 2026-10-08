@@ -1371,6 +1371,6 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 
 **Primeira execução real (pregões até 05/10/2026).** ETFs: universo 234, 80 elegíveis. BDRs: universo 702, 64 elegíveis, 10 em conferência (vários por salto de desdobramento ainda não confirmado em `config/bdrs.json`: NFLX34, BKNG34 e outros). A verificação independente passou nos dois.
 
-**Publicação.** `aprovadoPeloResponsavel` está `false` nos dois: o app mostra "em validação" até a decisão do responsável.
+**Publicação.** O responsável mandou publicar os dois em 08/10/2026 ("publique os 2"): `aprovadoPeloResponsavel` passou a `true` nos dois (v1.1.0, aprovação registrada em `publicacao.aprovacao`); nenhuma regra de cálculo mudou. ETFs ficam abertos. Os BDRs só abrem com o código do mês próprio (`TOP15_BDRS_CODIGOS`): **até a variável existir na Vercel a lista de BDRs fica fechada** (503). O parecer independente (D22) segue como item do responsável.
 
 **Testes.** Scripts: +33 (`top15-mercado.test.mjs`) e +1 (`top15-acesso.test.mjs`). **Mutação:** 31 defeitos no cálculo (mediana trocada por média, dia sem negócio ignorado, limites inclusivos de liquidez, dias e pregões sem negócio, máxima por máxima do dia em vez do fechamento, desdobramento ignorado, limites do salto, desconto extremo, ordem, janela, alinhamento da série, cortes de lista e de categoria, desempates, sanidade) e os 31 foram detectados; 6 sobreviveram à primeira versão dos testes (limites exatos e o dia sem negócio) e foram cobertos. Web: telas, domínio e acesso dos dois rankings.

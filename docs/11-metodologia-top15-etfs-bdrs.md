@@ -1,6 +1,6 @@
 # Metodologia: Top 15 ETFs mais negociados e Top 15 BDRs com maior desconto de preço
 
-Versão **1.0.0** de cada ranking (08/10/2026, decisão D70). Parâmetros: `config/top15-etfs.json` e `config/top15-bdrs.json` (fonte única; o hash de cada um vai no manifesto de cada execução). Cálculo: `scripts/top15-mercado-calculo.mjs` (função pura). Verificação independente: `scripts/top15-mercado-verificar.mjs`.
+Versão **1.1.0** de cada ranking (publicação aprovada em 08/10/2026; a 1.0.0 foi o cálculo, decisão D70). Parâmetros: `config/top15-etfs.json` e `config/top15-bdrs.json` (fonte única; o hash de cada um vai no manifesto de cada execução). Cálculo: `scripts/top15-mercado-calculo.mjs` (função pura). Verificação independente: `scripts/top15-mercado-verificar.mjs`.
 
 ## 1. O que são, e o que não são
 
@@ -54,7 +54,7 @@ Cada execução grava `auditoria/top15-etfs/<data>/` e `auditoria/top15-bdrs/<da
 
 ## 6. Publicação e acesso
 
-- `publicacao.aprovadoPeloResponsavel` começa `false` nos dois: o job só grava a auditoria e o app mostra "em validação". A aprovação é decisão do responsável.
+- `publicacao.aprovadoPeloResponsavel` é `true` nos dois desde 08/10/2026 (v1.1.0, aprovação registrada em `publicacao.aprovacao`). Se voltar a `false`, ou se a trava de sanidade falhar, o app mostra "em validação" (ou não muda).
 - **ETFs: acesso aberto.** O arquivo `webapp-src/src/data/etfsMaisNegociados.json` traz tudo. Motivo: é uma ordenação por volume de dados públicos da B3, que o app já mostra na aba de ETFs.
 - **BDRs: com código próprio** (`TOP15_BDRS_CODIGOS`, D66/D70), pelo mesmo desenho das ações e dos FIIs: o arquivo público (`bdrsDesconto.json`) traz só o cabeçalho, sem nenhum BDR, e a lista fica em `dados-privados/bdr-desconto.json`, entregue por `api/top15-bdrs.ts` depois de validar o código. Um código só abre a própria lista.
 - Telas: aba "Top 15 mais negociados" no Simule ETF e aba "Top 15 maior desconto" no Simule BDR, com o aviso "Não é recomendação de investimento" e a explicação de que liquidez e desconto de preço não são qualidade nem valor.

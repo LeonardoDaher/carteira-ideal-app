@@ -1,11 +1,16 @@
 {
   "_leia": "Parâmetros do 'Top 15 BDRs com maior desconto de preço' (D70). ESTE ARQUIVO É A FONTE ÚNICA: o cálculo (scripts/top15-mercado-calculo.mjs) e o documento docs/11-metodologia-top15-etfs-bdrs.md citam estes valores. Qualquer mudança exige subir 'versaoMetodologia' e registrar o motivo em 'historicoDeVersoes'. Desconto = 1 − fechamento atual ÷ maior fechamento dos últimos 'janelaMaxima' pregões (desdobramentos confirmados em config/bdrs.json já aplicados). É desconto de PREÇO, que inclui o câmbio: não é desconto de valor da empresa, porque não há balanço de empresa estrangeira nos dados. Só BDRs de ação (códigos 31 a 35); BDRs de ETF (39) ficam de fora. Fonte: Boletim de Preços da B3 (BVBG.086) guardado em historico/bdrs.json pelo job de BDRs (D19/D24).",
-  "versaoMetodologia": "1.0.0",
+  "versaoMetodologia": "1.1.0",
   "historicoDeVersoes": [
     {
       "versao": "1.0.0",
       "data": "2026-10-08",
       "mudanca": "Versão inicial. Primeiro critério dos BDRs: desconto de preço contra a própria máxima de 12 meses, filtrado por liquidez. Fundamentos (P/L etc.) exigiriam fonte externa dos balanços das empresas estrangeiras e ficam para uma versão futura."
+    },
+    {
+      "versao": "1.1.0",
+      "data": "2026-10-08",
+      "mudanca": "PUBLICAÇÃO (D70). O responsável aprovou publicar o ranking no app, só com o código do mês próprio dos BDRs (TOP15_BDRS_CODIGOS): aprovadoPeloResponsavel passa a true. Nenhuma regra de cálculo mudou."
     }
   ],
   "tamanhoDaLista": 15,
@@ -20,7 +25,12 @@
   "saltoAlta": 1.8,
   "descontoParaConferir": 0.6,
   "publicacao": {
-    "aprovadoPeloResponsavel": false,
+    "aprovadoPeloResponsavel": true,
+    "aprovacao": {
+      "por": "responsável pelo projeto (Leonardo Daher)",
+      "data": "2026-10-08",
+      "escopo": "Publicar o Top 15 de BDRs com maior desconto de preço no app, SOMENTE com acesso por código do mês próprio dos BDRs. O parecer independente de especialista (D22) segue como item do responsável antes de divulgar em escala."
+    },
     "_leia": "Com aprovadoPeloResponsavel = false o job só grava a trilha de auditoria e o app mostra 'em validação'. Com true E a trava de sanidade aprovada, o ranking chega ao app por acesso com CÓDIGO do mês próprio dos BDRs (TOP15_BDRS_CODIGOS, diferente do das ações e dos FIIs): o arquivo público do app traz só o cabeçalho e a lista fica em dados-privados/bdr-desconto.json, lida só por api/top15-bdrs.ts depois de conferir o código.",
     "acesso": {
       "restritoPorCodigo": true,
