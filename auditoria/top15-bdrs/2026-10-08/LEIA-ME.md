@@ -1,6 +1,6 @@
 # Auditoria: BDRs com maior desconto de preço (auditoria/top15-bdrs/2026-10-08)
 
-Execução com preços até o pregão de **2026-10-07** · metodologia **v1.0.0**. Fonte: Boletim de Preços da B3 (BVBG.086), guardado em `historico/bdrs.json`.
+Execução com preços até o pregão de **2026-10-07** · metodologia **v1.1.0**. Fonte: Boletim de Preços da B3 (BVBG.086), guardado em `historico/bdrs.json`.
 
 ## O que tem aqui
 

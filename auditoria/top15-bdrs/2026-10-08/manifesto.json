@@ -1,28 +1,28 @@
 {
   "esquema": "top15-mercado/1",
   "classe": "bdrs",
-  "versaoMetodologia": "1.0.0",
-  "geradoEm": "2026-10-08T13:00:27.911Z",
+  "versaoMetodologia": "1.1.0",
+  "geradoEm": "2026-10-08T15:01:53.081Z",
   "dataExecucao": "2026-10-08",
   "ultimoPregao": "2026-10-07",
   "ambiente": {
     "node": "v22.23.3",
     "plataforma": "linux",
-    "commit": "ad881a200b082d8fdf2ded017f55f5c7bb806d98",
-    "execucao": "37780971570"
+    "commit": "4c3ff6250606cb2e4448cacda6445246937022bb",
+    "execucao": "37797326997"
   },
   "codigo": {
     "calculoSha256": "66690ca1712962bf073209b0a2266cc03274d5ba66a34d9fe21f125ff5577ea5",
     "extracaoSha256": "3309380b5470ef81e0ea8432f65738bd0c3d2d5be1040de73d5b756da9be9b54"
   },
   "hashes": {
-    "config": "9a84ba859c12eb5b1973f85d58f5f30e3d1dec7f5678f05b41762d4c03250fa8",
+    "config": "e7992464b62cc9f147361297a8c2d39a8c96fac5e528ac5d5ccf03e1e3b4c395",
     "insumos": "543b2619b4f21235b02ecc2988a60bb20e23503d0a10d40bebc7289aed9d513d",
     "resultado": "ba4a98ed8847e4def599309ae129148c92e4368195767bf0bc395a37d1f61e53",
     "memoria": "1384f06d48f5cdf55f0847af4de6b749c40b4ca813bde3eb6499600b8a46e9b8",
     "arquivos": {
       "insumos.json.gz": "9329c1bf7fcebc6e0996537a53e1807b577f699d40e0292066d66309c7d0cd6e",
-      "config.json": "568d42fa9f7a24c43341592c4873600603987c65804c2e0003ee296370c7518b",
+      "config.json": "d246e64c2428bacd8608d9c88f45dbfc584d4ea742cc16faaa5f65b70ece0bbb",
       "resultado.json": "dd506d83d959d4d8500e6a7710d98545064d290b683667c142138e6fde4dccf7",
       "memoria-de-calculo.json.gz": "9b5fdf067f925bdb9a5f25a44d488ce30fb2e87060fe28dbefdbc9da4f1e608a",
       "ranking.csv": "adbc02d1c554402b82c548b928fee0f9a9e393429256474fdb22108b2e445047",
@@ -47,5 +47,5 @@
     "exclusoes": 631,
     "aConferir": 9
   },
-  "publicadoNoApp": false
+  "publicadoNoApp": true
 }
