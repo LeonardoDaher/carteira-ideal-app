@@ -1401,6 +1401,6 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 
 **Primeira execução real.** IFIX: 99 fundos, os 15 maiores somam 50,9% (KNCR11, KNIP11, BTLG11, HGLG11, XPML11). Ibovespa: 76 ativos, os 15 maiores somam 66,2% (ITUB4, VALE3, PETR4, PETR3, AXIA3). Pesos somam 100% nos dois.
 
-**Publicação.** `aprovadoPeloResponsavel` está `false` nos dois (nas telas aparece "em validação") até o responsável mandar publicar. Acesso aberto, sem código.
+**Publicação.** O responsável mandou publicar os dois em 08/10/2026 ("publique os 2"): `aprovadoPeloResponsavel` passou a `true` (v1.1.0, aprovação registrada em `publicacao.aprovacao`); nenhuma regra de cálculo mudou. Acesso aberto, sem código e sem variável na Vercel.
 
 **Testes.** Scripts +9 no `b3-indices.test.mjs` e +11 no `top15-mercado.test.mjs`; web +16 (`Top15Indice.test.tsx`) mais os testes de abas atualizados. **Mutação:** 34 defeitos nos índices (ordem e desempate, acúmulo e arredondamento do peso, corte, universo, cada limite da sanidade, cada validação da leitura da B3, nova tentativa, erro HTTP, nomes e setores, sha256 da resposta, CSV, verificador) e os 34 foram detectados; 3 sobreviveram à primeira versão (arredondamento dos pesos, que o teste não exercitava, e uma mutação mal escolhida minha) e foram cobertos.

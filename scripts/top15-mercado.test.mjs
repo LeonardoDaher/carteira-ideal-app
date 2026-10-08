@@ -738,9 +738,11 @@ test('publicação aberta do índice: cabeçalho e lista no mesmo arquivo, sem a
   assert.ok(!JSON.stringify(aberto).includes('"_leia"'))
 })
 
-test('configuração dos índices: abertos, sem código, com aviso e limites de sanidade', () => {
+test('configuração dos índices: publicados em 08/10/2026, abertos, sem código, com aviso e limites de sanidade', () => {
   for (const [classe, cfg] of Object.entries(cfgsIndice)) {
-    assert.equal(cfg.versaoMetodologia, '1.0.0', classe)
+    assert.equal(cfg.versaoMetodologia, '1.1.0', classe)
+    assert.equal(cfg.publicacao.aprovadoPeloResponsavel, true, `: aprovado pelo responsável (D72)`)
+    assert.equal(cfg.publicacao.aprovacao.data, '2026-10-08', classe)
     assert.equal(cfg.historicoDeVersoes.at(-1).versao, cfg.versaoMetodologia, classe)
     assert.equal(cfg.tamanhoDaLista, 15, classe)
     assert.equal(cfg.publicacao.acesso, undefined, `${classe}: aberto, sem código`)

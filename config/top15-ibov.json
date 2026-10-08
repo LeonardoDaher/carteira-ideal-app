@@ -1,17 +1,27 @@
 {
   "_leia": "Parâmetros do 'Top 15 maiores pesos do Ibovespa' (D72). ESTE ARQUIVO É A FONTE ÚNICA: o cálculo (scripts/top15-mercado-calculo.mjs) e o documento docs/11-metodologia-top15-etfs-bdrs.md citam estes valores. Qualquer mudança exige subir 'versaoMetodologia' e registrar o motivo em 'historicoDeVersoes'. O hash SHA-256 deste arquivo vai no manifesto de cada execução. A lista são os 'tamanhoDaLista' ativos de MAIOR PESO na carteira teórica do Ibovespa, publicada pela B3 (indexProxy/GetPortfolioDay) na data da execução. O peso é o da B3: o job só ordena e soma. Cotação e volume (mediana dos últimos 'janelaLiquidez' pregões, do histórico diário da B3) são informativos.",
-  "versaoMetodologia": "1.0.0",
+  "versaoMetodologia": "1.1.0",
   "historicoDeVersoes": [
     {
       "versao": "1.0.0",
       "data": "2026-10-08",
       "mudanca": "Versão inicial. Critério pedido pelo responsável: os 15 maiores pesos do Ibovespa. Única etapa com rede: a carteira do dia na B3."
+    },
+    {
+      "versao": "1.1.0",
+      "data": "2026-10-08",
+      "mudanca": "PUBLICAÇÃO (D72). O responsável aprovou publicar o ranking no app, com acesso aberto (sem código): aprovadoPeloResponsavel passa a true. Nenhuma regra de cálculo mudou."
     }
   ],
   "tamanhoDaLista": 15,
   "janelaLiquidez": 21,
   "publicacao": {
-    "aprovadoPeloResponsavel": false,
+    "aprovadoPeloResponsavel": true,
+    "aprovacao": {
+      "por": "responsável pelo projeto (Leonardo Daher)",
+      "data": "2026-10-08",
+      "escopo": "Publicar o Top 15 do Ibovespa (15 maiores pesos) no app, com acesso aberto (sem código)."
+    },
     "_leia": "Com aprovadoPeloResponsavel = false o job só grava a trilha de auditoria e o app mostra 'em validação'. Com true E a trava de sanidade aprovada, o ranking vai para o arquivo do app. Acesso ABERTO, sem código: é a composição oficial e pública do índice.",
     "sanidade": {
       "minimoNaLista": 15,
