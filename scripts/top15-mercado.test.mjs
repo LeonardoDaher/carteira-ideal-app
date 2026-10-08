@@ -490,8 +490,10 @@ test('FIIs, ações e BDRs mais negociados: o resultado leva a classe certa e or
 
 test('configuração dos três rankings novos: abertos, sem código, com aviso, e pisos coerentes com cada classe', () => {
   for (const [classe, cfg] of Object.entries(cfgsLiquidez)) {
-    assert.equal(cfg.versaoMetodologia, '1.0.0', classe)
+    assert.equal(cfg.versaoMetodologia, '1.1.0', classe)
     assert.equal(cfg.historicoDeVersoes.at(-1).versao, cfg.versaoMetodologia, classe)
+    assert.equal(cfg.publicacao.aprovadoPeloResponsavel, true, `: publicação aprovada em 08/10/2026 (D71)`)
+    assert.equal(cfg.publicacao.aprovacao.data, '2026-10-08', classe)
     assert.equal(cfg.tamanhoDaLista, 15, classe)
     assert.equal(cfg.janelaLiquidez, 21, classe)
     assert.equal(cfg.publicacao.acesso, undefined, `${classe}: ranking aberto, sem código`)

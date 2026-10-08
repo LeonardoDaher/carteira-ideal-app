@@ -1385,6 +1385,6 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 
 **Primeira execução real (pregões até 07/10/2026).** FIIs: 202 analisados, 75 elegíveis (topo KNCR11, TRXF11, MXRF11, BTLG11, HGLG11). Ações: 390 analisadas, 196 elegíveis (PETR4, VALE3, ITUB4, BBAS3, AXIA3). BDRs: 933 analisados, 91 elegíveis (AURA33, MELI34, MUTC34, NVDC34, TSLA34). A verificação independente passou nos três.
 
-**Publicação.** `aprovadoPeloResponsavel` está `false` nos três até o responsável mandar publicar (nas telas aparece "em validação").
+**Publicação.** O responsável mandou publicar os três em 08/10/2026 ("publique os 3"): `aprovadoPeloResponsavel` passou a `true` (v1.1.0, aprovação registrada em `publicacao.aprovacao`); nenhuma regra de cálculo mudou. Acesso aberto, sem código e sem variável na Vercel.
 
 **Testes.** Scripts +11 (`top15-mercado.test.mjs`: classe nos resultados, configs, três construtores de insumos, publicação aberta sem arquivo privado, verificação independente, pastas e arquivos sem colisão); web +28 (`Top15MaisNegociados.test.tsx`, um bloco por classe mais as abas das três telas). **Mutação:** 15 defeitos novos (precedência do nome, categoria padrão, ordem dos segmentos e setores, filtro de BDR de ETF, exclusões manuais, classe errada nos adaptadores, formato do snapshot e do CSV, sanidade, verificador) e os 15 foram detectados (um sobreviveu à primeira versão do teste de nomes e foi coberto); as 31 mutações do cálculo (D70) continuam todas detectadas.

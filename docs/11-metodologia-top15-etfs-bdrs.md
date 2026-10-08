@@ -72,7 +72,7 @@ O MESMO cálculo da seção 3 (mediana do volume diário dos últimos 21 pregõe
 
 Resultado de 08/10/2026 (pregões até 07/10): **FIIs** 202 analisados, 75 passaram; topo KNCR11, TRXF11, MXRF11, BTLG11, HGLG11. **Ações** 390 analisadas, 196 passaram; topo PETR4, VALE3, ITUB4, BBAS3, AXIA3. **BDRs** 933 analisados, 91 passaram; topo AURA33, MELI34, MUTC34, NVDC34, TSLA34.
 
-Mais negociado é **liquidez**, não qualidade, preço baixo nem segurança, e o aviso de cada tela diz isso. Para olhar preço contra os números do ativo, há o Top 15 FIIs baratos e o Top 15 ações baratas; para BDR, o Top 15 maior desconto. A publicação de cada ranking depende de `publicacao.aprovadoPeloResponsavel` no config da classe.
+Mais negociado é **liquidez**, não qualidade, preço baixo nem segurança, e o aviso de cada tela diz isso. Para olhar preço contra os números do ativo, há o Top 15 FIIs baratos e o Top 15 ações baratas; para BDR, o Top 15 maior desconto. A publicação de cada ranking depende de `publicacao.aprovadoPeloResponsavel` no config da classe; os três estão `true` desde 08/10/2026 (v1.1.0).
 
 ## 8. Limitações conhecidas
 
