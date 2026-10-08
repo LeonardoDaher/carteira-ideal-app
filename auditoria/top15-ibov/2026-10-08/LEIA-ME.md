@@ -1,6 +1,6 @@
 # Auditoria: maiores pesos do Ibovespa (auditoria/top15-ibov/2026-10-08)
 
-Execução com preços até o pregão de **2026-10-08** · metodologia **v1.0.0**. Fonte: Boletim de Preços da B3 (BVBG.086), guardado em `historico/acoes.json`.
+Execução com preços até o pregão de **2026-10-08** · metodologia **v1.1.0**. Fonte: Boletim de Preços da B3 (BVBG.086), guardado em `historico/acoes.json`.
 
 ## O que tem aqui
 

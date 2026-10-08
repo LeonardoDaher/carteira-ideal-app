@@ -1,28 +1,28 @@
 {
   "esquema": "top15-mercado/1",
   "classe": "ifix",
-  "versaoMetodologia": "1.0.0",
-  "geradoEm": "2026-10-08T16:37:37.249Z",
+  "versaoMetodologia": "1.1.0",
+  "geradoEm": "2026-10-08T17:24:45.922Z",
   "dataExecucao": "2026-10-08",
   "ultimoPregao": "2026-10-08",
   "ambiente": {
     "node": "v22.23.3",
     "plataforma": "linux",
-    "commit": "d3ad68c85be97acd555e4204f99062f96b9c924d",
-    "execucao": "37810232471"
+    "commit": "f5b91a30f5083fc203674bf7dfd784eb72b874f0",
+    "execucao": "37816310748"
   },
   "codigo": {
     "calculoSha256": "a0dc43da80d729b990968dae2fa3ce1adf9e8c0f32771bafd41d19c8a5a3f39e",
     "extracaoSha256": "65ba5f391e7b496d4b218ad51f8925f7eb1a5fa42327c7a21fdbd21faaad283b"
   },
   "hashes": {
-    "config": "30eb9995fb4642cb1fba43f8d684522ef6d8a52c2d8a380e6f006cc1b081da1f",
+    "config": "6a5d286fa860db3b03e0e5d54405cb50b5f9bb89bcabdf667815b0d90dfc2ebb",
     "insumos": "30b0ac577d2ff411b9a4c92d65eebce58f97babaecd5ab899dce8b313260d6f4",
     "resultado": "5334873b111a3e874e43d3ade96bbc2215b8af40d8c37cae90c876a405c52540",
     "memoria": "97e5f31eb43f19de90876f2187d9fb55569a9885385178da035ab01868f0a1e3",
     "arquivos": {
       "insumos.json.gz": "7dd61aaeba089572a9cddca35a92e7cef38c6429700b7b0e4b5849365326c454",
-      "config.json": "c1cd68c237bd458369247b408a22c10431b5db53a7630abfbba775e2aa8344c1",
+      "config.json": "b494c3c2d5549797f13aff993ad860d5a38acc2d0370062ac144f2d8ecd0847e",
       "resultado.json": "b669397d7e06386be2f6a802f53274f15397fb80a1bce4d37ce514df17a67c59",
       "memoria-de-calculo.json.gz": "7a1c4cc2410abb7a302f4c8ee22982ef6d5b87d6f6fd5031554e97c28244e36c",
       "ranking.csv": "74a9c4d1f6709534e3be96e1e655d4824d304a74c89f05bb58ecc7c884a57806"
@@ -34,7 +34,7 @@
       "url": "https://sistemaswebb3-listados.b3.com.br/indexProxy/indexCall/GetPortfolioDay/eyJsYW5ndWFnZSI6InB0LWJyIiwicGFnZU51bWJlciI6MSwicGFnZVNpemUiOjIwMCwiaW5kZXgiOiJJRklYIiwic2VnbWVudCI6IjEifQ==",
       "sha256": "7585d5d93a523059d11c9a4dac0ed9931ea2c36b4e8646f0337bb0db81332203",
       "bytes": 12945,
-      "baixadoEm": "2026-10-08T16:37:37.245Z",
+      "baixadoEm": "2026-10-08T17:24:45.918Z",
       "dataDaCarteira": "2026-10-08"
     },
     {
@@ -58,5 +58,5 @@
     "elegiveis": 99,
     "exclusoes": 0
   },
-  "publicadoNoApp": false
+  "publicadoNoApp": true
 }
