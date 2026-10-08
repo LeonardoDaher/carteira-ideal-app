@@ -7,9 +7,9 @@ import test from 'node:test'
 import zlib from 'node:zlib'
 import { fileURLToPath } from 'node:url'
 import {
-  ajustarDesdobramentos, calcularAcoes, calcularBdrs, calcularBdrsNegociados, calcularEtfs, calcularFiis, hashDoResultado, mediana, saltosDePreco, verificarSanidade,
+  ajustarDesdobramentos, calcularAcoes, calcularBdrs, calcularBdrsNegociados, calcularEtfs, calcularFiis, calcularIndice, hashDoResultado, mediana, saltosDePreco, verificarSanidade,
 } from './top15-mercado-calculo.mjs'
-import { CLASSES, arquivosCsv, concluir, montarInsumosAcoes, montarInsumosBdrs, montarInsumosBdrsNegociados, montarInsumosEtfs, montarInsumosFiis, semNotas } from './atualizar-top15-mercado.mjs'
+import { CLASSES, arquivosCsv, concluir, executarIndice, montarInsumosIndice, montarInsumosAcoes, montarInsumosBdrs, montarInsumosBdrsNegociados, montarInsumosEtfs, montarInsumosFiis, semNotas } from './atualizar-top15-mercado.mjs'
 import { verificar } from './top15-mercado-verificar.mjs'
 
 const AQUI = path.dirname(fileURLToPath(import.meta.url))
@@ -581,6 +581,177 @@ test('cada classe tem sua própria pasta de auditoria, seu config e seu arquivo 
   const apps = Object.values(CLASSES).map((c) => c.snapshotApp)
   const configs = Object.values(CLASSES).map((c) => c.config)
   for (const lista of [pastas, apps, configs]) assert.equal(new Set(lista).size, lista.length)
-  assert.deepEqual(Object.keys(CLASSES).sort(), ['acoes', 'bdrs', 'bdrs-negociados', 'etfs', 'fiis'])
+  assert.deepEqual(Object.keys(CLASSES).sort(), ['acoes', 'bdrs', 'bdrs-negociados', 'etfs', 'fiis', 'ibov', 'ifix'])
   for (const c of Object.values(CLASSES)) assert.ok(fs.existsSync(path.join(RAIZ, 'config', c.config)), c.config)
+})
+// ---------------------------------------------------------------------------------------
+// IFIX e Ibovespa: os maiores pesos da carteira teórica da B3 (D72)
+// ---------------------------------------------------------------------------------------
+
+const cfgsIndice = { ifix: lerJson(RAIZ, 'config', 'top15-ifix.json'), ibov: lerJson(RAIZ, 'config', 'top15-ibov.json') }
+const cfgIdx = (classe, o = {}) => ({ ...cfgsIndice[classe], tamanhoDaLista: 3, ...o, publicacao: { ...cfgsIndice[classe].publicacao, aprovadoPeloResponsavel: false, sanidade: { minimoNaLista: 3, minimoComponentes: 5, toleranciaSomaPesos: 0.5, idadeMaximaDias: 10 }, ...(o.publicacao ?? {}) } })
+const comp = (ticker, peso, extra = {}) => ({ ticker, nome: `Nome ${ticker}`, tipo: 'ON', setor: 'Setor X', peso, quantidadeTeorica: 1000, ...extra })
+const insumosIdx = (classe = 'ibov', componentes = null, extra = {}) => ({
+  classe, indice: classe === 'ibov' ? 'IBOV' : 'IFIX', dataExecucao: '2026-10-08', dataComposicao: '2026-10-08',
+  componentes: componentes ?? [comp('CCCC3', 10), comp('AAAA3', 40), comp('BBBB3', 30), comp('DDDD3', 8), comp('EEEE3', 7), comp('FFFF3', 5)],
+  mercado: { AAAA3: { cotacao: 10, dataCotacao: '2026-10-07', volumeMediano: 5000 } }, ...extra,
+})
+
+test('índice: os 3 maiores pesos, em ordem, com peso acumulado calculado à mão (40 → 70 → 80)', () => {
+  const { resultado } = calcularIndice(insumosIdx(), cfgIdx('ibov'))
+  assert.deepEqual(resultado.ranking.map((r) => [r.posicao, r.ticker, r.peso, r.pesoAcumulado]), [[1, 'AAAA3', 40, 40], [2, 'BBBB3', 30, 70], [3, 'CCCC3', 10, 80]])
+  assert.equal(resultado.somaPesos, 100)
+  assert.equal(resultado.somaPesosDaLista, 80)
+  assert.equal(resultado.universo, 6)
+  assert.equal(resultado.classe, 'ibov')
+  assert.equal(resultado.indice, 'IBOV')
+  assert.equal(resultado.ultimoPregao, '2026-10-08')
+  assert.deepEqual(resultado.exclusoes, [])
+})
+
+test('índice: desempate de peso por ordem alfabética; cotação e volume são informativos e podem faltar', () => {
+  const comps = [comp('ZZZZ3', 20), comp('MMMM3', 20), comp('AAAA3', 20), comp('BBBB3', 20), comp('CCCC3', 20)]
+  const { resultado } = calcularIndice(insumosIdx('ibov', comps), cfgIdx('ibov'))
+  assert.deepEqual(resultado.ranking.map((r) => r.ticker), ['AAAA3', 'BBBB3', 'CCCC3'])
+  const { resultado: r2 } = calcularIndice(insumosIdx(), cfgIdx('ibov'))
+  assert.deepEqual([r2.ranking[0].cotacao, r2.ranking[0].volumeMediano, r2.ranking[1].cotacao, r2.ranking[1].volumeMediano], [10, 5000, null, null])
+})
+
+test('índice: peso acumulado e soma dos pesos não carregam erro de ponto flutuante (0,2 + 0,1 daria 0,30000000000000004)', () => {
+  const comps = [comp('AAAA3', 0.2), comp('BBBB3', 0.1), comp('CCCC3', 0.05)]
+  assert.equal(0.2 + 0.1, 0.30000000000000004, 'premissa do teste: a soma crua tem ruído')
+  const { resultado } = calcularIndice(insumosIdx('ibov', comps), cfgIdx('ibov', { tamanhoDaLista: 3 }))
+  assert.deepEqual(resultado.ranking.map((r) => r.pesoAcumulado), [0.2, 0.3, 0.35])
+  assert.equal(resultado.somaPesos, 0.35)
+  assert.equal(resultado.somaPesosDaLista, 0.35)
+})
+
+test('índice: determinismo, hash igual em qualquer ordem dos componentes', () => {
+  const a = insumosIdx()
+  const b = insumosIdx('ibov', [...a.componentes].reverse())
+  assert.equal(hashDoResultado(calcularIndice(a, cfgIdx('ibov')).resultado), hashDoResultado(calcularIndice(b, cfgIdx('ibov')).resultado))
+})
+
+test('sanidade do índice: poucos ativos, carteira incompleta, pesos que não somam 100 e carteira velha derrubam o job', () => {
+  const san = { sanidade: { minimoNaLista: 3, minimoComponentes: 5, toleranciaSomaPesos: 0.5, idadeMaximaDias: 10 } }
+  const bom = calcularIndice(insumosIdx(), cfgIdx('ibov')).resultado
+  assert.deepEqual(verificarSanidade(bom, san), [])
+  assert.match(verificarSanidade({ ...bom, ranking: bom.ranking.slice(0, 2) }, san)[0], /só 2 ativos na lista \(mínimo 3\)/)
+  assert.match(verificarSanidade({ ...bom, universo: 4 }, san)[0], /a carteira tem 4 ativos \(mínimo 5\)/)
+  assert.match(verificarSanidade({ ...bom, somaPesos: 99.4 }, san)[0], /pesos somam 99.4%/)
+  assert.deepEqual(verificarSanidade({ ...bom, somaPesos: 99.5 }, san), [], 'exatamente na tolerância passa')
+  assert.deepEqual(verificarSanidade({ ...bom, somaPesos: 100.5 }, san), [])
+  assert.match(verificarSanidade({ ...bom, somaPesos: 100.6 }, san)[0], /pesos somam/)
+  assert.deepEqual(verificarSanidade({ ...bom, dataComposicao: '2026-09-28' }, san), [], '10 dias: exatamente no limite passa')
+  assert.match(verificarSanidade({ ...bom, dataComposicao: '2026-09-27' }, san)[0], /11 dias antes da execução.*desatualizada/)
+  assert.match(verificarSanidade({ ...bom, dataComposicao: '2026-10-09' }, san)[0], /-1 dias/, 'carteira do futuro também é suspeita')
+})
+
+test('insumos de índice: nome e setor do app, cotação e volume mediano do histórico da B3, nome da B3 para FII', () => {
+  const pregoes = datas(8)
+  const serie = serieDe([10, 10, 10, 11, 12, 12, 12, 13], [0, 100, 100, 100, 500, 500, 500, 500])
+  const historico = { pregoes, ativos: { AAAA3: serie } }
+  const composicao = { data: '2026-10-08', componentes: [{ ticker: 'AAAA3', nome: 'AAAA SA', tipo: 'ON', peso: 60, quantidadeTeorica: 10 }, { ticker: 'BBBB3', nome: 'BBBB SA', tipo: 'PN', peso: 40, quantidadeTeorica: 20 }] }
+  const apoio = { porTicker: new Map([['AAAA3', { nome: 'Empresa A', setor: 'Bancos' }]]) }
+  const acao = montarInsumosIndice({ classe: 'ibov', composicao, historico, apoio, cfg: { janelaLiquidez: 5 }, dataExecucao: '2026-10-08' })
+  assert.deepEqual(acao.componentes.map((c) => [c.ticker, c.nome, c.setor]), [['AAAA3', 'Empresa A', 'Bancos'], ['BBBB3', 'BBBB SA', null]])
+  assert.deepEqual(acao.mercado, { AAAA3: { cotacao: 13, dataCotacao: pregoes[7], volumeMediano: 500 } }, 'BBBB3 não tem histórico: sem dado de mercado')
+  assert.equal(acao.indice, 'IBOV')
+  assert.equal(acao.dataComposicao, '2026-10-08')
+  const fii = montarInsumosIndice({ classe: 'ifix', composicao, historico, apoio, cfg: { janelaLiquidez: 5 }, dataExecucao: '2026-10-08' })
+  assert.equal(fii.componentes[0].nome, 'AAAA SA', 'FII: o nome é o curto da B3, não o do job de FIIs')
+  assert.equal(fii.componentes[0].setor, 'Bancos')
+  assert.equal(fii.indice, 'IFIX')
+})
+
+function raizComDados(classe) {
+  const raiz = raizTemporaria()
+  const pregoes = datas(30)
+  fs.mkdirSync(path.join(raiz, 'historico'), { recursive: true })
+  fs.mkdirSync(path.join(raiz, 'config'), { recursive: true })
+  fs.mkdirSync(path.join(raiz, 'webapp-src', 'src', 'data'), { recursive: true })
+  const ativos = { AAAA3: serieDe(new Array(30).fill(10), new Array(30).fill(500)), AAAA11: serieDe(new Array(30).fill(10), new Array(30).fill(500)) }
+  fs.writeFileSync(path.join(raiz, 'historico', classe === 'ibov' ? 'acoes.json' : 'fiis.json'), JSON.stringify({ pregoes, ativos }))
+  fs.writeFileSync(path.join(raiz, 'webapp-src', 'src', 'data', 'acoes.json'), JSON.stringify({ busca: [{ ticker: 'AAAA3', nome: 'Empresa A', setor: 'Bancos' }] }))
+  fs.writeFileSync(path.join(raiz, 'webapp-src', 'src', 'data', 'rendimentosFii.json'), JSON.stringify({ fundos: [{ ticker: 'AAAA11', setor: 'Logística' }] }))
+  const cfg = cfgIdx(classe, { tamanhoDaLista: 2, publicacao: { sanidade: { minimoNaLista: 2, minimoComponentes: 5, toleranciaSomaPesos: 0.5, idadeMaximaDias: 10 } } })
+  fs.writeFileSync(path.join(raiz, 'config', `top15-${classe}.json`), JSON.stringify(cfg))
+  return { raiz, cfg }
+}
+const composicaoFalsa = (classe) => ({ url: 'https://exemplo/b3', sha256: 'f'.repeat(64), bytes: 1234, baixadoEm: '2026-10-08T10:00:00Z', data: '2026-10-08', componentes: [
+  { ticker: classe === 'ibov' ? 'AAAA3' : 'AAAA11', nome: 'AAAA', tipo: 'ON', peso: 50, quantidadeTeorica: 1 },
+  ...['BBBB', 'CCCC', 'DDDD', 'EEEE'].map((t, i) => ({ ticker: `${t}${classe === 'ibov' ? '3' : '11'}`, nome: t, tipo: 'ON', peso: 12.5, quantidadeTeorica: i })),
+] })
+
+test('executarIndice: monta fontes (carteira da B3 com sha256, histórico, nomes), grava a auditoria e a verificação independente aprova', async () => {
+  for (const classe of ['ibov', 'ifix']) {
+    const { raiz } = raizComDados(classe)
+    const r = await executarIndice({ classe, raiz, hoje: '2026-10-08', log: () => {}, composicaoLocal: composicaoFalsa(classe) })
+    assert.equal(r.publicado, false)
+    const pasta = path.join(raiz, 'auditoria', CLASSES[classe].pasta, '2026-10-08')
+    const man = lerJson(pasta, 'manifesto.json')
+    assert.equal(man.classe, classe)
+    assert.equal(man.fontes[0].sha256, 'f'.repeat(64))
+    assert.equal(man.fontes[0].dataDaCarteira, '2026-10-08')
+    assert.equal(man.fontes.length, 3)
+    assert.ok(man.fontes.every((f) => f.url))
+    const res = lerJson(pasta, 'resultado.json')
+    assert.equal(res.ranking[0].peso, 50)
+    assert.equal(res.ranking[0].volumeMediano, 500)
+    const v = verificar(pasta, raiz)
+    assert.equal(v.ok, true, `${classe}: ${JSON.stringify(v.mensagens.filter((m) => !m.ok))}`)
+    assert.ok(fs.existsSync(path.join(pasta, 'ranking.csv')))
+  }
+})
+
+test('executarIndice: sem histórico, classe errada e carteira velha (trava) deixam o app intacto ou nem começam', async () => {
+  await assert.rejects(executarIndice({ classe: 'etfs', raiz: raizTemporaria(), log: () => {} }), /Classe de índice inválida/)
+  const sem = raizComDados('ibov')
+  fs.rmSync(path.join(sem.raiz, 'historico'), { recursive: true })
+  await assert.rejects(executarIndice({ classe: 'ibov', raiz: sem.raiz, hoje: '2026-10-08', log: () => {}, composicaoLocal: composicaoFalsa('ibov') }), /historico\/acoes.json não existe/)
+
+  const { raiz } = raizComDados('ifix')
+  const pub = path.join(raiz, 'webapp-src', 'src', 'data', 'ifixMaioresPesos.json')
+  fs.writeFileSync(pub, '{"sentinela":"publico"}')
+  const velha = { ...composicaoFalsa('ifix'), data: '2026-09-01' }
+  await assert.rejects(executarIndice({ classe: 'ifix', raiz, hoje: '2026-10-08', log: () => {}, composicaoLocal: velha }), /trava de sanidade.*desatualizada.*o app não foi alterado/)
+  assert.equal(fs.readFileSync(pub, 'utf8'), '{"sentinela":"publico"}')
+})
+
+test('publicação aberta do índice: cabeçalho e lista no mesmo arquivo, sem arquivo privado; sem aprovação só o cabeçalho', async () => {
+  const { raiz, cfg } = raizComDados('ibov')
+  await executarIndice({ classe: 'ibov', raiz, hoje: '2026-10-08', log: () => {}, composicaoLocal: composicaoFalsa('ibov') })
+  const fechado = saida(raiz, 'webapp-src/src/data/ibovMaioresPesos.json')
+  assert.equal(fechado.publicado, false)
+  assert.deepEqual(fechado.ranking, [])
+  assert.deepEqual([fechado.indice, fechado.dataComposicao, fechado.somaPesos], ['IBOV', '2026-10-08', 100])
+
+  fs.writeFileSync(path.join(raiz, 'config', 'top15-ibov.json'), JSON.stringify(aprovado(cfg)))
+  const r = await executarIndice({ classe: 'ibov', raiz, hoje: '2026-10-08', log: () => {}, composicaoLocal: composicaoFalsa('ibov') })
+  assert.equal(r.publicado, true)
+  const aberto = saida(raiz, 'webapp-src/src/data/ibovMaioresPesos.json')
+  assert.equal(aberto.publicado, true)
+  assert.equal(aberto.acessoRestrito, false)
+  assert.deepEqual(aberto.ranking.map((x) => [x.ticker, x.peso, x.pesoAcumulado]), [['AAAA3', 50, 50], ['BBBB3', 12.5, 62.5]])
+  assert.equal(aberto.somaPesosDaLista, 62.5)
+  assert.ok(!fs.existsSync(path.join(raiz, 'dados-privados')))
+  assert.ok(!JSON.stringify(aberto).includes('"_leia"'))
+})
+
+test('configuração dos índices: abertos, sem código, com aviso e limites de sanidade', () => {
+  for (const [classe, cfg] of Object.entries(cfgsIndice)) {
+    assert.equal(cfg.versaoMetodologia, '1.0.0', classe)
+    assert.equal(cfg.historicoDeVersoes.at(-1).versao, cfg.versaoMetodologia, classe)
+    assert.equal(cfg.tamanhoDaLista, 15, classe)
+    assert.equal(cfg.publicacao.acesso, undefined, `${classe}: aberto, sem código`)
+    assert.match(cfg.publicacao.avisoProposto, /^Não é recomendação de investimento\./, classe)
+    assert.match(cfg.publicacao.avisoProposto, /composição oficial/, classe)
+    assert.equal(cfg.publicacao.sanidade.toleranciaSomaPesos, 0.5, classe)
+    assert.equal(cfg.publicacao.sanidade.idadeMaximaDias, 10, classe)
+    assert.equal(CLASSES[classe].privado, null, classe)
+  }
+  assert.equal(cfgsIndice.ifix.publicacao.sanidade.minimoComponentes, 50)
+  assert.equal(cfgsIndice.ibov.publicacao.sanidade.minimoComponentes, 40)
+  assert.equal(CLASSES.ifix.indice, 'IFIX')
+  assert.equal(CLASSES.ibov.indice, 'IBOV')
 })

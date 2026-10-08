@@ -19,7 +19,8 @@ import path from 'node:path'
 import zlib from 'node:zlib'
 import crypto from 'node:crypto'
 import { fileURLToPath, pathToFileURL } from 'node:url'
-import { calcularAcoes, calcularBdrs, calcularBdrsNegociados, calcularEtfs, calcularFiis, canonico, hashDoResultado, sha256, verificarSanidade } from './top15-mercado-calculo.mjs'
+import { CLASSES_INDICE, calcularAcoes, calcularBdrs, calcularBdrsNegociados, calcularEtfs, calcularFiis, calcularIndice, canonico, hashDoResultado, numerosDeLiquidez, sha256, verificarSanidade } from './top15-mercado-calculo.mjs'
+import { INDICES, baixarComposicao } from './b3-indices.mjs'
 import { limparNome } from './atualizar-etfs.mjs'
 import { criarFiltroBdr, nomeDe, setorDe } from './atualizar-bdrs.mjs'
 import { executarCli } from './top15-mercado-verificar.mjs'
@@ -67,6 +68,26 @@ export const CLASSES = {
     snapshotApp: path.join('webapp-src', 'src', 'data', 'bdrsMaisNegociados.json'),
     privado: null,
     calcular: calcularBdrsNegociados,
+  },
+  ifix: {
+    rotulo: 'maiores pesos do IFIX',
+    pasta: 'top15-ifix',
+    config: 'top15-ifix.json',
+    historico: 'fiis.json',
+    indice: 'IFIX',
+    snapshotApp: path.join('webapp-src', 'src', 'data', 'ifixMaioresPesos.json'),
+    privado: null,
+    calcular: calcularIndice,
+  },
+  ibov: {
+    rotulo: 'maiores pesos do Ibovespa',
+    pasta: 'top15-ibov',
+    config: 'top15-ibov.json',
+    historico: 'acoes.json',
+    indice: 'IBOV',
+    snapshotApp: path.join('webapp-src', 'src', 'data', 'ibovMaioresPesos.json'),
+    privado: null,
+    calcular: calcularIndice,
   },
   bdrs: {
     rotulo: 'BDRs com maior desconto de preço',
@@ -152,6 +173,27 @@ export function montarInsumosBdrsNegociados({ historico, configBdrs, cfg, dataEx
   return { classe: 'bdrs-negociados', dataExecucao, pregoes, excluidos: [...(configBdrs.excluir?.tickers ?? [])].sort(), ativos }
 }
 
+/**
+ * Índices (D72): a carteira teórica vem da B3 (já lida e validada por lerComposicao). Nome, setor/segmento, cotação e
+ * volume vêm dos jobs e históricos do projeto e são INFORMATIVOS (o peso é o que ordena). `apoio` = { porTicker }:
+ * ticker → { nome?, setor? }; o histórico diário (B3) dá cotação, data e volume mediano dos últimos pregões.
+ */
+export function montarInsumosIndice({ classe, composicao, historico, apoio, cfg, dataExecucao }) {
+  const pregoes = historico.pregoes
+  const mercado = {}
+  const componentes = composicao.componentes.map((c) => {
+    const serie = historico.ativos?.[c.ticker]
+    if (serie?.length) {
+      const alinhada = serie.length >= pregoes.length ? serie.slice(serie.length - pregoes.length) : [...new Array(pregoes.length - serie.length).fill(null), ...serie]
+      const n = numerosDeLiquidez(alinhada, pregoes, cfg.janelaLiquidez)
+      if (n.ultimo !== -1) mercado[c.ticker] = { cotacao: n.cotacao, dataCotacao: n.dataCotacao, volumeMediano: n.volumeMediano }
+    }
+    const a = apoio?.porTicker?.get(c.ticker)
+    return { ticker: c.ticker, nome: classe === 'ibov' ? (a?.nome ?? c.nome) : c.nome, tipo: c.tipo, setor: a?.setor ?? null, peso: c.peso, quantidadeTeorica: c.quantidadeTeorica }
+  })
+  return { classe, indice: CLASSES[classe].indice, dataExecucao, dataComposicao: composicao.data, componentes, mercado }
+}
+
 export function montarInsumosBdrs({ historico, configBdrs, cfg, dataExecucao }) {
   const n = Math.min(cfg.janelaMaxima + 1, historico.pregoes.length)
   const pregoes = historico.pregoes.slice(-n)
@@ -185,7 +227,10 @@ const COLUNAS_ETF = ['posicaoGeral', 'ticker', 'nome', 'categoria', 'volumeMedia
 const COLUNAS_BDR = ['posicao', 'ticker', 'nome', 'setor', 'desconto', 'cotacao', 'maximaFechamento12m', 'dataMaxima', 'variacao3m', 'volumeMediano', 'diasNegociados', 'pregoesComDado', 'alertas']
 const COLUNAS_EXC = ['ticker', 'nome', 'codigo', 'motivo']
 
+const COLUNAS_INDICE = ['posicao', 'ticker', 'nome', 'tipo', 'setor', 'peso', 'pesoAcumulado', 'quantidadeTeorica', 'cotacao', 'dataCotacao', 'volumeMediano']
+
 export function arquivosCsv(classe, resultado) {
+  if (CLASSES_INDICE.includes(classe)) return { 'ranking.csv': csv(COLUNAS_INDICE, resultado.ranking) }
   if (classe !== 'bdrs') {
     const porCat = Object.entries(resultado.porCategoria).flatMap(([, l]) => l)
     return {
@@ -260,6 +305,39 @@ export function executar({ classe, raiz = RAIZ_PADRAO, hoje = null, log = consol
   return concluir({ raiz, classe, cfg, insumos, fontes, log })
 }
 
+/**
+ * Índices (IFIX e Ibovespa): baixa a carteira do dia na B3 (a ÚNICA etapa com rede) e monta o ranking. O sha256 e o endereço
+ * da resposta bruta entram no manifesto; a verificação independente usa só a tabela gravada nos insumos.
+ * `composicaoLocal` (testes) substitui o download.
+ */
+export async function executarIndice({ classe, raiz = RAIZ_PADRAO, hoje = null, log = console.log, fetchImpl = fetch, composicaoLocal = null } = {}) {
+  const c = CLASSES[classe]
+  if (!c || !CLASSES_INDICE.includes(classe)) throw new Error(`Classe de índice inválida. Use: ${CLASSES_INDICE.join(', ')}.`)
+  const cfg = lerJson(path.join(raiz, 'config', c.config))
+  const arquivoHist = path.join(raiz, 'historico', c.historico)
+  if (!fs.existsSync(arquivoHist)) throw new Error(`historico/${c.historico} não existe: rode antes a carga inicial.`)
+  const historico = lerJson(arquivoHist)
+  const dataExecucao = hoje ?? new Date().toISOString().slice(0, 10)
+  const composicao = composicaoLocal ?? (await baixarComposicao(c.indice, { fetchImpl }))
+  log(`${c.rotulo}: carteira da B3 de ${composicao.data} com ${composicao.componentes.length} ativos · execução em ${dataExecucao}`)
+  const fontes = [
+    { papel: `Carteira teórica do ${INDICES[c.indice].nome} (B3, indexProxy/GetPortfolioDay)`, url: composicao.url ?? 'composicao fornecida localmente', sha256: composicao.sha256 ?? null, bytes: composicao.bytes ?? null, baixadoEm: composicao.baixadoEm ?? null, dataDaCarteira: composicao.data },
+    { papel: 'Histórico diário (B3, Boletim de Preços BVBG.086): cotação e volume (informativos)', url: `historico/${c.historico} (neste repositório)`, arquivo: c.historico, bytes: fs.statSync(arquivoHist).size, sha256: hashArquivo(arquivoHist), ultimoPregao: historico.pregoes.at(-1) },
+  ]
+  const porTicker = new Map()
+  if (classe === 'ibov') {
+    const arq = path.join(raiz, 'webapp-src', 'src', 'data', 'acoes.json')
+    for (const a of lerJson(arq).busca ?? []) porTicker.set(a.ticker, { nome: a.nome, setor: a.setor })
+    fontes.push({ papel: 'Nome e setor das ações (job de ações)', url: 'webapp-src/src/data/acoes.json (neste repositório)', arquivo: 'acoes.json', bytes: fs.statSync(arq).size, sha256: hashArquivo(arq) })
+  } else {
+    const arq = path.join(raiz, 'webapp-src', 'src', 'data', 'rendimentosFii.json')
+    for (const f of lerJson(arq).fundos ?? []) porTicker.set(f.ticker, { setor: f.setor })
+    fontes.push({ papel: 'Segmento dos FIIs (job de FIIs)', url: 'webapp-src/src/data/rendimentosFii.json (neste repositório)', arquivo: 'rendimentosFii.json', bytes: fs.statSync(arq).size, sha256: hashArquivo(arq) })
+  }
+  const insumos = montarInsumosIndice({ classe, composicao, historico, apoio: { porTicker }, cfg, dataExecucao })
+  return concluir({ raiz, classe, cfg, insumos, fontes, log })
+}
+
 /** Calcula e grava a auditoria e o app. Separado para os testes poderem alimentar insumos prontos. */
 export function concluir({ raiz, classe, cfg, insumos, fontes = [], log = console.log, agora = new Date() }) {
   const c = CLASSES[classe]
@@ -301,7 +379,7 @@ export function concluir({ raiz, classe, cfg, insumos, fontes = [], log = consol
     gravarJson(path.join(raiz, 'auditoria', c.pasta, 'ultima.json'), { pasta: relPosix, dataExecucao: insumos.dataExecucao, hashResultado: hashes.resultado, versaoMetodologia: cfg.versaoMetodologia })
   }
 
-  const lista = classe === 'bdrs' ? resultado.ranking : resultado.geral
+  const lista = resultado.geral ?? resultado.ranking
   log(`Universo ${resultado.universo} · elegíveis ${resultado.elegiveis} · fora ${resultado.exclusoes.length}${classe === 'bdrs' ? ` · a conferir ${resultado.aConferir.length}` : ''}`)
   log(`Top ${cfg.tamanhoDaLista}: ${lista.map((r) => r.ticker).join(' ')}`)
   if (classe === 'bdrs') log(`A conferir (fora do ranking): ${resultado.aConferir.map((f) => `${f.ticker}[${f.alertas.join(',')}]`).join(' ') || 'nenhum'}`)
@@ -348,6 +426,17 @@ export function montarSnapshotApp({ classe, resultado, cfg, manifesto, pasta, pu
   // Sem os campos "_leia" (notas internas): o cabeçalho público não pode trazer código de ativo.
   const { publicacao, historicoDeVersoes, versaoMetodologia, ...parametros } = cfg
   void publicacao; void historicoDeVersoes; void versaoMetodologia
+  if (CLASSES_INDICE.includes(classe)) {
+    return {
+      ...base,
+      parametros: { ...semNotas(parametros), idadeMaximaDias: cfg.publicacao?.sanidade?.idadeMaximaDias ?? null },
+      indice: resultado.indice,
+      dataComposicao: resultado.dataComposicao,
+      somaPesos: resultado.somaPesos,
+      somaPesosDaLista: resultado.somaPesosDaLista,
+      ranking: publicado ? resultado.ranking : [],
+    }
+  }
   if (classe !== 'bdrs') {
     return { ...base, parametros: semNotas(parametros), geral: publicado ? resultado.geral : [], porCategoria: publicado ? resultado.porCategoria : {}, exclusoes: publicado ? resultado.exclusoes : [] }
   }
@@ -380,7 +469,8 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
     const classe = process.argv[2]
     const data = process.argv.find((x) => x.startsWith('--data='))?.slice(7) ?? null
     if (process.argv.includes('--verificar')) process.exit(executarCli(classe))
-    executar({ classe, hoje: data })
+    if (CLASSES_INDICE.includes(classe)) await executarIndice({ classe, hoje: data })
+    else executar({ classe, hoje: data })
     process.exit(executarCli('ultima', classe))
   } catch (e) {
     console.error(`ERRO: ${e.message}`)

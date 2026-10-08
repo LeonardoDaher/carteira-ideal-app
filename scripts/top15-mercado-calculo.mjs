@@ -256,9 +256,76 @@ export function calcularBdrs(insumos, cfg) {
   }
 }
 
+// ---------------------------------------------------------------------------------------
+// Índices (IFIX e Ibovespa): os maiores pesos da carteira teórica da B3 (D72)
+// ---------------------------------------------------------------------------------------
+
+export const CLASSES_INDICE = ['ifix', 'ibov']
+
+const arredondarPeso = (v) => Math.round(v * 1000) / 1000
+
+/**
+ * Os 	amanhoDaLista ativos de maior peso na carteira teórica do índice. O peso é o que a B3 publica (participação
+ * em %, três casas); aqui só se ordena e se soma. insumos.mercado[ticker] (cotação e volume do histórico da B3) é
+ * informativo e pode faltar. Desempate: ordem alfabética do código.
+ */
+export function calcularIndice(insumos, cfg) {
+  const ordenados = [...insumos.componentes].sort((a, b) => b.peso - a.peso || a.ticker.localeCompare(b.ticker))
+  let acumulado = 0
+  const ranking = ordenados.slice(0, cfg.tamanhoDaLista).map((c, i) => {
+    acumulado += c.peso
+    const m = insumos.mercado?.[c.ticker] ?? null
+    return {
+      posicao: i + 1,
+      ticker: c.ticker,
+      nome: c.nome,
+      tipo: c.tipo,
+      setor: c.setor ?? null,
+      peso: c.peso,
+      pesoAcumulado: arredondarPeso(acumulado),
+      quantidadeTeorica: c.quantidadeTeorica ?? null,
+      cotacao: m?.cotacao ?? null,
+      dataCotacao: m?.dataCotacao ?? null,
+      volumeMediano: m?.volumeMediano ?? null,
+    }
+  })
+  const somaPesos = arredondarPeso(ordenados.reduce((s, c) => s + c.peso, 0))
+  const memoria = {}
+  for (const r of ranking) memoria[r.ticker] = { formula: 'peso = participação do ativo na carteira teórica do índice, publicada pela B3 na data da composição', peso: r.peso, pesoAcumulado: r.pesoAcumulado, dataComposicao: insumos.dataComposicao }
+  return {
+    resultado: {
+      classe: insumos.classe,
+      indice: insumos.indice,
+      dataExecucao: insumos.dataExecucao,
+      dataComposicao: insumos.dataComposicao,
+      ultimoPregao: insumos.dataComposicao,
+      universo: ordenados.length,
+      elegiveis: ordenados.length,
+      somaPesos,
+      somaPesosDaLista: ranking.length ? ranking.at(-1).pesoAcumulado : 0,
+      ranking,
+      exclusoes: [],
+    },
+    memoria,
+  }
+}
+
+function diasEntreDatas(de, ate) {
+  return Math.round((Date.parse(`${ate}T00:00:00Z`) - Date.parse(`${de}T00:00:00Z`)) / 86_400_000)
+}
+
 /** Resultado inverossímil derruba o job antes de tocar no app. Devolve a lista de problemas. */
 export function verificarSanidade(resultado, cfg) {
   const p = []
+  if (CLASSES_INDICE.includes(resultado.classe)) {
+    const s = cfg.sanidade
+    if (resultado.ranking.length < s.minimoNaLista) p.push(`só ${resultado.ranking.length} ativos na lista (mínimo ${s.minimoNaLista})`)
+    if (resultado.universo < s.minimoComponentes) p.push(`a carteira tem ${resultado.universo} ativos (mínimo ${s.minimoComponentes}): resposta incompleta da B3`)
+    if (Math.abs(resultado.somaPesos - 100) > s.toleranciaSomaPesos) p.push(`os pesos somam ${resultado.somaPesos}% (esperado 100% com tolerância de ${s.toleranciaSomaPesos})`)
+    const idade = diasEntreDatas(resultado.dataComposicao, resultado.dataExecucao)
+    if (idade > s.idadeMaximaDias || idade < 0) p.push(`a carteira é de ${resultado.dataComposicao}, ${idade} dias antes da execução (máximo ${s.idadeMaximaDias}): carteira desatualizada`)
+    return p
+  }
   const lista = resultado.classe === 'bdrs' ? resultado.ranking : resultado.geral
   if (lista.length < cfg.sanidade.minimoNaLista) p.push(`só ${lista.length} ativos na lista (mínimo ${cfg.sanidade.minimoNaLista})`)
   const semNegocio = resultado.exclusoes.filter((e) => e.codigo === 'sem_negocio' || e.codigo === 'cotacao_defasada').length

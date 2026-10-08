@@ -74,6 +74,35 @@ export const ROTULO_EXCLUSAO_ETF: Record<string, string> = {
 }
 
 // ---------------------------------------------------------------------------------------
+// Índices: IFIX e Ibovespa (D72)
+// ---------------------------------------------------------------------------------------
+
+export interface ItemIndice {
+  posicao: number
+  ticker: string
+  nome: string
+  tipo: string
+  setor: string | null
+  /** Participação do ativo na carteira teórica do índice, em % (a B3 publica três casas). */
+  peso: number
+  pesoAcumulado: number
+  quantidadeTeorica: number | null
+  cotacao: number | null
+  dataCotacao: string | null
+  volumeMediano: number | null
+}
+
+export interface SnapshotIndice extends CabecalhoMercado {
+  acessoRestrito: boolean
+  indice: string
+  dataComposicao: string
+  somaPesos: number
+  somaPesosDaLista: number
+  parametros: { tamanhoDaLista: number; janelaLiquidez: number; idadeMaximaDias: number | null }
+  ranking: ItemIndice[]
+}
+
+// ---------------------------------------------------------------------------------------
 // BDRs
 // ---------------------------------------------------------------------------------------
 

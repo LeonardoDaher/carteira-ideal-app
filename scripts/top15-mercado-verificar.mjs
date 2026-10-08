@@ -17,7 +17,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import zlib from 'node:zlib'
 import { fileURLToPath, pathToFileURL } from 'node:url'
-import { calcularAcoes, calcularBdrs, calcularBdrsNegociados, calcularEtfs, calcularFiis, canonico, hashDoResultado, sha256 } from './top15-mercado-calculo.mjs'
+import { calcularAcoes, calcularBdrs, calcularBdrsNegociados, calcularEtfs, calcularFiis, calcularIndice, canonico, hashDoResultado, sha256 } from './top15-mercado-calculo.mjs'
 
 const RAIZ_PADRAO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const lerJson = (arquivo) => JSON.parse(fs.readFileSync(arquivo, 'utf8'))
@@ -38,14 +38,14 @@ export function verificar(pasta, raiz = RAIZ_PADRAO) {
   sha256(canonico(insumos)) === manifesto.hashes.insumos ? ok('insumos: hash canônico confere') : falha('insumos: hash canônico DIVERGE')
   sha256(canonico(cfg)) === manifesto.hashes.config ? ok('config: hash canônico confere') : falha('config: hash canônico DIVERGE')
 
-  const calcular = { etfs: calcularEtfs, fiis: calcularFiis, acoes: calcularAcoes, 'bdrs-negociados': calcularBdrsNegociados, bdrs: calcularBdrs }[manifesto.classe] ?? null
+  const calcular = { etfs: calcularEtfs, fiis: calcularFiis, acoes: calcularAcoes, 'bdrs-negociados': calcularBdrsNegociados, ifix: calcularIndice, ibov: calcularIndice, bdrs: calcularBdrs }[manifesto.classe] ?? null
   if (!calcular) {
     falha(`classe desconhecida no manifesto: ${manifesto.classe}`)
     return { ok: false, mensagens: msgs }
   }
   const { resultado } = calcular(insumos, cfg)
   const hash = hashDoResultado(resultado)
-  const lista = manifesto.classe === 'bdrs' ? resultado.ranking : resultado.geral
+  const lista = resultado.geral ?? resultado.ranking
   hash === manifesto.hashes.resultado
     ? ok(`resultado recalculado: ${hash.slice(0, 16)}… confere (${lista.length} na lista, ${resultado.elegiveis} elegíveis, ${resultado.exclusoes.length} exclusões)`)
     : falha(`resultado recalculado DIVERGE: ${hash.slice(0, 16)}… × manifesto ${manifesto.hashes.resultado.slice(0, 16)}…`)
@@ -57,12 +57,12 @@ export function verificar(pasta, raiz = RAIZ_PADRAO) {
   return { ok: msgs.every((x) => x.ok), mensagens: msgs }
 }
 
-const PASTA_POR_CLASSE = { etfs: 'top15-etfs', fiis: 'top15-fiis', acoes: 'top15-acoes', 'bdrs-negociados': 'top15-bdrs-negociados', bdrs: 'top15-bdrs' }
+const PASTA_POR_CLASSE = { etfs: 'top15-etfs', fiis: 'top15-fiis', acoes: 'top15-acoes', 'bdrs-negociados': 'top15-bdrs-negociados', ifix: 'top15-ifix', ibov: 'top15-ibov', bdrs: 'top15-bdrs' }
 
 /** Interpreta os argumentos ("ultima" + classe, ou uma pasta) e imprime o relatório. */
 export function executarCli(argumento, classe, raiz = RAIZ_PADRAO) {
   if (!argumento || (argumento === 'ultima' && !PASTA_POR_CLASSE[classe])) {
-    console.error('Uso: node scripts/top15-mercado-verificar.mjs <pasta-da-execução | ultima <classe: etfs | fiis | acoes | bdrs-negociados | bdrs>>')
+    console.error('Uso: node scripts/top15-mercado-verificar.mjs <pasta-da-execução | ultima <classe: etfs | fiis | acoes | bdrs-negociados | ifix | ibov | bdrs>>')
     return 2
   }
   const alvo = argumento === 'ultima' ? lerJson(path.join(raiz, 'auditoria', PASTA_POR_CLASSE[classe], 'ultima.json')).pasta : argumento

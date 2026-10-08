@@ -129,9 +129,9 @@ describe('Top15MaisNegociados: os quatro rankings não se confundem', () => {
 describe('abas "Top 15 mais negociados" nas telas de simulação', () => {
   const ctx = { screen: 'x', setScreen: vi.fn() } as unknown as AppCtx
 
-  it('Simule FII: três abas; a terceira abre o ranking e dá para voltar ao simulador', () => {
+  it('Simule FII: quatro abas; a de mais negociados abre o ranking e dá para voltar ao simulador', () => {
     render(<SimuleFii ctx={ctx} snapshot={{ geradoEm: null, vigenciaIfix: null, fundos: [] } as never} />)
-    expect(screen.getAllByRole('tab').map((x) => x.textContent?.replace(/^\S+\s*/, '').slice(0, 24))).toHaveLength(3)
+    expect(screen.getAllByRole('tab')).toHaveLength(4)
     fireEvent.click(screen.getByRole('tab', { name: /Top 15 mais negociados/ }))
     expect(screen.getByRole('tab', { name: /Top 15 mais negociados/ }).getAttribute('aria-selected')).toBe('true')
     expect(screen.queryByTestId('top15-fiis-negociados-validacao') ?? screen.queryByTestId('top15-fiis-negociados')).toBeTruthy()
@@ -142,9 +142,9 @@ describe('abas "Top 15 mais negociados" nas telas de simulação', () => {
     expect(screen.getByText('Os dados deste mês ainda não foram carregados.')).toBeTruthy()
   })
 
-  it('Simule Ações: três abas; a terceira abre o ranking de ações mais negociadas', () => {
+  it('Simule Ações: quatro abas; a de mais negociadas abre o ranking de ações mais negociadas', () => {
     render(<SimuleAcoes ctx={ctx} snapshot={{ geradoEm: null, dataPregao: null, fonte: null, cadastroId: null, pregoesNoHistorico: 0, sessoesLiquidez: 21, totais: { setores: 0, empresas: 0 }, gruposOrdem: [], setores: [], busca: [] } as never} />)
-    expect(screen.getAllByRole('tab')).toHaveLength(3)
+    expect(screen.getAllByRole('tab')).toHaveLength(4)
     fireEvent.click(screen.getByRole('tab', { name: /Top 15 mais negociadas/ }))
     expect(screen.getByRole('tab', { name: /Top 15 mais negociadas/ }).getAttribute('aria-selected')).toBe('true')
     expect(screen.queryByTestId('top15-acoes-negociadas-validacao') ?? screen.queryByTestId('top15-acoes-negociadas')).toBeTruthy()

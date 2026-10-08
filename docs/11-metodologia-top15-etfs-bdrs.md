@@ -74,10 +74,24 @@ Resultado de 08/10/2026 (pregões até 07/10): **FIIs** 202 analisados, 75 passa
 
 Mais negociado é **liquidez**, não qualidade, preço baixo nem segurança, e o aviso de cada tela diz isso. Para olhar preço contra os números do ativo, há o Top 15 FIIs baratos e o Top 15 ações baratas; para BDR, o Top 15 maior desconto. A publicação de cada ranking depende de `publicacao.aprovadoPeloResponsavel` no config da classe; os três estão `true` desde 08/10/2026 (v1.1.0).
 
-## 8. Limitações conhecidas
+## 8. Top 15 do IFIX e do Ibovespa: os maiores pesos (D72)
+
+Aqui o critério não é volume nem preço: é o **peso do ativo na carteira teórica oficial do índice**, publicada pela B3. O app mostra os 15 maiores pesos do **IFIX** (fundos imobiliários, aba do Simule FII) e do **Ibovespa** (ações, aba do Simule Ações).
+
+- **Fonte (única etapa com rede):** a carteira do dia na API pública da B3 que alimenta a página do índice (`sistemaswebb3-listados.b3.com.br/indexProxy/indexCall/GetPortfolioDay`), lida por `scripts/b3-indices.mjs`. O manifesto guarda o endereço, o tamanho e o **sha256 da resposta bruta**; a tabela completa (todos os ativos e pesos) fica nos insumos, de modo que a **verificação independente refaz o ranking sem internet**.
+- **Leitura estrita:** a leitura **erra** em vez de adivinhar se a resposta não tem a lista, a data ou o peso de um ativo, se há código repetido, ou se o total de registros informado pela B3 não bate com o recebido (paginação incompleta).
+- **Cálculo:** ordena do maior para o menor peso (empate: ordem alfabética do código), corta em 15 e acumula o peso (soma arredondada em três casas). Cotação, setor/segmento e a mediana do volume dos últimos 21 pregões são **informativos**, vêm do histórico diário da B3 e dos jobs do projeto, e não entram na ordem. Nome: o da B3 para FIIs e o do app (quando existe) para ações.
+- **Trava de sanidade:** o job falha, e o app não muda, se a lista tem menos de 15 ativos, se a carteira tem menos de 50 ativos (IFIX) ou 40 (Ibovespa), se os pesos não somam 100% (tolerância de 0,5 ponto) ou se a data da carteira está mais de 10 dias antes da execução (ou no futuro). O workflow isola essas duas etapas: se a B3 falhar, os outros rankings são guardados, o índice que falhou fica como estava e o job termina com erro (e-mail do GitHub).
+- **Publicação:** acesso **aberto**, sem código. `publicacao.aprovadoPeloResponsavel` em `config/top15-ifix.json` e `config/top15-ibov.json`.
+- **Peso não é qualidade.** Peso grande quer dizer ativo grande e líquido dentro do índice. A B3 revisa a carteira a cada quadrimestre e, entre as revisões, os pesos mudam todo dia com os preços. A empresa pode aparecer com mais de um código no Ibovespa (PETR3 e PETR4).
+
+Resultado de 08/10/2026 (carteira da B3 de 08/10/2026): **IFIX** com 99 fundos; os 15 maiores somam 50,9% do índice (KNCR11 8,76%, KNIP11 4,71%, BTLG11 4,69%, HGLG11 4,51%, XPML11 4,38%…). **Ibovespa** com 76 ativos; os 15 maiores somam 66,2% (ITUB4 9,16%, VALE3 8,86%, PETR4 8,37%, PETR3 5,12%, AXIA3 4,77%…). A verificação independente passou nos dois.
+
+## 9. Limitações conhecidas
 
 - Liquidez não é qualidade: o ETF mais negociado pode ser caro ou ruim para o seu objetivo. A taxa de administração, o índice e o risco estão no regulamento e na lâmina.
 - O histórico guarda 260 pregões; BDR listado há menos de 240 pregões fica de fora (histórico curto).
 - Desdobramentos e grupamentos só entram quando confirmados em `config/bdrs.json`; até lá o BDR vai para "a conferir". Confirmar exige olhar o aviso de evento corporativo na B3 (decisão manual).
 - O desconto de BDR inclui o câmbio (BDR = ação lá fora × dólar) e usa o fechamento, não o preço ajustado por dividendos.
+- A API da B3 dos índices não é um contrato público documentado: se o formato mudar, a leitura erra e o ranking deixa de ser atualizado (a trava avisa por e-mail).
 - A B3 não traz alguns instrumentos no boletim (como já visto nos FIIs, D64); o ativo ausente simplesmente não entra.

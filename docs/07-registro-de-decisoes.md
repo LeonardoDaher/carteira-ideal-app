@@ -1388,3 +1388,19 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 **Publicação.** O responsável mandou publicar os três em 08/10/2026 ("publique os 3"): `aprovadoPeloResponsavel` passou a `true` (v1.1.0, aprovação registrada em `publicacao.aprovacao`); nenhuma regra de cálculo mudou. Acesso aberto, sem código e sem variável na Vercel.
 
 **Testes.** Scripts +11 (`top15-mercado.test.mjs`: classe nos resultados, configs, três construtores de insumos, publicação aberta sem arquivo privado, verificação independente, pastas e arquivos sem colisão); web +28 (`Top15MaisNegociados.test.tsx`, um bloco por classe mais as abas das três telas). **Mutação:** 15 defeitos novos (precedência do nome, categoria padrão, ordem dos segmentos e setores, filtro de BDR de ETF, exclusões manuais, classe errada nos adaptadores, formato do snapshot e do CSV, sanidade, verificador) e os 15 foram detectados (um sobreviveu à primeira versão do teste de nomes e foi coberto); as 31 mutações do cálculo (D70) continuam todas detectadas.
+
+## D72 (08/10/2026): Top 15 do IFIX e do Ibovespa (maiores pesos)
+
+**Decisão.** O responsável pediu o "Top 15 FII do IFIX" e o "Top 15 ações do IBOV". Foi lido como **os 15 maiores pesos de cada índice**, o sentido usual de "top do índice", que é dado oficial e auditável. A alternativa (ranquear só os componentes por volume ou por preço) ficou como possibilidade futura, porque os rankings de mais negociados (D70 e D71) e de baratos já existem.
+
+**O que foi construído.** `scripts/b3-indices.mjs` (endereço, download com nova tentativa e leitura estrita da carteira da B3), `calcularIndice` e a sanidade de índice em `scripts/top15-mercado-calculo.mjs`, classes `ifix` e `ibov` no orquestrador (`executarIndice`, assíncrono; é a única etapa com rede) e no verificador, `config/top15-ifix.json` e `config/top15-ibov.json` (v1.0.0), arquivos do app `ifixMaioresPesos.json` e `ibovMaioresPesos.json`. A auditoria guarda a tabela completa da B3, o endereço e o sha256 da resposta bruta; a verificação independente refaz tudo sem internet. Detalhe na seção 8 de `docs/11-metodologia-top15-etfs-bdrs.md`.
+
+**Telas.** Componente `Top15Indice` e quarta aba em Simule FII ("Top 15 do IFIX") e em Simule Ações ("Top 15 do Ibovespa"); as abas passaram a ficar em duas colunas. Cada cartão mostra o peso, o peso acumulado, a barra proporcional, a cotação e o volume (informativos).
+
+**Workflow.** As duas etapas de índice rodam com `continue-on-error`: se a B3 falhar, os outros rankings são guardados, a auditoria do índice que falhou vai só como artefato (não para o repositório) e o job termina com erro no fim.
+
+**Primeira execução real.** IFIX: 99 fundos, os 15 maiores somam 50,9% (KNCR11, KNIP11, BTLG11, HGLG11, XPML11). Ibovespa: 76 ativos, os 15 maiores somam 66,2% (ITUB4, VALE3, PETR4, PETR3, AXIA3). Pesos somam 100% nos dois.
+
+**Publicação.** `aprovadoPeloResponsavel` está `false` nos dois (nas telas aparece "em validação") até o responsável mandar publicar. Acesso aberto, sem código.
+
+**Testes.** Scripts +9 no `b3-indices.test.mjs` e +11 no `top15-mercado.test.mjs`; web +16 (`Top15Indice.test.tsx`) mais os testes de abas atualizados. **Mutação:** 34 defeitos nos índices (ordem e desempate, acúmulo e arredondamento do peso, corte, universo, cada limite da sanidade, cada validação da leitura da B3, nova tentativa, erro HTTP, nomes e setores, sha256 da resposta, CSV, verificador) e os 34 foram detectados; 3 sobreviveram à primeira versão (arredondamento dos pesos, que o teste não exercitava, e uma mutação mal escolhida minha) e foram cobertos.
