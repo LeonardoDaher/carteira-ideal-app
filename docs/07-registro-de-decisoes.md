@@ -1358,3 +1358,19 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 **Textos públicos.** Páginas de carro e moto (título, descrição, "o que calcula", custos, FAQ), cartões da landing e rodapé atualizados.
 
 **Testes.** Web 1.347 → 1.375; scripts 308. Teste de mutação no orçamento de referência (só os caminhos escolhidos): confirmado e arquivo restaurado.
+
+## D70 (08/10/2026): Top 15 ETFs mais negociados e Top 15 BDRs com maior desconto de preço
+
+**Decisão e o que mudou em relação ao plano.** O responsável pediu os rankings de ETFs e BDRs. A recomendação inicial para ETFs era "mais eficientes" (menor taxa de administração, patrimônio e liquidez mínimos). **Não é viável de forma confiável**: a CVM não traz a taxa de administração de ETFs em dado aberto (o `cad_fi.csv` antigo não tem ETF ativo e o `registro_classe.csv` novo não tem coluna de taxa), e ligar ticker a CNPJ também não é direto. Por isso o ETF seguiu o critério que o próprio responsável pediu antes, **mais negociados** (liquidez), e o BDR o critério recomendado: **desconto de preço** contra a máxima de 12 meses. Metodologia completa em `docs/11-metodologia-top15-etfs-bdrs.md`.
+
+**O que foi construído.** Cálculo puro `scripts/top15-mercado-calculo.mjs`; orquestrador com auditoria `scripts/atualizar-top15-mercado.mjs` (`etfs` ou `bdrs`); verificador independente `scripts/top15-mercado-verificar.mjs`; configurações `config/top15-etfs.json` e `config/top15-bdrs.json` (v1.0.0); workflow mensal "Atualizar Top 15 ETFs e BDRs" (dia 22); trilha em `auditoria/top15-etfs/` e `auditoria/top15-bdrs/`. Sem rede: lê `historico/etfs.json` e `historico/bdrs.json`, com o sha256 no manifesto.
+
+**Acesso.** ETFs: **aberto** (ordenação por volume de dado público que o app já exibe). BDRs: **código próprio**, `TOP15_BDRS_CODIGOS` (função `api/top15-bdrs.ts`, arquivo `dados-privados/bdr-desconto.json`, chave `carteiraideal.top15bdrs.codigo`), isolado das ações e dos FIIs nos dois sentidos, como na D66. `npm run codigo-top15 -- --classe bdrs`. O cabeçalho público dos BDRs não tem nenhum ticker (teste automático).
+
+**Telas.** Novo componente `AbasDaTela` e abas "Simulador | Top 15" em Simule ETF e Simule BDR. A nota do D23 ("sem ranking") passa a valer só para o simulador; o ranking tem aviso próprio.
+
+**Primeira execução real (pregões até 05/10/2026).** ETFs: universo 234, 80 elegíveis. BDRs: universo 702, 64 elegíveis, 10 em conferência (vários por salto de desdobramento ainda não confirmado em `config/bdrs.json`: NFLX34, BKNG34 e outros). A verificação independente passou nos dois.
+
+**Publicação.** `aprovadoPeloResponsavel` está `false` nos dois: o app mostra "em validação" até a decisão do responsável.
+
+**Testes.** Scripts: +33 (`top15-mercado.test.mjs`) e +1 (`top15-acesso.test.mjs`). **Mutação:** 31 defeitos no cálculo (mediana trocada por média, dia sem negócio ignorado, limites inclusivos de liquidez, dias e pregões sem negócio, máxima por máxima do dia em vez do fechamento, desdobramento ignorado, limites do salto, desconto extremo, ordem, janela, alinhamento da série, cortes de lista e de categoria, desempates, sanidade) e os 31 foram detectados; 6 sobreviveram à primeira versão dos testes (limites exatos e o dia sem negócio) e foram cobertos. Web: telas, domínio e acesso dos dois rankings.

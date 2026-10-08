@@ -6,7 +6,7 @@ import { carregarTs } from './ts-loader.mjs'
 import { ALFABETO, VARIAVEL_POR_CLASSE, gerarCodigo, lerArgumentos } from './gerar-codigo-top15.mjs'
 
 const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
-const { modulos, limpar } = await carregarTs(path.join(RAIZ, 'api'), ['_top15.ts', 'top15.ts', 'top15-fiis.ts'])
+const { modulos, limpar } = await carregarTs(path.join(RAIZ, 'api'), ['_top15.ts', 'top15.ts', 'top15-fiis.ts', 'top15-bdrs.ts'])
 test.after(() => limpar())
 const A = modulos['_top15.ts']
 
@@ -212,10 +212,10 @@ test('FIIs (api/top15-fiis.ts): sem TOP15_FIIS_CODIGOS a porta responde 503; com
   }
 })
 
-test('vercel.json inclui dados-privados nas duas funções do Top 15 (ações e FIIs)', async () => {
+test('vercel.json inclui dados-privados nas três funções do Top 15 (ações, FIIs e BDRs)', async () => {
   const fs = await import('node:fs')
   const v = JSON.parse(fs.readFileSync(path.join(RAIZ, 'vercel.json'), 'utf8'))
-  for (const f of ['api/top15.ts', 'api/top15-fiis.ts']) assert.equal(v.functions[f].includeFiles, 'dados-privados/**', f)
+  for (const f of ['api/top15.ts', 'api/top15-fiis.ts', 'api/top15-bdrs.ts']) assert.equal(v.functions[f].includeFiles, 'dados-privados/**', f)
 })
 
 test('gerador de código: formato, alfabeto sem símbolos ambíguos, sem repetição e atende ao tamanho mínimo do servidor', () => {
@@ -233,12 +233,71 @@ test('gerador de código: formato, alfabeto sem símbolos ambíguos, sem repeti�
 })
 
 test('gerador de código por classe (D66): --classe acoes|fiis aponta a variável certa, aceita a quantidade e recusa classe desconhecida', () => {
-  assert.deepEqual(VARIAVEL_POR_CLASSE, { acoes: 'TOP15_CODIGOS', fiis: 'TOP15_FIIS_CODIGOS' })
+  assert.deepEqual(VARIAVEL_POR_CLASSE, { acoes: 'TOP15_CODIGOS', fiis: 'TOP15_FIIS_CODIGOS', bdrs: 'TOP15_BDRS_CODIGOS' })
+  assert.deepEqual(lerArgumentos(['--classe', 'bdrs']), { classe: 'bdrs', quantidade: 1 })
   assert.deepEqual(lerArgumentos([]), { classe: undefined, quantidade: 1 })
   assert.deepEqual(lerArgumentos(['--classe', 'fiis']), { classe: 'fiis', quantidade: 1 })
   assert.deepEqual(lerArgumentos(['2', '--classe', 'acoes']), { classe: 'acoes', quantidade: 2 })
   assert.deepEqual(lerArgumentos(['--classe', 'acoes', '9']), { classe: 'acoes', quantidade: 5 })
-  assert.throws(() => lerArgumentos(['--classe', 'etf']), /Classe inválida/)
+  assert.throws(() => lerArgumentos(['--classe', 'etf']), /Classe inválida/, 'ETF tem ranking aberto: não há código')
   assert.throws(() => lerArgumentos(['--classe']), /Classe inválida/)
   assert.throws(() => lerArgumentos(['--classe', 'toString']), /Classe inválida/)
+})
+test('BDRs (api/top15-bdrs.ts): variável própria TOP15_BDRS_CODIGOS; os códigos das ações e dos FIIs não abrem, e vice-versa (D70)', async () => {
+  const fs = await import('node:fs')
+  const os = await import('node:os')
+  const bdrs = modulos['top15-bdrs.ts'].default
+  const fiis = modulos['top15-fiis.ts'].default
+  const acoes = modulos['top15.ts'].default
+  const anterior = { cwd: process.cwd(), b: process.env.TOP15_BDRS_CODIGOS, f: process.env.TOP15_FIIS_CODIGOS, a: process.env.TOP15_CODIGOS }
+  const pasta = fs.mkdtempSync(path.join(os.tmpdir(), 'top15-bdrs-'))
+  try {
+    delete process.env.TOP15_BDRS_CODIGOS
+    process.env.TOP15_CODIGOS = 'CI-ACOE-SSSS'
+    process.env.TOP15_FIIS_CODIGOS = 'CI-FIIS-FIIS'
+    // sem a variável própria, a porta fica fechada mesmo com os códigos das outras listas configurados
+    const fechada = await chamar(bdrs, { codigo: 'CI-ACOE-SSSS' })
+    assert.deepEqual([fechada.statusCode, fechada.corpo.motivo], [503, 'nao_configurado'])
+    const fechada2 = await chamar(bdrs, { codigo: 'CI-FIIS-FIIS' })
+    assert.deepEqual([fechada2.statusCode, fechada2.corpo.motivo], [503, 'nao_configurado'])
+
+    process.env.TOP15_BDRS_CODIGOS = 'CI-BDRS-BDRS'
+    fs.mkdirSync(path.join(pasta, 'dados-privados'))
+    process.chdir(pasta)
+    const semArquivo = await chamar(bdrs, { codigo: 'CI-BDRS-BDRS' }, { ip: '203.0.113.1' })
+    assert.deepEqual([semArquivo.statusCode, semArquivo.corpo.motivo], [503, 'indisponivel'])
+    fs.writeFileSync(path.join(pasta, 'dados-privados', 'bdr-desconto.json'), JSON.stringify({ publicado: false }))
+    assert.equal((await chamar(bdrs, { codigo: 'CI-BDRS-BDRS' }, { ip: '203.0.113.2' })).statusCode, 503)
+    const lista = { publicado: true, ranking: [{ ticker: 'BDRX34' }], aConferir: [], exclusoes: [] }
+    fs.writeFileSync(path.join(pasta, 'dados-privados', 'bdr-desconto.json'), JSON.stringify(lista))
+    fs.writeFileSync(path.join(pasta, 'dados-privados', 'fii-baratos.json'), JSON.stringify({ publicado: true, tijolo: [{ ticker: 'FIIT11' }], papel: [] }))
+    fs.writeFileSync(path.join(pasta, 'dados-privados', 'acoes-baratas.json'), JSON.stringify({ publicado: true, ranking: [{ ticker: 'ACAO3' }] }))
+
+    const ok = await chamar(bdrs, { codigo: 'ci bdrs bdrs' }, { ip: '203.0.113.3' })
+    assert.equal(ok.statusCode, 200)
+    assert.deepEqual(ok.corpo, lista)
+    assert.equal(ok.cabecalhos['cache-control'], 'private, no-store')
+
+    // isolamento nos dois sentidos: o código de cada lista só abre a própria
+    for (const [codigo, ip] of [['CI-ACOE-SSSS', '203.0.113.4'], ['CI-FIIS-FIIS', '203.0.113.5']]) {
+      const r = await chamar(bdrs, { codigo }, { ip })
+      assert.deepEqual([r.statusCode, r.corpo.motivo], [401, 'invalido'], `${codigo} não abre os BDRs`)
+      assert.ok(!JSON.stringify(r.corpo).includes('BDRX34'))
+    }
+    const doBdrNasAcoes = await chamar(acoes, { codigo: 'CI-BDRS-BDRS' }, { ip: '203.0.113.6' })
+    assert.deepEqual([doBdrNasAcoes.statusCode, doBdrNasAcoes.corpo.motivo], [401, 'invalido'])
+    assert.ok(!JSON.stringify(doBdrNasAcoes.corpo).includes('ACAO3'))
+    const doBdrNosFiis = await chamar(fiis, { codigo: 'CI-BDRS-BDRS' }, { ip: '203.0.113.7' })
+    assert.deepEqual([doBdrNosFiis.statusCode, doBdrNosFiis.corpo.motivo], [401, 'invalido'])
+    assert.ok(!JSON.stringify(doBdrNosFiis.corpo).includes('FIIT11'))
+
+    assert.equal((await chamar(bdrs, {}, { metodo: 'GET' })).statusCode, 405)
+  } finally {
+    process.chdir(anterior.cwd)
+    for (const [chave, valor] of [['TOP15_BDRS_CODIGOS', anterior.b], ['TOP15_FIIS_CODIGOS', anterior.f], ['TOP15_CODIGOS', anterior.a]]) {
+      if (valor === undefined) delete process.env[chave]
+      else process.env[chave] = valor
+    }
+    fs.rmSync(pasta, { recursive: true, force: true })
+  }
 })

@@ -13,6 +13,8 @@ import { formatarData, formatarVolume } from '../domain/rendaFii'
 import { VoltarInicio } from '../ui/VoltarInicio'
 import { rolarParaResultado } from '../ui/rolarParaResultado'
 import { AvisoEducacional } from '../ui/AvisoEducacional'
+import { AbasDaTela } from '../ui/AbasDaTela'
+import { Top15BdrsDesconto } from './Top15BdrsDesconto'
 import type { AppCtx } from '../state/useAppState'
 
 function reais(valor: number) {
@@ -45,6 +47,7 @@ export function SimuleBdr({
   const [selecao, setSelecao] = useState<Selecao | undefined>(primeiro ? { origem: 'lista', bdr: primeiro, tipo: 'acao' } : undefined)
   const [valorLivre, setValorLivre] = useState('')
   const [valorEscolhido, setValorEscolhido] = useState<number>(VALORES_PADRAO[1])
+  const [aba, setAba] = useState<'simulador' | 'top15'>('simulador')
 
   const levarAoCartao = () => rolarParaResultado('cartao-bdr')
 
@@ -83,6 +86,20 @@ export function SimuleBdr({
         </div>
       </div>
 
+      <AbasDaTela
+        prefixo="bdr"
+        rotulo="O que você quer ver"
+        ativa={aba}
+        aoMudar={setAba}
+        abas={[
+          { id: 'simulador', emoji: '🧮', titulo: 'Simulador', descricao: 'Preço e quantos BDRs compra' },
+          { id: 'top15', emoji: '🏷️', titulo: 'Top 15 maior desconto', descricao: 'Desconto de preço, com auditoria' },
+        ] as const}
+      >
+      {aba === 'top15' ? (
+        <Top15BdrsDesconto />
+      ) : (
+      <>
       {!selecao ? (
         <div className="card col" style={{ gap: 6 }} role="status">
           <span style={{ fontWeight: 700 }}>Os dados dos BDRs ainda não foram carregados.</span>
@@ -150,10 +167,14 @@ export function SimuleBdr({
         </span>
       </div>
 
+      </>
+      )}
+      </AbasDaTela>
+
       <div className="card-outline small muted justify" style={{ lineHeight: 1.5 }} role="note">
         <strong>Rentabilidade obtida no passado não representa garantia de rentabilidade futura.</strong> O preço de um BDR
         muda com a ação lá fora e com o dólar: mesmo que a empresa não se mova, a alta ou a queda do dólar muda o valor em
-        reais. Estar na lista ou na busca não é uma indicação de compra: o critério da lista é só o volume negociado.
+        reais. Estar na lista, na busca ou no Top 15 não é uma indicação de compra: o critério da lista é só o volume negociado, e o do Top 15 é só o desconto de preço.
         {snapshot.geradoEm
           ? snapshot.fonte
             ? ` Preços e volumes oficiais da B3 (Boletim de Preços); nome, setor e proporção da brapi. Atualizados em ${formatarData(snapshot.geradoEm)}.`

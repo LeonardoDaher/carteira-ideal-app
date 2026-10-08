@@ -1,0 +1,30 @@
+{
+  "publicado": false,
+  "acessoRestrito": false,
+  "instagram": null,
+  "versaoMetodologia": "1.0.0",
+  "geradoEm": "2026-10-08T12:57:25.785Z",
+  "dataExecucao": "2026-10-08",
+  "ultimoPregao": "2026-10-05",
+  "pastaAuditoria": "auditoria/top15-etfs/2026-10-08",
+  "hashResultado": "6f43882514d60bebcc0f121b17dd15a3e44de4a41cced59068e4b9d1534b37e6",
+  "hashInsumos": "7f7980312896dc05330097113941f88adfc8bcbef7517c3334e0ca533adbda82",
+  "hashConfig": "bedaa460efd1b7e2aef5b89fddc61262ff4b54d8605f300f2dfe3f881fde28c2",
+  "tamanhoDaLista": 15,
+  "universo": 234,
+  "elegiveis": 80,
+  "aviso": "Não é recomendação de investimento. “Mais negociado” significa apenas maior volume financeiro diário (mediana dos últimos 21 pregões): é liquidez, e não indica qualidade, custo baixo, bom momento de compra nem adequação ao seu perfil. Cada ETF tem taxa de administração, índice, risco e tributação próprios; leia o regulamento e a lâmina antes de investir. Os números vêm do Boletim de Preços da B3, são do passado e podem conter erros. Rentabilidade passada não garante rentabilidade futura. Converse com um profissional certificado antes de investir.",
+  "parametros": {
+    "tamanhoDaLista": 15,
+    "tamanhoPorCategoria": 5,
+    "janelaLiquidez": 21,
+    "janela3Meses": 63,
+    "volumeMinimoDiario": 500000,
+    "diasNegociadosMinimos": 15,
+    "pregoesMaxSemNegocio": 5,
+    "pregoesNosInsumos": 80
+  },
+  "geral": [],
+  "porCategoria": {},
+  "exclusoes": []
+}

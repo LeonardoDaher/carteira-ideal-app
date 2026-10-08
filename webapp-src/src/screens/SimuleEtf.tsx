@@ -7,6 +7,8 @@ import { formatarData, formatarVolume } from '../domain/rendaFii'
 import { VoltarInicio } from '../ui/VoltarInicio'
 import { rolarParaResultado } from '../ui/rolarParaResultado'
 import { AvisoEducacional } from '../ui/AvisoEducacional'
+import { AbasDaTela } from '../ui/AbasDaTela'
+import { Top15EtfsMaisNegociados } from './Top15EtfsMaisNegociados'
 import type { AppCtx } from '../state/useAppState'
 
 function reais(valor: number) {
@@ -21,9 +23,10 @@ function inteiro(valor: number) {
 type Selecao = { origem: 'lista'; etf: EtfLista } | { origem: 'busca'; etf: EtfBusca }
 
 /**
- * Aba "Simule ETF" (decisão D23). Tela estritamente descritiva: os 40 ETFs da B3 mais
+ * Aba "Simule ETF" (decisão D23). O simulador é estritamente descritivo: os 40 ETFs da B3 mais
  * negociados, agrupados por categoria e ordenados por volume, com a busca para os demais.
- * Sem ranking, sem múltiplos de avaliação, sem projeção de retorno. Dados oficiais da B3.
+ * Sem múltiplos de avaliação, sem projeção de retorno. Dados oficiais da B3. Desde a D70 há uma segunda aba,
+ * "Top 15 mais negociados": o ranking por volume (liquidez), que não diz nada sobre qualidade ou preço.
  */
 export function SimuleEtf({
   snapshot = SNAPSHOT_ETFS,
@@ -38,6 +41,7 @@ export function SimuleEtf({
   const [selecao, setSelecao] = useState<Selecao | undefined>(primeiro ? { origem: 'lista', etf: primeiro } : undefined)
   const [valorLivre, setValorLivre] = useState('')
   const [valorEscolhido, setValorEscolhido] = useState<number>(VALORES_PADRAO[1])
+  const [aba, setAba] = useState<'simulador' | 'top15'>('simulador')
 
   const levarAoCartao = () => rolarParaResultado('cartao-etf')
 
@@ -66,6 +70,20 @@ export function SimuleEtf({
         </div>
       </div>
 
+      <AbasDaTela
+        prefixo="etf"
+        rotulo="O que você quer ver"
+        ativa={aba}
+        aoMudar={setAba}
+        abas={[
+          { id: 'simulador', emoji: '🧮', titulo: 'Simulador', descricao: 'Preço e quantas cotas compra' },
+          { id: 'top15', emoji: '📊', titulo: 'Top 15 mais negociados', descricao: 'Ranking por volume, com auditoria' },
+        ] as const}
+      >
+      {aba === 'top15' ? (
+        <Top15EtfsMaisNegociados />
+      ) : (
+      <>
       {!selecao ? (
         <div className="card col" style={{ gap: 6 }} role="status">
           <span style={{ fontWeight: 700 }}>Os dados dos ETFs ainda não foram carregados.</span>
@@ -134,11 +152,15 @@ export function SimuleEtf({
         </span>
       </div>
 
+      </>
+      )}
+      </AbasDaTela>
+
       <div className="card-outline small muted justify" style={{ lineHeight: 1.5 }} role="note">
         <strong>Rentabilidade obtida no passado não representa garantia de rentabilidade futura.</strong> ETFs de bolsa
         exterior podem variar também com o dólar, conforme a estrutura de cada fundo; ETFs de renda fixa também oscilam de
-        preço até o vencimento dos títulos da carteira. Estar na lista ou na busca não é uma indicação de compra: o critério da
-        lista é só o volume negociado.
+        preço até o vencimento dos títulos da carteira. Estar na lista, na busca ou no Top 15 não é uma indicação de compra: o critério
+        é só o volume negociado.
         {snapshot.geradoEm ? ` Dados oficiais da B3 (Boletim de Preços), atualizados em ${formatarData(snapshot.geradoEm)}.` : ''}
       </div>
 

@@ -1,0 +1,38 @@
+{
+  "publicado": false,
+  "acessoRestrito": true,
+  "instagram": "acarteiraideal",
+  "versaoMetodologia": "1.0.0",
+  "geradoEm": "2026-10-08T12:57:26.668Z",
+  "dataExecucao": "2026-10-08",
+  "ultimoPregao": "2026-10-05",
+  "pastaAuditoria": "auditoria/top15-bdrs/2026-10-08",
+  "hashResultado": "7fb0bedc90766997228254a7b350a6b45072da44bc3a9b00c14435cb3c4ef3dd",
+  "hashInsumos": "16cc91d2030c99c255f09e20dc212638ef42657af0356c0bed9c82cd2ca41e8d",
+  "hashConfig": "9a84ba859c12eb5b1973f85d58f5f30e3d1dec7f5678f05b41762d4c03250fa8",
+  "tamanhoDaLista": 15,
+  "universo": 702,
+  "elegiveis": 64,
+  "aviso": "Não é recomendação de investimento. “Maior desconto” significa só que o preço do BDR está abaixo do maior fechamento dos últimos 12 meses. Isso não é desconto de valor: o preço do BDR depende da ação lá fora e do câmbio, e uma queda grande costuma refletir um problema real da empresa ou do setor, não uma pechincha. A triagem não analisa balanço, dívida nem lucro das empresas estrangeiras. Os números vêm do Boletim de Preços da B3, são do passado, podem conter erros, e desdobramentos ainda não confirmados podem distorcer o preço. Rentabilidade passada não garante rentabilidade futura e BDRs podem causar perda de parte ou de todo o dinheiro aplicado. Converse com um profissional certificado antes de investir.",
+  "parametros": {
+    "tamanhoDaLista": 15,
+    "janelaLiquidez": 21,
+    "janela3Meses": 63,
+    "janelaMaxima": 252,
+    "pregoesMinimosHistorico": 240,
+    "volumeMinimoDiario": 300000,
+    "diasNegociadosMinimos": 15,
+    "pregoesMaxSemNegocio": 5,
+    "saltoQueda": 0.55,
+    "saltoAlta": 1.8,
+    "descontoParaConferir": 0.6
+  },
+  "contagens": {
+    "ranking": 15,
+    "aConferir": 10,
+    "exclusoes": 628
+  },
+  "ranking": [],
+  "aConferir": [],
+  "exclusoes": []
+}

@@ -1,17 +1,20 @@
 import type { SnapshotAcoesBaratas } from './acoesBaratas'
 import type { SnapshotFiiBaratos } from './fiiBaratos'
+import type { SnapshotBdrsDesconto } from './top15Mercado'
 
 /**
  * Acesso ao Top 15 por código mensal (D50). O ranking não vem no arquivo do app: o navegador pede à
- * função api/top15 (ações) ou api/top15-fiis (FIIs, D65) enviando o código, e ela só devolve a lista
+ * função api/top15 (ações), api/top15-fiis (FIIs, D65) ou api/top15-bdrs (BDRs, D70) enviando o código, e ela só devolve a lista
  * se o código estiver certo. Cada classe de ativos tem o SEU código (D66): ações em TOP15_CODIGOS, FIIs em
- * TOP15_FIIS_CODIGOS, e o app guarda cada um em chave própria.
+ * TOP15_FIIS_CODIGOS, BDRs em TOP15_BDRS_CODIGOS, e o app guarda cada um em chave própria.
  */
 
 /** Código das ações (chave mantida desde a D50: quem já liberou as ações continua liberado). */
 export const CHAVE_CODIGO_TOP15 = 'carteiraideal.top15.codigo'
 /** Código dos FIIs. */
 export const CHAVE_CODIGO_TOP15_FIIS = 'carteiraideal.top15fiis.codigo'
+/** Código dos BDRs (D70). Os ETFs não têm código: o ranking é aberto. */
+export const CHAVE_CODIGO_TOP15_BDRS = 'carteiraideal.top15bdrs.codigo'
 
 export type MotivoFalhaTop15 = 'invalido' | 'limite' | 'indisponivel' | 'nao_configurado' | 'rede' | 'resposta'
 
@@ -20,6 +23,7 @@ export type RespostaLista<T> = { ok: true; snapshot: T } | { ok: false; motivo: 
 
 export type RespostaTop15 = RespostaLista<SnapshotAcoesBaratas>
 export type RespostaTop15Fiis = RespostaLista<SnapshotFiiBaratos>
+export type RespostaTop15Bdrs = RespostaLista<SnapshotBdrsDesconto>
 
 /** Só para conforto de quem digita: aceita minúsculas, espaços e com ou sem hífen. O servidor normaliza de novo. */
 export function limparCodigoDigitado(texto: string): string {
@@ -68,6 +72,10 @@ export async function buscarTop15(codigo: string, fetchImpl: typeof fetch = fetc
 
 export async function buscarTop15Fiis(codigo: string, fetchImpl: typeof fetch = fetch): Promise<RespostaTop15Fiis> {
   return pedirLista('/api/top15-fiis', codigo, (s): s is SnapshotFiiBaratos => !!s && (s as SnapshotFiiBaratos).publicado === true && Array.isArray((s as SnapshotFiiBaratos).tijolo) && Array.isArray((s as SnapshotFiiBaratos).papel), fetchImpl)
+}
+
+export async function buscarTop15Bdrs(codigo: string, fetchImpl: typeof fetch = fetch): Promise<RespostaTop15Bdrs> {
+  return pedirLista('/api/top15-bdrs', codigo, (s): s is SnapshotBdrsDesconto => !!s && (s as SnapshotBdrsDesconto).publicado === true && Array.isArray((s as SnapshotBdrsDesconto).ranking) && Array.isArray((s as SnapshotBdrsDesconto).aConferir), fetchImpl)
 }
 
 export function mensagemDaFalha(r: { motivo: MotivoFalhaTop15; espera?: number }): string {
