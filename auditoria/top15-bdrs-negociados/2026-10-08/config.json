@@ -1,11 +1,16 @@
 {
   "_leia": "Parâmetros do 'Top 15 BDRs mais negociados' (D71). ESTE ARQUIVO É A FONTE ÚNICA: o cálculo (scripts/top15-mercado-calculo.mjs) e o documento docs/11-metodologia-top15-etfs-bdrs.md citam estes valores. Qualquer mudança exige subir 'versaoMetodologia' e registrar o motivo em 'historicoDeVersoes'. O hash SHA-256 deste arquivo vai no manifesto de cada execução. Mais negociado = MEDIANA do volume financeiro diário dos últimos 'janelaLiquidez' pregões, dia sem negócio conta zero. É liquidez: não é qualidade, preço baixo nem segurança. Fonte: Boletim de Preços da B3 (BVBG.086) guardado em historico/bdrs.json pelo job de BDRs (D19/D24). Entram BDRs de ação (31 a 35) e de ETF (39); ficam de fora as empresas de origem ou operação brasileira de config/bdrs.json. A categoria é o setor da empresa; os BDRs de ETF formam a categoria 'BDRs de ETF'.",
-  "versaoMetodologia": "1.0.0",
+  "versaoMetodologia": "1.1.0",
   "historicoDeVersoes": [
     {
       "versao": "1.0.0",
       "data": "2026-10-08",
       "mudanca": "Versão inicial. Critério pedido pelo responsável: BDRs mais negociados."
+    },
+    {
+      "versao": "1.1.0",
+      "data": "2026-10-08",
+      "mudanca": "PUBLICAÇÃO (D71). O responsável aprovou publicar o ranking no app, com acesso aberto (sem código): aprovadoPeloResponsavel passa a true. Nenhuma regra de cálculo mudou."
     }
   ],
   "tamanhoDaLista": 15,
@@ -17,7 +22,12 @@
   "pregoesMaxSemNegocio": 5,
   "pregoesNosInsumos": 80,
   "publicacao": {
-    "aprovadoPeloResponsavel": false,
+    "aprovadoPeloResponsavel": true,
+    "aprovacao": {
+      "por": "responsável pelo projeto (Leonardo Daher)",
+      "data": "2026-10-08",
+      "escopo": "Publicar o Top 15 de BDRs mais negociados no app, com acesso aberto (sem código). O parecer independente de especialista (D22) foi declarado pelo responsável, que se identifica como o especialista."
+    },
     "_leia": "Com aprovadoPeloResponsavel = false o job só grava a trilha de auditoria e o app mostra 'em validação'. Com true E a trava de sanidade aprovada, o ranking vai para o arquivo do app. Acesso ABERTO, sem código (decisão do responsável em 08/10/2026): é uma ordenação por volume de dados públicos da B3.",
     "sanidade": {
       "minimoNaLista": 15,
