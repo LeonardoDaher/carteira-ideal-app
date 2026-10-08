@@ -15,6 +15,7 @@ import { rolarParaResultado } from '../ui/rolarParaResultado'
 import { AvisoEducacional } from '../ui/AvisoEducacional'
 import { AbasDaTela } from '../ui/AbasDaTela'
 import { Top15BdrsDesconto } from './Top15BdrsDesconto'
+import { Top15BdrsMaisNegociados } from './Top15EtfsMaisNegociados'
 import type { AppCtx } from '../state/useAppState'
 
 function reais(valor: number) {
@@ -47,7 +48,7 @@ export function SimuleBdr({
   const [selecao, setSelecao] = useState<Selecao | undefined>(primeiro ? { origem: 'lista', bdr: primeiro, tipo: 'acao' } : undefined)
   const [valorLivre, setValorLivre] = useState('')
   const [valorEscolhido, setValorEscolhido] = useState<number>(VALORES_PADRAO[1])
-  const [aba, setAba] = useState<'simulador' | 'top15'>('simulador')
+  const [aba, setAba] = useState<'simulador' | 'top15' | 'negociados'>('simulador')
 
   const levarAoCartao = () => rolarParaResultado('cartao-bdr')
 
@@ -94,10 +95,13 @@ export function SimuleBdr({
         abas={[
           { id: 'simulador', emoji: '🧮', titulo: 'Simulador', descricao: 'Preço e quantos BDRs compra' },
           { id: 'top15', emoji: '🏷️', titulo: 'Top 15 maior desconto', descricao: 'Desconto de preço, com auditoria' },
+          { id: 'negociados', emoji: '📊', titulo: 'Top 15 mais negociados', descricao: 'Ranking por volume' },
         ] as const}
       >
       {aba === 'top15' ? (
         <Top15BdrsDesconto />
+      ) : aba === 'negociados' ? (
+        <Top15BdrsMaisNegociados />
       ) : (
       <>
       {!selecao ? (

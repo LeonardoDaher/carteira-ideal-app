@@ -1,0 +1,30 @@
+{
+  "publicado": false,
+  "acessoRestrito": false,
+  "instagram": null,
+  "versaoMetodologia": "1.0.0",
+  "geradoEm": "2026-10-08T15:44:05.083Z",
+  "dataExecucao": "2026-10-08",
+  "ultimoPregao": "2026-10-07",
+  "pastaAuditoria": "auditoria/top15-acoes/2026-10-08",
+  "hashResultado": "25a5069f848c99eb455b1feaa3e37f6050def3cc487f5d4eb71bac21a85164f1",
+  "hashInsumos": "e32d5dfb57fec7625310af29dd08ccac3536e436f3db50a422f859ce7f4b6604",
+  "hashConfig": "45fe5dd776062cd6b6cfb8dbcb142acef3f1bb69303b5dfdc146e85362785863",
+  "tamanhoDaLista": 15,
+  "universo": 390,
+  "elegiveis": 196,
+  "aviso": "Não é recomendação de investimento. “Mais negociada” significa apenas maior volume financeiro diário (mediana dos últimos 21 pregões): é liquidez, e não indica qualidade da empresa, preço baixo, bom momento de compra nem adequação ao seu perfil. Uma ação muito negociada pode estar cara, em queda ou em dificuldade. Os números vêm do Boletim de Preços da B3, são do passado e podem conter erros. Rentabilidade passada não garante rentabilidade futura e ações podem causar perda de parte ou de todo o dinheiro aplicado. Converse com um profissional certificado antes de investir.",
+  "parametros": {
+    "tamanhoDaLista": 15,
+    "tamanhoPorCategoria": 5,
+    "janelaLiquidez": 21,
+    "janela3Meses": 63,
+    "volumeMinimoDiario": 1000000,
+    "diasNegociadosMinimos": 15,
+    "pregoesMaxSemNegocio": 5,
+    "pregoesNosInsumos": 80
+  },
+  "geral": [],
+  "porCategoria": {},
+  "exclusoes": []
+}

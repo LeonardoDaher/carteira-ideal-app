@@ -7,9 +7,9 @@ import test from 'node:test'
 import zlib from 'node:zlib'
 import { fileURLToPath } from 'node:url'
 import {
-  ajustarDesdobramentos, calcularBdrs, calcularEtfs, hashDoResultado, mediana, saltosDePreco, verificarSanidade,
+  ajustarDesdobramentos, calcularAcoes, calcularBdrs, calcularBdrsNegociados, calcularEtfs, calcularFiis, hashDoResultado, mediana, saltosDePreco, verificarSanidade,
 } from './top15-mercado-calculo.mjs'
-import { arquivosCsv, concluir, montarInsumosBdrs, montarInsumosEtfs, semNotas } from './atualizar-top15-mercado.mjs'
+import { CLASSES, arquivosCsv, concluir, montarInsumosAcoes, montarInsumosBdrs, montarInsumosBdrsNegociados, montarInsumosEtfs, montarInsumosFiis, semNotas } from './atualizar-top15-mercado.mjs'
 import { verificar } from './top15-mercado-verificar.mjs'
 
 const AQUI = path.dirname(fileURLToPath(import.meta.url))
@@ -463,4 +463,122 @@ test('BDR: desconto exatamente em 60% fica no ranking; só acima disso vai para 
   const { resultado } = calcularBdrs(insumosBdr([bdr('AAAA34', s)]), { ...cfgBdr, janelaMaxima: 14, pregoesMinimosHistorico: 14 })
   assert.deepEqual(resultado.aConferir, [])
   assert.equal(resultado.ranking[0].desconto, 0.6)
+})
+// ---------------------------------------------------------------------------------------
+// FIIs, ações e BDRs mais negociados (D71): mesmo cálculo de liquidez dos ETFs, com a classe nos insumos
+// ---------------------------------------------------------------------------------------
+
+const cfgsLiquidez = {
+  fiis: lerJson(RAIZ, 'config', 'top15-fiis.json'),
+  acoes: lerJson(RAIZ, 'config', 'top15-acoes.json'),
+  'bdrs-negociados': lerJson(RAIZ, 'config', 'top15-bdrs-negociados.json'),
+}
+const calculoPorClasse = { fiis: calcularFiis, acoes: calcularAcoes, 'bdrs-negociados': calcularBdrsNegociados }
+const comJanelasPequenas = (cfg) => ({ ...cfg, tamanhoDaLista: 3, tamanhoPorCategoria: 1, janelaLiquidez: 5, janela3Meses: 8, volumeMinimoDiario: 100, diasNegociadosMinimos: 3, pregoesMaxSemNegocio: 2,
+  publicacao: { ...cfg.publicacao, aprovadoPeloResponsavel: false, sanidade: { minimoNaLista: 1, maximoFracaoSemCotacao: 0.9 } } })
+
+test('FIIs, ações e BDRs mais negociados: o resultado leva a classe certa e ordena como os ETFs (mediana do volume)', () => {
+  for (const classe of ['fiis', 'acoes', 'bdrs-negociados']) {
+    const ativos = [etf('BBBB11', plana(10, 300), 'Seg B'), etf('AAAA11', plana(10, 900), 'Seg A'), etf('CCCC11', serieDe(new Array(N).fill(10), [...new Array(N - 1).fill(10), 5000]), 'Seg A')]
+    const { resultado } = calculoPorClasse[classe]({ ...insumosEtf(ativos), classe: undefined, ordemCategorias: ['Seg A', 'Seg B'] }, { ...comJanelasPequenas(cfgsLiquidez[classe]), volumeMinimoDiario: 5 })
+    assert.equal(resultado.classe, classe)
+    assert.deepEqual(resultado.geral.map((x) => x.ticker), ['AAAA11', 'BBBB11', 'CCCC11'], `${classe}: CCCC11 tem um dia gigante, mas a mediana é 10`)
+    assert.deepEqual(Object.keys(resultado.porCategoria), ['Seg A', 'Seg B'])
+    assert.deepEqual(resultado.porCategoria['Seg A'].map((x) => x.ticker), ['AAAA11'], 'tamanhoPorCategoria = 1')
+  }
+})
+
+test('configuração dos três rankings novos: abertos, sem código, com aviso, e pisos coerentes com cada classe', () => {
+  for (const [classe, cfg] of Object.entries(cfgsLiquidez)) {
+    assert.equal(cfg.versaoMetodologia, '1.0.0', classe)
+    assert.equal(cfg.historicoDeVersoes.at(-1).versao, cfg.versaoMetodologia, classe)
+    assert.equal(cfg.tamanhoDaLista, 15, classe)
+    assert.equal(cfg.janelaLiquidez, 21, classe)
+    assert.equal(cfg.publicacao.acesso, undefined, `${classe}: ranking aberto, sem código`)
+    assert.match(cfg.publicacao.avisoProposto, /^Não é recomendação de investimento\./, classe)
+    assert.match(cfg.publicacao.avisoProposto, /liquidez/, classe)
+    assert.equal(cfg.publicacao.sanidade.minimoNaLista, 15, classe)
+    assert.equal(CLASSES[classe].privado, null, `${classe}: sem arquivo privado`)
+  }
+  assert.equal(cfgsLiquidez.fiis.volumeMinimoDiario, 300000, 'mesmo piso dos FIIs (D13)')
+  assert.equal(cfgsLiquidez.acoes.volumeMinimoDiario, 1000000)
+  assert.equal(cfgsLiquidez['bdrs-negociados'].volumeMinimoDiario, 300000, 'mesmo piso dos BDRs de ação')
+  assert.equal(cfgsLiquidez.fiis.janela3Meses, 60, 'o histórico de FIIs tem 61 pregões: a janela de variação é de 60')
+  assert.ok(cfgsLiquidez.fiis.ordemCategorias.includes('Logística'))
+})
+
+test('insumos de FII: nome e segmento do job de FIIs, "Outros" para quem não está lá, recorte e série curta alinhada', () => {
+  const pregoes = datas(10)
+  const historico = { pregoes, nomes: { AAAA11: 'Nome antigo do histórico', CCCC11: 'Nome do histórico' }, ativos: { AAAA11: serieDe(new Array(10).fill(10), new Array(10).fill(500)), BBBB11: serieDe([5, 5, 5], [1, 1, 1]), CCCC11: serieDe(new Array(10).fill(10), new Array(10).fill(500)) } }
+  const ins = montarInsumosFiis({ historico, fundos: [{ ticker: 'AAAA11', nome: 'Fundo A', setor: 'Logística' }, { ticker: 'BBBB11', nome: 'Fundo B', setor: 'Shoppings' }], cfg: { pregoesNosInsumos: 6, ordemCategorias: ['Logística'] }, dataExecucao: '2026-10-08' })
+  assert.equal(ins.classe, 'fiis')
+  assert.deepEqual(ins.pregoes, pregoes.slice(-6))
+  assert.deepEqual(ins.ativos.map((a) => [a.ticker, a.nome, a.categoria, a.serie.length]), [['AAAA11', 'Fundo A', 'Logística', 6], ['BBBB11', 'Fundo B', 'Shoppings', 6], ['CCCC11', 'Nome do histórico', 'Outros', 6]])
+  assert.deepEqual(ins.ativos[1].serie.slice(0, 3), [null, null, null])
+  assert.deepEqual(ins.ordemCategorias, ['Logística'])
+  assert.deepEqual(ins.excluidos, [])
+})
+
+test('insumos de ação: nome e setor do job de ações, ordem dos setores do app', () => {
+  const pregoes = datas(8)
+  const s = serieDe(new Array(8).fill(10), new Array(8).fill(500))
+  const historico = { pregoes, ativos: { PETR4: s, XXXX3: s } }
+  const ins = montarInsumosAcoes({ historico, busca: [{ ticker: 'PETR4', nome: 'Petrobras', setor: 'Petróleo' }], setores: [{ setor: 'Bancos' }, { setor: 'Petróleo' }], cfg: { pregoesNosInsumos: 5 }, dataExecucao: '2026-10-08' })
+  assert.equal(ins.classe, 'acoes')
+  assert.deepEqual(ins.ativos.map((a) => [a.ticker, a.nome, a.categoria]), [['PETR4', 'Petrobras', 'Petróleo'], ['XXXX3', 'XXXX3', 'Outros']])
+  assert.deepEqual(ins.ordemCategorias, ['Bancos', 'Petróleo'])
+})
+
+test('insumos de BDR mais negociado: BDRs de ação (31 a 35) E de ETF (39), sem derivativos; empresas brasileiras vão para as exclusões', () => {
+  const pregoes = datas(5)
+  const s = serieDe(new Array(5).fill(10), new Array(5).fill(500))
+  const historico = { pregoes, cadastro: {}, ativos: { AAPL34: s, SPXI39: s, DI1F31: s, PETR4: s, XPBR31: s } }
+  const ins = montarInsumosBdrsNegociados({ historico, configBdrs: { excluir: { tickers: ['XPBR31'] } }, cfg: { pregoesNosInsumos: 5 }, dataExecucao: '2026-10-08' })
+  assert.equal(ins.classe, 'bdrs-negociados')
+  assert.deepEqual(ins.ativos.map((a) => [a.ticker, a.categoria === 'BDRs de ETF' ? 'etf' : 'acao']), [['AAPL34', 'acao'], ['SPXI39', 'etf'], ['XPBR31', 'acao']])
+  assert.deepEqual(ins.excluidos, ['XPBR31'])
+  const { resultado } = calcularBdrsNegociados(ins, comJanelasPequenas(cfgsLiquidez['bdrs-negociados']))
+  assert.deepEqual(resultado.geral.map((x) => x.ticker).sort(), ['AAPL34', 'SPXI39'], 'XPBR31 sai por decisão registrada')
+  assert.deepEqual(resultado.exclusoes.map((e) => [e.ticker, e.codigo]), [['XPBR31', 'excluido_manual']])
+})
+
+test('publicação aberta (sem código) dos três rankings novos: cabeçalho e lista no MESMO arquivo, sem arquivo privado, e a verificação independente aprova', () => {
+  for (const classe of ['fiis', 'acoes', 'bdrs-negociados']) {
+    const cfg = aprovado(comJanelasPequenas(cfgsLiquidez[classe]))
+    const raiz = raizTemporaria()
+    const ins = { ...insumosEtfPub(), classe }
+    const r = concluir({ raiz, classe, cfg, insumos: ins, log: () => {} })
+    assert.equal(r.publicado, true, classe)
+    const arquivo = path.relative(raiz, path.join(raiz, CLASSES[classe].snapshotApp)).split(path.sep).join('/')
+    const pub = saida(raiz, arquivo)
+    assert.equal(pub.publicado, true, classe)
+    assert.equal(pub.acessoRestrito, false, classe)
+    assert.deepEqual(pub.geral.map((x) => x.ticker), ['BBBB11', 'AAAA11'], classe)
+    assert.ok(!fs.existsSync(path.join(raiz, 'dados-privados')), `${classe}: sem arquivo privado`)
+    assert.ok(!JSON.stringify(pub).includes('"_leia"'), classe)
+    const pasta = path.join(raiz, 'auditoria', CLASSES[classe].pasta, '2026-10-08')
+    const man = lerJson(pasta, 'manifesto.json')
+    assert.equal(man.classe, classe)
+    const v = verificar(pasta, raiz)
+    assert.equal(v.ok, true, `${classe}: ${JSON.stringify(v.mensagens.filter((m) => !m.ok))}`)
+  }
+})
+
+test('sem aprovação, cada ranking novo grava só o cabeçalho "em validação" (sem nenhum ativo)', () => {
+  for (const classe of ['fiis', 'acoes', 'bdrs-negociados']) {
+    const raiz = raizTemporaria()
+    concluir({ raiz, classe, cfg: comJanelasPequenas(cfgsLiquidez[classe]), insumos: { ...insumosEtfPub(), classe }, log: () => {} })
+    const pub = saida(raiz, CLASSES[classe].snapshotApp.split(path.sep).join('/'))
+    assert.equal(pub.publicado, false, classe)
+    assert.deepEqual([pub.geral, pub.porCategoria, pub.exclusoes], [[], {}, []], classe)
+  }
+})
+
+test('cada classe tem sua própria pasta de auditoria, seu config e seu arquivo do app (nenhuma sobrescreve a outra)', () => {
+  const pastas = Object.values(CLASSES).map((c) => c.pasta)
+  const apps = Object.values(CLASSES).map((c) => c.snapshotApp)
+  const configs = Object.values(CLASSES).map((c) => c.config)
+  for (const lista of [pastas, apps, configs]) assert.equal(new Set(lista).size, lista.length)
+  assert.deepEqual(Object.keys(CLASSES).sort(), ['acoes', 'bdrs', 'bdrs-negociados', 'etfs', 'fiis'])
+  for (const c of Object.values(CLASSES)) assert.ok(fs.existsSync(path.join(RAIZ, 'config', c.config)), c.config)
 })

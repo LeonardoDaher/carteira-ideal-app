@@ -22,6 +22,7 @@ import { VoltarInicio } from '../ui/VoltarInicio'
 import { rolarParaResultado } from '../ui/rolarParaResultado'
 import { AvisoEducacional } from '../ui/AvisoEducacional'
 import { Top15FiisBaratos } from './Top15FiisBaratos'
+import { Top15FiisMaisNegociados } from './Top15EtfsMaisNegociados'
 import type { AppCtx } from '../state/useAppState'
 
 const SNAPSHOT_PADRAO = dadosRendimentos as SnapshotRendimentosFii
@@ -57,7 +58,7 @@ export function SimuleFii({
   const exibidos = grupos.flatMap((g) => g.fundos)
   const [tickerSelecionado, setTickerSelecionado] = useState<string | undefined>(exibidos[0]?.ticker)
   const [quantidadeLivre, setQuantidadeLivre] = useState('')
-  const [aba, setAba] = useState<'simulador' | 'top15'>('simulador')
+  const [aba, setAba] = useState<'simulador' | 'top15' | 'negociados'>('simulador')
 
   // A busca pode escolher um fundo fora da lista por setor: procura em todos.
   const fundo = snapshot.fundos.find((f) => f.ticker === tickerSelecionado) ?? exibidos[0]
@@ -82,11 +83,12 @@ export function SimuleFii({
       </div>
 
       {/* Duas caixinhas (D65): o simulador de sempre e a triagem "Top 15 FIIs baratos". */}
-      <div role="tablist" aria-label="O que você quer ver" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+      <div role="tablist" aria-label="O que você quer ver" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
         {(
           [
             { id: 'simulador', emoji: '🧮', titulo: 'Simulador', descricao: 'Quanto as cotas rendem por mês' },
             { id: 'top15', emoji: '🏷️', titulo: 'Top 15 mais baratos', descricao: 'Tijolo e papel, com auditoria' },
+            { id: 'negociados', emoji: '📊', titulo: 'Top 15 mais negociados', descricao: 'Ranking por volume' },
           ] as const
         ).map((c) => (
           <button
@@ -108,6 +110,8 @@ export function SimuleFii({
       <div id="painel-fii-aba" role="tabpanel" aria-labelledby={`aba-fii-${aba}`} className="col" style={{ gap: 'inherit' }}>
       {aba === 'top15' ? (
         <Top15FiisBaratos />
+      ) : aba === 'negociados' ? (
+        <Top15FiisMaisNegociados />
       ) : (
       <>
       {!fundo ? (

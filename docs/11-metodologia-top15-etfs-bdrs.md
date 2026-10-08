@@ -1,4 +1,4 @@
-# Metodologia: Top 15 ETFs mais negociados e Top 15 BDRs com maior desconto de preço
+# Metodologia: Top 15 mais negociados (ETFs, FIIs, ações e BDRs) e Top 15 BDRs com maior desconto de preço
 
 Versão **1.1.0** de cada ranking (publicação aprovada em 08/10/2026; a 1.0.0 foi o cálculo, decisão D70). Parâmetros: `config/top15-etfs.json` e `config/top15-bdrs.json` (fonte única; o hash de cada um vai no manifesto de cada execução). Cálculo: `scripts/top15-mercado-calculo.mjs` (função pura). Verificação independente: `scripts/top15-mercado-verificar.mjs`.
 
@@ -60,7 +60,21 @@ Cada execução grava `auditoria/top15-etfs/<data>/` e `auditoria/top15-bdrs/<da
 - Telas: aba "Top 15 mais negociados" no Simule ETF e aba "Top 15 maior desconto" no Simule BDR, com o aviso "Não é recomendação de investimento" e a explicação de que liquidez e desconto de preço não são qualidade nem valor.
 - Workflow "Atualizar Top 15 ETFs e BDRs": dia 22 de cada mês (e sob demanda).
 
-## 7. Limitações conhecidas
+## 7. FIIs, ações e BDRs mais negociados (D71)
+
+O MESMO cálculo da seção 3 (mediana do volume diário dos últimos 21 pregões; filtros de dias negociados e de último negócio; lista geral de 15 e os 5 de cada categoria), aplicado a mais três classes. Cada uma tem seu config (`config/top15-fiis.json`, `top15-acoes.json`, `top15-bdrs-negociados.json`, v1.0.0), sua trilha (`auditoria/top15-fiis/`, `top15-acoes/`, `top15-bdrs-negociados/`) e seu arquivo do app (`fiisMaisNegociados.json`, `acoesMaisNegociadas.json`, `bdrsMaisNegociados.json`). **Acesso aberto, sem código**, por decisão do responsável: é uma ordenação por volume de dado público da B3.
+
+| Classe | Histórico | Universo | Categoria | Piso de volume | Variação |
+|---|---|---|---|---|---|
+| FIIs | `historico/fiis.json` (61 pregões; B3, com complemento da brapi, D64) | ~202 fundos | segmento do fundo (nome e segmento do job de FIIs) | R$ 300 mil por dia | 60 pregões (o histórico de FIIs ainda não tem 63) |
+| Ações | `historico/acoes.json` (260 pregões) | ~390 códigos (cada código conta: PETR3 e PETR4) | setor (do job de ações) | R$ 1 milhão por dia | 3 meses |
+| BDRs | `historico/bdrs.json` (260 pregões) | ~930 códigos: BDRs de ação (31 a 35) e de ETF (39), fora derivativos e fora as empresas brasileiras de `config/bdrs.json` (D19) | setor; os BDRs de ETF formam a categoria "BDRs de ETF" | R$ 300 mil por dia | 3 meses |
+
+Resultado de 08/10/2026 (pregões até 07/10): **FIIs** 202 analisados, 75 passaram; topo KNCR11, TRXF11, MXRF11, BTLG11, HGLG11. **Ações** 390 analisadas, 196 passaram; topo PETR4, VALE3, ITUB4, BBAS3, AXIA3. **BDRs** 933 analisados, 91 passaram; topo AURA33, MELI34, MUTC34, NVDC34, TSLA34.
+
+Mais negociado é **liquidez**, não qualidade, preço baixo nem segurança, e o aviso de cada tela diz isso. Para olhar preço contra os números do ativo, há o Top 15 FIIs baratos e o Top 15 ações baratas; para BDR, o Top 15 maior desconto. A publicação de cada ranking depende de `publicacao.aprovadoPeloResponsavel` no config da classe.
+
+## 8. Limitações conhecidas
 
 - Liquidez não é qualidade: o ETF mais negociado pode ser caro ou ruim para o seu objetivo. A taxa de administração, o índice e o risco estão no regulamento e na lâmina.
 - O histórico guarda 260 pregões; BDR listado há menos de 240 pregões fica de fora (histórico curto).

@@ -8,6 +8,7 @@ import { VoltarInicio } from '../ui/VoltarInicio'
 import { rolarParaResultado } from '../ui/rolarParaResultado'
 import { AvisoEducacional } from '../ui/AvisoEducacional'
 import { Top15Baratas } from './Top15Baratas'
+import { Top15AcoesMaisNegociadas } from './Top15EtfsMaisNegociados'
 import type { AppCtx } from '../state/useAppState'
 
 function reais(valor: number) {
@@ -45,7 +46,7 @@ export function SimuleAcoes({
   const [valorLivre, setValorLivre] = useState('')
   const [valorEscolhido, setValorEscolhido] = useState<number>(VALORES_PADRAO[1])
   // Duas caixinhas (D49): o simulador de sempre e a triagem "Top 15 mais baratas".
-  const [aba, setAba] = useState<'simulador' | 'top15'>('simulador')
+  const [aba, setAba] = useState<'simulador' | 'top15' | 'negociadas'>('simulador')
 
   const levarAoCartao = () => rolarParaResultado('cartao-acao')
 
@@ -76,11 +77,12 @@ export function SimuleAcoes({
         </div>
       </div>
 
-      <div role="tablist" aria-label="O que você quer ver" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+      <div role="tablist" aria-label="O que você quer ver" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
         {(
           [
             { id: 'simulador', emoji: '🧮', titulo: 'Simulador', descricao: 'Quantas ações o valor compra' },
             { id: 'top15', emoji: '🏷️', titulo: 'Top 15 mais baratas', descricao: 'Triagem de valor, com auditoria' },
+            { id: 'negociadas', emoji: '📊', titulo: 'Top 15 mais negociadas', descricao: 'Ranking por volume' },
           ] as const
         ).map((c) => (
           <button
@@ -102,6 +104,8 @@ export function SimuleAcoes({
       <div id="painel-acoes" role="tabpanel" aria-labelledby={`aba-acoes-${aba}`} className="col" style={{ gap: 'inherit' }}>
       {aba === 'top15' ? (
         <Top15Baratas />
+      ) : aba === 'negociadas' ? (
+        <Top15AcoesMaisNegociadas />
       ) : !selecao ? (
         <div className="card col" style={{ gap: 6 }} role="status">
           <span style={{ fontWeight: 700 }}>Os dados das ações ainda não foram carregados.</span>

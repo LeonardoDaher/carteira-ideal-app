@@ -23,7 +23,7 @@ export function AbasDaTela<T extends string>({
 }) {
   return (
     <>
-      <div role="tablist" aria-label={rotulo} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+      <div role="tablist" aria-label={rotulo} style={{ display: 'grid', gridTemplateColumns: `repeat(${abas.length}, 1fr)`, gap: 10 }}>
         {abas.map((c) => (
           <button
             key={c.id}

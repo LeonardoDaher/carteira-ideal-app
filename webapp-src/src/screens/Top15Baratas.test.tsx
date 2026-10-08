@@ -168,7 +168,7 @@ describe('Top15Baratas', () => {
   })
 })
 
-describe('Simule Ações: as duas caixinhas', () => {
+describe('Simule Ações: as caixinhas (simulador, mais baratas e mais negociadas)', () => {
   const ctx = { screen: 'simuleAcoes', setScreen: vi.fn() } as unknown as AppCtx
   const base = {
     geradoEm: '2026-10-01T23:05:00Z', dataPregao: '2026-10-01', sessoesLiquidez: 21, totais: { setores: 1, empresas: 1 }, gruposOrdem: ['Petróleo, Gás e Biocombustíveis'],
@@ -179,7 +179,7 @@ describe('Simule Ações: as duas caixinhas', () => {
   it('abre no simulador e troca para o Top 15 e de volta', async () => {
     render(<SimuleAcoes ctx={ctx} snapshot={base} />)
     const abas = screen.getAllByRole('tab')
-    expect(abas.map((a) => a.textContent)).toEqual([expect.stringContaining('Simulador'), expect.stringContaining('Top 15 mais baratas')])
+    expect(abas.map((a) => a.textContent)).toEqual([expect.stringContaining('Simulador'), expect.stringContaining('Top 15 mais baratas'), expect.stringContaining('Top 15 mais negociadas')])
     expect(abas[0].getAttribute('aria-selected')).toBe('true')
     expect(screen.getByText('Quantas ações esse valor compra')).toBeTruthy()
 

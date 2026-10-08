@@ -1,0 +1,30 @@
+{
+  "publicado": false,
+  "acessoRestrito": false,
+  "instagram": null,
+  "versaoMetodologia": "1.0.0",
+  "geradoEm": "2026-10-08T15:44:05.523Z",
+  "dataExecucao": "2026-10-08",
+  "ultimoPregao": "2026-10-05",
+  "pastaAuditoria": "auditoria/top15-bdrs-negociados/2026-10-08",
+  "hashResultado": "ad007140318b3d65319fc3ac7c948cf6b18bde784a09f379e518a0fced7d820b",
+  "hashInsumos": "b504f5637a199b6d124e7d556954fb2117ab1019dabc1ebe527d470fbd052159",
+  "hashConfig": "63277d9f86643c91034ac65d0d71aa15de73edf883174dd717d7e09f9288f54a",
+  "tamanhoDaLista": 15,
+  "universo": 933,
+  "elegiveis": 91,
+  "aviso": "Não é recomendação de investimento. “Mais negociado” significa apenas maior volume financeiro diário (mediana dos últimos 21 pregões): é liquidez, e não indica qualidade da empresa, preço baixo nem bom momento de compra. O preço do BDR depende da ação lá fora e do câmbio, e o BDR de ETF tem as características do fundo que ele representa. Os números vêm do Boletim de Preços da B3, são do passado e podem conter erros. Rentabilidade passada não garante rentabilidade futura e BDRs podem causar perda de parte ou de todo o dinheiro aplicado. Converse com um profissional certificado antes de investir.",
+  "parametros": {
+    "tamanhoDaLista": 15,
+    "tamanhoPorCategoria": 5,
+    "janelaLiquidez": 21,
+    "janela3Meses": 63,
+    "volumeMinimoDiario": 300000,
+    "diasNegociadosMinimos": 15,
+    "pregoesMaxSemNegocio": 5,
+    "pregoesNosInsumos": 80
+  },
+  "geral": [],
+  "porCategoria": {},
+  "exclusoes": []
+}

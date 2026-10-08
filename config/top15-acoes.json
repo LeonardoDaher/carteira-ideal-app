@@ -1,0 +1,29 @@
+{
+    "_leia":  "Parâmetros do \u0027Top 15 ações mais negociadas\u0027 (D71). ESTE ARQUIVO É A FONTE ÚNICA: o cálculo (scripts/top15-mercado-calculo.mjs) e o documento docs/11-metodologia-top15-etfs-bdrs.md citam estes valores. Qualquer mudança exige subir \u0027versaoMetodologia\u0027 e registrar o motivo em \u0027historicoDeVersoes\u0027. O hash SHA-256 deste arquivo vai no manifesto de cada execução. Mais negociado = MEDIANA do volume financeiro diário dos últimos \u0027janelaLiquidez\u0027 pregões, dia sem negócio conta zero. É liquidez: não é qualidade, preço baixo nem segurança. Fonte: Boletim de Preços da B3 (BVBG.086) guardado em historico/acoes.json pelo job de ações (D43); nome e setor vêm do job de ações (acoes.json). A categoria é o setor da empresa. Cada código negociado conta separadamente (por exemplo, PETR3 e PETR4).",
+    "versaoMetodologia":  "1.0.0",
+    "historicoDeVersoes":  [
+                               {
+                                   "versao":  "1.0.0",
+                                   "data":  "2026-10-08",
+                                   "mudanca":  "Versão inicial. Critério pedido pelo responsável: ações mais negociadas."
+                               }
+                           ],
+    "tamanhoDaLista":  15,
+    "tamanhoPorCategoria":  5,
+    "janelaLiquidez":  21,
+    "janela3Meses":  63,
+    "volumeMinimoDiario":  1000000,
+    "diasNegociadosMinimos":  15,
+    "pregoesMaxSemNegocio":  5,
+    "pregoesNosInsumos":  80,
+    "publicacao":  {
+                       "aprovadoPeloResponsavel":  false,
+                       "_leia":  "Com aprovadoPeloResponsavel = false o job só grava a trilha de auditoria e o app mostra \u0027em validação\u0027. Com true E a trava de sanidade aprovada, o ranking vai para o arquivo do app. Acesso ABERTO, sem código (decisão do responsável em 08/10/2026): é uma ordenação por volume de dados públicos da B3.",
+                       "sanidade":  {
+                                        "minimoNaLista":  15,
+                                        "maximoFracaoSemCotacao":  0.5,
+                                        "_leia":  "Se a lista sair com menos de 15 ativos, ou mais da metade do universo estiver sem negócio recente (histórico desatualizado), o job termina com erro depois de gravar a auditoria e o app não é alterado."
+                                    },
+                       "avisoProposto":  "Não é recomendação de investimento. “Mais negociada” significa apenas maior volume financeiro diário (mediana dos últimos 21 pregões): é liquidez, e não indica qualidade da empresa, preço baixo, bom momento de compra nem adequação ao seu perfil. Uma ação muito negociada pode estar cara, em queda ou em dificuldade. Os números vêm do Boletim de Preços da B3, são do passado e podem conter erros. Rentabilidade passada não garante rentabilidade futura e ações podem causar perda de parte ou de todo o dinheiro aplicado. Converse com um profissional certificado antes de investir."
+                   }
+}

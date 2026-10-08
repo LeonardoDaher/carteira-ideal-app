@@ -1,5 +1,8 @@
 import etfs from './etfsMaisNegociados.json'
 import bdrs from './bdrsDesconto.json'
+import fiisNeg from './fiisMaisNegociados.json'
+import acoesNeg from './acoesMaisNegociadas.json'
+import bdrsNeg from './bdrsMaisNegociados.json'
 import type { SnapshotBdrsDesconto, SnapshotEtfsMaisNegociados } from '../domain/top15Mercado'
 
 /**
@@ -11,3 +14,6 @@ import type { SnapshotBdrsDesconto, SnapshotEtfsMaisNegociados } from '../domain
  */
 export const SNAPSHOT_ETFS_MAIS_NEGOCIADOS = etfs as unknown as SnapshotEtfsMaisNegociados
 export const SNAPSHOT_BDRS_DESCONTO = bdrs as unknown as SnapshotBdrsDesconto
+export const SNAPSHOT_FIIS_MAIS_NEGOCIADOS = fiisNeg as unknown as SnapshotEtfsMaisNegociados
+export const SNAPSHOT_ACOES_MAIS_NEGOCIADAS = acoesNeg as unknown as SnapshotEtfsMaisNegociados
+export const SNAPSHOT_BDRS_MAIS_NEGOCIADOS = bdrsNeg as unknown as SnapshotEtfsMaisNegociados

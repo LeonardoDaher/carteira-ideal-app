@@ -62,6 +62,9 @@ export interface SnapshotEtfsMaisNegociados extends CabecalhoMercado {
   exclusoes: ExclusaoMercado[]
 }
 
+/** Mesmo formato para ETFs, FIIs, ações e BDRs mais negociados (D71): muda só a classe e a categoria (segmento, setor). */
+export type SnapshotMaisNegociados = SnapshotEtfsMaisNegociados
+
 export const ROTULO_EXCLUSAO_ETF: Record<string, string> = {
   excluido_manual: 'Fora por decisão registrada (não é fundo de índice comum)',
   sem_negocio: 'Sem negócio no período',

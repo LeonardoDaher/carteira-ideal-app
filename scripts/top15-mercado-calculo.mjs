@@ -81,6 +81,20 @@ export function motivoDeExclusaoEtf(n, ativo, insumos, cfg) {
   return null
 }
 
+/**
+ * FIIs, ações e BDRs mais negociados (D71): é o MESMO cálculo de liquidez dos ETFs (mediana do volume dos últimos
+ * pregões); só muda a classe e a categoria (segmento do fundo, setor da empresa). A classe vem nos insumos.
+ */
+export function calcularFiis(insumos, cfg) {
+  return calcularEtfs({ ...insumos, classe: 'fiis' }, cfg)
+}
+export function calcularAcoes(insumos, cfg) {
+  return calcularEtfs({ ...insumos, classe: 'acoes' }, cfg)
+}
+export function calcularBdrsNegociados(insumos, cfg) {
+  return calcularEtfs({ ...insumos, classe: 'bdrs-negociados' }, cfg)
+}
+
 export function calcularEtfs(insumos, cfg) {
   const pregoes = insumos.pregoes
   const itens = []
@@ -121,7 +135,7 @@ export function calcularEtfs(insumos, cfg) {
   exclusoes.sort((a, b) => a.ticker.localeCompare(b.ticker))
   return {
     resultado: {
-      classe: 'etfs',
+      classe: insumos.classe ?? 'etfs',
       dataExecucao: insumos.dataExecucao,
       ultimoPregao: pregoes.at(-1) ?? null,
       universo: insumos.ativos.length,
@@ -245,7 +259,7 @@ export function calcularBdrs(insumos, cfg) {
 /** Resultado inverossímil derruba o job antes de tocar no app. Devolve a lista de problemas. */
 export function verificarSanidade(resultado, cfg) {
   const p = []
-  const lista = resultado.classe === 'etfs' ? resultado.geral : resultado.ranking
+  const lista = resultado.classe === 'bdrs' ? resultado.ranking : resultado.geral
   if (lista.length < cfg.sanidade.minimoNaLista) p.push(`só ${lista.length} ativos na lista (mínimo ${cfg.sanidade.minimoNaLista})`)
   const semNegocio = resultado.exclusoes.filter((e) => e.codigo === 'sem_negocio' || e.codigo === 'cotacao_defasada').length
   if (resultado.universo && semNegocio / resultado.universo > cfg.sanidade.maximoFracaoSemCotacao) p.push(`${semNegocio} de ${resultado.universo} ativos sem cotação recente (máximo ${Math.round(cfg.sanidade.maximoFracaoSemCotacao * 100)}%): o histórico de preços parece desatualizado`)

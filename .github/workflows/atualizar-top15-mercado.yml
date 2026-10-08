@@ -1,12 +1,12 @@
-# Rankings "Top 15 ETFs mais negociados" e "Top 15 BDRs com maior desconto de preço", decisão D70.
+# Rankings "Top 15 mais negociados" (ETFs, FIIs, ações e BDRs, D70 e D71) e "Top 15 BDRs com maior desconto de preço" (D70).
 #
-# Sem rede: lê os históricos diários que os jobs de ETFs e BDRs já mantêm (historico/etfs.json e historico/bdrs.json,
-# do Boletim de Preços da B3), calcula os dois rankings e grava a TRILHA DE AUDITORIA em
-# auditoria/top15-etfs/<data>/ e auditoria/top15-bdrs/<data>/ (manifesto com sha256, insumos congelados, memória de
-# cálculo, CSVs). Em seguida refaz o cálculo a partir dos insumos gravados (verificação independente).
+# Sem rede: lê os históricos diários que os jobs já mantêm (historico/etfs.json, fiis.json, acoes.json e bdrs.json,
+# do Boletim de Preços da B3), calcula os rankings e grava a TRILHA DE AUDITORIA em
+# auditoria/top15-<classe>/<data>/ (manifesto com sha256, insumos congelados, memória de cálculo, CSVs). Em seguida refaz o cálculo a partir dos insumos gravados (verificação independente).
 #
 # PUBLICAÇÃO: o ranking só chega ao app se config/top15-etfs.json (ou top15-bdrs.json) → publicacao.aprovadoPeloResponsavel
-# for true E passar na trava de sanidade. ETFs: acesso aberto (webapp-src/src/data/etfsMaisNegociados.json). BDRs: COM
+# for true E passar na trava de sanidade. Os rankings de "mais negociados" têm acesso ABERTO (sem código; arquivos
+# etfsMaisNegociados.json, fiisMaisNegociados.json, acoesMaisNegociadas.json e bdrsMaisNegociados.json em webapp-src/src/data). BDRs com desconto: COM
 # CÓDIGO do mês próprio (TOP15_BDRS_CODIGOS): o arquivo público (webapp-src/src/data/bdrsDesconto.json) traz só o
 # cabeçalho, sem nenhum BDR; a lista fica em dados-privados/bdr-desconto.json, entregue por api/top15-bdrs.
 #
@@ -49,6 +49,15 @@ jobs:
       - name: Ranking de BDRs com maior desconto de preço (calcula, grava a auditoria e verifica)
         run: node scripts/atualizar-top15-mercado.mjs bdrs
 
+      - name: Ranking de FIIs mais negociados (calcula, grava a auditoria e verifica)
+        run: node scripts/atualizar-top15-mercado.mjs fiis
+
+      - name: Ranking de ações mais negociadas (calcula, grava a auditoria e verifica)
+        run: node scripts/atualizar-top15-mercado.mjs acoes
+
+      - name: Ranking de BDRs mais negociados (calcula, grava a auditoria e verifica)
+        run: node scripts/atualizar-top15-mercado.mjs bdrs-negociados
+
       - name: Guardar a auditoria desta execução (mesmo se algo falhar)
         if: always()
         uses: actions/upload-artifact@v4
@@ -56,6 +65,9 @@ jobs:
           name: auditoria-top15-mercado
           path: |
             auditoria/top15-etfs
+            auditoria/top15-fiis
+            auditoria/top15-acoes
+            auditoria/top15-bdrs-negociados
             auditoria/top15-bdrs
           if-no-files-found: ignore
           retention-days: 30
@@ -67,7 +79,7 @@ jobs:
 
       - name: Publicar (commit) se houver mudança
         run: |
-          ALVOS="auditoria/top15-etfs auditoria/top15-bdrs webapp-src/src/data/etfsMaisNegociados.json webapp-src/src/data/bdrsDesconto.json dados-privados/bdr-desconto.json"
+          ALVOS="auditoria/top15-etfs auditoria/top15-fiis auditoria/top15-acoes auditoria/top15-bdrs-negociados auditoria/top15-bdrs webapp-src/src/data/etfsMaisNegociados.json webapp-src/src/data/fiisMaisNegociados.json webapp-src/src/data/acoesMaisNegociadas.json webapp-src/src/data/bdrsMaisNegociados.json webapp-src/src/data/bdrsDesconto.json dados-privados/bdr-desconto.json"
           if [ -z "$(git status --porcelain $ALVOS)" ]; then
             echo "Sem mudanças."
             exit 0
@@ -75,6 +87,6 @@ jobs:
           git config user.name "${{ vars.COMMIT_AUTOR_NOME || 'github-actions[bot]' }}"
           git config user.email "${{ vars.COMMIT_AUTOR_EMAIL || '41898283+github-actions[bot]@users.noreply.github.com' }}"
           git add $ALVOS
-          git commit -m "dados: Top 15 ETFs e BDRs ($(date -u +%Y-%m-%d))"
+          git commit -m "dados: Top 15 mais negociados e BDRs com desconto ($(date -u +%Y-%m-%d))"
           git pull --rebase
           git push

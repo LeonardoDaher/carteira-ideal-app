@@ -19,7 +19,7 @@ import path from 'node:path'
 import zlib from 'node:zlib'
 import crypto from 'node:crypto'
 import { fileURLToPath, pathToFileURL } from 'node:url'
-import { calcularBdrs, calcularEtfs, canonico, hashDoResultado, sha256, verificarSanidade } from './top15-mercado-calculo.mjs'
+import { calcularAcoes, calcularBdrs, calcularBdrsNegociados, calcularEtfs, calcularFiis, canonico, hashDoResultado, sha256, verificarSanidade } from './top15-mercado-calculo.mjs'
 import { limparNome } from './atualizar-etfs.mjs'
 import { criarFiltroBdr, nomeDe, setorDe } from './atualizar-bdrs.mjs'
 import { executarCli } from './top15-mercado-verificar.mjs'
@@ -40,6 +40,33 @@ export const CLASSES = {
     snapshotApp: path.join('webapp-src', 'src', 'data', 'etfsMaisNegociados.json'),
     privado: null,
     calcular: calcularEtfs,
+  },
+  fiis: {
+    rotulo: 'FIIs mais negociados',
+    pasta: 'top15-fiis',
+    config: 'top15-fiis.json',
+    historico: 'fiis.json',
+    snapshotApp: path.join('webapp-src', 'src', 'data', 'fiisMaisNegociados.json'),
+    privado: null,
+    calcular: calcularFiis,
+  },
+  acoes: {
+    rotulo: 'ações mais negociadas',
+    pasta: 'top15-acoes',
+    config: 'top15-acoes.json',
+    historico: 'acoes.json',
+    snapshotApp: path.join('webapp-src', 'src', 'data', 'acoesMaisNegociadas.json'),
+    privado: null,
+    calcular: calcularAcoes,
+  },
+  'bdrs-negociados': {
+    rotulo: 'BDRs mais negociados',
+    pasta: 'top15-bdrs-negociados',
+    config: 'top15-bdrs-negociados.json',
+    historico: 'bdrs.json',
+    snapshotApp: path.join('webapp-src', 'src', 'data', 'bdrsMaisNegociados.json'),
+    privado: null,
+    calcular: calcularBdrsNegociados,
   },
   bdrs: {
     rotulo: 'BDRs com maior desconto de preço',
@@ -81,6 +108,50 @@ export function montarInsumosEtfs({ historico, configEtfs, cfg, dataExecucao }) 
   return { classe: 'etfs', dataExecucao, pregoes, ordemCategorias: configEtfs.ordemCategorias ?? [], excluidos: [...(configEtfs.excluir?.tickers ?? [])].sort(), ativos }
 }
 
+/** FIIs (D71): séries do histórico diário da B3 (historico/fiis.json); nome e segmento vêm do job de FIIs (rendimentosFii.json). */
+export function montarInsumosFiis({ historico, fundos, cfg, dataExecucao }) {
+  const n = Math.min(cfg.pregoesNosInsumos, historico.pregoes.length)
+  const pregoes = historico.pregoes.slice(-n)
+  const porTicker = new Map((fundos ?? []).map((f) => [f.ticker, f]))
+  const ativos = Object.keys(historico.ativos).sort().map((ticker) => {
+    const f = porTicker.get(ticker)
+    return { ticker, nome: f?.nome ?? historico.nomes?.[ticker] ?? ticker, categoria: f?.setor ?? 'Outros', serie: recortar(historico.ativos[ticker], historico.pregoes.length, n) }
+  })
+  return { classe: 'fiis', dataExecucao, pregoes, ordemCategorias: cfg.ordemCategorias ?? [], excluidos: [], ativos }
+}
+
+/** Ações (D71): séries do histórico diário da B3 (historico/acoes.json); nome e setor vêm do job de ações (acoes.json, campo `busca`). */
+export function montarInsumosAcoes({ historico, busca, setores, cfg, dataExecucao }) {
+  const n = Math.min(cfg.pregoesNosInsumos, historico.pregoes.length)
+  const pregoes = historico.pregoes.slice(-n)
+  const porTicker = new Map((busca ?? []).map((a) => [a.ticker, a]))
+  const ativos = Object.keys(historico.ativos).sort().map((ticker) => {
+    const a = porTicker.get(ticker)
+    return { ticker, nome: a?.nome ?? ticker, categoria: a?.setor ?? 'Outros', serie: recortar(historico.ativos[ticker], historico.pregoes.length, n) }
+  })
+  return { classe: 'acoes', dataExecucao, pregoes, ordemCategorias: (setores ?? []).map((s) => s.setor), excluidos: [], ativos }
+}
+
+/** BDRs mais negociados (D71): BDRs de ação (31 a 35) e de ETF (39), fora os de empresas brasileiras do config/bdrs.json (D19). */
+export function montarInsumosBdrsNegociados({ historico, configBdrs, cfg, dataExecucao }) {
+  const n = Math.min(cfg.pregoesNosInsumos, historico.pregoes.length)
+  const pregoes = historico.pregoes.slice(-n)
+  const filtro = criarFiltroBdr(historico.cadastro, configBdrs)
+  const ativos = []
+  for (const ticker of Object.keys(historico.ativos).sort()) {
+    const tipo = filtro(ticker)
+    if (!tipo) continue
+    const cadastro = historico.cadastro?.[ticker]
+    ativos.push({
+      ticker,
+      nome: nomeDe(ticker, cadastro, configBdrs) ?? ticker,
+      categoria: tipo === 'etf' ? 'BDRs de ETF' : setorDe(ticker, 'acao', cadastro?.setorBrapi ?? null, configBdrs).setor,
+      serie: recortar(historico.ativos[ticker], historico.pregoes.length, n),
+    })
+  }
+  return { classe: 'bdrs-negociados', dataExecucao, pregoes, excluidos: [...(configBdrs.excluir?.tickers ?? [])].sort(), ativos }
+}
+
 export function montarInsumosBdrs({ historico, configBdrs, cfg, dataExecucao }) {
   const n = Math.min(cfg.janelaMaxima + 1, historico.pregoes.length)
   const pregoes = historico.pregoes.slice(-n)
@@ -115,7 +186,7 @@ const COLUNAS_BDR = ['posicao', 'ticker', 'nome', 'setor', 'desconto', 'cotacao'
 const COLUNAS_EXC = ['ticker', 'nome', 'codigo', 'motivo']
 
 export function arquivosCsv(classe, resultado) {
-  if (classe === 'etfs') {
+  if (classe !== 'bdrs') {
     const porCat = Object.entries(resultado.porCategoria).flatMap(([, l]) => l)
     return {
       'ranking-geral.csv': csv(COLUNAS_ETF, resultado.geral),
@@ -164,7 +235,7 @@ O comando recalcula o resultado só com \`insumos.json.gz\` + \`config.json\` e 
 
 export function executar({ classe, raiz = RAIZ_PADRAO, hoje = null, log = console.log } = {}) {
   const c = CLASSES[classe]
-  if (!c) throw new Error('Classe inválida. Use "etfs" ou "bdrs".')
+  if (!c) throw new Error(`Classe inválida. Use: ${Object.keys(CLASSES).join(', ')}.`)
   const cfg = lerJson(path.join(raiz, 'config', c.config))
   const arquivoHist = path.join(raiz, 'historico', c.historico)
   if (!fs.existsSync(arquivoHist)) throw new Error(`historico/${c.historico} não existe: rode antes a carga inicial.`)
@@ -172,10 +243,20 @@ export function executar({ classe, raiz = RAIZ_PADRAO, hoje = null, log = consol
   if (!historico.pregoes?.length) throw new Error(`historico/${c.historico} sem pregões.`)
   const dataExecucao = hoje ?? new Date().toISOString().slice(0, 10)
   log(`${c.rotulo}: histórico com ${historico.pregoes.length} pregões, último de ${historico.pregoes.at(-1)} · execução em ${dataExecucao}`)
-  const insumos = classe === 'etfs'
-    ? montarInsumosEtfs({ historico, configEtfs: lerJson(path.join(raiz, 'config', 'etfs.json')), cfg, dataExecucao })
-    : montarInsumosBdrs({ historico, configBdrs: lerJson(path.join(raiz, 'config', 'bdrs.json')), cfg, dataExecucao })
   const fontes = [{ papel: `Histórico diário (B3, Boletim de Preços BVBG.086)`, url: `historico/${c.historico} (neste repositório)`, arquivo: c.historico, bytes: fs.statSync(arquivoHist).size, sha256: hashArquivo(arquivoHist), pregoes: historico.pregoes.length, ultimoPregao: historico.pregoes.at(-1) }]
+  const fonteExtra = (papel, relativo) => {
+    const arquivo = path.join(raiz, ...relativo.split('/'))
+    fontes.push({ papel, url: `${relativo} (neste repositório)`, arquivo: path.basename(arquivo), bytes: fs.statSync(arquivo).size, sha256: hashArquivo(arquivo) })
+    return lerJson(arquivo)
+  }
+  let insumos
+  if (classe === 'etfs') insumos = montarInsumosEtfs({ historico, configEtfs: lerJson(path.join(raiz, 'config', 'etfs.json')), cfg, dataExecucao })
+  else if (classe === 'fiis') insumos = montarInsumosFiis({ historico, fundos: fonteExtra('Nome e segmento dos FIIs (job de FIIs)', 'webapp-src/src/data/rendimentosFii.json').fundos, cfg, dataExecucao })
+  else if (classe === 'acoes') {
+    const acoes = fonteExtra('Nome e setor das ações (job de ações)', 'webapp-src/src/data/acoes.json')
+    insumos = montarInsumosAcoes({ historico, busca: acoes.busca, setores: acoes.setores, cfg, dataExecucao })
+  } else if (classe === 'bdrs-negociados') insumos = montarInsumosBdrsNegociados({ historico, configBdrs: lerJson(path.join(raiz, 'config', 'bdrs.json')), cfg, dataExecucao })
+  else insumos = montarInsumosBdrs({ historico, configBdrs: lerJson(path.join(raiz, 'config', 'bdrs.json')), cfg, dataExecucao })
   return concluir({ raiz, classe, cfg, insumos, fontes, log })
 }
 
@@ -220,7 +301,7 @@ export function concluir({ raiz, classe, cfg, insumos, fontes = [], log = consol
     gravarJson(path.join(raiz, 'auditoria', c.pasta, 'ultima.json'), { pasta: relPosix, dataExecucao: insumos.dataExecucao, hashResultado: hashes.resultado, versaoMetodologia: cfg.versaoMetodologia })
   }
 
-  const lista = classe === 'etfs' ? resultado.geral : resultado.ranking
+  const lista = classe === 'bdrs' ? resultado.ranking : resultado.geral
   log(`Universo ${resultado.universo} · elegíveis ${resultado.elegiveis} · fora ${resultado.exclusoes.length}${classe === 'bdrs' ? ` · a conferir ${resultado.aConferir.length}` : ''}`)
   log(`Top ${cfg.tamanhoDaLista}: ${lista.map((r) => r.ticker).join(' ')}`)
   if (classe === 'bdrs') log(`A conferir (fora do ranking): ${resultado.aConferir.map((f) => `${f.ticker}[${f.alertas.join(',')}]`).join(' ') || 'nenhum'}`)
@@ -267,7 +348,7 @@ export function montarSnapshotApp({ classe, resultado, cfg, manifesto, pasta, pu
   // Sem os campos "_leia" (notas internas): o cabeçalho público não pode trazer código de ativo.
   const { publicacao, historicoDeVersoes, versaoMetodologia, ...parametros } = cfg
   void publicacao; void historicoDeVersoes; void versaoMetodologia
-  if (classe === 'etfs') {
+  if (classe !== 'bdrs') {
     return { ...base, parametros: semNotas(parametros), geral: publicado ? resultado.geral : [], porCategoria: publicado ? resultado.porCategoria : {}, exclusoes: publicado ? resultado.exclusoes : [] }
   }
   return {
@@ -285,7 +366,7 @@ export function montarSnapshotApp({ classe, resultado, cfg, manifesto, pasta, pu
  * lista completa vai para dados-privados/ (lida só por api/top15-bdrs.ts depois de conferir o código).
  */
 export function separarSnapshot(classe, completo) {
-  if (classe === 'etfs' || !completo.acessoRestrito) return { publico: completo, privado: { publicado: false } }
+  if (classe !== 'bdrs' || !completo.acessoRestrito) return { publico: completo, privado: { publicado: false } }
   const publico = { ...completo, ranking: [], aConferir: [], exclusoes: [] }
   return { publico, privado: completo.publicado ? completo : { publicado: false } }
 }
