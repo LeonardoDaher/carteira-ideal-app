@@ -371,6 +371,29 @@ export function agruparPorCategoria(lista: ListaDeCompras): GrupoDaLista[] {
   }).filter((g) => g.itens.length > 0)
 }
 
+// ---------------------------------------------------------------- compartilhar
+
+/**
+ * Texto da lista para mandar por WhatsApp (D76): só o que AINDA FALTA comprar (itens não ticados),
+ * por categoria, na ordem dos corredores. Devolve vazio quando nada falta.
+ */
+export function textoParaCompartilhar(lista: ListaDeCompras): string {
+  const faltam = { itens: lista.itens.filter((i) => !i.comprado) }
+  const grupos = agruparPorCategoria(faltam)
+  if (grupos.length === 0) return ''
+  const blocos = grupos.map(({ categoria, itens }) => {
+    const linhas = itens.map((i) => (i.quantidade ? `• ${i.nome}, ${i.quantidade}` : `• ${i.nome}`))
+    return `${categoria.emoji} ${categoria.nome}\n${linhas.join('\n')}`
+  })
+  return `🛒 Lista de compras\n\n${blocos.join('\n\n')}`
+}
+
+/** Link do WhatsApp com a lista pronta; a pessoa escolhe o contato lá. Vazio quando nada falta. */
+export function linkDoWhatsApp(lista: ListaDeCompras): string {
+  const texto = textoParaCompartilhar(lista)
+  return texto ? `https://wa.me/?text=${encodeURIComponent(texto)}` : ''
+}
+
 // ---------------------------------------------------------------- validação
 
 /** Aceita só o que tem a forma certa; o resto do que estiver gravado é descartado sem travar o app. */

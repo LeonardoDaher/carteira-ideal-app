@@ -1449,3 +1449,16 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 **Testes.** +9 no domínio e +4 na tela. **Mutação:** 12 defeitos em `editarItem` (regex da quantidade, quantidade e categoria ignoradas, divisão, extras descartados, "comprado" perdido, nome vazio, id inexistente, limites de tamanho), todos detectados. Um defeito real apareceu antes do envio: a limpeza de espaços da quantidade apagava a letra "s" (uma barra invertida perdida na edição por script), e foi corrigido.
 
 **Também neste envio (sem mudança no app).** Os testes `Top15BdrsDesconto.test.tsx` e `Top15MaisNegociados.test.tsx` (Simule BDR) já falhavam: o Top 15 de BDRs foi publicado atrás de código (D70) e a tela passou a conferir primeiro o código salvo no aparelho ("Verificando o código salvo neste aparelho…") antes de mostrar o portão; os testes conferiam de forma síncrona e agora esperam o portão (`findByTestId`). O teste de varredura da D73 ganhou limite de 60 s, porque estourava os 5 s padrão na suíte inteira.
+
+
+## D76 (09/10/2026): Meu Mês Supermercado, enviar a lista pelo WhatsApp
+
+**Pedido.** Um botão para mandar a lista de compras a outra pessoa (ou a si mesmo). Decidido: manda **só o que ainda falta comprar** (itens não ticados), não a lista inteira.
+
+**Como funciona.** `textoParaCompartilhar` monta a mensagem por categoria, na ordem dos corredores, só com os itens não ticados ("🛒 Lista de compras", cada categoria com emoji e itens em "• Nome, quantidade"); categoria que esvazia some. `linkDoWhatsApp` devolve `https://wa.me/?text=…` com o texto codificado; a pessoa escolhe o contato no próprio WhatsApp. O botão ("Enviar o que falta pelo WhatsApp") é um link que abre em nova aba (`noopener noreferrer`) e **só aparece quando há algo faltando** (some com a lista vazia ou tudo ticado); o texto acompanha os tiques.
+
+**Privacidade.** O texto não passa por servidor nosso; só sai do aparelho quando a pessoa toca no botão e escolhe o contato, e a partir daí é tratado pelo WhatsApp. A Política de Privacidade ganhou um parágrafo sobre isso, e o aviso no fim da aba também.
+
+**Limites.** É um envio único (não sincroniza se a lista mudar depois) e quem recebe ganha só o texto, não a lista no app.
+
+**Testes.** +4 no domínio (só o que falta, itens ticados e categorias vazias fora, vazio sem link, codificação do link) e +2 na tela (o link acompanha os tiques e o botão some sem nada faltando).

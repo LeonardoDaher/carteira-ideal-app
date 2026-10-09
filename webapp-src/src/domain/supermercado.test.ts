@@ -8,12 +8,14 @@ import {
   editarItem,
   interpretarTexto,
   limparComprados,
+  linkDoWhatsApp,
   mudarCategoria,
   quebrarEmItens,
   removerItem,
   resumoDaLista,
   separarQuantidade,
   sugerirCategoria,
+  textoParaCompartilhar,
   validarLista,
 } from './supermercado'
 import type { ListaDeCompras } from './supermercado'
@@ -331,5 +333,45 @@ describe('editarItem', () => {
     const r = editarItem(b, b.itens[0].id, { nome: 'a'.repeat(200), quantidade: 'b'.repeat(100), categoria: 'outros' }, id)
     expect(r.itens[0].nome).toHaveLength(80)
     expect(r.itens[0].quantidade).toHaveLength(30)
+  })
+})
+
+describe('compartilhar por WhatsApp', () => {
+  const montar = () => adicionarItens({ itens: [] }, itens('tomate, 2 kg de frango, arroz, feijão, sabão em pó')).lista
+
+  it('manda só o que falta comprar, por categoria, na ordem dos corredores', () => {
+    const l = montar()
+    expect(textoParaCompartilhar(l)).toBe(
+      ['🛒 Lista de compras', '', '🥬 Hortifruti', '• Tomate', '', '🥩 Açougue e peixaria', '• Frango, 2 kg', '', '🍚 Mercearia', '• Arroz', '• Feijão', '', '🧽 Limpeza', '• Sabão em pó'].join('\n'),
+    )
+  })
+
+  it('o que já está ticado fica de fora, e a categoria que esvazia some', () => {
+    const l = montar()
+    const t = alternarComprado(alternarComprado(l, l.itens.find((i) => i.nome === 'Tomate')!.id), l.itens.find((i) => i.nome === 'Arroz')!.id)
+    const texto = textoParaCompartilhar(t)
+    expect(texto).not.toContain('Tomate')
+    expect(texto).not.toContain('Hortifruti')
+    expect(texto).not.toContain('Arroz')
+    expect(texto).toContain('• Feijão')
+    expect(texto).toContain('Mercearia')
+  })
+
+  it('sem nada faltando (lista vazia ou tudo ticado), não há texto nem link', () => {
+    expect(textoParaCompartilhar({ itens: [] })).toBe('')
+    expect(linkDoWhatsApp({ itens: [] })).toBe('')
+    const l = montar()
+    const tudo = { itens: l.itens.map((i) => ({ ...i, comprado: true })) }
+    expect(textoParaCompartilhar(tudo)).toBe('')
+    expect(linkDoWhatsApp(tudo)).toBe('')
+  })
+
+  it('o link é do WhatsApp com o texto codificado (acentos, quebras de linha e emojis intactos ao decodificar)', () => {
+    const l = montar()
+    const link = linkDoWhatsApp(l)
+    expect(link.startsWith('https://wa.me/?text=')).toBe(true)
+    expect(link).not.toContain('\n')
+    expect(link).not.toContain(' ')
+    expect(decodeURIComponent(link.slice('https://wa.me/?text='.length))).toBe(textoParaCompartilhar(l))
   })
 })

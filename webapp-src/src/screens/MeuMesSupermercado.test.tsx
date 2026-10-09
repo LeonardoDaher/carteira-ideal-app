@@ -156,6 +156,32 @@ describe('MeuMesSupermercado', () => {
     expect(screen.getByRole('button', { name: 'Confirmar: apagar a lista inteira' }).className).toContain('btn-primary')
   })
 
+  it('WhatsApp: o link leva só o que falta comprar e muda quando a pessoa tica um item', async () => {
+    render(<MeuMesSupermercado />)
+    await escrever('arroz, leite, tomate')
+    const texto = () => {
+      const link = screen.getByRole('link', { name: 'Enviar o que falta pelo WhatsApp' }) as HTMLAnchorElement
+      expect(link.href.startsWith('https://wa.me/?text=')).toBe(true)
+      expect(link.target).toBe('_blank')
+      expect(link.rel).toContain('noopener')
+      return decodeURIComponent(link.href.slice('https://wa.me/?text='.length))
+    }
+    expect(texto()).toContain('• Arroz')
+    expect(texto()).toContain('• Leite')
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Arroz' }))
+    expect(texto()).not.toContain('Arroz')
+    expect(texto()).toContain('• Tomate')
+  })
+
+  it('WhatsApp: com tudo ticado ou sem lista, o botão não aparece', async () => {
+    render(<MeuMesSupermercado />)
+    expect(screen.queryByRole('link', { name: /WhatsApp/ })).toBeNull()
+    await escrever('arroz')
+    expect(screen.getByRole('link', { name: /WhatsApp/ })).toBeTruthy()
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Arroz' }))
+    expect(screen.queryByRole('link', { name: /WhatsApp/ })).toBeNull()
+  })
+
   it('remove um item', async () => {
     render(<MeuMesSupermercado />)
     await escrever('arroz, leite')

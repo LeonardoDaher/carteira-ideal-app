@@ -1,5 +1,5 @@
 import { useId, useState } from 'react'
-import { CATEGORIAS, agruparPorCategoria, resumoDaLista } from '../domain/supermercado'
+import { CATEGORIAS, agruparPorCategoria, linkDoWhatsApp, resumoDaLista } from '../domain/supermercado'
 import type { CategoriaId, EdicaoDeItem, ItemDeCompra } from '../domain/supermercado'
 import { useSupermercado } from '../state/useSupermercado'
 
@@ -21,6 +21,7 @@ export function MeuMesSupermercado() {
   const { lista } = est
   const resumo = resumoDaLista(lista)
   const grupos = agruparPorCategoria(lista)
+  const linkWhatsApp = linkDoWhatsApp(lista)
 
   function adicionar() {
     if (!texto.trim()) return
@@ -101,6 +102,11 @@ export function MeuMesSupermercado() {
           ))}
 
           <div className="mm-rodape-lista col" style={{ gap: 8 }}>
+            {linkWhatsApp && (
+              <a className="btn btn-secondary" href={linkWhatsApp} target="_blank" rel="noopener noreferrer">
+                Enviar o que falta pelo WhatsApp
+              </a>
+            )}
             {resumo.comprados > 0 &&
               (confirmando === 'comprados' ? (
                 <div className="row" style={{ gap: 8 }}>
@@ -154,7 +160,7 @@ export function MeuMesSupermercado() {
       )}
 
       <div className="muted tiny justify">
-        A lista fica só neste aparelho e não vai para nenhum servidor. Se trocar de celular ou limpar os dados do navegador, ela some.
+        A lista fica só neste aparelho e não vai para nenhum servidor. Se trocar de celular ou limpar os dados do navegador, ela some. Ao enviar pelo WhatsApp, só o texto do que falta comprar sai do aparelho, para quem você escolher.
       </div>
     </div>
   )
