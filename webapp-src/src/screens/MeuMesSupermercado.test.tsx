@@ -96,6 +96,66 @@ describe('MeuMesSupermercado', () => {
     expect(lerSalva()[0].categoria).toBe('limpeza')
   })
 
+  it('editar: corrige o nome, a quantidade e a categoria de um item e grava no aparelho', async () => {
+    render(<MeuMesSupermercado />)
+    await escrever('arros, leite')
+    fireEvent.click(screen.getByRole('button', { name: 'Editar Arros' }))
+    fireEvent.change(screen.getByLabelText('Nome do item'), { target: { value: 'arroz integral' } })
+    fireEvent.change(screen.getByLabelText('Quantidade (opcional)'), { target: { value: '2 kg' } })
+    fireEvent.change(screen.getByLabelText('Categoria'), { target: { value: 'mercearia' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Salvar' }))
+
+    expect(screen.getByRole('checkbox', { name: 'Arroz integral, 2 kg' })).toBeTruthy()
+    expect(screen.queryByLabelText('Nome do item')).toBeNull()
+    const salvo = lerSalva().find((i) => i.nome === 'Arroz integral')
+    expect(salvo).toMatchObject({ quantidade: '2 kg', categoria: 'mercearia', comprado: false })
+  })
+
+  it('editar: o áudio juntou tudo num item; escrever com vírgulas separa em vários', async () => {
+    render(<MeuMesSupermercado />)
+    await escrever('arroz feijão leite pão')
+    expect(screen.getAllByRole('checkbox')).toHaveLength(1)
+    fireEvent.click(screen.getByRole('button', { name: /^Editar / }))
+    fireEvent.change(screen.getByLabelText('Nome do item'), { target: { value: 'arroz, feijão, leite, pão' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Salvar' }))
+    expect(screen.getAllByRole('checkbox')).toHaveLength(4)
+    expect(within(screen.getByRole('region', { name: 'Mercearia' })).getAllByRole('checkbox')).toHaveLength(2)
+    expect(within(screen.getByRole('region', { name: 'Padaria' })).getByRole('checkbox', { name: 'Pão' })).toBeTruthy()
+  })
+
+  it('editar: Cancelar e Escape não mudam nada; Enter salva; nome vazio não salva', async () => {
+    render(<MeuMesSupermercado />)
+    await escrever('arroz')
+    fireEvent.click(screen.getByRole('button', { name: 'Editar Arroz' }))
+    fireEvent.change(screen.getByLabelText('Nome do item'), { target: { value: 'outra coisa' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Cancelar' }))
+    expect(screen.getByRole('checkbox', { name: 'Arroz' })).toBeTruthy()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Editar Arroz' }))
+    fireEvent.change(screen.getByLabelText('Nome do item'), { target: { value: 'outra coisa' } })
+    fireEvent.keyDown(screen.getByLabelText('Nome do item'), { key: 'Escape' })
+    expect(screen.getByRole('checkbox', { name: 'Arroz' })).toBeTruthy()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Editar Arroz' }))
+    fireEvent.change(screen.getByLabelText('Nome do item'), { target: { value: '   ' } })
+    expect((screen.getByRole('button', { name: 'Salvar' }) as HTMLButtonElement).disabled).toBe(true)
+    fireEvent.keyDown(screen.getByLabelText('Nome do item'), { key: 'Enter' })
+    expect(screen.getByLabelText('Nome do item')).toBeTruthy()
+
+    fireEvent.change(screen.getByLabelText('Nome do item'), { target: { value: 'arroz parboilizado' } })
+    fireEvent.keyDown(screen.getByLabelText('Nome do item'), { key: 'Enter' })
+    expect(screen.getByRole('checkbox', { name: 'Arroz parboilizado' })).toBeTruthy()
+  })
+
+  it('o botão de apagar a lista inteira é amarelo (botão principal), como o de adicionar', async () => {
+    render(<MeuMesSupermercado />)
+    await escrever('arroz')
+    const apagar = screen.getByRole('button', { name: 'Apagar a lista inteira' })
+    expect(apagar.className).toContain('btn-primary')
+    fireEvent.click(apagar)
+    expect(screen.getByRole('button', { name: 'Confirmar: apagar a lista inteira' }).className).toContain('btn-primary')
+  })
+
   it('remove um item', async () => {
     render(<MeuMesSupermercado />)
     await escrever('arroz, leite')

@@ -293,6 +293,46 @@ export function mudarCategoria(lista: ListaDeCompras, id: string, categoria: Cat
   return { itens: lista.itens.map((i) => (i.id === id ? { ...i, categoria } : i)) }
 }
 
+export interface EdicaoDeItem {
+  nome: string
+  quantidade: string
+  categoria: CategoriaId
+}
+
+/**
+ * Edita um item (D75). O áudio do teclado costuma juntar vários itens num só ("arroz feijão leite")
+ * ou errar a escrita; por isso, se o nome editado tiver separadores (vírgula, " e ", quebra de linha),
+ * o primeiro pedaço fica no lugar do item e os outros viram itens novos logo abaixo, cada um com a
+ * categoria sugerida. O primeiro pedaço usa a quantidade e a categoria escolhidas na edição; se a
+ * quantidade ficou vazia, vale a que estiver escrita no nome ("2 litros de leite"). Nome vazio não muda nada.
+ */
+export function editarItem(
+  lista: ListaDeCompras,
+  id: string,
+  dados: EdicaoDeItem,
+  gerarId: () => string = novoIdItem,
+): ListaDeCompras {
+  const indice = lista.itens.findIndex((i) => i.id === id)
+  if (indice < 0) return lista
+  const pedacos = interpretarTexto(dados.nome, gerarId)
+  if (pedacos.length === 0) return lista
+  const original = lista.itens[indice]
+  const quantidadeEditada = dados.quantidade.trim().replace(/\s+/g, ' ')
+  const [primeiro, ...extras] = pedacos
+  // Ao separar um item grudado, o primeiro pedaço também ganha a categoria sugerida, a menos que
+  // a pessoa tenha escolhido outra categoria na edição (a do item grudado quase sempre está errada).
+  const categoria = extras.length > 0 && dados.categoria === original.categoria ? primeiro.categoria : dados.categoria
+  const editado: ItemDeCompra = {
+    ...original,
+    nome: primeiro.nome.slice(0, 80),
+    quantidade: (quantidadeEditada || primeiro.quantidade).slice(0, 30),
+    categoria,
+  }
+  const itens = [...lista.itens]
+  itens.splice(indice, 1, editado, ...extras.map((e) => ({ ...e, nome: e.nome.slice(0, 80) })))
+  return { itens }
+}
+
 export function removerItem(lista: ListaDeCompras, id: string): ListaDeCompras {
   return { itens: lista.itens.filter((i) => i.id !== id) }
 }

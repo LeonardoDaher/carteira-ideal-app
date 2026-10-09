@@ -1,6 +1,6 @@
 import { useId, useState } from 'react'
 import { CATEGORIAS, agruparPorCategoria, resumoDaLista } from '../domain/supermercado'
-import type { CategoriaId, ItemDeCompra } from '../domain/supermercado'
+import type { CategoriaId, EdicaoDeItem, ItemDeCompra } from '../domain/supermercado'
 import { useSupermercado } from '../state/useSupermercado'
 
 /**
@@ -92,6 +92,7 @@ export function MeuMesSupermercado() {
                     item={item}
                     onAlternar={() => est.alternar(item.id)}
                     onCategoria={(c) => est.trocarCategoria(item.id, c)}
+                    onEditar={(dados) => est.editar(item.id, dados)}
                     onRemover={() => est.remover(item.id)}
                   />
                 ))}
@@ -130,7 +131,7 @@ export function MeuMesSupermercado() {
             {confirmando === 'tudo' ? (
               <div className="row" style={{ gap: 8 }}>
                 <button
-                  className="btn btn-secondary"
+                  className="btn btn-primary"
                   onClick={() => {
                     est.apagarTudo()
                     setConfirmando(null)
@@ -144,7 +145,7 @@ export function MeuMesSupermercado() {
                 </button>
               </div>
             ) : (
-              <button className="btn btn-ghost" onClick={() => setConfirmando('tudo')}>
+              <button className="btn btn-primary" onClick={() => setConfirmando('tudo')}>
                 Apagar a lista inteira
               </button>
             )}
@@ -163,13 +164,92 @@ function LinhaDoItem({
   item,
   onAlternar,
   onCategoria,
+  onEditar,
   onRemover,
 }: {
   item: ItemDeCompra
   onAlternar: () => void
   onCategoria: (c: CategoriaId) => void
+  onEditar: (dados: EdicaoDeItem) => void
   onRemover: () => void
 }) {
+  const [editando, setEditando] = useState(false)
+  const idBase = useId()
+  const [nome, setNome] = useState(item.nome)
+  const [quantidade, setQuantidade] = useState(item.quantidade)
+  const [categoria, setCategoria] = useState<CategoriaId>(item.categoria)
+
+  function abrirEdicao() {
+    setNome(item.nome)
+    setQuantidade(item.quantidade)
+    setCategoria(item.categoria)
+    setEditando(true)
+  }
+
+  function salvar() {
+    if (!nome.trim()) return
+    onEditar({ nome, quantidade, categoria })
+    setEditando(false)
+  }
+
+  if (editando) {
+    return (
+      <li className="sm-edicao col" style={{ gap: 8 }}>
+        <label htmlFor={`${idBase}-nome`} className="small" style={{ fontWeight: 700 }}>
+          Nome do item
+        </label>
+        <input
+          id={`${idBase}-nome`}
+          className="input-cotas"
+          style={{ fontWeight: 400 }}
+          value={nome}
+          autoFocus
+          onChange={(e) => setNome(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') salvar()
+            if (e.key === 'Escape') setEditando(false)
+          }}
+        />
+        <div className="muted tiny justify">
+          Para separar em vários itens, escreva com vírgula (ex.: arroz, feijão, leite). Cada um vira um item, com a categoria sugerida.
+        </div>
+        <label htmlFor={`${idBase}-qtd`} className="small" style={{ fontWeight: 700 }}>
+          Quantidade (opcional)
+        </label>
+        <input
+          id={`${idBase}-qtd`}
+          className="input-cotas"
+          style={{ fontWeight: 400 }}
+          value={quantidade}
+          placeholder="Ex.: 2 litros"
+          onChange={(e) => setQuantidade(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') salvar()
+            if (e.key === 'Escape') setEditando(false)
+          }}
+        />
+        <label htmlFor={`${idBase}-cat`} className="small" style={{ fontWeight: 700 }}>
+          Categoria
+        </label>
+        <select id={`${idBase}-cat`} className="input-cotas" style={{ fontWeight: 400 }} value={categoria} onChange={(e) => setCategoria(e.target.value as CategoriaId)}>
+          {CATEGORIAS.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.nome}
+            </option>
+          ))}
+        </select>
+        <div className="row" style={{ gap: 8 }}>
+          <button className="btn btn-primary" disabled={!nome.trim()} onClick={salvar}>
+            Salvar
+          </button>
+          <button className="btn btn-ghost" onClick={() => setEditando(false)}>
+            Cancelar
+          </button>
+        </div>
+      </li>
+    )
+  }
+
   const rotulo = item.quantidade ? `${item.nome}, ${item.quantidade}` : item.nome
   return (
     <li className="sm-linha">
@@ -180,6 +260,14 @@ function LinhaDoItem({
           {item.quantidade && <span className="muted small"> · {item.quantidade}</span>}
         </span>
       </label>
+      <div className="sm-acoes">
+        <button className="btn btn-ghost sm-botao" onClick={abrirEdicao} aria-label={`Editar ${item.nome}`}>
+          ✎
+        </button>
+        <button className="btn btn-ghost sm-botao" onClick={onRemover} aria-label={`Remover ${item.nome}`}>
+          ✕
+        </button>
+      </div>
       <select
         className="input-cotas sm-categoria-select"
         aria-label={`Categoria de ${item.nome}`}
@@ -192,9 +280,6 @@ function LinhaDoItem({
           </option>
         ))}
       </select>
-      <button className="btn btn-ghost sm-remover" onClick={onRemover} aria-label={`Remover ${item.nome}`}>
-        ✕
-      </button>
     </li>
   )
 }

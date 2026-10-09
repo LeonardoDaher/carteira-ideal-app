@@ -192,14 +192,15 @@ describe('Top15BdrsDesconto dentro do Simule BDR', () => {
   const ctx = { screen: 'simuleBdr', setScreen: vi.fn() } as unknown as AppCtx
   const vazio = { geradoEm: null, dataPregao: null, fonte: null, pregoesNoHistorico: 0, sessoesLiquidez: 21, criterio: null, acoes: [], etfs: [], busca: [] }
 
-  it('abre no simulador; a segunda aba leva ao Top 15 e dá para voltar', () => {
+  it('abre no simulador; a segunda aba leva ao Top 15 e dá para voltar', async () => {
     render(<SimuleBdr ctx={ctx} snapshot={vazio as never} />)
     expect(screen.getByRole('tab', { name: /Simulador/ }).getAttribute('aria-selected')).toBe('true')
     expect(screen.getByText('Os dados dos BDRs ainda não foram carregados.')).toBeTruthy()
     fireEvent.click(screen.getByRole('tab', { name: /Top 15 maior desconto/ }))
     expect(screen.getByRole('tab', { name: /Top 15 maior desconto/ }).getAttribute('aria-selected')).toBe('true')
     expect(screen.queryByText('Os dados dos BDRs ainda não foram carregados.')).toBeNull()
-    expect(screen.queryByTestId('top15-bdrs-validacao') ?? screen.queryByTestId('top15-bdrs-codigo')).toBeTruthy()
+    // publicado com código: a tela confere primeiro o código salvo no aparelho e só então mostra o portão
+    expect(await screen.findByTestId('top15-bdrs-codigo')).toBeTruthy()
     fireEvent.click(screen.getByRole('tab', { name: /Simulador/ }))
     expect(screen.getByText('Os dados dos BDRs ainda não foram carregados.')).toBeTruthy()
   })

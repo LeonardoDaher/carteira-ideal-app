@@ -5,6 +5,7 @@ import {
   agruparPorCategoria,
   alternarComprado,
   desmarcarTodos,
+  editarItem,
   interpretarTexto,
   limparComprados,
   mudarCategoria,
@@ -253,6 +254,81 @@ describe('validarLista', () => {
     const muitos = Array.from({ length: 400 }, (_, i) => ({ id: `i${i}`, nome: 'x'.repeat(200), quantidade: 'y'.repeat(100) }))
     const r = validarLista({ itens: muitos })
     expect(r.itens).toHaveLength(300)
+    expect(r.itens[0].nome).toHaveLength(80)
+    expect(r.itens[0].quantidade).toHaveLength(30)
+  })
+})
+
+describe('editarItem', () => {
+  const base = (): ListaDeCompras => adicionarItens({ itens: [] }, itens('arroz, leite, tomate')).lista
+
+  it('troca nome, quantidade e categoria, sem mexer nos outros itens nem no estado de comprado', () => {
+    const b = base()
+    const marcado = alternarComprado(b, b.itens[1].id)
+    const leite = marcado.itens[1]
+    const r = editarItem(marcado, leite.id, { nome: 'leite integral', quantidade: '2 litros', categoria: 'bebidas' }, id)
+    expect(r.itens[1]).toEqual({ id: leite.id, nome: 'Leite integral', quantidade: '2 litros', categoria: 'bebidas', comprado: true })
+    expect(r.itens[0]).toEqual(marcado.itens[0])
+    expect(r.itens[2]).toEqual(marcado.itens[2])
+    expect(r.itens).toHaveLength(3)
+  })
+
+  it('ditado juntou tudo: o nome com vírgulas vira vários itens, na mesma posição', () => {
+    const b = base()
+    const alvo = b.itens[1]
+    const r = editarItem(b, alvo.id, { nome: 'leite, pão de forma e queijo', quantidade: '', categoria: 'frios' }, id)
+    expect(r.itens.map((i) => i.nome)).toEqual(['Arroz', 'Leite', 'Pão de forma', 'Queijo', 'Tomate'])
+    expect(r.itens[1].id).toBe(alvo.id)
+    expect(r.itens[1].categoria).toBe('frios')
+    expect(r.itens[2].categoria).toBe('padaria')
+    expect(r.itens[3].categoria).toBe('frios')
+    expect(new Set(r.itens.map((i) => i.id)).size).toBe(5)
+    expect(r.itens.every((i) => !i.comprado)).toBe(true)
+  })
+
+  it('a quantidade escrita no nome vale quando o campo de quantidade fica vazio; o campo vence quando preenchido', () => {
+    const b = base()
+    const alvo = b.itens[1]
+    expect(editarItem(b, alvo.id, { nome: '3 litros de leite', quantidade: '', categoria: 'frios' }, id).itens[1].quantidade).toBe('3 litros')
+    expect(editarItem(b, alvo.id, { nome: '3 litros de leite', quantidade: '1 caixa', categoria: 'frios' }, id).itens[1].quantidade).toBe('1 caixa')
+  })
+
+  it('apagar a quantidade esvazia o campo', () => {
+    const b = adicionarItens({ itens: [] }, itens('2 litros de leite')).lista
+    expect(editarItem(b, b.itens[0].id, { nome: 'Leite', quantidade: '', categoria: 'frios' }, id).itens[0].quantidade).toBe('')
+  })
+
+  it('nome vazio ou id que não existe não mudam nada', () => {
+    const b = base()
+    expect(editarItem(b, b.itens[0].id, { nome: '  ,  ', quantidade: '1', categoria: 'frios' }, id)).toEqual(b)
+    expect(editarItem(b, 'nao-existe', { nome: 'x', quantidade: '', categoria: 'frios' }, id)).toEqual(b)
+  })
+
+  it('ao separar, o primeiro pedaço ganha a categoria sugerida se a pessoa não mexeu na categoria; se mexeu, vale a dela', () => {
+    const juntado = adicionarItens({ itens: [] }, itens('arroz feijão leite')).lista // um item só, categoria do conjunto
+    const alvo = juntado.itens[0]
+    expect(juntado.itens).toHaveLength(1)
+    const semMexer = editarItem(juntado, alvo.id, { nome: 'leite, arroz', quantidade: '', categoria: alvo.categoria }, id)
+    expect(semMexer.itens.map((i) => [i.nome, i.categoria])).toEqual([['Leite', 'frios'], ['Arroz', 'mercearia']])
+    const escolhida = editarItem(juntado, alvo.id, { nome: 'leite, arroz', quantidade: '', categoria: 'bebidas' }, id)
+    expect(escolhida.itens.map((i) => [i.nome, i.categoria])).toEqual([['Leite', 'bebidas'], ['Arroz', 'mercearia']])
+  })
+
+  it('sem separar, a categoria do item não muda sozinha ao editar só o nome', () => {
+    const l = adicionarItens({ itens: [] }, itens('pilha')).lista
+    const comCategoria = mudarCategoria(l, l.itens[0].id, 'limpeza')
+    const r = editarItem(comCategoria, l.itens[0].id, { nome: 'arroz', quantidade: '', categoria: 'limpeza' }, id)
+    expect(r.itens[0].categoria).toBe('limpeza')
+  })
+
+  it('a quantidade com espaços de sobra é arrumada, sem apagar letras', () => {
+    const l = adicionarItens({ itens: [] }, itens('leite')).lista
+    expect(editarItem(l, l.itens[0].id, { nome: 'leite', quantidade: '  2   litros ', categoria: 'frios' }, id).itens[0].quantidade).toBe('2 litros')
+  })
+
+  it('limita o tamanho do nome e da quantidade', () => {
+    const b = base()
+    const r = editarItem(b, b.itens[0].id, { nome: 'a'.repeat(200), quantidade: 'b'.repeat(100), categoria: 'outros' }, id)
     expect(r.itens[0].nome).toHaveLength(80)
     expect(r.itens[0].quantidade).toHaveLength(30)
   })

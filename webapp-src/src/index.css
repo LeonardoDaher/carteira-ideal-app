@@ -1344,7 +1344,9 @@ button.alloc-box:active {
 .sm-categoria { font-size: 13px; font-weight: 700; margin: 6px 0 0; color: var(--text-muted); text-transform: none; }
 .sm-linha { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: 8px; padding-bottom: 6px; }
 .sm-linha > .mm-item { grid-column: 1; grid-row: 1; min-width: 0; }
-.sm-remover { grid-column: 2; grid-row: 1; width: auto; min-width: 40px; min-height: 40px; padding: 0 8px; }
+.sm-acoes { grid-column: 2; grid-row: 1; display: flex; gap: 2px; }
+.sm-botao { width: auto; min-width: 40px; min-height: 40px; padding: 0 8px; }
+.sm-edicao { padding: 10px 0 12px; }
 .sm-categoria-select { grid-column: 1 / -1; grid-row: 2; justify-self: start; width: auto; max-width: 100%; margin-left: 38px; font-weight: 400; font-size: 12px; padding: 4px 8px; }
 
 .mm-campo { display: flex; align-items: center; gap: 8px; }

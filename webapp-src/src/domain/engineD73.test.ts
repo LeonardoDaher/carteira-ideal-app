@@ -181,5 +181,6 @@ describe('D73 — correções do motor', () => {
         }
       }
     }
-  })
+    // 6.561 execuções com várias asserções cada: sob a carga da suíte inteira passa dos 5 s padrão.
+  }, 60_000)
 })

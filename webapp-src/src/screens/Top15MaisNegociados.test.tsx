@@ -152,14 +152,15 @@ describe('abas "Top 15 mais negociados" nas telas de simulação', () => {
     expect(screen.getByText('Os dados das ações ainda não foram carregados.')).toBeTruthy()
   })
 
-  it('Simule BDR: três abas (simulador, maior desconto, mais negociados), cada uma com o seu ranking', () => {
+  it('Simule BDR: três abas (simulador, maior desconto, mais negociados), cada uma com o seu ranking', async () => {
     render(<SimuleBdr ctx={ctx} snapshot={{ geradoEm: null, dataPregao: null, fonte: null, pregoesNoHistorico: 0, sessoesLiquidez: 21, criterio: null, acoes: [], etfs: [], busca: [] } as never} />)
     expect(screen.getAllByRole('tab')).toHaveLength(3)
     fireEvent.click(screen.getByRole('tab', { name: /Top 15 mais negociados/ }))
     expect(screen.queryByTestId('top15-bdrs-negociados-validacao') ?? screen.queryByTestId('top15-bdrs-negociados')).toBeTruthy()
     expect(screen.queryByTestId('top15-bdrs-validacao') ?? screen.queryByTestId('top15-bdrs-codigo')).toBeNull()
     fireEvent.click(screen.getByRole('tab', { name: /Top 15 maior desconto/ }))
-    expect(screen.queryByTestId('top15-bdrs-validacao') ?? screen.queryByTestId('top15-bdrs-codigo')).toBeTruthy()
+    // publicado com código: espera a conferência do código salvo no aparelho e o portão aparecer
+    expect(await screen.findByTestId('top15-bdrs-codigo')).toBeTruthy()
     expect(screen.queryByTestId('top15-bdrs-negociados-validacao')).toBeNull()
   })
 })

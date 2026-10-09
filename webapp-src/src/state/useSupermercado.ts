@@ -5,13 +5,14 @@ import {
   adicionarItens,
   alternarComprado,
   desmarcarTodos,
+  editarItem,
   interpretarTexto,
   limparComprados,
   mudarCategoria,
   removerItem,
   validarLista,
 } from '../domain/supermercado'
-import type { CategoriaId, ListaDeCompras } from '../domain/supermercado'
+import type { CategoriaId, EdicaoDeItem, ListaDeCompras } from '../domain/supermercado'
 
 /**
  * Estado do Meu Mês Supermercado (D74). Chave própria no aparelho, separada do orçamento
@@ -72,10 +73,11 @@ export function useSupermercado() {
 
   const alternar = useCallback((id: string) => setLista((l) => alternarComprado(l, id)), [])
   const trocarCategoria = useCallback((id: string, categoria: CategoriaId) => setLista((l) => mudarCategoria(l, id, categoria)), [])
+  const editar = useCallback((id: string, dados: EdicaoDeItem) => setLista((l) => editarItem(l, id, dados)), [])
   const remover = useCallback((id: string) => setLista((l) => removerItem(l, id)), [])
   const limparJaComprados = useCallback(() => setLista((l) => limparComprados(l)), [])
   const desmarcar = useCallback(() => setLista((l) => desmarcarTodos(l)), [])
   const apagarTudo = useCallback(() => setLista(LISTA_VAZIA), [])
 
-  return { lista, hidratado, adicionarTexto, alternar, trocarCategoria, remover, limparJaComprados, desmarcar, apagarTudo }
+  return { lista, hidratado, adicionarTexto, alternar, trocarCategoria, editar, remover, limparJaComprados, desmarcar, apagarTudo }
 }
