@@ -1,4 +1,4 @@
-# Passagem para o chat (Carteira Ideal) — estado em 09/10/2026, após a D76
+# Passagem para o chat (Carteira Ideal) — estado em 09/10/2026, após a D77
 
 Cole este arquivo no início do chat e anexe `docs/06-proximos-passos.md`, `docs/07-registro-de-decisoes.md` (a partir da D57), `docs/02-metodologia.md`, `docs/09-metodologia-acoes-baratas.md`, `docs/10-metodologia-fii-baratos.md` e `docs/11-metodologia-top15-etfs-bdrs.md`. O repositório é a memória do projeto: tudo abaixo está no GitHub (`LeonardoDaher/carteira-ideal-app`, branch `main`).
 
@@ -27,6 +27,8 @@ O Meu Mês tem **duas abas**: "Contas do mês" (como sempre) e "Supermercado" (n
 - **D76:** botão verde **"Enviar o que falta pelo WhatsApp"** (com a logo): abre `wa.me` com só os itens **não ticados**, por categoria; some se nada falta. O texto só sai do aparelho quando a pessoa toca no botão; a Política de Privacidade cita isso.
 - **Limites:** o dicionário é finito (o que não casa cai em "Outros"); não sincroniza entre aparelhos nem pessoas. **"Organizar com IA"** foi discutido e **adiado**: exigiria função nova na Vercel, chave de API, limite por pessoa e aviso de privacidade (o texto sairia do aparelho). O responsável quer testar o que existe antes.
 
+- **D77:** a página inicial, o FAQ, a página `/meu-mes/` e o atalho do manifest passaram a citar a aba Supermercado (e que só o texto enviado pelo WhatsApp sai do aparelho).
+
 ### Decisões anteriores recentes
 D67 Simule Imóvel com seleção de caminhos, D68 cartão "Simule Bens", D69 locação como quinto caminho no carro e na moto.
 
@@ -43,14 +45,14 @@ D67 Simule Imóvel com seleção de caminhos, D68 cartão "Simule Bens", D69 loc
 3. **Confirmar desdobramentos dos BDRs em conferência** olhando os avisos de evento corporativo da B3 e registrando em `config/bdrs.json → desdobramentos` (formato no `_leia` do arquivo). Sem isso, esses BDRs (NFLX34 e outros) ficam fora do ranking.
 4. **Parecer independente** (D22): o responsável declarou que ele mesmo é o especialista; o registro disso é dele (o assistente não avalia o mérito jurídico). Vale para FIIs, ações, ETFs e BDRs **e agora também para o desenho novo do motor de perfis (D73)**.
 5. **Rever os parâmetros do motor (D73):** tetos de risco, faixas de capacidade, idade do aviso de sucessão; decidir se renomeia o perfil 3 "Conservador Acúmulo" (sai com carteira bem conservadora por causa do teto).
-6. **Testar o Meu Mês Supermercado no celular** depois que a Vercel publicar: ditado do teclado, ✎ editar, ticar, WhatsApp (conferir a mensagem e que o item ticado fica de fora) e layout dos botões. Conferir também a página de Privacidade no ar.
+6. **Testar o Meu Mês Supermercado no celular** depois que a Vercel publicar: ditado do teclado, ✎ editar, ticar, WhatsApp (conferir a mensagem e que o item ticado fica de fora) e layout dos botões. Conferir também no ar a página de Privacidade, a página inicial (FAQ novo) e `/meu-mes/`.
 7. Divulgar cada código no Instagram `@acarteiraideal`.
 8. Acompanhar: o job de FIIs no dia 21 e o de ETFs/BDRs no dia 22 (e-mail do GitHub se falhar), as conferências manuais dos FIIs (vencem em 05/01/2027), RZAT11 e o preço diário (workflow "Atualizar preço diário dos FIIs", 22h15).
 
 ## 4. Como o trabalho é entregue (importante para não voltar ao zip nem desfazer o trabalho do outro lado)
 - No **Claude Code (desktop)** o assistente tem Git e GitHub CLI no computador (`C:\nodeportatil`), clone em `C:\nodeportatil\repo` (Node portátil em `C:\nodeportatil\node-v22.23.3-win-x64`; **não há Python**), e faz commit e push na `main`, dispara workflows e lê logs. O assistente **só faz commit e push quando o responsável pede**, cada vez. Para revogar o acesso: `gh auth logout` ou github.com/settings/applications.
 - No **chat comum** o assistente **não** acessa o GitHub; o responsável sobe os arquivos que o chat gera ("Add files via upload"). **As duas frentes mexem no mesmo repositório.** Em 07–08/10 o chat subiu D67, D68 e D69 enquanto o Code trabalhava na D70, e a pasta de trabalho do Code estava desatualizada: se o Code enviasse como estava, desfaria o trabalho do chat. Por isso:
-  - **Números de decisão:** conferir o último `## D..` em `docs/07-registro-de-decisoes.md` do GitHub antes de numerar a próxima (**a próxima livre é a D77**).
+  - **Números de decisão:** conferir o último `## D..` em `docs/07-registro-de-decisoes.md` do GitHub antes de numerar a próxima (**a próxima livre é a D78**).
   - **O Code sempre traz a versão do GitHub antes de enviar** (`git pull --ff-only`) e tem uma trava que recusa enviar se o GitHub mudou um arquivo que ele ia enviar.
   - **No chat:** ao receber o zip do projeto, usar sempre o zip **mais recente do GitHub** (Code → Download ZIP) e dizer o número da última decisão.
 - Regra prática: mudanças de código e dados no Code; decisões, texto, estratégia e conteúdo no chat. O zip do GitHub vem sem `.git` e sem `node_modules` (normal); o chat não roda `npm install`.
@@ -75,7 +77,6 @@ D67 Simule Imóvel com seleção de caminhos, D68 cartão "Simule Bens", D69 loc
 
 ## 7. Próximas ideias (nenhuma iniciada)
 - **Organizar com IA** na lista de supermercado (só se o ditado continuar ruim depois do teste).
-- Atualizar a página inicial e o FAQ para citar a aba Supermercado do Meu Mês.
 - BDRs com fundamentos (P/L etc.) a partir de uma fonte externa dos balanços das empresas estrangeiras (projeto grande).
 - ETFs com taxa de administração mantida à mão e conferida (tabela com fonte e data, no molde da conferência dos FIIs).
 - Divulgação mensal automática do ranking (texto para o Instagram, sem código).

@@ -1462,3 +1462,15 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 **Limites.** É um envio único (não sincroniza se a lista mudar depois) e quem recebe ganha só o texto, não a lista no app.
 
 **Testes.** +4 no domínio (só o que falta, itens ticados e categorias vazias fora, vazio sem link, codificação do link) e +2 na tela (o link acompanha os tiques e o botão some sem nada faltando).
+
+
+## D77 (09/10/2026): Página inicial, FAQ e página /meu-mes/ passam a citar o Meu Mês Supermercado
+
+**Pedido.** Depois da D74 a D76, a página inicial e o FAQ ainda descreviam o Meu Mês só como contas.
+
+**O que mudou.**
+- **Página inicial (`index.html`):** o cartão do Meu Mês diz "Contas do mês, supermercado e planejamento financeiro"; o cartão da lista de ferramentas virou "Meu Mês: contas e supermercado" e cita a lista por categoria para ticar no mercado e enviar pelo WhatsApp. A resposta do FAQ "Minhas respostas ficam guardadas em algum lugar?" passou a dizer que a lista de supermercado também fica só no aparelho e que **só o texto da lista sai dele, e apenas se a pessoa tocar em "Enviar o que falta pelo WhatsApp"**. Nova pergunta do FAQ, "O que posso fazer no Meu Mês?" (visível e no JSON-LD; as 6 perguntas coincidem nos dois).
+- **Página `/meu-mes/` (`scripts/gerar-paginas.mjs`):** descrição, lead, nova seção "Aba Supermercado: a lista de compras" (bolinha para ticar, editar, WhatsApp), seção "Onde ficam os seus dados" com a exceção do WhatsApp (e a cópia de segurança, que cobre só as contas), e duas perguntas novas no FAQ ("Como funciona o Meu Mês Supermercado?" e "Posso mandar a lista de compras para outra pessoa?"). Data de revisão desta página: 09/10/2026 (as demais seguem em 28/09/2026).
+- **`manifest.webmanifest`:** descrição do atalho do Meu Mês. O arquivo estava com fim de linha do Windows (CRLF) no disco e foi normalizado para LF, como está no repositório.
+
+**Verificação.** Os 366 testes de scripts passam; o JSON-LD da página inicial e o da `/meu-mes/` são válidos; conferido na tela, com um servidor estático local, que a página inicial mostra os textos novos.

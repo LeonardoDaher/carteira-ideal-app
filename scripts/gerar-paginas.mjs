@@ -623,16 +623,16 @@ function paginaMeuMes(hubDividas) {
   return {
     caminho: '/meu-mes/',
     titulo: 'Meu Mês: controle financeiro e plano para sair das dívidas',
-    descricao: 'Organize o mês em 3 potes (guardar, crescer, gastar), controle o cartão de crédito e monte um plano para sair das dívidas. Grátis, dados só no seu aparelho.',
+    descricao: 'Organize o mês em 3 potes, controle o cartão, saia das dívidas e monte a lista de supermercado por categoria. Grátis, dados só no seu aparelho.',
     h1: 'Meu Mês: controle das contas e planejamento financeiro',
-    lead: 'Salário, contas, cartão e dívidas num só lugar, no molde dos três potes: uma parte para guardar, uma para fazer crescer e uma para gastar sem culpa.',
+    lead: 'Salário, contas, cartão e dívidas num só lugar, no molde dos três potes: uma parte para guardar, uma para fazer crescer e uma para gastar sem culpa. E, na aba Supermercado, a lista de compras do mês.',
     botoes: [
       { texto: 'Abrir o Meu Mês', href: '/app/?tela=meuMes' },
       { texto: 'Guia: sair das dívidas', href: hubDividas, tipo: 'site' },
     ],
     migalhas: [],
     schema: 'WebPage',
-    lastmod: REVISADO_EM,
+    lastmod: '2026-10-09',
     corpo: [
       secao(
         'Como funciona',
@@ -653,13 +653,24 @@ function paginaMeuMes(hubDividas) {
 <p>A lógica é simples: enquanto houver dívida cara, quitar costuma ser o melhor "investimento" disponível, porque nenhum investimento seguro rende o que o cartão ou o cheque especial cobram.</p>`,
       ),
       secao(
+        'Aba Supermercado: a lista de compras',
+        `<p>Ao lado das contas, o Meu Mês tem uma aba <strong>Supermercado</strong>. Você escreve (ou dita, pelo microfone do teclado do celular) o que precisa comprar, por exemplo "arroz, feijão, 2 litros de leite, sabão em pó e frango". O app separa em itens, lê a quantidade e sugere a categoria de cada um: hortifruti, açougue e peixaria, padaria, frios e laticínios, mercearia, bebidas, congelados, limpeza, higiene e beleza, pet e outros.</p>
+<ul>
+<li><strong>Bolinha para ticar:</strong> cada item tem uma bolinha; no mercado, você vai ticando e o item vai para o fim da categoria. Um contador mostra quantos já estão no carrinho.</li>
+<li><strong>Editar:</strong> se o ditado do teclado juntar ou errar os itens, o botão de editar corrige o nome, a quantidade e a categoria. Escrevendo com vírgulas, um item se divide em vários.</li>
+<li><strong>Enviar pelo WhatsApp:</strong> manda para quem você escolher só o que ainda falta comprar, por categoria.</li>
+</ul>`,
+      ),
+      secao(
         'Onde ficam os seus dados',
-        `<p>Tudo o que você lança no Meu Mês fica só no seu aparelho. Nada é enviado para servidor, e o app oferece uma cópia de segurança para você guardar.</p>`,
+        `<p>Tudo o que você lança no Meu Mês, inclusive a lista de supermercado, fica só no seu aparelho. Nada é enviado para servidor, e o app oferece uma cópia de segurança das contas para você guardar. A única exceção é o botão de enviar a lista pelo WhatsApp: ele só leva o texto do que falta comprar, para o contato que você escolher, quando você toca nele.</p>`,
       ),
     ].join('\n'),
     faq: [
       { p: 'O Meu Mês é gratuito?', r: 'Sim, é gratuito e não pede cadastro.' },
-      { p: 'Meus dados financeiros ficam guardados na internet?', r: 'Não. Ficam só no seu aparelho e não são enviados a nenhum servidor.' },
+      { p: 'Meus dados financeiros ficam guardados na internet?', r: 'Não. Ficam só no seu aparelho e não são enviados a nenhum servidor. A lista de supermercado também fica só no aparelho; só o texto do que falta comprar sai dele, e apenas se você tocar em enviar pelo WhatsApp.' },
+      { p: 'Como funciona o Meu Mês Supermercado?', r: 'Você escreve ou dita o que precisa comprar, o app separa em itens, sugere a categoria de cada um (hortifruti, açougue, mercearia, limpeza e outras) e você vai ticando no mercado. Dá para editar cada item e enviar pelo WhatsApp só o que ainda falta comprar.' },
+      { p: 'Posso mandar a lista de compras para outra pessoa?', r: 'Sim. O botão "Enviar o que falta pelo WhatsApp" abre o WhatsApp com a lista pronta, só com os itens que você ainda não ticou, e você escolhe o contato. É um envio único: se a lista mudar depois, é preciso enviar de novo.' },
       { p: 'O que é o método avalanche e o método bola de neve?', r: 'No avalanche, você paga primeiro a dívida de maior juro, o que custa menos no total. Na bola de neve, você começa pela menor dívida para ganhar motivação. O app monta o plano nos dois formatos.' },
     ],
     relacionados: [
