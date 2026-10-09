@@ -47,10 +47,21 @@ import type { Compra, Conta, ItemDoMes, Orcamento, ResumoDoMes, Semaforo, TipoCo
 import { reais } from '../domain/mercadoOficial'
 import { useOrcamento } from '../state/useOrcamento'
 import { VoltarInicio } from '../ui/VoltarInicio'
+import { AbasDaTela } from '../ui/AbasDaTela'
+import type { AbaDaTela } from '../ui/AbasDaTela'
+import { MeuMesSupermercado } from './MeuMesSupermercado'
 import { encontrarTrilha, totalDeAulas } from '../data/trilhas'
 import { NOME_ARQUIVO_MANUAL_MEU_MES, RESUMO_MANUAL_MEU_MES, TITULO_MANUAL_MEU_MES, URL_MANUAL_MEU_MES } from '../data/manualMeuMes'
 import { MinhasDividas, PactoNaoParcelar, PainelRecuperacao, PlanoDeQuitacao, RoteiroNegociacao } from './MeuMesRecuperacao'
 import type { AppCtx } from '../state/useAppState'
+
+type AbaMeuMes = 'contas' | 'supermercado'
+
+/** As duas abas do Meu Mês (D74): as contas do mês de sempre e a lista de supermercado. */
+const ABAS_MEU_MES: readonly AbaDaTela<AbaMeuMes>[] = [
+  { id: 'contas', emoji: '🧾', titulo: 'Contas do mês', descricao: 'Salário, contas e cartão' },
+  { id: 'supermercado', emoji: '🛒', titulo: 'Supermercado', descricao: 'Lista de compras por categoria' },
+]
 
 const TRILHA_SAIR_DAS_DIVIDAS = encontrarTrilha('sair-das-dividas')
 const AULAS_SAIR_DAS_DIVIDAS = TRILHA_SAIR_DAS_DIVIDAS ? totalDeAulas(TRILHA_SAIR_DAS_DIVIDAS) : 0
@@ -75,6 +86,7 @@ export function MeuMes({
   hoje?: Date
 }) {
   const est = useOrcamento()
+  const [aba, setAba] = useState<AbaMeuMes>('contas')
   const [mes, setMes] = useState(() => chaveMes(hoje))
   // "Editar" na lista do mês abre a conta no formulário de Minhas contas (ajuste após a Etapa 4).
   const [pedidoEdicao, setPedidoEdicao] = useState<{ id: string; vez: number } | null>(null)
@@ -91,13 +103,17 @@ export function MeuMes({
     <div className="screen">
       <VoltarInicio />
 
-      <div className="col" style={{ gap: 4 }}>
-        <h1 style={{ fontSize: 21 }}>Meu mês</h1>
-        {/* Texto de abertura maior (ajuste de 26/09/2026): em 12px, apagado, passava despercebido. */}
-        <div className="muted justify mm-abertura">
-          Anote suas contas uma vez. Quando o salário cair, é só ir ticando, e você sabe exatamente quanto sobra para guardar,
-          investir e gastar.
-        </div>
+      <h1 style={{ fontSize: 21 }}>Meu mês</h1>
+
+      <AbasDaTela prefixo="meu-mes" rotulo="Seções do Meu mês" abas={ABAS_MEU_MES} ativa={aba} aoMudar={setAba}>
+      {aba === 'supermercado' ? (
+        <MeuMesSupermercado />
+      ) : (
+      <>
+      {/* Texto de abertura maior (ajuste de 26/09/2026): em 12px, apagado, passava despercebido. */}
+      <div className="muted justify mm-abertura">
+        Anote suas contas uma vez. Quando o salário cair, é só ir ticando, e você sabe exatamente quanto sobra para guardar,
+        investir e gastar.
       </div>
 
       {primeiraVez ? (
@@ -167,6 +183,9 @@ export function MeuMes({
           </div>
         </div>
       )}
+      </>
+      )}
+      </AbasDaTela>
     </div>
   )
 }

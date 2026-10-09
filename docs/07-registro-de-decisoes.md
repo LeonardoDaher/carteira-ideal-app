@@ -1423,3 +1423,18 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 **Testes.** 46 testes no motor (`engineD73.test.ts` novo e ajustes em `engine.test.ts`), incluindo varredura das 2.187 combinações x 3 suitabilities (soma 100%, sem negativos, dentro do teto, cripto só Arrojado, piso de liquidez). **Mutação:** 17 defeitos introduzidos (tetos, cripto, prazo do Pilar 3, pontuação do Pilar 7, faixas, calibradores, reação, piso, vetores, idade, destino do corte); 3 passaram na primeira rodada (fronteira da faixa baixa, destino do corte e um trecho redundante, que foi removido) e todos são detectados agora.
 
 **Pendência.** Os testes `Top15BdrsDesconto.test.tsx` e `Top15MaisNegociados.test.tsx` (Simule BDR) já falhavam na `main` antes desta mudança; não foram mexidos aqui.
+
+
+## D74 (09/10/2026): Meu Mês Supermercado, lista de compras por categoria (sem IA)
+
+**Decisão.** O responsável pediu uma segunda aba no Meu Mês, "Supermercado": a pessoa diz o que precisa comprar, os itens aparecem com uma bolinha para ticar no mercado, agrupados por categoria. Começou **sem IA**, com categorias. O Meu Mês passou a ter duas abas (mesmo componente `AbasDaTela` das telas de simulação): **Contas do mês** (o que já existia, sem mudança) e **Supermercado**.
+
+**Como funciona.** A pessoa escreve (ou dita pelo microfone do teclado) "arroz, feijão, 2 litros de leite, sabão em pó e frango". `domain/supermercado.ts` separa em itens (vírgula, ponto e vírgula, quebra de linha, " e ", " + "; marcadores e numeração saem; "2,5 kg" não quebra), lê a quantidade ("2 litros", "3kg", "12", "meia dúzia", números por extenso), sugere a **categoria** por dicionário de palavras (11 categorias na ordem dos corredores: Hortifruti, Açougue e peixaria, Padaria, Frios e laticínios, Mercearia, Bebidas, Congelados, Limpeza, Higiene e beleza, Pet, Outros; sem acento, plural ignorado, a expressão mais longa vence, como "leite de coco" = bebida e "leite" = laticínio) e a pessoa troca a categoria de qualquer item. Item igual a um que ainda não foi comprado não duplica (a pessoa é avisada); item já comprado volta como compra nova. Na categoria, o que falta vem antes do que já está no carrinho. Botões: tirar da lista o que já foi comprado, desmarcar tudo (reusar a lista) e apagar a lista, os dois de apagar com confirmação.
+
+**Onde fica.** Só no aparelho (`localStorage`, chave `carteiraideal.supermercado`, versão 1), separada do orçamento (`carteiraideal.orcamento`): uma não mexe na outra. Nada vai para a API. A leitura descarta o que estiver malformado (limite de 300 itens, 80 caracteres no nome) sem travar. A Política de Privacidade passou a citar a lista de compras entre os dados guardados no aparelho.
+
+**Limites conhecidos.** O dicionário de categorias é finito: o que não casa cai em "Outros" (dá para trocar, mas o app não aprende). Não sincroniza entre aparelhos nem entre pessoas. O microfone é o do teclado do celular (a página não faz reconhecimento de voz própria).
+
+**Próximo passo, se o responsável quiser.** Um botão opcional "Organizar com IA" (função nova na Vercel, chave de API, limite por pessoa e texto de privacidade avisando que o texto sai do aparelho), e/ou "Enviar a lista pelo WhatsApp".
+
+**Testes.** Domínio +56 (`supermercado.test.ts`) e tela +16 (`MeuMesSupermercado.test.tsx`, inclusive as duas abas juntas e a lista independente do orçamento). **Mutação:** 19 defeitos (duplicidade, ordem, limpeza, desmarcar, limites da leitura, decimal, separadores, marcadores, plural, desempate de categoria, validação); todos detectados, exceto o desempate entre categorias de mesmo tamanho, que é equivalente porque nenhuma palavra do dicionário repete entre categorias.
