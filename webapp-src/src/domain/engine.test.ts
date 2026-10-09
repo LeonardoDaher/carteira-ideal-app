@@ -136,10 +136,10 @@ describe('calcularPerfilPatrimonial', () => {
     eficienciaFiscal: 'c',
   }
 
-  it('soma o score de 7 (todo a) a 21 (todo c)', () => {
-    expect(calcularPerfilPatrimonial('Arrojado', respostasBaixa).scoreArquitetura).toBe(7)
-    expect(calcularPerfilPatrimonial('Arrojado', respostasMedia).scoreArquitetura).toBe(14)
-    expect(calcularPerfilPatrimonial('Arrojado', respostasAlta).scoreArquitetura).toBe(21)
+  it('soma o score de 6 (todo a) a 18 (todo c); o Pilar 7 não pontua', () => {
+    expect(calcularPerfilPatrimonial('Arrojado', respostasBaixa).scoreArquitetura).toBe(6)
+    expect(calcularPerfilPatrimonial('Arrojado', respostasMedia).scoreArquitetura).toBe(12)
+    expect(calcularPerfilPatrimonial('Arrojado', respostasAlta).scoreArquitetura).toBe(18)
   })
 
   it('aplica a regra de veto quando um pilar-restrição-dura vem como "a", mesmo com suitability Arrojado', () => {
@@ -154,22 +154,33 @@ describe('calcularPerfilPatrimonial', () => {
     expect(resultado.perfilPatrimonial).toBe('Crescimento Pleno')
   })
 
-  it('capacidade alta + suitability Conservador ainda fica Defensivo (o mais conservador prevalece)', () => {
+  it('capacidade alta + suitability Conservador dá vetor Crescimento Pleno (o teto de risco do suitability é aplicado na carteira, não no vetor)', () => {
     const resultado = calcularPerfilPatrimonial('Conservador', respostasAlta)
-    expect(resultado.perfilPatrimonial).toBe('Defensivo')
+    expect(resultado.perfilPatrimonial).toBe('Crescimento Pleno')
+    expect(resultado.perfilFinalCarteira).toBe('3. Conservador Acúmulo')
+  })
+
+  it('os 9 Perfis-Mãe são todos alcançáveis (D73): vetor pela capacidade x suitability', () => {
+    const veto = { ...respostasAlta, capacidadeFinanceira: 'a' as const }
+    const nomes = new Set<string>()
+    for (const suit of ['Conservador', 'Moderado', 'Arrojado'] as const) {
+      for (const r of [respostasBaixa, respostasMedia, respostasAlta, veto]) {
+        nomes.add(calcularPerfilPatrimonial(suit, r).perfilFinalCarteira)
+      }
+    }
+    expect(nomes.size).toBe(9)
+    expect(calcularPerfilPatrimonial('Conservador', respostasMedia).perfilFinalCarteira).toBe('2. Conservador Renda')
+    expect(calcularPerfilPatrimonial('Moderado', respostasAlta).perfilFinalCarteira).toBe('6. Moderado Expansão')
   })
 
   it('devolve o Perfil Final da Carteira (1 a 9) e não só o Perfil Patrimonial — cliente vê o nome do perfil-mãe', () => {
-    // MATRIZ_PATRIMONIAL (pré-existente) já limita o suitability Conservador sempre ao
-    // vetor Defensivo ("o mais conservador prevalece" — ver teste acima), então só o
-    // perfil 1 é alcançável por essa via para o Conservador; os perfis 2 e 3 existem no
-    // nome do mapa (para o caso de essa trava mudar no futuro) mas não são alcançados aqui.
+    // respostasBaixa tem [A] nos pilares duros (veto) e, por isso, é sempre Defensivo.
     expect(calcularPerfilPatrimonial('Conservador', respostasBaixa).perfilFinalCarteira).toBe('1. Conservador Puro')
-    expect(calcularPerfilPatrimonial('Conservador', respostasMedia).perfilFinalCarteira).toBe('1. Conservador Puro')
-    expect(calcularPerfilPatrimonial('Conservador', respostasAlta).perfilFinalCarteira).toBe('1. Conservador Puro')
+    expect(calcularPerfilPatrimonial('Conservador', respostasMedia).perfilFinalCarteira).toBe('2. Conservador Renda')
+    expect(calcularPerfilPatrimonial('Conservador', respostasAlta).perfilFinalCarteira).toBe('3. Conservador Acúmulo')
     expect(calcularPerfilPatrimonial('Moderado', respostasBaixa).perfilFinalCarteira).toBe('4. Moderado Defensivo')
     expect(calcularPerfilPatrimonial('Moderado', respostasMedia).perfilFinalCarteira).toBe('5. Moderado Renda (Equilíbrio)')
-    expect(calcularPerfilPatrimonial('Moderado', respostasAlta).perfilFinalCarteira).toBe('5. Moderado Renda (Equilíbrio)')
+    expect(calcularPerfilPatrimonial('Moderado', respostasAlta).perfilFinalCarteira).toBe('6. Moderado Expansão')
     expect(calcularPerfilPatrimonial('Arrojado', respostasBaixa).perfilFinalCarteira).toBe('7. Arrojado Travado (Falso Arrojado)')
     expect(calcularPerfilPatrimonial('Arrojado', respostasMedia).perfilFinalCarteira).toBe('8. Arrojado Gerador de Renda')
     expect(calcularPerfilPatrimonial('Arrojado', respostasAlta).perfilFinalCarteira).toBe('9. Arrojado Pleno / Global')
@@ -196,29 +207,40 @@ describe('calcularPerfilPatrimonial', () => {
     }
     const resultado = gerarRecomendacao(respostasSuitability, { idade: 35 }, respostasMedia)
     expect(resultado.perfilPatrimonial).toBeDefined()
-    expect(resultado.scoreArquitetura).toBe(14)
+    expect(resultado.scoreArquitetura).toBe(12)
   })
 
-  it('a carteira-modelo depende do perfil patrimonial e do prazo, não do suitability bruto', () => {
+  const suitModerado: RespostasQuestionario = {
+    objetivo: 'b', prazo: 'd', tolerancia: 'b', reserva: 'd', patrimonio: 'c', experiencia: 'c', reacao: 'c',
+  }
+  const suitArrojado: RespostasQuestionario = {
+    objetivo: 'd', prazo: 'd', tolerancia: 'd', reserva: 'd', patrimonio: 'd', experiencia: 'd', reacao: 'c',
+  }
+
+  it('a carteira-modelo vem do vetor patrimonial e do prazo; o suitability só limita o risco', () => {
     const dados = { idade: 35 }
-    // Duas combinações diferentes que caem em "Equilibrado" pela matriz 3x3: capacidade
-    // média + suitability Moderado, e capacidade média + suitability Arrojado.
-    const respostasModerado: RespostasQuestionario = {
-      objetivo: 'b', prazo: 'd', tolerancia: 'b', reserva: 'd', patrimonio: 'c', experiencia: 'c', reacao: 'c',
-    }
-    const respostasArrojado: RespostasQuestionario = {
-      objetivo: 'd', prazo: 'd', tolerancia: 'd', reserva: 'd', patrimonio: 'd', experiencia: 'd', reacao: 'c',
-    }
-    const r1 = gerarRecomendacao(respostasModerado, dados, respostasMedia)
-    const r2 = gerarRecomendacao(respostasArrojado, dados, respostasMedia)
+    // respostasMedia tem Pilar 3 = "b" (gasto entre 3 e 5 anos): o prazo "longo" do
+    // suitability cai para "médio" (D73). Nesse prazo o Equilibrado não chega ao teto do
+    // Moderado, então Moderado e Arrojado recebem a mesma carteira.
+    const r1 = gerarRecomendacao(suitModerado, dados, respostasMedia)
+    const r2 = gerarRecomendacao(suitArrojado, dados, respostasMedia)
     expect(r1.perfilPatrimonial).toBe('Equilibrado')
     expect(r2.perfilPatrimonial).toBe('Equilibrado')
-    expect(r1.perfilFinal).not.toBe(r2.perfilFinal) // suitability diferente...
-    expect(r1.prazo).toBe(r2.prazo) // ...mesmo prazo (longo)...
-    // ...e, como nenhuma trava rígida (reserva/patrimônio/experiência) diverge entre os
-    // dois cenários, a carteira final é idêntica: quem escolhe a carteira-modelo é o
-    // Perfil Patrimonial (Equilibrado) x prazo (longo), não o suitability bruto.
+    expect(r1.perfilFinal).not.toBe(r2.perfilFinal)
+    expect(r1.prazo).toBe('medio')
+    expect(r2.prazo).toBe('medio')
     expect(r1.carteira).toEqual(r2.carteira)
+  })
+
+  it('no prazo longo o suitability Moderado não recebe cripto; o Arrojado recebe (cripto só para Arrojado)', () => {
+    const dados = { idade: 35 }
+    const longa = { ...respostasMedia, janelaLiquidez: 'c' as const }
+    const r1 = gerarRecomendacao(suitModerado, dados, longa)
+    const r2 = gerarRecomendacao(suitArrojado, dados, longa)
+    expect(r1.prazo).toBe('longo')
+    expect(r1.carteira.cripto ?? 0).toBe(0)
+    expect(r2.carteira.cripto ?? 0).toBeGreaterThan(0)
+    expect(carteiraSoma100(r1.carteira)).toBe(100)
   })
 })
 
@@ -236,10 +258,11 @@ describe('aplicarCalibradoresSuaves', () => {
     return Object.values(c).reduce((s: number, v) => s + (v ?? 0), 0)
   }
 
-  it('não altera a carteira quando os 4 pilares suaves vêm todos como "b"', () => {
+  it('não move percentual quando os 4 pilares suaves vêm todos como "b" (só sobra o aviso informativo do Pilar 7)', () => {
     const { carteira, alertas } = aplicarCalibradoresSuaves(carteiraBase, respostasTodoB)
     expect(carteira).toEqual(carteiraBase)
-    expect(alertas).toHaveLength(0)
+    expect(alertas).toHaveLength(1)
+    expect(alertas[0]).toContain('simplificada')
   })
 
   it('Pilar 4 = "a" reduz Ações/BDRs/Internacionais/Cripto e redireciona para Ouro, preservando a soma', () => {
@@ -292,11 +315,36 @@ describe('aplicarCalibradoresSuaves', () => {
     expect(carteiraC).toEqual(carteiraBase)
   })
 
-  it('Pilar 7 = "a" ou "c" gera um alerta informativo sobre o veículo (PGBL/VGBL)', () => {
-    const { alertas: alertasA } = aplicarCalibradoresSuaves(carteiraBase, { ...respostasTodoB, eficienciaFiscal: 'a' })
-    const { alertas: alertasC } = aplicarCalibradoresSuaves(carteiraBase, { ...respostasTodoB, eficienciaFiscal: 'c' })
-    expect(alertasA.some((a) => a.includes('PGBL'))).toBe(true)
-    expect(alertasC.some((a) => a.includes('VGBL'))).toBe(true)
+  it('Pilar 7 gera um alerta por resposta (a: PGBL; b: compare com VGBL; c: confira o modelo), todas mutuamente exclusivas', () => {
+    const al = (l: 'a' | 'b' | 'c') => aplicarCalibradoresSuaves(carteiraBase, { ...respostasTodoB, eficienciaFiscal: l }).alertas
+    expect(al('a').some((a) => a.includes('PGBL'))).toBe(true)
+    expect(al('b').some((a) => a.includes('simplificada'))).toBe(true)
+    expect(al('c').some((a) => a.includes('Confira'))).toBe(true)
+    expect(al('a')).toHaveLength(1)
+    expect(al('b')).toHaveLength(1)
+    expect(al('c')).toHaveLength(1)
+  })
+
+  it('Pilar 7 não pontua: trocar só a resposta dele não muda score, capacidade nem perfil', () => {
+    for (const l of ['a', 'b', 'c'] as const) {
+      const r = calcularPerfilPatrimonial('Arrojado', { ...respostasTodoB, eficienciaFiscal: l })
+      expect(r.scoreArquitetura).toBe(12)
+      expect(r.perfilFinalCarteira).toBe('8. Arrojado Gerador de Renda')
+    }
+  })
+
+  it('calibradores que aumentam risco (Pilar 4 [C], Pilar 6 [C]) não rodam em carteira Defensiva', () => {
+    const defensivoCurto: Carteira = { tesouroSelic: 55, cdbLiquidez: 25, tesouroIPCA: 5, tesouroPrefixado: 5, ouro: 6, bdrs: 1, fundosInternacionais: 1, fiis: 2 }
+    const ousado: RespostasArquitetura = { ...respostasTodoB, comportamentoEstresse: 'c', capitalHumano: 'c' }
+    const { carteira } = aplicarCalibradoresSuaves(defensivoCurto, ousado, { permitirAumentoRisco: false })
+    expect(carteira).toEqual(defensivoCurto)
+    // sem a trava (comportamento antigo), eles aumentam o risco
+    expect(aplicarCalibradoresSuaves(defensivoCurto, ousado).carteira.acoesETFs ?? 0).toBeGreaterThan(0)
+  })
+
+  it('Pilar 4 [C] não aumenta ações se a reação do suitability é de quem se abala com quedas', () => {
+    const { carteira } = aplicarCalibradoresSuaves(carteiraBase, { ...respostasTodoB, comportamentoEstresse: 'c' }, { reacaoCalma: false })
+    expect(carteira).toEqual(carteiraBase)
   })
 
   it('nunca deixa uma classe negativa mesmo com carteiras pequenas (ex.: perfil Defensivo curto)', () => {

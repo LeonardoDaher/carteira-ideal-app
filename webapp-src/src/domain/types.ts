@@ -7,7 +7,7 @@ export type LetraArquitetura = 'a' | 'b' | 'c'
 
 export type PerfilInvestidor = 'Conservador' | 'Moderado' | 'Arrojado'
 
-/** Faixa de capacidade real, derivada do score da Arquitetura Patrimonial (7 a 21 pontos). */
+/** Faixa de capacidade real, derivada do score da Arquitetura Patrimonial (6 a 18 pontos). */
 export type CapacidadeReal = 'baixa' | 'media' | 'alta'
 
 /** Perfil final da carteira depois de cruzar o suitability com a Arquitetura Patrimonial. */
@@ -113,13 +113,13 @@ export interface ResultadoRecomendacao {
   prazo: PrazoBucket
   carteira: Carteira
   alertas: string[]
-  /** Score de capacidade real (7 a 21) somado a partir das 7 respostas da Arquitetura
+  /** Score de capacidade real (6 a 18) somado a partir dos 6 pilares que pontuam da Arquitetura
    * Patrimonial. Só existe quando o questionário de Arquitetura foi respondido. */
   scoreArquitetura?: number
   capacidadeReal?: CapacidadeReal
   /** true quando algum dos 3 pilares-restrição-dura veio como resposta 'a'. */
   vetoAplicado?: boolean
-  /** Perfil final depois de cruzar perfilFinal (suitability) x capacidadeReal na matriz 3x3. */
+  /** Vetor patrimonial dado pela capacidadeReal (ou Defensivo, se houve veto); o suitability limita o risco da carteira depois (D73). */
   perfilPatrimonial?: PerfilPatrimonial
   /** Um dos 9 Perfis-Mãe de Carteira (suitability x Vetor da Arquitetura Patrimonial).
    * É ESTE o nome que deve ser exibido ao cliente como resultado final — ver

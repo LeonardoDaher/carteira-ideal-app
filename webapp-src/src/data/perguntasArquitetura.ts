@@ -4,8 +4,10 @@ import type { PerguntaArquitetura } from '../domain/types'
  * As 7 perguntas da Arquitetura Patrimonial, aplicadas em complemento às 7 perguntas de
  * suitability já existentes (ver data/questions.ts). O cliente responde as 14 no total.
  *
- * Cada opção tem peso 1 (a) a 3 (c), somado pelo motor (ver domain/engine.ts) para chegar
- * ao score de capacidade real (7 a 21). Os pilares 1, 2 e 3 são "restrições duras": uma
+ * Cada opção dos pilares 1 a 6 tem peso 1 (a) a 3 (c), somado pelo motor (ver
+ * domain/engine.ts) para chegar ao score de capacidade real (6 a 18). O pilar 7 (Eficiência
+ * Fiscal) NÃO pontua: só gera um aviso sobre previdência (D73). Os pilares 1, 2 e 3 são
+ * "restrições duras": uma
  * resposta 'a' neles aciona a regra de veto e força o perfil final para Defensivo,
  * independentemente do score consolidado ou do resultado do suitability.
  *
@@ -70,7 +72,7 @@ export const PERGUNTAS_ARQUITETURA: PerguntaArquitetura[] = [
     opcoes: [
       { letra: 'a', texto: 'Preciso do dinheiro caindo na conta mensal/semestralmente para pagar custo de vida.' },
       { letra: 'b', texto: 'Não preciso agora, mas quero construir uma transição para viver de renda em 3 a 5 anos.' },
-      { letra: 'c', texto: 'Acúmulo 100% focado no longo prazo (reinvisto todas as regras, dividendos e juros).' },
+      { letra: 'c', texto: 'Acúmulo 100% focado no longo prazo (reinvisto todos os rendimentos, dividendos e juros).' },
     ],
   },
   {
@@ -86,13 +88,13 @@ export const PERGUNTAS_ARQUITETURA: PerguntaArquitetura[] = [
   },
   {
     id: 'eficienciaFiscal',
-    titulo: 'Como é estruturada a sua declaração de Imposto de Renda e visão de futuro do patrimônio?',
-    ajuda: 'Pilar 7 de 7 — Eficiência Fiscal & Planejamento Sucessório (calibrador suave).',
+    titulo: 'Como você declara o Imposto de Renda hoje?',
+    ajuda: 'Pilar 7 de 7 — Eficiência Fiscal (informativo: não muda o seu perfil nem a sua carteira, só os avisos sobre previdência).',
     restricaoDura: false,
     opcoes: [
-      { letra: 'a', texto: 'Declaração Completa do IR (PF) e busco formas de deduzir imposto (ex: PGBL).' },
-      { letra: 'b', texto: 'Declaração Simplificada (PF) ou operações via PJ/Empresa.' },
-      { letra: 'c', texto: 'Foco principal em facilitar a transferência para herdeiros no futuro (sucessão/doação).' },
+      { letra: 'a', texto: 'Declaração completa (pessoa física).' },
+      { letra: 'b', texto: 'Declaração simplificada (pessoa física).' },
+      { letra: 'c', texto: 'Sou isento(a) de declarar ou ainda não sei qual modelo uso.' },
     ],
   },
 ]

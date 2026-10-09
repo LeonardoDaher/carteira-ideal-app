@@ -19,9 +19,20 @@ const PONTOS: Record<Letra, number> = { a: 1, b: 2, c: 3, d: 4 }
 
 const ORDEM_PERFIL: PerfilInvestidor[] = ['Conservador', 'Moderado', 'Arrojado']
 
-/** Pontos da Arquitetura Patrimonial: [A] = 1, [B] = 2, [C] = 3. Soma das 7 respostas
- * varia de 7 a 21. */
+/** Pontos da Arquitetura Patrimonial: [A] = 1, [B] = 2, [C] = 3. Soma dos 6 pilares que
+ * medem capacidade de risco (1 a 6): varia de 6 a 18. O Pilar 7 (Eficiência Fiscal) é só
+ * informativo: o regime de declaração do IR não diz nada sobre capacidade de assumir risco
+ * (D73), então não pontua. */
 const PONTOS_ARQUITETURA: Record<LetraArquitetura, number> = { a: 1, b: 2, c: 3 }
+
+const PILARES_PONTUAM: (keyof RespostasArquitetura)[] = [
+  'capacidadeFinanceira',
+  'passivoDividas',
+  'janelaLiquidez',
+  'comportamentoEstresse',
+  'dependenciaRenda',
+  'capitalHumano',
+]
 
 /** Pilares com poder de veto — ver Seção 4.2 do documento "Estrutura de uma carteira
  * verdadeiramente personalizada". Uma resposta 'a' em qualquer um deles rebaixa o perfil
@@ -32,16 +43,36 @@ const PILARES_RESTRICAO_DURA: (keyof RespostasArquitetura)[] = [
   'janelaLiquidez',
 ]
 
-/** Matriz cruzada 3x3 (Seção 4.3): capacidade real (linha) x resultado do suitability
- * (coluna) → perfil final da carteira. */
-const MATRIZ_PATRIMONIAL: Record<CapacidadeReal, Record<PerfilInvestidor, PerfilPatrimonial>> = {
-  baixa: { Conservador: 'Defensivo', Moderado: 'Defensivo', Arrojado: 'Defensivo' },
-  media: { Conservador: 'Defensivo', Moderado: 'Equilibrado', Arrojado: 'Equilibrado' },
-  alta: { Conservador: 'Defensivo', Moderado: 'Equilibrado', Arrojado: 'Crescimento Pleno' },
+/** Capacidade real → Vetor da Arquitetura Patrimonial (D73). A capacidade define SÓ o
+ * vetor; o suitability entra depois como teto de risco da carteira (TETO_RISCO_SUITABILITY)
+ * e como a outra metade do nome do Perfil-Mãe. Assim os 9 Perfis-Mãe são todos
+ * alcançáveis (antes, 2, 3 e 6 nunca apareciam) sem que um Conservador receba mais risco
+ * do que declarou tolerar. */
+const VETOR_PELA_CAPACIDADE: Record<CapacidadeReal, PerfilPatrimonial> = {
+  baixa: 'Defensivo',
+  media: 'Equilibrado',
+  alta: 'Crescimento Pleno',
 }
 
+/** Teto de risco (soma de ouro, FIIs, ações, BDRs, internacionais e cripto, em % da
+ * carteira) por suitability e prazo. Os do Conservador são os da carteira Defensivo; os do
+ * Moderado deixam passar o Equilibrado de hoje e cortam só o Crescimento Pleno. O Arrojado
+ * não tem teto. Cripto só para Arrojado (doc 02, seção 5.1). */
+const TETO_RISCO_SUITABILITY: Record<PerfilInvestidor, Record<PrazoBucket, number>> = {
+  Conservador: { curto: 10, medio: 20, longo: 30 },
+  Moderado: { curto: 35, medio: 45, longo: 55 },
+  Arrojado: { curto: 100, medio: 100, longo: 100 },
+}
+
+/** Piso de liquidez (Tesouro Selic + CDB) quando o investidor não tem reserva. */
+const PISO_LIQUIDEZ_SEM_RESERVA = 20
+
+/** A partir desta idade o app avisa sobre previdência e sucessão (o Pilar 7 já não
+ * pergunta sobre sucessão — D73). */
+const IDADE_ALERTA_SUCESSAO = 50
+
 /** Os 9 Perfis-Mãe de Carteira: cruzamento dos 3 Perfis de Suitability (linha) com os
- * 3 Vetores da Arquitetura Patrimonial (coluna) — resultado de MATRIZ_PATRIMONIAL acima,
+ * 3 Vetores da Arquitetura Patrimonial (coluna) — resultado de VETOR_PELA_CAPACIDADE acima,
  * já com a regra de veto aplicada quando for o caso. Este é o nome final exibido ao
  * cliente (ResultadoRecomendacao.perfilFinalCarteira), não o Perfil Patrimonial sozinho. */
 const MATRIZ_PERFIL_FINAL: Record<PerfilInvestidor, Record<PerfilPatrimonial, PerfilFinalCarteira>> = {
@@ -95,13 +126,12 @@ const MATRIZ_PATRIMONIAL_CARTEIRA: Record<PerfilPatrimonial, Record<PrazoBucket,
 }
 
 export function calcularScoreArquitetura(respostas: RespostasArquitetura): number {
-  const letras = Object.values(respostas) as LetraArquitetura[]
-  return letras.reduce((soma, letra) => soma + PONTOS_ARQUITETURA[letra], 0)
+  return PILARES_PONTUAM.reduce((soma, pilar) => soma + PONTOS_ARQUITETURA[respostas[pilar]], 0)
 }
 
 export function capacidadePeloScore(score: number): CapacidadeReal {
-  if (score <= 11) return 'baixa'
-  if (score <= 16) return 'media'
+  if (score <= 9) return 'baixa'
+  if (score <= 14) return 'media'
   return 'alta'
 }
 
@@ -127,7 +157,7 @@ export function calcularPerfilPatrimonial(
   const scoreArquitetura = calcularScoreArquitetura(respostasArquitetura)
   const capacidadeReal = capacidadePeloScore(scoreArquitetura)
   const veto = vetoAplicado(respostasArquitetura)
-  const perfilPatrimonial: PerfilPatrimonial = veto ? 'Defensivo' : MATRIZ_PATRIMONIAL[capacidadeReal][perfilSuitability]
+  const perfilPatrimonial: PerfilPatrimonial = veto ? 'Defensivo' : VETOR_PELA_CAPACIDADE[capacidadeReal]
   // O Perfil Final da Carteira (1 a 9) sempre cruza o suitability original com o Vetor
   // da Arquitetura Patrimonial já resolvido acima — inclusive quando o veto rebaixa o
   // vetor para Defensivo, o que resulta em perfis como "7. Arrojado Travado".
@@ -242,10 +272,21 @@ function moverPontos(carteira: Carteira, de: AtivoKey, para: AtivoKey, pontos: n
  * veículos/invólucros fiscais, não classes de ativo, então a resposta gera apenas
  * um alerta informativo para o consultor.
  */
+export interface OpcoesCalibradores {
+  /** false numa carteira vetada/Defensiva: os calibradores que AUMENTAM risco (Pilar 4 [C]
+   * e Pilar 6 [C]) não rodam, para não furar o teto que o veto acabou de impor (D73). */
+  permitirAumentoRisco?: boolean
+  /** false quando a pergunta de reação do suitability disse que o investidor se abala com
+   * quedas: o Pilar 4 [C] ("comprar mais na queda") então não vale (D73). */
+  reacaoCalma?: boolean
+}
+
 export function aplicarCalibradoresSuaves(
   carteiraOriginal: Carteira,
   respostas: RespostasArquitetura,
+  opcoes: OpcoesCalibradores = {},
 ): { carteira: Carteira; alertas: string[] } {
+  const { permitirAumentoRisco = true, reacaoCalma = true } = opcoes
   const carteira: Carteira = { ...carteiraOriginal }
   const alertas: string[] = []
 
@@ -258,7 +299,7 @@ export function aplicarCalibradoresSuaves(
     if (movido > 0) {
       alertas.push('Reduzimos a fatia mais volátil da carteira: você já reagiu a quedas fortes resgatando tudo antes.')
     }
-  } else if (respostas.comportamentoEstresse === 'c') {
+  } else if (respostas.comportamentoEstresse === 'c' && permitirAumentoRisco && reacaoCalma) {
     moverPontos(carteira, 'tesouroSelic', 'acoesETFs', 3)
     moverPontos(carteira, 'tesouroSelic', 'bdrs', 2)
   }
@@ -279,19 +320,74 @@ export function aplicarCalibradoresSuaves(
   // risco, já que a "reserva humana" de estabilidade é maior.
   if (respostas.capitalHumano === 'a') {
     moverPontos(carteira, 'tesouroPrefixado', 'tesouroIPCA', Math.round((carteira.tesouroPrefixado ?? 0) * 0.5))
-  } else if (respostas.capitalHumano === 'c') {
+  } else if (respostas.capitalHumano === 'c' && permitirAumentoRisco) {
     moverPontos(carteira, 'tesouroSelic', 'acoesETFs', 2)
     moverPontos(carteira, 'tesouroSelic', 'bdrs', 1)
   }
 
-  // Pilar 7 — Eficiência Fiscal e Sucessão: apenas alerta (ver comentário acima).
+  // Pilar 7 — Eficiência Fiscal: só o regime de declaração do IR (uma resposta, um conceito).
+  // Apenas alerta, não pontua nem move percentual (ver comentário acima e D73).
   if (respostas.eficienciaFiscal === 'a') {
     alertas.push('Considere aportar parte da fatia de Renda Fixa via PGBL para aproveitar a dedução de até 12% do IR.')
+  } else if (respostas.eficienciaFiscal === 'b') {
+    alertas.push('Na declaração simplificada, aportes em PGBL não reduzem o imposto a pagar; se previdência fizer sentido para você, compare com o VGBL.')
   } else if (respostas.eficienciaFiscal === 'c') {
-    alertas.push('Considere VGBL ou Previdência em regime regressivo para os blocos de Renda Fixa e Hedge, dado o foco sucessório.')
+    alertas.push('Confira se você precisa declarar o IR e qual modelo (completo ou simplificado) é mais vantajoso antes de contratar previdência.')
   }
 
   return { carteira, alertas }
+}
+
+function somaRisco(carteira: Carteira): number {
+  return ATIVOS_RISCO.reduce((s, k) => s + (carteira[k] ?? 0), 0)
+}
+
+/** O suitability é o teto de risco (D73): cripto só para o Arrojado e, acima do teto da
+ * tabela TETO_RISCO_SUITABILITY, o excesso sai de todas as classes de risco na mesma
+ * proporção e vai para o Tesouro Selic (prazo curto) ou o Tesouro IPCA+ (médio e longo).
+ * Devolve o alerta a mostrar, ou nada se não houve corte. */
+function aplicarTetoSuitability(carteira: Carteira, perfil: PerfilInvestidor, prazo: PrazoBucket): string[] {
+  const destino: AtivoKey = prazo === 'curto' ? 'tesouroSelic' : 'tesouroIPCA'
+  let movido = 0
+  if (perfil !== 'Arrojado' && carteira.cripto) {
+    movido += moverPontos(carteira, 'cripto', destino, carteira.cripto)
+  }
+  const teto = TETO_RISCO_SUITABILITY[perfil][prazo]
+  const total = somaRisco(carteira)
+  if (total > teto) {
+    const fator = teto / total
+    for (const ativo of ATIVOS_RISCO) {
+      const atual = carteira[ativo] ?? 0
+      if (atual > 0) movido += moverPontos(carteira, ativo, destino, atual - Math.floor(atual * fator))
+    }
+  }
+  return movido > 0
+    ? [`Limitamos a fatia de maior risco ao que o seu perfil de investidor (${perfil}) tolera.`]
+    : []
+}
+
+/** Garante o piso de liquidez de quem não tem reserva. A fatia que falta vem das outras
+ * classes na mesma proporção (e não é somada por cima, o que a normalização final
+ * diluiria e deixaria o piso abaixo de 20%). Devolve true se mexeu na carteira. */
+function garantirPisoLiquidez(carteira: Carteira): boolean {
+  const liquidez = ATIVOS_LIQUIDEZ.reduce((s, k) => s + (carteira[k] ?? 0), 0)
+  const falta = PISO_LIQUIDEZ_SEM_RESERVA - liquidez
+  if (falta <= 0) return false
+  const outras = (Object.keys(carteira) as AtivoKey[])
+    .filter((k) => !ATIVOS_LIQUIDEZ.includes(k) && (carteira[k] ?? 0) > 0)
+    .sort((a, b) => (carteira[b] ?? 0) - (carteira[a] ?? 0))
+  const totalOutras = outras.reduce((s, k) => s + (carteira[k] ?? 0), 0)
+  const cortes = outras.map((k) => Math.floor(((carteira[k] ?? 0) * falta) / totalOutras))
+  let resto = falta - cortes.reduce((s, c) => s + c, 0)
+  for (let i = 0; resto > 0 && i < cortes.length * 2; i++) {
+    const idx = i % cortes.length
+    if (cortes[idx] < (carteira[outras[idx]] ?? 0)) {
+      cortes[idx] += 1
+      resto -= 1
+    }
+  }
+  outras.forEach((k, i) => moverPontos(carteira, k, 'cdbLiquidez', cortes[i]))
+  return true
 }
 
 /**
@@ -306,8 +402,10 @@ export function gerarRecomendacao(
 ): ResultadoRecomendacao {
   const score = calcularScore(respostas)
   const perfilBase = perfilPeloScore(score)
-  const prazo = prazoPelaLetra(respostas.prazo)
-  const temReserva = respostas.reserva === 'c' || respostas.reserva === 'd'
+  const prazoSuitability = prazoPelaLetra(respostas.prazo)
+  let prazo = prazoSuitability
+  const reservaSuitability = respostas.reserva === 'c' || respostas.reserva === 'd'
+  const temReserva = reservaSuitability
   const patrimonio = patrimonioPelaLetra(respostas.patrimonio)
   const experiencia = experienciaPelaLetra(respostas.experiencia)
   const liquidezFrequente = respostas.reacao === 'a'
@@ -316,7 +414,7 @@ export function gerarRecomendacao(
   const alertas: string[] = []
   let perfilFinal = perfilBase
 
-  if (prazo === 'curto' && perfilFinal === 'Arrojado') {
+  if (prazoSuitability === 'curto' && perfilFinal === 'Arrojado') {
     perfilFinal = rebaixar(perfilFinal)
     alertas.push('Perfil ajustado para Moderado: prazo curto não combina com o risco de um perfil Arrojado.')
   }
@@ -343,6 +441,23 @@ export function gerarRecomendacao(
   let arquitetura: ReturnType<typeof calcularPerfilPatrimonial> | null = null
   if (respostasArquitetura) {
     arquitetura = calcularPerfilPatrimonial(perfilFinal, respostasArquitetura)
+
+    // Janela de liquidez (Pilar 3) manda no prazo da carteira (D73): quem vai sacar em até
+    // 24 meses recebe o modelo de curto prazo, e quem vai sacar entre 3 e 5 anos recebe, no
+    // máximo, o de médio, mesmo que tenha marcado prazo longo no suitability.
+    if (respostasArquitetura.janelaLiquidez === 'a' && prazo !== 'curto') {
+      prazo = 'curto'
+      alertas.push('Usamos o modelo de curto prazo: você vai precisar de uma parte relevante do dinheiro em até 24 meses.')
+    } else if (respostasArquitetura.janelaLiquidez === 'b' && prazo === 'longo') {
+      prazo = 'medio'
+      alertas.push('Usamos o modelo de médio prazo: você prevê um gasto grande entre 3 e 5 anos.')
+    }
+    if (reservaSuitability && respostasArquitetura.capacidadeFinanceira === 'a') {
+      alertas.push('Suas respostas sobre reserva divergiram; consideramos a mais cautelosa (menos de 3 meses).')
+    }
+    if (respostasArquitetura.passivoDividas === 'a') {
+      alertas.push('Prioridade antes de investir: quitar dívida cara (cartão, cheque especial) costuma render mais do que qualquer investimento. O plano de dívidas do Meu Mês ajuda nisso.')
+    }
   }
 
   let carteira: Carteira = arquitetura
@@ -355,17 +470,26 @@ export function gerarRecomendacao(
   // rígidas logo abaixo (reserva, patrimônio, experiência) rodam depois e sempre
   // podem desfazer o que for necessário.
   if (respostasArquitetura) {
-    const calibrado = aplicarCalibradoresSuaves(carteira, respostasArquitetura)
+    const reacaoCalma = respostas.reacao === 'c' || respostas.reacao === 'd'
+    const calibrado = aplicarCalibradoresSuaves(carteira, respostasArquitetura, {
+      permitirAumentoRisco: arquitetura !== null && !arquitetura.vetoAplicado && arquitetura.perfilPatrimonial !== 'Defensivo',
+      reacaoCalma,
+    })
     carteira = calibrado.carteira
     alertas.push(...calibrado.alertas)
+    if (respostasArquitetura.comportamentoEstresse === 'c' && !reacaoCalma) {
+      alertas.push('Você disse que notícias de crise te abalam; por isso não aumentamos a exposição a ações por ver quedas como oportunidade.')
+    }
+    if (dados.idade >= IDADE_ALERTA_SUCESSAO) {
+      alertas.push('Se o planejamento sucessório é uma preocupação, converse com um especialista sobre VGBL/previdência e outras formas de organizar a herança.')
+    }
   }
 
-  if (!temReserva) {
-    const liquidezAtual = ATIVOS_LIQUIDEZ.reduce((s, k) => s + (carteira[k] ?? 0), 0)
-    if (liquidezAtual < 20) {
-      carteira.cdbLiquidez = (carteira.cdbLiquidez ?? 0) + (20 - liquidezAtual)
-      alertas.push('Reforçamos a liquidez da carteira: você ainda não tem reserva de emergência formada.')
-    }
+  // O suitability é o teto de risco da carteira, qualquer que seja o vetor patrimonial.
+  alertas.push(...aplicarTetoSuitability(carteira, perfilFinal, prazo))
+
+  if (!temReserva && garantirPisoLiquidez(carteira)) {
+    alertas.push('Reforçamos a liquidez da carteira: você ainda não tem reserva de emergência formada.')
   }
 
   if (patrimonio < 5000) {

@@ -22,7 +22,7 @@ const DESCRICAO_PATRIMONIAL: Record<string, string> = {
   Equilibrado:
     'Sua capacidade real permite uma parcela de risco, equilibrada com renda e proteção — sem abrir mão da segurança para os compromissos dos próximos anos.',
   'Crescimento Pleno':
-    'Sua capacidade real e o suitability caminham juntos: reserva sólida, sem dívida cara e sem saques previstos. Uma carteira de referência para esse perfil pode priorizar acúmulo de longo prazo.',
+    'Sua capacidade real é alta: reserva sólida, sem dívida cara e sem saques previstos. Uma carteira de referência para esse perfil pode priorizar acúmulo de longo prazo, e o seu perfil de investidor define quanto dessa folga vira risco.',
 }
 
 /** Remove espaços do nome do perfil para usar como classe CSS (ex: "Crescimento Pleno" → "CrescimentoPleno"). */
@@ -62,7 +62,7 @@ export function Resultado({ ctx }: { ctx: AppCtx }) {
         </div>
         {perfilPatrimonial ? (
           <div className="small muted" style={{ textAlign: 'center' }}>
-            Suitability: {resultado.perfilFinal} · Capacidade real: {resultado.capacidadeReal} (score {resultado.scoreArquitetura}/21)
+            Suitability: {resultado.perfilFinal} · Capacidade real: {resultado.capacidadeReal} (score {resultado.scoreArquitetura}/18)
             {resultado.vetoAplicado ? ' · Regra de veto aplicada' : ''}
           </div>
         ) : (

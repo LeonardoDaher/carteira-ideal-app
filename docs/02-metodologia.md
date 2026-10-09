@@ -4,6 +4,8 @@
 
 > **Atualização de arquitetura (setembro/2026).** Desde a versão com API protegida, o motor descrito neste documento (`engine.ts`) **não roda mais no navegador do usuário**. Ele fica em `webapp-src/src/domain/engine.ts` e é executado apenas pela função serverless `api/recomendacao.ts`, hospedada na Vercel. O app envia as 14 respostas e recebe de volta só o resultado pronto. Toda a lógica abaixo continua valendo exatamente como descrita; mudou apenas **onde** ela é executada. Detalhes em `docs/03-arquitetura-tecnica.md`.
 >
+> **Revisão de 09/10/2026 (D73).** O motor mudou em sete pontos: (1) a capacidade real define só o vetor patrimonial e o suitability virou **teto de risco** da carteira, o que torna os **9 Perfis-Mãe todos alcançáveis**; (2) o **Pilar 3** manda no prazo da carteira; (3) calibradores que aumentam risco não rodam em carteira vetada; (4) o **Pilar 7 não pontua** (score de 6 a 18) e a pergunta foi reescrita; (5) o piso de liquidez de 20% agora é cumprido; (6) respostas contraditórias geram aviso; (7) o Pilar 2 [A] avisa para quitar a dívida cara antes. As seções abaixo já descrevem o comportamento novo; o texto completo da decisão está em `docs/07-registro-de-decisoes.md` (D73).
+>
 > **Faixas do suitability interno do app** (não detalhadas no texto original): cada uma das 7 perguntas vale de 1 (A) a 4 (D), somando 7 a 28 pontos. Até 14 pontos = Conservador; 15 a 21 = Moderado; 22 a 28 = Arrojado.
 
 Para estruturar uma carteira verdadeiramente personalizada — indo além das perguntas padronizadas de suitability (perfil de risco) aplicadas pelas corretoras —, é preciso investigar a realidade prática, psicológica e comportamental do investidor.
@@ -21,12 +23,12 @@ Este questionário de 7 perguntas é aplicado em complemento ao suitability já 
 | 1. Capacidade Financeira de Risco | Se você perdesse sua fonte principal de renda hoje, por quanto tempo sua reserva atual pagaria suas contas sem precisar vender investimentos de longo prazo? | Separa a tolerância emocional da capacidade real de tomar risco. Restrição dura: uma resposta [A] força o Perfil Patrimonial para Defensivo. |
 | 2. Arquitetura do Passivo & Dívidas | Qual é a situação das suas obrigações financeiras e custos fixos atuais? | De nada adianta buscar rentabilidade se o investidor paga juros mais altos em dívida cara. Restrição dura: uma resposta [A] força o Perfil Patrimonial para Defensivo. |
 | 3. Janela de Liquidez & Desembolsos | Você tem algum grande evento de gasto planejado para os próximos 2 a 5 anos (imóvel, casamento, reforma, viagem, transição de carreira)? | Evita ter que vender Ações ou FIIs no fundo de um ciclo de queda. Restrição dura: uma resposta [A] força o Perfil Patrimonial para Defensivo. |
-| 4. Comportamento sob Estresse | Como você reagiu (ou reagiria) se visse sua carteira caindo 20% a 30% em um momento de crise de mercado? | Calibrador suave: entra no Score de Capacidade Real (7 a 21 pontos), sem poder de veto. |
+| 4. Comportamento sob Estresse | Como você reagiu (ou reagiria) se visse sua carteira caindo 20% a 30% em um momento de crise de mercado? | Calibrador suave: entra no Score de Capacidade Real (6 a 18 pontos), sem poder de veto. |
 | 5. Dependência de Renda Passiva | Qual é o objetivo principal dos rendimentos gerados por essa carteira hoje? | Calibrador suave: entra no Score de Capacidade Real, sem poder de veto. |
 | 6. Capital Humano & Concentração de Risco | Qual é o perfil da sua atividade profissional e patrimônio fora do mercado financeiro? | Calibrador suave: entra no Score de Capacidade Real, sem poder de veto. |
-| 7. Eficiência Fiscal e Sucessão | Como é estruturada a sua declaração de Imposto de Renda e visão de futuro do patrimônio? | Calibrador suave: entra no Score de Capacidade Real, sem poder de veto. |
+| 7. Eficiência Fiscal | Como você declara o Imposto de Renda hoje? | Informativo: não pontua, não tem veto e não move percentual; só escolhe o aviso sobre previdência (PGBL, VGBL). Declaração de IR não mede capacidade de risco (D73). |
 
-*Os textos das perguntas e opções acima reproduzem literalmente webapp-src/src/data/perguntasArquitetura.ts do app. Os Pilares 1 a 3 são as "restrições duras" (restricaoDura: true no código); os Pilares 4 a 7 são "calibradores suaves" — contribuem para o Score de Capacidade Real (Seção 3.1) e, além disso, ajustam a composição fina da carteira dentro do teto de risco já definido (função aplicarCalibradoresSuaves, ver Seção 3.5).*
+*Os textos das perguntas e opções acima reproduzem literalmente webapp-src/src/data/perguntasArquitetura.ts do app. Os Pilares 1 a 3 são as "restrições duras" (restricaoDura: true no código); os Pilares 4 a 6 são "calibradores suaves" — contribuem para o Score de Capacidade Real (Seção 3.1) e, além disso, ajustam a composição fina da carteira dentro do teto de risco já definido (função aplicarCalibradoresSuaves, ver Seção 3.5).*
 
 ## Resumo da Lógica em Um Parágrafo
 
@@ -46,13 +48,13 @@ A junção dos dois modelos cria um filtro de duas etapas onde a vida real sempr
 
 ## 3.1 Pontuação por Pilar (Score de Capacidade Real)
 
-Cada resposta das 7 perguntas recebe um valor numérico: [A] = 1 ponto, [B] = 2 pontos, [C] = 3 pontos (calcularScoreArquitetura em engine.ts). Somando as 7 respostas — duras e suaves —, o Score de Capacidade Real varia de 7 a 21 pontos:
+Cada resposta dos Pilares 1 a 6 recebe um valor numérico: [A] = 1 ponto, [B] = 2 pontos, [C] = 3 pontos (calcularScoreArquitetura em engine.ts). Somando as 6 respostas — duras e suaves —, o Score de Capacidade Real varia de 6 a 18 pontos. O Pilar 7 (Eficiência Fiscal) não pontua:
 
 | **Faixa de Score** | **Capacidade Real** | **Leitura Prática** |
 | --- | --- | --- |
-| 7 a 11 pontos | Baixa | Vida financeira pouco amortecida — foco em caixa e liquidez |
-| 12 a 16 pontos | Média | Estabilidade razoável, mas com pontos de atenção em algum pilar |
-| 17 a 21 pontos | Alta | Vida financeira sólida — liberdade real para buscar rentabilidade |
+| 6 a 9 pontos | Baixa | Vida financeira pouco amortecida — foco em caixa e liquidez |
+| 10 a 14 pontos | Média | Estabilidade razoável, mas com pontos de atenção em algum pilar |
+| 15 a 18 pontos | Alta | Vida financeira sólida — liberdade real para buscar rentabilidade |
 
 ## 3.2 Regra de Veto
 
@@ -64,17 +66,27 @@ Na versão implementada (função vetoAplicado em engine.ts), a regra de veto é
 
 *O motor não distingue hoje se um, dois ou três Pilares Duros vieram como [A] — o efeito é o mesmo (Defensivo) em qualquer desses casos. Não há uma versão "parcial" do veto nem uma exceção que eleve o perfil de volta quando os 3 pilares vierem como [C].*
 
-## 3.3 Matriz Cruzada de Decisão (Suitability x Capacidade Real)
+## 3.3 Vetor Patrimonial (Capacidade Real) e Teto de Risco (Suitability)
 
-Sem veto acionado, o Perfil Patrimonial é lido diretamente na matriz 3x3 abaixo (MATRIZ_PATRIMONIAL em engine.ts):
+Desde a D73 o cruzamento tem dois papéis separados. Sem veto acionado, a **capacidade real define só o vetor** (VETOR_PELA_CAPACIDADE em engine.ts):
 
-| **Capacidade Real ↓ / Suitability →** | **Conservador** | **Moderado** | **Arrojado** |
-| --- | --- | --- | --- |
-| Baixa (7–11) | Defensivo | Defensivo | Defensivo |
-| Média (12–16) | Defensivo | Equilibrado | Equilibrado |
-| Alta (17–21) | Defensivo | Equilibrado | Crescimento Pleno |
+| **Capacidade Real** | **Vetor (Perfil Patrimonial)** |
+| --- | --- |
+| Baixa (6–9) | Defensivo |
+| Média (10–14) | Equilibrado |
+| Alta (15–18) | Crescimento Pleno |
 
-*Sem exceções: mesmo com Capacidade Real Alta, um suitability Conservador resolve sempre para Defensivo, e não existe, na versão implementada, uma regra que eleve esse resultado.*
+O **suitability é o teto de risco da carteira** (TETO_RISCO_SUITABILITY): soma de ouro, FIIs, ações, BDRs, fundos internacionais e cripto, em % da carteira.
+
+| **Suitability** | **Curto prazo** | **Médio prazo** | **Longo prazo** | **Cripto** |
+| --- | --- | --- | --- | --- |
+| Conservador | 10% | 20% | 30% | não |
+| Moderado | 35% | 45% | 55% | não |
+| Arrojado | sem teto | sem teto | sem teto | sim |
+
+Se a carteira-modelo do vetor passa do teto, o excesso sai de todas as classes de risco na mesma proporção e vai para o Tesouro Selic (curto prazo) ou o Tesouro IPCA+ (médio e longo). Os tetos do Conservador são os da carteira Defensivo; os do Moderado deixam passar o Equilibrado e cortam só o Crescimento Pleno. São parâmetros de produto, a revisar com o parecer independente.
+
+*Antes da D73 a matriz 3x3 resolvia o Conservador sempre para Defensivo e o Moderado nunca chegava a Crescimento Pleno; por isso os perfis 2, 3 e 6 nunca apareciam. Agora aparecem, com a carteira limitada pelo teto do suitability.*
 
 ## 3.4 Os 9 Perfis-Mãe de Carteira
 
@@ -86,11 +98,11 @@ O nome exibido ao cliente não é o Perfil Patrimonial isolado (Defensivo/Equili
 | Moderado | 4. Moderado Defensivo | 5. Moderado Renda (Equilíbrio) | 6. Moderado Expansão |
 | Arrojado | 7. Arrojado Travado (Falso Arrojado) | 8. Arrojado Gerador de Renda | 9. Arrojado Pleno / Global |
 
-*"7. Arrojado Travado (Falso Arrojado)" é o nome dado a quem se declarou Arrojado no suitability mas teve o Perfil Patrimonial rebaixado para Defensivo — seja por veto, seja por baixa Capacidade Real.*
+*"7. Arrojado Travado (Falso Arrojado)" é o nome dado a quem se declarou Arrojado no suitability mas teve o Perfil Patrimonial rebaixado para Defensivo — seja por veto, seja por baixa Capacidade Real. Com a D73 os 9 perfis são alcançáveis; o nome mostra o cruzamento, e o suitability limita o risco da carteira (seção 3.3).*
 
-## 3.5 Calibradores Suaves (Pilares 4 a 7) — Ajuste Fino de Composição
+## 3.5 Calibradores Suaves (Pilares 4 a 6) e Aviso Fiscal (Pilar 7) — Ajuste Fino de Composição
 
-Os Pilares 4 a 7 somam pontos ao Score de Capacidade Real (Seção 3.1) exatamente como os 3 Pilares Duros. Além disso, a função aplicarCalibradoresSuaves (engine.ts) usa essas mesmas 4 respostas para mover pontos percentuais entre classes de ativos que competem pela mesma função na carteira — sempre dentro do teto de risco já definido pelo Perfil Patrimonial (Seções 3.2 e 3.3), e sempre antes das travas de segurança rígidas (Seção 6), que têm a palavra final.
+Os Pilares 4 a 6 somam pontos ao Score de Capacidade Real (Seção 3.1) exatamente como os 3 Pilares Duros. Além disso, a função aplicarCalibradoresSuaves (engine.ts) usa essas respostas (e a do Pilar 7, só para avisos) para mover pontos percentuais entre classes de ativos que competem pela mesma função na carteira — sempre dentro do teto de risco já definido pelo Perfil Patrimonial (Seções 3.2 e 3.3), e sempre antes das travas de segurança rígidas (Seção 6), que têm a palavra final.
 
 | **Pilar** | **Resposta** | **Ajuste Implementado (aplicarCalibradoresSuaves)** |
 | --- | --- | --- |
@@ -103,15 +115,17 @@ Os Pilares 4 a 7 somam pontos ao Score de Capacidade Real (Seção 3.1) exatamen
 | 6. Capital Humano | [A] | Move 50% do Tesouro Prefixado para Tesouro IPCA+ (mais previsibilidade real com renda oscilante). |
 |  | [B] | Nenhum ajuste. |
 |  | [C] | Move até 2 pp de Tesouro Selic para Ações e até 1 pp de Tesouro Selic para BDRs (menos colchão necessário). |
-| 7. Eficiência Fiscal e Sucessão | [A] | Não move percentual — gera um alerta sugerindo aportar via PGBL para a dedução de até 12% do IR. |
-|  | [B] | Nenhum ajuste, nenhum alerta. |
-|  | [C] | Não move percentual — gera um alerta sugerindo VGBL/Previdência regressiva para foco sucessório. |
+| 7. Eficiência Fiscal | [A] Declaração completa | Não move percentual nem pontua — gera um alerta sugerindo aportar via PGBL para a dedução de até 12% do IR. |
+|  | [B] Declaração simplificada | Alerta: PGBL não reduz o imposto a pagar nesse modelo; compare com o VGBL. |
+|  | [C] Isento ou não sabe | Alerta: confira se precisa declarar e qual modelo vale mais antes de contratar previdência. |
 
-*Pilar 7 nunca move percentual entre classes: PGBL, VGBL e Holding são veículos/invólucros fiscais, não classes de ativo — por isso o ajuste correto é um alerta para o consultor escolher o invólucro certo, não uma realocação. Todas as movimentações são feitas ponto a ponto (moverPontos), nunca deixam uma classe negativa e preservam a soma total da carteira, que segue normalizada a 100% ao final de gerarRecomendacao.*
+*Pilar 7 nunca move percentual entre classes: PGBL e VGBL são veículos/invólucros fiscais, não classes de ativo — por isso o ajuste correto é um alerta para o consultor escolher o invólucro certo, não uma realocação. Todas as movimentações são feitas ponto a ponto (moverPontos), nunca deixam uma classe negativa e preservam a soma total da carteira, que segue normalizada a 100% ao final de gerarRecomendacao.*
+
+*Regras da D73 sobre os calibradores: (a) os que AUMENTAM risco (Pilar 4 [C] e Pilar 6 [C]) não rodam em carteira vetada ou Defensiva; (b) o Pilar 4 [C] também não roda se a pergunta de reação do suitability disse que a pessoa se abala com quedas (e um aviso explica); (c) depois dos calibradores, o teto de risco do suitability (seção 3.3) corta qualquer excesso; (d) a partir dos 50 anos aparece um aviso sobre previdência e sucessão, que saiu da pergunta do Pilar 7.*
 
 ## Resumo da Lógica em Um Parágrafo
 
-O mecanismo implementado resolve o cruzamento em quatro passos: (1) somar as 7 respostas de [A] a [C] para obter o Score de Capacidade Real (7 a 21); (2) checar se algum dos 3 Pilares Duros veio como [A] — se sim, o Perfil Patrimonial vai direto para Defensivo; se não, o Score cruza com o suitability na matriz 3x3 (Seção 3.3); (3) cruzar esse Perfil Patrimonial com o Perfil de Suitability original na matriz de 9 células para chegar ao Perfil-Mãe de Carteira (Seção 3.4); e (4) aplicar os Calibradores Suaves dos Pilares 4 a 7 para ajustar, dentro desse teto, a composição fina entre classes que competem pela mesma função (Seção 3.5).
+O mecanismo implementado resolve o cruzamento em quatro passos: (1) somar as 6 respostas dos Pilares 1 a 6, de [A] a [C], para obter o Score de Capacidade Real (6 a 18); (2) checar se algum dos 3 Pilares Duros veio como [A] — se sim, o Perfil Patrimonial vai direto para Defensivo; se não, a capacidade real define o vetor (Seção 3.3), e o suitability limita o risco da carteira; (3) cruzar esse Perfil Patrimonial com o Perfil de Suitability original na matriz de 9 células para chegar ao Perfil-Mãe de Carteira (Seção 3.4); e (4) aplicar os Calibradores Suaves dos Pilares 4 a 7 para ajustar, dentro desse teto, a composição fina entre classes que competem pela mesma função (Seção 3.5).
 
 # 4. Menu de Respostas Objetivas
 
@@ -177,16 +191,7 @@ Texto literal das 7 perguntas conforme implementado em webapp-src/src/data/pergu
 
 - [C] Renda ultra estável (concursado público, aposentado, rentista).
 
-## 7. Eficiência Fiscal & Planejamento Sucessório (calibrador suave)
-
-*Como é estruturada a sua declaração de Imposto de Renda e visão de futuro do patrimônio?*
-
-- [A] Declaração Completa do IR (PF) e busco formas de deduzir imposto (ex: PGBL).
-
-- [B] Declaração Simplificada (PF) ou operações via PJ/Empresa.
-
-- [C] Foco principal em facilitar a transferência para herdeiros no futuro (sucessão/doação).
-
+## 7. Eficiência Fiscal (informativo, não pontua)*Como você declara o Imposto de Renda hoje?*- [A] Declaração completa (pessoa física).- [B] Declaração simplificada (pessoa física).- [C] Sou isento(a) de declarar ou ainda não sei qual modelo uso.*Antes da D73 as três opções misturavam regime de declaração, PJ e sucessão e não se excluíam (quem faz declaração completa e quer planejar sucessão não tinha onde marcar). Agora é um conceito só, com opções que se excluem. PJ deixou de ser coberto; sucessão virou aviso por idade (50 anos ou mais).*
 # 5. Integração com as 11 Classes de Ativos
 
 O app trabalha com 11 classes de ativos (webapp-src/src/data/assets.ts).
@@ -302,7 +307,11 @@ Depois de montar a carteira-modelo (Seção 5.2 ou 5.4), o motor (gerarRecomenda
 
 - Idade e aposentadoria: se o investidor tem mais de 60 anos e o objetivo é aposentadoria, o perfil é rebaixado 1 nível para preservar capital.
 
-- Sem reserva de emergência: se a liquidez atual (Tesouro Selic + CDB) ficar abaixo de 20% da carteira, o motor reforça CDB Liquidez Diária até atingir esse piso.
+- Sem reserva de emergência: se a liquidez atual (Tesouro Selic + CDB) ficar abaixo de 20% da carteira, o motor leva a diferença para o CDB Liquidez Diária, tirando-a das outras classes na mesma proporção, até o piso de 20% (D73: antes a diferença era somada por cima e a normalização final deixava a liquidez em 17% a 19%).
+
+- Teto de risco do suitability (D73): antes da trava de reserva, o excesso de risco acima do teto da seção 3.3 e a cripto dos perfis Conservador e Moderado são cortados.
+
+- Janela de liquidez (D73): o Pilar 3 ajusta o prazo da carteira (24 meses = curto; 3 a 5 anos = no máximo médio) antes de escolher a carteira-modelo.
 
 - Patrimônio baixo (< R$ 5 mil): remove FIIs, Ações, BDRs, Ouro, Fundos Internacionais e Criptomoedas, redirecionando tudo para Tesouro Selic até o cliente ter mais capital para diversificar.
 
