@@ -173,6 +173,17 @@ describe('MeuMesSupermercado', () => {
     expect(texto()).toContain('• Tomate')
   })
 
+  it('WhatsApp: o botão é verde (classe própria) e traz a logo, escondida dos leitores de tela', async () => {
+    render(<MeuMesSupermercado />)
+    await escrever('arroz')
+    const link = screen.getByRole('link', { name: 'Enviar o que falta pelo WhatsApp' })
+    expect(link.className).toContain('sm-whatsapp')
+    const logo = link.querySelector('svg')
+    expect(logo).toBeTruthy()
+    expect(logo!.getAttribute('aria-hidden')).toBe('true')
+    expect(logo!.querySelector('path')?.getAttribute('d')?.length ?? 0).toBeGreaterThan(200)
+  })
+
   it('WhatsApp: com tudo ticado ou sem lista, o botão não aparece', async () => {
     render(<MeuMesSupermercado />)
     expect(screen.queryByRole('link', { name: /WhatsApp/ })).toBeNull()
