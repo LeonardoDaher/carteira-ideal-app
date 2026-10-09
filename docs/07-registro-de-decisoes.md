@@ -1438,3 +1438,14 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 **Próximo passo, se o responsável quiser.** Um botão opcional "Organizar com IA" (função nova na Vercel, chave de API, limite por pessoa e texto de privacidade avisando que o texto sai do aparelho), e/ou "Enviar a lista pelo WhatsApp".
 
 **Testes.** Domínio +56 (`supermercado.test.ts`) e tela +16 (`MeuMesSupermercado.test.tsx`, inclusive as duas abas juntas e a lista independente do orçamento). **Mutação:** 19 defeitos (duplicidade, ordem, limpeza, desmarcar, limites da leitura, decimal, separadores, marcadores, plural, desempate de categoria, validação); todos detectados, exceto o desempate entre categorias de mesmo tamanho, que é equivalente porque nenhuma palavra do dicionário repete entre categorias.
+
+
+## D75 (09/10/2026): Editar itens do Meu Mês Supermercado; botão de apagar em amarelo
+
+**Pedido.** O ditado do teclado do celular reproduz mal a lista (junta itens e erra a escrita), então o responsável pediu um botão de **editar** em cada item, e o botão "Apagar a lista inteira" em amarelo, como o de adicionar.
+
+**O que mudou.** Cada item ganhou o botão ✎: abre um formulário no próprio item com nome, quantidade (opcional) e categoria, com Salvar, Cancelar, Enter e Esc. `editarItem` (em `domain/supermercado.ts`) **separa em vários itens** quando o nome editado tem vírgula, " e " ou quebra de linha, para consertar o ditado que veio tudo junto: o primeiro pedaço fica no lugar do item (mantém o "comprado"), os outros entram logo abaixo com a categoria sugerida. Ao separar, o primeiro pedaço também ganha a categoria sugerida, a menos que a pessoa tenha escolhido outra na edição. A quantidade escrita no nome vale quando o campo de quantidade fica vazio. Nome vazio não muda nada. "Apagar a lista inteira" e a confirmação usam `btn-primary` (amarelo).
+
+**Testes.** +9 no domínio e +4 na tela. **Mutação:** 12 defeitos em `editarItem` (regex da quantidade, quantidade e categoria ignoradas, divisão, extras descartados, "comprado" perdido, nome vazio, id inexistente, limites de tamanho), todos detectados. Um defeito real apareceu antes do envio: a limpeza de espaços da quantidade apagava a letra "s" (uma barra invertida perdida na edição por script), e foi corrigido.
+
+**Também neste envio (sem mudança no app).** Os testes `Top15BdrsDesconto.test.tsx` e `Top15MaisNegociados.test.tsx` (Simule BDR) já falhavam: o Top 15 de BDRs foi publicado atrás de código (D70) e a tela passou a conferir primeiro o código salvo no aparelho ("Verificando o código salvo neste aparelho…") antes de mostrar o portão; os testes conferiam de forma síncrona e agora esperam o portão (`findByTestId`). O teste de varredura da D73 ganhou limite de 60 s, porque estourava os 5 s padrão na suíte inteira.
