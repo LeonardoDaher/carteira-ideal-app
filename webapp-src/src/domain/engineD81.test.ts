@@ -18,7 +18,8 @@ const equilibrado: RespostasArquitetura = {
 
 describe('D81 — piso de liquidez sai da renda fixa longa', () => {
   it('a versão do motor registra a mudança', () => {
-    expect(VERSAO_MOTOR).toBe('2026.10.12-D81')
+    // a versão segue em frente a cada mudança de regra; aqui só o formato é conferido.
+    expect(VERSAO_MOTOR).toMatch(/^2026\.10\.\d+-D\d+$/)
   })
 
   it('sem reserva, o piso de 20% é cumprido sem reduzir o risco que o teto já permitia', () => {

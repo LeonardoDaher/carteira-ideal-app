@@ -38,7 +38,7 @@ const PILARES_PONTUAM: (keyof RespostasArquitetura)[] = [
 /** Pilares com poder de veto — ver docs/02-metodologia.md, seção 3.2. Uma resposta 'a' em qualquer um deles rebaixa o perfil
  * final para Defensivo, independentemente do score consolidado ou do suitability. */
 /** Identifica a versão das regras do motor em cada resultado (D78). Mude a cada alteração de regra. */
-export const VERSAO_MOTOR = '2026.10.12-D81'
+export const VERSAO_MOTOR = '2026.10.12-D82'
 
 /** Texto de cada pilar duro para explicar o veto ao cliente, em linguagem simples. */
 const MOTIVO_DO_VETO: Record<PilarDeVeto, string> = {
@@ -485,6 +485,14 @@ export function gerarRecomendacao(
       prazo = 'medio'
       alertas.push('Usamos o modelo de médio prazo: você prevê um gasto grande entre 3 e 5 anos.')
       regras.push('prazo:janela-3-a-5-anos')
+    }
+    // Veto (D82): quem vetou por reserva curta, dívida cara ou saque próximo recebe no máximo o modelo
+    // de médio prazo. O Defensivo de longo prazo tem 30% em risco, o que contradiz o aviso de
+    // "resolva isso antes de investir"; o de médio tem 20%.
+    if (arquitetura.vetoAplicado && prazo === 'longo') {
+      prazo = 'medio'
+      alertas.push('Usamos o modelo de médio prazo: com a sua situação de reserva, dívidas ou saque próximo, a prioridade agora é segurança e liquidez, e não o crescimento de longo prazo.')
+      regras.push('prazo:veto-medio')
     }
     if (reservaSuitability && respostasArquitetura.capacidadeFinanceira === 'a') {
       alertas.push('Suas respostas sobre reserva divergiram; consideramos a mais cautelosa (menos de 3 meses).')

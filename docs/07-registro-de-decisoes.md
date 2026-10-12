@@ -1534,3 +1534,13 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 **Decisão do responsável (opção B).** O piso passa a sair primeiro da renda fixa de prazo mais longo (Tesouro IPCA+, Prefixado e LCI/LCA, na mesma proporção entre elas) e, só se isso não bastar, das classes de risco. A opção C (um teto de risco explícito para quem não tem reserva) fica para ser decidida junto das decisões do veto (D78).
 
 **Efeito medido** (60 suitabilities x 729 arquiteturas): com reserva, nenhuma carteira muda (0 de 26.973); sem reserva, 15% mudam (2.510 de 16.767), com aumento médio de 1,7 ponto de risco entre as que mudam e máximo de 8, sempre dentro do teto do perfil. No teste de propriedade: aumentos de 2 pontos ou mais de 956 para 469 e o maior de 5 para 3 pontos. `VERSAO_MOTOR` 2026.10.12-D81; limites do teste apertados. Testes novos em `engineD81.test.ts` (falham com o piso antigo).
+
+## D82 (12/10/2026): veto limita o prazo da carteira ao médio
+
+**Contexto.** Primeira das decisões em aberto da D78. Quem vetou por reserva menor que 3 meses (Pilar 1) ou por dívida cara/passivo em dólar (Pilar 2) e tinha prazo longo no suitability recebia o Defensivo de **longo** prazo: 30% em risco (22% em FIIs e ações). A tela diz "resolva isso antes de investir", e a carteira exibida contradizia o aviso. Só o veto por saque em até 24 meses (Pilar 3 [A]) levava ao prazo curto.
+
+**Decisão do responsável.** Qualquer veto limita o prazo da carteira a, no máximo, **médio** (Defensivo de médio prazo: 20% em risco). O saque em até 24 meses segue como curto. Quem tinha prazo curto ou médio não muda. Regra registrada como `prazo:veto-medio` e aviso na tela. `VERSAO_MOTOR` 2026.10.12-D82.
+
+**Efeito.** Só carteiras vetadas com prazo longo mudam (de 30% para 20% de risco). No teste de propriedade, aumentos de risco ao piorar uma resposta (2 pontos ou mais) caem de 469 para 379 e o maior de 3 para 2 pontos. Testes novos em `engineD82.test.ts` (falham sem a regra).
+
+**Segue em aberto (D78):** separar o Pilar 2 em "dívida cara" e "passivo em dólar"; perguntar o percentual a sacar no Pilar 3; unir reserva e reação com os Pilares 1 e 4 (14 vira 12 ou 13 perguntas); nome do perfil 3; opção C do piso (teto de risco explícito para quem não tem reserva).

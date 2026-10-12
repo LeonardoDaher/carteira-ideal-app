@@ -315,6 +315,8 @@ Depois de montar a carteira-modelo (Seção 5.2 ou 5.4), o motor (gerarRecomenda
 
 - Janela de liquidez (D73): o Pilar 3 ajusta o prazo da carteira (24 meses = curto; 3 a 5 anos = no máximo médio) antes de escolher a carteira-modelo.
 
+- Veto e prazo (D82): se algum Pilar duro vier como [A] (reserva menor que 3 meses, dívida cara ou saque em até 24 meses), o prazo da carteira é, no máximo, médio (o Defensivo de médio prazo tem 20% em risco; o de longo, 30%). O saque em até 24 meses continua levando ao curto prazo.
+
 - Patrimônio baixo (< R$ 5 mil): remove FIIs, Ações, BDRs, Ouro, Fundos Internacionais e Criptomoedas, redirecionando tudo para Tesouro Selic até o cliente ter mais capital para diversificar.
 
 - Sem experiência de investimento: limita cada ativo de risco (Ações, BDRs, FIIs, Ouro, Fundos Internacionais, Criptomoedas) a no máximo 10% cada, redirecionando o excedente para Tesouro Selic.

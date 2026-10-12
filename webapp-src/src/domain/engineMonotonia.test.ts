@@ -14,8 +14,9 @@ import type { Carteira, Letra, PerfilInvestidor, RespostasArquitetura, Respostas
 // amostrada, com semente fixa, no suitability. Com o motor D78 o risco SUBIA em 2.507 comparações
 // (máximo de 8 pontos): o corte do teto ficava abaixo do teto e o limite de 10% por classe cortava
 // de novo. A D80 corrigiu os dois (956 e máximo de 5) e a D81 mudou a origem do piso de liquidez
-// (469 e máximo de 3). O que resta é principalmente arredondamento (o Pilar 4 [A] move 30% de cada
-// classe para o ouro, que conta como risco); o resto ainda não foi analisado. Este teste TRAVA o
+// (469 e máximo de 3) e a D82 limitou o veto ao prazo médio (379 e máximo de 2). O que resta é
+// principalmente arredondamento (o Pilar 4 [A] move 30% de cada classe para o ouro, que conta
+// como risco); o resto ainda não foi analisado. Este teste TRAVA o
 // estado atual: o número de aumentos de 2 pontos ou mais e o maior aumento não podem crescer;
 // quem melhorar o motor deve apertar os limites.
 
@@ -117,6 +118,6 @@ describe('propriedades do motor (D79)', () => {
   }, 120_000)
 })
 
-// Medidos com o motor 2026.10.12-D81 (amostra e semente acima; com o D78 eram 2.507 e 8, com o D80 956 e 5). Só podem DIMINUIR.
-const LIMITE_AUMENTOS = 469
-const LIMITE_MAIOR_AUMENTO = 3
+// Medidos com o motor 2026.10.12-D82 (amostra e semente acima; com o D78 eram 2.507 e 8, com o D80 956 e 5, com o D81 469 e 3). Só podem DIMINUIR.
+const LIMITE_AUMENTOS = 379
+const LIMITE_MAIOR_AUMENTO = 2
