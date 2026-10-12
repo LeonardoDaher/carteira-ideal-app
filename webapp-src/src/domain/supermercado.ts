@@ -233,6 +233,130 @@ export function sugerirCategoria(nome: string): CategoriaId {
   return melhor?.categoria ?? 'outros'
 }
 
+// ---------------------------------------------------------------- itens grudados
+
+/** Palavras que ligam duas partes de um mesmo produto: o que vem depois delas não começa item novo. */
+const CONECTORES = new Set(['de', 'do', 'da', 'dos', 'das', 'com', 'sem', 'para', 'pra', 'ao', 'no', 'na'])
+
+/** Palavras que qualificam o item anterior ("arroz integral", "biscoito recheado"): nunca abrem item novo. */
+const MODIFICADORES = new Set([
+  'integral', 'recheado', 'light', 'zero', 'diet', 'desnatado', 'semidesnatado', 'natural', 'tradicional',
+  'congelado', 'ralado', 'moido', 'empanado', 'gelado', 'fresco', 'picado', 'fatiado', 'sache', 'po',
+])
+
+/**
+ * "queijo mussarela" é um produto só, embora as duas palavras sejam do dicionário. Para cada
+ * palavra-cabeça, as que a completam sem abrir item novo.
+ */
+const COMPLETAM: Record<string, ReadonlySet<string>> = {
+  queijo: new Set(['mussarela', 'mucarela', 'parmesao', 'gorgonzola', 'ricota', 'cottage', 'ralado']),
+  suco: new Set(['laranja', 'uva', 'maracuja', 'limao', 'abacaxi', 'manga', 'morango', 'goiaba']),
+  refrigerante: new Set(['coca', 'guarana', 'pepsi', 'fanta', 'sprite']),
+  molho: new Set(['tomate']),
+  biscoito: new Set(['chocolate', 'recheado']),
+  bolacha: new Set(['chocolate', 'recheado']),
+  sorvete: new Set(['chocolate', 'morango', 'coco', 'uva', 'limao']),
+  iogurte: new Set(['morango', 'coco', 'uva', 'natural']),
+  bolo: new Set(['cenoura', 'chocolate', 'laranja', 'milho']),
+  farinha: new Set(['mandioca', 'milho']),
+  agua: new Set(['coco']),
+  leite: new Set(['coco']),
+  fruta: new Set(['morango']),
+}
+
+const TODAS_AS_CHAVES: readonly string[][] = CHAVES_TOKENIZADAS.flatMap((c) => c.chaves)
+
+const ehNumero = (palavra: string) =>
+  /^\d+(?:[.,]\d+)?$/.test(palavra) || Object.prototype.hasOwnProperty.call(NUMEROS_POR_EXTENSO, palavra)
+
+/**
+ * O ditado do teclado costuma entregar "arroz feijão leite ovos" sem nenhuma vírgula. Aqui o
+ * pedaço é cortado onde começa um produto do dicionário, sem abrir mão do que não se conhece:
+ *  - palavra desconhecida gruda no item anterior ("arroz parboilizado");
+ *  - depois de "de", "com", "sem"... a parte continua o mesmo item ("suco de laranja");
+ *  - qualificativos ("integral", "ralado") e pares como "queijo mussarela" não abrem item novo;
+ *  - se o texto começa por quantidade ("2 leite 3 ovos", "2 kg arroz 1 kg feijão"), cada número
+ *    seguido de palavra abre um item novo.
+ * Sem separação possível, devolve o pedaço como veio.
+ */
+export function separarItensGrudados(pedaco: string): string[] {
+  const original = pedaco.trim()
+  // "2kg" colado em qualquer ponto vira "2 kg".
+  const palavras = original
+    .split(/\s+/)
+    .filter(Boolean)
+    .flatMap((p) => {
+      const m = /^(\d+(?:[.,]\d+)?)([a-zA-Z]+)$/.exec(p)
+      return m && UNIDADES.includes(normalizar(m[2])) ? [m[1], m[2]] : [p]
+    })
+  if (palavras.length < 2) return original ? [original] : []
+
+  const cruas = palavras.map((p) => normalizar(p))
+  const formas = cruas.map((p) => singular(p.replace(/[^a-z0-9]/g, '')))
+  const comeca = ehNumero(cruas[0])
+  const ehQuantidade = (i: number) => {
+    const c = cruas[i]
+    return ehNumero(c) || UNIDADES.includes(c) || c === 'de'
+  }
+
+  const buscar = (i: number): string[] | null => {
+    let melhor: string[] | null = null
+    for (const chave of TODAS_AS_CHAVES) {
+      if (chave.length > formas.length - i) continue
+      if ((!melhor || chave.length > melhor.length) && chave.every((t, j) => formas[i + j] === t)) melhor = chave
+    }
+    return melhor
+  }
+
+  const grupos: string[][] = []
+  let atual: number[] = []
+  let ultimaChave: string[] | null = null
+
+  let i = 0
+  while (i < palavras.length) {
+    const chave = buscar(i)
+    if (chave) {
+      const primeira = chave[0]
+      let abre = atual.length > 0 && ultimaChave !== null
+      if (abre && CONECTORES.has(formas[i - 1])) abre = false
+      if (abre && MODIFICADORES.has(primeira)) abre = false
+      if (abre && ultimaChave && COMPLETAM[ultimaChave.join(' ')]?.has(primeira)) abre = false
+      if (abre) {
+        grupos.push(atual.map((k) => palavras[k]))
+        atual = []
+      }
+      for (let k = 0; k < chave.length; k++) atual.push(i + k)
+      ultimaChave = chave
+      i += chave.length
+      continue
+    }
+    if (comeca && ehNumero(cruas[i]) && atual.some((k) => !ehQuantidade(k))) {
+      // só abre item novo se, depois do número (e da unidade, e do "de"), ainda vier palavra.
+      let j = i + 1
+      if (j < palavras.length && UNIDADES.includes(cruas[j])) j++
+      if (j < palavras.length && cruas[j] === 'de') j++
+      if (j < palavras.length) {
+        grupos.push(atual.map((k) => palavras[k]))
+        atual = []
+        ultimaChave = null
+      }
+    }
+    atual.push(i)
+    i += 1
+  }
+  if (atual.length > 0) grupos.push(atual.map((k) => palavras[k]))
+
+  const textos = grupos.map((g) => g.join(' ')).filter((t) => t.length > 0)
+  return textos.length > 1 ? textos : [original]
+}
+
+/** "leite 2 litros" → { quantidade: "2 litros", nome: "leite" } (quantidade depois do nome). */
+function quantidadeNoFinal(nome: string): { quantidade: string; nome: string } | null {
+  const m = /^(.*\S)\s+(\d+(?:[.,]\d+)?)\s*([a-zA-Z]+)$/.exec(nome)
+  if (!m || !UNIDADES.includes(normalizar(m[3]))) return null
+  return { quantidade: `${m[2].replace('.', ',')} ${m[3]}`, nome: m[1] }
+}
+
 // ---------------------------------------------------------------- lista
 
 export function novoIdItem(): string {
@@ -241,8 +365,11 @@ export function novoIdItem(): string {
 
 /** Transforma o texto digitado em itens prontos (sem id repetido, sem verificar a lista atual). */
 export function interpretarTexto(texto: string, gerarId: () => string = novoIdItem): ItemDeCompra[] {
-  return quebrarEmItens(texto).map((pedaco) => {
-    const { quantidade, nome } = separarQuantidade(descolarUnidade(pedaco))
+  return quebrarEmItens(texto).flatMap(separarItensGrudados).map((pedaco) => {
+    const lido = separarQuantidade(descolarUnidade(pedaco))
+    const final = lido.quantidade ? null : quantidadeNoFinal(lido.nome)
+    const quantidade = final ? final.quantidade : lido.quantidade
+    const nome = final ? final.nome : lido.nome
     const limpo = nome.replace(/[.!?]+$/, '').trim() || pedaco.trim()
     return {
       id: gerarId(),

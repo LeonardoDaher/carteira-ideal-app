@@ -111,15 +111,22 @@ describe('MeuMesSupermercado', () => {
     expect(salvo).toMatchObject({ quantidade: '2 kg', categoria: 'mercearia', comprado: false })
   })
 
-  it('editar: o áudio juntou tudo num item; escrever com vírgulas separa em vários', async () => {
+  it('o áudio juntou tudo sem vírgulas: o separador já divide pelos produtos conhecidos', async () => {
     render(<MeuMesSupermercado />)
     await escrever('arroz feijão leite pão')
-    expect(screen.getAllByRole('checkbox')).toHaveLength(1)
-    fireEvent.click(screen.getByRole('button', { name: /^Editar / }))
-    fireEvent.change(screen.getByLabelText('Nome do item'), { target: { value: 'arroz, feijão, leite, pão' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Salvar' }))
     expect(screen.getAllByRole('checkbox')).toHaveLength(4)
     expect(within(screen.getByRole('region', { name: 'Mercearia' })).getAllByRole('checkbox')).toHaveLength(2)
+    expect(within(screen.getByRole('region', { name: 'Padaria' })).getByRole('checkbox', { name: 'Pão' })).toBeTruthy()
+  })
+
+  it('editar: item de nome desconhecido veio grudado; escrever com vírgulas separa em vários', async () => {
+    render(<MeuMesSupermercado />)
+    await escrever('xarope bala')
+    expect(screen.getAllByRole('checkbox')).toHaveLength(1)
+    fireEvent.click(screen.getByRole('button', { name: /^Editar / }))
+    fireEvent.change(screen.getByLabelText('Nome do item'), { target: { value: 'xarope, bala, pão' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Salvar' }))
+    expect(screen.getAllByRole('checkbox')).toHaveLength(3)
     expect(within(screen.getByRole('region', { name: 'Padaria' })).getByRole('checkbox', { name: 'Pão' })).toBeTruthy()
   })
 

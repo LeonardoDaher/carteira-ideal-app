@@ -1492,3 +1492,20 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 **Decisões de produto que ficam com o responsável** (propostas da revisão, não aplicadas): (a) o Defensivo de longo prazo, que recebe quem vetou por P1 ou P2 (30% em risco, 22% em FIIs e ações), é adequado?; (b) separar o P2 em "dívida cara" e "passivo em dólar" (hoje dois conceitos numa resposta); (c) reserva e reação são perguntadas no suitability e nos Pilares 1 e 4: unificar mudaria 14 para 12 ou 13 perguntas; (d) perguntar o percentual a sacar no P3 (15ª pergunta) para segregar só a fatia, em vez de levar a carteira inteira ao curto prazo; (e) teste de propriedade "piorar uma resposta nunca aumenta o risco", ainda não escrito.
 
 **Testes.** +15 (`engineD78.test.ts`, `Resultado.test.tsx`). **Mutação:** 13 defeitos (ordem e filtro dos pilares, versão e regras não gravadas, aviso do veto fora de ordem, regras de veto, teto, piso e prazo ausentes, motivo errado, tela ignorando o veto ou os motivos); todos detectados, o primeiro defeito que sobreviveu ([B] contando como veto) ganhou teste.
+
+## D79 (12/10/2026): Meu Mês Supermercado separa sozinho o ditado sem vírgulas (sem IA, sem rede)
+
+**Contexto.** O ditado do teclado do celular entrega a lista inteira numa linha só ("arroz feijão leite ovos"), e o separador só cortava por vírgula, ponto e vírgula, quebra de linha, " e " e " + ". O responsável perguntou sobre usar IA; o custo estimado é de centavos (Haiku 5.5, US$ 0,10 e US$ 0,50 por milhão de tokens), mas a IA exigiria função na Vercel, chave, limite por pessoa e aviso de privacidade (o texto sairia do aparelho). Decidido começar pela melhoria gratuita e local; a IA continua adiada.
+
+**O que mudou** (`separarItensGrudados` em `webapp-src/src/domain/supermercado.ts`, usada por `interpretarTexto` e, portanto, também pela edição do item):
+1. Corta onde começa um produto do dicionário de categorias (a chave mais longa vence). Palavra desconhecida gruda no item anterior ("arroz parboilizado").
+2. Depois de "de", "com", "sem", "para"... a parte continua o mesmo item ("suco de laranja", "arroz com feijão").
+3. Qualificativos ("integral", "recheado", "congelado", "ralado"...) e pares conhecidos ("queijo mussarela", "suco laranja", "farinha mandioca") não abrem item novo (`MODIFICADORES`, `COMPLETAM`).
+4. Se o texto começa por quantidade ("2 leite 3 ovos", "2 kg arroz 1 kg feijão"), cada número seguido de palavra abre item novo; "2kg" colado é descolado em qualquer ponto.
+5. Quantidade depois do nome ("leite 2 litros", "arroz 5kg") vira quantidade do item (antes ficava no nome).
+
+**Limites conhecidos.** Dois produtos do dicionário seguidos que formam um nome só e não estão em `COMPLETAM` são separados (ex.: "queijo presunto" vira dois itens); "arroz com feijão" fica como um item. A pessoa corrige no ✎ (nome com vírgula separa). Quantidade depois do nome só é lida com unidade. Produto fora do dicionário não separa. Esses limites são o gatilho para voltar à IA, se o teste no celular mostrar que pesam.
+
+**Não mudou.** Privacidade (nada sai do aparelho), categorias, formato gravado, WhatsApp.
+
+**Testes.** +10 em `supermercado.test.ts`; dois testes antigos (domínio e tela) que usavam "arroz feijão leite" como item grudado passaram a usar texto que o separador não reconhece. **Mutação:** 5 defeitos (conector, qualificativo, par conhecido, número abre item, número solto no fim); um sobrevivente (qualificativo) levou a um teste novo ("frango congelado").

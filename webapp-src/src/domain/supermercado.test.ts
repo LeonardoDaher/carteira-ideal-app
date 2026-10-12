@@ -11,6 +11,7 @@ import {
   linkDoWhatsApp,
   mudarCategoria,
   quebrarEmItens,
+  separarItensGrudados,
   removerItem,
   resumoDaLista,
   separarQuantidade,
@@ -134,6 +135,63 @@ describe('interpretarTexto', () => {
   it('texto vazio não gera item', () => {
     expect(itens('')).toEqual([])
     expect(itens(' , ; ')).toEqual([])
+  })
+})
+
+describe('separarItensGrudados (ditado sem vírgulas)', () => {
+  const nomes = (texto: string) => itens(texto).map((i) => i.nome)
+
+  it('separa produtos do dicionário que vieram todos juntos', () => {
+    expect(separarItensGrudados('arroz feijão leite ovos')).toEqual(['arroz', 'feijão', 'leite', 'ovos'])
+    expect(nomes('arroz feijão leite ovos')).toEqual(['Arroz', 'Feijão', 'Leite', 'Ovos'])
+  })
+
+  it('palavra desconhecida gruda no item anterior', () => {
+    expect(separarItensGrudados('arroz parboilizado feijão preto leite')).toEqual(['arroz parboilizado', 'feijão preto', 'leite'])
+  })
+
+  it('"de", "com" e "sem" mantêm o produto inteiro', () => {
+    expect(separarItensGrudados('suco de laranja pão de queijo creme de leite')).toEqual(['suco de laranja', 'pão de queijo', 'creme de leite'])
+    expect(separarItensGrudados('óleo de soja arroz com feijão')).toEqual(['óleo de soja', 'arroz com feijão'])
+  })
+
+  it('qualificativos e pares conhecidos não abrem item novo', () => {
+    expect(separarItensGrudados('arroz integral queijo mussarela biscoito recheado leite')).toEqual([
+      'arroz integral', 'queijo mussarela', 'biscoito recheado', 'leite',
+    ])
+  })
+
+  it('qualificativo que também é palavra do dicionário gruda no item (frango congelado)', () => {
+    expect(separarItensGrudados('frango congelado pão')).toEqual(['frango congelado', 'pão'])
+  })
+
+  it('texto que começa por quantidade: cada número abre um item', () => {
+    expect(separarItensGrudados('2 leite 3 ovos 1 arroz')).toEqual(['2 leite', '3 ovos', '1 arroz'])
+    expect(separarItensGrudados('2 kg arroz 1 kg feijão')).toEqual(['2 kg arroz', '1 kg feijão'])
+    const lista = itens('2 litros de leite 12 ovos 1kg de arroz')
+    expect(lista.map((i) => [i.nome, i.quantidade])).toEqual([['Leite', '2 litros'], ['Ovos', '12'], ['Arroz', '1 kg']])
+  })
+
+  it('número no fim, só com unidade, não vira item solto', () => {
+    expect(separarItensGrudados('2 pacotes de arroz 5 kg')).toEqual(['2 pacotes de arroz 5 kg'])
+  })
+
+  it('quantidade escrita depois do nome ("leite 2 litros") vira quantidade', () => {
+    const lista = itens('leite 2 litros, arroz 5kg')
+    expect(lista.map((i) => [i.nome, i.quantidade])).toEqual([['Leite', '2 litros'], ['Arroz', '5 kg']])
+  })
+
+  it('item simples ou desconhecido fica como está', () => {
+    expect(separarItensGrudados('arroz')).toEqual(['arroz'])
+    expect(separarItensGrudados('molho shoyu')).toEqual(['molho shoyu'])
+    expect(separarItensGrudados('Pé de alface')).toEqual(['Pé de alface'])
+    expect(separarItensGrudados('   ')).toEqual([])
+  })
+
+  it('a edição do item usa o mesmo separador (áudio juntou tudo no nome)', () => {
+    const lista: ListaDeCompras = { itens: [{ id: 'a', nome: 'Arroz feijão leite', quantidade: '', categoria: 'outros', comprado: false }] }
+    const nova = editarItem(lista, 'a', { nome: 'arroz feijão leite', quantidade: '', categoria: 'outros' }, id)
+    expect(nova.itens.map((i) => i.nome)).toEqual(['Arroz', 'Feijão', 'Leite'])
   })
 })
 
@@ -307,7 +365,7 @@ describe('editarItem', () => {
   })
 
   it('ao separar, o primeiro pedaço ganha a categoria sugerida se a pessoa não mexeu na categoria; se mexeu, vale a dela', () => {
-    const juntado = adicionarItens({ itens: [] }, itens('arroz feijão leite')).lista // um item só, categoria do conjunto
+    const juntado: ListaDeCompras = { itens: [{ id: 'j', nome: 'Arroz feijão leite', quantidade: '', categoria: 'mercearia', comprado: false }] } // item grudado, categoria do conjunto
     const alvo = juntado.itens[0]
     expect(juntado.itens).toHaveLength(1)
     const semMexer = editarItem(juntado, alvo.id, { nome: 'leite, arroz', quantidade: '', categoria: alvo.categoria }, id)
