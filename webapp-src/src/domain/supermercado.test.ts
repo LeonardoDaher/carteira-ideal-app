@@ -172,6 +172,13 @@ describe('separarItensGrudados (ditado sem vírgulas)', () => {
     expect(lista.map((i) => [i.nome, i.quantidade])).toEqual([['Leite', '2 litros'], ['Ovos', '12'], ['Arroz', '1 kg']])
   })
 
+  it('quantidade com "de" no meio do ditado abre o item seguinte, mesmo sem começar por número', () => {
+    expect(separarItensGrudados('arroz feijão 2 litros de leite ovos')).toEqual(['arroz', 'feijão', '2 litros de leite', 'ovos'])
+    expect(separarItensGrudados('arroz 12 ovos pão')).toEqual(['arroz', '12 ovos', 'pão'])
+    // a quantidade depois do nome continua do nome anterior
+    expect(separarItensGrudados('leite 2 litros arroz 1 kg')).toEqual(['leite 2 litros', 'arroz 1 kg'])
+  })
+
   it('número no fim, só com unidade, não vira item solto', () => {
     expect(separarItensGrudados('2 pacotes de arroz 5 kg')).toEqual(['2 pacotes de arroz 5 kg'])
   })

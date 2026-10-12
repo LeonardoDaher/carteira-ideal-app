@@ -1503,6 +1503,7 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 3. Qualificativos ("integral", "recheado", "congelado", "ralado"...) e pares conhecidos ("queijo mussarela", "suco laranja", "farinha mandioca") não abrem item novo (`MODIFICADORES`, `COMPLETAM`).
 4. Se o texto começa por quantidade ("2 leite 3 ovos", "2 kg arroz 1 kg feijão"), cada número seguido de palavra abre item novo; "2kg" colado é descolado em qualquer ponto.
 5. Quantidade depois do nome ("leite 2 litros", "arroz 5kg") vira quantidade do item (antes ficava no nome).
+6. Achado na conferência no ar (12/10/2026): "arroz feijão 2 litros de leite" deixava "feijão 2 litros de leite" junto, porque o texto não começava por número. Agora, no meio do texto, número + unidade + "de" (ou número direto + palavra) abre item novo; "leite 2 litros arroz 1 kg" segue lendo a quantidade como do nome anterior.
 
 **Limites conhecidos.** Dois produtos do dicionário seguidos que formam um nome só e não estão em `COMPLETAM` são separados (ex.: "queijo presunto" vira dois itens); "arroz com feijão" fica como um item. A pessoa corrige no ✎ (nome com vírgula separa). Quantidade depois do nome só é lida com unidade. Produto fora do dicionário não separa. Esses limites são o gatilho para voltar à IA, se o teste no celular mostrar que pesam.
 

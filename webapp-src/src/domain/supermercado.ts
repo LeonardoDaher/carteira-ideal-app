@@ -275,8 +275,8 @@ const ehNumero = (palavra: string) =>
  *  - palavra desconhecida gruda no item anterior ("arroz parboilizado");
  *  - depois de "de", "com", "sem"... a parte continua o mesmo item ("suco de laranja");
  *  - qualificativos ("integral", "ralado") e pares como "queijo mussarela" não abrem item novo;
- *  - se o texto começa por quantidade ("2 leite 3 ovos", "2 kg arroz 1 kg feijão"), cada número
- *    seguido de palavra abre um item novo.
+ *  - número seguido de palavra abre item novo ("2 leite 3 ovos", "arroz feijão 2 litros de leite"); se
+ *    o texto começa por quantidade, também "2 kg arroz 1 kg feijão". "leite 2 litros arroz" não abre.
  * Sem separação possível, devolve o pedaço como veio.
  */
 export function separarItensGrudados(pedaco: string): string[] {
@@ -330,12 +330,17 @@ export function separarItensGrudados(pedaco: string): string[] {
       i += chave.length
       continue
     }
-    if (comeca && ehNumero(cruas[i]) && atual.some((k) => !ehQuantidade(k))) {
-      // só abre item novo se, depois do número (e da unidade, e do "de"), ainda vier palavra.
+    if (ehNumero(cruas[i]) && atual.some((k) => !ehQuantidade(k))) {
+      // Só abre item novo se, depois do número (e da unidade, e do "de"), ainda vier palavra.
+      // Texto que não começa por quantidade ("arroz feijão 2 litros de leite") só abre com sinal
+      // claro de quantidade na frente do próximo item: "unidade + de" ou número direto + palavra.
+      // "leite 2 litros arroz" fica como está: a quantidade pode ser do leite.
       let j = i + 1
-      if (j < palavras.length && UNIDADES.includes(cruas[j])) j++
-      if (j < palavras.length && cruas[j] === 'de') j++
-      if (j < palavras.length) {
+      const temUnidade = j < palavras.length && UNIDADES.includes(cruas[j])
+      if (temUnidade) j++
+      const temDe = j < palavras.length && cruas[j] === 'de'
+      if (temDe) j++
+      if (j < palavras.length && (comeca || temDe || !temUnidade)) {
         grupos.push(atual.map((k) => palavras[k]))
         atual = []
         ultimaChave = null
