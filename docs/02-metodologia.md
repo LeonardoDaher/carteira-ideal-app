@@ -309,7 +309,7 @@ Depois de montar a carteira-modelo (Seção 5.2 ou 5.4), o motor (gerarRecomenda
 
 - Idade e aposentadoria: se o investidor tem mais de 60 anos e o objetivo é aposentadoria, o perfil é rebaixado 1 nível para preservar capital.
 
-- Sem reserva de emergência: se a liquidez atual (Tesouro Selic + CDB) ficar abaixo de 20% da carteira, o motor leva a diferença para o CDB Liquidez Diária, tirando-a das outras classes na mesma proporção, até o piso de 20% (D73: antes a diferença era somada por cima e a normalização final deixava a liquidez em 17% a 19%).
+- Sem reserva de emergência: se a liquidez atual (Tesouro Selic + CDB) ficar abaixo de 20% da carteira, o motor leva a diferença para o CDB Liquidez Diária, tirando-a primeiro da renda fixa de prazo mais longo (Tesouro IPCA+, Prefixado e LCI/LCA, na mesma proporção) e, só se não bastar, das classes de risco (D81), até o piso de 20% (D73: antes a diferença era somada por cima e a normalização final deixava a liquidez em 17% a 19%).
 
 - Teto de risco do suitability (D73): antes da trava de reserva, o excesso de risco acima do teto da seção 3.3 e a cripto dos perfis Conservador e Moderado são cortados. Desde a D80 o corte fecha exatamente no teto (maiores restos) e acontece depois do limite de 10% por classe de quem não tem experiência.
 

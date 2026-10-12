@@ -19,7 +19,8 @@ const moderadoCurto: RespostasQuestionario = {
 
 describe('D80 — teto fecha exatamente e limite de 10% antes do teto', () => {
   it('a versão do motor registra a mudança', () => {
-    expect(VERSAO_MOTOR).toBe('2026.10.12-D80')
+    // D80 trouxe a mudança; a versão do motor segue em frente (D81...), então só o formato é conferido.
+    expect(VERSAO_MOTOR).toMatch(/^2026\.10\.\d+-D\d+$/)
   })
 
   it('Crescimento Pleno de curto prazo (50% de risco) cortado pelo teto do Moderado (35%) fica em 35%, não em 32%', () => {

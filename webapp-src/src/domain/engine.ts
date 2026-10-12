@@ -38,7 +38,7 @@ const PILARES_PONTUAM: (keyof RespostasArquitetura)[] = [
 /** Pilares com poder de veto — ver docs/02-metodologia.md, seção 3.2. Uma resposta 'a' em qualquer um deles rebaixa o perfil
  * final para Defensivo, independentemente do score consolidado ou do suitability. */
 /** Identifica a versão das regras do motor em cada resultado (D78). Mude a cada alteração de regra. */
-export const VERSAO_MOTOR = '2026.10.12-D80'
+export const VERSAO_MOTOR = '2026.10.12-D81'
 
 /** Texto de cada pilar duro para explicar o veto ao cliente, em linguagem simples. */
 const MOTIVO_DO_VETO: Record<PilarDeVeto, string> = {
@@ -389,27 +389,32 @@ function aplicarTetoSuitability(carteira: Carteira, perfil: PerfilInvestidor, pr
     : []
 }
 
-/** Garante o piso de liquidez de quem não tem reserva. A fatia que falta vem das outras
- * classes na mesma proporção (e não é somada por cima, o que a normalização final
- * diluiria e deixaria o piso abaixo de 20%). Devolve true se mexeu na carteira. */
+/** Garante o piso de liquidez de quem não tem reserva. A fatia que falta vem primeiro da renda
+ * fixa de prazo mais longo (IPCA+, Prefixado e LCI/LCA, que não são risco) e, só se isso não bastar,
+ * das classes de risco, sempre na mesma proporção dentro de cada grupo (D81). Antes todas cediam
+ * juntas, e o piso reduzia o risco de quem tinha a carteira mais arrojada, o que podia deixá-la
+ * com menos risco que a Defensiva do veto. Não é somada por cima: a normalização final diluiria o
+ * piso abaixo de 20%. Devolve true se mexeu na carteira. */
 function garantirPisoLiquidez(carteira: Carteira): boolean {
   const liquidez = ATIVOS_LIQUIDEZ.reduce((s, k) => s + (carteira[k] ?? 0), 0)
-  const falta = PISO_LIQUIDEZ_SEM_RESERVA - liquidez
+  let falta = PISO_LIQUIDEZ_SEM_RESERVA - liquidez
   if (falta <= 0) return false
-  const outras = (Object.keys(carteira) as AtivoKey[])
-    .filter((k) => !ATIVOS_LIQUIDEZ.includes(k) && (carteira[k] ?? 0) > 0)
-    .sort((a, b) => (carteira[b] ?? 0) - (carteira[a] ?? 0))
-  const totalOutras = outras.reduce((s, k) => s + (carteira[k] ?? 0), 0)
-  const cortes = outras.map((k) => Math.floor(((carteira[k] ?? 0) * falta) / totalOutras))
-  let resto = falta - cortes.reduce((s, c) => s + c, 0)
-  for (let i = 0; resto > 0 && i < cortes.length * 2; i++) {
-    const idx = i % cortes.length
-    if (cortes[idx] < (carteira[outras[idx]] ?? 0)) {
-      cortes[idx] += 1
-      resto -= 1
+  // Primeiro da renda fixa de prazo mais longo (não é risco); só depois das classes de risco.
+  const grupos: AtivoKey[][] = [['tesouroIPCA', 'tesouroPrefixado', 'lciLca'], ATIVOS_RISCO]
+  for (const grupo of grupos) {
+    const classes = grupo.filter((k) => (carteira[k] ?? 0) > 0).sort((a, b) => (carteira[b] ?? 0) - (carteira[a] ?? 0))
+    const total = classes.reduce((s, k) => s + (carteira[k] ?? 0), 0)
+    if (total <= 0 || falta <= 0) continue
+    const tirar = Math.min(falta, total)
+    const cortes = classes.map((k) => Math.floor(((carteira[k] ?? 0) * tirar) / total))
+    let resto = tirar - cortes.reduce((s, c) => s + c, 0)
+    for (let n = 0; resto > 0 && n < cortes.length * 2; n++) {
+      const idx = n % cortes.length
+      if (cortes[idx] < (carteira[classes[idx]] ?? 0)) { cortes[idx] += 1; resto -= 1 }
     }
+    classes.forEach((k, idx) => moverPontos(carteira, k, 'cdbLiquidez', cortes[idx]))
+    falta -= tirar
   }
-  outras.forEach((k, i) => moverPontos(carteira, k, 'cdbLiquidez', cortes[i]))
   return true
 }
 

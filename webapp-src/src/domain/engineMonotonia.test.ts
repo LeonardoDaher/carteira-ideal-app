@@ -13,10 +13,11 @@ import type { Carteira, Letra, PerfilInvestidor, RespostasArquitetura, Respostas
 // A conferência é exaustiva na arquitetura (3^6, com o Pilar 7 fixo; ele é conferido à parte) e
 // amostrada, com semente fixa, no suitability. Com o motor D78 o risco SUBIA em 2.507 comparações
 // (máximo de 8 pontos): o corte do teto ficava abaixo do teto e o limite de 10% por classe cortava
-// de novo. A D80 corrigiu os dois (956 e máximo de 5). O que resta é arredondamento (o Pilar 4 [A]
-// move 30% de cada classe para o ouro, que conta como risco) e o piso de liquidez de quem não tem
-// reserva, decisão de produto. Este teste TRAVA o estado atual: o número de aumentos de 2 pontos
-// ou mais e o maior aumento não podem crescer; quem melhorar o motor deve apertar os limites.
+// de novo. A D80 corrigiu os dois (956 e máximo de 5) e a D81 mudou a origem do piso de liquidez
+// (469 e máximo de 3). O que resta é principalmente arredondamento (o Pilar 4 [A] move 30% de cada
+// classe para o ouro, que conta como risco); o resto ainda não foi analisado. Este teste TRAVA o
+// estado atual: o número de aumentos de 2 pontos ou mais e o maior aumento não podem crescer;
+// quem melhorar o motor deve apertar os limites.
 
 const RISCO = ['ouro', 'fiis', 'acoesETFs', 'bdrs', 'fundosInternacionais', 'cripto'] as const
 const risco = (c: Carteira) => RISCO.reduce((s, k) => s + (c[k] ?? 0), 0)
@@ -116,6 +117,6 @@ describe('propriedades do motor (D79)', () => {
   }, 120_000)
 })
 
-// Medidos com o motor 2026.10.12-D80 (amostra e semente acima; com o D78 eram 2.507 e 8). Só podem DIMINUIR.
-const LIMITE_AUMENTOS = 956
-const LIMITE_MAIOR_AUMENTO = 5
+// Medidos com o motor 2026.10.12-D81 (amostra e semente acima; com o D78 eram 2.507 e 8, com o D80 956 e 5). Só podem DIMINUIR.
+const LIMITE_AUMENTOS = 469
+const LIMITE_MAIOR_AUMENTO = 3
