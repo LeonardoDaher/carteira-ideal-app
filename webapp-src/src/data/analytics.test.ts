@@ -41,7 +41,7 @@ describe('registrarEvento (métricas anônimas)', () => {
   })
 
   it('leva só rótulos agregados no resultado, sem respostas individuais', async () => {
-    await registrarEvento('recomendacao_gerada', { perfil: '7. Arrojado Travado (Falso Arrojado)', prazo: 'longo', veto: true })
+    await registrarEvento('recomendacao_gerada', { perfil: '7. Arrojado Travado (Quase Arrojado)', prazo: 'longo', veto: true })
     const c = await corpoEnviado()
     expect(Object.keys(c.props).sort()).toEqual(['perfil', 'prazo', 'veto'])
   })

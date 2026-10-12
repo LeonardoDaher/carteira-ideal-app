@@ -1474,3 +1474,21 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 - **`manifest.webmanifest`:** descrição do atalho do Meu Mês. O arquivo estava com fim de linha do Windows (CRLF) no disco e foi normalizado para LF, como está no repositório.
 
 **Verificação.** Os 366 testes de scripts passam; o JSON-LD da página inicial e o da `/meu-mes/` são válidos; conferido na tela, com um servidor estático local, que a página inicial mostra os textos novos.
+
+
+## D78 (12/10/2026): Veto explicado na tela, trilha de auditoria do motor e perfil 7 passa a "Quase Arrojado"
+
+**Contexto.** Uma segunda revisão do motor (cenários com um, dois e três [A] nos pilares duros, conferidos no motor local e na API publicada) achou uma contradição visível ao cliente: com veto, a tela mostrava "Capacidade real: alta (score 16/18)" ao lado de um perfil defensivo, porque o score mede a vida financeira em geral e o veto olha o risco imediato.
+
+**O que mudou.**
+1. **Tela de resultado sem contradição.** Com veto, a linha passa a explicar: "Pelo score, sua capacidade seria alta (16/18), mas [motivos]: por isso a carteira de referência fica defensiva", com os motivos de cada pilar que vetou ("a sua reserva cobre menos de 3 meses", "você tem dívida cara ou passivo em dólar", "você vai precisar de parte do dinheiro em até 24 meses"). Sem veto, a linha é a de sempre.
+2. **Motivo do veto em linguagem simples, como primeiro aviso** ("Carteira levada a Defensivo porque …. Resolvendo isso, o perfil pode subir numa nova avaliação.").
+3. **Trilha de auditoria em cada resultado:** `versaoMotor` (`VERSAO_MOTOR`, hoje `2026.10.12-D78`; mudar a cada alteração de regra), `regrasAcionadas` (identificadores estáveis, na ordem em que rodaram: `veto:<pilar>`, `prazo:janela-24-meses`, `prazo:janela-3-a-5-anos`, `aviso:divida-cara`, `aviso:reserva-divergente`, `limite:estresse-vs-reacao`, `teto:suitability-<perfil>`, `piso:liquidez-sem-reserva`, `limite:patrimonio-baixo`, `limite:sem-experiencia`, `rebaixa:prazo-curto-arrojado`, `limite:reacao-ansiosa`, `rebaixa:idade-aposentadoria`) e `pilaresDoVeto`. A API devolve os campos novos junto com o resto; nada é gravado no servidor. Os calibradores suaves (Pilares 4 a 6) ainda não geram regra própria.
+4. **Rótulo do perfil 7:** "7. Arrojado Travado (Falso Arrojado)" virou **"7. Arrojado Travado (Quase Arrojado)"** (tipo, motor, testes, docs/02 e painel). O painel de métricas soma as contagens do nome antigo e do novo na mesma barra, para o histórico não se partir.
+5. **Comentários do código:** corrigidos os que citavam "13 classes" e seções do documento antigo; documentado que a chave `acoesETFs` é um nome herdado de "Ações".
+
+**Não mudou.** O veto continua binário (qualquer [A] nos Pilares 1 a 3 leva ao Defensivo); as carteiras-modelo; o número de perguntas (14); as regras de cálculo.
+
+**Decisões de produto que ficam com o responsável** (propostas da revisão, não aplicadas): (a) o Defensivo de longo prazo, que recebe quem vetou por P1 ou P2 (30% em risco, 22% em FIIs e ações), é adequado?; (b) separar o P2 em "dívida cara" e "passivo em dólar" (hoje dois conceitos numa resposta); (c) reserva e reação são perguntadas no suitability e nos Pilares 1 e 4: unificar mudaria 14 para 12 ou 13 perguntas; (d) perguntar o percentual a sacar no P3 (15ª pergunta) para segregar só a fatia, em vez de levar a carteira inteira ao curto prazo; (e) teste de propriedade "piorar uma resposta nunca aumenta o risco", ainda não escrito.
+
+**Testes.** +15 (`engineD78.test.ts`, `Resultado.test.tsx`). **Mutação:** 13 defeitos (ordem e filtro dos pilares, versão e regras não gravadas, aviso do veto fora de ordem, regras de veto, teto, piso e prazo ausentes, motivo errado, tela ignorando o veto ou os motivos); todos detectados, o primeiro defeito que sobreviveu ([B] contando como veto) ganhou teste.

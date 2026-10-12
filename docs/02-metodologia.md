@@ -66,6 +66,8 @@ Na versão implementada (função vetoAplicado em engine.ts), a regra de veto é
 
 *O motor não distingue hoje se um, dois ou três Pilares Duros vieram como [A] — o efeito é o mesmo (Defensivo) em qualquer desses casos. Não há uma versão "parcial" do veto nem uma exceção que eleve o perfil de volta quando os 3 pilares vierem como [C].*
 
+*Explicação ao cliente e trilha de auditoria (D78).* O score dos Pilares 1 a 6 mede a vida financeira em geral e o veto olha o risco imediato; por isso um cliente pode ter capacidade "alta" no score e carteira Defensiva. A tela de resultado explica isso ("Pelo score, sua capacidade seria alta (16/18), mas a sua reserva cobre menos de 3 meses: por isso a carteira de referência fica defensiva"), e o primeiro aviso da lista diz o motivo do veto. Cada resultado carrega `versaoMotor`, `pilaresDoVeto` e `regrasAcionadas` (identificadores como `veto:capacidadeFinanceira`, `prazo:janela-24-meses`, `teto:suitability-conservador`, `piso:liquidez-sem-reserva`).
+
 ## 3.3 Vetor Patrimonial (Capacidade Real) e Teto de Risco (Suitability)
 
 Desde a D73 o cruzamento tem dois papéis separados. Sem veto acionado, a **capacidade real define só o vetor** (VETOR_PELA_CAPACIDADE em engine.ts):
@@ -96,9 +98,9 @@ O nome exibido ao cliente não é o Perfil Patrimonial isolado (Defensivo/Equili
 | --- | --- | --- | --- |
 | Conservador | 1. Conservador Puro | 2. Conservador Renda | 3. Conservador Acúmulo |
 | Moderado | 4. Moderado Defensivo | 5. Moderado Renda (Equilíbrio) | 6. Moderado Expansão |
-| Arrojado | 7. Arrojado Travado (Falso Arrojado) | 8. Arrojado Gerador de Renda | 9. Arrojado Pleno / Global |
+| Arrojado | 7. Arrojado Travado (Quase Arrojado) | 8. Arrojado Gerador de Renda | 9. Arrojado Pleno / Global |
 
-*"7. Arrojado Travado (Falso Arrojado)" é o nome dado a quem se declarou Arrojado no suitability mas teve o Perfil Patrimonial rebaixado para Defensivo — seja por veto, seja por baixa Capacidade Real. Com a D73 os 9 perfis são alcançáveis; o nome mostra o cruzamento, e o suitability limita o risco da carteira (seção 3.3).*
+*"7. Arrojado Travado (Quase Arrojado)" é o nome dado a quem se declarou Arrojado no suitability mas teve o Perfil Patrimonial rebaixado para Defensivo — seja por veto, seja por baixa Capacidade Real. Com a D73 os 9 perfis são alcançáveis; o nome mostra o cruzamento, e o suitability limita o risco da carteira (seção 3.3).*
 
 ## 3.5 Calibradores Suaves (Pilares 4 a 6) e Aviso Fiscal (Pilar 7) — Ajuste Fino de Composição
 

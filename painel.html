@@ -151,7 +151,8 @@
         var s = {};
         mensal.forEach(function (m) {
           var d = (m.distribuicao && m.distribuicao[campo]) || {};
-          Object.keys(d).forEach(function (k) { s[k] = (s[k] || 0) + Number(d[k]); });
+          // o rótulo do perfil 7 mudou (D78): une as contagens antigas e novas na mesma barra
+          Object.keys(d).forEach(function (k) { var nome = campo === "perfil" ? String(k).replace("(Falso Arrojado)", "(Quase Arrojado)") : k; s[nome] = (s[nome] || 0) + Number(d[k]); });
         });
         return s;
       }
@@ -201,7 +202,7 @@
         });
         if (!totalPerfis) h += '<p class="vazio">Ainda sem carteiras geradas no período.</p>';
         if (arrojados > 0) {
-          h += '<p class="insight"><strong>' + pctTxt(pct(travados, arrojados)) + "</strong> dos perfis Arrojados são &ldquo;Falso Arrojado&rdquo; (" + fmt(travados) + " de " + fmt(arrojados) + "): a pessoa aceitou risco no suitability, mas a vida financeira real não sustenta esse apetite.</p>";
+          h += '<p class="insight"><strong>' + pctTxt(pct(travados, arrojados)) + "</strong> dos perfis Arrojados são &ldquo;Quase Arrojado&rdquo; (" + fmt(travados) + " de " + fmt(arrojados) + "): a pessoa aceitou risco no suitability, mas a vida financeira real não sustenta esse apetite.</p>";
         }
         $("#c-perfis").innerHTML = h;
 

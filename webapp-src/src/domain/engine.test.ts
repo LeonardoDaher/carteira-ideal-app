@@ -181,15 +181,15 @@ describe('calcularPerfilPatrimonial', () => {
     expect(calcularPerfilPatrimonial('Moderado', respostasBaixa).perfilFinalCarteira).toBe('4. Moderado Defensivo')
     expect(calcularPerfilPatrimonial('Moderado', respostasMedia).perfilFinalCarteira).toBe('5. Moderado Renda (Equilíbrio)')
     expect(calcularPerfilPatrimonial('Moderado', respostasAlta).perfilFinalCarteira).toBe('6. Moderado Expansão')
-    expect(calcularPerfilPatrimonial('Arrojado', respostasBaixa).perfilFinalCarteira).toBe('7. Arrojado Travado (Falso Arrojado)')
+    expect(calcularPerfilPatrimonial('Arrojado', respostasBaixa).perfilFinalCarteira).toBe('7. Arrojado Travado (Quase Arrojado)')
     expect(calcularPerfilPatrimonial('Arrojado', respostasMedia).perfilFinalCarteira).toBe('8. Arrojado Gerador de Renda')
     expect(calcularPerfilPatrimonial('Arrojado', respostasAlta).perfilFinalCarteira).toBe('9. Arrojado Pleno / Global')
   })
 
-  it('regra de veto: suitability Arrojado + veto vira "7. Arrojado Travado (Falso Arrojado)", não "9. Arrojado Pleno / Global"', () => {
+  it('regra de veto: suitability Arrojado + veto vira "7. Arrojado Travado (Quase Arrojado)", não "9. Arrojado Pleno / Global"', () => {
     const resultado = calcularPerfilPatrimonial('Arrojado', { ...respostasAlta, capacidadeFinanceira: 'a' })
     expect(resultado.perfilPatrimonial).toBe('Defensivo')
-    expect(resultado.perfilFinalCarteira).toBe('7. Arrojado Travado (Falso Arrojado)')
+    expect(resultado.perfilFinalCarteira).toBe('7. Arrojado Travado (Quase Arrojado)')
   })
 
   it('gerarRecomendacao propaga perfilFinalCarteira para a tela de Resultado', () => {

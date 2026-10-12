@@ -7,6 +7,7 @@ import type {
   Letra,
   LetraArquitetura,
   PerfilFinalCarteira,
+  PilarDeVeto,
   PerfilInvestidor,
   PerfilPatrimonial,
   PrazoBucket,
@@ -34,9 +35,18 @@ const PILARES_PONTUAM: (keyof RespostasArquitetura)[] = [
   'capitalHumano',
 ]
 
-/** Pilares com poder de veto — ver Seção 4.2 do documento "Estrutura de uma carteira
- * verdadeiramente personalizada". Uma resposta 'a' em qualquer um deles rebaixa o perfil
+/** Pilares com poder de veto — ver docs/02-metodologia.md, seção 3.2. Uma resposta 'a' em qualquer um deles rebaixa o perfil
  * final para Defensivo, independentemente do score consolidado ou do suitability. */
+/** Identifica a versão das regras do motor em cada resultado (D78). Mude a cada alteração de regra. */
+export const VERSAO_MOTOR = '2026.10.12-D78'
+
+/** Texto de cada pilar duro para explicar o veto ao cliente, em linguagem simples. */
+const MOTIVO_DO_VETO: Record<PilarDeVeto, string> = {
+  capacidadeFinanceira: 'sua reserva cobre menos de 3 meses de despesas',
+  passivoDividas: 'você tem dívida cara ou passivo em dólar',
+  janelaLiquidez: 'você vai precisar de uma parte relevante do dinheiro em até 24 meses',
+}
+
 const PILARES_RESTRICAO_DURA: (keyof RespostasArquitetura)[] = [
   'capacidadeFinanceira',
   'passivoDividas',
@@ -87,17 +97,16 @@ const MATRIZ_PERFIL_FINAL: Record<PerfilInvestidor, Record<PerfilPatrimonial, Pe
     'Crescimento Pleno': '6. Moderado Expansão',
   },
   Arrojado: {
-    Defensivo: '7. Arrojado Travado (Falso Arrojado)',
+    Defensivo: '7. Arrojado Travado (Quase Arrojado)',
     Equilibrado: '8. Arrojado Gerador de Renda',
     'Crescimento Pleno': '9. Arrojado Pleno / Global',
   },
 }
 
 /**
- * Carteiras-modelo das 13 classes por perfil da Arquitetura Patrimonial x prazo — a
- * "Carteira Ideal" propriamente dita. O documento "Estrutura de uma carteira
- * verdadeiramente personalizada" (Seção 2) define uma única alocação por perfil; aqui
- * ela vira a variante "medio", e as variantes "curto"/"longo" seguem a mesma lógica já
+ * Carteiras-modelo das 11 classes por perfil da Arquitetura Patrimonial x prazo — a
+ * "Carteira Ideal" propriamente dita. O documento docs/02-metodologia.md (seção 5.2) define as carteiras-modelo; aqui
+ * a do prazo médio é a referência, e as variantes "curto"/"longo" seguem a mesma lógica já
  * usada em MATRIZ_BASE: mais liquidez e menos duração/risco no curto prazo, mais IPCA+/
  * ações/global no longo prazo. Cada uma das 9 combinações soma exatamente 100%.
  *
@@ -135,6 +144,11 @@ export function capacidadePeloScore(score: number): CapacidadeReal {
   return 'alta'
 }
 
+/** Quais pilares duros vieram como [A], na ordem das perguntas. */
+export function pilaresQueVetam(respostas: RespostasArquitetura): PilarDeVeto[] {
+  return PILARES_RESTRICAO_DURA.filter((pilar) => respostas[pilar] === 'a') as PilarDeVeto[]
+}
+
 export function vetoAplicado(respostas: RespostasArquitetura): boolean {
   return PILARES_RESTRICAO_DURA.some((pilar) => respostas[pilar] === 'a')
 }
@@ -142,7 +156,7 @@ export function vetoAplicado(respostas: RespostasArquitetura): boolean {
 /**
  * Cruza o perfil já calculado pelo suitability (perfilFinal, após as travas de segurança
  * existentes) com as 7 respostas da Arquitetura Patrimonial, aplicando a regra de veto
- * quando necessário. Ver Seção 4 do documento para a lógica completa.
+ * quando necessário. Ver docs/02-metodologia.md, seções 3.2 e 3.3, para a lógica completa.
  */
 export function calcularPerfilPatrimonial(
   perfilSuitability: PerfilInvestidor,
@@ -412,17 +426,20 @@ export function gerarRecomendacao(
   const buscaAposentadoria = respostas.objetivo === 'd'
 
   const alertas: string[] = []
+  const regras: string[] = []
   let perfilFinal = perfilBase
 
   if (prazoSuitability === 'curto' && perfilFinal === 'Arrojado') {
     perfilFinal = rebaixar(perfilFinal)
     alertas.push('Perfil ajustado para Moderado: prazo curto não combina com o risco de um perfil Arrojado.')
+    regras.push('rebaixa:prazo-curto-arrojado')
   }
   if (liquidezFrequente) {
     const anterior = perfilFinal
     perfilFinal = limitarAoTeto(perfilFinal, 'Moderado')
     if (perfilFinal !== anterior) {
       alertas.push('Perfil limitado a Moderado: você pode precisar do dinheiro de forma inesperada.')
+      regras.push('limite:reacao-ansiosa')
     }
   }
   if (dados.idade > 60 && buscaAposentadoria) {
@@ -430,6 +447,7 @@ export function gerarRecomendacao(
     perfilFinal = rebaixar(perfilFinal)
     if (perfilFinal !== anterior) {
       alertas.push('Perfil ajustado para preservar capital, considerando idade e foco em aposentadoria.')
+      regras.push('rebaixa:idade-aposentadoria')
     }
   }
 
@@ -448,15 +466,19 @@ export function gerarRecomendacao(
     if (respostasArquitetura.janelaLiquidez === 'a' && prazo !== 'curto') {
       prazo = 'curto'
       alertas.push('Usamos o modelo de curto prazo: você vai precisar de uma parte relevante do dinheiro em até 24 meses.')
+      regras.push('prazo:janela-24-meses')
     } else if (respostasArquitetura.janelaLiquidez === 'b' && prazo === 'longo') {
       prazo = 'medio'
       alertas.push('Usamos o modelo de médio prazo: você prevê um gasto grande entre 3 e 5 anos.')
+      regras.push('prazo:janela-3-a-5-anos')
     }
     if (reservaSuitability && respostasArquitetura.capacidadeFinanceira === 'a') {
       alertas.push('Suas respostas sobre reserva divergiram; consideramos a mais cautelosa (menos de 3 meses).')
+      regras.push('aviso:reserva-divergente')
     }
     if (respostasArquitetura.passivoDividas === 'a') {
       alertas.push('Prioridade antes de investir: quitar dívida cara (cartão, cheque especial) costuma render mais do que qualquer investimento. O plano de dívidas do Meu Mês ajuda nisso.')
+      regras.push('aviso:divida-cara')
     }
   }
 
@@ -479,6 +501,7 @@ export function gerarRecomendacao(
     alertas.push(...calibrado.alertas)
     if (respostasArquitetura.comportamentoEstresse === 'c' && !reacaoCalma) {
       alertas.push('Você disse que notícias de crise te abalam; por isso não aumentamos a exposição a ações por ver quedas como oportunidade.')
+      regras.push('limite:estresse-vs-reacao')
     }
     if (dados.idade >= IDADE_ALERTA_SUCESSAO) {
       alertas.push('Se o planejamento sucessório é uma preocupação, converse com um especialista sobre VGBL/previdência e outras formas de organizar a herança.')
@@ -486,10 +509,15 @@ export function gerarRecomendacao(
   }
 
   // O suitability é o teto de risco da carteira, qualquer que seja o vetor patrimonial.
-  alertas.push(...aplicarTetoSuitability(carteira, perfilFinal, prazo))
+  const avisoTeto = aplicarTetoSuitability(carteira, perfilFinal, prazo)
+  if (avisoTeto.length > 0) {
+    alertas.push(...avisoTeto)
+    regras.push(`teto:suitability-${perfilFinal.toLowerCase()}`)
+  }
 
   if (!temReserva && garantirPisoLiquidez(carteira)) {
     alertas.push('Reforçamos a liquidez da carteira: você ainda não tem reserva de emergência formada.')
+    regras.push('piso:liquidez-sem-reserva')
   }
 
   if (patrimonio < 5000) {
@@ -503,6 +531,7 @@ export function gerarRecomendacao(
     if (removido > 0) {
       carteira.tesouroSelic = (carteira.tesouroSelic ?? 0) + removido
       alertas.push('Com um valor inicial baixo, priorizamos Tesouro Direto e CDB até você diversificar mais.')
+      regras.push('limite:patrimonio-baixo')
     }
   }
 
@@ -518,6 +547,7 @@ export function gerarRecomendacao(
     if (excedente > 0) {
       carteira.tesouroSelic = (carteira.tesouroSelic ?? 0) + excedente
       alertas.push('Limitamos a exposição a ativos de maior risco: você está começando agora a investir.')
+      regras.push('limite:sem-experiencia')
     }
   }
 
@@ -531,10 +561,19 @@ export function gerarRecomendacao(
     resultado.vetoAplicado = arquitetura.vetoAplicado
     resultado.perfilPatrimonial = arquitetura.perfilPatrimonial
     resultado.perfilFinalCarteira = arquitetura.perfilFinalCarteira
-    if (arquitetura.vetoAplicado) {
-      alertas.push('Perfil final levado a Defensivo: um dos pilares de restrição dura (capacidade, passivo ou liquidez) indicou risco imediato.')
+    if (arquitetura.vetoAplicado && respostasArquitetura) {
+      const pilares = pilaresQueVetam(respostasArquitetura)
+      resultado.pilaresDoVeto = pilares
+      // O motivo do veto vem primeiro: é o que o cliente mais precisa entender do resultado.
+      alertas.unshift(
+        `Carteira levada a Defensivo porque ${pilares.map((p) => MOTIVO_DO_VETO[p]).join('; ')}. Resolvendo isso, o perfil pode subir numa nova avaliação.`,
+      )
+      regras.unshift(...pilares.map((p) => `veto:${p}`))
     }
   }
+
+  resultado.versaoMotor = VERSAO_MOTOR
+  resultado.regrasAcionadas = regras
 
   return resultado
 }

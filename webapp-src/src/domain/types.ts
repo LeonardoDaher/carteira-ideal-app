@@ -27,7 +27,7 @@ export type PerfilFinalCarteira =
   | '4. Moderado Defensivo'
   | '5. Moderado Renda (Equilíbrio)'
   | '6. Moderado Expansão'
-  | '7. Arrojado Travado (Falso Arrojado)'
+  | '7. Arrojado Travado (Quase Arrojado)'
   | '8. Arrojado Gerador de Renda'
   | '9. Arrojado Pleno / Global'
 
@@ -35,7 +35,8 @@ export type PrazoBucket = 'curto' | 'medio' | 'longo'
 
 export type ExperienciaNivel = 'nenhuma' | 'basica' | 'avancada'
 
-/** Chave interna de cada classe de ativo usada na carteira e no glossário. */
+/** Chave interna de cada classe de ativo usada na carteira e no glossário.
+ * `acoesETFs` é um nome herdado: a classe aparece para o cliente como "Ações" (ver data/assets.ts). */
 export type AtivoKey =
   | 'tesouroSelic'
   | 'tesouroIPCA'
@@ -125,4 +126,14 @@ export interface ResultadoRecomendacao {
    * É ESTE o nome que deve ser exibido ao cliente como resultado final — ver
    * PerfilFinalCarteira. */
   perfilFinalCarteira?: PerfilFinalCarteira
+  /** Pilares duros que acionaram o veto, na ordem das perguntas (vazio ou ausente = sem veto). */
+  pilaresDoVeto?: PilarDeVeto[]
+  /** Versão do motor que gerou este resultado (trilha de auditoria, D78). */
+  versaoMotor?: string
+  /** Identificadores estáveis das regras que mexeram no resultado (veto, prazo, teto, piso...),
+   * na ordem em que rodaram (trilha de auditoria, D78). */
+  regrasAcionadas?: string[]
 }
+
+/** Pilares duros: uma resposta [A] em qualquer um deles aciona o veto. */
+export type PilarDeVeto = 'capacidadeFinanceira' | 'passivoDividas' | 'janelaLiquidez'

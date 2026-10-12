@@ -25,6 +25,20 @@ const DESCRICAO_PATRIMONIAL: Record<string, string> = {
     'Sua capacidade real é alta: reserva sólida, sem dívida cara e sem saques previstos. Uma carteira de referência para esse perfil pode priorizar acúmulo de longo prazo, e o seu perfil de investidor define quanto dessa folga vira risco.',
 }
 
+const MOTIVO_DO_VETO: Record<string, string> = {
+  capacidadeFinanceira: 'a sua reserva cobre menos de 3 meses',
+  passivoDividas: 'você tem dívida cara ou passivo em dólar',
+  janelaLiquidez: 'você vai precisar de parte do dinheiro em até 24 meses',
+}
+
+/** "A, B e C" com os motivos do veto, na ordem das perguntas. */
+function motivosDoVeto(pilares: string[] | undefined) {
+  const motivos = (pilares ?? []).map((p) => MOTIVO_DO_VETO[p]).filter(Boolean)
+  if (motivos.length === 0) return 'um dos pilares de reserva, dívida ou liquidez indicou risco imediato'
+  if (motivos.length === 1) return motivos[0]
+  return motivos.slice(0, -1).join(', ') + ' e ' + motivos[motivos.length - 1]
+}
+
 /** Remove espaços do nome do perfil para usar como classe CSS (ex: "Crescimento Pleno" → "CrescimentoPleno"). */
 function classePerfil(perfil: string) {
   return perfil.replace(/\s+/g, '')
@@ -61,10 +75,19 @@ export function Resultado({ ctx }: { ctx: AppCtx }) {
           {semNumero(nomePerfilExibido)}
         </div>
         {perfilPatrimonial ? (
-          <div className="small muted" style={{ textAlign: 'center' }}>
-            Suitability: {resultado.perfilFinal} · Capacidade real: {resultado.capacidadeReal} (score {resultado.scoreArquitetura}/18)
-            {resultado.vetoAplicado ? ' · Regra de veto aplicada' : ''}
-          </div>
+          resultado.vetoAplicado ? (
+            // Com veto, "capacidade alta" ao lado de um perfil defensivo parece contradição (D78):
+            // o score mede a vida financeira em geral, e o veto olha o risco imediato.
+            <div className="small muted justify" style={{ textAlign: 'center' }} data-testid="explicacao-veto">
+              Suitability: {resultado.perfilFinal} · Regra de veto aplicada. Pelo score, sua capacidade seria {resultado.capacidadeReal}{' '}
+              ({resultado.scoreArquitetura}/18), mas {motivosDoVeto(resultado.pilaresDoVeto)}: por isso a carteira de referência fica
+              defensiva.
+            </div>
+          ) : (
+            <div className="small muted" style={{ textAlign: 'center' }}>
+              Suitability: {resultado.perfilFinal} · Capacidade real: {resultado.capacidadeReal} (score {resultado.scoreArquitetura}/18)
+            </div>
+          )
         ) : (
           foiAjustado && (
             <div className="small muted" style={{ textAlign: 'center' }}>

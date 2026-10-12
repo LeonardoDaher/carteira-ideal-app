@@ -1,4 +1,4 @@
-# Passagem para o chat (Carteira Ideal) — estado em 09/10/2026, após a D77
+# Passagem para o chat (Carteira Ideal) — estado em 12/10/2026, após a D78
 
 Cole este arquivo no início do chat e anexe `docs/06-proximos-passos.md`, `docs/07-registro-de-decisoes.md` (a partir da D57), `docs/02-metodologia.md`, `docs/09-metodologia-acoes-baratas.md`, `docs/10-metodologia-fii-baratos.md` e `docs/11-metodologia-top15-etfs-bdrs.md`. O repositório é a memória do projeto: tudo abaixo está no GitHub (`LeonardoDaher/carteira-ideal-app`, branch `main`).
 
@@ -27,6 +27,7 @@ O Meu Mês tem **duas abas**: "Contas do mês" (como sempre) e "Supermercado" (n
 - **D76:** botão verde **"Enviar o que falta pelo WhatsApp"** (com a logo): abre `wa.me` com só os itens **não ticados**, por categoria; some se nada falta. O texto só sai do aparelho quando a pessoa toca no botão; a Política de Privacidade cita isso.
 - **Limites:** o dicionário é finito (o que não casa cai em "Outros"); não sincroniza entre aparelhos nem pessoas. **"Organizar com IA"** foi discutido e **adiado**: exigiria função nova na Vercel, chave de API, limite por pessoa e aviso de privacidade (o texto sairia do aparelho). O responsável quer testar o que existe antes.
 
+- **D78 (12/10/2026):** (1) a tela de resultado deixou de mostrar "capacidade alta" ao lado de carteira defensiva: com veto, explica o motivo de cada pilar; (2) o primeiro aviso diz por que o veto ocorreu; (3) cada resultado carrega `versaoMotor` (`VERSAO_MOTOR`, hoje `2026.10.12-D78`; mudar a cada alteração de regra), `regrasAcionadas` e `pilaresDoVeto` (trilha de auditoria); (4) o perfil 7 passou de "Falso Arrojado" a **"Quase Arrojado"** (o painel soma os dois nomes); (5) comentários do código corrigidos. O veto continua binário e as carteiras não mudaram. Decisões em aberto sobre o veto estão na pendência 4 abaixo.
 - **D77:** a página inicial, o FAQ, a página `/meu-mes/` e o atalho do manifest passaram a citar a aba Supermercado (e que só o texto enviado pelo WhatsApp sai do aparelho).
 
 ### Decisões anteriores recentes
@@ -40,19 +41,18 @@ D67 Simule Imóvel com seleção de caminhos, D68 cartão "Simule Bens", D69 loc
 - No aparelho, cada lista guarda o código em chave própria (`carteiraideal.top15.codigo`, `...top15fiis.codigo`, `...top15bdrs.codigo`). A tela confere primeiro o código salvo ("Verificando o código salvo neste aparelho…") e só depois mostra o portão.
 
 ## 3. Pendências do responsável (nada disso o assistente pode fazer por ele)
-1. **Criar `TOP15_FIIS_CODIGOS` na Vercel** (Settings → Environment Variables → Production), com código novo (`-- --classe fiis`), e fazer **Redeploy**. Até lá a lista de FIIs fica fechada. Se o código das ações ainda for o de teste, trocar também `TOP15_CODIGOS`. *(A dos BDRs já foi feita.)*
-2. **Abrir a lista de BDRs com o código verdadeiro** (aba "Top 15 maior desconto" do Simule BDR) para conferir de ponta a ponta.
-3. **Confirmar desdobramentos dos BDRs em conferência** olhando os avisos de evento corporativo da B3 e registrando em `config/bdrs.json → desdobramentos` (formato no `_leia` do arquivo). Sem isso, esses BDRs (NFLX34 e outros) ficam fora do ranking.
-4. **Parecer independente** (D22): o responsável declarou que ele mesmo é o especialista; o registro disso é dele (o assistente não avalia o mérito jurídico). Vale para FIIs, ações, ETFs e BDRs **e agora também para o desenho novo do motor de perfis (D73)**.
-5. **Rever os parâmetros do motor (D73):** tetos de risco, faixas de capacidade, idade do aviso de sucessão; decidir se renomeia o perfil 3 "Conservador Acúmulo" (sai com carteira bem conservadora por causa do teto).
-6. **Testar o Meu Mês Supermercado no celular** depois que a Vercel publicar: ditado do teclado, ✎ editar, ticar, WhatsApp (conferir a mensagem e que o item ticado fica de fora) e layout dos botões. Conferir também no ar a página de Privacidade, a página inicial (FAQ novo) e `/meu-mes/`.
-7. Divulgar cada código no Instagram `@acarteiraideal`.
-8. Acompanhar: o job de FIIs no dia 21 e o de ETFs/BDRs no dia 22 (e-mail do GitHub se falhar), as conferências manuais dos FIIs (vencem em 05/01/2027), RZAT11 e o preço diário (workflow "Atualizar preço diário dos FIIs", 22h15).
+1. **Abrir as listas com os códigos verdadeiros** (FIIs: Simule FII, aba "Top 15 mais baratos"; BDRs: Simule BDR, aba "Top 15 maior desconto") para conferir de ponta a ponta. *(`TOP15_FIIS_CODIGOS` e `TOP15_BDRS_CODIGOS` já foram criadas na Vercel e conferidas na produção em 09/10/2026: as duas portas respondem 401 a um código falso, e não 503.)* Se o código das ações ainda for o de teste, trocar também `TOP15_CODIGOS` (`npm run codigo-top15 -- --classe acoes`).
+2. **Confirmar desdobramentos dos BDRs em conferência** olhando os avisos de evento corporativo da B3 e registrando em `config/bdrs.json → desdobramentos` (formato no `_leia` do arquivo). Sem isso, esses BDRs (NFLX34 e outros) ficam fora do ranking.
+3. **Parecer independente** (D22): o responsável declarou que ele mesmo é o especialista; o registro disso é dele (o assistente não avalia o mérito jurídico). Vale para FIIs, ações, ETFs e BDRs **e agora também para o desenho novo do motor de perfis (D73)**.
+4. **Rever os parâmetros do motor (D73) e as decisões em aberto do veto (D78):** tetos de risco, faixas de capacidade, idade do aviso de sucessão; se o Defensivo de longo prazo serve a quem vetou por reserva ou dívida; separar o Pilar 2 (dívida cara x passivo em dólar); unificar reserva e reação (14 vira 12 ou 13 perguntas); perguntar o % a sacar no P3; decidir se renomeia o perfil 3 "Conservador Acúmulo" (sai com carteira bem conservadora por causa do teto).
+5. **Testar o Meu Mês Supermercado no celular** depois que a Vercel publicar: ditado do teclado, ✎ editar, ticar, WhatsApp (conferir a mensagem e que o item ticado fica de fora) e layout dos botões. Conferir também no ar a página de Privacidade, a página inicial (FAQ novo) e `/meu-mes/`.
+6. Divulgar cada código no Instagram `@acarteiraideal`.
+7. Acompanhar: o job de FIIs no dia 21 e o de ETFs/BDRs no dia 22 (e-mail do GitHub se falhar), as conferências manuais dos FIIs (vencem em 05/01/2027), RZAT11 e o preço diário (workflow "Atualizar preço diário dos FIIs", 22h15).
 
 ## 4. Como o trabalho é entregue (importante para não voltar ao zip nem desfazer o trabalho do outro lado)
 - No **Claude Code (desktop)** o assistente tem Git e GitHub CLI no computador (`C:\nodeportatil`), clone em `C:\nodeportatil\repo` (Node portátil em `C:\nodeportatil\node-v22.23.3-win-x64`; **não há Python**), e faz commit e push na `main`, dispara workflows e lê logs. O assistente **só faz commit e push quando o responsável pede**, cada vez. Para revogar o acesso: `gh auth logout` ou github.com/settings/applications.
 - No **chat comum** o assistente **não** acessa o GitHub; o responsável sobe os arquivos que o chat gera ("Add files via upload"). **As duas frentes mexem no mesmo repositório.** Em 07–08/10 o chat subiu D67, D68 e D69 enquanto o Code trabalhava na D70, e a pasta de trabalho do Code estava desatualizada: se o Code enviasse como estava, desfaria o trabalho do chat. Por isso:
-  - **Números de decisão:** conferir o último `## D..` em `docs/07-registro-de-decisoes.md` do GitHub antes de numerar a próxima (**a próxima livre é a D78**).
+  - **Números de decisão:** conferir o último `## D..` em `docs/07-registro-de-decisoes.md` do GitHub antes de numerar a próxima (**a próxima livre é a D79**).
   - **O Code sempre traz a versão do GitHub antes de enviar** (`git pull --ff-only`) e tem uma trava que recusa enviar se o GitHub mudou um arquivo que ele ia enviar.
   - **No chat:** ao receber o zip do projeto, usar sempre o zip **mais recente do GitHub** (Code → Download ZIP) e dizer o número da última decisão.
 - Regra prática: mudanças de código e dados no Code; decisões, texto, estratégia e conteúdo no chat. O zip do GitHub vem sem `.git` e sem `node_modules` (normal); o chat não roda `npm install`.
