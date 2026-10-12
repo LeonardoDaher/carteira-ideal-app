@@ -311,7 +311,7 @@ Depois de montar a carteira-modelo (Seção 5.2 ou 5.4), o motor (gerarRecomenda
 
 - Sem reserva de emergência: se a liquidez atual (Tesouro Selic + CDB) ficar abaixo de 20% da carteira, o motor leva a diferença para o CDB Liquidez Diária, tirando-a das outras classes na mesma proporção, até o piso de 20% (D73: antes a diferença era somada por cima e a normalização final deixava a liquidez em 17% a 19%).
 
-- Teto de risco do suitability (D73): antes da trava de reserva, o excesso de risco acima do teto da seção 3.3 e a cripto dos perfis Conservador e Moderado são cortados.
+- Teto de risco do suitability (D73): antes da trava de reserva, o excesso de risco acima do teto da seção 3.3 e a cripto dos perfis Conservador e Moderado são cortados. Desde a D80 o corte fecha exatamente no teto (maiores restos) e acontece depois do limite de 10% por classe de quem não tem experiência.
 
 - Janela de liquidez (D73): o Pilar 3 ajusta o prazo da carteira (24 meses = curto; 3 a 5 anos = no máximo médio) antes de escolher a carteira-modelo.
 

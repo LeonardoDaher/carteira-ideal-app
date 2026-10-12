@@ -10,14 +10,13 @@ import type { Carteira, Letra, PerfilInvestidor, RespostasArquitetura, Respostas
 // é uma escala: reserva, bem, patrimônio, aposentadoria) e o Pilar 7 não pode mudar nada.
 // "Risco" é a soma de ouro, FIIs, ações, BDRs, internacionais e cripto, a mesma do teto do suitability.
 //
-// A conferência é exaustiva na arquitetura (3^6 x 3 do Pilar 7 = 2.187) e amostrada, com semente
-// fixa, no suitability. Resultado medido com o motor 2026.10.12-D78: o risco SOBE em alguns casos
-// (a carteira de quem declarou menos capacidade fica com mais risco que a de quem declarou mais).
-// Causas: (1) o corte do teto mantinha o piso de cada classe e ficava abaixo do teto; (2) o limite
-// de 10% por classe (sem experiência) e o piso de liquidez cortavam de novo o que já tinha sido
-// cortado; (3) arredondamento de 1 a 2 pontos. Este teste TRAVA o estado atual: o número de
-// aumentos de 2 pontos ou mais e o maior aumento não podem crescer. Quando o motor for corrigido,
-// os limites devem ser apertados (a correção proposta leva os aumentos a menos de um terço).
+// A conferência é exaustiva na arquitetura (3^6, com o Pilar 7 fixo; ele é conferido à parte) e
+// amostrada, com semente fixa, no suitability. Com o motor D78 o risco SUBIA em 2.507 comparações
+// (máximo de 8 pontos): o corte do teto ficava abaixo do teto e o limite de 10% por classe cortava
+// de novo. A D80 corrigiu os dois (956 e máximo de 5). O que resta é arredondamento (o Pilar 4 [A]
+// move 30% de cada classe para o ouro, que conta como risco) e o piso de liquidez de quem não tem
+// reserva, decisão de produto. Este teste TRAVA o estado atual: o número de aumentos de 2 pontos
+// ou mais e o maior aumento não podem crescer; quem melhorar o motor deve apertar os limites.
 
 const RISCO = ['ouro', 'fiis', 'acoesETFs', 'bdrs', 'fundosInternacionais', 'cripto'] as const
 const risco = (c: Carteira) => RISCO.reduce((s, k) => s + (c[k] ?? 0), 0)
@@ -117,6 +116,6 @@ describe('propriedades do motor (D79)', () => {
   }, 120_000)
 })
 
-// Medidos com o motor 2026.10.12-D78 (amostra e semente acima). Só podem DIMINUIR.
-const LIMITE_AUMENTOS = 2507
-const LIMITE_MAIOR_AUMENTO = 8
+// Medidos com o motor 2026.10.12-D80 (amostra e semente acima; com o D78 eram 2.507 e 8). Só podem DIMINUIR.
+const LIMITE_AUMENTOS = 956
+const LIMITE_MAIOR_AUMENTO = 5

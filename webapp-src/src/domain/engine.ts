@@ -38,7 +38,7 @@ const PILARES_PONTUAM: (keyof RespostasArquitetura)[] = [
 /** Pilares com poder de veto — ver docs/02-metodologia.md, seção 3.2. Uma resposta 'a' em qualquer um deles rebaixa o perfil
  * final para Defensivo, independentemente do score consolidado ou do suitability. */
 /** Identifica a versão das regras do motor em cada resultado (D78). Mude a cada alteração de regra. */
-export const VERSAO_MOTOR = '2026.10.12-D78'
+export const VERSAO_MOTOR = '2026.10.12-D80'
 
 /** Texto de cada pilar duro para explicar o veto ao cliente, em linguagem simples. */
 const MOTIVO_DO_VETO: Record<PilarDeVeto, string> = {
@@ -369,11 +369,20 @@ function aplicarTetoSuitability(carteira: Carteira, perfil: PerfilInvestidor, pr
   const teto = TETO_RISCO_SUITABILITY[perfil][prazo]
   const total = somaRisco(carteira)
   if (total > teto) {
+    // Maiores restos: cada classe mantém o piso de (atual x fator) e os pontos que sobram até o
+    // teto vão, um a um, para as classes de maior resto. Sem isso o corte ficava abaixo do teto.
     const fator = teto / total
-    for (const ativo of ATIVOS_RISCO) {
-      const atual = carteira[ativo] ?? 0
-      if (atual > 0) movido += moverPontos(carteira, ativo, destino, atual - Math.floor(atual * fator))
+    const partes = ATIVOS_RISCO.filter((a) => (carteira[a] ?? 0) > 0).map((ativo) => {
+      const exato = (carteira[ativo] ?? 0) * fator
+      return { ativo, mantido: Math.floor(exato), resto: exato - Math.floor(exato) }
+    })
+    let sobra = teto - partes.reduce((s, p) => s + p.mantido, 0)
+    for (const p of [...partes].sort((x, y) => y.resto - x.resto)) {
+      if (sobra <= 0) break
+      p.mantido += 1
+      sobra -= 1
     }
+    for (const p of partes) movido += moverPontos(carteira, p.ativo, destino, (carteira[p.ativo] ?? 0) - p.mantido)
   }
   return movido > 0
     ? [`Limitamos a fatia de maior risco ao que o seu perfil de investidor (${perfil}) tolera.`]
@@ -508,6 +517,25 @@ export function gerarRecomendacao(
     }
   }
 
+  // O limite de 10% por classe de quem nunca investiu roda ANTES do teto do suitability (D80): se rodasse
+  // depois, a mesma carteira seria cortada duas vezes e a de quem declarou mais capacidade acabaria com
+  // menos risco que a de quem declarou menos.
+  if (experiencia === 'nenhuma') {
+    let excedente = 0
+    for (const ativo of ATIVOS_RISCO) {
+      const atual = carteira[ativo]
+      if (atual && atual > 10) {
+        excedente += atual - 10
+        carteira[ativo] = 10
+      }
+    }
+    if (excedente > 0) {
+      carteira.tesouroSelic = (carteira.tesouroSelic ?? 0) + excedente
+      alertas.push('Limitamos a exposição a ativos de maior risco: você está começando agora a investir.')
+      regras.push('limite:sem-experiencia')
+    }
+  }
+
   // O suitability é o teto de risco da carteira, qualquer que seja o vetor patrimonial.
   const avisoTeto = aplicarTetoSuitability(carteira, perfilFinal, prazo)
   if (avisoTeto.length > 0) {
@@ -532,22 +560,6 @@ export function gerarRecomendacao(
       carteira.tesouroSelic = (carteira.tesouroSelic ?? 0) + removido
       alertas.push('Com um valor inicial baixo, priorizamos Tesouro Direto e CDB até você diversificar mais.')
       regras.push('limite:patrimonio-baixo')
-    }
-  }
-
-  if (experiencia === 'nenhuma') {
-    let excedente = 0
-    for (const ativo of ATIVOS_RISCO) {
-      const atual = carteira[ativo]
-      if (atual && atual > 10) {
-        excedente += atual - 10
-        carteira[ativo] = 10
-      }
-    }
-    if (excedente > 0) {
-      carteira.tesouroSelic = (carteira.tesouroSelic ?? 0) + excedente
-      alertas.push('Limitamos a exposição a ativos de maior risco: você está começando agora a investir.')
-      regras.push('limite:sem-experiencia')
     }
   }
 
