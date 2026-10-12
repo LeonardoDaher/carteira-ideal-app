@@ -1510,3 +1510,17 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 **Não mudou.** Privacidade (nada sai do aparelho), categorias, formato gravado, WhatsApp.
 
 **Testes.** +10 em `supermercado.test.ts`; dois testes antigos (domínio e tela) que usavam "arroz feijão leite" como item grudado passaram a usar texto que o separador não reconhece. **Mutação:** 5 defeitos (conector, qualificativo, par conhecido, número abre item, número solto no fim); um sobrevivente (qualificativo) levou a um teste novo ("frango congelado").
+
+## D80 (12/10/2026): teste de propriedade do motor ("piorar uma resposta nunca aumenta o risco") e verificação automática a cada envio
+
+**Contexto.** A revisão do motor (D78) deixou como pendência o teste de propriedade e a verificação a cada envio. Os testes do motor eram todos de exemplos escolhidos à mão; nada afirmava uma regra que vale para todas as respostas.
+
+**O que entrou.**
+1. **`engineMonotonia.test.ts`** (tempo de execução: cerca de 9 s). Três propriedades, com a arquitetura conferida de forma exaustiva (2.187 combinações) e o suitability amostrado com semente fixa (40 combinações): (a) o Pilar 7 não muda nenhum percentual; (b) toda carteira soma 100, sem classe negativa, cripto só para Arrojado e risco dentro do teto do suitability (+1 de arredondamento); (c) piorar uma resposta (prazo, tolerância, reserva, patrimônio, experiência e reação; os seis pilares que pontuam) não aumenta o risco. "Objetivo" fica de fora: não é uma escala.
+2. **Workflow `verificar.yml`**: `tsc -b` e `npm test` (web e scripts) a cada envio na `main` e em cada pull request, ignorando commits só de dados. É alarme (e-mail do GitHub), não trava: a Vercel publica por conta própria.
+
+**Achado: a propriedade (c) é violada.** Em 254.421 comparações, o risco **sobe** 2 pontos ou mais em 2.507 (cerca de 1%), com aumento máximo de 8 pontos: a carteira de quem declarou menos capacidade pode ficar com mais risco que a de quem declarou mais. Causas medidas (ordem de peso): (1) o corte do teto do suitability mantém o piso de cada classe e termina abaixo do teto (`aplicarTetoSuitability`, `atual - Math.floor(atual * fator)`); (2) o limite de 10% por classe de quem não tem experiência roda **depois** do teto e corta de novo; (3) o piso de liquidez de quem não tem reserva corta mais a carteira de vetor maior, que tem menos liquidez de partida, do que a Defensiva do veto; (4) arredondamento de 1 a 2 pontos (Pilar 4 [A] move 30% de cada classe para ouro, que conta como risco).
+
+**Como ficou o teste.** Trava o estado atual: o número de aumentos de 2 pontos ou mais (2.507) e o maior aumento (8) não podem crescer. Não corrige o motor.
+
+**Correção proposta (não aplicada; muda carteiras exibidas e exige subir `VERSAO_MOTOR`):** (i) corte do teto pelo método dos maiores restos, que fecha exatamente no teto; (ii) rodar o limite de 10% por classe **antes** do teto. Medido em experimento local, com os testes atuais do motor (56) passando: aumentos de 2 pontos ou mais caem de 12,6 mil para 3,6 mil (em outra amostra, de 60 suitabilities, sem o Pilar 7 fixo) e o maior de 8 para 4; o resto é arredondamento e o piso de liquidez. O piso, que é decisão de produto (tirar a liquidez que falta de renda fixa longa antes de tirar de risco), segue com o responsável.

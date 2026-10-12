@@ -1,0 +1,46 @@
+# Verificação automática a cada envio (D79): typecheck e todos os testes (app web e scripts).
+#
+# Não publica nem altera nada: só avisa (e-mail do GitHub) se um envio quebrou algum teste, inclusive os do motor
+# de perfis (engine*.test.ts). A Vercel continua publicando por conta própria; este job é o alarme, não a trava.
+# Os commits de dados dos outros workflows (feitos com o token do próprio GitHub) não disparam este job, e envios que
+# mexem só em dados (historico, auditoria, dados-privados) são ignorados.
+
+name: Verificar (typecheck e testes)
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'historico/**'
+      - 'auditoria/**'
+      - 'dados-privados/**'
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verificar-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verificar:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Typecheck
+        run: npx tsc -b
+
+      - name: Testes (app web e scripts)
+        run: npm test
