@@ -8,11 +8,24 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { pipeline, metricasHabilitadas } from './_redis.js'
 import { EVENTOS_ACEITOS, dataBrasilia, idAnonimoValido, refValido, rotuloValido } from './_eventos.js'
+import { aplicarCors } from './_cors.js'
+import { chaveDeChamadas, contadorComReserva, contadorEmMemoria, contadorRedis, JANELA_CHAMADAS_SEGUNDOS, passouDoLimite } from './_limite.js'
+import type { Contador } from './_limite.js'
+import { ipDe } from './_top15.js'
+
+// Limite por IP (D85): sem ele, qualquer script poderia inflar as métricas. 300 a cada 15 minutos é
+// folgado (o app manda poucos eventos por sessão e redes de celular compartilham IP). Ao passar do
+// limite o evento é descartado em silêncio: contar nunca devolve erro ao navegador.
+const MAX_EVENTOS = 300
+const reserva = contadorEmMemoria()
+const contador: Contador = metricasHabilitadas() ? contadorComReserva(contadorRedis(pipeline), reserva) : reserva
+const sal = process.env.TOP15_SAL ?? ''
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  res.setHeader('Access-Control-Allow-Origin', process.env.ALLOWED_ORIGIN ?? '*')
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+  if (!aplicarCors(req, res)) {
+    res.status(403).json({ erro: 'Origem não permitida.' })
+    return
+  }
 
   if (req.method === 'OPTIONS') {
     res.status(204).end()
@@ -25,6 +38,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   // Sem Redis configurado, as métricas estão desligadas: responde OK e segue.
   if (!metricasHabilitadas()) {
+    res.status(204).end()
+    return
+  }
+
+  const chave = chaveDeChamadas(ipDe(req.headers, req.socket?.remoteAddress), sal, 'evento:chamadas')
+  if (await passouDoLimite(contador, chave, MAX_EVENTOS, JANELA_CHAMADAS_SEGUNDOS)) {
     res.status(204).end()
     return
   }

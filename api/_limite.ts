@@ -17,8 +17,8 @@ export const MAX_CHAMADAS = 60
 export const JANELA_CHAMADAS_SEGUNDOS = 15 * 60
 
 /** Só o hash do IP vai para o Redis, e some em 15 minutos. */
-export function chaveDeChamadas(ip: string, sal = ''): string {
-  return `recomendacao:chamadas:${createHash('sha256').update(`${sal}|${ip}`).digest('hex').slice(0, 24)}`
+export function chaveDeChamadas(ip: string, sal = '', prefixo = 'recomendacao:chamadas'): string {
+  return `${prefixo}:${createHash('sha256').update(`${sal}|${ip}`).digest('hex').slice(0, 24)}`
 }
 
 export interface Contador {

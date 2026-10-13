@@ -46,7 +46,8 @@ Organizados por prioridade. Os itens do bloco 1 são necessários para lançar; 
 A mudança para a API tirou a metodologia do código visível. Ainda assim, vale conhecer os limites:
 
 - [x] **Limitar a frequência de chamadas à API (D58):** 60 chamadas por IP a cada 15 minutos em `api/recomendacao.ts` (`api/_limite.ts`), só com hash do IP por 15 minutos, falha aberta. Acompanhar a primeira semana: se aparecer reclamação de "Muitas consultas em pouco tempo" em rede compartilhada, subir `MAX_CHAMADAS`. Motivo original: como a API devolve a carteira completa para qualquer combinação de respostas, alguém muito determinado poderia chamar a API milhares de vezes com combinações diferentes e tentar reconstruir as matrizes. Limitar chamadas por IP (regras de firewall da Vercel ou um serviço como o Upstash Rate Limit) torna isso muito mais lento e caro. Não impede por completo, mas eleva bastante o esforço.
-- [ ] **Restringir `ALLOWED_ORIGIN`** ao domínio definitivo (variável de ambiente na Vercel). Impede outros sites de usarem sua API pelo navegador dos visitantes deles.
+- [x] **Restringir `ALLOWED_ORIGIN` (D85):** o padrão passou a ser o domínio definitivo no próprio código (a variável é opcional); origem estranha recebe 403. No mesmo pacote: limite no `/api/evento`, token do painel em tempo constante com limite de tentativas e cabeçalhos de segurança.
+- [ ] **Proteção, etapa 2:** `Content-Security-Policy` (inventário de scripts, estilos e fontes), Spend Management e Bot Protection na Vercel, 2FA e proteção da `main` no GitHub, testes automáticos do restante da API.
 - [ ] **Registro de programa de computador no INPI.** Cria prova de autoria e data do código, útil caso alguém copie a ferramenta.
 - [ ] **Termos de uso** proibindo cópia, engenharia reversa e uso automatizado da API.
 

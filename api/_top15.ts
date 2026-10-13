@@ -9,6 +9,7 @@
 // do IP, por 15 minutos); resposta com "no-store"; sem código configurado, a porta fica FECHADA.
 import { createHash, timingSafeEqual } from 'node:crypto'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
+import { aplicarCors } from './_cors.js'
 
 export const MAX_FALHAS = 10
 export const JANELA_SEGUNDOS = 15 * 60
@@ -125,10 +126,11 @@ export interface Dependencias {
 
 export function criarHandler(dep: Dependencias) {
   return async function handler(req: VercelRequest, res: VercelResponse) {
-    res.setHeader('Access-Control-Allow-Origin', process.env.ALLOWED_ORIGIN ?? '*')
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
     res.setHeader('Cache-Control', 'private, no-store')
+    if (!aplicarCors(req, res)) {
+      res.status(403).json({ erro: 'Origem não permitida.' })
+      return
+    }
 
     if (req.method === 'OPTIONS') {
       res.status(204).end()

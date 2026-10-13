@@ -6,6 +6,23 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { pipeline, metricasHabilitadas } from './_redis.js'
 import { EVENTOS_FUNIL, EVENTOS_EXTRAS, dataBrasilia } from './_eventos.js'
+import { timingSafeEqual, createHash } from 'node:crypto'
+import { chaveDeChamadas, contadorComReserva, contadorEmMemoria, contadorRedis, JANELA_CHAMADAS_SEGUNDOS, passouDoLimite } from './_limite.js'
+import type { Contador } from './_limite.js'
+import { ipDe } from './_top15.js'
+
+// Proteção do token (D85): comparação em tempo constante e limite de tentativas por IP, para que
+// ninguém descubra o METRICAS_TOKEN por força bruta ou por tempo de resposta.
+const MAX_TENTATIVAS = 30
+const reserva = contadorEmMemoria()
+const contador: Contador = metricasHabilitadas() ? contadorComReserva(contadorRedis(pipeline), reserva) : reserva
+const sal = process.env.TOP15_SAL ?? ''
+
+function mesmoToken(a: string, b: string): boolean {
+  const ha = createHash('sha256').update(a).digest()
+  const hb = createHash('sha256').update(b).digest()
+  return timingSafeEqual(ha, hb)
+}
 
 const TODOS_EVENTOS = [...EVENTOS_FUNIL, ...EVENTOS_EXTRAS]
 
@@ -26,7 +43,13 @@ function paraObjeto(lista: unknown): Record<string, number> {
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const token = process.env.METRICAS_TOKEN
   const enviado = (req.headers.authorization ?? '').replace(/^Bearer\s+/i, '')
-  if (!token || enviado !== token) {
+  const chave = chaveDeChamadas(ipDe(req.headers, req.socket?.remoteAddress), sal, 'metricas:tentativas')
+  if (await passouDoLimite(contador, chave, MAX_TENTATIVAS, JANELA_CHAMADAS_SEGUNDOS)) {
+    res.setHeader('Retry-After', String(JANELA_CHAMADAS_SEGUNDOS))
+    res.status(429).json({ erro: 'Muitas tentativas. Aguarde alguns minutos.' })
+    return
+  }
+  if (!token || !mesmoToken(enviado, token)) {
     res.status(401).json({ erro: 'Não autorizado.' })
     return
   }

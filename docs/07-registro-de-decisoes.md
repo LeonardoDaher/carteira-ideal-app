@@ -1574,3 +1574,17 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 **Limites.** Quem já respondeu [A] por causa do dólar segue vetado até refazer o questionário. O motor não passa a aumentar a exposição ao dólar para quem deve em dólar: só deixa de vetar.
 
 **Testes.** 2 novos (`recuperacao.test.ts`, `ponteQuestionario.test.ts`); 2 ajustados (texto do veto). **Mutação:** a regra do dólar removida derruba os 2.
+
+## D85 (13/10/2026): proteção da API e do site, etapa 1
+
+**Contexto.** O responsável pediu para proteger o app a partir da pendência "restringir `ALLOWED_ORIGIN`" (docs/06, seção 2). Levantamento no ar: as quatro famílias de função respondiam `Access-Control-Allow-Origin: *` (qualquer site podia chamar a API pelo navegador dos visitantes); o `/api/evento` não tinha limite (as métricas podiam ser inflacionadas); o token do painel era comparado com `!==` e sem limite de tentativas; a página não tinha cabeçalhos de segurança além do HSTS da Vercel. Já estavam bem: repositório privado, `npm audit` sem vulnerabilidades, nenhum segredo no código, limite por IP na recomendação e no Top 15.
+
+**O que mudou.**
+1. **Origens (`api/_cors.ts`):** a lista padrão passa a ser o domínio definitivo (`https://carteiraideal.app.br` e `https://www.carteiraideal.app.br`), sem precisar de variável. `ALLOWED_ORIGIN`, se existir, substitui a lista (várias separadas por vírgula; `*` vale, de forma explícita). Requisição de navegador com `Origin` fora da lista recebe **403** (inclusive no preflight), sem cabeçalho CORS. Sem `Origin` (curl, servidor) segue. Vale para `recomendacao`, `evento` e as três funções do Top 15.
+2. **Limite no `/api/evento`:** 300 por IP a cada 15 minutos (hash do IP com sal, mesmo Redis ou memória); acima disso o evento é descartado em silêncio (204), porque contar nunca devolve erro ao navegador.
+3. **Token do painel (`/api/metricas`):** comparação em tempo constante (hash + `timingSafeEqual`) e limite de 30 tentativas por IP a cada 15 minutos (429, inclusive com o token certo, até a janela vencer).
+4. **Cabeçalhos de segurança** em `vercel.json`, para todas as rotas: `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `X-Frame-Options: SAMEORIGIN` e `Permissions-Policy` sem câmera, microfone, geolocalização, pagamento e USB (o app não usa nenhum; o ditado do Supermercado é o do teclado).
+
+**Limites, ditos com franqueza.** CORS protege o navegador do visitante, não o servidor: quem chama a API fora de um navegador não é barrado por isto, e o que o limita é o limite por IP (60 por 15 minutos na recomendação), o código do Top 15 e o token do painel. Em redes de celular o IP é compartilhado. Fica **para a etapa 2**: `Content-Security-Policy` (exige inventário de scripts, estilos e fontes do site e das páginas geradas), Vercel (Spend Management, WAF/Bot Protection do plano), 2FA e proteção da `main` no GitHub, `dados-privados/` fora do repositório se ele um dia deixar de ser privado, e testes automáticos do restante da API.
+
+**Testes.** `scripts/api-protecao.test.mjs` (7): origens padrão e por variável, origens parecidas barradas, 403 em recomendação e evento, token errado de qualquer tamanho, 429 após 30 tentativas. **Mutação:** 3 defeitos (CORS sem barrar, limite do painel, CORS do evento), todos pegos.

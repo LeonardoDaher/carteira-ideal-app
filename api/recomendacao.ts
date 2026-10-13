@@ -18,17 +18,18 @@ import { chaveDeChamadas, contadorComReserva, contadorEmMemoria, contadorRedis, 
 import type { Contador } from './_limite.js'
 import { metricasHabilitadas, pipeline } from './_redis.js'
 import { ipDe } from './_top15.js'
+import { aplicarCors } from './_cors.js'
 
 const reserva = contadorEmMemoria()
 const contador: Contador = metricasHabilitadas() ? contadorComReserva(contadorRedis(pipeline), reserva) : reserva
 const sal = process.env.TOP15_SAL ?? ''
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // CORS básico: ajuste ALLOWED_ORIGIN nas variáveis de ambiente da Vercel se o front
-  // for servido de um domínio diferente do da própria função (ex.: apps mobile via WebView).
-  res.setHeader('Access-Control-Allow-Origin', process.env.ALLOWED_ORIGIN ?? '*')
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+  // CORS (D85): só o domínio definitivo, ou o que estiver em ALLOWED_ORIGIN (ver api/_cors.ts).
+  if (!aplicarCors(req, res)) {
+    res.status(403).json({ erro: 'Origem não permitida.' })
+    return
+  }
 
   if (req.method === 'OPTIONS') {
     res.status(204).end()
