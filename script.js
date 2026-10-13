@@ -21,6 +21,12 @@ function toggleMode() {
   }
 }
 
+// O botão não usa onclick inline (a política de segurança não permite): o clique é ligado aqui (D87).
+(function () {
+  var button = document.querySelector("#switch button");
+  if (button) button.addEventListener("click", toggleMode);
+})();
+
 // Sincroniza o botão e a cor da barra do navegador com o tema já aplicado no <head>
 applyTheme(document.documentElement.classList.contains("light"));
 

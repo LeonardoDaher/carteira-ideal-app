@@ -14,6 +14,8 @@ import { cp, mkdir, rm, access, writeFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import { gerarPaginas } from './gerar-paginas.mjs'
+import { conferirHtml, injetarCspMeta } from './csp-hashes.mjs'
+import { readdir, readFile } from 'node:fs/promises'
 
 const raiz = path.dirname(path.dirname(fileURLToPath(import.meta.url)))
 const saida = path.join(raiz, 'dist-site')
@@ -29,6 +31,35 @@ async function existe(caminho) {
 }
 
 const DOMINIO = 'https://carteiraideal.app.br'
+
+/** Todos os .html de uma pasta, recursivamente. */
+async function htmlsDe(pasta) {
+  const achados = []
+  for (const e of await readdir(pasta, { withFileTypes: true })) {
+    const caminho = path.join(pasta, e.name)
+    if (e.isDirectory()) achados.push(...(await htmlsDe(caminho)))
+    else if (e.name.endsWith('.html')) achados.push(caminho)
+  }
+  return achados
+}
+
+/**
+ * CSP por hash (D87): cada HTML publicado recebe uma <meta> com o hash dos seus scripts inline. Roda por
+ * último, depois que todo HTML está pronto (landing, app e páginas geradas), e confere o resultado.
+ * Se uma página tiver atributo de evento inline ou URL "javascript:", o build falha de propósito.
+ */
+export async function protegerScripts(pasta) {
+  const arquivos = await htmlsDe(pasta)
+  for (const arquivo of arquivos) {
+    const nome = path.relative(pasta, arquivo)
+    const html = await readFile(arquivo, 'utf8')
+    const novo = injetarCspMeta(html, nome)
+    const problemas = conferirHtml(novo)
+    if (problemas.length > 0) throw new Error(`[csp] ${nome}: ${problemas.join('; ')}`)
+    await writeFile(arquivo, novo)
+  }
+  return arquivos.length
+}
 
 /**
  * Monta o sitemap.xml a partir de [{ caminho, lastmod }] (D26).
@@ -97,6 +128,10 @@ async function main() {
 
   // 4) sitemap.xml (D26)
   await writeFile(path.join(saida, 'sitemap.xml'), montarSitemap(entradasSitemap))
+
+  // 5) CSP por hash dos scripts inline (D87). Tem de ser o último passo que mexe em HTML.
+  const protegidas = await protegerScripts(saida)
+  console.log(`[build-site] CSP: ${protegidas} páginas com a política de scripts por hash`)
 
   console.log(`[build-site] Site montado em ${path.relative(raiz, saida)}/ (landing + app/ + ${geradas} páginas estáticas)`)
 }
