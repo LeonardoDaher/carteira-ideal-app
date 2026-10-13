@@ -1589,7 +1589,7 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 
 **Testes.** `scripts/api-protecao.test.mjs` (7): origens padrão e por variável, origens parecidas barradas, 403 em recomendação e evento, token errado de qualquer tamanho, 429 após 30 tentativas. **Mutação:** 3 defeitos (CORS sem barrar, limite do painel, CORS do evento), todos pegos.
 
-## D86 (13/10/2026): Content-Security-Policy, fase 1 (só relata, ainda não bloqueia)
+## D86 (13/10/2026): Content-Security-Policy (fase 1 só relatou; fase 2 já bloqueia)
 
 **Contexto.** Etapa 2 da proteção (D85). Inventário do site montado (40 páginas HTML): nenhuma página carrega script, estilo ou fonte de outro domínio; as chamadas de rede do app são só `/api/recomendacao` e `/api/evento` (o painel usa `/api/metricas`); o Vercel Web Analytics vem de `/_vercel/insights/script.js` (mesmo domínio); o único conteúdo de terceiros embutido é o vídeo do YouTube (`iframe`) das aulas; imagens e fontes são do próprio site ou `data:`; o app é um arquivo único com **script inline de 1,7 MB** (`vite-plugin-singlefile`), mais 5 scripts inline pequenos (tema claro/escuro e o painel); não há `eval` nem `dangerouslySetInnerHTML`.
 
@@ -1598,3 +1598,5 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 **Fases seguintes.** (2) Conferir no ar, página por página, que nenhuma violação aparece (landing, app com o questionário, Meu Mês, Aprender com vídeo, Minha Carteira com importação de PDF, painel) e trocar para `Content-Security-Policy` (bloqueia). (3) Trocar `'unsafe-inline'` do `script-src` por **hashes** calculados no build (os cinco scripts pequenos são fixos; o do app muda a cada build, então os hashes entram numa `<meta>` injetada por `build-site.mjs`, e o cabeçalho passa a ser a interseção das duas).
 
 **Limite.** Com `'unsafe-inline'` nos scripts, a política **ainda não impede** um script inline injetado; o ganho da fase 1 é impedir que a página fale com outros domínios, carregue plugins ou seja embutida em outro site. O ganho contra injeção de script só vem na fase 3. Hoje não há ponto de injeção conhecido (React escapa o texto; nada usa `innerHTML`).
+
+**Fase 2 (13/10/2026): bloqueando.** A fase 1 ficou no ar em modo "só relata" e foi conferida no navegador, página por página, com o console aberto: landing, questionário completo até o resultado, Meu Mês (as duas abas), Aprender com aula em vídeo do YouTube, Simule FII e Tesouro, Minha Carteira com importação de CSV, Privacidade, painel e uma página de guia. **Nenhuma violação.** (O método foi validado provocando uma violação de propósito, que o console registrou.) O cabeçalho passou a `Content-Security-Policy`. Não testado diretamente: o navegador interno do Instagram e o painel autenticado. Se algo quebrar, voltar a chave para `Content-Security-Policy-Report-Only` em `vercel.json` (um commit). Observação sem relação com a CSP: `/favicon.ico` responde 404.

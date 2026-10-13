@@ -13,6 +13,7 @@ function lerPolitica() {
   const cabecalhos = vercel.headers.find((h) => h.source === '/(.*)').headers
   const h = cabecalhos.find((c) => /^Content-Security-Policy(-Report-Only)?$/.test(c.key))
   assert.ok(h, 'cabeçalho Content-Security-Policy ausente')
+  assert.equal(h.key, 'Content-Security-Policy', 'a política deve bloquear (D86, fase 2), não só relatar')
   const diretivas = Object.fromEntries(
     h.value.split(';').map((d) => d.trim()).filter(Boolean).map((d) => {
       const [nome, ...valores] = d.split(/\s+/)
