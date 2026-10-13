@@ -27,7 +27,7 @@ const DESCRICAO_PATRIMONIAL: Record<string, string> = {
 
 const MOTIVO_DO_VETO: Record<string, string> = {
   capacidadeFinanceira: 'a sua reserva cobre menos de 3 meses',
-  passivoDividas: 'você tem dívida cara ou passivo em dólar',
+  passivoDividas: 'você tem dívida cara',
   janelaLiquidez: 'você vai precisar de parte do dinheiro em até 24 meses',
 }
 

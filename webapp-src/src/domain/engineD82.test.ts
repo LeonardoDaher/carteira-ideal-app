@@ -24,7 +24,7 @@ describe('D82 — veto recebe no máximo o modelo de médio prazo', () => {
 
   it.each([
     ['reserva menor que 3 meses (Pilar 1)', { capacidadeFinanceira: 'a' }],
-    ['dívida cara ou passivo em dólar (Pilar 2)', { passivoDividas: 'a' }],
+    ['dívida cara (Pilar 2)', { passivoDividas: 'a' }],
   ] as const)('veto por %s com prazo longo cai para médio e fica com 20%% de risco', (_nome, troca) => {
     const r = gerarRecomendacao(prazoLongo, dados, { ...semVeto, ...troca })
     expect(r.vetoAplicado).toBe(true)

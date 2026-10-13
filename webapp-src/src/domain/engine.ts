@@ -43,7 +43,7 @@ export const VERSAO_MOTOR = '2026.10.12-D83'
 /** Texto de cada pilar duro para explicar o veto ao cliente, em linguagem simples. */
 const MOTIVO_DO_VETO: Record<PilarDeVeto, string> = {
   capacidadeFinanceira: 'sua reserva cobre menos de 3 meses de despesas',
-  passivoDividas: 'você tem dívida cara ou passivo em dólar',
+  passivoDividas: 'você tem dívida cara (cartão, cheque especial ou empréstimo pessoal)',
   janelaLiquidez: 'você vai precisar de uma parte relevante do dinheiro em até 24 meses',
 }
 

@@ -16,7 +16,7 @@
  * Meses são sempre chaves "AAAA-MM". Valores em reais, arredondados a centavos.
  */
 
-import { RECUPERACAO_VAZIA, ehDividaCara, simularQuitacao, somaParcelasMinimas, validarRecuperacao } from './recuperacao'
+import { RECUPERACAO_VAZIA, ehDividaCara, ehDividaCaraParaOPilar2, simularQuitacao, somaParcelasMinimas, validarRecuperacao } from './recuperacao'
 import type { Divida, Plano, Recuperacao } from './recuperacao'
 
 export type TipoConta = 'mensal' | 'anual'
@@ -577,7 +577,8 @@ export function parceladasDesdeOPacto(orc: Orcamento): Compra[] {
  * custo fixo alto). A resposta continua sendo da pessoa.
  */
 export function sugestaoPilar2(orc: Orcamento): 'a' | 'b' | 'c' | null {
-  if (temDividaCara(orc)) return 'a'
+  // A dívida em dólar, sozinha, não é [A] (D84): ver ehDividaCaraParaOPilar2.
+  if (recuperacaoDe(orc).dividas.some(ehDividaCaraParaOPilar2)) return 'a'
   if (orc.salario <= 0) return null
   const semDividas = recuperacaoDe(orc).dividas.every((d) => d.saldo <= 0)
   return semDividas && custoMensalDeVida(orc) <= orc.salario / 2 ? 'c' : 'b'

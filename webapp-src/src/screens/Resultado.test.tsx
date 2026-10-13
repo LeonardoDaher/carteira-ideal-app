@@ -37,7 +37,7 @@ describe('Resultado: score e veto sem contradição (D78)', () => {
   it('junta os motivos quando mais de um pilar veta', () => {
     render(<Resultado ctx={contexto({ ...alta, capacidadeFinanceira: 'a', passivoDividas: 'a', janelaLiquidez: 'a' })} />)
     const texto = screen.getByTestId('explicacao-veto').textContent!.replace(/\s+/g, ' ')
-    expect(texto).toContain('a sua reserva cobre menos de 3 meses, você tem dívida cara ou passivo em dólar e você vai precisar de parte do dinheiro em até 24 meses')
+    expect(texto).toContain('a sua reserva cobre menos de 3 meses, você tem dívida cara e você vai precisar de parte do dinheiro em até 24 meses')
   })
 
   it('sem veto, mostra a linha de sempre: capacidade real e score', () => {

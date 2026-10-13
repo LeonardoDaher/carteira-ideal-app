@@ -271,6 +271,14 @@ describe('Modo Recuperação no orçamento', () => {
     expect(sugestaoPilar2(base())).toBe('c')
     expect(sugestaoPilar2(base({ salario: 0 }))).toBeNull()
   })
+
+  it('dívida em dólar, sozinha, não sugere [A] no Pilar 2 (D84); com juros altos, sim', () => {
+    const dolar = divida({ id: 'usd', nome: 'Empréstimo em dólar', tipo: 'dolar', saldo: 10000, jurosMensal: 0.8, parcelaMinima: 400 })
+    expect(ehDividaCara(dolar)).toBe(true) // o Modo Recuperação continua ligando por ela
+    expect(sugestaoPilar2(base({ recuperacao: rec([dolar]) }))).toBe('b')
+    expect(sugestaoPilar2(base({ recuperacao: rec([{ ...dolar, jurosMensal: 3.5 }]) }))).toBe('a')
+    expect(sugestaoPilar2(base({ recuperacao: rec([dolar, cheque]) }))).toBe('a')
+  })
 })
 
 describe('compatibilidade das cópias', () => {

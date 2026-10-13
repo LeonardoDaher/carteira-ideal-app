@@ -77,6 +77,12 @@ describe('ponte do Meu Mês com o questionário', () => {
     expect(s?.motivo).toContain('2 dívidas caras')
   })
 
+  it('Pilar 2: dívida em dólar com juros baixos sugere [B] e cita o dólar (D84)', () => {
+    const s = sugestoesDoMeuMes(comDividas([divida({ tipo: 'dolar', jurosMensal: 0.8 })])).passivoDividas
+    expect(s?.letra).toBe('b')
+    expect(s?.motivo).toContain('dívida em dólar')
+  })
+
   it('Pilar 2: só dívida barata sugere [B]', () => {
     const s = sugestoesDoMeuMes(comDividas([divida({ tipo: 'financiamento', jurosMensal: 1.2 })])).passivoDividas
     expect(s?.letra).toBe('b')

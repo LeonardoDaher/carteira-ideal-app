@@ -55,7 +55,7 @@ export const LIMIAR_JUROS_CARO = 3
 
 /**
  * Tipos de dívida. `cara: true` segue o texto literal da opção [A] do Pilar 2 ("cartão, cheque
- * especial, empréstimo pessoal ou passivos em dólar"): esses tipos ligam o Modo Recuperação
+ * especial, empréstimo pessoal"): esses tipos ligam o Modo Recuperação
  * mesmo que a pessoa digite juros baixos por engano.
  *
  * `jurosReferencia` é só um ponto de partida para quem não sabe a taxa (médias de mercado do
@@ -98,6 +98,18 @@ export function jurosAnualDeMensal(mensal: number): number {
 /** Dívida cara em aberto: tipo caro ou juros a partir de LIMIAR_JUROS_CARO ao mês. */
 export function ehDividaCara(d: Divida): boolean {
   return d.saldo > 0 && (TIPOS_DE_DIVIDA[d.tipo].cara || d.jurosMensal >= LIMIAR_JUROS_CARO)
+}
+
+/**
+ * Dívida cara para efeito do Pilar 2 do questionário (D84). Igual a `ehDividaCara`, exceto que a
+ * dívida em dólar, sozinha, não conta: a opção [A] da pergunta é só "dívidas caras (cartão, cheque
+ * especial, empréstimo pessoal)", e quem deve em dólar muitas vezes quer ter dólar na carteira.
+ * Dívida em dólar com juros a partir de LIMIAR_JUROS_CARO ao mês continua sendo cara. O Modo
+ * Recuperação do Meu Mês segue usando `ehDividaCara` (a dívida em dólar anotada ainda o liga).
+ */
+export function ehDividaCaraParaOPilar2(d: Divida): boolean {
+  if (d.tipo === 'dolar') return d.saldo > 0 && d.jurosMensal >= LIMIAR_JUROS_CARO
+  return ehDividaCara(d)
 }
 
 /** Juros de um mês sobre o saldo de hoje. */

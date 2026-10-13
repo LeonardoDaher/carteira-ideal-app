@@ -149,9 +149,9 @@ Texto literal das 7 perguntas conforme implementado em webapp-src/src/data/pergu
 
 *Qual é a situação das suas obrigações financeiras e custos fixos atuais?*
 
-- [A] Possuo dívidas caras (cartão, cheque especial, empréstimo pessoal) ou passivos em dólar.
+- [A] Possuo dívidas caras (cartão, cheque especial, empréstimo pessoal).
 
-- [B] Possuo dívidas estruturadas/longas (financiamento imobiliário/auto com taxa baixa) e custos fixos controlados.
+- [B] Possuo dívidas estruturadas/longas (financiamento imobiliário/auto com taxa baixa) ou compromissos em dólar já controlados, e custos fixos controlados.
 
 - [C] Zero dívidas e custo fixo baixo em relação ao que ganho.
 

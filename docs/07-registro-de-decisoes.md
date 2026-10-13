@@ -1559,3 +1559,18 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 **Limites.** O veto continua binário nos Pilares 1 e 2. O texto do site diz "14 perguntas" (a FAQ da página do teste cita a exceção); a página inicial e o app mantêm 14. A pergunta mede a intenção declarada, não confere o valor.
 
 **Testes.** `engineD83.test.ts` (8), `validacaoApi.test.ts` (3), três fluxos em `useAppState.test.ts` e três do hook em `useQuestionario.test.ts`. **Mutação:** 4 defeitos (veto ignorando a parte, faixa [C], faixa [B], resposta oculta vazando), todos pegos.
+
+## D84 (12/10/2026): "passivo em dólar" sai da opção [A] do Pilar 2
+
+**Contexto.** Decisão 2 da D78, na forma mais simples. A opção [A] do Pilar 2 dizia "dívidas caras (cartão, cheque especial, empréstimo pessoal) **ou passivos em dólar**" e vetava. Dívida cara pede liquidez e quitação; passivo em dólar, muitas vezes, pede o contrário: ter parte do patrimônio em dólar (BDRs e fundos internacionais) como proteção natural. Quem devia em dólar era empurrado para o Defensivo, a carteira com menos exposição ao dólar.
+
+**O que mudou.**
+1. **Texto das opções** (`perguntasArquitetura.ts`, `docs/02`): [A] fica "Possuo dívidas caras (cartão, cheque especial, empréstimo pessoal)"; [B] passa a incluir "ou compromissos em dólar já controlados", para quem deve em dólar não ter que marcar [C] ("zero dívidas"). Mensagem do veto: "você tem dívida cara".
+2. **Ponte com o Meu Mês** (`ehDividaCaraParaOPilar2`): a dívida em dólar anotada no Meu Mês, sozinha, passa a sugerir [B], e não [A]; com juros a partir de 3% ao mês continua sendo [A]. A explicação da sugestão cita o dólar no [B].
+3. **Nada mudou no motor**: o veto é o mesmo, então `VERSAO_MOTOR` segue em 2026.10.12-D83.
+
+**Não mudou (a decidir).** O Modo Recuperação do Meu Mês continua ligando por dívida em dólar (`TIPOS_DE_DIVIDA.dolar.cara`, `ehDividaCara`): a pessoa anotou uma dívida e o plano de quitação segue sendo útil. Se o responsável preferir que o dólar também deixe de ligar o Modo Recuperação, é uma linha em `recuperacao.ts`, com impacto nos testes do Meu Mês.
+
+**Limites.** Quem já respondeu [A] por causa do dólar segue vetado até refazer o questionário. O motor não passa a aumentar a exposição ao dólar para quem deve em dólar: só deixa de vetar.
+
+**Testes.** 2 novos (`recuperacao.test.ts`, `ponteQuestionario.test.ts`); 2 ajustados (texto do veto). **Mutação:** a regra do dólar removida derruba os 2.

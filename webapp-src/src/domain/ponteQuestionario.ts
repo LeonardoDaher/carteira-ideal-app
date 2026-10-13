@@ -12,7 +12,7 @@
 import { reais } from './mercadoOficial'
 import { custoMensalDeVida, mesesDeReserva, recuperacaoDe, sugestaoPilar1, sugestaoPilar2 } from './orcamento'
 import type { Orcamento } from './orcamento'
-import { LIMIAR_JUROS_CARO, ehDividaCara } from './recuperacao'
+import { LIMIAR_JUROS_CARO, ehDividaCaraParaOPilar2 } from './recuperacao'
 
 export type LetraSugerida = 'a' | 'b' | 'c'
 
@@ -55,13 +55,13 @@ function motivoPilar1(orc: Orcamento): string {
 function motivoPilar2(orc: Orcamento, letra: LetraSugerida): string {
   const abertas = recuperacaoDe(orc).dividas.filter((d) => d.saldo > 0)
   if (letra === 'a') {
-    const caras = abertas.filter(ehDividaCara).length
+    const caras = abertas.filter(ehDividaCaraParaOPilar2).length
     const quantas = caras === 1 ? 'uma dívida cara' : `${caras} dívidas caras`
-    return `No Meu Mês você anotou ${quantas} (cartão, cheque especial, empréstimo pessoal, dólar ou juros de ${LIMIAR_JUROS_CARO}% ao mês ou mais).`
+    return `No Meu Mês você anotou ${quantas} (cartão, cheque especial, empréstimo pessoal ou juros de ${LIMIAR_JUROS_CARO}% ao mês ou mais).`
   }
   const parteDoSalario = porcentagem(custoMensalDeVida(orc), orc.salario)
   if (abertas.length > 0) {
-    return `No Meu Mês, suas dívidas têm juros abaixo de ${LIMIAR_JUROS_CARO}% ao mês (como financiamento ou consignado) e o custo de vida é ${parteDoSalario} do salário.`
+    return `No Meu Mês, suas dívidas têm juros abaixo de ${LIMIAR_JUROS_CARO}% ao mês (como financiamento, consignado ou dívida em dólar) e o custo de vida é ${parteDoSalario} do salário.`
   }
   return letra === 'c'
     ? `No Meu Mês você não tem dívidas e o custo de vida é ${parteDoSalario} do salário, até a metade.`

@@ -33,10 +33,11 @@ export const PERGUNTAS_ARQUITETURA: PerguntaArquitetura[] = [
     ajuda: 'Pilar 2 de 7 — Arquitetura do Passivo & Dívidas (restrição dura).',
     restricaoDura: true,
     opcoes: [
-      { letra: 'a', texto: 'Possuo dívidas caras (cartão, cheque especial, empréstimo pessoal) ou passivos em dólar.' },
+      { letra: 'a', texto: 'Possuo dívidas caras (cartão, cheque especial, empréstimo pessoal).' },
       {
         letra: 'b',
-        texto: 'Possuo dívidas estruturadas/longas (financiamento imobiliário/auto com taxa baixa) e custos fixos controlados.',
+        texto:
+          'Possuo dívidas estruturadas/longas (financiamento imobiliário/auto com taxa baixa) ou compromissos em dólar já controlados, e custos fixos controlados.',
       },
       { letra: 'c', texto: 'Zero dívidas e custo fixo baixo em relação ao que ganho.' },
     ],
