@@ -345,7 +345,7 @@ function paginaPerfil() {
     ].join('\n'),
     faq: [
       { p: 'O teste de perfil de investidor é gratuito?', r: 'Sim. O Carteira Ideal é gratuito e não pede cadastro, e-mail nem telefone.' },
-      { p: 'Quanto tempo leva?', r: 'Menos de 3 minutos. São 14 perguntas de múltipla escolha, uma por tela.' },
+      { p: 'Quanto tempo leva?', r: 'Menos de 3 minutos. São 14 perguntas de múltipla escolha, uma por tela (uma a mais só se você marcar que vai sacar uma parte relevante do dinheiro em até 24 meses).' },
       { p: 'Preciso ter feito o teste na corretora?', r: 'Não. O app já traz as perguntas de perfil de investidor e as de vida real no mesmo teste.' },
       { p: 'O resultado é uma recomendação de investimento?', r: 'Não. É um conteúdo educacional para você entender como a sua situação de vida muda a forma de investir.' },
     ],

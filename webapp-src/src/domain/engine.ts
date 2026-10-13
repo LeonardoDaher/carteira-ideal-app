@@ -26,7 +26,7 @@ const ORDEM_PERFIL: PerfilInvestidor[] = ['Conservador', 'Moderado', 'Arrojado']
  * (D73), então não pontua. */
 const PONTOS_ARQUITETURA: Record<LetraArquitetura, number> = { a: 1, b: 2, c: 3 }
 
-const PILARES_PONTUAM: (keyof RespostasArquitetura)[] = [
+const PILARES_PONTUAM: (Exclude<keyof RespostasArquitetura, 'eficienciaFiscal' | 'parteDoSaque'>)[] = [
   'capacidadeFinanceira',
   'passivoDividas',
   'janelaLiquidez',
@@ -38,7 +38,7 @@ const PILARES_PONTUAM: (keyof RespostasArquitetura)[] = [
 /** Pilares com poder de veto — ver docs/02-metodologia.md, seção 3.2. Uma resposta 'a' em qualquer um deles rebaixa o perfil
  * final para Defensivo, independentemente do score consolidado ou do suitability. */
 /** Identifica a versão das regras do motor em cada resultado (D78). Mude a cada alteração de regra. */
-export const VERSAO_MOTOR = '2026.10.12-D82'
+export const VERSAO_MOTOR = '2026.10.12-D83'
 
 /** Texto de cada pilar duro para explicar o veto ao cliente, em linguagem simples. */
 const MOTIVO_DO_VETO: Record<PilarDeVeto, string> = {
@@ -47,7 +47,7 @@ const MOTIVO_DO_VETO: Record<PilarDeVeto, string> = {
   janelaLiquidez: 'você vai precisar de uma parte relevante do dinheiro em até 24 meses',
 }
 
-const PILARES_RESTRICAO_DURA: (keyof RespostasArquitetura)[] = [
+const PILARES_RESTRICAO_DURA: PilarDeVeto[] = [
   'capacidadeFinanceira',
   'passivoDividas',
   'janelaLiquidez',
@@ -144,13 +144,24 @@ export function capacidadePeloScore(score: number): CapacidadeReal {
   return 'alta'
 }
 
-/** Quais pilares duros vieram como [A], na ordem das perguntas. */
+/** O Pilar 3 [A] só veta quando o saque é grande (D83): quem declarou que vai sacar menos da metade
+ * em até 24 meses ('b' ou 'c' em `parteDoSaque`) não é vetado. Sem a resposta de complemento
+ * (estado salvo antigo, API sem o campo), vale o comportamento anterior: veta. */
+function janelaVeta(respostas: RespostasArquitetura): boolean {
+  return respostas.janelaLiquidez === 'a' && (respostas.parteDoSaque === undefined || respostas.parteDoSaque === 'a')
+}
+
+function pilarVeta(respostas: RespostasArquitetura, pilar: PilarDeVeto): boolean {
+  return pilar === 'janelaLiquidez' ? janelaVeta(respostas) : respostas[pilar] === 'a'
+}
+
+/** Quais pilares duros vetam, na ordem das perguntas. */
 export function pilaresQueVetam(respostas: RespostasArquitetura): PilarDeVeto[] {
-  return PILARES_RESTRICAO_DURA.filter((pilar) => respostas[pilar] === 'a') as PilarDeVeto[]
+  return (PILARES_RESTRICAO_DURA as PilarDeVeto[]).filter((pilar) => pilarVeta(respostas, pilar))
 }
 
 export function vetoAplicado(respostas: RespostasArquitetura): boolean {
-  return PILARES_RESTRICAO_DURA.some((pilar) => respostas[pilar] === 'a')
+  return pilaresQueVetam(respostas).length > 0
 }
 
 /**
@@ -477,10 +488,23 @@ export function gerarRecomendacao(
     // Janela de liquidez (Pilar 3) manda no prazo da carteira (D73): quem vai sacar em até
     // 24 meses recebe o modelo de curto prazo, e quem vai sacar entre 3 e 5 anos recebe, no
     // máximo, o de médio, mesmo que tenha marcado prazo longo no suitability.
-    if (respostasArquitetura.janelaLiquidez === 'a' && prazo !== 'curto') {
+    if (respostasArquitetura.janelaLiquidez === 'a' && respostasArquitetura.parteDoSaque === 'c') {
+      // Saque pequeno (menos de um quarto) em até 24 meses (D83): sem veto, e no máximo o modelo
+      // de médio prazo, como quem prevê o gasto entre 3 e 5 anos.
+      if (prazo === 'longo') {
+        prazo = 'medio'
+        alertas.push('Usamos o modelo de médio prazo: você prevê sacar menos de um quarto do dinheiro em até 24 meses.')
+        regras.push('prazo:saque-pequeno-24-meses')
+      }
+    } else if (respostasArquitetura.janelaLiquidez === 'a' && prazo !== 'curto') {
       prazo = 'curto'
-      alertas.push('Usamos o modelo de curto prazo: você vai precisar de uma parte relevante do dinheiro em até 24 meses.')
-      regras.push('prazo:janela-24-meses')
+      if (respostasArquitetura.parteDoSaque === 'b') {
+        alertas.push('Usamos o modelo de curto prazo, que mantém cerca de metade da carteira em liquidez: você prevê sacar de um quarto até a metade do dinheiro em até 24 meses. Não tratamos isso como veto.')
+        regras.push('prazo:saque-medio-24-meses')
+      } else {
+        alertas.push('Usamos o modelo de curto prazo: você vai precisar de uma parte relevante do dinheiro em até 24 meses.')
+        regras.push('prazo:janela-24-meses')
+      }
     } else if (respostasArquitetura.janelaLiquidez === 'b' && prazo === 'longo') {
       prazo = 'medio'
       alertas.push('Usamos o modelo de médio prazo: você prevê um gasto grande entre 3 e 5 anos.')

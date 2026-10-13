@@ -1,4 +1,4 @@
-import type { PerguntaArquitetura } from '../domain/types'
+import type { LetraArquitetura, PerguntaArquitetura } from '../domain/types'
 
 /**
  * As 7 perguntas da Arquitetura Patrimonial, aplicadas em complemento às 7 perguntas de
@@ -54,6 +54,19 @@ export const PERGUNTAS_ARQUITETURA: PerguntaArquitetura[] = [
     ],
   },
   {
+    id: 'parteDoSaque',
+    titulo: 'Que parte do dinheiro que você vai investir aqui você prevê sacar nesses 24 meses?',
+    ajuda:
+      'Complemento do Pilar 3 de 7 — só aparece para quem marcou saque em até 24 meses. Quanto menor a parte, menos esse saque pesa na sua carteira.',
+    restricaoDura: true,
+    opcional: true,
+    opcoes: [
+      { letra: 'a', texto: 'Mais da metade.' },
+      { letra: 'b', texto: 'De um quarto até a metade.' },
+      { letra: 'c', texto: 'Menos de um quarto.' },
+    ],
+  },
+  {
     id: 'comportamentoEstresse',
     titulo: 'Como você reagiu (ou reagiria) se visse sua carteira caindo 20% a 30% em um momento de crise de mercado?',
     ajuda: 'Pilar 4 de 7 — Comportamento sob Estresse (calibrador suave).',
@@ -98,3 +111,15 @@ export const PERGUNTAS_ARQUITETURA: PerguntaArquitetura[] = [
     ],
   },
 ]
+
+/**
+ * O complemento do Pilar 3 (D83) só aparece para quem marcou [A] ("vou sacar uma fatia relevante em
+ * até 24 meses"): as demais perguntas são sempre mostradas. Por isso o questionário tem 14 perguntas
+ * para a maioria e 15 para quem vai sacar em até 24 meses.
+ */
+export function perguntaArquiteturaVisivel(
+  pergunta: PerguntaArquitetura,
+  respostas: Partial<Record<PerguntaArquitetura['id'], LetraArquitetura>>,
+): boolean {
+  return pergunta.id !== 'parteDoSaque' || respostas.janelaLiquidez === 'a'
+}

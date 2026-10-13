@@ -62,6 +62,8 @@ Na versão implementada (função vetoAplicado em engine.ts), a regra de veto é
 
 - Qualquer resposta [A] em pelo menos um dos 3 Pilares Duros (Capacidade Financeira, Passivo ou Janela de Liquidez) força o Perfil Patrimonial para Defensivo, independentemente do Score consolidado ou do resultado do suitability.
 
+- **Exceção (D83):** o [A] do Pilar 3 (saque em até 24 meses) só veta quando a parte a sacar é grande. Quem marcou [A] responde uma pergunta de complemento (`parteDoSaque`): "mais da metade" mantém o veto e o prazo curto; "de um quarto até a metade" **não veta** e usa o prazo curto (os modelos de curto prazo mantêm 45% a 50% em liquidez); "menos de um quarto" **não veta** e usa, no máximo, o prazo médio. Sem a resposta (estado salvo antigo), vale o comportamento anterior: veta. O [A] continua valendo 1 ponto no score. Os Pilares 1 e 2 seguem vetando sempre.
+
 - Nenhuma resposta [A] nesses 3 pilares → o Perfil Patrimonial segue normalmente para a Matriz Cruzada (Seção 3.3).
 
 *O motor não distingue hoje se um, dois ou três Pilares Duros vieram como [A] — o efeito é o mesmo (Defensivo) em qualquer desses casos. Não há uma versão "parcial" do veto nem uma exceção que eleve o perfil de volta quando os 3 pilares vierem como [C].*

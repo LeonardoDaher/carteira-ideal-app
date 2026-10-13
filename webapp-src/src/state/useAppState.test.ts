@@ -28,7 +28,8 @@ function responderSuitability(result: { current: ReturnType<typeof useAppState> 
 
 /** Responde todas as perguntas de Arquitetura Patrimonial com a letra 'b' (sem acionar veto). */
 function responderArquitetura(result: { current: ReturnType<typeof useAppState> }) {
-  for (let i = 0; i < PERGUNTAS_ARQUITETURA.length; i++) {
+  // 7 perguntas sempre visíveis; o complemento do Pilar 3 (D83) só aparece com o [A].
+  for (let i = 0; i < PERGUNTAS_ARQUITETURA.length - 1; i++) {
     act(() => result.current.responderPerguntaArquitetura('b'))
   }
 }
@@ -407,5 +408,60 @@ describe('useAppState — Aprender e Simule FII abertos pela landing (sem questi
     await waitFor(() => expect(terceira.result.current.hidratado).toBe(true))
     expect(terceira.result.current.screen).toBe('questionarioArquitetura')
     expect(terceira.result.current.idade).toBe(42)
+  })
+})
+
+describe('useAppState — complemento do Pilar 3 (D83)', () => {
+  async function chegarNaArquitetura() {
+    const hook = renderHook(() => useAppState())
+    await waitFor(() => expect(hook.result.current.hidratado).toBe(true))
+    act(() => hook.result.current.iniciarQuestionario())
+    act(() => hook.result.current.confirmarIdade(35))
+    responderSuitability(hook.result)
+    return hook.result
+  }
+
+  it('sem saque em até 24 meses, o questionário tem 14 perguntas e o complemento não aparece', async () => {
+    const result = await chegarNaArquitetura()
+    expect(result.current.totalPerguntasCombinado).toBe(14)
+    act(() => result.current.responderPerguntaArquitetura('b')) // Pilar 1
+    act(() => result.current.responderPerguntaArquitetura('b')) // Pilar 2
+    act(() => result.current.responderPerguntaArquitetura('b')) // Pilar 3 [B]
+    expect(result.current.perguntaArquiteturaAtual.id).toBe('comportamentoEstresse')
+    expect(result.current.totalPerguntasCombinado).toBe(14)
+  })
+
+  it('com [A] no Pilar 3 aparece o complemento (15 perguntas) e a resposta chega ao motor', async () => {
+    const result = await chegarNaArquitetura()
+    act(() => result.current.responderPerguntaArquitetura('c')) // Pilar 1
+    act(() => result.current.responderPerguntaArquitetura('c')) // Pilar 2
+    act(() => result.current.responderPerguntaArquitetura('a')) // Pilar 3 [A]
+    expect(result.current.perguntaArquiteturaAtual.id).toBe('parteDoSaque')
+    expect(result.current.totalPerguntasCombinado).toBe(15)
+
+    act(() => result.current.responderPerguntaArquitetura('c')) // menos de um quarto
+    expect(result.current.perguntaArquiteturaAtual.id).toBe('comportamentoEstresse')
+    for (let i = 0; i < 4; i++) act(() => result.current.responderPerguntaArquitetura('b'))
+    expect(result.current.screen).toBe('processando')
+    await waitFor(() => expect(result.current.resultado?.vetoAplicado).toBeDefined())
+    expect(result.current.resultado?.vetoAplicado).toBe(false)
+    expect(result.current.resultado?.prazo).not.toBe('longo')
+  })
+
+  it('voltar ao Pilar 3 e mudar para [B] esconde o complemento e descarta a resposta dele', async () => {
+    const result = await chegarNaArquitetura()
+    act(() => result.current.responderPerguntaArquitetura('c'))
+    act(() => result.current.responderPerguntaArquitetura('c'))
+    act(() => result.current.responderPerguntaArquitetura('a'))
+    act(() => result.current.responderPerguntaArquitetura('b')) // parteDoSaque [B]
+    act(() => result.current.voltarPerguntaArquitetura()) // Pilar 4 -> volta ao complemento
+    act(() => result.current.voltarPerguntaArquitetura()) // complemento -> Pilar 3
+    expect(result.current.perguntaArquiteturaAtual.id).toBe('janelaLiquidez')
+    act(() => result.current.responderPerguntaArquitetura('c')) // muda o Pilar 3
+    expect(result.current.perguntaArquiteturaAtual.id).toBe('comportamentoEstresse')
+    expect(result.current.totalPerguntasCombinado).toBe(14)
+    for (let i = 0; i < 4; i++) act(() => result.current.responderPerguntaArquitetura('b'))
+    await waitFor(() => expect(result.current.resultado?.vetoAplicado).toBeDefined())
+    expect(result.current.resultado?.regrasAcionadas?.some((r) => r.startsWith('prazo:saque'))).toBe(false)
   })
 })

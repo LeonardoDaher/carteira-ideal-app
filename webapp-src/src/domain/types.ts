@@ -89,6 +89,11 @@ export interface RespostasArquitetura {
   dependenciaRenda: LetraArquitetura
   capitalHumano: LetraArquitetura
   eficienciaFiscal: LetraArquitetura
+  /** Complemento do Pilar 3 (D83), só perguntado a quem marcou saque em até 24 meses: que parte do
+   * dinheiro será sacada. 'a' = mais da metade (mantém o veto), 'b' = de um quarto à metade (sem
+   * veto, prazo curto), 'c' = menos de um quarto (sem veto, prazo no máximo médio). Ausente
+   * (estados salvos antigos, API sem o campo) vale como 'a': o comportamento anterior. */
+  parteDoSaque?: LetraArquitetura
 }
 
 export interface PerguntaArquiteturaOpcao {
@@ -102,6 +107,8 @@ export interface PerguntaArquitetura {
   ajuda: string
   /** Pilar 1, 2 ou 3 tem poder de veto (ver RespostasArquitetura). */
   restricaoDura: boolean
+  /** Pergunta de complemento: não impede o resultado se ficar sem resposta (estado salvo antigo). */
+  opcional?: boolean
   opcoes: PerguntaArquiteturaOpcao[]
 }
 

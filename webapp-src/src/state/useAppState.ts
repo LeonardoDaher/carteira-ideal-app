@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { buscarRecomendacao, ErroRecomendacao } from '../data/apiRecomendacao'
 import { registrarEvento } from '../data/analytics'
 import { PERGUNTAS } from '../data/questions'
-import { PERGUNTAS_ARQUITETURA } from '../data/perguntasArquitetura'
+import { PERGUNTAS_ARQUITETURA, perguntaArquiteturaVisivel } from '../data/perguntasArquitetura'
 import { storage } from '../data/storage'
 import { useQuestionario } from './useQuestionario'
 import type { AtivoKey, RespostasArquitetura, RespostasQuestionario, ResultadoRecomendacao } from '../domain/types'
@@ -104,6 +104,10 @@ type EstadoPersistido = {
   tema: Tema
 }
 
+// Funções de módulo (referência estável): se mudassem a cada render, `completas` seria recalculado
+// sempre e dispararia o cálculo do resultado em loop.
+const perguntaArquiteturaOpcional = (pergunta: { opcional?: boolean }) => pergunta.opcional === true
+
 export function useAppState() {
   const [screen, setScreen] = useState<Screen>('onboarding')
   const [idade, setIdade] = useState<number>(30)
@@ -131,6 +135,8 @@ export function useAppState() {
   })
 
   const arquitetura = useQuestionario(PERGUNTAS_ARQUITETURA, {
+    visivel: perguntaArquiteturaVisivel,
+    opcional: perguntaArquiteturaOpcional,
     onCompletar: () => {
       registrarEvento('arquitetura_concluida')
       setScreen('processando')
@@ -412,7 +418,7 @@ export function useAppState() {
     totalPerguntasArquitetura: arquitetura.total,
     /** Total combinado das 14 perguntas (7 suitability + 7 arquitetura), para a barra de
      * progresso mostrar "pergunta X de 14" ao longo de todo o fluxo. */
-    totalPerguntasCombinado: PERGUNTAS.length + PERGUNTAS_ARQUITETURA.length,
+    totalPerguntasCombinado: PERGUNTAS.length + arquitetura.total,
     respostasArquitetura: arquitetura.respostas,
     iniciarQuestionario,
     confirmarIdade,

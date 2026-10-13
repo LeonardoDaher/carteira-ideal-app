@@ -1544,3 +1544,18 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 **Efeito.** Só carteiras vetadas com prazo longo mudam (de 30% para 20% de risco). No teste de propriedade, aumentos de risco ao piorar uma resposta (2 pontos ou mais) caem de 469 para 379 e o maior de 3 para 2 pontos. Testes novos em `engineD82.test.ts` (falham sem a regra).
 
 **Segue em aberto (D78):** separar o Pilar 2 em "dívida cara" e "passivo em dólar"; perguntar o percentual a sacar no Pilar 3; unir reserva e reação com os Pilares 1 e 4 (14 vira 12 ou 13 perguntas); nome do perfil 3; opção C do piso (teto de risco explícito para quem não tem reserva).
+
+## D83 (12/10/2026): veto menos rígido: o Pilar 3 pergunta quanto vai ser sacado
+
+**Contexto.** Decisão 4 da D78. O [A] do Pilar 3 ("vou sacar uma fatia relevante do capital em até 24 meses") vetava igual para quem ia sacar 10% e para quem ia sacar 80%, sempre com Defensivo de curto prazo.
+
+**O que mudou.**
+1. **Pergunta de complemento** (`parteDoSaque`), mostrada só a quem marcou [A] no Pilar 3: "Que parte do dinheiro que você vai investir aqui você prevê sacar nesses 24 meses?" ([A] mais da metade; [B] de um quarto até a metade; [C] menos de um quarto). A maioria continua com 14 perguntas; quem marca o saque responde 15. A contagem "Pergunta X de N" já considera isso.
+2. **Regras do motor** (`VERSAO_MOTOR` 2026.10.12-D83): [A] mantém o veto (Defensivo, curto); [B] não veta, vetor pela capacidade e prazo curto (liquidez de 45% a 50%); [C] não veta e usa no máximo o prazo médio. Regras registradas: `prazo:saque-medio-24-meses` e `prazo:saque-pequeno-24-meses`. Sem a resposta, comportamento anterior (veta).
+3. **Compatibilidade.** Campo opcional na API (letra a/b/c validada); estados salvos antigos continuam completos sem ele. Resposta de pergunta que deixou de aparecer (a pessoa voltou e mudou o Pilar 3) é descartada. O hook `useQuestionario` ganhou perguntas condicionais e opcionais.
+
+**Parâmetros de produto escolhidos pelo assistente** (a revisar pelo responsável e pelo parecer independente, D22): os cortes de um quarto e da metade e o efeito de cada faixa. A justificativa do corte na metade é a liquidez dos modelos de curto prazo (45% a 50%); a do prazo médio para menos de um quarto, a mesma do Pilar 3 [B].
+
+**Limites.** O veto continua binário nos Pilares 1 e 2. O texto do site diz "14 perguntas" (a FAQ da página do teste cita a exceção); a página inicial e o app mantêm 14. A pergunta mede a intenção declarada, não confere o valor.
+
+**Testes.** `engineD83.test.ts` (8), `validacaoApi.test.ts` (3), três fluxos em `useAppState.test.ts` e três do hook em `useQuestionario.test.ts`. **Mutação:** 4 defeitos (veto ignorando a parte, faixa [C], faixa [B], resposta oculta vazando), todos pegos.

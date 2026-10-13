@@ -75,6 +75,11 @@ export function validarPayload(body: unknown): ResultadoValidacao {
         return { ok: false, erro: `Resposta de arquitetura inválida ou ausente para "${campo}".` }
       }
     }
+    // Complemento do Pilar 3 (D83): opcional, mas, se vier, tem de ser uma letra válida.
+    const parte = respostasArquitetura.parteDoSaque
+    if (parte !== undefined && (typeof parte !== 'string' || !LETRAS_ARQUITETURA.includes(parte as LetraArquitetura))) {
+      return { ok: false, erro: 'Resposta de arquitetura inválida para "parteDoSaque".' }
+    }
     arquiteturaValidada = respostasArquitetura as unknown as RespostasArquitetura
   }
 

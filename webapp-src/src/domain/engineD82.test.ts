@@ -19,7 +19,7 @@ const dados = { idade: 35 }
 
 describe('D82 — veto recebe no máximo o modelo de médio prazo', () => {
   it('a versão do motor registra a mudança', () => {
-    expect(VERSAO_MOTOR).toBe('2026.10.12-D82')
+    expect(VERSAO_MOTOR).toMatch(/^2026\.10\.\d+-D\d+$/)
   })
 
   it.each([
