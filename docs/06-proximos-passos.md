@@ -51,7 +51,8 @@ A mudança para a API tirou a metodologia do código visível. Ainda assim, vale
 - [x] **Vercel (complemento da D85, 14/10/2026):** regra de limite da API (120 por minuto por IP, testada no ar) e Bot Protection em `Log`.
 - [ ] **Bot Protection: decidir `Challenge`** depois de cerca de 7 dias de `Log` (olhar a tela Firewall; não ligar se aparecerem Googlebot ou o navegador do Instagram).
 - [x] **2FA (responsável, 14/10/2026):** ativado. Conferir que cobre GitHub, Registro.br, Vercel, Upstash, e-mail e Instagram, e que os códigos de recuperação estão guardados fora do computador.
-- [ ] **GitHub (responsável):** ruleset da `main` (só restringir exclusões e bloquear force push; não exigir pull request) e Dependabot alerts.
+- [x] **Ruleset da `main` (14/10/2026): criado, mas não aplicado no plano gratuito** (GitHub exige conta paga em repositório privado; a API responde 403). A `main` **não** está protegida contra exclusão e force push; vale sozinho ao migrar para o GitHub Pro. Não tornar o repositório público (tem `dados-privados/`).
+- [ ] **Dependabot alerts (responsável):** Settings → Code security → Dependabot alerts → Enable (gratuito em repositório privado).
 - [ ] **Testes automáticos do restante da API** (`api/recomendacao.ts`: 200, 400, 405 e veto). Spend Management só existe no plano Pro (D22).
 - [ ] **Registro de programa de computador no INPI.** Cria prova de autoria e data do código, útil caso alguém copie a ferramenta.
 - [ ] **Termos de uso** proibindo cópia, engenharia reversa e uso automatizado da API.
