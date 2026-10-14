@@ -52,8 +52,8 @@ A mudança para a API tirou a metodologia do código visível. Ainda assim, vale
 - [ ] **Bot Protection: decidir `Challenge`** depois de cerca de 7 dias de `Log` (olhar a tela Firewall; não ligar se aparecerem Googlebot ou o navegador do Instagram).
 - [x] **2FA (responsável, 14/10/2026):** ativado. Conferir que cobre GitHub, Registro.br, Vercel, Upstash, e-mail e Instagram, e que os códigos de recuperação estão guardados fora do computador.
 - [x] **Ruleset da `main` (14/10/2026): criado, mas não aplicado no plano gratuito** (GitHub exige conta paga em repositório privado; a API responde 403). A `main` **não** está protegida contra exclusão e force push; vale sozinho ao migrar para o GitHub Pro. Não tornar o repositório público (tem `dados-privados/`).
-- [ ] **Dependabot alerts (responsável):** Settings → Code security → Dependabot alerts → Enable (gratuito em repositório privado).
-- [ ] **Testes automáticos do restante da API** (`api/recomendacao.ts`: 200, 400, 405 e veto). Spend Management só existe no plano Pro (D22).
+- [x] **Dependabot (responsável, 14/10/2026):** alertas de vulnerabilidade, alertas de malware e atualizações de segurança ligados; atualizações de versão e agrupadas desligadas de propósito. Os pull requests que ele abrir passam pelo workflow "Verificar" antes de você mesclar.
+- [x] **Testes automáticos de `/api/recomendacao` (D88):** 200, contrato da resposta, veto, 405, 400, 429 e CORS. **Falta:** teste do caminho 500 (erro interno do motor) e das funções do Top 15 além do acesso por código. Spend Management só existe no plano Pro (D22).
 - [ ] **Registro de programa de computador no INPI.** Cria prova de autoria e data do código, útil caso alguém copie a ferramenta.
 - [ ] **Termos de uso** proibindo cópia, engenharia reversa e uso automatizado da API.
 

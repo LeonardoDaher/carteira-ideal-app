@@ -1622,3 +1622,20 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 **Limites.** (a) A proteção contra script inline vale só para navegadores que respeitam `<meta>` CSP (todos os atuais); a `<meta>` não aceita `frame-ancestors` nem relatório, que continuam no cabeçalho. (b) `style-src 'unsafe-inline'` fica (o React usa atributos `style`); estilo injetado não executa código. (c) Um novo script inline entra sozinho na lista a cada build, mas um novo **atributo de evento** faz o build falhar: usar `addEventListener`. (d) O que o responsável publicar fora deste build (um HTML colado à mão no `dist-site`) não ganha a meta.
 
 **Testes.** `scripts/csp-hashes.test.mjs` (10): só scripts executáveis entram, hash exato, `unsafe-inline` ausente, posição da meta, idempotência, handler/`javascript:` derrubam o build, arquivo do Google intacto. **Mutação:** 3 defeitos (`unsafe-inline` na meta, proibição ignorada, script com `src` contado), todos pegos.
+
+## D88 (14/10/2026): testes automáticos do contrato de `/api/recomendacao`
+
+**Contexto.** A API era verificada só à mão e pela validação do payload (`validacaoApi.test.ts`). Último item técnico da lista de proteção (D85).
+
+**O que entrou** (`scripts/api-recomendacao.test.mjs`, 11 testes, rodam no `npm test` e no workflow "Verificar"): o handler real, chamado com requisição e resposta simuladas, sem Redis.
+1. **200:** carteira soma 100 e sem classe negativa; `versaoMotor` no formato esperado; `alertas` e `regrasAcionadas` em lista; determinismo (mesmo corpo, mesma resposta); sem as perguntas da arquitetura, calcula só pelo suitability.
+2. **Contrato da resposta:** só os campos conhecidos; nenhum nome de matriz ou parâmetro interno vaza no JSON (a API existe para o motor não ficar no navegador).
+3. **Veto:** reserva curta leva ao Defensivo, prazo no máximo médio e até 20% em risco; o Pilar 3 [A] veta sem `parteDoSaque` ou com [A] e não veta com [B] e [C].
+4. **405** para GET, PUT, DELETE e PATCH; `OPTIONS` responde 204.
+5. **400** em 11 formas de payload inválido, sempre com `{ erro }` e sem detalhe interno.
+6. **429:** 60 chamadas por IP passam e a 61ª recebe 429 com `Retry-After: 900`; o limite vem antes da validação; outro IP não é afetado; vale o primeiro IP do `x-forwarded-for`.
+7. **CORS:** sem `Origin` não há cabeçalho de origem; a do próprio site é ecoada.
+
+**Mutação:** 4 defeitos (checagem de método removida, limite desligado, validação desligada, limite de 60 para 70), todos pegos.
+
+**Não coberto:** o caminho 500 (erro interno do motor), porque a validação impede entradas que o façam falhar; e o comportamento do limite com Redis ligado (usa o mesmo contador, testado em `recomendacao-limite.test.mjs`).
