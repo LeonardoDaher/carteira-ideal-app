@@ -47,7 +47,12 @@ A mudança para a API tirou a metodologia do código visível. Ainda assim, vale
 
 - [x] **Limitar a frequência de chamadas à API (D58):** 60 chamadas por IP a cada 15 minutos em `api/recomendacao.ts` (`api/_limite.ts`), só com hash do IP por 15 minutos, falha aberta. Acompanhar a primeira semana: se aparecer reclamação de "Muitas consultas em pouco tempo" em rede compartilhada, subir `MAX_CHAMADAS`. Motivo original: como a API devolve a carteira completa para qualquer combinação de respostas, alguém muito determinado poderia chamar a API milhares de vezes com combinações diferentes e tentar reconstruir as matrizes. Limitar chamadas por IP (regras de firewall da Vercel ou um serviço como o Upstash Rate Limit) torna isso muito mais lento e caro. Não impede por completo, mas eleva bastante o esforço.
 - [x] **Restringir `ALLOWED_ORIGIN` (D85):** o padrão passou a ser o domínio definitivo no próprio código (a variável é opcional); origem estranha recebe 403. No mesmo pacote: limite no `/api/evento`, token do painel em tempo constante com limite de tentativas e cabeçalhos de segurança.
-- [ ] **Proteção, etapa 2:** CSP bloqueando desde 13/10/2026 (D86) e com scripts inline só por hash (D87, feito); Spend Management e Bot Protection na Vercel, 2FA e proteção da `main` no GitHub, testes automáticos do restante da API.
+- [x] **CSP (D86 e D87):** bloqueando desde 13/10/2026 e com scripts inline só por hash.
+- [x] **Vercel (complemento da D85, 14/10/2026):** regra de limite da API (120 por minuto por IP, testada no ar) e Bot Protection em `Log`.
+- [ ] **Bot Protection: decidir `Challenge`** depois de cerca de 7 dias de `Log` (olhar a tela Firewall; não ligar se aparecerem Googlebot ou o navegador do Instagram).
+- [x] **2FA (responsável, 14/10/2026):** ativado. Conferir que cobre GitHub, Registro.br, Vercel, Upstash, e-mail e Instagram, e que os códigos de recuperação estão guardados fora do computador.
+- [ ] **GitHub (responsável):** ruleset da `main` (só restringir exclusões e bloquear force push; não exigir pull request) e Dependabot alerts.
+- [ ] **Testes automáticos do restante da API** (`api/recomendacao.ts`: 200, 400, 405 e veto). Spend Management só existe no plano Pro (D22).
 - [ ] **Registro de programa de computador no INPI.** Cria prova de autoria e data do código, útil caso alguém copie a ferramenta.
 - [ ] **Termos de uso** proibindo cópia, engenharia reversa e uso automatizado da API.
 
