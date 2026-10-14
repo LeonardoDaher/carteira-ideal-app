@@ -30,7 +30,7 @@ permissions:
 jobs:
   atualizar:
     runs-on: ubuntu-24.04 # fixo, mesmo motivo dos outros jobs
-    timeout-minutes: 20
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v5
 

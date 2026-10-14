@@ -146,7 +146,7 @@ function descompactar(zip, pasta, apenas = null) {
  * devolver o zip vazio (dia sem pregão). Extrai só o XML necessário, para não ocupar ~540 MB
  * em disco por dia.
  */
-export async function baixarBoletim(data, pastaTemp, { fetchImpl = fetch, limiteMs = 90_000, tentativas = 2 } = {}) {
+export async function baixarBoletim(data, pastaTemp, { fetchImpl = fetch, limiteMs = 180_000, tentativas = 4, pausaMs = 15_000 } = {}) {
   const codigo = codigoBoletim(data)
   let conteudo
   for (let tentativa = 1; ; tentativa++) {
@@ -164,7 +164,7 @@ export async function baixarBoletim(data, pastaTemp, { fetchImpl = fetch, limite
       const motivo = erro?.name === 'TimeoutError' ? `sem resposta da B3 em ${limiteMs / 1000} s para o boletim ${codigo}.` : erro.message
       if (tentativa >= tentativas) throw new Error(motivo)
       console.warn(`[aviso] ${motivo} Nova tentativa.`)
-      await new Promise((r) => setTimeout(r, 5000))
+      await new Promise((r) => setTimeout(r, pausaMs * tentativa))
     }
   }
   if (conteudo.length < TAMANHO_MINIMO_ZIP) return null

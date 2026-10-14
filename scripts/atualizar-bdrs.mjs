@@ -684,6 +684,9 @@ export async function executar({
   const pastaTemp = fs.mkdtempSync(path.join(os.tmpdir(), 'bdrs-b3-'))
   let novos = 0
   let semPregao = 0
+  // Data sem resposta da B3 (tempo esgotado ou erro) não bloqueia o job se uma data MAIS NOVA
+  // responder: feriado que a B3 não atende não pode travar os pregões seguintes (12/10/2026).
+  // Se a mais recente não responde, o job falha como antes.
   const falhar = (mensagem) => {
     if (carga > 0) {
       log.warn(`[aviso] ${mensagem} Ignorado (carga inicial segue).`)
@@ -699,6 +702,10 @@ export async function executar({
       try {
         xml = await baixar(data, pastaTemp)
       } catch (erro) {
+        if (carga === 0 && data !== faltam[faltam.length - 1]) {
+          log.warn(`[aviso] ${data}: ${erro.message} Data antiga ignorada se uma mais nova responder.`)
+          continue
+        }
         falhar(`${data}: ${erro.message}`)
         continue
       }

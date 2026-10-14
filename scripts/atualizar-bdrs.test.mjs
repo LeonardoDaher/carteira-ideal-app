@@ -479,6 +479,23 @@ describe('ponta a ponta com boletins sintéticos', () => {
     assert.equal(denovo.motivo, 'sem pregão novo')
   })
 
+  it('data antiga sem resposta da B3 não trava o job se uma mais nova responde; a mais recente sem resposta falha', async () => {
+    const baixarOriginal = dep.baixar
+    const timeout = Object.assign(new Error('sem resposta da B3 em 180 s.'), { name: 'TimeoutError' })
+    const semResposta = (datas) => async (data, pasta) => {
+      if (datas.includes(data)) throw timeout
+      return baixarOriginal(data, pasta)
+    }
+    const r = await executar({ raiz, agora: new Date('2026-10-02T01:30:00Z'), argv: [], token: undefined, ...dep, baixar: semResposta(['2026-09-30']) })
+    assert.equal(r.publicado, true)
+    assert.equal(lerSaida().dataPregao, '2026-10-01')
+    assert.ok(dep.linhas.some((l) => l.includes('2026-09-30') && l.includes('Data antiga ignorada')))
+    await assert.rejects(
+      () => executar({ raiz, agora: new Date('2026-10-03T01:30:00Z'), argv: [], token: undefined, ...dep, baixar: semResposta(['2026-10-02']) }),
+      /2026-10-02: sem resposta da B3.*NÃO atualizado/,
+    )
+  })
+
   it('para sem gravar se o histórico for curto demais', async () => {
     const outra = prepararRaiz()
     await assert.rejects(() => executar({ raiz: outra.raiz, agora: AGORA, argv: [], token: undefined, ...dependencias(), baixar: async () => null }), /Rode a carga inicial/)
