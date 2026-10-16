@@ -154,11 +154,11 @@ function Cartao({ t, item: r, maior }: { t: Textos; item: ItemIndice; maior: num
     <li className="card col" style={{ gap: 8 }} data-testid={`${t.id}-${r.ticker}`}>
       <div className="row-between" style={{ alignItems: 'flex-start', gap: 10 }}>
         <div className="col" style={{ gap: 1, minWidth: 0 }}>
-          <span className="font-display" style={{ fontWeight: 700, fontSize: 18 }}>{r.posicao}. {r.ticker}</span>
+          <span className="font-display" style={{ fontWeight: 700, fontSize: 18, color: 'var(--accent)' }}>{r.posicao}. {r.ticker}</span>
           <span className="tiny muted">{r.nome}{r.setor ? ` · ${r.setor}` : ''}</span>
         </div>
         <div className="col" style={{ gap: 1, alignItems: 'flex-end', flexShrink: 0 }}>
-          <span style={{ fontWeight: 700 }}>{r.cotacao == null ? '—' : reais(r.cotacao)}</span>
+          <span style={{ fontWeight: 700, color: 'var(--accent)' }}>{r.cotacao == null ? '—' : reais(r.cotacao)}</span>
           <span className="tiny muted">fech. {r.dataCotacao ? formatarData(r.dataCotacao) : '—'}</span>
         </div>
       </div>

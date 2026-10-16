@@ -113,11 +113,11 @@ function CartaoBdr({ item: b, ordem, janelaMaxima }: { item: ItemBdrTop; ordem: 
     <li className="card col" style={{ gap: 8 }} data-testid={`top15-bdrs-${b.ticker}`}>
       <div className="row-between" style={{ alignItems: 'flex-start', gap: 10 }}>
         <div className="col" style={{ gap: 1, minWidth: 0 }}>
-          <span className="font-display" style={{ fontWeight: 700, fontSize: 18 }}>{ordem}. {b.ticker}</span>
+          <span className="font-display" style={{ fontWeight: 700, fontSize: 18, color: 'var(--accent)' }}>{ordem}. {b.ticker}</span>
           <span className="tiny muted">{b.nome ?? '—'}{b.setor ? ` · ${b.setor}` : ''}</span>
         </div>
         <div className="col" style={{ gap: 1, alignItems: 'flex-end', flexShrink: 0 }}>
-          <span style={{ fontWeight: 700 }}>{reais(b.cotacao)}</span>
+          <span style={{ fontWeight: 700, color: 'var(--accent)' }}>{reais(b.cotacao)}</span>
           <span className="tiny muted">fech. {formatarData(b.dataCotacao)}</span>
         </div>
       </div>

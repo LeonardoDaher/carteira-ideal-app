@@ -169,14 +169,14 @@ function CartaoRanking({ item: r, ordem, comFiltro }: { item: ItemRanking; ordem
     <li className="card col" style={{ gap: 10 }} data-testid={`top15-${r.ticker}`}>
       <div className="row-between" style={{ alignItems: 'flex-start', gap: 10 }}>
         <div className="col" style={{ gap: 1, minWidth: 0 }}>
-          <span className="font-display" style={{ fontWeight: 700, fontSize: 18 }}>
+          <span className="font-display" style={{ fontWeight: 700, fontSize: 18, color: 'var(--accent)' }}>
             {ordem}. {r.ticker}
             {comFiltro && r.posicao !== ordem && <span className="tiny muted" style={{ fontWeight: 400 }}> (#{r.posicao} no ranking geral)</span>}
           </span>
           <span className="tiny muted">{r.nome} · {r.setor}</span>
         </div>
         <div className="col" style={{ gap: 1, alignItems: 'flex-end', flexShrink: 0 }}>
-          <span style={{ fontWeight: 700 }}>{reais(r.cotacao)}</span>
+          <span style={{ fontWeight: 700, color: 'var(--accent)' }}>{reais(r.cotacao)}</span>
           <span className="tiny muted">fech. {formatarData(r.dataCotacao)}</span>
         </div>
       </div>
