@@ -3,12 +3,12 @@
   "acessoRestrito": false,
   "instagram": null,
   "versaoMetodologia": "1.1.0",
-  "geradoEm": "2026-10-16T01:16:57.687Z",
+  "geradoEm": "2026-10-16T07:26:28.077Z",
   "dataExecucao": "2026-10-16",
-  "ultimoPregao": "2026-10-15",
+  "ultimoPregao": "2026-10-16",
   "pastaAuditoria": "auditoria/top15-ibov/2026-10-08",
-  "hashResultado": "30244fdc56321af83b6a1924318b183f77f371b62e0d2b141ea86ed8266c88ef",
-  "hashInsumos": "94d84df03541d3059b8536ed68fb863c12db8248048b623b1bc66f8b1efa311e",
+  "hashResultado": "018da07763ba5eea19bbbab341085d1936b9d06866cb586bd13afc09e7937fd6",
+  "hashInsumos": "b2ec86f87688c51d4f588215f1af8915d20a2d75412cac9d862b78b574e0f86a",
   "hashConfig": "ac118b7733afbd5f420fbd473becdfe97422a96b44e0a82c76fb6acab6ae3c4d",
   "tamanhoDaLista": 15,
   "universo": 76,
@@ -20,9 +20,9 @@
     "idadeMaximaDias": 10
   },
   "indice": "IBOV",
-  "dataComposicao": "2026-10-15",
+  "dataComposicao": "2026-10-16",
   "somaPesos": 100,
-  "somaPesosDaLista": 66.157,
+  "somaPesosDaLista": 66.215,
   "ranking": [
     {
       "posicao": 1,
@@ -30,12 +30,12 @@
       "nome": "Itaú Unibanco",
       "tipo": "PN N1",
       "setor": "Bancos",
-      "peso": 9.042,
-      "pesoAcumulado": 9.042,
+      "peso": 9.021,
+      "pesoAcumulado": 9.021,
       "quantidadeTeorica": 5337898685,
-      "cotacao": 48.98,
-      "dataCotacao": "2026-10-14",
-      "volumeMediano": 1234834253
+      "cotacao": 48.35,
+      "dataCotacao": "2026-10-15",
+      "volumeMediano": 1425476339
     },
     {
       "posicao": 2,
@@ -43,12 +43,12 @@
       "nome": "Petrobras",
       "tipo": "PN N2",
       "setor": "Petróleo e gás",
-      "peso": 8.865,
-      "pesoAcumulado": 17.907,
+      "peso": 8.844,
+      "pesoAcumulado": 17.865,
       "quantidadeTeorica": 4410957710,
-      "cotacao": 58.11,
-      "dataCotacao": "2026-10-14",
-      "volumeMediano": 2337819403
+      "cotacao": 57.36,
+      "dataCotacao": "2026-10-15",
+      "volumeMediano": 2291401034
     },
     {
       "posicao": 3,
@@ -56,11 +56,11 @@
       "nome": "Vale",
       "tipo": "ON NM",
       "setor": "Mineração",
-      "peso": 8.509,
-      "pesoAcumulado": 26.416,
+      "peso": 8.561,
+      "pesoAcumulado": 26.426,
       "quantidadeTeorica": 3687404862,
-      "cotacao": 66.72,
-      "dataCotacao": "2026-10-14",
+      "cotacao": 66.42,
+      "dataCotacao": "2026-10-15",
       "volumeMediano": 1678735594
     },
     {
@@ -69,12 +69,12 @@
       "nome": "PETROBRAS",
       "tipo": "ON N2",
       "setor": "Outros",
-      "peso": 5.491,
-      "pesoAcumulado": 31.907,
+      "peso": 5.482,
+      "pesoAcumulado": 31.908,
       "quantidadeTeorica": 2441951100,
-      "cotacao": 65.02,
-      "dataCotacao": "2026-10-14",
-      "volumeMediano": 568019707
+      "cotacao": 64.22,
+      "dataCotacao": "2026-10-15",
+      "volumeMediano": 675780466
     },
     {
       "posicao": 5,
@@ -82,11 +82,11 @@
       "nome": "Axia Energia (ex-Eletrobras)",
       "tipo": "ON NM",
       "setor": "Energia elétrica: geração",
-      "peso": 4.722,
-      "pesoAcumulado": 36.629,
+      "peso": 4.711,
+      "pesoAcumulado": 36.619,
       "quantidadeTeorica": 2278697967,
-      "cotacao": 59.91,
-      "dataCotacao": "2026-10-14",
+      "cotacao": 59.14,
+      "dataCotacao": "2026-10-15",
       "volumeMediano": 989254004
     },
     {
@@ -95,12 +95,12 @@
       "nome": "Sabesp",
       "tipo": "ON NM",
       "setor": "Saneamento e resíduos",
-      "peso": 3.946,
-      "pesoAcumulado": 40.575,
+      "peso": 3.926,
+      "pesoAcumulado": 40.545,
       "quantidadeTeorica": 3524534025,
-      "cotacao": 32.37,
-      "dataCotacao": "2026-10-14",
-      "volumeMediano": 582636230
+      "cotacao": 31.87,
+      "dataCotacao": "2026-10-15",
+      "volumeMediano": 659155096
     },
     {
       "posicao": 7,
@@ -108,12 +108,12 @@
       "nome": "B3",
       "tipo": "ON NM",
       "setor": "Bolsa, holdings e serviços financeiros",
-      "peso": 3.851,
-      "pesoAcumulado": 44.426,
+      "peso": 3.873,
+      "pesoAcumulado": 44.418,
       "quantidadeTeorica": 4985893391,
-      "cotacao": 22.33,
-      "dataCotacao": "2026-10-14",
-      "volumeMediano": 893569794
+      "cotacao": 22.22,
+      "dataCotacao": "2026-10-15",
+      "volumeMediano": 999058790
     },
     {
       "posicao": 8,
@@ -121,11 +121,11 @@
       "nome": "Bradesco",
       "tipo": "PN EJ N1",
       "setor": "Bancos",
-      "peso": 3.682,
-      "pesoAcumulado": 48.108,
+      "peso": 3.696,
+      "pesoAcumulado": 48.114,
       "quantidadeTeorica": 5100907585,
-      "cotacao": 20.87,
-      "dataCotacao": "2026-10-14",
+      "cotacao": 20.73,
+      "dataCotacao": "2026-10-15",
       "volumeMediano": 996783133
     },
     {
@@ -135,11 +135,11 @@
       "tipo": "PN N1",
       "setor": "Bolsa, holdings e serviços financeiros",
       "peso": 3.253,
-      "pesoAcumulado": 51.361,
+      "pesoAcumulado": 51.367,
       "quantidadeTeorica": 5980171123,
-      "cotacao": 15.73,
-      "dataCotacao": "2026-10-14",
-      "volumeMediano": 472059427
+      "cotacao": 15.56,
+      "dataCotacao": "2026-10-15",
+      "volumeMediano": 503836121
     },
     {
       "posicao": 10,
@@ -147,12 +147,12 @@
       "nome": "BTG Pactual",
       "tipo": "UNT N2",
       "setor": "Bancos",
-      "peso": 3.236,
-      "pesoAcumulado": 54.597,
+      "peso": 3.221,
+      "pesoAcumulado": 54.588,
       "quantidadeTeorica": 1194770950,
-      "cotacao": 78.3,
-      "dataCotacao": "2026-10-14",
-      "volumeMediano": 743215658
+      "cotacao": 77.13,
+      "dataCotacao": "2026-10-15",
+      "volumeMediano": 825695518
     },
     {
       "posicao": 11,
@@ -160,12 +160,12 @@
       "nome": "WEG",
       "tipo": "ON NM",
       "setor": "Máquinas, equipamentos e aeroespacial",
-      "peso": 2.548,
-      "pesoAcumulado": 57.145,
+      "peso": 2.506,
+      "pesoAcumulado": 57.094,
       "quantidadeTeorica": 1460506056,
-      "cotacao": 50.44,
-      "dataCotacao": "2026-10-14",
-      "volumeMediano": 443753517
+      "cotacao": 49.09,
+      "dataCotacao": "2026-10-15",
+      "volumeMediano": 499580418
     },
     {
       "posicao": 12,
@@ -173,11 +173,11 @@
       "nome": "Banco do Brasil",
       "tipo": "ON NM",
       "setor": "Bancos",
-      "peso": 2.378,
-      "pesoAcumulado": 59.523,
+      "peso": 2.361,
+      "pesoAcumulado": 59.455,
       "quantidadeTeorica": 2842760965,
-      "cotacao": 24.19,
-      "dataCotacao": "2026-10-14",
+      "cotacao": 23.76,
+      "dataCotacao": "2026-10-15",
       "volumeMediano": 959553314
     },
     {
@@ -186,12 +186,12 @@
       "nome": "Ambev",
       "tipo": "ON",
       "setor": "Alimentos e bebidas",
-      "peso": 2.31,
-      "pesoAcumulado": 61.833,
+      "peso": 2.359,
+      "pesoAcumulado": 61.814,
       "quantidadeTeorica": 4043349180,
-      "cotacao": 16.52,
-      "dataCotacao": "2026-10-14",
-      "volumeMediano": 385697896
+      "cotacao": 16.69,
+      "dataCotacao": "2026-10-15",
+      "volumeMediano": 502015978
     },
     {
       "posicao": 14,
@@ -199,25 +199,25 @@
       "nome": "Embraer",
       "tipo": "ON NM",
       "setor": "Máquinas, equipamentos e aeroespacial",
-      "peso": 2.213,
-      "pesoAcumulado": 64.046,
+      "peso": 2.296,
+      "pesoAcumulado": 64.11,
       "quantidadeTeorica": 711833141,
-      "cotacao": 89.87,
-      "dataCotacao": "2026-10-14",
+      "cotacao": 92.3,
+      "dataCotacao": "2026-10-15",
       "volumeMediano": 543299628
     },
     {
       "posicao": 15,
-      "ticker": "EQTL3",
-      "nome": "Equatorial",
+      "ticker": "ENEV3",
+      "nome": "Eneva",
       "tipo": "ON NM",
-      "setor": "Energia elétrica: distribuição",
-      "peso": 2.111,
-      "pesoAcumulado": 66.157,
-      "quantidadeTeorica": 1245905097,
-      "cotacao": 49,
-      "dataCotacao": "2026-10-14",
-      "volumeMediano": 428317483
+      "setor": "Energia elétrica: geração",
+      "peso": 2.105,
+      "pesoAcumulado": 66.215,
+      "quantidadeTeorica": 1916508073,
+      "cotacao": 31.42,
+      "dataCotacao": "2026-10-15",
+      "volumeMediano": 326840601
     }
   ],
   "modoAuditoria": "diaria",
