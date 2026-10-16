@@ -453,3 +453,8 @@ footer .disclaimer {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Tema claro: contorno preto fino por fora do anel amarelo da logo (D90). */
+.light #profile img {
+  filter: drop-shadow(0 0 0.8px #111) drop-shadow(0 0 0.8px #111);
+}

@@ -2136,3 +2136,9 @@ select option:disabled { color: #6b7280 !important; -webkit-text-fill-color: #6b
   -webkit-text-stroke: 0;
   text-shadow: none;
 }
+
+/* Tema claro: a logo ganha o mesmo contorno preto fino por fora do anel amarelo (D90). */
+:root[data-theme='light'] .marca-logo {
+  overflow: visible;
+  filter: drop-shadow(0 0 0.6px #111) drop-shadow(0 0 0.6px #111);
+}
