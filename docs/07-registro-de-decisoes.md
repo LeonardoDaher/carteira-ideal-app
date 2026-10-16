@@ -1692,3 +1692,15 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 **Testes.** `scripts/gerar-divulgacao.test.mjs` (10). **Mutação:** 12 defeitos introduzidos (cada trava, o formato do percentual, ativo no post das listas com código e o aviso removido de cada slide e legenda); 2 passaram na primeira rodada (aviso só no slide ou só na legenda, porque o teste olhava o texto inteiro) e agora o teste confere os dois; todos são pegos. Um defeito (tirar a trava final que procura a frase do aviso) é equivalente: o aviso vem do mesmo texto fixo, e o teste cobre.
 
 **Limites.** O texto sai de dados do dia do job, não do dia da publicação: se o responsável postar dias depois, as datas ("até 15/10") continuam corretas, mas a lista pode ter mudado. Sem imagens: só o texto de cada slide. O parecer independente da D22 continua pendente para ampliar o alcance.
+
+## D92 (16/10/2026): `@vercel/node` removido (só fornecia dois tipos) e alertas do Dependabot
+
+**Contexto.** Três execuções do Dependabot falharam (`tar`, `undici`, `@fastify/busboy`): as três vinham de `@vercel/node`, e a única atualização automática rebaixaria o pacote. `npm audit` listava 17 alertas (1 crítico, 14 altos). O pacote era usado só em `import type { VercelRequest, VercelResponse }` nas quatro funções da API.
+
+**Tentativa descartada.** Subir `@vercel/node` para a 24.0.2 (a "correção" que o `npm audit` sugere) não resolvia: continuava com `@fastify/busboy` e `path-to-regexp` vulneráveis e mexia em quase 6 mil linhas do `package-lock.json`.
+
+**O que mudou.** `api/_tipos.ts` (novo) declara os dois tipos com o que as funções usam (`IncomingMessage` e `ServerResponse` do Node, mais `query`, `body`, `status()` e `json()`); as quatro funções importam de lá; `@vercel/node` saiu do `package.json`. Arquivo com `_` no nome não vira função na Vercel. Mais `source-map-js` 1.2.1 → 1.2.2 (`npm update`). Nenhuma linha de lógica mudou.
+
+**Resultado.** Alertas do `npm audit`: 17 → 3 (os 3 restantes são `braces`, `micromatch` e `vite-plugin-singlefile`, só na montagem do site, sem ir para o navegador nem para a API; o "conserto" sugerido é rebaixar o plugin para a 0.9.0, que não adotei). `tsc -b` limpo, 1.626 testes do app e 433 de scripts passando, `npm run build` ok.
+
+**Limites.** Se uma função passar a usar outro campo do pedido ou da resposta, o `tsc -b` avisa e o tipo é ampliado em `api/_tipos.ts`. O Dependabot pode ainda abrir pull requests para os 3 alertas restantes. `npm audit fix` quebra neste projeto (erro interno do npm: `edgesOut`), por isso o ajuste do `source-map-js` foi por `npm update`. **Ainda não conferido no ar:** o deploy da Vercel com a API sem o pacote (os tipos somem na compilação, mas só a produção confirma).

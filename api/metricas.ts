@@ -3,7 +3,7 @@
 // Painel de números para apresentar a parceiros e fundações. Só responde a quem tiver o
 // token definido na variável de ambiente METRICAS_TOKEN (Vercel → Settings → Environment
 // Variables). Sem o token configurado, o endpoint fica fechado.
-import type { VercelRequest, VercelResponse } from '@vercel/node'
+import type { VercelRequest, VercelResponse } from './_tipos'
 import { pipeline, metricasHabilitadas } from './_redis.js'
 import { EVENTOS_FUNIL, EVENTOS_EXTRAS, dataBrasilia } from './_eventos.js'
 import { timingSafeEqual, createHash } from 'node:crypto'

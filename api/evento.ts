@@ -5,7 +5,7 @@
 // pode atrapalhar quem está usando o app.
 //
 // Corpo esperado: { evento, id, ref?, props? { perfil?, prazo?, capacidade?, veto?, tela? } }
-import type { VercelRequest, VercelResponse } from '@vercel/node'
+import type { VercelRequest, VercelResponse } from './_tipos'
 import { pipeline, metricasHabilitadas } from './_redis.js'
 import { EVENTOS_ACEITOS, dataBrasilia, idAnonimoValido, refValido, rotuloValido } from './_eventos.js'
 import { aplicarCors } from './_cors.js'

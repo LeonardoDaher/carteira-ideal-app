@@ -8,7 +8,7 @@
 // Defesas: comparação em tempo constante; limite de tentativas ERRADAS por IP (guardamos só um hash
 // do IP, por 15 minutos); resposta com "no-store"; sem código configurado, a porta fica FECHADA.
 import { createHash, timingSafeEqual } from 'node:crypto'
-import type { VercelRequest, VercelResponse } from '@vercel/node'
+import type { VercelRequest, VercelResponse } from './_tipos'
 import { aplicarCors } from './_cors.js'
 
 export const MAX_FALHAS = 10
