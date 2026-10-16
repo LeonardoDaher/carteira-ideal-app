@@ -1,0 +1,98 @@
+{
+  "esquema": 1,
+  "versaoMetodologia": "1.5.0",
+  "geradoEm": "2026-10-16T01:16:59.263Z",
+  "dataExecucao": "2026-10-16",
+  "dataCotacoes": "2026-10-07",
+  "competenciaReferencia": "2026-08",
+  "ambiente": {
+    "node": "v22.23.3",
+    "plataforma": "linux",
+    "commit": "7428a8d584c30f578812e219f9d8c9dcbed5fa60",
+    "execucao": "38834244103"
+  },
+  "codigo": {
+    "calculoSha256": "174646b22b60a79300b4ff6576c0d713e5974ad46c455317597f8b8bce644569",
+    "extracaoSha256": "d4544dca5e5e497a7810ad0b79baa40446ec267a4415d8cb2b3007e6023f8d3a"
+  },
+  "hashes": {
+    "config": "52e4151b4f1891858892ad3aecd873f6f47676f67503d261015a6cec375abec7",
+    "insumos": "05d29b602f3f14a82e7f255d1ed765aab4be6618cd82c14875f42ac7dbb5e304",
+    "resultado": "49c17c2043a874b5d11a214d6136ace2c3cd815097fcfff138e35ed2d34a7a11",
+    "memoria": "b243954a1ccd31de2bc757fd164590127dfd0574ae9077909c0418fcd79b3d1f",
+    "arquivos": {
+      "insumos.json.gz": "e6fa88a7e9d33abc47ed18a6e21b995c96d15352b2b003c23714deeb108d3d49",
+      "config.json": "b844be0709a25d4d9ce7197c2abd79da6945358feb1310f503ebd3a497e97e8c",
+      "resultado.json": "0c01c4ab3dfb8a15213cb246d1bd28a1d96eb589b918285e0580713873ee7ec0",
+      "memoria-de-calculo.json.gz": "c56ec89f32ae9ce53fe9d42a9dd3042524f1b7bdd81ba91f1dcbffaf6a5c356f",
+      "ranking-tijolo.csv": "e69aa90003f37e5220c2eab9887a9b0abf3968ee464bb016e210532bd2c6e1e3",
+      "ranking-papel.csv": "32dfb323efb08147d5824f3ddb5e432c13a525a3dc3321233aef2e107884e3df",
+      "a-conferir.csv": "c00bc833b3babe92767b3ca14f041744e88a53c52d27ddb6cf3766434604c85a",
+      "exclusoes.csv": "54418ca227a6adcefdf2266e34a6a8d43aa29fb8001bdf6f9becd5a694124d70"
+    }
+  },
+  "fontes": [
+    {
+      "papel": "Informe Mensal de FII 2025",
+      "url": "https://dados.cvm.gov.br/dados/FII/DOC/INF_MENSAL/DADOS/inf_mensal_fii_2025.zip",
+      "arquivo": "inf_mensal_fii_2025.zip",
+      "bytes": 1522380,
+      "sha256": "5345f295f9ca7a9b0bfda44b5392b78c93cd7b6b5bc752a545945b5de6a7db17",
+      "baixadoEm": "2026-10-16T01:16:57.658Z"
+    },
+    {
+      "papel": "Informe Mensal de FII 2026",
+      "url": "https://dados.cvm.gov.br/dados/FII/DOC/INF_MENSAL/DADOS/inf_mensal_fii_2026.zip",
+      "arquivo": "inf_mensal_fii_2026.zip",
+      "bytes": 1143952,
+      "sha256": "0a9c9b2a414c891baf5734c05ee4d8fb84fb27c3adb3e30d095ae65a05523d76",
+      "baixadoEm": "2026-10-16T01:16:57.768Z"
+    },
+    {
+      "papel": "Histórico de preço diário dos FIIs (B3, boletim BVBG.086)",
+      "url": "historico/fiis.json (neste repositório)",
+      "arquivo": "fiis.json",
+      "bytes": 347772,
+      "sha256": "faa78ab31906c994f2ab91c79d8c7dfbe0680ae1ad7007fe6b87f9b7deb4e9d8",
+      "pregoes": 65,
+      "ultimoPregao": "2026-10-14"
+    },
+    {
+      "papel": "Cotação e volume dos FIIs (job de FIIs)",
+      "url": "webapp-src/src/data/rendimentosFii.json (neste repositório)",
+      "dataCotacoes": "2026-10-07"
+    }
+  ],
+  "contagens": {
+    "universo": 218,
+    "tijolo": 30,
+    "papel": 17,
+    "aConferir": 6,
+    "exclusoes": 165,
+    "etapas": [
+      {
+        "etapa": "universo e preço",
+        "entram": 218,
+        "ficam": 185
+      },
+      {
+        "etapa": "dados do informe",
+        "entram": 185,
+        "ficam": 183
+      },
+      {
+        "etapa": "classificação e filtros",
+        "entram": 183,
+        "tijolo": 36,
+        "papel": 17
+      },
+      {
+        "etapa": "a conferir",
+        "aConferir": 6,
+        "tijolo": 30,
+        "papel": 17
+      }
+    ]
+  },
+  "publicadoNoApp": true
+}

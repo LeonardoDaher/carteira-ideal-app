@@ -1,0 +1,181 @@
+{
+  "_leia": "Metodologia da triagem 'FIIs baratos' (Tijolo e Papel). ESTE ARQUIVO É A FONTE ÚNICA DOS PARÂMETROS: o script e o documento docs/10-metodologia-fii-baratos.md leem/citam estes valores. Qualquer mudança aqui exige subir 'versaoMetodologia' e registrar o motivo em 'historicoDeVersoes'. O hash SHA-256 deste arquivo vai no manifesto de cada execução.",
+  "versaoMetodologia": "1.5.0",
+  "historicoDeVersoes": [
+    {
+      "versao": "1.0.0",
+      "data": "2026-10-06",
+      "mudanca": "Versão inicial, vinda do protótipo analisado com o Informe Mensal real da CVM (competência 2026-08). Classificação do fundo pelo que ele tem no ativo (Tijolo, Papel, Fundo de fundos, Misto), ranking separado por grupo pela média dos ranks de P/VP baixo e DY de 12 meses alto, filtros de liquidez, patrimônio, cotistas, alavancagem e rentabilidade patrimonial, e lista 'a conferir' para dado suspeito (P/VP muito baixo ou DY muito alto), que fica fora do ranking. Nada é publicado no app: o job só grava a trilha de auditoria."
+    },
+    {
+      "versao": "1.1.0",
+      "data": "2026-10-07",
+      "mudanca": "Conferência dos 6 fundos da lista 'a conferir' no Investidor10 (MFII11, TGAR11, BBIG11, BRCR11, TRBL11, OUJP11): nenhum tinha cota e valor patrimonial em bases diferentes (valor patrimonial, patrimônio e rendimento de 12 meses bateram com a CVM), mas 3 (MFII11, BBIG11, TRBL11) tinham DY de 12 meses inflado por corte de rendimento ou pagamento extra (MFII11: R$ 0,91 para R$ 0,30 por mês; BBIG11: R$ 0,07 para R$ 0,03; TRBL11: R$ 2,68 em julho e R$ 0,44 depois). (1) Novo alerta 'rendimento_em_queda': mediana dos 3 últimos meses abaixo de 75% da mediana dos 12 meses (MFII11 0,29; BBIG11 0,43; TRBL11 0,68; fundos de rendimento estável ficam acima de 0,85). A primeira tentativa, com a MÉDIA dos 2 últimos meses, marcou por engano GTWR11 e BRCO11 (que pagam todo mês, mas têm um mês com DY zero no informe) e foi trocada pela mediana. (2) Novo alerta 'rendimento_com_pico': média dos 12 meses acima de 1,25 vez a mediana, o que pegou HGRE11 (pico de R$ 8,52 no informe de janeiro/26, DY de 12 meses de 16,6% contra ~9,4% no Investidor10) e KORE11 (rendimento cortado de R$ 1,25 para R$ 0,60 em janeiro, DY de 14,7% contra ~10,8% atual). Fundo com qualquer alerta vai para 'a conferir'. (3) Nova lista 'conferencia' em config: fundo conferido manualmente, com data, fonte e QUAIS alertas a conferência libera, entra no ranking marcado como conferido; vale por 90 dias; alerta novo ou conferência vencida devolve o fundo para 'a conferir'. Liberados nesta versão: BRCR11 (pvp_muito_baixo) e OUJP11 (dy_alto). (4) O ranking passa a mostrar o DY recente (mediana dos 3 últimos meses, anualizada), a razão contra a mediana de 12 meses e o pico de rendimento."
+    },
+    {
+      "versao": "1.2.0",
+      "data": "2026-10-07",
+      "mudanca": "Liquidez pela MEDIANA do volume financeiro diário (21 pregões) em vez da média. Com as cotações de 07/10, o ranking trouxe SAPI11 (papel, 3º) e BROF11 (tijolo, 6º) com volume médio acima dos mínimos do job, mas o Investidor10 mostrava R$ 181 mil e R$ 354 mil por dia (mínimos: R$ 300 mil no papel e R$ 500 mil no tijolo): a média é puxada por poucos dias de negociação intensa (o rali do dia anterior). O job de FIIs passa a gravar também 'volumeMediano' (a média continua igual); o ranking usa a mediana quando existe e a média quando o job de FIIs ainda não a trouxe, e registra a fonte de cada fundo ('liquidez_pela' nos CSVs e liquidez na memória de cálculo). Os mínimos de R$ 500 mil e R$ 300 mil continuam os mesmos, agora aplicados ao dia típico; revisar depois de ver o efeito real."
+    },
+    {
+      "versao": "1.3.0",
+      "data": "2026-10-07",
+      "mudanca": "Mínimo de liquidez único de R$ 300 mil por dia (mediana) nos dois grupos: o do tijolo cai de R$ 500 mil para R$ 300 mil e o do papel continua R$ 300 mil. Com a mediana aplicada (execução de 07/10), 84 fundos de tijolo e 22 de papel saíram por liquidez; só 4 de tijolo ficaram numa faixa discutível entre R$ 300 mil e R$ 500 mil (TRBL11 R$ 471 mil, RCRB11 R$ 466 mil, RZAT11 R$ 429 mil, BROF11 R$ 334 mil) e 2 de papel a menos de R$ 15 mil do corte (OUJP11 R$ 285 mil, GAME11 R$ 286 mil). A diferença entre os mínimos só existia para fechar 15 fundos no papel quando o corte se aplicava à média. Decisão do responsável. Esses 4 fundos de tijolo voltam a passar pelos demais filtros e alertas."
+    },
+    {
+      "versao": "1.4.0",
+      "data": "2026-10-07",
+      "mudanca": "(1) Preço DIÁRIO: cotação e volume (média e mediana de 21 pregões) vêm do histórico diário da B3 (historico/fiis.json, boletim BVBG.086, mesmo módulo dos jobs de ações, BDRs e ETFs) quando existe, com o preço mensal do job de FIIs (brapi) como reserva; a fonte de cada fundo fica registrada (fonteCotacao). Cotação diária com mais de 7 dias sai (a mensal, 45). Novo parâmetro precoDiarioObrigatorio (false por enquanto): vira true quando o responsável decidir publicar. (2) Novo alerta salto_de_preco: variação de mais de 25% de um dia para o outro no fechamento nos últimos pregões (desdobramento, grupamento) manda o fundo para a conferência. (3) TGAR11 aceito no ranking por decisão do responsável (conferido, libera pvp_muito_baixo e dy_alto). OUJP11 continua fora: a conferência dele fica registrada, mas a mediana de volume de R$ 285 mil está abaixo do mínimo de R$ 300 mil."
+    },
+    {
+      "versao": "1.4.1",
+      "data": "2026-10-07",
+      "mudanca": "Na primeira execução com o preço diário da B3 (60 pregões carregados), 3 fundos líquidos ficaram fora do histórico porque o Boletim de Preços da B3 não os traz (CVBI11, MALL11 e BBPO11, com R$ 0,8 a 2,7 mi por dia na brapi): a triagem usava o preço MENSAL deles, e com o preço diário obrigatório (condição para publicar) CVBI11 (3º do papel) e BBPO11 (8º do tijolo) sairiam do ranking. O job de preço diário passa a completar, pela brapi, só os fundos líquidos que o boletim não traz (cerca de 3 requisições por dia), sem nunca sobrescrever um dia do boletim. A triagem registra a origem de cada preço: B3 (boletim diário) ou brapi (histórico diário completado). Nenhuma regra de cálculo mudou."
+    },
+    {
+      "versao": "1.5.0",
+      "data": "2026-10-07",
+      "mudanca": "PUBLICAÇÃO (D65). O responsável aprovou publicar o Top 15 de FIIs baratos no app, atrás do código do mês (o mesmo do Top 15 de ações). aprovadoPeloResponsavel passa a true e precoDiarioObrigatorio a true (fundo sem preço diário sai da triagem). O arquivo público do app traz só o cabeçalho; a lista fica em dados-privados/fii-baratos.json e só é entregue por api/top15-fiis depois de conferir o código. Nenhuma regra de cálculo mudou."
+    }
+  ],
+  "tamanhoDaLista": 15,
+  "dados": {
+    "mesesHistorico": 12,
+    "minimoMesesComDados": 10,
+    "mesesGuardadosNosInsumos": 14,
+    "mesesRecentes": 3,
+    "coberturaMinimaDaCompetencia": 0.8,
+    "cotacaoMaxIdadeDias": 45,
+    "_leia": "A competência de referência é a mais recente com pelo menos 'coberturaMinimaDaCompetencia' do número de fundos da competência com mais fundos (o mês corrente costuma vir com poucos informes). A cotação vem do job de FIIs (rendimentosFii.json); mais velha que 'cotacaoMaxIdadeDias' dias da execução, o fundo sai. Preço: o histórico DIÁRIO da B3 (historico/fiis.json, config/fiis-preco.json) vale quando tem pelo menos minimoPregoesPrecoDiario pregões e o fundo negociou na janela de pregoesPrecoDiario pregões; a cotação mais velha que cotacaoDiariaMaxIdadeDias dias da execução tira o fundo. Sem preço diário, vale o do job mensal de FIIs (brapi), a menos que precoDiarioObrigatorio seja true (condição para publicar).",
+    "pregoesPrecoDiario": 21,
+    "minimoPregoesPrecoDiario": 21,
+    "cotacaoDiariaMaxIdadeDias": 7,
+    "precoDiarioObrigatorio": true
+  },
+  "classificacao": {
+    "fatiaMinimaDoTipo": 0.6,
+    "imoveis": [
+      "Direitos_Bens_Imoveis",
+      "Acoes_Sociedades_Atividades_FII",
+      "Cotas_Sociedades_Atividades_FII"
+    ],
+    "recebiveis": [
+      "CRI",
+      "CRI_CRA",
+      "LCI",
+      "LCI_LCA",
+      "LIG",
+      "Letras_Hipotecarias",
+      "FDIC",
+      "Cedulas_Debentures",
+      "Debentures",
+      "Notas_Promissorias",
+      "Certificados_Deposito_Valores_Mobiliarios",
+      "Outros_Valores_Mobliarios"
+    ],
+    "cotas": [
+      "FII",
+      "Outras_Cotas_FI",
+      "Fundo_Acoes",
+      "FIP"
+    ],
+    "outros": [
+      "Acoes",
+      "Bonus_Subscricao",
+      "CEPAC",
+      "Titulos_Publicos",
+      "Titulos_Privados",
+      "Fundos_Renda_Fixa"
+    ],
+    "_leia": "O fundo é Tijolo se imóveis >= 60% do total investido, Papel se recebíveis >= 60%, Fundo de fundos se cotas >= 60%; senão Misto. Fundo de fundos e Misto não entram nos rankings. CRI e CRI_CRA (e LCI e LCI_LCA) são colunas de versões diferentes do informe e nunca vêm preenchidas juntas; somam-se."
+  },
+  "filtros": {
+    "tijolo": {
+      "volumeMinimoDiario": 300000,
+      "patrimonioMinimo": 200000000,
+      "cotistasMinimos": 3000,
+      "rentabPatrimonial12mMinima": -0.15,
+      "alavancagemMaxima": 0.4,
+      "pvpMinimo": 0.3
+    },
+    "papel": {
+      "volumeMinimoDiario": 300000,
+      "patrimonioMinimo": 150000000,
+      "cotistasMinimos": 3000,
+      "rentabPatrimonial12mMinima": -0.05,
+      "alavancagemMaxima": 0.4,
+      "pvpMinimo": 0.7,
+      "dy12Maximo": 0.25
+    },
+    "_leia": "Liquidez: mediana do volume financeiro diário dos últimos 21 pregões (dias sem negócio contam zero), quando o job de FIIs a traz (campo volumeMediano); sem ela, a média (campo volumeMedio), e a fonte fica registrada por fundo. Mínimo de R$ 300 mil por dia nos dois grupos (na 1.3.0; antes era R$ 500 mil no tijolo). Papel: patrimônio mais folgado que o tijolo (quase todo fundo de papel é menor). P/VP mínimo de 0,7 no papel: desconto grande em fundo de crédito costuma ser perda já precificada, não pechincha. Sem cotistas informados, o filtro de cotistas não se aplica."
+  },
+  "alertas": {
+    "pvpMuitoBaixo": 0.55,
+    "dy12Alto": 0.18,
+    "rendimentoRecenteMinimoSobre12m": 0.75,
+    "_leia": "Fundo com P/VP abaixo de pvpMuitoBaixo (cota e valor patrimonial possivelmente em bases diferentes, como em desdobramento), DY de 12 meses acima de dy12Alto (distribuição não recorrente), mediana dos 'dados.mesesRecentes' últimos meses abaixo de rendimentoRecenteMinimoSobre12m da mediana dos 12 meses (corte de rendimento) ou média dos 12 meses acima de picoDeRendimentoMaximo vezes a mediana (o DY de 12 meses depende de poucos meses atípicos: pagamento extra, pico no informe ou rendimento de antes de um corte) NÃO entra no ranking: vai para 'a conferir', sem posição, até alguém confirmar o dado numa fonte pública (e registrar em 'conferencia'). As duas últimas regras usam MEDIANA de propósito: um mês com DY zero no informe (GTWR11, BRCO11) não pode decidir sozinho. Sai antes de calcular os ranks, para não distorcer a nota dos demais. Também vai para a conferência o fundo com salto de preço de um dia para o outro acima de saltoDePrecoDiario (25%) nos últimos pregões do histórico diário: cota que mudou de base (desdobramento ou grupamento) deixa o P/VP sem sentido.",
+    "picoDeRendimentoMaximo": 1.25,
+    "saltoDePrecoDiario": 0.25
+  },
+  "conferencia": {
+    "validadeDias": 90,
+    "fundos": {
+      "BRCR11": {
+        "conferidoEm": "2026-10-07",
+        "fonte": "Investidor10 (investidor10.com.br/fiis/brcr11), comparado com o informe da CVM",
+        "libera": [
+          "pvp_muito_baixo"
+        ],
+        "nota": "Valor patrimonial por cota (R$ 80,78 × 80,71 da CVM) e patrimônio (R$ 2,15 bi) batem; cota e valor patrimonial na mesma base. Rendimento fixo em R$ 0,41 por mês nos últimos 10 meses. Desconto real, com vacância de 10,4% no site. A conferência cobre a BASE DOS DADOS, não a qualidade dos imóveis."
+      },
+      "OUJP11": {
+        "conferidoEm": "2026-10-07",
+        "fonte": "Investidor10 (investidor10.com.br/fiis/oujp11), comparado com o informe da CVM",
+        "libera": [
+          "dy_alto"
+        ],
+        "nota": "Valor patrimonial por cota (R$ 97,10) e patrimônio (R$ 315,8 mi) batem. DY alto recorrente: R$ 1,03 a R$ 1,58 por mês nos últimos 10 meses, sem corte. Fundo de papel de alto retorno: o risco é de crédito, que esta conferência NÃO avalia."
+      },
+      "TGAR11": {
+        "conferidoEm": "2026-10-07",
+        "fonte": "Investidor10 (investidor10.com.br/fiis/tgar11), comparado com o informe da CVM",
+        "libera": [
+          "pvp_muito_baixo",
+          "dy_alto"
+        ],
+        "nota": "Valor patrimonial por cota (R$ 106,64) e patrimônio (R$ 2,51 bi) batem com a CVM; rendimento de 12 meses de R$ 9,73 igual à nossa estimativa (R$ 9,727); cota e valor patrimonial na mesma base. Rendimento estável (R$ 0,70 a R$ 0,72 por mês, com R$ 1,00 em janeiro). FUNDO DE DESENVOLVIMENTO: a receita é menos previsível que a de um fundo de renda, e a cota caiu 34% em 12 meses. Aceito no ranking por decisão do responsável; a conferência cobre a base dos dados, não a qualidade do fundo."
+      }
+    },
+    "_leia": "Conferência manual de dado, feita pelo responsável ou por quem ele indicar, numa fonte pública. 'libera' lista SÓ os alertas que a conferência cobre: um alerta novo volta a segurar o fundo. Vale por validadeDias dias a partir de conferidoEm; depois volta para 'a conferir'. Conferir o dado não é recomendar o fundo: P/VP baixo e DY alto continuam podendo refletir risco real."
+  },
+  "publicacao": {
+    "aprovadoPeloResponsavel": true,
+    "aprovacao": {
+      "por": "responsável pelo projeto (Leonardo Daher)",
+      "data": "2026-10-07",
+      "escopo": "Publicar o Top 15 de FIIs baratos (Tijolo e Papel) no app, SOMENTE com acesso por código do mês. Os pontos de enquadramento regulatório (parecer independente, D22) continuam com o responsável."
+    },
+    "_leia": "Publicação (D65). Com aprovadoPeloResponsavel = false, o job só grava a trilha de auditoria e o app mostra \"em validação\". Com true E a trava de sanidade aprovada, o ranking chega ao app por acesso com CÓDIGO do mês (o código próprio dos FIIs, TOP15_FIIS_CODIGOS, diferente do das ações (D66)): o arquivo público do app traz só o cabeçalho e a lista fica em dados-privados/fii-baratos.json, lida só por api/top15-fiis.ts depois de conferir o código. O texto de aviso mostrado na tela é publicacao.aviso (ou, se não houver, avisoProposto). enquadramento é a proposta registrada para o responsável.",
+    "sanidade": {
+      "minimoNoRankingTijolo": 15,
+      "minimoNoRankingPapel": 10,
+      "maximoFracaoSemDados": 0.15,
+      "_leia": "Se o resultado é claramente inverossímil (grupo pequeno demais ou muitos fundos sem dado utilizável), o job termina com erro depois de gravar a auditoria, para diagnóstico."
+    },
+    "enquadramento": {
+      "status": "Publicação aprovada pelo responsável em 2026-10-07, com acesso por código. Parecer independente de especialista (D22) segue como item dele, antes de divulgar em escala.",
+      "descricao": "Triagem objetiva por fórmula, igual para todos, com dados públicos (Informe Mensal da CVM e Boletim de Preços da B3), regras e parâmetros públicos e auditáveis (trilha de auditoria com insumos congelados e verificação independente). Não considera o perfil de ninguém, não indica compra nem venda, não projeta preço nem rendimento e não promete retorno.",
+      "pontosParaDecisao": [
+        "Mesma base da D22 para o Top 15 de ações (triagem contábil por fórmula, análise jurídica interna sem objeção), mas FIIs têm risco próprio: o desconto no P/VP costuma ser risco de crédito ou de vacância já precificado, e o rendimento é estimado a partir do DY do informe.",
+        "A D22 previu parecer independente de especialista em mercado de capitais antes de divulgar em escala ou de telas que mudem a natureza do conteúdo (ranking de ativos).",
+        "A lista 'a conferir' e a lista de fundos conferidos (config > conferencia) envolvem juízo humano sobre a base dos dados. A regra do projeto é que a conferência valida o DADO (cota, valor patrimonial, rendimento), nunca o mérito do fundo, e fica registrada com data, fonte e prazo de 90 dias.",
+        "O ranking separa Tijolo e Papel por regra objetiva (composição do ativo no informe), sem opinião sobre gestoras ou fundos específicos."
+      ]
+    },
+    "avisoProposto": "Não é recomendação de investimento. Esta lista é uma triagem automática por fórmula, igual para todos, e não considera o seu perfil, seus objetivos nem o preço que faria sentido pagar. Os números vêm do Informe Mensal da CVM e do Boletim de Preços da B3, são do passado, podem conter erros e defasagem de divulgação, e o rendimento por cota é uma estimativa. Fundos “baratos” incluem os que têm problemas reais (vacância, inadimplência, alavancagem, perda de valor): desconto grande no P/VP costuma ser risco que o mercado já está cobrando, não pechincha. Rentabilidade passada não garante rentabilidade futura, os rendimentos não são garantidos e fundos imobiliários podem causar perda de parte ou de todo o dinheiro aplicado. Converse com um profissional certificado antes de investir.",
+    "acesso": {
+      "restritoPorCodigo": true,
+      "instagram": "acarteiraideal"
+    }
+  }
+}

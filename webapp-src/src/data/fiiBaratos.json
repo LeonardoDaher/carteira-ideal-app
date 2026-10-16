@@ -3,15 +3,15 @@
   "acessoRestrito": true,
   "instagram": "acarteiraideal",
   "versaoMetodologia": "1.5.0",
-  "geradoEm": "2026-10-07T17:03:12.757Z",
-  "dataExecucao": "2026-10-07",
+  "geradoEm": "2026-10-16T01:16:59.263Z",
+  "dataExecucao": "2026-10-16",
   "dataCotacoes": "2026-10-07",
-  "ultimoPregaoDiario": "2026-10-06",
+  "ultimoPregaoDiario": "2026-10-14",
   "competenciaReferencia": "2026-08",
-  "pastaAuditoria": "auditoria/fii-baratos/2026-10-07",
-  "hashResultado": "c3e105bf5b3c9a059855f2d68f8d3465104bce26a4b706d5ce197bb49b53ec76",
-  "hashInsumos": "b789eaec5563c4024ee62eef22c0c5aff88d86dc02e78da957d0dbc197765f30",
-  "hashConfig": "db7fb481e849ff694f14131d3a40785ed5df1dbd3e62530ffc3119731bcca3eb",
+  "pastaAuditoria": "auditoria/fii-baratos/2026-10-16",
+  "hashResultado": "49c17c2043a874b5d11a214d6136ace2c3cd815097fcfff138e35ed2d34a7a11",
+  "hashInsumos": "05d29b602f3f14a82e7f255d1ed765aab4be6618cd82c14875f42ac7dbb5e304",
+  "hashConfig": "52e4151b4f1891858892ad3aecd873f6f47676f67503d261015a6cec375abec7",
   "tamanhoDaLista": 15,
   "universo": 218,
   "aviso": "Não é recomendação de investimento. Esta lista é uma triagem automática por fórmula, igual para todos, e não considera o seu perfil, seus objetivos nem o preço que faria sentido pagar. Os números vêm do Informe Mensal da CVM e do Boletim de Preços da B3, são do passado, podem conter erros e defasagem de divulgação, e o rendimento por cota é uma estimativa. Fundos “baratos” incluem os que têm problemas reais (vacância, inadimplência, alavancagem, perda de valor): desconto grande no P/VP costuma ser risco que o mercado já está cobrando, não pechincha. Rentabilidade passada não garante rentabilidade futura, os rendimentos não são garantidos e fundos imobiliários podem causar perda de parte ou de todo o dinheiro aplicado. Converse com um profissional certificado antes de investir.",
@@ -50,13 +50,15 @@
     "conferenciaValidadeDias": 90
   },
   "contagens": {
-    "tijolo": 31,
-    "papel": 16,
-    "aConferir": 5,
-    "exclusoes": 166
+    "tijolo": 30,
+    "papel": 17,
+    "aConferir": 6,
+    "exclusoes": 165
   },
   "tijolo": [],
   "papel": [],
   "aConferir": [],
-  "exclusoes": []
+  "exclusoes": [],
+  "modoAuditoria": "completa",
+  "auditoriaCompletaEm": "2026-10-16"
 }
