@@ -1,0 +1,48 @@
+# Divulgação mensal dos Top 15 (D91): gera o TEXTO das publicações do Instagram (mais negociados, pesos do IFIX e do
+# Ibovespa, e a chamada das listas com código) a partir dos arquivos públicos do app. Sem rede. NÃO posta nada: o
+# responsável lê divulgacao/AAAA-MM/ e publica. Rankings com código nunca entram com ativo no texto (o script para com erro).
+# Roda no dia 2 de cada mês, depois dos jobs diários de Top 15, e sob demanda.
+
+name: Gerar divulgação mensal
+
+on:
+  schedule:
+    - cron: '0 12 2 * *' # dia 2, 12h UTC = 9h de Brasília
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gerar-divulgacao
+  cancel-in-progress: false
+
+jobs:
+  gerar:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Testes da geração do texto
+        run: node --test scripts/gerar-divulgacao.test.mjs
+
+      - name: Gerar o texto do mês
+        run: node scripts/gerar-divulgacao.mjs
+
+      - name: Publicar (commit) se houver mudança
+        run: |
+          if [ -z "$(git status --porcelain divulgacao)" ]; then
+            echo "Sem mudanças."
+            exit 0
+          fi
+          git config user.name "${{ vars.COMMIT_AUTOR_NOME || 'github-actions[bot]' }}"
+          git config user.email "${{ vars.COMMIT_AUTOR_EMAIL || '41898283+github-actions[bot]@users.noreply.github.com' }}"
+          git add divulgacao
+          git commit -m "dados: texto da divulgação mensal ($(date -u +%Y-%m))"
+          git pull --rebase
+          git push

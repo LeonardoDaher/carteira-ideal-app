@@ -1678,3 +1678,17 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 **Limites.** O contorno herdado pode aparecer em texto colorido aninhado dentro de um trecho amarelo (só tratei o `.muted`). `--mc-ouro` (dourado escuro do Minha Carteira) já tinha contraste e ficou como estava. Quem escrever amarelo em outro formato (cor hexadecimal, `rgb`) não é pego pelo seletor inline; o teste cobre só `--accent` e `--warning`.
 
 **Complemento da D90 (16/10/2026): logo.** No tema claro, o anel amarelo da logo também ganhou o contorno preto fino por fora (`drop-shadow` de 0,6 a 0,8 px, duas vezes): na logo do app (`.marca-logo`, `index.css`), na da landing (`.light #profile img`, `style.css`) e nas das páginas geradas (`:root.light .marca img`, `paginas.css`). Os arquivos `logo-mark.svg` e `favicon.svg` não mudaram. Conferido no navegador só a logo do app (computador); landing e páginas geradas não foram abertas.
+
+## D91 (16/10/2026): divulgação mensal dos Top 15 (texto pronto para o Instagram, sem postar)
+
+**Contexto.** A ideia "divulgação mensal automática do ranking" estava nas próximas ideias. Os rankings mudam todo dia útil (D89), então a divulgação é uma foto datada ("até 15/10").
+
+**O que foi feito.** `scripts/gerar-divulgacao.mjs` lê só os arquivos públicos do app (`webapp-src/src/data`), sem rede, e grava `divulgacao/AAAA-MM/` com três textos: (1) carrossel dos mais negociados (ações, FIIs, ETFs e BDRs); (2) carrossel dos 15 maiores pesos do Ibovespa e do IFIX, com o peso de cada posição; (3) chamada das listas com código (ações baratas, FIIs baratos e BDRs com desconto), **sem nenhum ativo**. Workflow "Gerar divulgação mensal" (`.github/workflows/gerar-divulgacao.yml`): dia 2 de cada mês, 12h UTC, e sob demanda; faz commit só da pasta `divulgacao/`.
+
+**Decisões.** (1) **Não posta sozinho:** o responsável lê e publica. Postar exigiria conta comercial ligada à Meta e um token guardado, e publicaria sem leitura humana. (2) Todo texto leva o aviso de que não é recomendação (nos slides e na legenda). (3) A instrução de como pedir o código fica entre colchetes (`[instrução definida pelo responsável]`) até ele definir.
+
+**Travas (o script para com erro):** ranking não publicado; lista com tamanho diferente de 15 ou com ativo repetido; ranking com código marcado como aberto; ranking com código que traga lista no arquivo público (vazaria o que o código protege).
+
+**Testes.** `scripts/gerar-divulgacao.test.mjs` (10). **Mutação:** 12 defeitos introduzidos (cada trava, o formato do percentual, ativo no post das listas com código e o aviso removido de cada slide e legenda); 2 passaram na primeira rodada (aviso só no slide ou só na legenda, porque o teste olhava o texto inteiro) e agora o teste confere os dois; todos são pegos. Um defeito (tirar a trava final que procura a frase do aviso) é equivalente: o aviso vem do mesmo texto fixo, e o teste cobre.
+
+**Limites.** O texto sai de dados do dia do job, não do dia da publicação: se o responsável postar dias depois, as datas ("até 15/10") continuam corretas, mas a lista pode ter mudado. Sem imagens: só o texto de cada slide. O parecer independente da D22 continua pendente para ampliar o alcance.
