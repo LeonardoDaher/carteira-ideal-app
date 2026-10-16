@@ -11,9 +11,11 @@
 # (webapp-src/src/data/fiiBaratos.json) traz só o cabeçalho, sem nenhum fundo; a lista fica em
 # dados-privados/fii-baratos.json, entregue por api/top15-fiis só a quem tem o código.
 #
-# Roda no dia 21 de cada mês, um dia depois do job de rendimentos de FIIs (dia 20), para usar as
-# cotações novas, e sob demanda. Se a cotação for mais velha que dados.cotacaoMaxIdadeDias, os
-# fundos saem com o motivo "cotacao_defasada".
+# Roda TODO DIA ÚTIL (D89), depois do preço diário dos FIIs (22h15 de Brasília), e sob demanda. Na primeira execução do mês
+# (ou se os parâmetros ou o código de cálculo mudarem, ou com "auditoria completa" marcada) baixa o informe da CVM e grava a
+# pasta de auditoria completa; nos outros dias reaproveita o informe congelado nessa pasta, troca só o preço diário e CONFERE o
+# cálculo de forma independente em memória antes de publicar (sem pasta nova). Se a cotação for mais velha que
+# dados.cotacaoMaxIdadeDias, os fundos saem com o motivo "cotacao_defasada".
 #
 # Se qualquer etapa falhar (layout da CVM mudou, resultado inverossímil, verificação divergente), o
 # job termina com erro SEM guardar a auditoria no repositório (ela fica como artefato do workflow) e
@@ -23,8 +25,17 @@ name: Atualizar FIIs Baratos
 
 on:
   schedule:
-    - cron: '0 6 21 * *' # dia 21, 06h UTC = 03h de Brasília
+    - cron: '45 2 * * 2-6' # terça a sábado, 02h45 UTC = segunda a sexta, 23h45 de Brasília
   workflow_dispatch:
+    inputs:
+      auditoria_completa:
+        description: 'Baixar o informe da CVM e gravar a pasta de auditoria completa mesmo que já exista uma neste mês'
+        type: boolean
+        required: false
+        default: false
+
+env:
+  COMPLETA: ${{ github.event.inputs.auditoria_completa == 'true' && '--completa' || '' }}
 
 permissions:
   contents: write
@@ -46,10 +57,10 @@ jobs:
           cache: npm
 
       - name: Testes da metodologia (cálculo, extração e auditoria)
-        run: node --test scripts/fii-baratos.test.mjs
+        run: node --test scripts/fii-baratos.test.mjs scripts/auditoria-diaria.test.mjs
 
       - name: Baixar o informe da CVM, calcular e gravar a auditoria
-        run: node scripts/atualizar-fii-baratos.mjs
+        run: node scripts/atualizar-fii-baratos.mjs $COMPLETA
 
       - name: Guardar a auditoria desta execução (mesmo se algo falhar)
         if: always()

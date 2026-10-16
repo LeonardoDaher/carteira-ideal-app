@@ -24,6 +24,7 @@ import { INDICES, baixarComposicao } from './b3-indices.mjs'
 import { limparNome } from './atualizar-etfs.mjs'
 import { criarFiltroBdr, nomeDe, setorDe } from './atualizar-bdrs.mjs'
 import { executarCli } from './top15-mercado-verificar.mjs'
+import { conferirEmMemoria, decidirModo, lerAuditoriaCompleta } from './auditoria-diaria.mjs'
 
 const RAIZ_PADRAO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const ESQUEMA = 'top15-mercado/1'
@@ -278,7 +279,7 @@ O comando recalcula o resultado só com \`insumos.json.gz\` + \`config.json\` e 
 // Execução
 // ---------------------------------------------------------------------------------------
 
-export function executar({ classe, raiz = RAIZ_PADRAO, hoje = null, log = console.log } = {}) {
+export function executar({ classe, raiz = RAIZ_PADRAO, hoje = null, log = console.log, diaria = false, forcarCompleta = false } = {}) {
   const c = CLASSES[classe]
   if (!c) throw new Error(`Classe inválida. Use: ${Object.keys(CLASSES).join(', ')}.`)
   const cfg = lerJson(path.join(raiz, 'config', c.config))
@@ -302,7 +303,7 @@ export function executar({ classe, raiz = RAIZ_PADRAO, hoje = null, log = consol
     insumos = montarInsumosAcoes({ historico, busca: acoes.busca, setores: acoes.setores, cfg, dataExecucao })
   } else if (classe === 'bdrs-negociados') insumos = montarInsumosBdrsNegociados({ historico, configBdrs: lerJson(path.join(raiz, 'config', 'bdrs.json')), cfg, dataExecucao })
   else insumos = montarInsumosBdrs({ historico, configBdrs: lerJson(path.join(raiz, 'config', 'bdrs.json')), cfg, dataExecucao })
-  return concluir({ raiz, classe, cfg, insumos, fontes, log })
+  return concluir({ raiz, classe, cfg, insumos, fontes, log, diaria, forcarCompleta })
 }
 
 /**
@@ -310,7 +311,7 @@ export function executar({ classe, raiz = RAIZ_PADRAO, hoje = null, log = consol
  * da resposta bruta entram no manifesto; a verificação independente usa só a tabela gravada nos insumos.
  * `composicaoLocal` (testes) substitui o download.
  */
-export async function executarIndice({ classe, raiz = RAIZ_PADRAO, hoje = null, log = console.log, fetchImpl = fetch, composicaoLocal = null } = {}) {
+export async function executarIndice({ classe, raiz = RAIZ_PADRAO, hoje = null, log = console.log, fetchImpl = fetch, composicaoLocal = null, diaria = false, forcarCompleta = false } = {}) {
   const c = CLASSES[classe]
   if (!c || !CLASSES_INDICE.includes(classe)) throw new Error(`Classe de índice inválida. Use: ${CLASSES_INDICE.join(', ')}.`)
   const cfg = lerJson(path.join(raiz, 'config', c.config))
@@ -335,21 +336,35 @@ export async function executarIndice({ classe, raiz = RAIZ_PADRAO, hoje = null, 
     fontes.push({ papel: 'Segmento dos FIIs (job de FIIs)', url: 'webapp-src/src/data/rendimentosFii.json (neste repositório)', arquivo: 'rendimentosFii.json', bytes: fs.statSync(arq).size, sha256: hashArquivo(arq) })
   }
   const insumos = montarInsumosIndice({ classe, composicao, historico, apoio: { porTicker }, cfg, dataExecucao })
-  return concluir({ raiz, classe, cfg, insumos, fontes, log })
+  return concluir({ raiz, classe, cfg, insumos, fontes, log, diaria, forcarCompleta })
 }
 
 /** Calcula e grava a auditoria e o app. Separado para os testes poderem alimentar insumos prontos. */
-export function concluir({ raiz, classe, cfg, insumos, fontes = [], log = console.log, agora = new Date() }) {
+export function concluir({ raiz, classe, cfg, insumos, fontes = [], log = console.log, agora = new Date(), diaria = false, forcarCompleta = false }) {
   const c = CLASSES[classe]
   const { resultado, memoria } = c.calcular(insumos, cfg)
   const hashes = { config: sha256(canonico(cfg)), insumos: sha256(canonico(insumos)), resultado: hashDoResultado(resultado), memoria: sha256(canonico(memoria)) }
 
+  // D89: com `diaria`, só a primeira execução do mês (ou uma mudança de parâmetros/código) grava a pasta de auditoria.
+  let modo = 'completa'
+  let anteriorCompleta = null
+  if (diaria) {
+    const { ultima, manifesto: manifestoCompleta } = lerAuditoriaCompleta(raiz, c.pasta)
+    const decisao = decidirModo({ ultima, manifesto: manifestoCompleta, hoje: insumos.dataExecucao, hashConfig: hashes.config, calculoSha256: hashArquivo(path.join(raiz, 'scripts', 'top15-mercado-calculo.mjs')), forcarCompleta })
+    log(`Auditoria: ${decisao.modo === 'completa' ? 'COMPLETA' : 'diária (recalcula e confere, sem pasta nova)'} · ${decisao.motivo}`)
+    if (decisao.modo === 'diaria') { modo = 'diaria'; anteriorCompleta = ultima }
+  }
+
   const rel = path.join('auditoria', c.pasta, insumos.dataExecucao)
   const pasta = path.join(raiz, rel)
-  const relPosix = rel.replace(/\\/g, '/')
-  const anterior = fs.existsSync(path.join(pasta, 'manifesto.json')) ? lerJson(path.join(pasta, 'manifesto.json')) : null
+  const relPosix = modo === 'diaria' ? anteriorCompleta.pasta : rel.replace(/\\/g, '/')
+  const anterior = modo === 'completa' && fs.existsSync(path.join(pasta, 'manifesto.json')) ? lerJson(path.join(pasta, 'manifesto.json')) : null
   const inalterado = anterior && anterior.hashes.insumos === hashes.insumos && anterior.hashes.resultado === hashes.resultado && anterior.hashes.config === hashes.config
-  if (inalterado) {
+  if (modo === 'diaria') {
+    const problemas = conferirEmMemoria({ calcular: c.calcular, canonico, sha256, hashDoResultado, insumos, cfg, hashes })
+    if (problemas.length) throw new Error(`Conferência independente falhou: ${problemas.join('; ')}. Nada foi publicado.`)
+    log('Conferência independente: OK (insumos e config relidos, cálculo refeito do zero, hash do resultado confere).')
+  } else if (inalterado) {
     log('Sem mudança em relação à auditoria já gravada para esta data (mesmos insumos, config e resultado).')
   } else {
     fs.mkdirSync(pasta, { recursive: true })
@@ -386,12 +401,17 @@ export function concluir({ raiz, classe, cfg, insumos, fontes = [], log = consol
 
   // Trava de sanidade ANTES de tocar no app.
   const problemas = verificarSanidade(resultado, cfg.publicacao)
-  if (problemas.length) throw new Error(`Resultado barrado pela trava de sanidade: ${problemas.join('; ')}. A auditoria foi gravada em ${relPosix} para diagnóstico; o app não foi alterado.`)
+  if (problemas.length) throw new Error(`Resultado barrado pela trava de sanidade: ${problemas.join('; ')}. ${modo === 'diaria' ? 'Nenhuma pasta foi gravada' : `A auditoria foi gravada em ${relPosix} para diagnóstico`}; o app não foi alterado.`)
 
   const publicado = cfg.publicacao?.aprovadoPeloResponsavel === true
-  const manifesto = lerJson(path.join(pasta, 'manifesto.json'))
-  if (manifesto.publicadoNoApp !== publicado) gravarJson(path.join(pasta, 'manifesto.json'), { ...manifesto, publicadoNoApp: publicado })
-  const snapshot = montarSnapshotApp({ classe, resultado, cfg, manifesto, pasta: relPosix, publicado })
+  // Na execução diária não há manifesto novo: o do dia leva a impressão digital de hoje e aponta para a pasta completa do mês.
+  let manifesto
+  if (modo === 'diaria') manifesto = { geradoEm: agora.toISOString(), hashes }
+  else {
+    manifesto = lerJson(path.join(pasta, 'manifesto.json'))
+    if (manifesto.publicadoNoApp !== publicado) gravarJson(path.join(pasta, 'manifesto.json'), { ...manifesto, publicadoNoApp: publicado })
+  }
+  const snapshot = { ...montarSnapshotApp({ classe, resultado, cfg, manifesto, pasta: relPosix, publicado }), modoAuditoria: modo, auditoriaCompletaEm: path.posix.basename(relPosix) }
   const { publico, privado } = separarSnapshot(classe, snapshot)
   fs.mkdirSync(path.join(raiz, 'webapp-src', 'src', 'data'), { recursive: true })
   gravarJson(path.join(raiz, c.snapshotApp), publico)
@@ -399,8 +419,8 @@ export function concluir({ raiz, classe, cfg, insumos, fontes = [], log = consol
     fs.mkdirSync(path.join(raiz, 'dados-privados'), { recursive: true })
     gravarJson(path.join(raiz, c.privado), privado)
   }
-  log(publicado ? (snapshot.acessoRestrito ? 'App: ranking PUBLICADO com acesso por código (lista em dados-privados/).' : 'App: ranking PUBLICADO (acesso aberto).') : 'App: ranking NÃO publicado (aprovadoPeloResponsavel = false). A auditoria completa foi gravada.')
-  return { resultado, hashes, pasta, publicado }
+  log(publicado ? (snapshot.acessoRestrito ? 'App: ranking PUBLICADO com acesso por código (lista em dados-privados/).' : 'App: ranking PUBLICADO (acesso aberto).') : `App: ranking NÃO publicado (aprovadoPeloResponsavel = false).${modo === 'diaria' ? '' : ' A auditoria completa foi gravada.'}`)
+  return { resultado, hashes, pasta: modo === 'diaria' ? path.join(raiz, relPosix) : pasta, publicado, modo }
 }
 
 /** O que o app lê. Sem aprovação do responsável, vai só o cabeçalho (o app mostra "em validação"). */
@@ -469,8 +489,10 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
     const classe = process.argv[2]
     const data = process.argv.find((x) => x.startsWith('--data='))?.slice(7) ?? null
     if (process.argv.includes('--verificar')) process.exit(executarCli(classe))
-    if (CLASSES_INDICE.includes(classe)) await executarIndice({ classe, hoje: data })
-    else executar({ classe, hoje: data })
+    // D89: por padrão a execução é "diária" (grava a pasta de auditoria só na primeira do mês); --completa força a pasta.
+    const opcoes = { classe, hoje: data, diaria: true, forcarCompleta: process.argv.includes('--completa') }
+    if (CLASSES_INDICE.includes(classe)) await executarIndice(opcoes)
+    else executar(opcoes)
     process.exit(executarCli('ultima', classe))
   } catch (e) {
     console.error(`ERRO: ${e.message}`)

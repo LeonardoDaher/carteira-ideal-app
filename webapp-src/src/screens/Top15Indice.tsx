@@ -1,5 +1,6 @@
 import { Fragment } from 'react'
 import { SNAPSHOT_IBOV_MAIORES_PESOS, SNAPSHOT_IFIX_MAIORES_PESOS } from '../data/snapshotTop15Mercado'
+import { introAuditoria, notaAuditoriaDiaria } from '../domain/auditoriaDiaria'
 import { formatarVolumeDiario } from '../domain/fiiBaratos'
 import { formatarData } from '../domain/rendaFii'
 import type { ItemIndice, SnapshotIndice } from '../domain/top15Mercado'
@@ -121,10 +122,11 @@ export function Top15Indice({ classe, snapshot }: { classe: ClasseIndice; snapsh
         <summary style={{ cursor: 'pointer', fontWeight: 700 }}>Auditoria e verificação</summary>
         <div className="col small justify" style={{ gap: 8, lineHeight: 1.5, marginTop: 8 }}>
           <span>
-            Toda execução grava, no repositório do projeto, a pasta <code>{s.pastaAuditoria ?? t.pastaPadrao}</code> com a carteira completa da B3 (todos os pesos), o endereço e a impressão digital (sha256) da resposta da B3, o resultado e
+            {introAuditoria(s)} <code>{s.pastaAuditoria ?? t.pastaPadrao}</code> com a carteira completa da B3 (todos os pesos), o endereço e a impressão digital (sha256) da resposta da B3, o resultado e
             o motivo de cada número.
           </span>
-          <span>Para refazer o cálculo, sem internet, e conferir se o resultado é o mesmo:</span>
+          {notaAuditoriaDiaria(s) && <span>{notaAuditoriaDiaria(s)}</span>}
+        <span>Para refazer o cálculo, sem internet, e conferir se o resultado é o mesmo:</span>
           <code style={{ display: 'block', overflowX: 'auto', whiteSpace: 'pre', padding: '6px 8px', borderRadius: 8, background: 'var(--surface2)' }}>
             node scripts/top15-mercado-verificar.mjs {s.pastaAuditoria ?? '…'}
           </code>

@@ -4,6 +4,7 @@ import { SNAPSHOT_BDRS_DESCONTO } from '../data/snapshotTop15Mercado'
 import { CHAVE_CODIGO_TOP15_BDRS, buscarTop15Bdrs } from '../domain/acessoTop15'
 import type { RespostaTop15Bdrs } from '../domain/acessoTop15'
 import { formatarPercentual } from '../domain/acoesBaratas'
+import { introAuditoria, notaAuditoriaDiaria } from '../domain/auditoriaDiaria'
 import { formatarVariacao } from '../domain/bdrs'
 import { formatarVolumeDiario } from '../domain/fiiBaratos'
 import { formatarData } from '../domain/rendaFii'
@@ -248,9 +249,10 @@ function Auditoria({ snapshot: s }: { snapshot: SnapshotBdrsDesconto }) {
       <summary style={{ cursor: 'pointer', fontWeight: 700 }}>Auditoria e verificação</summary>
       <div className="col small justify" style={{ gap: 8, lineHeight: 1.5, marginTop: 8 }}>
         <span>
-          Toda execução grava, no repositório do projeto, a pasta <code>{s.pastaAuditoria ?? 'auditoria/top15-bdrs/…'}</code> com os preços e volumes usados, os desdobramentos aplicados, o resultado, a conta de cada desconto e o motivo
+          {introAuditoria(s)} <code>{s.pastaAuditoria ?? 'auditoria/top15-bdrs/…'}</code> com os preços e volumes usados, os desdobramentos aplicados, o resultado, a conta de cada desconto e o motivo
           de cada exclusão.
         </span>
+        {notaAuditoriaDiaria(s) && <span>{notaAuditoriaDiaria(s)}</span>}
         <span>Para refazer o cálculo, sem internet, e conferir se o resultado é o mesmo:</span>
         <code style={{ display: 'block', overflowX: 'auto', whiteSpace: 'pre', padding: '6px 8px', borderRadius: 8, background: 'var(--surface2)' }}>
           node scripts/top15-mercado-verificar.mjs {s.pastaAuditoria ?? '…'}

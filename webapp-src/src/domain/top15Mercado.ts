@@ -4,6 +4,8 @@
  * mostra, sem recalcular nem reordenar, para a tela ser sempre igual à pasta de auditoria.
  */
 
+import type { CampoAuditoriaDiaria } from './auditoriaDiaria'
+
 export interface ExclusaoMercado {
   ticker: string
   nome: string | null
@@ -13,7 +15,7 @@ export interface ExclusaoMercado {
   motivo: string
 }
 
-export interface CabecalhoMercado {
+export interface CabecalhoMercado extends CampoAuditoriaDiaria {
   publicado: boolean
   versaoMetodologia: string
   geradoEm: string | null

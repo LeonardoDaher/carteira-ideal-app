@@ -25,6 +25,7 @@ import { competenciaDe, lerCsv, lerNumero, prefixoTickerDoIsin, somenteDigitos }
 import { ultimosPregoes } from './atualizar-fiis-historico.mjs'
 import { calcular, canonico, hashDoResultado, sha256, verificarSanidade } from './fii-baratos-calculo.mjs'
 import { executarCli, verificar } from './fii-baratos-verificar.mjs'
+import { conferirEmMemoria, decidirModo, lerAuditoriaCompleta } from './auditoria-diaria.mjs'
 
 export { verificar }
 
@@ -127,6 +128,28 @@ export function montarInsumos({ complemento, geral, ativo, snapshot, cfg, dataEx
   return { esquema: ESQUEMA, dataExecucao, dataCotacoes: (snapshot.geradoEm ?? '').slice(0, 10), pregoesDiarios, contagemPorCompetencia, medianaDyPorCompetencia, fundos }
 }
 
+/**
+ * Modo diário (D89): parte dos insumos CONGELADOS da última auditoria completa (informe da CVM do mês) e troca só o que se
+ * move com o mercado: a série de preço diário da B3 e, do job de FIIs, cotação, volume, nome e segmento. Com os mesmos
+ * dados de entrada devolve exatamente os insumos de `montarInsumos` (o teste fixa isso).
+ */
+export function atualizarPrecosDosInsumos({ congelados, snapshot, historicoPrecos, cfg, dataExecucao }) {
+  const porTicker = new Map((snapshot.fundos ?? []).map((f) => [f.ticker, f]))
+  const complementados = new Set(historicoPrecos?.complementadosPelaBrapi ?? [])
+  const fundos = congelados.fundos.map((f) => {
+    const s = porTicker.get(f.ticker)
+    const mercado = s ? { nome: s.nome ?? null, setor: s.setor ?? null, cotacao: s.cotacao ?? null, dataCotacao: s.dataCotacao ?? null, volumeMedio: s.volumeMedio ?? null, volumeMediano: s.volumeMediano ?? null } : {}
+    return {
+      ...f,
+      ...mercado,
+      precoDiario: historicoPrecos ? ultimosPregoes(historicoPrecos, f.ticker.toUpperCase(), cfg.dados.pregoesPrecoDiario).serie : null,
+      precoDiarioFonte: complementados.has(f.ticker.toUpperCase()) ? 'brapi' : 'B3',
+    }
+  })
+  const pregoesDiarios = historicoPrecos ? (historicoPrecos.pregoes ?? []).slice(-cfg.dados.pregoesPrecoDiario) : []
+  return { ...congelados, dataExecucao, dataCotacoes: (snapshot.geradoEm ?? '').slice(0, 10), pregoesDiarios, fundos }
+}
+
 // ---------------------------------------------------------------------------------------
 // Saída: CSVs e auditoria
 // ---------------------------------------------------------------------------------------
@@ -180,13 +203,32 @@ Em \`memoria-de-calculo.json.gz\`, localize o ticker: cada competência traz o D
 // Execução
 // ---------------------------------------------------------------------------------------
 
-export async function executar({ raiz = RAIZ_PADRAO, dadosLocais = null, hoje = null, log = console.log, fetchImpl = fetch } = {}) {
+export async function executar({ raiz = RAIZ_PADRAO, dadosLocais = null, hoje = null, log = console.log, fetchImpl = fetch, diaria = false, forcarCompleta = false } = {}) {
   const cfg = lerJson(path.join(raiz, 'config', 'fii-baratos.json'))
   const snapshot = lerJson(path.join(raiz, 'webapp-src', 'src', 'data', 'rendimentosFii.json'))
   if (!snapshot.fundos?.length) throw new Error('rendimentosFii.json sem fundos: rode antes o job de FIIs.')
   const dataExecucao = hoje ?? new Date().toISOString().slice(0, 10)
   const ano = Number(dataExecucao.slice(0, 4))
   log(`Triagem de FIIs baratos: ${snapshot.fundos.length} fundos no job de FIIs · cotações de ${(snapshot.geradoEm ?? '?').slice(0, 10)} · execução em ${dataExecucao}`)
+
+  // D89: execução diária reaproveita o informe da CVM congelado na última auditoria completa do mês e troca só o preço.
+  if (diaria) {
+    const { ultima, manifesto } = lerAuditoriaCompleta(raiz, 'fii-baratos')
+    const arquivoPrecosDiarios = path.join(raiz, 'historico', 'fiis.json')
+    const decisao = decidirModo({ ultima, manifesto, hoje: dataExecucao, hashConfig: sha256(canonico(cfg)), calculoSha256: sha256Arquivo(path.join(raiz, 'scripts', 'fii-baratos-calculo.mjs')), forcarCompleta })
+    let congelados = null
+    if (decisao.modo === 'diaria') {
+      try { congelados = JSON.parse(zlib.gunzipSync(fs.readFileSync(path.join(raiz, ultima.pasta, 'insumos.json.gz'))).toString('utf8')) } catch { congelados = null }
+    }
+    if (decisao.modo === 'diaria' && congelados && fs.existsSync(arquivoPrecosDiarios)) {
+      log(`Auditoria: diária (recalcula e confere, sem pasta nova) · ${decisao.motivo}`)
+      const historicoPrecos = lerJson(arquivoPrecosDiarios)
+      log(`  preço diário: ${historicoPrecos.pregoes?.length ?? 0} pregões, último de ${historicoPrecos.pregoes?.at(-1) ?? '?'} · informe da CVM congelado em ${path.posix.basename(ultima.pasta)}`)
+      const insumos = atualizarPrecosDosInsumos({ congelados, snapshot, historicoPrecos, cfg, dataExecucao })
+      return concluir({ raiz, cfg, insumos, fontes: [], log, diaria: { pasta: ultima.pasta } })
+    }
+    log(`Auditoria: COMPLETA · ${decisao.modo === 'diaria' ? 'não foi possível reaproveitar os insumos congelados' : decisao.motivo}`)
+  }
 
   const pastaTemp = dadosLocais ?? fs.mkdtempSync(path.join(os.tmpdir(), 'fii-baratos-'))
   const fontes = []
@@ -236,15 +278,21 @@ export async function executar({ raiz = RAIZ_PADRAO, dadosLocais = null, hoje = 
 }
 
 /** Calcula e grava a auditoria. Separado para os testes poderem alimentar insumos prontos. */
-export function concluir({ raiz, cfg, insumos, fontes = [], log = console.log, agora = new Date() }) {
+export function concluir({ raiz, cfg, insumos, fontes = [], log = console.log, agora = new Date(), diaria = null }) {
   const { resultado, memoria } = calcular(insumos, cfg)
   const hashes = { config: sha256(canonico(cfg)), insumos: sha256(canonico(insumos)), resultado: hashDoResultado(resultado), memoria: sha256(canonico(memoria)) }
 
-  const rel = path.join('auditoria', 'fii-baratos', insumos.dataExecucao)
+  // `diaria` = { pasta } da auditoria completa do mês (D89): recalcula, confere e publica sem gravar pasta nova.
+  const rel = diaria ? diaria.pasta : path.join('auditoria', 'fii-baratos', insumos.dataExecucao)
+  const relPosix = rel.replace(/\\/g, '/')
   const pasta = path.join(raiz, rel)
-  const anterior = fs.existsSync(path.join(pasta, 'manifesto.json')) ? lerJson(path.join(pasta, 'manifesto.json')) : null
+  const anterior = !diaria && fs.existsSync(path.join(pasta, 'manifesto.json')) ? lerJson(path.join(pasta, 'manifesto.json')) : null
   const inalterado = anterior && anterior.hashes.insumos === hashes.insumos && anterior.hashes.resultado === hashes.resultado && anterior.hashes.config === hashes.config
-  if (inalterado) {
+  if (diaria) {
+    const problemas = conferirEmMemoria({ calcular, canonico, sha256, hashDoResultado, insumos, cfg, hashes })
+    if (problemas.length) throw new Error(`Conferência independente falhou: ${problemas.join('; ')}. Nada foi publicado.`)
+    log('Conferência independente: OK (insumos e config relidos, cálculo refeito do zero, hash do resultado confere).')
+  } else if (inalterado) {
     log('Sem mudança em relação à auditoria já gravada para esta data (mesmos insumos, config e resultado).')
   } else {
     fs.mkdirSync(pasta, { recursive: true })
@@ -286,20 +334,24 @@ export function concluir({ raiz, cfg, insumos, fontes = [], log = console.log, a
 
   // Trava de sanidade ANTES de tocar no app: resultado inverossímil derruba o job e o app fica como estava.
   const problemas = verificarSanidade(resultado, cfg)
-  if (problemas.length) throw new Error(`Resultado barrado pela trava de sanidade: ${problemas.join('; ')}. A auditoria foi gravada em ${rel} para diagnóstico (veja exclusoes.csv); o app não foi alterado.`)
+  if (problemas.length) throw new Error(`Resultado barrado pela trava de sanidade: ${problemas.join('; ')}. ${diaria ? 'Nenhuma pasta foi gravada' : `A auditoria foi gravada em ${rel} para diagnóstico (veja exclusoes.csv)`}; o app não foi alterado.`)
 
   // Publicação (decisão D65): só com a aprovação do responsável. Sem ela, o app recebe só o cabeçalho (mostra "em validação").
   const publicado = cfg.publicacao?.aprovadoPeloResponsavel === true
-  const manifesto = lerJson(path.join(pasta, 'manifesto.json'))
-  if (manifesto.publicadoNoApp !== publicado) gravarJson(path.join(pasta, 'manifesto.json'), { ...manifesto, publicadoNoApp: publicado })
-  const snapshot = montarSnapshotApp({ resultado, cfg, manifesto, pasta: rel.replace(/\\/g, '/'), publicado })
+  let manifesto
+  if (diaria) manifesto = { geradoEm: agora.toISOString(), hashes }
+  else {
+    manifesto = lerJson(path.join(pasta, 'manifesto.json'))
+    if (manifesto.publicadoNoApp !== publicado) gravarJson(path.join(pasta, 'manifesto.json'), { ...manifesto, publicadoNoApp: publicado })
+  }
+  const snapshot = { ...montarSnapshotApp({ resultado, cfg, manifesto, pasta: relPosix, publicado }), modoAuditoria: diaria ? 'diaria' : 'completa', auditoriaCompletaEm: path.posix.basename(relPosix) }
   const { publico, privado } = separarSnapshot(snapshot)
   fs.mkdirSync(path.join(raiz, 'webapp-src', 'src', 'data'), { recursive: true })
   gravarJson(path.join(raiz, 'webapp-src', 'src', 'data', 'fiiBaratos.json'), publico)
   fs.mkdirSync(path.join(raiz, 'dados-privados'), { recursive: true })
   gravarJson(path.join(raiz, 'dados-privados', 'fii-baratos.json'), privado)
-  log(publicado ? (snapshot.acessoRestrito ? 'App: ranking PUBLICADO com acesso por código (lista em dados-privados/, servida por api/top15-fiis).' : 'App: ranking PUBLICADO (acesso aberto).') : 'App: ranking NÃO publicado (aprovadoPeloResponsavel = false). A auditoria completa foi gravada.')
-  return { resultado, hashes, pasta, publicado }
+  log(publicado ? (snapshot.acessoRestrito ? 'App: ranking PUBLICADO com acesso por código (lista em dados-privados/, servida por api/top15-fiis).' : 'App: ranking PUBLICADO (acesso aberto).') : `App: ranking NÃO publicado (aprovadoPeloResponsavel = false).${diaria ? '' : ' A auditoria completa foi gravada.'}`)
+  return { resultado, hashes, pasta, publicado, modo: diaria ? 'diaria' : 'completa' }
 }
 
 /**
@@ -375,7 +427,8 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
   try {
     const pastaVerificar = argumento('verificar')
     if (pastaVerificar) process.exit(executarCli(pastaVerificar))
-    await executar({ dadosLocais: argumento('dados-locais') ? path.resolve(argumento('dados-locais')) : null, hoje: argumento('data') })
+    // D89: por padrão a execução é "diária" (grava a pasta de auditoria só na primeira do mês); --completa força a pasta.
+    await executar({ dadosLocais: argumento('dados-locais') ? path.resolve(argumento('dados-locais')) : null, hoje: argumento('data'), diaria: true, forcarCompleta: process.argv.includes('--completa') })
   } catch (e) {
     console.error(`ERRO: ${e.message}`)
     process.exit(1)

@@ -1,3 +1,4 @@
+import type { CampoAuditoriaDiaria } from './auditoriaDiaria'
 import { normalizarBusca } from './rendaFii'
 
 /**
@@ -112,7 +113,7 @@ export interface EtapaTriagem {
   saem: number
 }
 
-export interface SnapshotAcoesBaratas {
+export interface SnapshotAcoesBaratas extends CampoAuditoriaDiaria {
   publicado: boolean
   /** Acesso por código (D50): o arquivo do app traz só o cabeçalho; a lista vem de /api/top15. */
   acessoRestrito?: boolean

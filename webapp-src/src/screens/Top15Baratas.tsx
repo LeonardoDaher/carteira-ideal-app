@@ -7,6 +7,7 @@ import {
   CONTAGEM_POR_ETAPA, SEM_FILTROS, buscarExclusao, descreverComponente, formatarMultiplo, formatarPercentual, formatarReaisCompacto, selecionarTop,
 } from '../domain/acoesBaratas'
 import type { ComposicaoLtm, FiltrosQualidade, ItemRanking, SnapshotAcoesBaratas } from '../domain/acoesBaratas'
+import { introAuditoria, notaAuditoriaDiaria } from '../domain/auditoriaDiaria'
 import { formatarData } from '../domain/rendaFii'
 import { PortaoPorCodigo } from '../ui/PortaoPorCodigo'
 
@@ -397,10 +398,11 @@ function Auditoria({ snapshot: s }: { snapshot: SnapshotAcoesBaratas }) {
       <summary style={{ cursor: 'pointer', fontWeight: 700 }}>Auditoria e verificação</summary>
       <div className="col small justify" style={{ gap: 8, lineHeight: 1.5, marginTop: 8 }}>
         <span>
-          Toda execução grava, no repositório do projeto, a pasta <code>{s.pastaAuditoria ?? 'auditoria/acoes-baratas/…'}</code> com: a origem de cada arquivo
+          {introAuditoria(s)} <code>{s.pastaAuditoria ?? 'auditoria/acoes-baratas/…'}</code> com: a origem de cada arquivo
           da CVM (endereço e impressão digital sha256), cada linha das demonstrações usada (conta, versão, período e link do documento), a memória de
           cálculo de cada empresa, a lista de empresas excluídas com o motivo e o ranking completo.
         </span>
+        {notaAuditoriaDiaria(s) && <span>{notaAuditoriaDiaria(s)}</span>}
         <span>Para refazer o cálculo, sem internet, e conferir se o resultado é o mesmo:</span>
         <code style={{ display: 'block', overflowX: 'auto', whiteSpace: 'pre', padding: '6px 8px', borderRadius: 8, background: 'var(--surface2)' }}>
           node scripts/acoes-baratas-verificar.mjs {s.pastaAuditoria ?? '…'}

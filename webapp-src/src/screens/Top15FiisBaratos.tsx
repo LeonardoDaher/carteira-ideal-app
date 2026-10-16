@@ -4,6 +4,7 @@ import { SNAPSHOT_FII_BARATOS } from '../data/snapshotFiiBaratos'
 import { CHAVE_CODIGO_TOP15_FIIS, buscarTop15Fiis } from '../domain/acessoTop15'
 import type { RespostaTop15Fiis } from '../domain/acessoTop15'
 import { buscarExclusao, formatarPercentual, formatarReaisCompacto } from '../domain/acoesBaratas'
+import { introAuditoria, notaAuditoriaDiaria } from '../domain/auditoriaDiaria'
 import { GRUPOS_FII, ROTULO_ALERTA, contarExclusoes, formatarPvp, formatarVolumeDiario, validadeDaConferencia } from '../domain/fiiBaratos'
 import type { GrupoFii, ItemFii, SnapshotFiiBaratos } from '../domain/fiiBaratos'
 import { formatarData } from '../domain/rendaFii'
@@ -317,9 +318,10 @@ function Auditoria({ snapshot: s }: { snapshot: SnapshotFiiBaratos }) {
       <summary style={{ cursor: 'pointer', fontWeight: 700 }}>Auditoria e verificação</summary>
       <div className="col small justify" style={{ gap: 8, lineHeight: 1.5, marginTop: 8 }}>
         <span>
-          Toda execução grava, no repositório do projeto, a pasta <code>{s.pastaAuditoria ?? 'auditoria/fii-baratos/…'}</code> com: a origem de cada arquivo (endereço e impressão digital sha256), cada linha
+          {introAuditoria(s)} <code>{s.pastaAuditoria ?? 'auditoria/fii-baratos/…'}</code> com: a origem de cada arquivo (endereço e impressão digital sha256), cada linha
           do informe da CVM e cada cotação usada, a memória de cálculo de cada fundo, a lista de fundos excluídos com o motivo e os rankings completos.
         </span>
+        {notaAuditoriaDiaria(s) && <span>{notaAuditoriaDiaria(s)}</span>}
         <span>Para refazer o cálculo, sem internet, e conferir se o resultado é o mesmo:</span>
         <code style={{ display: 'block', overflowX: 'auto', whiteSpace: 'pre', padding: '6px 8px', borderRadius: 8, background: 'var(--surface2)' }}>
           node scripts/fii-baratos-verificar.mjs {s.pastaAuditoria ?? '…'}

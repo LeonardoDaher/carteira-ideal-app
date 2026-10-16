@@ -1,5 +1,6 @@
 import { Fragment, useState } from 'react'
 import { SNAPSHOT_ACOES_MAIS_NEGOCIADAS, SNAPSHOT_BDRS_MAIS_NEGOCIADOS, SNAPSHOT_ETFS_MAIS_NEGOCIADOS, SNAPSHOT_FIIS_MAIS_NEGOCIADOS } from '../data/snapshotTop15Mercado'
+import { introAuditoria, notaAuditoriaDiaria } from '../domain/auditoriaDiaria'
 import { formatarVariacao } from '../domain/bdrs'
 import { formatarVolumeDiario } from '../domain/fiiBaratos'
 import { formatarData } from '../domain/rendaFii'
@@ -285,9 +286,10 @@ function Auditoria({ t, s }: { t: Textos; s: SnapshotMaisNegociados }) {
       <summary style={{ cursor: 'pointer', fontWeight: 700 }}>Auditoria e verificação</summary>
       <div className="col small justify" style={{ gap: 8, lineHeight: 1.5, marginTop: 8 }}>
         <span>
-          Toda execução grava, no repositório do projeto, a pasta <code>{s.pastaAuditoria ?? t.pastaPadrao}</code> com os preços e volumes usados, o resultado, o volume de cada dia de cada {t.singular} da lista e o
+          {introAuditoria(s)} <code>{s.pastaAuditoria ?? t.pastaPadrao}</code> com os preços e volumes usados, o resultado, o volume de cada dia de cada {t.singular} da lista e o
           motivo de cada exclusão.
         </span>
+        {notaAuditoriaDiaria(s) && <span>{notaAuditoriaDiaria(s)}</span>}
         <span>Para refazer o cálculo, sem internet, e conferir se o resultado é o mesmo:</span>
         <code style={{ display: 'block', overflowX: 'auto', whiteSpace: 'pre', padding: '6px 8px', borderRadius: 8, background: 'var(--surface2)' }}>
           node scripts/top15-mercado-verificar.mjs {s.pastaAuditoria ?? '…'}

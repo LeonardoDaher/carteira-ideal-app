@@ -12,16 +12,28 @@
 # CÓDIGO do mês próprio (TOP15_BDRS_CODIGOS): o arquivo público (webapp-src/src/data/bdrsDesconto.json) traz só o
 # cabeçalho, sem nenhum BDR; a lista fica em dados-privados/bdr-desconto.json, entregue por api/top15-bdrs.
 #
-# Roda no dia 22 de cada mês (depois do job de FIIs, dia 21) e sob demanda. Se qualquer etapa falhar (resultado
-# inverossímil, verificação divergente), o job termina com erro SEM guardar nada no repositório (a auditoria fica como
-# artefato do workflow) e o GitHub envia e-mail.
+# Roda TODO DIA ÚTIL (D89), depois dos jobs de preço (ETFs 22h, FIIs 22h15, BDRs 22h30, ações 23h de Brasília), e sob demanda.
+# Auditoria: a pasta completa em auditoria/top15-<classe>/<data>/ só é gravada na primeira execução do mês (ou se os
+# parâmetros ou o código de cálculo mudarem, ou com "auditoria completa" marcada na execução manual). Nos outros dias o
+# ranking é recalculado com o preço do dia e CONFERIDO de forma independente em memória antes de publicar.
+# Se qualquer etapa falhar (resultado inverossímil, verificação divergente), o job termina com erro SEM publicar e o
+# GitHub envia e-mail.
 
 name: Atualizar Top 15 ETFs e BDRs
 
 on:
   schedule:
-    - cron: '0 6 22 * *' # dia 22, 06h UTC = 03h de Brasília
+    - cron: '30 2 * * 2-6' # terça a sábado, 02h30 UTC = segunda a sexta, 23h30 de Brasília
   workflow_dispatch:
+    inputs:
+      auditoria_completa:
+        description: 'Gravar a pasta de auditoria completa mesmo que já exista uma neste mês'
+        type: boolean
+        required: false
+        default: false
+
+env:
+  COMPLETA: ${{ github.event.inputs.auditoria_completa == 'true' && '--completa' || '' }}
 
 permissions:
   contents: write
@@ -43,32 +55,32 @@ jobs:
           cache: npm
 
       - name: Testes da metodologia (cálculo, auditoria e publicação)
-        run: node --test scripts/top15-mercado.test.mjs scripts/b3-indices.test.mjs
+        run: node --test scripts/top15-mercado.test.mjs scripts/b3-indices.test.mjs scripts/auditoria-diaria.test.mjs
 
       - name: Ranking de ETFs mais negociados (calcula, grava a auditoria e verifica)
-        run: node scripts/atualizar-top15-mercado.mjs etfs
+        run: node scripts/atualizar-top15-mercado.mjs etfs $COMPLETA
 
       - name: Ranking de BDRs com maior desconto de preço (calcula, grava a auditoria e verifica)
-        run: node scripts/atualizar-top15-mercado.mjs bdrs
+        run: node scripts/atualizar-top15-mercado.mjs bdrs $COMPLETA
 
       - name: Ranking de FIIs mais negociados (calcula, grava a auditoria e verifica)
-        run: node scripts/atualizar-top15-mercado.mjs fiis
+        run: node scripts/atualizar-top15-mercado.mjs fiis $COMPLETA
 
       - name: Ranking de ações mais negociadas (calcula, grava a auditoria e verifica)
-        run: node scripts/atualizar-top15-mercado.mjs acoes
+        run: node scripts/atualizar-top15-mercado.mjs acoes $COMPLETA
 
       - name: Ranking de BDRs mais negociados (calcula, grava a auditoria e verifica)
-        run: node scripts/atualizar-top15-mercado.mjs bdrs-negociados
+        run: node scripts/atualizar-top15-mercado.mjs bdrs-negociados $COMPLETA
 
       - name: Ranking dos maiores pesos do IFIX (baixa a carteira da B3, calcula, grava a auditoria e verifica)
         id: ifix
         continue-on-error: true
-        run: node scripts/atualizar-top15-mercado.mjs ifix
+        run: node scripts/atualizar-top15-mercado.mjs ifix $COMPLETA
 
       - name: Ranking dos maiores pesos do Ibovespa (baixa a carteira da B3, calcula, grava a auditoria e verifica)
         id: ibov
         continue-on-error: true
-        run: node scripts/atualizar-top15-mercado.mjs ibov
+        run: node scripts/atualizar-top15-mercado.mjs ibov $COMPLETA
 
       - name: Guardar a auditoria dos índices que falharam só como artefato (não vai para o repositório)
         if: steps.ifix.outcome == 'failure' || steps.ibov.outcome == 'failure'
@@ -123,7 +135,7 @@ jobs:
           git config user.name "${{ vars.COMMIT_AUTOR_NOME || 'github-actions[bot]' }}"
           git config user.email "${{ vars.COMMIT_AUTOR_EMAIL || '41898283+github-actions[bot]@users.noreply.github.com' }}"
           git add $ALVOS
-          git commit -m "dados: Top 15 mais negociados e BDRs com desconto ($(date -u +%Y-%m-%d))"
+          git commit -m "dados: Top 15 mais negociados, BDRs com desconto e maiores pesos ($(date -u +%Y-%m-%d))"
           git pull --rebase
           git push
 

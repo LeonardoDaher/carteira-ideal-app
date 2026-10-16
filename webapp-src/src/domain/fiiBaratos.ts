@@ -1,4 +1,5 @@
 import type { ExclusaoTriagem } from './acoesBaratas'
+import type { CampoAuditoriaDiaria } from './auditoriaDiaria'
 
 /**
  * Triagem "Top 15 FIIs baratos" (D59 a D65). O ranking é calculado FORA do app, pelo job
@@ -66,7 +67,7 @@ export interface ParametrosFiltroFii {
   dy12Maximo?: number
 }
 
-export interface SnapshotFiiBaratos {
+export interface SnapshotFiiBaratos extends CampoAuditoriaDiaria {
   publicado: boolean
   /** Acesso por código (D50): o arquivo do app traz só o cabeçalho; a lista vem de /api/top15-fiis. */
   acessoRestrito?: boolean

@@ -214,6 +214,16 @@ Qualquer alteração de parâmetro, de conta ou de fórmula: (1) muda `config/ac
 
 `scripts/acoes-baratas.test.mjs` cobre: estatística (ranks, quantis, volatilidade), leitura de CSV no layout da CVM com fixtures (`scripts/fixtures/cvm`, geradas por `gerar-fixtures-cvm.py`: versão reapresentada ignorada, moeda estrangeira descartada, comparativo PENÚLTIMO ignorado), LTM, cada filtro e seu motivo de exclusão, as verificações de integridade, determinismo de hash, cobertura de juros, consistência, o ciclo completo gravar → verificar → detectar adulteração, a trava de publicação e a trava de coerência do texto público. O cenário "ALFA S.A." foi calculado à mão e o teste confere valor de mercado, EV, EBIT ajustado, rendimentos, ROIC, dívida líquida/EBITDA, cobertura e consistência.
 
+### 9.5 Execução diária e auditoria completa mensal (D89)
+
+O workflow roda **todo dia útil** (00h de Brasília, depois do job de Ações), porque "barata" depende do preço e o preço muda todo dia. A fórmula, os filtros e a `versaoMetodologia` **não mudaram**; mudou só a frequência e o que fica gravado:
+
+- **Primeira execução do mês** (ou quando os parâmetros em `config/acoes-baratas.json` ou o código de `acoes-baratas-calculo.mjs` mudam, ou com data de corte manual, ou com "auditoria completa" marcada na execução manual): baixa a CVM (FCA, DFP, ITR), calcula e **grava a pasta completa** `auditoria/acoes-baratas/<último pregão>/`, como descrito acima. `ultima.json` passa a apontar para ela e ganha o campo `dataExecucao`.
+- **Demais dias úteis:** não baixa a CVM. Parte dos **insumos congelados** dessa pasta (demonstrações, CNPJ e data de corte) e troca só o bloco de preço de cada empresa (`atualizarPrecosDosInsumos`). Recalcula o ranking e o **confere de forma independente em memória** (grava e relê os insumos e a config como se fossem arquivos, refaz o cálculo do zero e compara os três hashes; se divergir, nada é publicado e o GitHub envia e-mail). **Não grava pasta nova** nem mexe em `ultima.json`.
+- O cabeçalho público (`acoesBaratas.json`) leva `dataPrecos` do dia, a impressão digital do resultado **do dia**, `modoAuditoria` (`completa` ou `diaria`) e `auditoriaCompletaEm` (data da pasta do mês); `pastaAuditoria` aponta para a pasta completa vigente.
+- `node scripts/acoes-baratas-verificar.mjs ultima` verifica a pasta do mês (com os preços daquela data). O ranking de um dia comum usa as mesmas regras e a mesma base de demonstrações com o preço do dia.
+- **Limite:** as demonstrações novas (ITR/DFP) só entram na primeira execução do mês seguinte à entrega, o mesmo ritmo de antes.
+
 ## 10. Limitações conhecidas
 
 1. **Dados reais da CVM.** O código nasceu contra fixtures no layout documentado e, desde a 1.0.1, é validado a cada rodada com os arquivos reais (a 1.0.7 foi a primeira executada com a CVM dentro do ambiente de desenvolvimento, e não só no GitHub). O leitor valida os cabeçalhos e **falha com mensagem explícita** se algo divergir. Os erros de preenchimento dos emissores continuam a surgir um a um (itens 16 e 17b); cada rodada nova pode achar outro.

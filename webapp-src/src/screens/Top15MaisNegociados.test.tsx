@@ -114,6 +114,24 @@ describe.each(CLASSES)('Top15MaisNegociados (%s): ranking aberto por volume', (c
   })
 })
 
+describe('Top15MaisNegociados: auditoria diária (D89)', () => {
+  it('arquivo sem o campo: "Toda execução grava" e nenhuma nota; execução diária: recalculado todo dia, pasta completa mensal e a data', () => {
+    const t = TEXTOS.fiis
+    const { unmount } = render(<Top15MaisNegociados classe="fiis" snapshot={snapshot(60)} />)
+    const antes = screen.getByTestId(t.id).textContent ?? ''
+    expect(antes).toContain('Toda execução grava, no repositório do projeto')
+    expect(antes).not.toContain('recalculado todo dia útil')
+    unmount()
+    render(<Top15MaisNegociados classe="fiis" snapshot={snapshot(60, { modoAuditoria: 'diaria', auditoriaCompletaEm: '2026-10-08' })} />)
+    const depois = screen.getByTestId(t.id).textContent ?? ''
+    expect(depois).toContain('recalculado todo dia útil')
+    expect(depois).toContain('uma vez por mês')
+    expect(depois).toContain('08/10/2026')
+    expect(depois).not.toContain('Toda execução grava')
+    expect(depois).toContain('O comando abaixo refaz o cálculo da pasta do mês')
+  })
+})
+
 describe('Top15MaisNegociados: os quatro rankings não se confundem', () => {
   it('cada classe tem seu prefixo de teste e seu texto (o dos FIIs não colide com o "Top 15 FIIs baratos")', () => {
     const ids = Object.values(TEXTOS).map((x) => x.id)

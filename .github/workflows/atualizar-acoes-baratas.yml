@@ -5,8 +5,11 @@
 # (manifesto com sha256 das fontes, insumos congelados, memória de cálculo por empresa, exclusões).
 # Em seguida refaz o cálculo a partir dos insumos gravados (--verificar) e só então publica.
 #
-# Roda no dia 2 de cada mês (os preços do mês anterior já estão fechados) e sob demanda. Os
-# demonstrativos mudam só em março, maio, agosto e novembro; o resto do tempo a mudança é de preço.
+# Roda TODO DIA ÚTIL (D89), depois do job de Ações (23h de Brasília), e sob demanda. Na primeira execução do mês (ou se os
+# parâmetros ou o código de cálculo mudarem, ou com data de corte manual, ou com "auditoria completa" marcada) baixa a CVM e grava
+# a pasta de auditoria completa; nos outros dias reaproveita as demonstrações congeladas nessa pasta, troca só o preço e CONFERE
+# o cálculo de forma independente em memória antes de publicar (sem pasta nova). Os demonstrativos mudam só em março, maio,
+# agosto e novembro; o resto do tempo a mudança é de preço.
 #
 # O ranking só chega ao app se config/acoes-baratas.json → publicacao.aprovadoPeloResponsavel for true E
 # o resultado passar na trava de sanidade (publicacao.sanidade): ranking com tamanho mínimo e pouca perda
@@ -21,9 +24,14 @@ name: Atualizar Top 15 Ações Baratas
 
 on:
   schedule:
-    - cron: '0 5 2 * *' # dia 2, 05h UTC = 02h de Brasília
+    - cron: '0 3 * * 2-6' # terça a sábado, 03h UTC = segunda a sexta, 00h de Brasília
   workflow_dispatch:
     inputs:
+      auditoria_completa:
+        description: 'Baixar a CVM e gravar a pasta de auditoria completa mesmo que já exista uma neste mês'
+        type: boolean
+        required: false
+        default: false
       data_corte:
         description: 'Data de corte contábil AAAA-MM-DD (vazio = último pregão do histórico)'
         required: false
@@ -49,16 +57,17 @@ jobs:
           cache: npm
 
       - name: Testes da metodologia (cálculo, extração e auditoria)
-        run: node --test scripts/acoes-baratas.test.mjs
+        run: node --test scripts/acoes-baratas.test.mjs scripts/auditoria-diaria.test.mjs
 
       - name: Baixar a CVM, calcular e gravar a auditoria
         env:
           DATA_CORTE: ${{ github.event.inputs.data_corte }}
+          COMPLETA: ${{ github.event.inputs.auditoria_completa == 'true' && '--completa' || '' }}
         run: |
           if [ -n "$DATA_CORTE" ]; then
-            node scripts/atualizar-acoes-baratas.mjs --data-corte="$DATA_CORTE"
+            node scripts/atualizar-acoes-baratas.mjs --data-corte="$DATA_CORTE" $COMPLETA
           else
-            node scripts/atualizar-acoes-baratas.mjs
+            node scripts/atualizar-acoes-baratas.mjs $COMPLETA
           fi
 
       - name: Guardar a auditoria desta execução (mesmo se algo falhar)
