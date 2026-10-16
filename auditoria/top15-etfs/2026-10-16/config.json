@@ -1,0 +1,39 @@
+{
+  "_leia": "Parâmetros do 'Top 15 ETFs mais negociados' (D70). ESTE ARQUIVO É A FONTE ÚNICA: o cálculo (scripts/top15-mercado-calculo.mjs) e o documento docs/11-metodologia-top15-etfs-bdrs.md citam estes valores. Qualquer mudança exige subir 'versaoMetodologia' e registrar o motivo em 'historicoDeVersoes'. O hash SHA-256 deste arquivo vai no manifesto de cada execução. Mais negociado = MEDIANA do volume financeiro diário dos últimos 'janelaLiquidez' pregões, dia sem negócio conta zero. É liquidez: não é qualidade, custo nem preço baixo. Fonte: Boletim de Preços da B3 (BVBG.086) guardado em historico/etfs.json pelo job de ETFs (D23).",
+  "versaoMetodologia": "1.1.0",
+  "historicoDeVersoes": [
+    {
+      "versao": "1.0.0",
+      "data": "2026-10-08",
+      "mudanca": "Versão inicial. Critério pedido pelo responsável: ETFs mais negociados. A taxa de administração dos ETFs não está em dado aberto da CVM (o cadastro antigo não traz ETF ativo e o registro novo não tem coluna de taxa), por isso não há ranking de custo."
+    },
+    {
+      "versao": "1.1.0",
+      "data": "2026-10-08",
+      "mudanca": "PUBLICAÇÃO (D70). O responsável aprovou publicar o ranking no app: aprovadoPeloResponsavel passa a true. Nenhuma regra de cálculo mudou."
+    }
+  ],
+  "tamanhoDaLista": 15,
+  "tamanhoPorCategoria": 5,
+  "janelaLiquidez": 21,
+  "janela3Meses": 63,
+  "volumeMinimoDiario": 500000,
+  "diasNegociadosMinimos": 15,
+  "pregoesMaxSemNegocio": 5,
+  "pregoesNosInsumos": 80,
+  "publicacao": {
+    "aprovadoPeloResponsavel": true,
+    "aprovacao": {
+      "por": "responsável pelo projeto (Leonardo Daher)",
+      "data": "2026-10-08",
+      "escopo": "Publicar o Top 15 de ETFs mais negociados no app, com acesso aberto. O parecer independente de especialista (D22) segue como item do responsável antes de divulgar em escala."
+    },
+    "_leia": "Com aprovadoPeloResponsavel = false o job só grava a trilha de auditoria e o app mostra 'em validação'. Com true E a trava de sanidade aprovada, o ranking vai para o arquivo do app (webapp-src/src/data/etfsMaisNegociados.json). Acesso ABERTO: o ranking é uma ordenação por volume de dados públicos da B3, que o app já mostra na aba de ETFs.",
+    "sanidade": {
+      "minimoNaLista": 15,
+      "maximoFracaoSemCotacao": 0.5,
+      "_leia": "Se a lista sair com menos de 15 ETFs, ou mais da metade do universo estiver sem negócio recente (histórico desatualizado), o job termina com erro depois de gravar a auditoria e o app não é alterado."
+    },
+    "avisoProposto": "Não é recomendação de investimento. “Mais negociado” significa apenas maior volume financeiro diário (mediana dos últimos 21 pregões): é liquidez, e não indica qualidade, custo baixo, bom momento de compra nem adequação ao seu perfil. Cada ETF tem taxa de administração, índice, risco e tributação próprios; leia o regulamento e a lâmina antes de investir. Os números vêm do Boletim de Preços da B3, são do passado e podem conter erros. Rentabilidade passada não garante rentabilidade futura. Converse com um profissional certificado antes de investir."
+  }
+}

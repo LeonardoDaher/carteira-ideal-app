@@ -1,0 +1,54 @@
+{
+  "_leia": "Parâmetros do 'Top 15 FIIs mais negociados' (D71). ESTE ARQUIVO É A FONTE ÚNICA: o cálculo (scripts/top15-mercado-calculo.mjs) e o documento docs/11-metodologia-top15-etfs-bdrs.md citam estes valores. Qualquer mudança exige subir 'versaoMetodologia' e registrar o motivo em 'historicoDeVersoes'. O hash SHA-256 deste arquivo vai no manifesto de cada execução. Mais negociado = MEDIANA do volume financeiro diário dos últimos 'janelaLiquidez' pregões, dia sem negócio conta zero. É liquidez: não é qualidade, preço baixo nem segurança. Fonte: histórico diário de preço e volume dos FIIs (Boletim de Preços da B3, BVBG.086, com complemento da brapi para fundos que o boletim não traz), guardado em historico/fiis.json (D64); nome e segmento vêm do job de FIIs (rendimentosFii.json). O histórico diário dos FIIs tem 61 pregões, por isso a janela de variação é de 60 pregões (o campo se chama variacao3m nos arquivos). A categoria é o segmento do fundo.",
+  "versaoMetodologia": "1.1.0",
+  "historicoDeVersoes": [
+    {
+      "versao": "1.0.0",
+      "data": "2026-10-08",
+      "mudanca": "Versão inicial. Critério pedido pelo responsável: FIIs mais negociados na bolsa."
+    },
+    {
+      "versao": "1.1.0",
+      "data": "2026-10-08",
+      "mudanca": "PUBLICAÇÃO (D71). O responsável aprovou publicar o ranking no app, com acesso aberto (sem código): aprovadoPeloResponsavel passa a true. Nenhuma regra de cálculo mudou."
+    }
+  ],
+  "tamanhoDaLista": 15,
+  "tamanhoPorCategoria": 5,
+  "janelaLiquidez": 21,
+  "janela3Meses": 60,
+  "volumeMinimoDiario": 300000,
+  "diasNegociadosMinimos": 15,
+  "pregoesMaxSemNegocio": 5,
+  "pregoesNosInsumos": 80,
+  "ordemCategorias": [
+    "Logística",
+    "Shoppings",
+    "Escritórios",
+    "Papel (CRI)",
+    "Híbrido",
+    "Varejo e renda urbana",
+    "Residencial",
+    "Saúde",
+    "Hotéis",
+    "Agro",
+    "Energia",
+    "Fundo de fundos",
+    "Outros"
+  ],
+  "publicacao": {
+    "aprovadoPeloResponsavel": true,
+    "aprovacao": {
+      "por": "responsável pelo projeto (Leonardo Daher)",
+      "data": "2026-10-08",
+      "escopo": "Publicar o Top 15 de FIIs mais negociados no app, com acesso aberto (sem código). O parecer independente de especialista (D22) foi declarado pelo responsável, que se identifica como o especialista."
+    },
+    "_leia": "Com aprovadoPeloResponsavel = false o job só grava a trilha de auditoria e o app mostra 'em validação'. Com true E a trava de sanidade aprovada, o ranking vai para o arquivo do app. Acesso ABERTO, sem código (decisão do responsável em 08/10/2026): é uma ordenação por volume de dados públicos da B3.",
+    "sanidade": {
+      "minimoNaLista": 15,
+      "maximoFracaoSemCotacao": 0.5,
+      "_leia": "Se a lista sair com menos de 15 ativos, ou mais da metade do universo estiver sem negócio recente (histórico desatualizado), o job termina com erro depois de gravar a auditoria e o app não é alterado."
+    },
+    "avisoProposto": "Não é recomendação de investimento. “Mais negociado” significa apenas maior volume financeiro diário (mediana dos últimos 21 pregões): é liquidez, e não indica qualidade, preço baixo, rendimento, segurança nem adequação ao seu perfil. Cada fundo tem vacância, inadimplência, endividamento, gestão e tributação próprios; leia o regulamento e o relatório gerencial antes de investir. Os números vêm do Boletim de Preços da B3, são do passado e podem conter erros. Rentabilidade passada não garante rentabilidade futura, os rendimentos não são garantidos e fundos imobiliários podem causar perda de parte ou de todo o dinheiro aplicado. Converse com um profissional certificado antes de investir."
+  }
+}

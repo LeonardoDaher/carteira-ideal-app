@@ -1,0 +1,57 @@
+{
+  "esquema": "top15-mercado/1",
+  "classe": "fiis",
+  "versaoMetodologia": "1.1.0",
+  "geradoEm": "2026-10-16T01:16:55.874Z",
+  "dataExecucao": "2026-10-16",
+  "ultimoPregao": "2026-10-14",
+  "ambiente": {
+    "node": "v22.23.3",
+    "plataforma": "linux",
+    "commit": "7428a8d584c30f578812e219f9d8c9dcbed5fa60",
+    "execucao": "38834241488"
+  },
+  "codigo": {
+    "calculoSha256": "a0dc43da80d729b990968dae2fa3ce1adf9e8c0f32771bafd41d19c8a5a3f39e",
+    "extracaoSha256": "00e600c8530b58924fdd245f28e5fae6f7fb116cc5cb11d95412c9d829aed208"
+  },
+  "hashes": {
+    "config": "ac0e965470e90c123cf33228ce5cb32a23057c8f750d9160f0bb42b41c3cfe03",
+    "insumos": "54769f08e31e116d8002375e93d1b1f5a893ced2f2bed8db0425c4b479864a11",
+    "resultado": "304c31ab3632aa79cd054e88a5b733df7bff68c047d0730f47493bae44bbf909",
+    "memoria": "4831f37e251cf3a87241fee09bbe201f0df4bdbeda81cba8287f4c11f6543d4f",
+    "arquivos": {
+      "insumos.json.gz": "5e689a2f801391b7d6d37df222b444fe4997cfd6cf1721c823d1c01bf758cba3",
+      "config.json": "e70bfc2c2312aa337537ee80855c24b1a2ad4f02a2341745a258ef5778d6996f",
+      "resultado.json": "46ab7f73fa5b0d808ca92a1f803d154f8a005385f49172cb413cd7180442e8a2",
+      "memoria-de-calculo.json.gz": "f69f66de46619a80a072589d97133fefad58dabe58da0ad9754e00ae4e2ecfc5",
+      "ranking-geral.csv": "ab87f65bebc42800b39caead2ccc360806c748922f8f6ec6592499641f8716e4",
+      "ranking-por-categoria.csv": "c897181cb47f1ece4d80c5559d109fbdd0f573df0d3ea61f0e5c746d7bca0c41",
+      "exclusoes.csv": "dd8620b59990f26392d7ee6cc8dbfaa2a0cb671fc6d240eb3233c1ac473722ef"
+    }
+  },
+  "fontes": [
+    {
+      "papel": "Histórico diário (B3, Boletim de Preços BVBG.086)",
+      "url": "historico/fiis.json (neste repositório)",
+      "arquivo": "fiis.json",
+      "bytes": 347772,
+      "sha256": "faa78ab31906c994f2ab91c79d8c7dfbe0680ae1ad7007fe6b87f9b7deb4e9d8",
+      "pregoes": 65,
+      "ultimoPregao": "2026-10-14"
+    },
+    {
+      "papel": "Nome e segmento dos FIIs (job de FIIs)",
+      "url": "webapp-src/src/data/rendimentosFii.json (neste repositório)",
+      "arquivo": "rendimentosFii.json",
+      "bytes": 77425,
+      "sha256": "6940c8533c2bf5c8085048a85e8249c3a30c1f291398b0ec65c7833060f71eda"
+    }
+  ],
+  "contagens": {
+    "universo": 203,
+    "elegiveis": 78,
+    "exclusoes": 125
+  },
+  "publicadoNoApp": true
+}
