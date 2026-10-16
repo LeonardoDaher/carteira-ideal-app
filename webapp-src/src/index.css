@@ -2072,3 +2072,67 @@ select option:disabled { color: #6b7280 !important; -webkit-text-fill-color: #6b
   .mc-pos-numeros { flex: 0 0 360px; }
   .mc-pos-extra { flex: 1 1 100%; }
 }
+
+/* ---------------------------------------------------------------------------------------
+   Tema claro: contorno preto fino em todo texto amarelo (D90)
+   O amarelo da marca (--accent) e o âmbar de alerta (--warning) funcionam como fundo e como
+   texto no tema escuro, mas sobre fundo claro o texto amarelo some. Em vez de trocar a cor,
+   o texto ganha um contorno preto fino por fora das letras (paint-order: stroke fill mantém
+   o miolo inteiro, sem afinar a fonte). Sem suporte a paint-order, cai num anel de text-shadow.
+   Pega as classes abaixo e qualquer estilo inline `color: var(--accent|--warning)`; ícones
+   SVG recebem um contorno equivalente por drop-shadow. Fundo amarelo com texto escuro
+   (botões, opção marcada) não entra: já tem contraste.
+   --------------------------------------------------------------------------------------- */
+:root[data-theme='light'] {
+  --contorno-amarelo: #111;
+  --contorno-amarelo-sombra:
+    -0.6px 0 0 var(--contorno-amarelo), 0.6px 0 0 var(--contorno-amarelo),
+    0 -0.6px 0 var(--contorno-amarelo), 0 0.6px 0 var(--contorno-amarelo),
+    -0.45px -0.45px 0 var(--contorno-amarelo), 0.45px -0.45px 0 var(--contorno-amarelo),
+    -0.45px 0.45px 0 var(--contorno-amarelo), 0.45px 0.45px 0 var(--contorno-amarelo);
+}
+:root[data-theme='light'] :is(
+  .tab.active,
+  .trilha-badge,
+  .badge-media,
+  .perfil-badge.Moderado,
+  .perfil-badge.Equilibrado,
+  .mc-selo.faltaSaldoAnterior,
+  .mc-chip-situacao.abaixo,
+  [style^="color: var(--accent)"], [style*="; color: var(--accent)"],
+  [style^="color: var(--warning)"], [style*="; color: var(--warning)"]
+) {
+  text-shadow: var(--contorno-amarelo-sombra);
+}
+@supports (paint-order: stroke fill) and (-webkit-text-stroke: 1px #000) {
+  :root[data-theme='light'] :is(
+    .tab.active,
+    .trilha-badge,
+    .badge-media,
+    .perfil-badge.Moderado,
+    .perfil-badge.Equilibrado,
+    .mc-selo.faltaSaldoAnterior,
+    .mc-chip-situacao.abaixo,
+    [style^="color: var(--accent)"], [style*="; color: var(--accent)"],
+    [style^="color: var(--warning)"], [style*="; color: var(--warning)"]
+  ) {
+    -webkit-text-stroke: 1.1px var(--contorno-amarelo);
+    paint-order: stroke fill;
+    text-shadow: none;
+  }
+}
+:root[data-theme='light'] :is(
+  .trilha-badge,
+  [style^="color: var(--accent)"], [style*="; color: var(--accent)"],
+  [style^="color: var(--warning)"], [style*="; color: var(--warning)"]
+) svg {
+  filter: drop-shadow(0 0 0.5px var(--contorno-amarelo)) drop-shadow(0 0 0.5px var(--contorno-amarelo));
+}
+/* O contorno é herdado: texto auxiliar aninhado num trecho amarelo (ex.: "(#3 no ranking geral)") volta ao normal. */
+:root[data-theme='light'] :is(
+  [style^="color: var(--accent)"], [style*="; color: var(--accent)"],
+  [style^="color: var(--warning)"], [style*="; color: var(--warning)"]
+) :is(.muted, .tiny.muted) {
+  -webkit-text-stroke: 0;
+  text-shadow: none;
+}
