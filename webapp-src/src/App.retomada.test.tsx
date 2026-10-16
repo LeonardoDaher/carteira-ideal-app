@@ -88,6 +88,8 @@ describe('reabrir o app depois de responder o questionário (API ainda calculand
     gravarEstado('resultado')
     await abrirApp()
     expect(screen.getByRole('status')).toBeTruthy()
+    // o pedido à API sai num efeito, depois de o app ler o aparelho: sem esperar por ele, `pendentes` pode estar vazio
+    await waitFor(() => expect(pendentes.length).toBeGreaterThan(0))
     const res = await resultadoDeVerdade()
     await act(async () => pendentes[pendentes.length - 1].resolver(res))
     expect(await screen.findByText(/Seu perfil de carteira de referência/)).toBeTruthy()
@@ -98,6 +100,8 @@ describe('reabrir o app depois de responder o questionário (API ainda calculand
   it('se a API falhar, mostra o erro com "Tentar novamente" (e não o convite para responder de novo)', async () => {
     gravarEstado('resultado')
     await abrirApp()
+    // o pedido à API sai num efeito, depois de o app ler o aparelho: sem esperar por ele, `pendentes` pode estar vazio
+    await waitFor(() => expect(pendentes.length).toBeGreaterThan(0))
     await act(async () => pendentes[pendentes.length - 1].rejeitar(new Error('sem internet')))
     expect(await screen.findByRole('alert')).toBeTruthy()
     expect(screen.queryByText(CONVITE)).toBeNull()
