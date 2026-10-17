@@ -19,13 +19,17 @@ import { AbasDaTela } from '../ui/AbasDaTela'
 import { CampoReais } from '../ui/CampoReais'
 import { CampoNumero } from '../ui/CampoNumero'
 import { EscolhaDeAtivo } from './EscolhaDeAtivo'
+import { GraficosOpcoes } from './GraficosOpcoes'
 import { PorVisaoOpcoes } from './PorVisaoOpcoes'
 import { TopPremiosOpcoes } from './TopPremiosOpcoes'
 import { FaixaDeStrike } from '../ui/FaixaDeStrike'
 import { GraficoPayoff } from '../ui/GraficoPayoff'
 import type { AppCtx } from '../state/useAppState'
 
-type Aba = 'series' | 'premios' | 'visao' | 'estrategias'
+type Aba = 'series' | 'premios' | 'visao' | 'graficos' | 'estrategias'
+
+/** Abas que, ao abrir, criam uma entrada no histórico: o "voltar" do navegador as fecha em vez de sair da tela. */
+const ABAS_COM_HISTORICO: Aba[] = ['premios', 'visao', 'graficos', 'estrategias']
 
 const LINHAS_POR_PAGINA = 100
 const ATALHOS_PERTO = [5, 10, 20] as const
@@ -93,7 +97,7 @@ export function SimuleOpcoes({ snapshot, endividadas, carregarBaratas, armazenam
     if (window.history.state?.opcoesAba) window.history.replaceState(null, '')
     const aoVoltar = () => {
       const guardada = window.history.state?.opcoesAba
-      setAba(guardada === 'estrategias' || guardada === 'premios' || guardada === 'visao' ? guardada : 'series')
+      setAba(ABAS_COM_HISTORICO.includes(guardada) ? guardada : 'series')
     }
     window.addEventListener('popstate', aoVoltar)
     return () => window.removeEventListener('popstate', aoVoltar)
@@ -162,11 +166,14 @@ export function SimuleOpcoes({ snapshot, endividadas, carregarBaratas, armazenam
           { id: 'series', emoji: '📋', titulo: 'Séries da B3', descricao: 'Strike, vencimento e prêmio' },
           { id: 'premios', emoji: '🏆', titulo: 'Top 15 prêmios', descricao: 'Quem paga mais' },
           { id: 'visao', emoji: '🧭', titulo: 'Por visão', descricao: 'Alta, baixa, lateral' },
+          { id: 'graficos', emoji: '📊', titulo: 'Gráficos', descricao: 'Negócios por strike' },
           { id: 'estrategias', emoji: '📈', titulo: 'Estratégias', descricao: 'Payoff, tempo e gregas' },
         ] as const}
       >
         {aba === 'series' ? (
           comDados((d) => <SeriesDaB3 snapshot={d} ativo={ativoAtual} onEscolher={setTicker} onCriar={criarEstrategia} />)
+        ) : aba === 'graficos' ? (
+          comDados((d) => <GraficosOpcoes snapshot={d} ativo={ativoAtual} onEscolher={setTicker} />)
         ) : aba === 'visao' ? (
           comDados((d) => <PorVisaoOpcoes snapshot={d} ativo={ativoAtual} onEscolher={setTicker} onSimular={criarEstrategia} />)
         ) : aba === 'premios' ? (

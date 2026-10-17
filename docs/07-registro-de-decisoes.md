@@ -1819,3 +1819,23 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 **Limites.** O preço de cada perna é o do último negócio, e não o de compra e venda. A tendência é leitura do passado e não prevê. Lucro da empresa, dívida e notícias não entram nesta aba (a aba Top 15 prêmios cruza com a dívida). Modelo europeu sem dividendos. Corretagem, emolumentos, IR e margem de garantia ficam de fora. Só risco limitado.
 
 **Testes.** 23 do motor (`estrategiasPorVisao.test.ts`, com as contas de cada estrutura conferidas à mão e a chance de lucro contra a fórmula fechada), 6 da leitura de tendência, 5 do cálculo de tendência no job e 12 da aba (`SimuleOpcoesPorVisao.test.tsx`).
+
+## D100 (17/10/2026): aba "Gráficos" do Simule Opções (primeiro gráfico: negócios por strike)
+
+**Pedido do responsável (17/10/2026).** Uma aba de gráficos; o primeiro mostra o **número de negócios por strike** para um vencimento (ele esperava uma parábola), podendo escolher **quantos vencimentos quiser dentro dos 6 meses**. Esclarecimentos dele durante a construção: vale para **calls e puts**, **independentemente de a série ser europeia ou americana**, e o **preço do ativo-objeto no dia deve ficar no centro do gráfico**.
+
+**Desenho.** Quinta aba do Simule Opções, "Gráficos" (\`GraficosOpcoes.tsx\`; cálculo em \`domain/graficoNegocios.ts\`; desenho em \`ui/GraficoPorStrike.tsx\`), com a mesma busca de ativo das outras abas. Controles: **vencimentos** (vários, em grupos mensais e semanais, com "só mensais", "só semanais", "todos" e "limpar"); **tipo** (calls e puts separadas, somadas, só calls ou só puts); **o que contar** (negócios ou volume financeiro); **strikes mostrados** (±10%, ±20%, ±30% do preço ou todos); **escala** (valores reais, ou cada linha em % do próprio pico, para comparar o formato entre vencimentos de tamanhos muito diferentes: o de 19/11 da PETR4 tem 11.393 negócios no pico e o de 18/12 tem 323). Uma cor por vencimento; calls em traço cheio e puts tracejadas.
+
+**O que entra na conta.** Só as séries que negociaram no último pregão contam (as que só negociaram em dias anteriores entram como zero, para o eixo mostrar todos os strikes listados). Americanas e europeias somam juntas, e séries diferentes do mesmo tipo, vencimento e strike (como as ajustadas por proventos) também. Mostra, por linha, o pico (strike, % do preço e valor) e o total, e uma tabela com os números de cada strike para quem prefere ler assim (e para leitor de tela).
+
+**Preço no centro.** O eixo horizontal é simétrico em torno do preço do ativo no dia, indo até o strike mais distante, de modo que a linha tracejada do preço fica sempre exatamente no meio e a marca central do eixo é o próprio preço (com um teto de 95% do preço para o eixo não ficar negativo quando há strikes muito acima; o excesso é recortado). O eixo vertical usa um teto "redondo" (12.000 em vez de 11.393, com 6.000 no meio).
+
+**Leitura.** Passar o mouse, tocar ou usar as setas (esquerda e direita, início e fim) sobre o gráfico mostra os valores de cada linha no strike mais próximo, com a distância ao preço. A seta começa no strike mais perto do preço.
+
+**A forma não é uma parábola.** Com os dados de 16/10/2026, é um sino **assimétrico e com picos**: os negócios se concentram perto do preço (PETR4, vencimento de 19/11: pico no strike 58,91, 1,3% abaixo do preço, com 11.393 negócios de calls e 10.199 de puts), com picos em strikes de números redondos, calls negociando mais acima do preço e puts mais abaixo. No BOVA11, com todos os strikes, o pico fica em 185 (8,6% abaixo do preço) e há muitas puts distantes, que são proteção de carteira. O texto da tela diz isso, e que muito negócio num strike mostra onde há liquidez, e não para onde o preço vai.
+
+**Barra de abas.** Com cinco abas, \`AbasDaTela\` passou a quebrar em linhas quando há mais de quatro (3 e 2 no celular, uma linha só no computador); com até quatro, nada mudou.
+
+**Limites.** Os negócios são os de **um pregão** (o último), então mudam bastante de um dia para o outro; não é posição em aberto (interesse aberto), que o app não tem. O volume financeiro de cada série é o do dia do último negócio. Só os próximos 6 meses de vencimentos.
+
+**Testes.** 8 do cálculo (\`graficoNegocios.test.ts\`: separação de calls e puts, soma, faixa, volume, pico, séries paradas, vencimentos vazios), 14 da aba (\`SimuleOpcoesGraficos.test.tsx\`, incluindo escala relativa, teclado e o "voltar" do navegador) e 10 do gráfico (teto do eixo e o preço sempre no centro, inclusive com strikes só de um lado).
