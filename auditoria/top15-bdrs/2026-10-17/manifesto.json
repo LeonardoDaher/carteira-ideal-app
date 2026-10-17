@@ -1,0 +1,51 @@
+{
+  "esquema": "top15-mercado/1",
+  "classe": "bdrs",
+  "versaoMetodologia": "1.1.0",
+  "geradoEm": "2026-10-17T10:09:36.490Z",
+  "dataExecucao": "2026-10-17",
+  "ultimoPregao": "2026-10-16",
+  "ambiente": {
+    "node": "v22.23.3",
+    "plataforma": "linux",
+    "commit": "367f20ee5ed8d635dcd76a88264b170905f95563",
+    "execucao": "39023815974"
+  },
+  "codigo": {
+    "calculoSha256": "a293113e3eefb7a54debc233465ee7baac9ed1d8bd54eac421204d754bffda26",
+    "extracaoSha256": "00e600c8530b58924fdd245f28e5fae6f7fb116cc5cb11d95412c9d829aed208"
+  },
+  "hashes": {
+    "config": "e7992464b62cc9f147361297a8c2d39a8c96fac5e528ac5d5ccf03e1e3b4c395",
+    "insumos": "f798e0bb4365a7b77887caecab3c275932f87a8014771378312f280300973610",
+    "resultado": "566abbd2aea469c7aa41eca5b59d3cb96c911b73fcc8f6d0705ea49b78df8448",
+    "memoria": "14d358d98fcdf573c8e11cd1a3773b941fee7b935af4d50faf86f355d9ebafdd",
+    "arquivos": {
+      "insumos.json.gz": "97dbf98677e614e361d1dec193cc3eb215a16be62ac35d952fdf7d80c7d01d10",
+      "config.json": "d246e64c2428bacd8608d9c88f45dbfc584d4ea742cc16faaa5f65b70ece0bbb",
+      "resultado.json": "4408da1d49c64d64d8b261c5de29f1525ad345ae701b96386a6004c4daffca36",
+      "memoria-de-calculo.json.gz": "680408f071252078315788a70f015b3d3c43aca909559ab4ddac9d373e0cf8ab",
+      "ranking.csv": "315991e35b3573ae715a7c1a90d997864e168f0b22c22a6ca7b14bc669860d82",
+      "a-conferir.csv": "068fbc16c6d59fdba638ee5cf82e461fa5866a5c731597f247320e522d487531",
+      "exclusoes.csv": "d41d6a91dc535ceb4d11ae55afc737e74d6a9f3daef6d8541f566809a67efe52"
+    }
+  },
+  "fontes": [
+    {
+      "papel": "Histórico diário (B3, Boletim de Preços BVBG.086)",
+      "url": "historico/bdrs.json (neste repositório)",
+      "arquivo": "bdrs.json",
+      "bytes": 1472299,
+      "sha256": "c0523499a518072d020ed9062b1db27d418c72cef144eb6f732a7032c5cb261d",
+      "pregoes": 260,
+      "ultimoPregao": "2026-10-16"
+    }
+  ],
+  "contagens": {
+    "universo": 716,
+    "elegiveis": 58,
+    "exclusoes": 645,
+    "aConferir": 13
+  },
+  "publicadoNoApp": true
+}

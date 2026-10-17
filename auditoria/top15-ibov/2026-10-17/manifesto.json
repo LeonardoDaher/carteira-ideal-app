@@ -1,0 +1,62 @@
+{
+  "esquema": "top15-mercado/1",
+  "classe": "ibov",
+  "versaoMetodologia": "1.1.1",
+  "geradoEm": "2026-10-17T10:09:38.587Z",
+  "dataExecucao": "2026-10-17",
+  "ultimoPregao": "2026-10-19",
+  "ambiente": {
+    "node": "v22.23.3",
+    "plataforma": "linux",
+    "commit": "367f20ee5ed8d635dcd76a88264b170905f95563",
+    "execucao": "39023815974"
+  },
+  "codigo": {
+    "calculoSha256": "a293113e3eefb7a54debc233465ee7baac9ed1d8bd54eac421204d754bffda26",
+    "extracaoSha256": "00e600c8530b58924fdd245f28e5fae6f7fb116cc5cb11d95412c9d829aed208"
+  },
+  "hashes": {
+    "config": "513fd602125efb5dcedb18e980d459f7c9ad71bb098ca01921925afa953246c1",
+    "insumos": "367d1ad39695428f1d2591cf14dde6058d3a9bd7a39889c5c8247cc0f029ace1",
+    "resultado": "b8bc56c2807b6af375576ea6f71e199ff02f84d65640c206fac7925db6d65000",
+    "memoria": "17d84ce75e2e3e1c97d3bd0aba669abcd07b2107a2626b258d52b4ee46906a19",
+    "arquivos": {
+      "insumos.json.gz": "5554155f41d33524fadf8218aa3f3a9462bd8b8a218d0ab1e95128502c8f27c2",
+      "config.json": "ebbb2a66eba7d31c0e61937825770caa188bbbb5322b388a2acb9ebe67ba52f3",
+      "resultado.json": "e1f3906067df2371e47415746c953f892bc397eb5f2a24030776fcf1a640c741",
+      "memoria-de-calculo.json.gz": "78dd832e6fa61c8a36a54d6ec286b81f7b313303811ed477f13067f30ab37533",
+      "ranking.csv": "cdf2b364c113a68f92550b00c08d2e554038458edd3ee0a59494023aad717354"
+    }
+  },
+  "fontes": [
+    {
+      "papel": "Carteira teórica do Ibovespa (B3, indexProxy/GetPortfolioDay)",
+      "url": "https://sistemaswebb3-listados.b3.com.br/indexProxy/indexCall/GetPortfolioDay/eyJsYW5ndWFnZSI6InB0LWJyIiwicGFnZU51bWJlciI6MSwicGFnZVNpemUiOjIwMCwiaW5kZXgiOiJJQk9WIiwic2VnbWVudCI6IjEifQ==",
+      "sha256": "7ab448730b80438655e99b85db01c38a00c3d3220a94febec6e01961f3171056",
+      "bytes": 10194,
+      "baixadoEm": "2026-10-17T10:09:38.579Z",
+      "dataDaCarteira": "2026-10-19"
+    },
+    {
+      "papel": "Histórico diário (B3, Boletim de Preços BVBG.086): cotação e volume (informativos)",
+      "url": "historico/acoes.json (neste repositório)",
+      "arquivo": "acoes.json",
+      "bytes": 1496043,
+      "sha256": "7401fb450871f1c07f2dbb24b80e3f2687b009b029b8847b98c3097104afe820",
+      "ultimoPregao": "2026-10-16"
+    },
+    {
+      "papel": "Nome e setor das ações (job de ações)",
+      "url": "webapp-src/src/data/acoes.json (neste repositório)",
+      "arquivo": "acoes.json",
+      "bytes": 86096,
+      "sha256": "8b79da5ab0eaf305f91f1c6ca743c4745fc3369791ff2e1bb316f44efea140fb"
+    }
+  ],
+  "contagens": {
+    "universo": 76,
+    "elegiveis": 76,
+    "exclusoes": 0
+  },
+  "publicadoNoApp": true
+}

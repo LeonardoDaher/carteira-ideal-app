@@ -1,0 +1,57 @@
+{
+  "esquema": "top15-mercado/1",
+  "classe": "acoes",
+  "versaoMetodologia": "1.1.0",
+  "geradoEm": "2026-10-17T10:09:37.089Z",
+  "dataExecucao": "2026-10-17",
+  "ultimoPregao": "2026-10-16",
+  "ambiente": {
+    "node": "v22.23.3",
+    "plataforma": "linux",
+    "commit": "367f20ee5ed8d635dcd76a88264b170905f95563",
+    "execucao": "39023815974"
+  },
+  "codigo": {
+    "calculoSha256": "a293113e3eefb7a54debc233465ee7baac9ed1d8bd54eac421204d754bffda26",
+    "extracaoSha256": "00e600c8530b58924fdd245f28e5fae6f7fb116cc5cb11d95412c9d829aed208"
+  },
+  "hashes": {
+    "config": "aacef27b68e500564375c495b0a99c2d658312026e876c5d96df38f635cc9ead",
+    "insumos": "d9a9b528883a475560d6e76f15d3b9ac48a700795ece78f6264aa412a411923e",
+    "resultado": "93d8fd988a248dd40c8cb15e02f04b1b6a89f73a3ac553f4a4d92ff24832d797",
+    "memoria": "cb2a685a56547cc6f71d450641118ebd11a8eecb950d1317fc1659076a75c25c",
+    "arquivos": {
+      "insumos.json.gz": "4579f10dbc6d6c433ab4d16dbd4926910365c2a16fccc1f260d8741df51b2ba3",
+      "config.json": "7ad1742093345bc577e75db5adb6f0128e223940edf011eec979f196b679a8fd",
+      "resultado.json": "bc1cf439e0011df6937e1552095039d89519d57153ece8d5a5e94b41ff736329",
+      "memoria-de-calculo.json.gz": "79c20f39c6a396d2fd638dab9add22c5e0d101c33f76852a1463d63394db39cd",
+      "ranking-geral.csv": "98e08b91a8461e98ebda285684e90f1692dc8c0c1e89c7ebca5a5947c8826503",
+      "ranking-por-categoria.csv": "9a7e3f7ff374c2bcc6cc474c942012b7ce925d32aadcfaea366d72afa600c337",
+      "exclusoes.csv": "fb4197c75b0efd8f8f3e40f1a39caf62a15fecd067c28d6a03c2ef2cedbf8661"
+    }
+  },
+  "fontes": [
+    {
+      "papel": "Histórico diário (B3, Boletim de Preços BVBG.086)",
+      "url": "historico/acoes.json (neste repositório)",
+      "arquivo": "acoes.json",
+      "bytes": 1496043,
+      "sha256": "7401fb450871f1c07f2dbb24b80e3f2687b009b029b8847b98c3097104afe820",
+      "pregoes": 260,
+      "ultimoPregao": "2026-10-16"
+    },
+    {
+      "papel": "Nome e setor das ações (job de ações)",
+      "url": "webapp-src/src/data/acoes.json (neste repositório)",
+      "arquivo": "acoes.json",
+      "bytes": 86096,
+      "sha256": "8b79da5ab0eaf305f91f1c6ca743c4745fc3369791ff2e1bb316f44efea140fb"
+    }
+  ],
+  "contagens": {
+    "universo": 391,
+    "elegiveis": 198,
+    "exclusoes": 193
+  },
+  "publicadoNoApp": true
+}
