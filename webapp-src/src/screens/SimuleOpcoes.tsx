@@ -270,24 +270,22 @@ function EscolhaDeAtivo({ snapshot, ativo, onEscolher }: { snapshot: SnapshotOpc
           </button>
         ))}
       </div>
-      <div className="card row-between" style={{ alignItems: 'flex-start', gap: 12 }} aria-label={`Preço de ${ativo.ticker} no mercado à vista`}>
-        <div className="col" style={{ gap: 2, minWidth: 0 }}>
+      <div className="card col" style={{ gap: 4 }} role="group" aria-label={`Preço de ${ativo.ticker} no mercado à vista`}>
+        <div className="row" style={{ alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
           <span className="font-display" style={{ fontWeight: 700, fontSize: 24 }}>{ativo.ticker}</span>
-          {ativo.nome && <span className="tiny muted">{ativo.nome}</span>}
-          <span className="tiny muted">
-            Opções negociam {formatarVolume(ativo.volumeOpcoes)} por dia ({ativo.series.length} séries nos próximos 6 meses).
-          </span>
-        </div>
-        <div className="col" style={{ gap: 2, alignItems: 'flex-end', flexShrink: 0 }}>
-          <span className="tiny muted">Preço à vista</span>
           <span className="font-display" style={{ fontWeight: 700, fontSize: 24 }} data-testid="preco-ativo">{reais(ativo.cotacao)}</span>
           {ativo.variacao != null && (
-            <span className="small" style={{ fontWeight: 700, color: corVar(ativo.variacao) }} data-testid="variacao-ativo">
+            <span style={{ fontWeight: 700, fontSize: 15, color: corVar(ativo.variacao) }} data-testid="variacao-ativo">
               {ativo.variacao > 0 ? '+' : ''}{num(ativo.variacao)}%
             </span>
           )}
-          <span className="tiny muted">fechamento de {formatarData(ativo.dataCotacao ?? snapshot.dataPregao ?? '')}</span>
         </div>
+        <span className="tiny muted">
+          {ativo.nome ? `${ativo.nome}, ` : ''}preço à vista, fechamento de {formatarData(ativo.dataCotacao ?? snapshot.dataPregao ?? '')}
+        </span>
+        <span className="tiny muted">
+          Opções negociam {formatarVolume(ativo.volumeOpcoes)} por dia ({ativo.series.length} séries nos próximos 6 meses).
+        </span>
       </div>
     </div>
   )

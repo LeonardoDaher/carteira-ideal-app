@@ -286,7 +286,7 @@ describe('SimuleOpcoes: preço do ativo, vencimentos, strike e voltar', () => {
     render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
     expect(txt('preco-ativo')).toBe('R$ 60,00')
     expect(txt('variacao-ativo')).toBe('+1,69%')
-    expect(screen.getByText('fechamento de 16/10/2026')).toBeDefined()
+    expect(screen.getByText(/PETROBRAS, preço à vista, fechamento de 16\/10\/2026/)).toBeDefined()
     fireEvent.change(screen.getByLabelText('Buscar ativo por código ou nome'), { target: { value: 'vale' } })
     fireEvent.keyDown(screen.getByLabelText('Buscar ativo por código ou nome'), { key: 'Enter' })
     expect(txt('preco-ativo')).toBe('R$ 66,00') // VALE3, sem variação informada
