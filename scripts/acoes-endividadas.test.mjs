@@ -160,8 +160,10 @@ test('trava de sanidade: poucas empresas avaliadas ou muitas sem dado derrubam a
   assert.deepEqual(verificarSanidade(bom, {}), [])
 })
 
-test('configuração: versão, publicação ainda NÃO aprovada, acesso aberto e aviso de "não é recomendação"', () => {
-  assert.equal(cfgArquivo.versaoMetodologia, '1.0.0')
+test('configuração: versão 1.1.0, publicação aprovada pelo responsável em 17/10/2026, acesso aberto e aviso de "não é recomendação"', () => {
+  assert.equal(cfgArquivo.versaoMetodologia, '1.1.0')
+  assert.equal(cfgArquivo.publicacao.aprovadoPeloResponsavel, true)
+  assert.equal(cfgArquivo.publicacao.aprovacao.data, '2026-10-17')
   assert.equal(cfgArquivo.historicoDeVersoes.at(-1).versao, cfgArquivo.versaoMetodologia)
   assert.equal(cfgArquivo.tamanhoDaLista, 15)
   assert.equal(cfgArquivo.criterio.indicador, 'dlEbitda')

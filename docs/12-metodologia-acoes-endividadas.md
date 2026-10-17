@@ -1,6 +1,6 @@
 # 12. Metodologia: Top 15 empresas mais endividadas (D94)
 
-Versão da metodologia: **1.0.0** (`config/acoes-endividadas.json`, fonte única dos parâmetros próprios). Ranking aberto (sem código), na aba "Top 15 mais endividadas" do Simule Ações. **Ainda não publicado:** `publicacao.aprovadoPeloResponsavel` é `false` até o responsável aprovar.
+Versão da metodologia: **1.1.0** (`config/acoes-endividadas.json`, fonte única dos parâmetros próprios). Ranking aberto (sem código), na aba "Top 15 mais endividadas" do Simule Ações. **Publicado em 17/10/2026**, por aprovação expressa do responsável (`publicacao.aprovadoPeloResponsavel` é `true`; v1.1.0). Sem parecer independente de terceiros (D22).
 
 ## 1. O que é, e o que não é
 

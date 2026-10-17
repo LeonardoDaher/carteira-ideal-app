@@ -49,12 +49,12 @@ O Meu Mês tem **duas abas**: "Contas do mês" (como sempre) e "Supermercado" (n
 - **Código:** `scripts/auditoria-diaria.mjs` (decisão e conferência), `scripts/auditoria-diaria.test.mjs` (21 testes, 9 mutações pegas), `webapp-src/src/domain/auditoriaDiaria.ts`. Detalhe e limites em `docs/07` D89.
 - **Para acompanhar:** na primeira execução depois do envio, o log mostra `Auditoria: diária ...` ou `COMPLETA ...` e o motivo; e-mail do GitHub se a conferência divergir. Balanços novos e o informe mensal da CVM só entram na primeira execução do mês seguinte.
 
-### D94 (17/10/2026) — Top 15 empresas mais endividadas (dívida líquida ÷ EBITDA), aberto, **ainda não publicado**
+### D94 (17/10/2026) — Top 15 empresas mais endividadas (dívida líquida ÷ EBITDA), aberto, **publicado em 17/10/2026**
 - **Pedido:** ranking das empresas mais endividadas. Decisões do responsável: medida = dívida líquida ÷ EBITDA; universo = o das ações baratas; acesso = aberto, sem código; nova aba no Simule Ações, atualizada todo dia útil.
 - **Desenho:** reaproveita as ações baratas (docs/09): parte das demonstrações da CVM congeladas na auditoria delas e troca só o preço do dia; mesma leitura contábil (`calcularFundamentos`), então a mesma empresa tem o mesmo número nas duas listas. **Sem** filtro de lucro, de volatilidade e da verificação "caixa operacional ≤ 2× o EBITDA" (esta derrubava AMER3, BHIA3, MGLU3 e SAPR11). Caixa maior que a dívida fica fora; **dívida líquida com EBITDA zero ou negativo** vai para uma lista à parte, fora da ordem numérica.
 - **Código:** `config/acoes-endividadas.json`, `scripts/acoes-endividadas-calculo.mjs`, `atualizar-acoes-endividadas.mjs`, `acoes-endividadas-verificar.mjs`, workflow `atualizar-acoes-endividadas.yml` (00h30 de Brasília, depois das ações baratas), `webapp-src/src/screens/Top15Endividadas.tsx`, aba no `SimuleAcoes.tsx`. Auditoria no desenho da D89 (completa só na primeira execução do mês, ou se mudarem os parâmetros, o código ou a auditoria de origem das ações baratas). Detalhe e limites em `docs/12` e `docs/07` D94.
 - **Primeira rodada:** AGRO3 (35,3x), AMER3 (24,2x), HBOR3, ONCO3, LOGG3, BRKM5, AURE3, TTEN3, CAML3, ROMI3, ECOR3, EQTL3, TAEE11, TUPY3, ORVR3.
-- **Pendente do responsável:** aprovar a publicação (`publicacao.aprovadoPeloResponsavel` em `config/acoes-endividadas.json` começa `false`, o app mostra "em validação") e a redação do aviso (`avisoProposto`). O divulgador mensal (D91) ainda não inclui esta lista.
+- **Publicação:** aprovada pelo responsável em 17/10/2026 (v1.1.0, `aprovadoPeloResponsavel` true, aviso proposto mantido). **Pendente:** decidir se o divulgador mensal (D91) passa a incluir esta lista e se a lista "sem EBITDA positivo" fica à parte (como está).
 
 ### Decisões anteriores recentes
 D67 Simule Imóvel com seleção de caminhos, D68 cartão "Simule Bens", D69 locação como quinto caminho no carro e na moto.
