@@ -1,5 +1,11 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { jurosPadrao } from '../data/jurosOpcoes'
+import { SNAPSHOT_ACOES_ENDIVIDADAS } from '../data/snapshotAcoesEndividadas'
+import { storage } from '../data/storage'
+import { CHAVE_CODIGO_TOP15, buscarTop15 } from '../domain/acessoTop15'
+import type { RespostaTop15 } from '../domain/acessoTop15'
+import type { SnapshotAcoesEndividadas } from '../domain/acoesEndividadas'
+import { LIMITES_DE_DIVIDA, fundamentoDoAtivo, montarIndiceFundamentos, raizDoTicker } from '../domain/fundamentosPremios'
 import { formatarData } from '../domain/rendaFii'
 import { reais } from '../domain/mercadoOficial'
 import type { EscolhaDeSeries, SnapshotOpcoes } from '../domain/opcoes'
@@ -16,20 +22,70 @@ const OPERACOES: { id: Operacao; titulo: string; descricao: string }[] = [
   { id: 'callCoberta', titulo: 'Vender call coberta', descricao: 'Você já tem a ação e pode ter de vendê-la pelo strike.' },
 ]
 
+type EstadoBaratas = { tipo: 'carregando' } | { tipo: 'sem_codigo' } | { tipo: 'falhou' } | { tipo: 'ok'; raizes: Set<string> }
+type CarregarBaratas = (codigo: string) => Promise<RespostaTop15>
+type Armazenamento = Pick<typeof storage, 'getItem'>
+
+// A lista das mais baratas vem do servidor, com o código do mês: guarda o resultado na sessão para não pedir de novo a cada troca de aba.
+const CACHE_BARATAS = new Map<string, Set<string>>()
+
+/**
+ * Raízes das empresas do Top 15 mais baratas, SÓ se a pessoa já liberou essa lista com o código (guardado neste aparelho pela
+ * tela do Simule Ações). Sem código, nada é pedido nem mostrado: a lista é restrita (D50).
+ */
+function useBaratas(carregar: CarregarBaratas, armazenamento: Armazenamento): EstadoBaratas {
+  const [estado, setEstado] = useState<EstadoBaratas>({ tipo: 'carregando' })
+  useEffect(() => {
+    let vivo = true
+    ;(async () => {
+      const codigo = await armazenamento.getItem(CHAVE_CODIGO_TOP15)
+      if (!vivo) return
+      if (!codigo) return setEstado({ tipo: 'sem_codigo' })
+      const guardado = carregar === buscarTop15 ? CACHE_BARATAS.get(codigo) : undefined
+      if (guardado) return setEstado({ tipo: 'ok', raizes: guardado })
+      const resposta = await carregar(codigo)
+      if (!vivo) return
+      if (!resposta.ok) return setEstado({ tipo: 'falhou' })
+      const raizes = new Set(resposta.snapshot.ranking.map((item) => raizDoTicker(item.ticker)))
+      if (carregar === buscarTop15) CACHE_BARATAS.set(codigo, raizes)
+      setEstado({ tipo: 'ok', raizes })
+    })()
+    return () => {
+      vivo = false
+    }
+  }, [carregar, armazenamento])
+  return estado
+}
+
 /**
  * Top 15 dos maiores prêmios para quem vende opção: rendimento do prêmio sobre o dinheiro travado, com o risco ao lado
  * (colchão, chance de exercício e volatilidade). O risco é um limite escolhido pela pessoa; o ranking compara os prêmios
- * dentro dele. Descritivo: não é recomendação de operação.
+ * dentro dele. Cruzado com a dívida da empresa (lista das mais endividadas, aberta) e, para quem liberou, com o Top 15
+ * mais baratas. Descritivo: não é recomendação de operação.
  */
-export function TopPremiosOpcoes({ snapshot, onSimular }: { snapshot: SnapshotOpcoes; onSimular: (e: EscolhaDeSeries) => void }) {
+export function TopPremiosOpcoes({
+  snapshot, onSimular, endividadas = SNAPSHOT_ACOES_ENDIVIDADAS, carregarBaratas = buscarTop15, armazenamento = storage,
+}: {
+  snapshot: SnapshotOpcoes
+  onSimular: (e: EscolhaDeSeries) => void
+  /** Injetáveis nos testes. */
+  endividadas?: SnapshotAcoesEndividadas
+  carregarBaratas?: CarregarBaratas
+  armazenamento?: Armazenamento
+}) {
   const [filtro, setFiltro] = useState<FiltroPremios>(FILTRO_PREMIOS_PADRAO)
   const juros = jurosPadrao()
+  const fundamentos = useMemo(() => montarIndiceFundamentos(endividadas), [endividadas])
+  const baratas = useBaratas(carregarBaratas, armazenamento)
+  const raizesBaratas = baratas.tipo === 'ok' ? baratas.raizes : null
   const mudar = (parcial: Partial<FiltroPremios>) => setFiltro((f) => ({ ...f, ...parcial }))
-  const linhas = useMemo(() => calcularTopPremios(snapshot, filtro, juros), [snapshot, filtro, juros])
+  const linhas = useMemo(
+    () => calcularTopPremios(snapshot, filtro, juros, TAMANHO_DO_TOP, { fundamentos, baratas: raizesBaratas }),
+    [snapshot, filtro, juros, fundamentos, raizesBaratas],
+  )
   const coberta = filtro.operacao === 'callCoberta'
 
-  const simular = (l: LinhaPremio) =>
-    onSimular({ ativo: l.ativo, series: [l.serie], lado: 'venda', coberta })
+  const simular = (l: LinhaPremio) => onSimular({ ativo: l.ativo, series: [l.serie], lado: 'venda', coberta })
 
   return (
     <>
@@ -38,8 +94,8 @@ export function TopPremiosOpcoes({ snapshot, onSimular }: { snapshot: SnapshotOp
         <span className="muted">
           O ranking mede o prêmio recebido sobre o dinheiro que fica travado ({coberta ? 'o preço da ação' : 'o strike'}),
           levado a {DIAS_DO_MES} dias úteis para comparar prazos diferentes. Prêmio alto costuma ser o mercado cobrando por
-          risco alto, por isso você escolhe o limite de risco, e a tabela mostra o colchão, a chance de exercício e a
-          volatilidade de cada linha.
+          risco alto, por isso você escolhe o limite de risco, e a tabela mostra o colchão, a chance de exercício, a
+          volatilidade e a dívida de cada empresa.
         </span>
       </div>
 
@@ -79,7 +135,7 @@ export function TopPremiosOpcoes({ snapshot, onSimular }: { snapshot: SnapshotOp
           <div className="col" style={{ gap: 6 }}>
             <span className="small" style={{ fontWeight: 600 }}>Vencimentos</span>
             <div className="row" style={{ gap: 6, flexWrap: 'wrap' }} role="group" aria-label="Vencimentos do ranking">
-              {([['todos', 'Todos'], ['mensais', 'Mensais'], ['semanais', 'Semanais']] as [FiltroVencimentos, string][]).map(([v, nome]) => (
+              {([['mensais', 'Mensais'], ['semanais', 'Semanais'], ['todos', 'Todos']] as [FiltroVencimentos, string][]).map(([v, nome]) => (
                 <button key={v} className={`chip ${filtro.vencimentos === v ? 'selected' : ''}`} aria-pressed={filtro.vencimentos === v} onClick={() => mudar({ vencimentos: v })}>
                   {nome}
                 </button>
@@ -98,6 +154,44 @@ export function TopPremiosOpcoes({ snapshot, onSimular }: { snapshot: SnapshotOp
             </div>
           </div>
         </div>
+
+        {fundamentos && (
+          <div className="col" style={{ gap: 6 }}>
+            <span className="small" style={{ fontWeight: 600 }}>Dívida da empresa (dívida líquida ÷ EBITDA)</span>
+            <div className="row" style={{ gap: 6, flexWrap: 'wrap' }} role="group" aria-label="Limite de dívida">
+              {LIMITES_DE_DIVIDA.map((limite) => (
+                <button
+                  key={String(limite)}
+                  className={`chip ${filtro.dividaMaxima === limite ? 'selected' : ''}`}
+                  aria-pressed={filtro.dividaMaxima === limite}
+                  onClick={() => mudar({ dividaMaxima: limite })}
+                >
+                  {limite === null ? 'Sem limite' : `Até ${limite}x`}
+                </button>
+              ))}
+            </div>
+            <span className="tiny muted">
+              Com limite, saem as empresas acima dele e as sem EBITDA positivo. Quem não tem o dado (bancos, ETFs, pouca
+              liquidez) continua na lista, com “—” na coluna. Balanços da CVM até {fundamentos.dataCorte ? formatarData(fundamentos.dataCorte) : 'a data de corte'}.
+            </span>
+          </div>
+        )}
+
+        {baratas.tipo === 'ok' && (
+          <label className="small" style={{ display: 'flex', gap: 8, alignItems: 'center', cursor: 'pointer' }}>
+            <input type="checkbox" checked={filtro.soBaratas} onChange={(ev) => mudar({ soBaratas: ev.target.checked })} />
+            Só as empresas do Top 15 mais baratas
+          </label>
+        )}
+        {baratas.tipo === 'sem_codigo' && (
+          <span className="tiny muted justify" data-testid="nota-baratas">
+            Para marcar as empresas que estão no Top 15 mais baratas, libere essa lista com o código, na aba Top 15 do{' '}
+            <a href="./?tela=simuleAcoes">Simule Ações</a>. Sem o código, a lista continua restrita e não aparece aqui.
+          </span>
+        )}
+        {baratas.tipo === 'falhou' && (
+          <span className="tiny muted" role="status">Não consegui conferir o Top 15 mais baratas agora; o ranking segue sem essa marca.</span>
+        )}
 
         <label className="small" style={{ display: 'flex', gap: 8, alignItems: 'center', cursor: 'pointer' }}>
           <input type="checkbox" checked={filtro.umPorAtivo} onChange={(ev) => mudar({ umPorAtivo: ev.target.checked })} />
@@ -118,7 +212,7 @@ export function TopPremiosOpcoes({ snapshot, onSimular }: { snapshot: SnapshotOp
           <div className="card-outline small justify" style={{ lineHeight: 1.5 }} role="status">
             <span className="muted">
               Só entram séries que negociaram no último pregão, com pelo menos {DIAS_UTEIS_MINIMOS} dias úteis até o vencimento
-              e {coberta ? 'strike a partir do preço do ativo' : 'strike até o preço do ativo'}. Aumente o limite de risco ou inclua as séries pouco negociadas.
+              e {coberta ? 'strike a partir do preço do ativo' : 'strike até o preço do ativo'}. Aumente o limite de risco ou de dívida, ou inclua as séries pouco negociadas.
             </span>
           </div>
         )}
@@ -140,33 +234,61 @@ export function TopPremiosOpcoes({ snapshot, onSimular }: { snapshot: SnapshotOp
                   {coberta && <th scope="col" title="Ganho se o ativo subir até o strike e a ação for vendida, contando o prêmio">Se exercida (%)</th>}
                   <th scope="col" title="Chance de a opção ser exercida, pelo modelo">Chance exerc. (%)</th>
                   <th scope="col" title="Volatilidade implícita no último preço">Vol. impl. (%)</th>
+                  {fundamentos && <th scope="col" title="Dívida líquida dividida pelo EBITDA dos últimos 12 meses, e a posição na lista das mais endividadas">Dív. líq./EBITDA</th>}
                   <th scope="col">Neg.</th>
                   <th scope="col"><span className="sr-only">Simular</span></th>
                 </tr>
               </thead>
               <tbody>
-                {linhas.map((l, i) => (
-                  <tr key={l.serie.codigo} data-testid="linha-premio">
-                    <td>{i + 1}</td>
-                    <td>
-                      <strong>{l.ativo.ticker}</strong> <span className="muted">{reais(l.ativo.cotacao)}</span>
-                    </td>
-                    <td style={{ fontWeight: 700 }}>{l.serie.codigo}</td>
-                    <td className="num">{num(l.serie.strike)}</td>
-                    <td>{formatarData(l.serie.vencimento)} ({l.diasUteis})</td>
-                    <td className="num">{num(l.serie.ultimo)}</td>
-                    <td className="num">{num(l.rendimentoPrazo)}</td>
-                    <td className="num" style={{ fontWeight: 700 }}>{num(l.rendimentoMes)}</td>
-                    <td className="num">{num(l.colchao)}</td>
-                    {coberta && <td className="num">{l.ganhoSeExercida === null ? '—' : num(l.ganhoSeExercida)}</td>}
-                    <td className="num">{num(l.chanceExercicio, 1)}</td>
-                    <td className="num">{num(l.volImplicita, 1)}</td>
-                    <td className="num">{l.serie.negocios.toLocaleString('pt-BR')}</td>
-                    <td>
-                      <button className="chip" onClick={() => simular(l)} aria-label={`Simular a venda de ${l.serie.codigo}`}>Simular</button>
-                    </td>
-                  </tr>
-                ))}
+                {linhas.map((l, i) => {
+                  const f = fundamentoDoAtivo(fundamentos, l.ativo.ticker)
+                  const barata = raizesBaratas?.has(raizDoTicker(l.ativo.ticker)) ?? false
+                  return (
+                    <tr key={l.serie.codigo} data-testid="linha-premio">
+                      <td>{i + 1}</td>
+                      <td>
+                        <strong>{l.ativo.ticker}</strong> <span className="muted">{reais(l.ativo.cotacao)}</span>
+                        {barata && (
+                          <div className="tiny" style={{ color: 'var(--mc-pos)', fontWeight: 700 }} data-testid="selo-barata">Top 15 mais baratas</div>
+                        )}
+                      </td>
+                      <td style={{ fontWeight: 700 }}>{l.serie.codigo}</td>
+                      <td className="num">{num(l.serie.strike)}</td>
+                      <td>{formatarData(l.serie.vencimento)} ({l.diasUteis})</td>
+                      <td className="num">{num(l.serie.ultimo)}</td>
+                      <td className="num">{num(l.rendimentoPrazo)}</td>
+                      <td className="num" style={{ fontWeight: 700 }}>{num(l.rendimentoMes)}</td>
+                      <td className="num">{num(l.colchao)}</td>
+                      {coberta && <td className="num">{l.ganhoSeExercida === null ? '—' : num(l.ganhoSeExercida)}</td>}
+                      <td className="num">{num(l.chanceExercicio, 1)}</td>
+                      <td className="num">{num(l.volImplicita, 1)}</td>
+                      {fundamentos && (
+                        <td data-testid="celula-divida">
+                          {!f ? (
+                            <span className="muted" title="Fora da lista: banco, seguradora, ETF, pouca liquidez ou setor excluído">—</span>
+                          ) : f.semEbitdaPositivo ? (
+                            <span style={{ color: 'var(--danger)', fontWeight: 700 }}>sem EBITDA positivo</span>
+                          ) : (
+                            <>
+                              {num(f.dlEbitda ?? 0, 1)}x{' '}
+                              {f.noTop ? (
+                                <span className="tiny" style={{ color: 'var(--danger)', fontWeight: 700 }}>
+                                  {f.posicao}ª mais endividada
+                                </span>
+                              ) : (
+                                <span className="tiny muted">({f.posicao}ª de {fundamentos.total})</span>
+                              )}
+                            </>
+                          )}
+                        </td>
+                      )}
+                      <td className="num">{l.serie.negocios.toLocaleString('pt-BR')}</td>
+                      <td>
+                        <button className="chip" onClick={() => simular(l)} aria-label={`Simular a venda de ${l.serie.codigo}`}>Simular</button>
+                      </td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>
@@ -196,6 +318,12 @@ export function TopPremiosOpcoes({ snapshot, onSimular }: { snapshot: SnapshotOp
               preço, porque o prêmio cai mais rápido do que o risco quando o strike se afasta. Fixando o risco, a pergunta
               fica justa: para a mesma chance de exercício, quem paga mais? Em geral, os ativos mais voláteis, e a
               volatilidade na tabela mostra o risco que está por trás desse prêmio.
+            </span>
+            <span className="muted">
+              <strong>Dívida da empresa.</strong> Vem da lista das mais endividadas do app (dívida líquida ÷ EBITDA, balanços da
+              CVM), e não é recalculada aqui. Prêmio alto com dívida alta é o mercado avisando de um risco que o preço da opção já
+              inclui; prêmio alto em empresa pouco endividada merece mais atenção. A marca “Top 15 mais baratas” só aparece para
+              quem liberou essa lista com o código. A dívida considera só empréstimos e financiamentos (com debêntures): arrendamentos, comuns em varejo e locadoras, não entram, e a razão não mede prazo, custo nem moeda. O cruzamento é um filtro para começar a análise, e não uma indicação.
             </span>
             <span className="muted">
               <strong>Limites.</strong> O preço é o do último negócio, e não o de compra e venda, então o prêmio realmente

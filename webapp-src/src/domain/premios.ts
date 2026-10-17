@@ -1,5 +1,7 @@
 import { diasUteis, montarLinha, tipoVencimento } from './opcoes'
 import type { AtivoComOpcoes, SerieOpcao, SnapshotOpcoes } from './opcoes'
+import { fundamentoDoAtivo, raizDoTicker } from './fundamentosPremios'
+import type { IndiceFundamentos } from './fundamentosPremios'
 import { DIAS_UTEIS_ANO, chanceDeExercicio } from './simulaOpcoes'
 
 // Top 15 dos maiores prêmios: rendimento do prêmio sobre o dinheiro que fica travado, para quem vende opção.
@@ -38,10 +40,15 @@ export interface FiltroPremios {
   poucoLiquidas: boolean
   /** Mostra só a melhor série de cada ativo. */
   umPorAtivo: boolean
+  /** Dívida líquida ÷ EBITDA máxima aceita; null = sem limite. Empresas sem esse dado (bancos, ETFs) continuam. */
+  dividaMaxima: number | null
+  /** Só as empresas do Top 15 mais baratas (a lista é restrita por código: sem ela liberada, o filtro não age). */
+  soBaratas: boolean
 }
 
 export const FILTRO_PREMIOS_PADRAO: FiltroPremios = {
   operacao: 'putVendida', vencimentos: 'mensais', ordem: 'mes', chanceMaxima: 25, poucoLiquidas: false, umPorAtivo: true,
+  dividaMaxima: null, soBaratas: false,
 }
 
 /** Limites de chance de exercício oferecidos na tela (null = sem limite). */
@@ -110,13 +117,23 @@ export function linhaDePremio(
   }
 }
 
+/** Listas do app usadas para cruzar com o ranking. */
+export interface ContextoPremios {
+  /** Dívida líquida ÷ EBITDA das empresas (lista das mais endividadas, aberta). */
+  fundamentos?: IndiceFundamentos | null
+  /** Raízes (4 letras) das empresas do Top 15 mais baratas; ausente ou null = lista não liberada. */
+  baratas?: Set<string> | null
+}
+
 const CHAVE_DA_ORDEM = { mes: 'rendimentoMes', prazo: 'rendimentoPrazo' } as const
 
 /**
  * O Top 15 de prêmios para o filtro dado. `snapshot` já deve vir só com os próximos 6 meses. Desempate pelo volume
  * negociado da série e depois pelo código, para a ordem ser sempre a mesma.
  */
-export function calcularTopPremios(snapshot: SnapshotOpcoes, filtro: FiltroPremios, jurosAnual: number, tamanho = TAMANHO_DO_TOP): LinhaPremio[] {
+export function calcularTopPremios(
+  snapshot: SnapshotOpcoes, filtro: FiltroPremios, jurosAnual: number, tamanho = TAMANHO_DO_TOP, contexto: ContextoPremios = {},
+): LinhaPremio[] {
   const hoje = snapshot.dataPregao
   if (!hoje) return []
   const minimoNegocios = filtro.poucoLiquidas ? NEGOCIOS_MINIMOS_FLEXIVEL : NEGOCIOS_MINIMOS
@@ -127,6 +144,11 @@ export function calcularTopPremios(snapshot: SnapshotOpcoes, filtro: FiltroPremi
       if (filtro.vencimentos !== 'todos' && tipoVencimento(serie.vencimento) !== (filtro.vencimentos === 'mensais' ? 'mensal' : 'semanal')) continue
       const linha = linhaDePremio(ativo, serie, filtro.operacao, hoje, jurosAnual)
       if (!linha) continue
+      if (filtro.dividaMaxima !== null && contexto.fundamentos) {
+        const f = fundamentoDoAtivo(contexto.fundamentos, ativo.ticker)
+        if (f && (f.semEbitdaPositivo || (f.dlEbitda !== null && f.dlEbitda > filtro.dividaMaxima))) continue
+      }
+      if (filtro.soBaratas && contexto.baratas && !contexto.baratas.has(raizDoTicker(ativo.ticker))) continue
       if (filtro.chanceMaxima !== null && linha.chanceExercicio > filtro.chanceMaxima) continue
       candidatas.push(linha)
     }

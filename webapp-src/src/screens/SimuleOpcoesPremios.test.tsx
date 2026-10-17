@@ -32,7 +32,7 @@ const snapshot: SnapshotOpcoes = {
 }
 
 const abrirTop = () => fireEvent.click(screen.getByRole('tab', { name: /Top 15 prêmios/ }))
-const semLimite = () => fireEvent.click(screen.getByRole('button', { name: 'Sem limite' }))
+const semLimite = () => fireEvent.click(within(screen.getByRole('group', { name: 'Risco máximo' })).getByRole('button', { name: 'Sem limite' }))
 const linhas = () => screen.queryAllByTestId('linha-premio')
 const celulas = (l: HTMLElement) => within(l).getAllByRole('cell').map((c) => (c.textContent ?? '').replace(/ /g, ' '))
 const series = () => linhas().map((l) => celulas(l)[2])
@@ -123,7 +123,7 @@ describe('SimuleOpcoes: Top 15 prêmios', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Simular a venda de PETRW600' }))
     expect(screen.getByTestId('ativo-estrategia')).toBeDefined()
     window.history.back()
-    await waitFor(() => expect(screen.getByRole('button', { name: 'Sem limite' })).toBeDefined())
+    await waitFor(() => expect(screen.getByRole('group', { name: 'Risco máximo' })).toBeDefined())
     expect(screen.queryByTestId('ativo-estrategia')).toBeNull()
   })
 

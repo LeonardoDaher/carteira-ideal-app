@@ -1780,8 +1780,22 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 
 **Resultado com dados reais (16/10/2026, vencimento de 19/11, chance de exercício até cerca de 25%).** BBAS3 rende 2,5% em 21 dias úteis, PETR4 1,9% e VALE3 1,1%; MGLU3 5,5% e ANIM3 3,1%. O topo da venda de put é de varejo, imobiliárias e locadoras, com volatilidade implícita de 100% a 170%: prêmio alto é incerteza alta, e é isso que a tela deixa visível.
 
-**Comparação com um método público.** Um vídeo de educador de opções (julho de 2026) fixa o vencimento, compara as opções na linha do dinheiro, trata o ranking como filtro e cruza com fundamentos e tendência. Coincide com nosso foco no valor extrínseco, no vencimento fixo e no ranking como filtro; difere ao comparar só a opção ATM (que ordena por volatilidade), enquanto nós fixamos a chance de exercício. O cruzamento com dívida, lucro e tendência do ativo **não está feito** (ideia: ligar às listas de ações baratas e endividadas que o app já tem).
+**Comparação com um método público.** Um vídeo de educador de opções (julho de 2026) fixa o vencimento, compara as opções na linha do dinheiro, trata o ranking como filtro e cruza com fundamentos e tendência. Coincide com nosso foco no valor extrínseco, no vencimento fixo e no ranking como filtro; difere ao comparar só a opção ATM (que ordena por volatilidade), enquanto nós fixamos a chance de exercício. O cruzamento com a dívida e com as ações baratas foi feito logo depois (D98); lucro e tendência do ativo continuam fora.
 
 **Limites.** O preço é o do último negócio, e não o de compra e venda: o prêmio realmente recebido pode ser menor. Dividendos, corretagem, emolumentos, IR e margem de garantia ficam de fora. A chance de exercício é estimativa do modelo, e não previsão.
 
 **Testes.** 14 de cálculo do ranking (`premios.test.ts`), 3 da chance de exercício e 9 da aba (`SimuleOpcoesPremios.test.tsx`).
+
+## D98 (17/10/2026): Top 15 de prêmios cruzado com as ações endividadas e baratas
+
+**Pedido do responsável (17/10/2026).** Depois da análise de um vídeo público sobre ranking de prêmios (que defende olhar a dívida e a qualidade da empresa antes de vender), pediu que o Top 15 de prêmios cruzasse com as listas de ações baratas e endividadas que o app já tem.
+
+**Desenho.** `domain/fundamentosPremios.ts` monta um índice por empresa (4 primeiras letras do código) com a posição e a dívida líquida ÷ EBITDA da lista das mais endividadas; `calcularTopPremios` ganhou um contexto opcional com esse índice e as raízes das mais baratas, e dois filtros: dívida máxima (sem limite, 5x ou 3x) e "só as mais baratas". Na tabela, coluna "Dív. líq./EBITDA" (razão, posição, aviso para as 15 mais endividadas, "sem EBITDA positivo"), e o selo "Top 15 mais baratas".
+
+**Decisão de privacidade (a que mais importa).** A lista das mais baratas é **restrita por código** (D50): o arquivo do app vem com `ranking` vazio e a lista só sai do servidor com o código do mês. Cruzar de forma aberta vazaria uma lista restrita. Por isso o ranking de prêmios **só lê a lista se a pessoa já liberou o código neste aparelho** (chave `carteiraideal.top15.codigo`, a mesma da aba do Simule Ações), pelo mesmo endpoint, com cache na sessão. Sem código: nenhum pedido ao servidor, nenhuma marca, e uma nota explica como liberar. Código recusado ou rede fora: aviso discreto, ranking intacto. Nenhuma regra, arquivo ou aprovação das ações baratas foi alterada.
+
+**Quem fica sem dado.** Bancos, seguradoras, bolsa/holdings, ETFs e empresas de pouca liquidez não estão na lista de dívida: continuam no ranking, com "—". Com dados de 16/10/2026, 61 dos 88 ativos do ranking (sem limite de risco) tinham dado de dívida. Com o limite de 3x, saem, por exemplo, MRVE3, EQTL3 (a 12ª mais endividada) e CSAN3; MGLU3 (1,1x), VAMO3, RENT3, CYRE3 e ANIM3 ficam.
+
+**Limites.** Os da D94: dívida só em empréstimos e financiamentos (sem arrendamentos, relevantes em varejo e locadoras), sem prazo, custo ou moeda; EBITDA de 12 meses pode estar distorcido. A lista de dívida só muda quando sai balanço novo. Lucro e tendência de preço do ativo **não** entram (o vídeo recomenda olhá-los). O cruzamento é um filtro para começar a análise, e não uma indicação de operação.
+
+**Testes.** 8 de domínio (`fundamentosPremios.test.ts`: índice, posição, empresas fora do universo, filtros de dívida e de baratas) e 6 de tela (`SimuleOpcoesCruzamento.test.tsx`: coluna, limite de dívida, lista não publicada, código liberado, sem código, código recusado). Os testes usam tudo injetado, sem rede.

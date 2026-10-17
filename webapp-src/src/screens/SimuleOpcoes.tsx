@@ -1,5 +1,5 @@
 import { useEffect, useId, useMemo, useState } from 'react'
-import type { ReactNode } from 'react'
+import type { ComponentProps, ReactNode } from 'react'
 import { jurosPadrao } from '../data/jurosOpcoes'
 import {
   FILTRO_VAZIO, buscarAtivos, diasUteis, expandirSnapshot, faixaPerto, filtrarSeries, limitarAosProximosMeses, limitesDeStrike, montarLinha,
@@ -71,11 +71,15 @@ function useSnapshot(injetado?: SnapshotOpcoes): [EstadoDados, () => void] {
  * ordenável, com filtro por tipo, estilo, vencimentos e faixa de strike) e "Estratégias" (payoff no vencimento, curva
  * antes do vencimento e gregas). Tela descritiva, sem indicação de operação: educacional.
  */
-export function SimuleOpcoes({ snapshot }: {
+export function SimuleOpcoes({ snapshot, endividadas, carregarBaratas, armazenamento }: {
   /** Recebido como as demais telas avulsas; esta tela só volta ao hub. */
   ctx: AppCtx
   /** Permite injetar dados nos testes. No app, vem do arquivo gerado pelo job diário. */
   snapshot?: SnapshotOpcoes
+  /** Injetáveis nos testes: lista das mais endividadas, leitura do Top 15 mais baratas e armazenamento do código. */
+  endividadas?: ComponentProps<typeof TopPremiosOpcoes>['endividadas']
+  carregarBaratas?: ComponentProps<typeof TopPremiosOpcoes>['carregarBaratas']
+  armazenamento?: ComponentProps<typeof TopPremiosOpcoes>['armazenamento']
 }) {
   const [estado, recarregar] = useSnapshot(snapshot)
   const [aba, setAba] = useState<Aba>('series')
@@ -160,7 +164,9 @@ export function SimuleOpcoes({ snapshot }: {
         {aba === 'series' ? (
           comDados((d) => <SeriesDaB3 snapshot={d} onCriar={criarEstrategia} onAtivo={setAtivoAtual} />)
         ) : aba === 'premios' ? (
-          comDados((d) => <TopPremiosOpcoes snapshot={d} onSimular={criarEstrategia} />)
+          comDados((d) => (
+            <TopPremiosOpcoes snapshot={d} onSimular={criarEstrategia} endividadas={endividadas} carregarBaratas={carregarBaratas} armazenamento={armazenamento} />
+          ))
         ) : (
           <Estrategias key={escolha?.n ?? 0} escolha={escolha} ativoAtual={ativoAtual} dataPregao={dados?.dataPregao ?? null} aoVoltar={() => irPara('series')} />
         )}
