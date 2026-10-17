@@ -196,3 +196,39 @@ describe('SimuleOpcoes: aba Gráficos, escala relativa', () => {
     expect(topo(`linha-${V2}-call`)).toBeCloseTo(topo(`linha-${V1}-call`), 5) // escala relativa: as duas encostam no topo
   })
 })
+
+describe('SimuleOpcoes: aba Gráficos, cores e traços', () => {
+  const caminho = (id: string) => screen.getByTestId(id).querySelector('path')!
+
+  it('calls em amarelo (âmbar do Tesouro), puts em azul e somadas em verde', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    abrirGraficos()
+    expect(caminho(`linha-${V1}-call`).getAttribute('stroke')).toBe('var(--grafico-selic)')
+    expect(caminho(`linha-${V1}-put`).getAttribute('stroke')).toBe('var(--grafico-ipca)')
+    fireEvent.click(screen.getByRole('button', { name: 'Calls e puts somadas' }))
+    expect(caminho(`linha-${V1}-soma`).getAttribute('stroke')).toBe('var(--grafico-con)')
+    expect(texto('nota-cores')).toMatch(/Amarelo são as calls, azul são as puts e verde são calls e puts somadas/)
+  })
+
+  it('o vencimento se distingue pelo traço: o primeiro é cheio, o segundo tracejado e o terceiro pontilhado, na mesma cor do tipo', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    abrirGraficos()
+    marcar('18/12/2026')
+    marcar('23/10/2026')
+    // vencimentos em ordem de data: 23/10, 19/11 e 18/12
+    expect(caminho(`linha-${S1}-call`).getAttribute('stroke-dasharray')).toBeNull()
+    expect(caminho(`linha-${V1}-call`).getAttribute('stroke-dasharray')).toBe('7 3.5')
+    expect(caminho(`linha-${V2}-call`).getAttribute('stroke-dasharray')).toBe('0.1 4.5')
+    for (const v of [S1, V1, V2]) expect(caminho(`linha-${v}-call`).getAttribute('stroke')).toBe('var(--grafico-selic)')
+    for (const v of [S1, V1, V2]) expect(caminho(`linha-${v}-put`).getAttribute('stroke')).toBe('var(--grafico-ipca)')
+  })
+
+  it('a legenda traz, para cada linha, um trecho dela com a cor e o traço certos', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    abrirGraficos()
+    marcar('18/12/2026')
+    const marcas = screen.getAllByTestId('legenda-linha').map((l) => l.querySelector('svg line')!)
+    expect(marcas.map((m) => m.getAttribute('stroke'))).toEqual(['var(--grafico-selic)', 'var(--grafico-ipca)', 'var(--grafico-selic)', 'var(--grafico-ipca)'])
+    expect(marcas.map((m) => m.getAttribute('stroke-dasharray'))).toEqual([null, null, '7 3.5', '7 3.5'])
+  })
+})

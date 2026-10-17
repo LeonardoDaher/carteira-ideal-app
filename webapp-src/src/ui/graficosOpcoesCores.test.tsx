@@ -12,50 +12,52 @@ describe('GraficoPorStrike usa o visual do Simule Tesouro', () => {
       <GraficoPorStrike
         strikes={[8, 9, 10, 11, 12]}
         linhas={[
-          { id: 'a', rotulo: '19/11 calls', cor: 'var(--grafico-v1)', valores: [1, 2, 3, 2, 1] },
-          { id: 'b', rotulo: '19/11 puts', cor: 'var(--grafico-v1)', tracejada: true, valores: [1, 2, 3, 2, 1] },
-          { id: 'c', rotulo: '18/12 calls', cor: 'var(--grafico-v2)', valores: [0, 1, 1, 1, 0] },
+          { id: 'a', rotulo: '19/11 calls', cor: 'var(--grafico-selic)', valores: [1, 2, 3, 2, 1] },
+          { id: 'b', rotulo: '19/11 puts', cor: 'var(--grafico-ipca)', valores: [1, 2, 3, 2, 1] },
+          { id: 'c', rotulo: '18/12 calls', cor: 'var(--grafico-selic)', traco: '7 3.5', valores: [0, 1, 1, 1, 0] },
+          { id: 'd', rotulo: '15/01 calls', cor: 'var(--grafico-selic)', traco: '0.1 4.5', espessura: 3, valores: [0, 1, 1, 1, 0] },
         ]}
         precoAtivo={10}
         formatarValor={String}
         descricao="teste"
       />,
     )
+  const linhas = (c: HTMLElement) => [...c.querySelectorAll('path.grafico-juros-linha')]
 
-  it('usa as classes e as variáveis de cor do Tesouro, sem cores fixas', () => {
+  it('usa as classes do Tesouro e as variáveis de cor dele, sem cores fixas', () => {
     const { container } = desenhar()
-    const svg = container.querySelector('svg')!
-    expect(svg.getAttribute('class')).toBe('grafico-juros')
+    expect(container.querySelector('svg')!.getAttribute('class')).toBe('grafico-juros')
     expect(container.querySelectorAll('line.grafico-juros-grade').length).toBeGreaterThan(0)
     expect(container.querySelectorAll('text.grafico-juros-eixo').length).toBeGreaterThan(0)
     expect(container.querySelector('line.grafico-juros-guia')).not.toBeNull()
-    const cores = [...container.querySelectorAll('path.grafico-juros-linha')].map((p) => p.getAttribute('stroke'))
-    expect(cores).toEqual(['var(--grafico-v1)', 'var(--grafico-v1)', 'var(--grafico-v2)'])
+    expect(linhas(container).map((p) => p.getAttribute('stroke'))).toEqual(['var(--grafico-selic)', 'var(--grafico-ipca)', 'var(--grafico-selic)', 'var(--grafico-selic)'])
     expect(container.innerHTML).not.toMatch(/#[0-9a-fA-F]{6}\b/) // nenhuma cor hexadecimal fixa
   })
 
-  it('as puts são tracejadas com o tracejado do Simule Imóvel (7 e 3,5), e as calls seguem em traço cheio', () => {
+  it('o traço e a espessura de cada linha vêm da própria linha: cheio por padrão, e tracejado ou pontilhado quando pedido', () => {
     const { container } = desenhar()
-    const tracos = [...container.querySelectorAll('path.grafico-juros-linha')].map((p) => p.getAttribute('stroke-dasharray'))
-    expect(tracos).toEqual([null, '7 3.5', null])
+    expect(linhas(container).map((p) => p.getAttribute('stroke-dasharray'))).toEqual([null, null, '7 3.5', '0.1 4.5'])
+    expect(linhas(container).map((p) => p.getAttribute('stroke-width'))).toEqual(['2.2', '2.2', '2.2', '3'])
   })
 
-  it('a leitura mostra, para cada linha, a marquinha do Tesouro na cor dela: cheia nas calls e tracejada nas puts', () => {
+  it('a leitura mostra, para cada linha, um trecho dela com a mesma cor, traço e espessura', () => {
     const { container, getByRole } = desenhar()
     fireEvent.keyDown(getByRole('img'), { key: 'Home' })
-    const marcas = [...container.querySelectorAll('.grafico-juros-marca')] as HTMLElement[]
-    expect(marcas).toHaveLength(3)
-    expect(marcas[0].style.background).toContain('var(--grafico-v1)') // call: barra cheia
-    expect(marcas[0].style.width).toBe('') // largura padrão da classe (12px)
-    expect(marcas[1].style.width).toBe('17px') // put: tracejada, um pouco mais larga para caberem os traços
-    expect(marcas[2].style.background).toContain('var(--grafico-v2)')
+    const marcas = [...container.querySelectorAll('[data-testid="leitura-grafico"] svg line')]
+    expect(marcas).toHaveLength(4)
+    expect(marcas.map((m) => m.getAttribute('stroke'))).toEqual(['var(--grafico-selic)', 'var(--grafico-ipca)', 'var(--grafico-selic)', 'var(--grafico-selic)'])
+    expect(marcas.map((m) => m.getAttribute('stroke-dasharray'))).toEqual([null, null, '7 3.5', '0.1 4.5'])
+    expect(marcas[3].getAttribute('stroke-width')).toBe('3')
   })
 
-  it('a marquinha avulsa da legenda é decorativa (escondida de leitor de tela) e leva a cor recebida', () => {
-    const { container } = render(<MarcaDaLinha cor="var(--grafico-selic)" />)
-    const marca = container.querySelector('.grafico-juros-marca') as HTMLElement
-    expect(marca.getAttribute('aria-hidden')).toBe('true')
-    expect(marca.style.background).toContain('var(--grafico-selic)')
+  it('a marquinha avulsa da legenda é decorativa (escondida de leitor de tela) e leva a cor e o traço recebidos', () => {
+    const { container } = render(<MarcaDaLinha cor="var(--grafico-selic)" traco="7 3.5" />)
+    const svg = container.querySelector('svg')!
+    expect(svg.getAttribute('aria-hidden')).toBe('true')
+    const linha = svg.querySelector('line')!
+    expect(linha.getAttribute('stroke')).toBe('var(--grafico-selic)')
+    expect(linha.getAttribute('stroke-dasharray')).toBe('7 3.5')
+    expect(linha.getAttribute('stroke-width')).toBe('2.2') // padrão
   })
 })
 

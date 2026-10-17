@@ -771,7 +771,7 @@ function Estrategias({ escolha, ativoAtual, dataPregao, aoVoltar }: { escolha: E
           </div>
           <div className="row tiny muted" style={{ gap: 14, flexWrap: 'wrap' }}>
             <span><MarcaDaLinha cor="var(--grafico-selic)" />No vencimento</span>
-            {dados.antes && <span><MarcaDaLinha cor="var(--grafico-ipca)" tracejada />{rotuloCurva}</span>}
+            {dados.antes && <span><MarcaDaLinha cor="var(--grafico-ipca)" traco="7 3.5" />{rotuloCurva}</span>}
             <span>┆ Preço de hoje</span>
             <span>○ Equilíbrio</span>
           </div>

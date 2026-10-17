@@ -8,9 +8,20 @@ import { EscolhaDeAtivo } from './EscolhaDeAtivo'
 import { GraficoPorStrike, MarcaDaLinha } from '../ui/GraficoPorStrike'
 import type { LinhaVisual } from '../ui/GraficoPorStrike'
 
-// Uma cor por vencimento, da paleta dos gráficos do Simule Tesouro (âmbar, azul e verde, e depois tons da mesma família), que muda
-// com o tema claro ou escuro. Calls em traço cheio e puts tracejadas.
-const CORES = ['var(--grafico-v1)', 'var(--grafico-v2)', 'var(--grafico-v3)', 'var(--grafico-v4)', 'var(--grafico-v5)', 'var(--grafico-v6)', 'var(--grafico-v7)', 'var(--grafico-v8)']
+// A cor diz o TIPO, com as cores do gráfico do Simule Tesouro (que mudam com o tema claro ou escuro): calls em amarelo (âmbar,
+// --grafico-selic), puts em azul (--grafico-ipca) e calls e puts somadas em verde (--grafico-con). O que distingue um vencimento do
+// outro é o TRAÇO (cheio, tracejado, pontilhado...), todos do vocabulário do Tesouro.
+const COR_DO_TIPO = { call: 'var(--grafico-selic)', put: 'var(--grafico-ipca)', soma: 'var(--grafico-con)' } as const
+const TRACOS: { traco?: string; espessura: number }[] = [
+  { espessura: 2.2 },
+  { traco: '7 3.5', espessura: 2.2 },
+  { traco: '0.1 4.5', espessura: 3 },
+  { traco: '10 3 1 3', espessura: 2.2 },
+  { traco: '3 3', espessura: 2.2 },
+  { traco: '14 4', espessura: 2.2 },
+  { traco: '5 2 1 2', espessura: 2.2 },
+  { traco: '1.5 2.5', espessura: 2.6 },
+]
 const dataCurta = (iso: string) => `${iso.slice(8, 10)}/${iso.slice(5, 7)}`
 const inteiro = (v: number) => Math.round(v).toLocaleString('pt-BR')
 const compacto = (v: number) => (v >= 1e6 ? `${(v / 1e6).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} mi` : v >= 1e3 ? `${Math.round(v / 1e3).toLocaleString('pt-BR')} mil` : inteiro(v))
@@ -69,8 +80,9 @@ function NegociosPorStrike({ snapshot, ativo }: { snapshot: SnapshotOpcoes; ativ
   const linhasVisuais: LinhaVisual[] = dados.linhas.map((l) => ({
     id: l.id,
     rotulo: `${dataCurta(l.vencimento)}${l.tipo === 'call' ? ' calls' : l.tipo === 'put' ? ' puts' : ''}`,
-    cor: CORES[ordenados.indexOf(l.vencimento) % CORES.length],
-    tracejada: l.tipo === 'put',
+    cor: COR_DO_TIPO[l.tipo],
+    traco: TRACOS[ordenados.indexOf(l.vencimento) % TRACOS.length].traco,
+    espessura: TRACOS[ordenados.indexOf(l.vencimento) % TRACOS.length].espessura,
     valores: escala === 'relativa' ? l.valores.map((v) => (l.picoValor > 0 ? (v / l.picoValor) * 100 : 0)) : l.valores,
     leitura: l.valores,
   }))
@@ -176,10 +188,13 @@ function NegociosPorStrike({ snapshot, ativo }: { snapshot: SnapshotOpcoes; ativ
           <div className="row" style={{ gap: 12, flexWrap: 'wrap' }} aria-label="Legenda" role="group">
             {linhasVisuais.map((l) => (
               <span key={l.id} className="small" data-testid="legenda-linha">
-                <MarcaDaLinha cor={l.cor} tracejada={l.tracejada} />{l.rotulo}
+                <MarcaDaLinha cor={l.cor} traco={l.traco} espessura={l.espessura} />{l.rotulo}
               </span>
             ))}
           </div>
+          <span className="tiny muted" data-testid="nota-cores">
+            Amarelo são as calls, azul são as puts e verde são calls e puts somadas. Cada vencimento tem o seu traço (cheio, tracejado, pontilhado...).
+          </span>
           <div style={{ width: '100%', maxWidth: 760, marginInline: 'auto' }}>
             <GraficoPorStrike
               strikes={dados.strikes}
@@ -199,7 +214,7 @@ function NegociosPorStrike({ snapshot, ativo }: { snapshot: SnapshotOpcoes; ativ
           <div className="col" style={{ gap: 4 }} data-testid="picos">
             {dados.linhas.map((l, i) => (
               <span key={l.id} className="small">
-                <MarcaDaLinha cor={linhasVisuais[i].cor} tracejada={linhasVisuais[i].tracejada} />
+                <MarcaDaLinha cor={linhasVisuais[i].cor} traco={linhasVisuais[i].traco} espessura={linhasVisuais[i].espessura} />
                 <strong>{linhasVisuais[i].rotulo || dataCurta(l.vencimento)}</strong>{' '}
                 {l.picoStrike === null ? (
                   <span className="muted">sem negócios no último pregão nesta faixa.</span>

@@ -1,12 +1,15 @@
 import { useId, useState } from 'react'
-import type { CSSProperties, KeyboardEvent, PointerEvent } from 'react'
+import type { KeyboardEvent, PointerEvent } from 'react'
 
 export interface LinhaVisual {
   id: string
   rotulo: string
-  /** Cor da linha: uma variável de cor dos gráficos (var(--grafico-v1) ...), que muda com o tema. */
+  /** Cor da linha: uma variável de cor dos gráficos do Tesouro (var(--grafico-selic) ...), que muda com o tema. */
   cor: string
-  tracejada?: boolean
+  /** Tracejado da linha (stroke-dasharray); sem isso, traço cheio. Distingue linhas da mesma cor. */
+  traco?: string
+  /** Espessura da linha; o padrão é 2,2. */
+  espessura?: number
   /** Um valor por strike de `strikes`: o que o gráfico desenha. */
   valores: number[]
   /** Valores reais para a leitura, quando o gráfico desenha outra escala (por exemplo, % do pico). */
@@ -32,12 +35,13 @@ export function tetoDoEixo(maximo: number): number {
 
 const strikeTexto = (v: number) => v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 
-/** Marquinha de legenda no desenho do Simule Tesouro: uma barra curta na cor da linha (tracejada para as puts). */
-export function MarcaDaLinha({ cor, tracejada }: { cor: string; tracejada?: boolean }) {
-  const estilo: CSSProperties = tracejada
-    ? { background: `repeating-linear-gradient(90deg, ${cor} 0 5px, transparent 5px 7px)`, width: 17 }
-    : { background: cor }
-  return <span className="grafico-juros-marca" style={estilo} aria-hidden="true" />
+/** Marquinha de legenda no desenho do Simule Tesouro: um trecho curto da linha, com a mesma cor, traço e espessura dela. */
+export function MarcaDaLinha({ cor, traco, espessura = 2.2 }: { cor: string; traco?: string; espessura?: number }) {
+  return (
+    <svg width={22} height={6} viewBox="0 0 22 6" aria-hidden="true" style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: 5 }}>
+      <line x1={1} x2={21} y1={3} y2={3} stroke={cor} strokeWidth={espessura} strokeDasharray={traco} strokeLinecap="round" />
+    </svg>
+  )
 }
 
 /**
@@ -107,7 +111,7 @@ export function GraficoPorStrike({
             </span>{' '}
             {linhas.map((l) => (
               <span key={l.id}>
-                <MarcaDaLinha cor={l.cor} tracejada={l.tracejada} />
+                <MarcaDaLinha cor={l.cor} traco={l.traco} espessura={l.espessura} />
                 {l.rotulo} <strong>{(formatarLeitura ?? formatarValor)((l.leitura ?? l.valores)[indice])}</strong>{' '}
               </span>
             ))}
@@ -149,7 +153,7 @@ export function GraficoPorStrike({
         </defs>
         {linhas.map((l) => (
           <g key={l.id} data-testid={`linha-${l.id}`} clipPath={`url(#${idRecorte})`}>
-            <path d={caminho(l.valores)} className="grafico-juros-linha" stroke={l.cor} strokeWidth={2.2} strokeDasharray={l.tracejada ? '7 3.5' : undefined} />
+            <path d={caminho(l.valores)} className="grafico-juros-linha" stroke={l.cor} strokeWidth={l.espessura ?? 2.2} strokeDasharray={l.traco} />
             {pontos && l.valores.map((v, i) => <circle key={strikes[i]} cx={x(strikes[i])} cy={y(v)} r={2} fill={l.cor} />)}
           </g>
         ))}
