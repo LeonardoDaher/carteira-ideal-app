@@ -19,6 +19,11 @@
 // últimos 5 pregões e, de cada série, guarda o último preço, a data desse negócio e a variação contra o fechamento
 // anterior dentro da janela. Só entram séries que negociaram em algum desses pregões.
 //
+// Tendência do ativo (aba "Por visão de mercado"): do histórico de fechamentos que os outros jobs já guardam
+// (historico/acoes.json e historico/etfs.json, 260 pregões), o job calcula por ativo as médias de 21 e 63 pregões, o retorno
+// nesses prazos, a posição na faixa de 52 semanas e a volatilidade realizada. A leitura (alta, baixa ou lateral) é feita no app,
+// com esses números. Ativo sem histórico suficiente fica sem o campo `tendencia`.
+//
 // A tela é descritiva (sem ranking de "melhor opção"): os ativos aparecem por volume de opções do último pregão.
 //
 // Regras de segurança: poucos ativos, ativos de controle sem dado ou série inválida = termina com erro SEM gravar
@@ -33,6 +38,7 @@ import { datasCandidatas } from './b3-boletim.mjs'
 
 const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 export const ARQUIVO_SAIDA = path.join(RAIZ, 'webapp-src', 'public', 'dados', 'opcoes.json')
+const ARQUIVOS_HISTORICO = ['acoes', 'etfs'].map((nome) => path.join(RAIZ, 'historico', `${nome}.json`))
 
 export const URL_COTAHIST = (data) => {
   const [a, m, d] = data.split('-')
@@ -231,6 +237,56 @@ export function montarSnapshot(cadastro, pregoes, agora = new Date()) {
   }
 }
 
+/**
+ * Métricas de tendência a partir dos fechamentos de um ativo (do mais antigo para o mais novo; null = não negociou no dia).
+ * Devolve null com menos de 64 fechamentos válidos. `pregoes` traz a data de cada posição de `fechamentos`.
+ */
+export function calcularTendencia(fechamentos, pregoes) {
+  const validos = []
+  fechamentos.forEach((f, i) => {
+    if (typeof f === 'number' && f > 0) validos.push({ f, data: pregoes[i] })
+  })
+  if (validos.length < 64) return null
+  const f = validos.map((x) => x.f)
+  const ultimo = f[f.length - 1]
+  const media = (n) => f.slice(-n).reduce((a, b) => a + b, 0) / n
+  const retorno = (n) => (ultimo / f[f.length - 1 - n] - 1) * 100
+  const ano = f.slice(-252)
+  const minima = Math.min(...ano)
+  const maxima = Math.max(...ano)
+  const volatilidade = (n) => {
+    const r = []
+    for (let i = f.length - n; i < f.length; i++) r.push(Math.log(f[i] / f[i - 1]))
+    const m = r.reduce((a, b) => a + b, 0) / r.length
+    const variancia = r.reduce((a, b) => a + (b - m) ** 2, 0) / (r.length - 1)
+    return Math.sqrt(variancia * 252) * 100
+  }
+  return {
+    data: validos[validos.length - 1].data,
+    fechamento: arredondar(ultimo),
+    sma21: arredondar(media(21)),
+    sma63: arredondar(media(63)),
+    retorno21: arredondar(retorno(21)),
+    retorno63: arredondar(retorno(63)),
+    posicao52: maxima > minima ? arredondar(((ultimo - minima) / (maxima - minima)) * 100, 1) : null,
+    volRealizada21: arredondar(volatilidade(21), 1),
+    volRealizada63: arredondar(volatilidade(63), 1),
+  }
+}
+
+/** Mapa ticker -> tendência, a partir dos arquivos de histórico dos outros jobs (os que existirem). */
+export function tendenciasDosHistoricos(historicos) {
+  const mapa = new Map()
+  for (const h of historicos) {
+    if (!h?.pregoes || !h?.ativos) continue
+    for (const [ticker, serie] of Object.entries(h.ativos)) {
+      const t = calcularTendencia(serie.map((x) => (Array.isArray(x) ? x[0] : null)), h.pregoes)
+      if (t) mapa.set(ticker.toUpperCase(), t)
+    }
+  }
+  return mapa
+}
+
 /** Motivo para NÃO publicar, ou null se o snapshot está bom. */
 export function motivoInvalido(snapshot, config = CONFIG) {
   if (!snapshot.dataPregao) return 'O arquivo não trouxe data de pregão.'
@@ -308,6 +364,19 @@ export async function principal() {
 
     const cadastro = lerCadastro(await baixarCadastro(pregoes[0].data), pregoes[0].data)
     const snapshot = montarSnapshot(cadastro, pregoes)
+    const tendencias = tendenciasDosHistoricos(
+      ARQUIVOS_HISTORICO.map((arquivo) => {
+        try {
+          return JSON.parse(fs.readFileSync(arquivo, 'utf8'))
+        } catch {
+          return null // histórico ausente: o ativo fica só sem tendência
+        }
+      }),
+    )
+    for (const a of snapshot.ativos) {
+      const t = tendencias.get(a.ticker)
+      if (t) a.tendencia = t
+    }
     const motivo = motivoInvalido(snapshot)
     if (motivo) throw new Error(`${motivo} Arquivo NÃO atualizado.`)
 

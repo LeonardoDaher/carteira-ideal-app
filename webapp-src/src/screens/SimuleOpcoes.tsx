@@ -2,7 +2,7 @@ import { useEffect, useId, useMemo, useState } from 'react'
 import type { ComponentProps, ReactNode } from 'react'
 import { jurosPadrao } from '../data/jurosOpcoes'
 import {
-  FILTRO_VAZIO, buscarAtivos, diasUteis, expandirSnapshot, faixaPerto, filtrarSeries, limitarAosProximosMeses, limitesDeStrike, montarLinha,
+  FILTRO_VAZIO, diasUteis, expandirSnapshot, faixaPerto, filtrarSeries, limitarAosProximosMeses, limitesDeStrike, montarLinha,
   ordenarLinhas, strikesDistintos, tipoVencimento, vencimentosDe,
 } from '../domain/opcoes'
 import type { AtivoComOpcoes, ChaveOrdem, EscolhaDeSeries, FiltroEstilo, FiltroSeries, FiltroTipo, LinhaOpcao, Ordem, SnapshotOpcoes } from '../domain/opcoes'
@@ -11,23 +11,24 @@ import {
   resultadoAntesDoVencimento, resultadoNoVencimento, validarEntrada, volatilidadeImplicita,
 } from '../domain/simulaOpcoes'
 import type { EntradaEstrategia, EstrategiaId, Lado, Perna, Posicao } from '../domain/simulaOpcoes'
-import { formatarData, formatarVolume } from '../domain/rendaFii'
+import { formatarData } from '../domain/rendaFii'
 import { reais } from '../domain/mercadoOficial'
 import { VoltarInicio } from '../ui/VoltarInicio'
 import { AvisoEducacional } from '../ui/AvisoEducacional'
 import { AbasDaTela } from '../ui/AbasDaTela'
 import { CampoReais } from '../ui/CampoReais'
 import { CampoNumero } from '../ui/CampoNumero'
+import { EscolhaDeAtivo } from './EscolhaDeAtivo'
+import { PorVisaoOpcoes } from './PorVisaoOpcoes'
 import { TopPremiosOpcoes } from './TopPremiosOpcoes'
 import { FaixaDeStrike } from '../ui/FaixaDeStrike'
 import { GraficoPayoff } from '../ui/GraficoPayoff'
 import type { AppCtx } from '../state/useAppState'
 
-type Aba = 'series' | 'premios' | 'estrategias'
+type Aba = 'series' | 'premios' | 'visao' | 'estrategias'
 
 const LINHAS_POR_PAGINA = 100
 const ATALHOS_PERTO = [5, 10, 20] as const
-const MAIS_NEGOCIADOS = 12
 
 const num = (v: number | null, casas = 2) => (v === null ? '—' : v.toLocaleString('pt-BR', { minimumFractionDigits: casas, maximumFractionDigits: casas }))
 const dinheiro = (v: number) => (v < 0 ? `−${reais(-v)}` : reais(v))
@@ -84,7 +85,7 @@ export function SimuleOpcoes({ snapshot, endividadas, carregarBaratas, armazenam
   const [estado, recarregar] = useSnapshot(snapshot)
   const [aba, setAba] = useState<Aba>('series')
   const [escolha, setEscolha] = useState<(EscolhaDeSeries & { n: number }) | null>(null)
-  const [ativoAtual, setAtivoAtual] = useState<AtivoComOpcoes | null>(null)
+  const [ticker, setTicker] = useState('')
 
   // Voltar (botão do navegador ou do celular) a partir das estratégias leva às séries, e não para fora da tela: abrir as
   // estratégias cria uma entrada no histórico, e o popstate devolve a aba.
@@ -92,7 +93,7 @@ export function SimuleOpcoes({ snapshot, endividadas, carregarBaratas, armazenam
     if (window.history.state?.opcoesAba) window.history.replaceState(null, '')
     const aoVoltar = () => {
       const guardada = window.history.state?.opcoesAba
-      setAba(guardada === 'estrategias' || guardada === 'premios' ? guardada : 'series')
+      setAba(guardada === 'estrategias' || guardada === 'premios' || guardada === 'visao' ? guardada : 'series')
     }
     window.addEventListener('popstate', aoVoltar)
     return () => window.removeEventListener('popstate', aoVoltar)
@@ -115,6 +116,8 @@ export function SimuleOpcoes({ snapshot, endividadas, carregarBaratas, armazenam
   const dados = estado.tipo === 'pronto' ? estado.dados : null
   // Só vencimentos dos próximos 6 meses: o resto (opções muito longas) fica fora da tela.
   const limitado = useMemo(() => (dados ? limitarAosProximosMeses(dados) : null), [dados])
+
+  const ativoAtual = limitado ? (limitado.ativos.find((a) => a.ticker === ticker) ?? limitado.ativos[0] ?? null) : null
 
   /** Mostra o conteúdo quando os dados chegaram, ou o aviso de carregando ou de erro. */
   const comDados = (conteudo: (d: SnapshotOpcoes) => ReactNode) =>
@@ -158,11 +161,14 @@ export function SimuleOpcoes({ snapshot, endividadas, carregarBaratas, armazenam
         abas={[
           { id: 'series', emoji: '📋', titulo: 'Séries da B3', descricao: 'Strike, vencimento e prêmio' },
           { id: 'premios', emoji: '🏆', titulo: 'Top 15 prêmios', descricao: 'Quem paga mais' },
+          { id: 'visao', emoji: '🧭', titulo: 'Por visão', descricao: 'Alta, baixa, lateral' },
           { id: 'estrategias', emoji: '📈', titulo: 'Estratégias', descricao: 'Payoff, tempo e gregas' },
         ] as const}
       >
         {aba === 'series' ? (
-          comDados((d) => <SeriesDaB3 snapshot={d} onCriar={criarEstrategia} onAtivo={setAtivoAtual} />)
+          comDados((d) => <SeriesDaB3 snapshot={d} ativo={ativoAtual} onEscolher={setTicker} onCriar={criarEstrategia} />)
+        ) : aba === 'visao' ? (
+          comDados((d) => <PorVisaoOpcoes snapshot={d} ativo={ativoAtual} onEscolher={setTicker} onSimular={criarEstrategia} />)
         ) : aba === 'premios' ? (
           comDados((d) => (
             <TopPremiosOpcoes snapshot={d} onSimular={criarEstrategia} endividadas={endividadas} carregarBaratas={carregarBaratas} armazenamento={armazenamento} />
@@ -189,13 +195,7 @@ export function SimuleOpcoes({ snapshot, endividadas, carregarBaratas, armazenam
 // Aba 1: séries reais
 // ---------------------------------------------------------------------------------------
 
-function SeriesDaB3({ snapshot, onCriar, onAtivo }: { snapshot: SnapshotOpcoes; onCriar: (e: EscolhaDeSeries) => void; onAtivo: (a: AtivoComOpcoes) => void }) {
-  const [ticker, setTicker] = useState(snapshot.ativos[0]?.ticker ?? '')
-  const ativo = snapshot.ativos.find((a) => a.ticker === ticker) ?? snapshot.ativos[0]
-  useEffect(() => {
-    if (ativo) onAtivo(ativo)
-  }, [ativo, onAtivo])
-
+function SeriesDaB3({ snapshot, ativo, onEscolher, onCriar }: { snapshot: SnapshotOpcoes; ativo: AtivoComOpcoes | null; onEscolher: (t: string) => void; onCriar: (e: EscolhaDeSeries) => void }) {
   if (!ativo) {
     return (
       <div className="card col" style={{ gap: 6 }} role="status">
@@ -207,98 +207,9 @@ function SeriesDaB3({ snapshot, onCriar, onAtivo }: { snapshot: SnapshotOpcoes; 
   // `key` zera filtros, ordem e seleção ao trocar de ativo.
   return (
     <>
-      <EscolhaDeAtivo snapshot={snapshot} ativo={ativo} onEscolher={setTicker} />
+      <EscolhaDeAtivo snapshot={snapshot} ativo={ativo} onEscolher={onEscolher} />
       <TabelaDoAtivo key={ativo.ticker} snapshot={snapshot} ativo={ativo} onCriar={onCriar} />
     </>
-  )
-}
-
-function EscolhaDeAtivo({ snapshot, ativo, onEscolher }: { snapshot: SnapshotOpcoes; ativo: AtivoComOpcoes; onEscolher: (t: string) => void }) {
-  const [termo, setTermo] = useState('')
-  const idResultados = useId()
-  const resultados = buscarAtivos(snapshot.ativos, termo)
-  const buscando = termo.trim().length >= 1
-  const maisNegociados = snapshot.ativos.slice(0, MAIS_NEGOCIADOS)
-
-  const escolher = (a: AtivoComOpcoes) => {
-    onEscolher(a.ticker)
-    setTermo('')
-  }
-
-  return (
-    <div className="col" style={{ gap: 8 }}>
-      <span className="small" style={{ fontWeight: 600 }}>Ativo</span>
-      <input
-        type="search"
-        className="busca-fii"
-        placeholder={`Buscar entre ${snapshot.ativos.length} ativos, ex.: PETR4`}
-        aria-label="Buscar ativo por código ou nome"
-        aria-controls={idResultados}
-        autoCapitalize="characters"
-        autoCorrect="off"
-        spellCheck={false}
-        enterKeyHint="search"
-        value={termo}
-        onChange={(ev) => setTermo(ev.target.value.slice(0, 40))}
-        onKeyDown={(ev) => {
-          if (ev.key === 'Enter' && resultados[0]) {
-            ev.preventDefault()
-            escolher(resultados[0])
-          }
-          if (ev.key === 'Escape') setTermo('')
-        }}
-      />
-      <div id={idResultados} aria-live="polite">
-        {buscando && resultados.length > 0 && (
-          <ul className="resultados-busca" aria-label="Ativos encontrados">
-            {resultados.map((a) => (
-              <li key={a.ticker}>
-                <button className="resultado-busca" onClick={() => escolher(a)}>
-                  <span style={{ fontWeight: 700 }}>{a.ticker}</span>
-                  <span className="tiny muted resultado-nome">{a.nome}, {a.series.length} séries</span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-        {buscando && resultados.length === 0 && (
-          <div className="card-outline small justify" style={{ lineHeight: 1.5 }} role="status">
-            <strong>Nenhum ativo com opções encontrado para “{termo.trim()}”.</strong>{' '}
-            <span className="muted">Confira o código (ex.: PETR4, VALE3, BOVA11). Só aparecem ativos com opções negociadas nos últimos pregões.</span>
-          </div>
-        )}
-      </div>
-
-      <div className="grade-tickers" role="group" aria-label="Ativos mais negociados em opções">
-        {[...maisNegociados, ...(maisNegociados.some((a) => a.ticker === ativo.ticker) ? [] : [ativo])].map((a) => (
-          <button
-            key={a.ticker}
-            className={`chip ${a.ticker === ativo.ticker ? 'selected' : ''}`}
-            aria-pressed={a.ticker === ativo.ticker}
-            onClick={() => onEscolher(a.ticker)}
-          >
-            {a.ticker}
-          </button>
-        ))}
-      </div>
-      <div className="card col" style={{ gap: 4 }} role="group" aria-label={`Preço de ${ativo.ticker} no mercado à vista`}>
-        <div className="row" style={{ alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
-          <span className="font-display" style={{ fontWeight: 700, fontSize: 24 }}>{ativo.ticker}</span>
-          <span className="font-display" style={{ fontWeight: 700, fontSize: 24 }} data-testid="preco-ativo">{reais(ativo.cotacao)}</span>
-          {ativo.variacao != null && (
-            <span style={{ fontWeight: 700, fontSize: 15, color: corVar(ativo.variacao) }} data-testid="variacao-ativo">
-              {ativo.variacao > 0 ? '+' : ''}{num(ativo.variacao)}%
-            </span>
-          )}
-        </div>
-        <span className="tiny muted">
-          {ativo.nome ? `${ativo.nome}, ` : ''}preço à vista, fechamento de {formatarData(ativo.dataCotacao ?? snapshot.dataPregao ?? '')}
-        </span>
-        <span className="tiny muted">
-          Opções negociam {formatarVolume(ativo.volumeOpcoes)} por dia ({ativo.series.length} séries nos próximos 6 meses).
-        </span>
-      </div>
-    </div>
   )
 }
 
@@ -612,7 +523,7 @@ function Estrategias({ escolha, ativoAtual, dataPregao, aoVoltar }: { escolha: E
   const [modo, setModo] = useState<'padrao' | 'escolhidas'>(escolha && !escolha.coberta ? 'escolhidas' : 'padrao')
   const [e, setE] = useState<EntradaEstrategia>(() => entradaInicial(escolha, ativo))
   const [pernas, setPernas] = useState<PernaEditavel[]>(() =>
-    (escolha && !escolha.coberta ? escolha.series : []).map((s) => ({ codigo: s.codigo, tipo: s.tipo, strike: s.strike, vencimento: s.vencimento, premio: s.ultimo, lado: escolha?.lado ?? 'compra', quantidade: 100 })),
+    (escolha && !escolha.coberta ? escolha.series : []).map((s) => ({ codigo: s.codigo, tipo: s.tipo, strike: s.strike, vencimento: s.vencimento, premio: s.ultimo, lado: escolha?.detalhes?.[s.codigo]?.lado ?? escolha?.lado ?? 'compra', quantidade: 100 * (escolha?.detalhes?.[s.codigo]?.fator ?? 1) })),
   )
   const [dias, setDias] = useState(() => {
     const v = escolha?.series[0]?.vencimento

@@ -3,7 +3,7 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 import {
-  CONFIG, URL_COTAHIST, adicionarMeses, URL_PEDIDO_CADASTRO, lerCadastro, lerLinha, lerPregao, montarSnapshot, motivoInvalido, numeroBr,
+  CONFIG, URL_COTAHIST, adicionarMeses, calcularTendencia, tendenciasDosHistoricos, URL_PEDIDO_CADASTRO, lerCadastro, lerLinha, lerPregao, montarSnapshot, motivoInvalido, numeroBr,
 } from './atualizar-opcoes.mjs'
 
 const campo = (valor, tamanho, direita = false) => (direita ? String(valor).padStart(tamanho, '0') : String(valor).padEnd(tamanho, ' '))
@@ -157,5 +157,53 @@ describe('motivoInvalido', () => {
     ruim.series[0][5] = 0
     assert.match(motivoInvalido({ dataPregao: '2026-10-16', ativos: [ruim, ativo('B')] }, minimo), /Série inválida/)
     assert.equal(motivoInvalido({ dataPregao: '2026-10-16', ativos: [ativo('A'), ativo('B')] }, minimo), null)
+  })
+})
+
+describe('calcularTendencia', () => {
+  const datas = (n) => Array.from({ length: n }, (_, i) => `d${i}`)
+  const rampa = (n, de, ate) => Array.from({ length: n }, (_, i) => de + ((ate - de) * i) / (n - 1))
+
+  it('sem 64 fechamentos válidos, não calcula', () => {
+    assert.equal(calcularTendencia(rampa(63, 10, 12), datas(63)), null)
+    // metade dos dias sem negócio: só 35 fechamentos válidos em 70 pregões
+    assert.equal(calcularTendencia(rampa(70, 10, 12).map((v, i) => (i % 2 ? null : v)), datas(70)), null)
+  })
+
+  it('numa alta constante: preço acima das médias, retorno positivo, no topo da faixa de 52 semanas', () => {
+    const t = calcularTendencia(rampa(260, 10, 20), datas(260))
+    assert.equal(t.fechamento, 20)
+    assert.ok(t.sma21 < 20)
+    assert.ok(t.sma63 < t.sma21)
+    assert.ok(t.retorno21 > 0)
+    assert.ok(t.retorno63 > t.retorno21)
+    assert.equal(t.posicao52, 100)
+    assert.equal(t.data, 'd259')
+  })
+
+  it('numa queda constante: preço abaixo das médias e no fundo da faixa', () => {
+    const t = calcularTendencia(rampa(260, 20, 10), datas(260))
+    assert.equal(t.fechamento, 10)
+    assert.ok(t.sma21 > 10)
+    assert.ok(t.retorno63 < 0)
+    assert.equal(t.posicao52, 0)
+  })
+
+  it('volatilidade realizada: zero num preço parado e bem maior num que oscila', () => {
+    assert.equal(calcularTendencia(Array(100).fill(10), datas(100)).volRealizada21, 0)
+    const serrilha = Array.from({ length: 100 }, (_, i) => (i % 2 ? 10 : 11))
+    assert.ok(calcularTendencia(serrilha, datas(100)).volRealizada21 > 100)
+  })
+
+  it('junta ações e ETFs, ignora dia sem negócio e histórico curto ou ausente', () => {
+    const com = rampa(100, 10, 12)
+    com[50] = null
+    const mapa = tendenciasDosHistoricos([
+      { pregoes: datas(100), ativos: { petr4: com.map((v) => (v === null ? null : [v, v, v, 1])), CURTO3: rampa(30, 1, 2).map((v) => [v, v, v, 1]) } },
+      null,
+      { pregoes: datas(100), ativos: { BOVA11: rampa(100, 100, 120).map((v) => [v, v, v, 1]) } },
+    ])
+    assert.deepEqual([...mapa.keys()].sort(), ['BOVA11', 'PETR4'])
+    assert.equal(mapa.get('PETR4').fechamento, 12)
   })
 })

@@ -23,6 +23,24 @@ export interface SerieOpcao {
   volume: number
 }
 
+/** Tendência do ativo, calculada pelo job a partir do histórico de fechamentos (ver scripts/atualizar-opcoes.mjs). */
+export interface TendenciaAtivo {
+  /** Último pregão com fechamento no histórico, AAAA-MM-DD. */
+  data: string
+  fechamento: number
+  /** Médias dos últimos 21 e 63 fechamentos. */
+  sma21: number
+  sma63: number
+  /** Retorno (%) em 21 e em 63 pregões. */
+  retorno21: number
+  retorno63: number
+  /** Posição do preço na faixa de 52 semanas, de 0 (mínima) a 100 (máxima). */
+  posicao52: number | null
+  /** Volatilidade realizada (% ao ano) nos últimos 21 e 63 pregões. */
+  volRealizada21: number
+  volRealizada63: number
+}
+
 export interface AtivoComOpcoes {
   ticker: string
   nome: string
@@ -36,6 +54,8 @@ export interface AtivoComOpcoes {
   volumeOpcoes: number
   /** Lote de contrato (100 nas ações, 1 em alguns ETFs). */
   lote: number
+  /** Ausente quando o ativo não tem histórico suficiente. */
+  tendencia?: TendenciaAtivo
   series: SerieOpcao[]
 }
 
@@ -345,6 +365,8 @@ export interface EscolhaDeSeries {
   series: SerieOpcao[]
   /** Lado inicial de cada série; sem isso, compra. */
   lado?: 'compra' | 'venda'
+  /** Lado e múltiplo da quantidade por série (código da série), para estruturas montadas, como borboleta (vende 2x o centro). */
+  detalhes?: Record<string, { lado: 'compra' | 'venda'; fator: number }>
   /** Venda coberta de call: abre a estratégia "Venda coberta" (a pessoa já tem a ação), em vez de séries soltas. */
   coberta?: boolean
 }
