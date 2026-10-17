@@ -29,7 +29,7 @@ Primeira tela para quem toca no link da bio do Instagram.
 - **🎓 Aprender**: abre direto a tela Aprender do app, sem questionário. O livro **Educação Financeira Infantil**, que antes ficava aqui, está no fim dessa tela (decisão D11). O link do curso de Candlesticks foi retirado do site (D22).
 - **🏢 Simule FII**: abre direto a tela Simule FII do app, sem questionário.
 - **🏛️ Simule Tesouro Direto**, **🌎 Simule BDR** e **🧺 Simule ETF**: abrem direto as respectivas telas, sem questionário.
-- **🎯 Simule Opções** (D93, `?tela=simuleOpcoes`, aberta pelo hub Simule Ativos): aba "Séries da B3" (calls e puts reais, com filtro por tipo, vencimento e faixa de strike) e aba "Estratégias" (payoff, passagem do tempo e gregas); o botão "Simular" de cada série leva a aba de estratégias já preenchida.
+- **🎯 Simule Opções** (D95, `?tela=simuleOpcoes`, aberta pelo hub Simule Ativos): aba "Séries da B3" (calls e puts reais, com filtro por tipo, vencimento e faixa de strike) e aba "Estratégias" (payoff, passagem do tempo e gregas); o botão "Simular" de cada série leva a aba de estratégias já preenchida.
 - **Falar comigo por e-mail**, ícones de Instagram e YouTube, alternância de tema claro/escuro.
 
 <br clear="all">
