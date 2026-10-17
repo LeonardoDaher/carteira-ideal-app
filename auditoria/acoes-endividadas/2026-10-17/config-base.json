@@ -1,0 +1,187 @@
+{
+  "_leia": "Metodologia da triagem 'Top 15 ações mais baratas' (D49). ESTE ARQUIVO É A FONTE ÚNICA DOS PARÂMETROS: o script, o app e o documento docs/09-metodologia-acoes-baratas.md leem/citam estes valores. Qualquer mudança aqui exige subir 'versaoMetodologia' e registrar o motivo em 'historicoDeVersoes'. O hash SHA-256 deste arquivo vai no manifesto de cada execução.",
+  "versaoMetodologia": "1.0.7",
+  "historicoDeVersoes": [
+    {
+      "versao": "1.0.0",
+      "data": "2026-10-04",
+      "mudanca": "Versão inicial: filtros, indicador composto (PL/VM, FCO/EV, EBIT/EV), ranking por média de ranks percentuais, filtros de qualidade opcionais (ROIC, dívida líquida/EBITDA, FCO, cobertura de juros e consistência de 5 exercícios)."
+    },
+    {
+      "versao": "1.0.1",
+      "data": "2026-10-04",
+      "mudanca": "Primeira execução real. (1) Corrige o EBITDA: a depreciação da DVA (7.04.01) vem com sinal negativo e estava sendo subtraída em vez de somada, o que inflava a dívida líquida/EBITDA (ex.: 51x para empresa com 1,1x); afeta só esse indicador e o filtro de qualidade, não a nota nem a ordem do ranking. (2) Exclui GOAU4 (Metalúrgica Gerdau), holding que consolida a Gerdau (GGBR4) e aparecia como segunda empresa igual. (3) A exclusão por capital implausível passa a mostrar valor de mercado, PL e quantidade de ações usadas."
+    },
+    {
+      "versao": "1.0.2",
+      "data": "2026-10-04",
+      "mudanca": "VALE3 informa a quantidade de ações em milhares no formulário da CVM (4.072.366 em vez de ~4,07 bilhões), o que a derrubava na verificação de capital. Criado o ajuste manual e registrado de unidade (capital.ajustesManuais), aplicado só a VALE3 (×1000); a verificação de plausibilidade continua valendo depois do ajuste."
+    },
+    {
+      "versao": "1.0.3",
+      "data": "2026-10-04",
+      "mudanca": "Conferência com fontes públicas (MGLU3 e SEER3). (1) Nova verificação de integridade: o caixa operacional de 12 meses não pode passar de 3x o EBITDA (ou o EBIT ajustado, sem EBITDA); a Magalu reporta ~R$ 15,7 bi de FCO com ~R$ 15 bi negativos no financiamento (apresentação contábil de recebíveis e financiamento a clientes), o que fazia o indicador FCO/EV chegar a 180% sem significado econômico; empresa nessa situação sai com o motivo e os números. (2) A memória de cálculo na tela passa a mostrar como cada valor de 12 meses foi montado (exercício + acumulado atual − acumulado do ano anterior) e o lucro e o caixa de cada exercício, para permitir a conferência contra o documento da CVM."
+    },
+    {
+      "versao": "1.0.4",
+      "data": "2026-10-04",
+      "mudanca": "SEER3 mostrava lucro positivo em 0 de 5 exercícios (as fontes públicas dão 2 de 5) e lucro de 12 meses de R$ 57 mi. Causa: a DFP da CVM traz a conta 3.11.01 (lucro dos controladores) como zero em todos os exercícios da empresa, enquanto os ITR trazem valores normais. O lucro de referência dos filtros (lucro de 12 meses positivo e consistência de 5 exercícios) passa a ser o CONSOLIDADO (3.11), obrigatório e coerente com EBIT, caixa operacional e EV; o dos controladores fica só como informação na memória de cálculo."
+    },
+    {
+      "versao": "1.0.5",
+      "data": "2026-10-04",
+      "mudanca": "Análise do ranking.csv e do exclusoes.csv da 1.0.3 (68 no ranking, 158 fora). (1) 30 empresas (Ambev, Renner, Cemig, Taesa, Vibra, Natura, MRV, Cyrela...) estavam fora por 'capital implausível' com o MESMO padrão: quantidade de ações informada em milhares na CVM (P/VP implícito de 0,0003 a 0,0034; com ×1000, de 0,30 a 3,40). Detecção automática da unidade, só com dois sinais independentes (P/VP abaixo do mínimo e giro diário impossível) e plausibilidade depois do ajuste. (2) Units (final 11) eram avaliadas como se fossem ações PN, superestimando o valor de mercado de ALUP11, ENGI11, IGTI11, SAPR11 e TAEE11 (ex.: PN a R$ 42,85 contra ON a R$ 14,03 na Taesa). Unit nunca é preço de classe. (3) Classe sem preço recente com mais de 10% das ações deixa de ser avaliada pelo preço de outra classe (caso TFCO4, cuja ON é 93% das ações e tem direito econômico menor): a empresa sai com o motivo. (4) Desdobramentos confirmados em fonte pública: SBSP3 1:5 em 29/04/2026, SIMH3 grupamento 2:1 em 18/02/2026, ORVR3 1:4 em 11/08/2026. (5) Alerta de P/VP acima de 10 na tela. (6) CNPJ pelo FCA de dois anos (união) e motivo real de 'sem preço'."
+    },
+    {
+      "versao": "1.0.6",
+      "data": "2026-10-05",
+      "mudanca": "Análise do ranking.csv da 1.0.5 (95 empresas). (1) Caixa operacional: limite de 3,0x para 2,0x o EBITDA. A Sanepar reporta R$ 7,06 bi de FCO em 2025 (R$ 2,8 bi em 2024) por um precatório de R$ 4 bi: dado correto, mas não recorrente (FCO/EBITDA 2,2x; o MLAS3 chegava a 2,98x; as demais empresas ficam em até 1,5x). (2) Desdobramento ou grupamento DEPOIS da data-base do balanço agora ajusta a quantidade de ações (caso ORVR3: balanço de 30/06 com a quantidade anterior ao desdobramento 1:4 de 11/08; valor de mercado saía 4x menor). (3) Classe sem preço: limite sobe de 10% para 50% das ações (AXIA3 e SHUL4 saíam por 21% e 43%; o TFCO4, 93%, continua fora). (4) Alerta de giro diário acima de 5% do valor de mercado (sinal de valor de mercado subestimado; caso TEND3, cuja quantidade de ações na CVM é menos da metade da real). (5) A memória de cálculo mostra as ações usadas e o balanço de onde vieram, e os exercícios que não puderam ser lidos na consistência. (6) CNPJ manual verificado para CSNA3 e CMIN3."
+    },
+    {
+      "versao": "1.0.7",
+      "data": "2026-10-06",
+      "mudanca": "Primeira execução com dado real da CVM dentro do ambiente de desenvolvimento (ranking.csv, exclusoes.csv e mapeamento-ticker-cnpj.csv analisados inteiros). (1) TEND3: o ITR de 30/06/2026 traz o capital em milhares (122.578) e a tesouraria em unidades (65.148), o que tirava 53% das ações (57,4 mi em vez de 122,5 mi); a tesouraria que passa de 30% das ações, que dividida por 1.000 fica abaixo de 10% e que no documento anterior era menor que 10% é tratada como informada em unidades. (2) LAVV3: a quantidade de ações do ITR de 30/06/2026 é exatamente 10x a de todos os documentos anteriores (1.954 mi contra 195,4 mi), sem desdobramento nem salto de preço; quantidade que muda por 10, 100 ou 1000 vezes sem evento que a explique, com os dois documentos anteriores concordando entre si, é dividida pelo fator. As duas correções ficam registradas na memória de cálculo (com o valor informado pela CVM) e em alertas 'capital_corrigido:...'. (3) Exercícios antigos não lidos: a DFP de empresa sem controladas só traz a demonstração individual (TIMS3, PGMN3, TTEN3 em 2021; SBSP3 em 2021 e 2022); sem nenhuma linha consolidada na DFP, vale a individual, com observação no exercício. (4) TIMS3 em 2024 e 2025: a coluna ÚLTIMO consolidada da DFP vem zerada (lucro 0 e caixa operacional 0 ao mesmo tempo) com a individual preenchida; nesse caso vale a individual. (5) TEND3: uma 'DFP' com data-base 31/03/2023 quebrava a cadeia de exercícios (lacuna de 275 dias); DFP com data-base diferente do fim do exercício é ignorada e listada como não lida. (6) Leitura de zip também no Windows (tar, quando não há unzip); sem efeito no GitHub."
+    }
+  ],
+  "publicacao": {
+    "aprovadoPeloResponsavel": true,
+    "aprovacao": {
+      "por": "responsável pelo projeto",
+      "data": "2026-10-04",
+      "forma": "autorização expressa no chat de desenvolvimento",
+      "parecerIndependente": false
+    },
+    "sanidade": {
+      "_leia": "Trava automática SÓ para a publicação: se o resultado vier claramente quebrado (típico de erro de leitura da CVM ou de mapeamento de CNPJ), o job grava a auditoria, FALHA e não atualiza o app. Não substitui a conferência manual.",
+      "minimoNoRanking": 40,
+      "maximoFracaoSemDados": 0.35
+    },
+    "_leia": "Trava regulatória. Com aprovadoPeloResponsavel=false, o job calcula e grava a auditoria completa, mas o app NÃO recebe o ranking (mostra 'em validação'). Aprovado em 04/10/2026 pelo responsável (que o classifica como análise estritamente contábil de informações públicas, não recomendação). Sem parecer independente de terceiros.",
+    "acesso": {
+      "restritoPorCodigo": true,
+      "instagram": "acarteiraideal",
+      "_leia": "Com restritoPorCodigo=true, o ranking NÃO vai no arquivo do app: o job grava o cabeçalho em webapp-src/src/data/acoesBaratas.json e a lista completa em dados-privados/acoes-baratas.json, que só a função api/top15.ts lê, e só depois de conferir o código do mês (variável TOP15_CODIGOS na Vercel). Com false, volta ao modo aberto (ranking no arquivo do app)."
+    }
+  },
+  "tamanhoDaLista": 15,
+  "dataCorteContabil": null,
+  "universo": {
+    "_leia": "Empresas do cadastro curado config/acoes.json (um código por empresa). Setores abaixo saem do ranking porque EV, EBIT e FCO não medem o negócio de instituições financeiras e seguradoras.",
+    "setoresExcluidos": [
+      "Bancos",
+      "Seguros e previdência",
+      "Bolsa, holdings e serviços financeiros"
+    ],
+    "excluirTickers": {
+      "GOAU4": "Duplicidade econômica: a Metalúrgica Gerdau é holding que consolida a Gerdau (GGBR4), então as demonstrações são as mesmas e a empresa apareceria duas vezes. Mantida a operacional, GGBR4."
+    }
+  },
+  "capital": {
+    "_leia": "Ajustes MANUAIS de unidade da quantidade de ações, um por ticker, com o motivo. Use só quando a mensagem de exclusão 'capital implausível' mostrar a quantidade de ações em milhares (o valor de mercado sai ~1000x menor que o real). Nunca é automático. O ajuste aparece na memória de cálculo, e a checagem de P/VP plausível roda depois dele: se ainda estiver fora da faixa, a empresa continua excluída.",
+    "ajustesManuais": {
+      "VALE3": {
+        "fatorQuantidade": 1000,
+        "motivo": "A tela mostrou ON 4.072.366 ações; a Vale tem cerca de 4,07 bilhões. O formulário da CVM traz a quantidade em milhares. Com ×1000: valor de mercado ~R$ 293,6 bi e P/VP ~1,49, plausíveis."
+      }
+    }
+  },
+  "desdobramentos": {
+    "_leia": "Desdobramentos (fator > 1) e grupamentos (fator < 1) confirmados em fonte pública, somados aos de config/acoes.json. 'data' = primeiro pregão negociado já ajustado; os preços ANTES da data são divididos pelo fator. Usado só para a série de preços (volatilidade).",
+    "SBSP3": [
+      {
+        "data": "2026-04-29",
+        "fator": 5,
+        "fonte": "Sabesp, AGE de 28/04/2026: desdobramento 1:5, negociação ex a partir de 29/04/2026"
+      }
+    ],
+    "SIMH3": [
+      {
+        "data": "2026-02-18",
+        "fator": 0.5,
+        "fonte": "Simpar, AGE de 13/02/2026: grupamento 2:1, negociação ajustada a partir de 18/02/2026"
+      }
+    ],
+    "ORVR3": [
+      {
+        "data": "2026-08-11",
+        "fator": 4,
+        "fonte": "Orizon, AGE de 10/08/2026: desdobramento 1:4, negociação ex a partir de 11/08/2026"
+      }
+    ]
+  },
+  "filtros": {
+    "liquidezMinimaDiariaReais": 3000000,
+    "sessoesLiquidez": 21,
+    "lucroLtmPositivo": true,
+    "sessoesVolatilidade": 252,
+    "minimoRetornosVolatilidade": 126,
+    "percentilVolatilidadeExcluir": 90,
+    "idadeMaximaDemonstracaoDias": 200
+  },
+  "indicador": {
+    "componentes": [
+      "plSobreValorDeMercado",
+      "fcoSobreEv",
+      "ebitAjustadoSobreEv"
+    ],
+    "metodoComposicao": "ranks",
+    "_metodoComposicao_opcoes": "ranks = média dos ranks percentuais (padrão, robusto a outliers); zscore_winsorizado = média dos z-scores após cortar em [p1,p99]",
+    "winsorizacao": {
+      "inferior": 0.01,
+      "superior": 0.99
+    },
+    "ebitAjustado": {
+      "removerEquivalenciaPatrimonial": true,
+      "removerRecuperabilidadeDeAtivos": true,
+      "removerOutrasReceitasDespesasOperacionais": true
+    },
+    "ev": {
+      "incluirMinoritarios": true,
+      "caixaInclui": [
+        "1.01.01",
+        "1.01.02"
+      ],
+      "dividaInclui": [
+        "2.01.04",
+        "2.02.01"
+      ]
+    }
+  },
+  "qualidade": {
+    "_leia": "Filtros OPCIONAIS, aplicados DEPOIS do ranking (não alteram a nota de ninguém, só retiram nomes da lista). O app deixa o usuário ligar/desligar cada um; os limites abaixo são parte da metodologia e aparecem na tela.",
+    "roic": {
+      "minimo": 0.1,
+      "aliquotaImpostoNopat": 0.34
+    },
+    "dividaLiquidaSobreEbitda": {
+      "maximo": 3
+    },
+    "fcoPositivo": true,
+    "coberturaJuros": {
+      "minimo": 3,
+      "_leia": "EBIT ajustado 12m ÷ |despesas financeiras 12m (CVM 3.06.02)|. Sem despesa financeira = passa. Conta ausente = reprova (cautela)."
+    },
+    "consistencia": {
+      "exercicios": 5,
+      "minimoComLucro": 4,
+      "minimoComFcoPositivo": 4,
+      "_leia": "Nos últimos N exercícios encerrados (DFP consecutivos até a data de corte): lucro líquido CONSOLIDADO (3.11) positivo e FCO (6.01) positivo em pelo menos o mínimo de anos. Menos de N exercícios disponíveis = reprova."
+    }
+  },
+  "verificacoes": {
+    "toleranciaBalancoPct": 0.5,
+    "toleranciaDrePct": 0.5,
+    "pvpMinimoPlausivel": 0.02,
+    "pvpMaximoPlausivel": 100,
+    "fcoMaximoSobreEbitda": 2,
+    "unidadeAutomatica": {
+      "ativa": true,
+      "fator": 1000,
+      "giroDiarioMaximo": 0.25,
+      "_leia": "Só aplica o fator se (1) o P/VP sem ajuste fica abaixo de pvpMinimoPlausivel E (2) o giro diário (volume médio do emissor ÷ valor de mercado) fica acima de giroDiarioMaximo, e depois do ajuste o P/VP fica na faixa e o giro volta a ser <= giroDiarioMaximo. Ajuste manual (capital.ajustesManuais) vence."
+    },
+    "maxFracaoSemPreco": 0.5,
+    "pvpAlerta": 10,
+    "giroAlerta": 0.05
+  }
+}

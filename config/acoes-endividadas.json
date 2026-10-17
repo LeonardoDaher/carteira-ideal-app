@@ -1,0 +1,28 @@
+{
+  "_leia": "Parâmetros do 'Top 15 empresas mais endividadas' (D94). ESTE ARQUIVO É A FONTE ÚNICA dos parâmetros PRÓPRIOS desta lista; o cálculo (scripts/acoes-endividadas-calculo.mjs) e o documento docs/12-metodologia-acoes-endividadas.md citam estes valores. O UNIVERSO (setores excluídos, duplicidade econômica, CNPJ, preço), a LIQUIDEZ mínima e a LEITURA CONTÁBIL (dívida bruta, caixa, EBITDA, verificações de integridade) são os de config/acoes-baratas.json: a mesma empresa tem o mesmo número nas duas listas, e uma mudança lá exige subir a versão aqui. Qualquer mudança neste arquivo exige subir 'versaoMetodologia' e registrar o motivo em 'historicoDeVersoes'. O hash SHA-256 deste arquivo e o do config-base vão no manifesto de cada execução.",
+  "versaoMetodologia": "1.0.0",
+  "historicoDeVersoes": [
+    {
+      "versao": "1.0.0",
+      "data": "2026-10-17",
+      "mudanca": "Versão inicial (D94). Critério pedido pelo responsável: as 15 empresas com maior dívida líquida ÷ EBITDA, no mesmo universo e com a mesma leitura contábil das ações baratas, sem os filtros de lucro positivo e de volatilidade (empresa com prejuízo ou muito volátil é justamente a que importa aqui) e sem a verificação 'caixa operacional ≤ 2× o EBITDA' (ela protege o indicador caixa operacional ÷ EV, que não é usado aqui, e derrubava AMER3, BHIA3, MGLU3 e SAPR11). As demais verificações de integridade das ações baratas continuam valendo. Empresa com caixa maior que a dívida (dívida líquida ≤ 0) não entra; empresa com dívida líquida positiva e EBITDA zero ou negativo (razão indefinida) aparece numa lista à parte, fora da ordem numérica. Publicação segura: aprovadoPeloResponsavel começa false."
+    }
+  ],
+  "tamanhoDaLista": 15,
+  "criterio": {
+    "_leia": "Indicador de ordenação: dívida líquida ÷ EBITDA dos últimos 12 meses (quantos anos de geração de caixa operacional, antes de impostos e juros, seriam necessários para pagar a dívida líquida). Ordem decrescente; empate pelo código. Dívida líquida = dívida bruta (2.01.04 + 2.02.01) − caixa (1.01.01 + 1.01.02). EBITDA = EBIT ajustado + |depreciação e amortização (DVA 7.04.01)|, exatamente como nas ações baratas.",
+    "indicador": "dlEbitda",
+    "ordem": "decrescente",
+    "grupoSemEbitdaPositivo": true
+  },
+  "publicacao": {
+    "aprovadoPeloResponsavel": false,
+    "_leia": "Trava regulatória. Com aprovadoPeloResponsavel=false o job calcula e grava a auditoria completa, mas o app NÃO recebe a lista (mostra 'em validação'). Acesso ABERTO, sem código: é fato contábil público de cada empresa, sem nota nem opinião nossa. Só mudar para true com aprovação expressa do responsável.",
+    "sanidade": {
+      "_leia": "Trava automática SÓ para a publicação: se o resultado vier claramente quebrado (típico de erro de leitura da CVM ou de mapeamento de CNPJ), o job grava a auditoria (execução completa), FALHA e não atualiza o app.",
+      "minimoAvaliadas": 40,
+      "maximoFracaoSemDados": 0.35
+    },
+    "avisoProposto": "Não é recomendação de investimento. Esta lista ordena as empresas pela razão entre a dívida líquida e o EBITDA dos últimos 12 meses, com dados das demonstrações financeiras publicadas na CVM, pela mesma fórmula para todas, sem nota nem opinião nossa. Dívida alta não quer dizer que a empresa está em risco, nem que a ação está barata ou cara: o endividamento convive com setores de investimento pesado (energia, saneamento, concessões) e com dívida de longo prazo e barata. A medida não captura prazo, custo, moeda nem garantias da dívida, e o EBITDA de 12 meses pode estar deprimido ou inflado por eventos pontuais. Empresas financeiras (bancos, seguradoras) ficam fora porque dívida é a matéria-prima do negócio delas. Leia as demonstrações e o formulário de referência antes de investir. Rentabilidade passada não garante rentabilidade futura e investir em ações pode causar perda de parte ou de todo o dinheiro aplicado. Converse com um profissional certificado antes de investir."
+  }
+}

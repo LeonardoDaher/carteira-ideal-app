@@ -1,0 +1,80 @@
+# "Top 15 empresas mais endividadas" (decisão D94), dívida líquida ÷ EBITDA.
+#
+# SEM REDE. Parte das demonstrações da CVM que a triagem de ações baratas já congelou em auditoria/acoes-baratas/ e troca só o preço do
+# dia (historico/acoes.json). Roda TODO DIA ÚTIL, depois do job "Atualizar Top 15 Ações Baratas" (00h de Brasília), e sob demanda.
+# Auditoria (desenho da D89): a pasta completa em auditoria/acoes-endividadas/<data>/ só é gravada na primeira execução do mês (ou
+# se os parâmetros, o código de cálculo ou os insumos de origem das ações baratas mudarem, ou com "auditoria completa" marcada na
+# execução manual). Nos outros dias o ranking é recalculado e CONFERIDO de forma independente em memória antes de publicar.
+#
+# PUBLICAÇÃO: o ranking só chega ao app se config/acoes-endividadas.json → publicacao.aprovadoPeloResponsavel for true E passar na
+# trava de sanidade. Acesso ABERTO (sem código): webapp-src/src/data/acoesEndividadas.json. Se qualquer etapa falhar (resultado
+# inverossímil, conferência divergente), o job termina com erro SEM publicar e o GitHub envia e-mail.
+
+name: Atualizar Top 15 Empresas Endividadas
+
+on:
+  schedule:
+    - cron: '30 3 * * 2-6' # terça a sábado, 03h30 UTC = segunda a sexta, 00h30 de Brasília (depois das ações baratas, 00h)
+  workflow_dispatch:
+    inputs:
+      auditoria_completa:
+        description: 'Gravar a pasta de auditoria completa mesmo que já exista uma neste mês'
+        type: boolean
+        required: false
+        default: false
+
+env:
+  COMPLETA: ${{ github.event.inputs.auditoria_completa == 'true' && '--completa' || '' }}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: acoes-endividadas # nunca duas execuções ao mesmo tempo
+  cancel-in-progress: false
+
+jobs:
+  atualizar:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Testes da metodologia (cálculo, auditoria e publicação)
+        run: node --test scripts/acoes-endividadas.test.mjs scripts/auditoria-diaria.test.mjs
+
+      - name: Calcular, conferir, gravar a auditoria (se for a completa do mês) e verificar
+        run: node scripts/atualizar-acoes-endividadas.mjs $COMPLETA
+
+      - name: Guardar a auditoria desta execução (mesmo se algo falhar)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: auditoria-acoes-endividadas
+          path: auditoria/acoes-endividadas
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Conferir se o site compila com os dados novos
+        run: |
+          npm ci
+          npm run build
+
+      - name: Publicar (commit) se houver mudança
+        run: |
+          ALVOS="auditoria/acoes-endividadas webapp-src/src/data/acoesEndividadas.json"
+          if [ -z "$(git status --porcelain $ALVOS)" ]; then
+            echo "Sem mudanças."
+            exit 0
+          fi
+          git config user.name "${{ vars.COMMIT_AUTOR_NOME || 'github-actions[bot]' }}"
+          git config user.email "${{ vars.COMMIT_AUTOR_EMAIL || '41898283+github-actions[bot]@users.noreply.github.com' }}"
+          git add $ALVOS
+          git commit -m "dados: Top 15 empresas endividadas ($(date -u +%Y-%m-%d))"
+          git pull --rebase
+          git push

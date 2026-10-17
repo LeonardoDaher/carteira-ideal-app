@@ -1,0 +1,39 @@
+{
+  "publicado": false,
+  "versaoMetodologia": "1.0.0",
+  "geradoEm": "2026-10-17T15:08:36.100Z",
+  "dataExecucao": "2026-10-18",
+  "dataPrecos": "2026-10-16",
+  "dataCorte": "2026-10-05",
+  "pastaAuditoria": "auditoria/acoes-endividadas/2026-10-17",
+  "hashResultado": "5ecac0229d3d206b79c203a60e09f1bcb8b5316c10a186763cf5c61aeb2960c8",
+  "hashInsumos": "e27441997b98724c3a98d8f019f5f9075bb55eb53a11da6a5e51050ef0b64137",
+  "hashConfig": "09b97a3086f644dda813c75706fe43c96ed4b87a66a816c9f45efd4f44628ac9",
+  "modoAuditoria": "diaria",
+  "auditoriaCompletaEm": "2026-10-17",
+  "tamanhoDaLista": 15,
+  "universo": 226,
+  "avaliadas": 129,
+  "aviso": "Não é recomendação de investimento. Esta lista ordena as empresas pela razão entre a dívida líquida e o EBITDA dos últimos 12 meses, com dados das demonstrações financeiras publicadas na CVM, pela mesma fórmula para todas, sem nota nem opinião nossa. Dívida alta não quer dizer que a empresa está em risco, nem que a ação está barata ou cara: o endividamento convive com setores de investimento pesado (energia, saneamento, concessões) e com dívida de longo prazo e barata. A medida não captura prazo, custo, moeda nem garantias da dívida, e o EBITDA de 12 meses pode estar deprimido ou inflado por eventos pontuais. Empresas financeiras (bancos, seguradoras) ficam fora porque dívida é a matéria-prima do negócio delas. Leia as demonstrações e o formulário de referência antes de investir. Rentabilidade passada não garante rentabilidade futura e investir em ações pode causar perda de parte ou de todo o dinheiro aplicado. Converse com um profissional certificado antes de investir.",
+  "parametros": {
+    "indicador": "dlEbitda",
+    "liquidezMinimaDiariaReais": 3000000,
+    "sessoesLiquidez": 21,
+    "idadeMaximaDemonstracaoDias": 200,
+    "setoresExcluidos": [
+      "Bancos",
+      "Seguros e previdência",
+      "Bolsa, holdings e serviços financeiros"
+    ]
+  },
+  "contagens": {
+    "ranking": 109,
+    "semEbitdaPositivo": 0,
+    "exclusoes": 117
+  },
+  "etapas": [],
+  "ranking": [],
+  "restante": [],
+  "semEbitdaPositivo": [],
+  "exclusoes": []
+}

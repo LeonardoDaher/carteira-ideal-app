@@ -48,6 +48,16 @@ test('decidirModo: cada gatilho da auditoria completa (sem pasta, virada de mês
   for (const d of [{ ...base, hoje: '2026-11-02' }, { ...base, hashConfig: 'cfg2' }, { ...base, calculoSha256: 'calc2' }, { ...base, forcarCompleta: true }]) assert.equal(decidirModo(d).modo, 'completa')
 })
 
+test('decidirModo (D94): lista que parte dos insumos de OUTRA auditoria vira completa quando a origem muda', () => {
+  const m = { ...manifesto, origemInsumos: 'auditoria/acoes-baratas/2026-10-05' }
+  assert.equal(decidirModo({ ...base, manifesto: m, origemAtual: 'auditoria/acoes-baratas/2026-10-05' }).modo, 'diaria')
+  const mudou = decidirModo({ ...base, manifesto: m, origemAtual: 'auditoria/acoes-baratas/2026-11-02' })
+  assert.equal(mudou.modo, 'completa')
+  assert.match(mudou.motivo, /insumos de origem mudaram/)
+  assert.match(decidirModo({ ...base, manifesto, origemAtual: 'auditoria/acoes-baratas/2026-10-05' }).motivo, /sem registro/)
+  assert.equal(decidirModo({ ...base, manifesto }).modo, 'diaria', 'sem origem informada, a regra antiga vale')
+})
+
 test('decidirModo: vale a data de EXECUÇÃO, não o nome da pasta (a das ações usa o último pregão, que pode ser do mês anterior)', () => {
   const u = { pasta: 'auditoria/acoes-baratas/2026-10-30', dataExecucao: '2026-11-02' }
   assert.equal(decidirModo({ ...base, ultima: u, hoje: '2026-11-03' }).modo, 'diaria')

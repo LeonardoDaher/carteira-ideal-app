@@ -9,6 +9,7 @@ import { rolarParaResultado } from '../ui/rolarParaResultado'
 import { AvisoEducacional } from '../ui/AvisoEducacional'
 import { Top15Baratas } from './Top15Baratas'
 import { Top15AcoesMaisNegociadas, Top15IbovMaioresPesos } from './Top15EtfsMaisNegociados'
+import { Top15Endividadas } from './Top15Endividadas'
 import type { AppCtx } from '../state/useAppState'
 
 function reais(valor: number) {
@@ -46,7 +47,7 @@ export function SimuleAcoes({
   const [valorLivre, setValorLivre] = useState('')
   const [valorEscolhido, setValorEscolhido] = useState<number>(VALORES_PADRAO[1])
   // Duas caixinhas (D49): o simulador de sempre e a triagem "Top 15 mais baratas".
-  const [aba, setAba] = useState<'simulador' | 'top15' | 'negociadas' | 'ibov'>('simulador')
+  const [aba, setAba] = useState<'simulador' | 'top15' | 'negociadas' | 'ibov' | 'endividadas'>('simulador')
 
   const levarAoCartao = () => rolarParaResultado('cartao-acao')
 
@@ -84,6 +85,7 @@ export function SimuleAcoes({
             { id: 'top15', emoji: '🏷️', titulo: 'Top 15 mais baratas', descricao: 'Triagem de valor, com auditoria' },
             { id: 'negociadas', emoji: '📊', titulo: 'Top 15 mais negociadas', descricao: 'Ranking por volume' },
             { id: 'ibov', emoji: '🏛️', titulo: 'Top 15 do Ibovespa', descricao: 'Maiores pesos do índice' },
+            { id: 'endividadas', emoji: '💳', titulo: 'Top 15 mais endividadas', descricao: 'Dívida líquida ÷ EBITDA' },
           ] as const
         ).map((c) => (
           <button
@@ -109,6 +111,8 @@ export function SimuleAcoes({
         <Top15IbovMaioresPesos />
       ) : aba === 'negociadas' ? (
         <Top15AcoesMaisNegociadas />
+      ) : aba === 'endividadas' ? (
+        <Top15Endividadas />
       ) : !selecao ? (
         <div className="card col" style={{ gap: 6 }} role="status">
           <span style={{ fontWeight: 700 }}>Os dados das ações ainda não foram carregados.</span>

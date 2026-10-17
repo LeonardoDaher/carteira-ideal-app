@@ -37,7 +37,7 @@ export const dataDaPasta = (ultima) => (ultima?.pasta ? path.posix.basename(Stri
  * Decide se a execução de hoje grava a auditoria completa ou só recalcula e confere.
  * @returns {{ modo: 'completa' | 'diaria', motivo: string }}
  */
-export function decidirModo({ ultima, manifesto, hoje, hashConfig, calculoSha256 = null, forcarCompleta = false }) {
+export function decidirModo({ ultima, manifesto, hoje, hashConfig, calculoSha256 = null, forcarCompleta = false, origemAtual = null }) {
   if (forcarCompleta) return { modo: 'completa', motivo: 'pedida (--completa)' }
   if (!ultima || !manifesto) return { modo: 'completa', motivo: 'ainda não há auditoria completa gravada' }
   // A data de EXECUÇÃO vale mais que o nome da pasta: a das ações é nomeada pelo último pregão (que pode ser do mês anterior).
@@ -45,6 +45,9 @@ export function decidirModo({ ultima, manifesto, hoje, hashConfig, calculoSha256
   if (mesDe(dataUltima) !== mesDe(hoje)) return { modo: 'completa', motivo: `primeira execução do mês (a última completa é de ${dataUltima || '?'})` }
   if (manifesto.hashes?.config !== hashConfig) return { modo: 'completa', motivo: 'os parâmetros mudaram desde a última auditoria completa' }
   if (calculoSha256 && manifesto.codigo?.calculoSha256 !== calculoSha256) return { modo: 'completa', motivo: 'o código de cálculo mudou desde a última auditoria completa' }
+  // Listas que partem dos insumos de OUTRA auditoria (D94: endividadas partem da das ações baratas): se aquela foi regravada
+  // (balanços novos da CVM), os insumos congelados desta ficaram velhos e a completa volta a ser gravada.
+  if (origemAtual != null && manifesto.origemInsumos !== origemAtual) return { modo: 'completa', motivo: `os insumos de origem mudaram (${manifesto.origemInsumos ?? 'sem registro'} → ${origemAtual})` }
   return { modo: 'diaria', motivo: `auditoria completa do mês: ${dataUltima}` }
 }
 

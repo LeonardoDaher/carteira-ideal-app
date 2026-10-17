@@ -126,7 +126,7 @@ export function Top15Indice({ classe, snapshot }: { classe: ClasseIndice; snapsh
             o motivo de cada número.
           </span>
           {notaAuditoriaDiaria(s) && <span>{notaAuditoriaDiaria(s)}</span>}
-        <span>Para refazer o cálculo, sem internet, e conferir se o resultado é o mesmo:</span>
+          <span>Para refazer o cálculo, sem internet, e conferir se o resultado é o mesmo:</span>
           <code style={{ display: 'block', overflowX: 'auto', whiteSpace: 'pre', padding: '6px 8px', borderRadius: 8, background: 'var(--surface2)' }}>
             node scripts/top15-mercado-verificar.mjs {s.pastaAuditoria ?? '…'}
           </code>
