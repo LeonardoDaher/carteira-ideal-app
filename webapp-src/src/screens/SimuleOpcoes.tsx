@@ -466,8 +466,13 @@ function LinhaDaTabela({ l, dataPregao, lado, onOperar }: { l: LinhaOpcao; dataP
         {(['compra', 'venda'] as Lado[]).map((x) => (
           <button
             key={x}
-            className={`chip ${lado === x ? 'selected' : ''}`}
-            style={{ padding: '2px 9px', minHeight: 0, marginRight: x === 'compra' ? 4 : 0 }}
+            className="chip"
+            data-lado={x}
+            style={{
+              padding: '2px 9px', minHeight: 0, marginRight: x === 'compra' ? 4 : 0, fontWeight: 700,
+              // compra em verde e venda em vermelho; escolhida fica cheia, as outras só com contorno e letra coloridos
+              ...(() => { const cor = x === 'compra' ? 'var(--mc-pos)' : 'var(--danger)'; return lado === x ? { background: cor, borderColor: cor, color: '#fff' } : { borderColor: cor, color: cor } })(),
+            }}
             aria-pressed={lado === x}
             aria-label={`${x === 'compra' ? 'Comprar' : 'Vender'} ${l.codigo}`}
             title={x === 'compra' ? 'Comprar' : 'Vender'}
