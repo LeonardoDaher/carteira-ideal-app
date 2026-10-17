@@ -1704,3 +1704,17 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 **Resultado.** Alertas do `npm audit`: 17 → 3 (os 3 restantes são `braces`, `micromatch` e `vite-plugin-singlefile`, só na montagem do site, sem ir para o navegador nem para a API; o "conserto" sugerido é rebaixar o plugin para a 0.9.0, que não adotei). `tsc -b` limpo, 1.626 testes do app e 433 de scripts passando, `npm run build` ok.
 
 **Limites.** Se uma função passar a usar outro campo do pedido ou da resposta, o `tsc -b` avisa e o tipo é ampliado em `api/_tipos.ts`. O Dependabot pode ainda abrir pull requests para os 3 alertas restantes. `npm audit fix` quebra neste projeto (erro interno do npm: `edgesOut`), por isso o ajuste do `source-map-js` foi por `npm update`. **Ainda não conferido no ar:** o deploy da Vercel com a API sem o pacote (os tipos somem na compilação, mas só a produção confirma).
+
+## D93 (17/10/2026): trava de sanidade do IFIX e do Ibovespa aceita a carteira do próximo pregão
+
+**Contexto.** No primeiro run agendado de sexta para sábado depois da D89, o job "Atualizar Top 15 ETFs e BDRs" terminou em **falha** (run `39012441704`, 17/10/2026): `a carteira é de 2026-10-19, -2 dias antes da execução (máximo 10): carteira desatualizada`. Os outros cinco rankings foram calculados e publicados normalmente (em modo diário, com a conferência independente OK); só o IFIX e o Ibovespa falharam, e o job terminou vermelho de propósito (e-mail).
+
+**Causa.** A API da B3 (`GetPortfolioDay`) devolve a carteira do **próximo pregão**. Na noite de sexta (execução já no sábado, em UTC), no fim de semana e antes de feriado, a data é futura. A trava de sanidade da D72 tratava qualquer data futura como carteira desatualizada, o que nunca apareceu porque o job rodava uma vez por mês (D89 o tornou diário). Defeito meu, de desenho: a D89 mudou a frequência sem rever as travas que dependem do calendário.
+
+**Decisão.** Novo parâmetro `publicacao.sanidade.antecedenciaMaximaDias = 4` em `config/top15-ifix.json` e `config/top15-ibov.json` (versão **1.1.1** de cada um): a trava aceita carteira de até 4 dias à frente da execução (cobre o fim de semana, 3 dias, e um feriado emendado, 4). Mais que isso, ou mais de 10 dias no passado, continua barrando. Sem o parâmetro vale 0 (comportamento antigo). A regra de ordenação, os pesos e o resto da trava não mudaram.
+
+**Efeito esperado.** O IFIX e o Ibovespa voltam a ser publicados todo dia útil, inclusive na noite de sexta. Como o código de cálculo e o config mudam, a primeira execução depois do envio grava a auditoria **completa** de todos os rankings de índice (e a dos demais, porque o hash do arquivo de cálculo muda); depois voltam ao modo diário.
+
+**Testes.** `top15-mercado.test.mjs`: caso novo da D93 (execução em 17/10 com carteira de 19/10 passa; 1 e 4 dias à frente passam; 5 dias à frente barra com mensagem própria; o limite de 10 dias no passado não mudou), o teste antigo ficou como "sem antecedência configurada, data futura barra" e o teste de configuração fixa versão 1.1.1 e `antecedenciaMaximaDias = 4` nos dois índices. **Mutação:** 4 defeitos (ignorar a antecedência, aceitar qualquer data futura, tolerância de 1 dia a mais, ignorar o valor da config), todos pegos. Suíte de scripts: 434 passam.
+
+**Para acompanhar.** Na próxima sexta à noite (ou no primeiro run agendado depois do envio) o job deve terminar verde. O run vermelho de 17/10 não precisa ser refeito: o IFIX e o Ibovespa ficaram com o ranking de 16/10, que continua válido até o próximo pregão.

@@ -644,7 +644,21 @@ test('sanidade do índice: poucos ativos, carteira incompleta, pesos que não so
   assert.match(verificarSanidade({ ...bom, somaPesos: 100.6 }, san)[0], /pesos somam/)
   assert.deepEqual(verificarSanidade({ ...bom, dataComposicao: '2026-09-28' }, san), [], '10 dias: exatamente no limite passa')
   assert.match(verificarSanidade({ ...bom, dataComposicao: '2026-09-27' }, san)[0], /11 dias antes da execução.*desatualizada/)
-  assert.match(verificarSanidade({ ...bom, dataComposicao: '2026-10-09' }, san)[0], /-1 dias/, 'carteira do futuro também é suspeita')
+  assert.match(verificarSanidade({ ...bom, dataComposicao: '2026-10-09' }, san)[0], /-1 dias/, 'sem antecedência configurada, carteira do futuro também é suspeita')
+})
+
+test('sanidade do índice (D93): a B3 publica a carteira do PRÓXIMO pregão; até antecedenciaMaximaDias à frente passa, além disso barra', () => {
+  const san = { sanidade: { minimoNaLista: 3, minimoComponentes: 5, toleranciaSomaPesos: 0.5, idadeMaximaDias: 10, antecedenciaMaximaDias: 4 } }
+  const bom = calcularIndice(insumosIdx(), cfgIdx('ibov')).resultado // execução em 08/10/2026
+  // sexta à noite (execução em UTC já no sábado): carteira de segunda, 2 dias à frente (o caso real de 17/10/2026)
+  assert.deepEqual(verificarSanidade({ ...bom, dataExecucao: '2026-10-17', dataComposicao: '2026-10-19' }, san), [], '-2 dias passa')
+  assert.deepEqual(verificarSanidade({ ...bom, dataComposicao: '2026-10-09' }, san), [], '1 dia à frente passa')
+  assert.deepEqual(verificarSanidade({ ...bom, dataComposicao: '2026-10-12' }, san), [], 'exatamente 4 dias à frente passa')
+  const longe = verificarSanidade({ ...bom, dataComposicao: '2026-10-13' }, san)
+  assert.match(longe[0], /-5 dias antes da execução.*até 4 dias à frente.*desatualizada/, '5 dias à frente barra')
+  // o limite de idade passada não mudou
+  assert.deepEqual(verificarSanidade({ ...bom, dataComposicao: '2026-09-28' }, san), [])
+  assert.match(verificarSanidade({ ...bom, dataComposicao: '2026-09-27' }, san)[0], /11 dias antes da execução/)
 })
 
 test('insumos de índice: nome e setor do app, cotação e volume mediano do histórico da B3, nome da B3 para FII', () => {
@@ -740,7 +754,7 @@ test('publicação aberta do índice: cabeçalho e lista no mesmo arquivo, sem a
 
 test('configuração dos índices: publicados em 08/10/2026, abertos, sem código, com aviso e limites de sanidade', () => {
   for (const [classe, cfg] of Object.entries(cfgsIndice)) {
-    assert.equal(cfg.versaoMetodologia, '1.1.0', classe)
+    assert.equal(cfg.versaoMetodologia, '1.1.1', classe)
     assert.equal(cfg.publicacao.aprovadoPeloResponsavel, true, `: aprovado pelo responsável (D72)`)
     assert.equal(cfg.publicacao.aprovacao.data, '2026-10-08', classe)
     assert.equal(cfg.historicoDeVersoes.at(-1).versao, cfg.versaoMetodologia, classe)
@@ -750,6 +764,7 @@ test('configuração dos índices: publicados em 08/10/2026, abertos, sem códig
     assert.match(cfg.publicacao.avisoProposto, /composição oficial/, classe)
     assert.equal(cfg.publicacao.sanidade.toleranciaSomaPesos, 0.5, classe)
     assert.equal(cfg.publicacao.sanidade.idadeMaximaDias, 10, classe)
+    assert.equal(cfg.publicacao.sanidade.antecedenciaMaximaDias, 4, `${classe}: carteira do próximo pregão (D93)`)
     assert.equal(CLASSES[classe].privado, null, classe)
   }
   assert.equal(cfgsIndice.ifix.publicacao.sanidade.minimoComponentes, 50)

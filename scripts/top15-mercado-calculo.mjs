@@ -323,7 +323,10 @@ export function verificarSanidade(resultado, cfg) {
     if (resultado.universo < s.minimoComponentes) p.push(`a carteira tem ${resultado.universo} ativos (mínimo ${s.minimoComponentes}): resposta incompleta da B3`)
     if (Math.abs(resultado.somaPesos - 100) > s.toleranciaSomaPesos) p.push(`os pesos somam ${resultado.somaPesos}% (esperado 100% com tolerância de ${s.toleranciaSomaPesos})`)
     const idade = diasEntreDatas(resultado.dataComposicao, resultado.dataExecucao)
-    if (idade > s.idadeMaximaDias || idade < 0) p.push(`a carteira é de ${resultado.dataComposicao}, ${idade} dias antes da execução (máximo ${s.idadeMaximaDias}): carteira desatualizada`)
+    // A B3 publica a carteira do PRÓXIMO pregão: na noite de sexta, no fim de semana e antes de feriado a data é futura (D93).
+    // `antecedenciaMaximaDias` diz até quantos dias à frente isso é normal (ausente = 0: data futura derruba o job).
+    const antecedencia = s.antecedenciaMaximaDias ?? 0
+    if (idade > s.idadeMaximaDias || idade < -antecedencia) p.push(`a carteira é de ${resultado.dataComposicao}, ${idade} dias antes da execução (máximo ${s.idadeMaximaDias}${antecedencia ? `; até ${antecedencia} dias à frente` : ''}): carteira desatualizada`)
     return p
   }
   const lista = resultado.classe === 'bdrs' ? resultado.ranking : resultado.geral

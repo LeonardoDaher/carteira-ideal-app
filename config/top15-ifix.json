@@ -1,6 +1,6 @@
 {
   "_leia": "Parâmetros do 'Top 15 maiores pesos do IFIX' (D72). ESTE ARQUIVO É A FONTE ÚNICA: o cálculo (scripts/top15-mercado-calculo.mjs) e o documento docs/11-metodologia-top15-etfs-bdrs.md citam estes valores. Qualquer mudança exige subir 'versaoMetodologia' e registrar o motivo em 'historicoDeVersoes'. O hash SHA-256 deste arquivo vai no manifesto de cada execução. A lista são os 'tamanhoDaLista' ativos de MAIOR PESO na carteira teórica do Índice de Fundos Imobiliários (IFIX), publicada pela B3 (indexProxy/GetPortfolioDay) na data da execução. O peso é o da B3: o job só ordena e soma. Cotação e volume (mediana dos últimos 'janelaLiquidez' pregões, do histórico diário da B3) são informativos.",
-  "versaoMetodologia": "1.1.0",
+  "versaoMetodologia": "1.1.1",
   "historicoDeVersoes": [
     {
       "versao": "1.0.0",
@@ -11,6 +11,11 @@
       "versao": "1.1.0",
       "data": "2026-10-08",
       "mudanca": "PUBLICAÇÃO (D72). O responsável aprovou publicar o ranking no app, com acesso aberto (sem código): aprovadoPeloResponsavel passa a true. Nenhuma regra de cálculo mudou."
+    },
+    {
+      "versao": "1.1.1",
+      "data": "2026-10-17",
+      "mudanca": "D93. O job passou a rodar todo dia útil (D89) e a B3 devolve a carteira do PRÓXIMO pregão: na noite de sexta, no fim de semana e antes de feriado a data da carteira é futura (ex.: execução em 17/10, carteira de 19/10), e a trava de sanidade tratava data futura como carteira desatualizada, derrubando o job. Novo parâmetro publicacao.sanidade.antecedenciaMaximaDias = 4 (cobre o fim de semana e um feriado emendado). Data futura além disso, e carteira com mais de 10 dias, continuam barrando. A regra de ordenação e os pesos não mudaram."
     }
   ],
   "tamanhoDaLista": 15,
@@ -28,7 +33,8 @@
       "minimoComponentes": 50,
       "toleranciaSomaPesos": 0.5,
       "idadeMaximaDias": 10,
-      "_leia": "Se a carteira vier com menos ativos que o mínimo (resposta incompleta), com pesos que não somam 100% (tolerância de 0,5 ponto) ou com data mais de 10 dias anterior à execução (carteira desatualizada), o job termina com erro depois de gravar a auditoria e o app não é alterado."
+      "antecedenciaMaximaDias": 4,
+      "_leia": "Se a carteira vier com menos ativos que o mínimo (resposta incompleta), com pesos que não somam 100% (tolerância de 0,5 ponto) ou com data mais de 10 dias anterior à execução (carteira desatualizada), o job termina com erro depois de gravar a auditoria e o app não é alterado. Carteira com data futura de até 4 dias (antecedenciaMaximaDias) é normal, porque a B3 publica a do próximo pregão; além disso, também barra."
     },
     "avisoProposto": "Não é recomendação de investimento. Esta lista mostra os 15 fundos de maior peso na carteira teórica do IFIX, como publicada pela B3: é a composição oficial do índice, sem nota nem opinião nossa. Peso grande significa fundo grande e líquido dentro do índice, e não qualidade, preço baixo, bom rendimento nem segurança. A carteira é revista pela B3 a cada quadrimestre e os pesos mudam com os preços. Cada fundo tem vacância, inadimplência, endividamento, gestão e tributação próprios; leia o regulamento e o relatório gerencial antes de investir. Rentabilidade passada não garante rentabilidade futura, os rendimentos não são garantidos e fundos imobiliários podem causar perda de parte ou de todo o dinheiro aplicado. Converse com um profissional certificado antes de investir."
   }
