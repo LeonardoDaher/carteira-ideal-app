@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
-  FILTRO_VAZIO, adicionarMeses, buscarAtivos, diasAte, diasUteis, seriesDosProximosMeses, tipoVencimento, expandirSnapshot, faixaPerto, filtrarSeries, limitesDeStrike, montarLinha,
+  FILTRO_VAZIO, adicionarMeses, posicoesDaFaixa, strikeDaPosicao, strikesDistintos, buscarAtivos, diasAte, diasUteis, seriesDosProximosMeses, tipoVencimento, expandirSnapshot, faixaPerto, filtrarSeries, limitesDeStrike, montarLinha,
   moneyness, ordenarLinhas, vencimentosDe,
 } from './opcoes'
 import type { AtivoComOpcoes, SerieOpcao, SnapshotOpcoesBruto } from './opcoes'
@@ -176,5 +176,37 @@ describe('vencimentos: 6 meses e mensal x semanal', () => {
     expect(tipoVencimento('2026-11-19')).toBe('mensal')
     expect(tipoVencimento('2026-11-12')).toBe('semanal') // quinta comum
     expect(tipoVencimento('2026-11-27')).toBe('semanal')
+  })
+})
+
+describe('controle deslizante de strike', () => {
+  const strikes = [10, 12.5, 15, 17.5, 20]
+
+  it('strikesDistintos tira repetidos e ordena', () => {
+    expect(strikesDistintos([s('A', 'call', 15, '2026-11-19'), s('B', 'put', 10, '2026-11-19'), s('C', 'call', 15, '2026-12-18')])).toEqual([10, 15])
+  })
+
+  it('sem limite, as alças ficam nas pontas', () => {
+    expect(posicoesDaFaixa(strikes, null, null)).toEqual({ menor: 0, maior: 4 })
+  })
+
+  it('valor que é um strike existente cai na posição dele; valor digitado entre strikes fica por dentro da faixa', () => {
+    expect(posicoesDaFaixa(strikes, 12.5, 17.5)).toEqual({ menor: 1, maior: 3 })
+    expect(posicoesDaFaixa(strikes, 13, 18)).toEqual({ menor: 2, maior: 3 })
+  })
+
+  it('faixa fora dos strikes ou invertida nunca cruza as alças e não quebra', () => {
+    expect(posicoesDaFaixa(strikes, 99, null)).toEqual({ menor: 4, maior: 4 })
+    expect(posicoesDaFaixa(strikes, null, 1)).toEqual({ menor: 0, maior: 0 })
+    const invertida = posicoesDaFaixa(strikes, 17.5, 12.5)
+    expect(invertida.menor).toBeLessThanOrEqual(invertida.maior)
+    expect(posicoesDaFaixa([], null, null)).toEqual({ menor: 0, maior: 0 })
+  })
+
+  it('strikeDaPosicao devolve o strike, e null nas pontas (sem limite)', () => {
+    expect(strikeDaPosicao(strikes, 0, 'menor')).toBeNull()
+    expect(strikeDaPosicao(strikes, 2, 'menor')).toBe(15)
+    expect(strikeDaPosicao(strikes, 4, 'maior')).toBeNull()
+    expect(strikeDaPosicao(strikes, 3, 'maior')).toBe(17.5)
   })
 })

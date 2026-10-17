@@ -132,6 +132,32 @@ export function limitesDeStrike(series: SerieOpcao[]): { min: number; max: numbe
   return { min: Math.min(...strikes), max: Math.max(...strikes) }
 }
 
+/** Strikes distintos das séries, em ordem crescente: são as posições do controle deslizante. */
+export function strikesDistintos(series: SerieOpcao[]): number[] {
+  return [...new Set(series.map((x) => x.strike))].sort((a, b) => a - b)
+}
+
+/**
+ * Posição das duas alças do controle de strike para o filtro atual. Sem limite (null) a alça fica na ponta; um valor
+ * digitado que não é um strike existente vale o strike mais próximo de dentro da faixa. As alças nunca se cruzam.
+ */
+export function posicoesDaFaixa(strikes: number[], min: number | null, max: number | null): { menor: number; maior: number } {
+  if (strikes.length === 0) return { menor: 0, maior: 0 }
+  const ultimo = strikes.length - 1
+  let menor = min === null ? 0 : strikes.findIndex((v) => v >= min)
+  if (menor === -1) menor = ultimo
+  let maior = max === null ? ultimo : strikes.length - 1 - [...strikes].reverse().findIndex((v) => v <= max)
+  if (maior > ultimo) maior = 0 // nenhum strike abaixo do máximo digitado
+  return { menor: Math.min(menor, maior), maior: Math.max(menor, maior) }
+}
+
+/** Valor do filtro para uma posição da alça: nas pontas, sem limite (null). */
+export function strikeDaPosicao(strikes: number[], posicao: number, ponta: 'menor' | 'maior'): number | null {
+  if (ponta === 'menor' && posicao <= 0) return null
+  if (ponta === 'maior' && posicao >= strikes.length - 1) return null
+  return strikes[Math.max(0, Math.min(posicao, strikes.length - 1))] ?? null
+}
+
 /** Busca ativos por código ou parte do nome. Código exato primeiro. Até `limite` resultados. */
 export function buscarAtivos(ativos: AtivoComOpcoes[], termo: string, limite = 8): AtivoComOpcoes[] {
   const t = normalizarBusca(termo)

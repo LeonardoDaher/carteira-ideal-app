@@ -2,7 +2,7 @@ import { useEffect, useId, useMemo, useState } from 'react'
 import { SNAPSHOT_MERCADO } from '../data/snapshotMercado'
 import {
   FILTRO_VAZIO, buscarAtivos, diasUteis, expandirSnapshot, faixaPerto, filtrarSeries, limitesDeStrike, montarLinha,
-  ordenarLinhas, seriesDosProximosMeses, tipoVencimento, vencimentosDe,
+  ordenarLinhas, seriesDosProximosMeses, strikesDistintos, tipoVencimento, vencimentosDe,
 } from '../domain/opcoes'
 import type { AtivoComOpcoes, ChaveOrdem, FiltroEstilo, FiltroSeries, FiltroTipo, LinhaOpcao, Ordem, SerieOpcao, SnapshotOpcoes } from '../domain/opcoes'
 import {
@@ -17,6 +17,7 @@ import { AvisoEducacional } from '../ui/AvisoEducacional'
 import { AbasDaTela } from '../ui/AbasDaTela'
 import { CampoReais } from '../ui/CampoReais'
 import { CampoNumero } from '../ui/CampoNumero'
+import { FaixaDeStrike } from '../ui/FaixaDeStrike'
 import { GraficoPayoff } from '../ui/GraficoPayoff'
 import type { AppCtx } from '../state/useAppState'
 
@@ -316,6 +317,7 @@ function TabelaDoAtivo({ snapshot, ativo, onCriar }: { snapshot: SnapshotOpcoes;
   const hoje = snapshot.dataPregao ?? new Date().toISOString().slice(0, 10)
   const vencimentos = useMemo(() => vencimentosDe(ativo.series), [ativo])
   const limites = useMemo(() => limitesDeStrike(ativo.series), [ativo])
+  const strikes = useMemo(() => strikesDistintos(ativo.series), [ativo])
   const mensais = useMemo(() => vencimentos.filter((v) => tipoVencimento(v) === 'mensal'), [vencimentos])
   const semanais = useMemo(() => vencimentos.filter((v) => tipoVencimento(v) === 'semanal'), [vencimentos])
   const [filtro, setFiltro] = useState<FiltroSeries>({ ...FILTRO_VAZIO, vencimentos: vencimentos.slice(0, 1) })
@@ -412,6 +414,7 @@ function TabelaDoAtivo({ snapshot, ativo, onCriar }: { snapshot: SnapshotOpcoes;
 
         <div className="col" style={{ gap: 8 }}>
           <span className="small" style={{ fontWeight: 600 }}>Faixa de strike</span>
+          <FaixaDeStrike strikes={strikes} min={filtro.strikeMin} max={filtro.strikeMax} onMudar={mudar} />
           <div className="row" style={{ gap: 10, flexWrap: 'wrap' }}>
             <div style={{ flex: '1 1 130px' }}>
               <CampoReais

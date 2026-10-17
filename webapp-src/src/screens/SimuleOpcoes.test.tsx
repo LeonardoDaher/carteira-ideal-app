@@ -366,3 +366,61 @@ describe('SimuleOpcoes: preço do ativo, vencimentos, strike e voltar', () => {
     expect((screen.getByLabelText('Strike') as HTMLInputElement).value).toBe('66,00')
   })
 })
+
+describe('SimuleOpcoes: controle deslizante de strike', () => {
+  // Strikes de PETR4 na janela de 6 meses: 55, 60, 65.
+  const mover = (rotulo: string, valor: string) => fireEvent.change(screen.getByLabelText(rotulo), { target: { value: valor } })
+  const valorCampo = (rotulo: string) => (screen.getByLabelText(rotulo) as HTMLInputElement).value
+
+  it('começa com as alças nas pontas (sem limite) e cada passo anda de um strike para o próximo', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    const menor = screen.getByLabelText('Strike mínimo (controle deslizante)') as HTMLInputElement
+    const maior = screen.getByLabelText('Strike máximo (controle deslizante)') as HTMLInputElement
+    expect([menor.min, menor.max, menor.value]).toEqual(['0', '2', '0'])
+    expect([maior.min, maior.max, maior.value]).toEqual(['0', '2', '2'])
+    expect(menor.getAttribute('aria-valuetext')).toBe('R$ 55,00')
+    expect(maior.getAttribute('aria-valuetext')).toBe('R$ 65,00')
+  })
+
+  it('arrastar a alça de baixo filtra a tabela e preenche o campo de digitar', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    todosVencimentos()
+    mover('Strike mínimo (controle deslizante)', '1') // 60
+    expect(valorCampo('Strike mínimo')).toBe('60,00')
+    expect(codigos()).not.toContain('PETRK550')
+    expect(codigos()).toContain('PETRK650')
+    mover('Strike máximo (controle deslizante)', '1') // 60
+    expect(valorCampo('Strike máximo')).toBe('60,00')
+    expect(codigos().sort()).toEqual(['PETRK600', 'PETRL600', 'PETRW600'])
+  })
+
+  it('as alças não se cruzam e voltar para a ponta tira o limite', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    todosVencimentos()
+    mover('Strike máximo (controle deslizante)', '1') // 60
+    mover('Strike mínimo (controle deslizante)', '2') // passaria do máximo: fica em 60
+    expect(valorCampo('Strike mínimo')).toBe('60,00')
+    mover('Strike mínimo (controle deslizante)', '0')
+    mover('Strike máximo (controle deslizante)', '2')
+    expect(valorCampo('Strike mínimo')).toBe('')
+    expect(valorCampo('Strike máximo')).toBe('')
+    expect(linhas()).toHaveLength(5)
+  })
+
+  it('o valor digitado e o atalho movem as alças', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    todosVencimentos()
+    digitar('Strike mínimo', '65')
+    expect((screen.getByLabelText('Strike mínimo (controle deslizante)') as HTMLInputElement).value).toBe('2')
+    fireEvent.click(screen.getByRole('button', { name: 'Perto do preço (±10%)' })) // 54 a 66
+    expect((screen.getByLabelText('Strike mínimo (controle deslizante)') as HTMLInputElement).value).toBe('0')
+    expect((screen.getByLabelText('Strike máximo (controle deslizante)') as HTMLInputElement).value).toBe('2')
+  })
+
+  it('com um strike só, o controle não aparece', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    fireEvent.change(screen.getByLabelText('Buscar ativo por código ou nome'), { target: { value: 'vale' } })
+    fireEvent.keyDown(screen.getByLabelText('Buscar ativo por código ou nome'), { key: 'Enter' })
+    expect(screen.queryByLabelText('Strike mínimo (controle deslizante)')).toBeNull()
+  })
+})
