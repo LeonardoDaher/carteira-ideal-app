@@ -9,6 +9,7 @@ export const SIMULADORES: { tela: string; emoji: string; titulo: string; descric
   { tela: 'simuleTesouro', emoji: '🏛️', titulo: 'Simule Tesouro Direto', descricao: 'Quanto cada título rende até o vencimento, já com IR' },
   { tela: 'simuleBdr', emoji: '🌎', titulo: 'Simule BDR', descricao: 'Os BDRs mais negociados na B3, por setor' },
   { tela: 'simuleEtf', emoji: '🧺', titulo: 'Simule ETF', descricao: 'Os ETFs mais negociados na B3, por categoria' },
+  { tela: 'simuleOpcoes', emoji: '🎯', titulo: 'Simule Opções', descricao: 'Calls e puts reais da B3, com filtro por strike, e o payoff de cada estratégia' },
 ]
 
 /**

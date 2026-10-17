@@ -1749,3 +1749,19 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 **Testes.** `gerar-divulgacao.test.mjs` passou de 10 para 12 testes (post 4 com razão, datas, cautela e slide da lista à parte; cada trava; os quatro arquivos; o arquivo público real do repositório). **Mutação:** 11 defeitos (cada trava, o formato da razão, a cautela, a numeração do slide de aviso, o singular e o plural do slide da lista à parte, o post fora da lista), todos pegos.
 
 **Limites.** O texto sai do arquivo público do dia da geração: se a lista for retirada (`publicado: false`), a divulgação do mês para com erro, como nas demais. O responsável lê e publica; o script não posta nada.
+
+
+
+## D96 (17/10/2026): Simule Opções (séries reais da B3 e payoff por estratégia)
+
+**Decisão.** Novo cartão "Simule Opções" no hub Simule Ativos (`?tela=simuleOpcoes`, tela avulsa, sem questionário), com duas abas: **Séries da B3** e **Estratégias**. Descritivo e educacional: não indica operação nem ranqueia séries.
+
+**Fonte e job.** COTAHIST diário da B3 (`bvmf.bmfbovespa.com.br/InstDados/SerHist`), sem cota e sem secret. `scripts/atualizar-opcoes.mjs` (workflow "Atualizar Opções", terça a sábado 01h15 UTC) lê o arquivo de largura fixa (calls = CODBDI 78, puts = 82), liga a opção ao ativo pelo ISIN e publica `webapp-src/src/data/opcoes.json`: 25 ativos de maior volume de opções, até 5 vencimentos, strikes entre 70% e 130% do preço, só séries com 3 negócios ou mais, e sem séries que vencem no próprio pregão. Conferido com o pregão de 16/10/2026 (15.317 opções lidas, ~390 KB publicados). Mesmas travas dos outros jobs: poucos ativos, ativos de controle ausentes (PETR4, VALE3, BOVA11) ou série inválida = termina com erro sem gravar.
+
+**Aba Séries.** Filtros por tipo, vencimento e **faixa de strike** (mínimo e máximo, mais atalhos "perto do preço" ±5%, ±10% e ±20%), combináveis. Cada série tem o botão "Simular", que abre a aba Estratégias já preenchida (preço, strike, prêmio, dias e volatilidade implícita).
+
+**Aba Estratégias.** Compra de call, compra de put, venda coberta, trava de alta e trava de baixa. Ganho máximo, perda máxima, ponto de equilíbrio e débito/crédito (exatos no vencimento), gráfico de lucro e prejuízo, curva "daqui a N dias" (passagem do tempo) e gregas da posição. Antes do vencimento usa Black-Scholes europeu, sem dividendos, com juro de partida na Selic meta (aproximação: opções de ações na B3 podem ser exercidas antes; a tela diz isso). A volatilidade é digitada ou a implícita no prêmio.
+
+**Limites.** Prêmio é o do último negócio do dia, não o preço de compra e venda atual. Sem corretagem, emolumentos, IR nem margem. Volatilidade histórica do ativo fica para uma segunda etapa (exige histórico de preços). **Ainda não conferido no ar:** a primeira execução do workflow no GitHub Actions (o parser foi conferido com o arquivo real de 16/10, baixado à mão).
+
+**Testes.** 23 de domínio (payoff, análise, Black-Scholes, gregas, volatilidade implícita, filtros), 12 da tela (incluindo o filtro por strike) e 5 do script; hub e `?tela=` atualizados.

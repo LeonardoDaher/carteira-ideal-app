@@ -353,6 +353,7 @@ describe('useAppState — Aprender e Simule FII abertos pela landing (sem questi
     ['simuleTesouro', 'simuleTesouro'],
     ['simuleBdr', 'simuleBdr'],
     ['simuleEtf', 'simuleEtf'],
+    ['simuleOpcoes', 'simuleOpcoes'],
     ['simuleAtivos', 'simuleAtivos'],
     ['simuleAcoes', 'simuleAcoes'],
     ['simuleImovel', 'simuleImovel'],
