@@ -4,12 +4,12 @@
 // Regras que o código garante (e os testes travam):
 //   - só entram rankings com `publicado: true`;
 //   - rankings COM CÓDIGO (ações baratas, FIIs baratos, BDRs com desconto) nunca têm ativo no texto: se o arquivo público
-//     trouxer lista (não deveria), o script para com erro;
+//     trouxer lista (não deveria), o script para com erro; o das empresas mais endividadas é ABERTO e entra com as 15 empresas;
 //   - toda publicação carrega o aviso de que não é recomendação de investimento;
 //   - cada lista tem exatamente 15 ativos, sem repetição.
 //
 // Uso: node scripts/gerar-divulgacao.mjs [AAAA-MM]   (o mês padrão é o da data do ranking mais recente)
-// Saída: divulgacao/AAAA-MM/post-1-mais-negociados.md, post-2-indices.md, post-3-listas-com-codigo.md
+// Saída: divulgacao/AAAA-MM/post-1-mais-negociados.md, post-2-indices.md, post-3-listas-com-codigo.md, post-4-endividadas.md (D95)
 
 import fs from 'node:fs'
 import path from 'node:path'
@@ -36,6 +36,7 @@ export const ARQUIVOS = {
   acoesBaratas: 'acoesBaratas.json',
   fiisBaratos: 'fiiBaratos.json',
   bdrsDesconto: 'bdrsDesconto.json',
+  endividadas: 'acoesEndividadas.json',
 }
 
 const RESTRITOS = ['acoesBaratas', 'fiisBaratos', 'bdrsDesconto']
@@ -85,6 +86,22 @@ function listaIndice(arq, rotulo) {
   return { itens: l.map((x) => ({ ticker: x.ticker, peso: x.peso })), data: arq.dataComposicao, soma: arq.somaPesosDaLista }
 }
 
+/** "9.7035" → "9,7x". */
+export function razao(n) {
+  return `${n.toFixed(1).replace('.', ',')}x`
+}
+
+/** Empresas mais endividadas (D95): ranking aberto, 15 empresas, cada uma com a razão dívida líquida ÷ EBITDA. */
+function listaEndividadas(arq, rotulo) {
+  exigirPublicado(arq, rotulo)
+  if (arq.acessoRestrito === true) throw new Error(`${rotulo}: ranking com código; a divulgação não pode usar ranking com código.`)
+  const l = arq.ranking
+  if (!Array.isArray(l) || l.length !== TAMANHO) throw new Error(`${rotulo}: a lista deve ter ${TAMANHO} ativos (tem ${l?.length ?? 0}).`)
+  semRepeticao(l.map((x) => x.ticker), rotulo)
+  if (l.some((x) => !Number.isFinite(x.dlEbitda))) throw new Error(`${rotulo}: empresa sem a razão dívida líquida ÷ EBITDA.`)
+  return { itens: l.map((x) => ({ ticker: x.ticker, razao: x.dlEbitda })), precos: arq.dataPrecos, balancos: arq.dataCorte, semEbitda: arq.semEbitdaPositivo?.length ?? 0 }
+}
+
 function semRepeticao(tickers, rotulo) {
   if (new Set(tickers).size !== tickers.length) throw new Error(`${rotulo}: ativo repetido na lista.`)
 }
@@ -110,6 +127,7 @@ export function gerarPosts(dados, mes) {
   const bdrs = listaNegociados(dados.bdrs, 'BDRs mais negociados')
   const ibov = listaIndice(dados.ibov, 'Ibovespa')
   const ifix = listaIndice(dados.ifix, 'IFIX')
+  const endiv = listaEndividadas(dados.endividadas, 'Empresas mais endividadas')
   for (const [chave, rotulo] of [['acoesBaratas', 'Ações baratas'], ['fiisBaratos', 'FIIs baratos'], ['bdrsDesconto', 'BDRs com desconto']]) {
     exigirRestritoSemLista(dados[chave], rotulo)
   }
@@ -163,10 +181,27 @@ Legenda:
 (Nenhum ativo, código de acesso nem posição aparece neste post.)
 `
 
+  const slideSemEbitda = endiv.semEbitda > 0
+    ? `\nSlide 3: "${endiv.semEbitda} ${endiv.semEbitda === 1 ? 'empresa tem dívida líquida e EBITDA zero ou negativo' : 'empresas têm dívida líquida e EBITDA zero ou negativo'}: a razão não existe e ${endiv.semEbitda === 1 ? 'ela fica à parte' : 'elas ficam à parte'}, fora da ordem. A lista completa está no app."\n`
+    : ''
+  const post4 = `# Post 4 (carrossel): as empresas mais endividadas, ${mesExtenso}
+
+Slide 1: "As 15 empresas mais endividadas da bolsa, ${mesExtenso}. Dívida líquida ÷ EBITDA, sem opinião nossa."
+
+Slide 2 (dívida líquida ÷ EBITDA dos últimos 12 meses, preços até ${diaMes(endiv.precos)}, balanços publicados até ${diaMes(endiv.balancos)}):
+${endiv.itens.map((x, i) => `${i + 1} ${x.ticker} (${razao(x.razao)})`).join(', ')}.
+${slideSemEbitda}
+Slide ${endiv.semEbitda > 0 ? 4 : 3} (aviso): "Dívida alta não quer dizer empresa em risco: energia, saneamento e concessões convivem com dívida longa e barata. A medida não mostra prazo, custo nem moeda da dívida. Bancos e seguradoras ficam de fora. ${AVISO_CURTO}"
+
+Legenda:
+"As 15 empresas com maior dívida líquida em relação ao EBITDA em ${mesExtenso}: quantos anos de geração de caixa operacional seriam necessários para pagar a dívida líquida. Dados das demonstrações da CVM, mesma fórmula para todas, com trilha de auditoria. Dívida alta não é sinal de risco por si só, nem de ação barata ou cara. Lista completa e metodologia no app (link na bio). ${AVISO_CURTO}"
+`
+
   const posts = [
     { arquivo: 'post-1-mais-negociados.md', texto: post1 },
     { arquivo: 'post-2-indices.md', texto: post2 },
     { arquivo: 'post-3-listas-com-codigo.md', texto: post3 },
+    { arquivo: 'post-4-endividadas.md', texto: post4 },
   ]
   for (const p of posts) {
     if (!p.texto.includes('Não é recomendação de investimento')) throw new Error(`${p.arquivo}: sem o aviso de recomendação.`)

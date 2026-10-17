@@ -1,5 +1,5 @@
 # Divulgação mensal dos Top 15 (D91): gera o TEXTO das publicações do Instagram (mais negociados, pesos do IFIX e do
-# Ibovespa, e a chamada das listas com código) a partir dos arquivos públicos do app. Sem rede. NÃO posta nada: o
+# Ibovespa, a chamada das listas com código e as empresas mais endividadas, D95) a partir dos arquivos públicos do app. Sem rede. NÃO posta nada: o
 # responsável lê divulgacao/AAAA-MM/ e publica. Rankings com código nunca entram com ativo no texto (o script para com erro).
 # Roda no dia 2 de cada mês, depois dos jobs diários de Top 15, e sob demanda.
 
