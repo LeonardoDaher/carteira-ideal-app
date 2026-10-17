@@ -1,7 +1,7 @@
-# Atualiza nos dias úteis os dados do Simule Opções: séries de calls e puts dos 25 ativos com mais volume de opções,
-# com strike, vencimento e prêmio de fechamento.
+# Atualiza nos dias úteis os dados do Simule Opções: todas as séries de opções de ações e ETFs que negociaram nos últimos 5 pregões,
+# com estilo (americana ou europeia), strike, vencimento, último preço e variação.
 #
-# Fonte: COTAHIST diário da B3 (série histórica oficial), sem cota e sem secret.
+# Fontes: cadastro de instrumentos e COTAHIST diário da B3, ambos oficiais, sem cota e sem secret.
 #
 # Segunda a sexta às 22h15 de Brasília (01h15 UTC do dia seguinte), depois do job de ETFs (22h): o arquivo do dia sai
 # por volta das 19h. Se o script achar algo errado (poucos ativos, ativos de controle ausentes, série inválida), o job
@@ -13,7 +13,12 @@ name: Atualizar Opções
 on:
   schedule:
     - cron: '15 1 * * 2-6' # terça a sábado, 01h15 UTC = segunda a sexta, 22h15 de Brasília
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      forcar:
+        description: 'Refazer o pregão mesmo já processado (confere o download do cadastro)'
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -30,7 +35,9 @@ jobs:
           node-version: 22
           cache: npm
 
-      - name: Baixar o COTAHIST da B3 e gerar opcoes.json
+      - name: Baixar o cadastro e o COTAHIST da B3 e gerar opcoes.json
+        env:
+          FORCAR: ${{ inputs.forcar && '1' || '' }}
         run: node scripts/atualizar-opcoes.mjs
 
       - name: Conferir se o site compila com os dados novos
@@ -40,13 +47,13 @@ jobs:
 
       - name: Publicar (commit) se houver mudança
         run: |
-          if [ -z "$(git status --porcelain webapp-src/src/data/opcoes.json)" ]; then
+          if [ -z "$(git status --porcelain webapp-src/public/dados/opcoes.json)" ]; then
             echo "Sem mudanças nos dados."
             exit 0
           fi
           git config user.name "${{ vars.COMMIT_AUTOR_NOME || 'github-actions[bot]' }}"
           git config user.email "${{ vars.COMMIT_AUTOR_EMAIL || '41898283+github-actions[bot]@users.noreply.github.com' }}"
-          git add webapp-src/src/data/opcoes.json
+          git add webapp-src/public/dados/opcoes.json
           git commit -m "dados: Opções ($(date -u +%Y-%m-%d))"
           git pull --rebase
           git push

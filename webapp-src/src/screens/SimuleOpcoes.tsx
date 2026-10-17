@@ -1,15 +1,15 @@
-import { useId, useMemo, useState } from 'react'
-import { SNAPSHOT_OPCOES } from '../data/snapshotOpcoes'
+import { useEffect, useId, useMemo, useState } from 'react'
 import { SNAPSHOT_MERCADO } from '../data/snapshotMercado'
 import {
-  FILTRO_VAZIO, diasAte, faixaPerto, filtrarSeries, limitesDeStrike, moneyness, vencimentosDe,
+  FILTRO_VAZIO, buscarAtivos, diasUteis, expandirSnapshot, faixaPerto, filtrarSeries, limitesDeStrike, montarLinha,
+  ordenarLinhas, vencimentosDe,
 } from '../domain/opcoes'
-import type { AtivoComOpcoes, FiltroSeries, FiltroTipo, SerieOpcao, SnapshotOpcoes } from '../domain/opcoes'
+import type { AtivoComOpcoes, ChaveOrdem, FiltroEstilo, FiltroSeries, FiltroTipo, LinhaOpcao, Ordem, SerieOpcao, SnapshotOpcoes } from '../domain/opcoes'
 import {
-  ESTRATEGIAS, analisar, curva, custoDeMontagem, faixaDoGrafico, gregasDaPosicao, montarPosicao, resultadoAntesDoVencimento,
-  resultadoNoVencimento, validarEntrada, volatilidadeImplicita,
+  DIAS_UTEIS_ANO, ESTRATEGIAS, analisar, curva, custoDeMontagem, faixaDoGrafico, gregasDaPosicao, montarPosicao,
+  resultadoAntesDoVencimento, resultadoNoVencimento, validarEntrada, volatilidadeImplicita,
 } from '../domain/simulaOpcoes'
-import type { EntradaEstrategia, EstrategiaId } from '../domain/simulaOpcoes'
+import type { EntradaEstrategia, EstrategiaId, Lado, Perna, Posicao } from '../domain/simulaOpcoes'
 import { formatarData, formatarVolume } from '../domain/rendaFii'
 import { reais } from '../domain/mercadoOficial'
 import { VoltarInicio } from '../ui/VoltarInicio'
@@ -20,38 +20,72 @@ import { CampoNumero } from '../ui/CampoNumero'
 import { GraficoPayoff } from '../ui/GraficoPayoff'
 import type { AppCtx } from '../state/useAppState'
 
-const LIMITE_LINHAS = 40
+const LINHAS_POR_PAGINA = 100
 const ATALHOS_PERTO = [5, 10, 20] as const
-const rotuloTipo = (t: 'call' | 'put') => (t === 'call' ? 'Call' : 'Put')
-const rotuloSituacao = { dentro: 'dentro do dinheiro', no: 'no dinheiro', fora: 'fora do dinheiro' } as const
-
-/** Dados para abrir o simulador de estratégias já preenchido com uma série real. */
-interface Preenchimento {
-  ativo: AtivoComOpcoes
-  serie: SerieOpcao
-  dias: number
-  /** Próxima série do mesmo tipo e vencimento, de strike maior: dá o outro lado das travas. */
-  proxima: SerieOpcao | null
-}
-
+const MAIS_NEGOCIADOS = 12
 const jurosPadrao = () => SNAPSHOT_MERCADO.indicadores?.selicMeta?.valor ?? 14
 
+const num = (v: number | null, casas = 2) => (v === null ? '—' : v.toLocaleString('pt-BR', { minimumFractionDigits: casas, maximumFractionDigits: casas }))
+const dinheiro = (v: number) => (v < 0 ? `−${reais(-v)}` : reais(v))
+const dataCurta = (iso: string) => `${iso.slice(8, 10)}/${iso.slice(5, 7)}`
+const rotuloTipo = (t: 'call' | 'put') => (t === 'call' ? 'CALL' : 'PUT')
+
+/** Séries escolhidas na tabela, levadas ao simulador de estratégias. */
+interface EscolhaDeSeries {
+  ativo: AtivoComOpcoes
+  series: SerieOpcao[]
+}
+
+type EstadoDados = { tipo: 'carregando' } | { tipo: 'erro' } | { tipo: 'pronto'; dados: SnapshotOpcoes }
+
+/** Carrega o arquivo de séries (dados/opcoes.json, publicado pelo job diário). Nos testes, os dados vêm por prop. */
+function useSnapshot(injetado?: SnapshotOpcoes): [EstadoDados, () => void] {
+  const [estado, setEstado] = useState<EstadoDados>(injetado ? { tipo: 'pronto', dados: injetado } : { tipo: 'carregando' })
+  const [tentativa, setTentativa] = useState(0)
+
+  useEffect(() => {
+    if (injetado) return
+    let vivo = true
+    fetch(new URL('dados/opcoes.json', document.baseURI))
+      .then((r) => {
+        if (!r.ok) throw new Error(String(r.status))
+        return r.json()
+      })
+      .then((json) => vivo && setEstado({ tipo: 'pronto', dados: expandirSnapshot(json) }))
+      .catch(() => vivo && setEstado({ tipo: 'erro' }))
+    return () => {
+      vivo = false
+    }
+  }, [injetado, tentativa])
+
+  return [
+    estado,
+    () => {
+      setEstado({ tipo: 'carregando' })
+      setTentativa((n) => n + 1)
+    },
+  ]
+}
+
 /**
- * Simule Opções. Duas abas: "Séries da B3" (calls e puts reais do último pregão, com filtro por tipo, vencimento e faixa
- * de strike) e "Estratégias" (payoff no vencimento, curva antes do vencimento e gregas). Tela descritiva, sem indicação
- * de operação: educacional.
+ * Simule Opções. Duas abas: "Séries da B3" (todas as opções de ações e ETFs com negócio nos últimos pregões, em tabela
+ * ordenável, com filtro por tipo, estilo, vencimentos e faixa de strike) e "Estratégias" (payoff no vencimento, curva
+ * antes do vencimento e gregas). Tela descritiva, sem indicação de operação: educacional.
  */
-export function SimuleOpcoes({ snapshot = SNAPSHOT_OPCOES }: {
+export function SimuleOpcoes({ snapshot }: {
   /** Recebido como as demais telas avulsas; esta tela só volta ao hub. */
   ctx: AppCtx
-  /** Permite injetar dados nos testes. No app, usa o arquivo gerado pelo job diário. */
+  /** Permite injetar dados nos testes. No app, vem do arquivo gerado pelo job diário. */
   snapshot?: SnapshotOpcoes
 }) {
+  const [estado, recarregar] = useSnapshot(snapshot)
   const [aba, setAba] = useState<'series' | 'estrategias'>('series')
-  const [pre, setPre] = useState<(Preenchimento & { n: number }) | null>(null)
+  const [escolha, setEscolha] = useState<(EscolhaDeSeries & { n: number }) | null>(null)
 
-  const simular = (p: Preenchimento) => {
-    setPre({ ...p, n: (pre?.n ?? 0) + 1 })
+  const dados = estado.tipo === 'pronto' ? estado.dados : null
+
+  const criarEstrategia = (e: EscolhaDeSeries) => {
+    setEscolha({ ...e, n: (escolha?.n ?? 0) + 1 })
     setAba('estrategias')
   }
 
@@ -79,20 +113,30 @@ export function SimuleOpcoes({ snapshot = SNAPSHOT_OPCOES }: {
         ] as const}
       >
         {aba === 'series' ? (
-          <SeriesDaB3 snapshot={snapshot} onSimular={simular} />
+          estado.tipo === 'pronto' ? (
+            <SeriesDaB3 snapshot={estado.dados} onCriar={criarEstrategia} />
+          ) : estado.tipo === 'carregando' ? (
+            <div className="card col" style={{ gap: 6 }} role="status">
+              <span style={{ fontWeight: 700 }}>Carregando as séries da B3…</span>
+            </div>
+          ) : (
+            <div className="card col" style={{ gap: 8 }} role="alert">
+              <span style={{ fontWeight: 700 }}>Não consegui carregar as séries agora.</span>
+              <span className="muted small justify">Confira a conexão e tente de novo.</span>
+              <button className="chip" onClick={recarregar} style={{ alignSelf: 'flex-start' }}>Tentar de novo</button>
+            </div>
+          )
         ) : (
-          <Estrategias key={pre?.n ?? 0} pre={pre} dataPregao={snapshot.dataPregao} />
+          <Estrategias key={escolha?.n ?? 0} escolha={escolha} dataPregao={dados?.dataPregao ?? null} />
         )}
       </AbasDaTela>
 
       <div className="card-outline small muted justify" style={{ lineHeight: 1.5 }} role="note">
         <strong>Opções têm risco alto.</strong> Quem compra pode perder todo o prêmio pago; quem vende sem ter o ativo ou uma
-        trava pode perder muito mais do que recebeu. As contas ignoram corretagem, emolumentos, imposto de renda e margem de
-        garantia. O prêmio mostrado é o do último negócio do dia, que pode estar longe do preço atual de compra e venda.
-        Ter uma série na lista não é uma indicação de operação.
-        {snapshot.geradoEm && snapshot.dataPregao
-          ? ` Dados oficiais da B3 (COTAHIST) do pregão de ${formatarData(snapshot.dataPregao)}.`
-          : ''}
+        trava pode perder muito mais do que recebeu, e a B3 exige margem de garantia. As contas ignoram corretagem,
+        emolumentos e imposto de renda. O preço mostrado é o do último negócio de cada série, que pode estar longe do preço
+        atual de compra e venda. Ter uma série na lista não é uma indicação de operação.
+        {dados?.dataPregao ? ` Dados oficiais da B3 (cadastro de instrumentos e COTAHIST) até o pregão de ${formatarData(dados.dataPregao)}.` : ''}
       </div>
 
       <AvisoEducacional />
@@ -104,21 +148,9 @@ export function SimuleOpcoes({ snapshot = SNAPSHOT_OPCOES }: {
 // Aba 1: séries reais
 // ---------------------------------------------------------------------------------------
 
-function SeriesDaB3({ snapshot, onSimular }: { snapshot: SnapshotOpcoes; onSimular: (p: Preenchimento) => void }) {
+function SeriesDaB3({ snapshot, onCriar }: { snapshot: SnapshotOpcoes; onCriar: (e: EscolhaDeSeries) => void }) {
   const [ticker, setTicker] = useState(snapshot.ativos[0]?.ticker ?? '')
-  const [filtro, setFiltro] = useState<FiltroSeries>(FILTRO_VAZIO)
-  const [mostrarTodas, setMostrarTodas] = useState(false)
-  const idVenc = useId()
-
   const ativo = snapshot.ativos.find((a) => a.ticker === ticker) ?? snapshot.ativos[0]
-
-  const vencimentos = useMemo(() => (ativo ? vencimentosDe(ativo.series) : []), [ativo])
-  const limites = useMemo(() => (ativo ? limitesDeStrike(ativo.series) : null), [ativo])
-  const invertida = filtro.strikeMin !== null && filtro.strikeMax !== null && filtro.strikeMin > filtro.strikeMax
-  const filtradas = useMemo(
-    () => (ativo && !invertida ? filtrarSeries(ativo.series, filtro) : []),
-    [ativo, filtro, invertida],
-  )
 
   if (!ativo) {
     return (
@@ -128,54 +160,157 @@ function SeriesDaB3({ snapshot, onSimular }: { snapshot: SnapshotOpcoes; onSimul
       </div>
     )
   }
+  // `key` zera filtros, ordem e seleção ao trocar de ativo.
+  return (
+    <>
+      <EscolhaDeAtivo snapshot={snapshot} ativo={ativo} onEscolher={setTicker} />
+      <TabelaDoAtivo key={ativo.ticker} snapshot={snapshot} ativo={ativo} onCriar={onCriar} />
+    </>
+  )
+}
 
-  const trocarAtivo = (t: string) => {
-    setTicker(t)
-    setFiltro(FILTRO_VAZIO)
-    setMostrarTodas(false)
+function EscolhaDeAtivo({ snapshot, ativo, onEscolher }: { snapshot: SnapshotOpcoes; ativo: AtivoComOpcoes; onEscolher: (t: string) => void }) {
+  const [termo, setTermo] = useState('')
+  const idResultados = useId()
+  const resultados = buscarAtivos(snapshot.ativos, termo)
+  const buscando = termo.trim().length >= 1
+  const maisNegociados = snapshot.ativos.slice(0, MAIS_NEGOCIADOS)
+
+  const escolher = (a: AtivoComOpcoes) => {
+    onEscolher(a.ticker)
+    setTermo('')
   }
+
+  return (
+    <div className="col" style={{ gap: 8 }}>
+      <span className="small" style={{ fontWeight: 600 }}>Ativo</span>
+      <input
+        type="search"
+        className="busca-fii"
+        placeholder={`Buscar entre ${snapshot.ativos.length} ativos, ex.: PETR4`}
+        aria-label="Buscar ativo por código ou nome"
+        aria-controls={idResultados}
+        autoCapitalize="characters"
+        autoCorrect="off"
+        spellCheck={false}
+        enterKeyHint="search"
+        value={termo}
+        onChange={(ev) => setTermo(ev.target.value.slice(0, 40))}
+        onKeyDown={(ev) => {
+          if (ev.key === 'Enter' && resultados[0]) {
+            ev.preventDefault()
+            escolher(resultados[0])
+          }
+          if (ev.key === 'Escape') setTermo('')
+        }}
+      />
+      <div id={idResultados} aria-live="polite">
+        {buscando && resultados.length > 0 && (
+          <ul className="resultados-busca" aria-label="Ativos encontrados">
+            {resultados.map((a) => (
+              <li key={a.ticker}>
+                <button className="resultado-busca" onClick={() => escolher(a)}>
+                  <span style={{ fontWeight: 700 }}>{a.ticker}</span>
+                  <span className="tiny muted resultado-nome">{a.nome}, {a.series.length} séries</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+        {buscando && resultados.length === 0 && (
+          <div className="card-outline small justify" style={{ lineHeight: 1.5 }} role="status">
+            <strong>Nenhum ativo com opções encontrado para “{termo.trim()}”.</strong>{' '}
+            <span className="muted">Confira o código (ex.: PETR4, VALE3, BOVA11). Só aparecem ativos com opções negociadas nos últimos pregões.</span>
+          </div>
+        )}
+      </div>
+
+      <div className="grade-tickers" role="group" aria-label="Ativos mais negociados em opções">
+        {[...maisNegociados, ...(maisNegociados.some((a) => a.ticker === ativo.ticker) ? [] : [ativo])].map((a) => (
+          <button
+            key={a.ticker}
+            className={`chip ${a.ticker === ativo.ticker ? 'selected' : ''}`}
+            aria-pressed={a.ticker === ativo.ticker}
+            onClick={() => onEscolher(a.ticker)}
+          >
+            {a.ticker}
+          </button>
+        ))}
+      </div>
+      <div className="tiny muted">
+        {ativo.ticker}: {reais(ativo.cotacao)} no fechamento. Opções negociam {formatarVolume(ativo.volumeOpcoes)} por dia ({ativo.series.length} séries com negócio nos últimos pregões).
+      </div>
+    </div>
+  )
+}
+
+const COLUNAS: { chave: ChaveOrdem; titulo: string; ajuda?: string }[] = [
+  { chave: 'codigo', titulo: 'Ticker' },
+  { chave: 'tipo', titulo: 'Tipo' },
+  { chave: 'estilo', titulo: 'Mod.', ajuda: 'A = americana (exercício a qualquer momento), E = europeia (só no vencimento)' },
+  { chave: 'strike', titulo: 'Strike' },
+  { chave: 'situacao', titulo: 'A/I/OTM', ajuda: 'ATM no dinheiro, ITM dentro do dinheiro, OTM fora do dinheiro' },
+  { chave: 'distanciaStrike', titulo: 'Dist. (%) do strike', ajuda: 'Strike em relação ao preço do ativo' },
+  { chave: 'ultimo', titulo: 'Último' },
+  { chave: 'variacao', titulo: 'Var. (%)', ajuda: 'Contra o fechamento anterior da série, quando ela negociou antes' },
+  { chave: 'dataUltimo', titulo: 'Data' },
+  { chave: 'negocios', titulo: 'Núm. de neg.' },
+  { chave: 'volume', titulo: 'Vol. financeiro' },
+  { chave: 'volImplicita', titulo: 'Vol. impl. (%)', ajuda: 'Volatilidade implícita no último preço, por Black-Scholes (estimativa nossa)' },
+  { chave: 'delta', titulo: 'Delta' },
+  { chave: 'gama', titulo: 'Gama' },
+  { chave: 'tetaReais', titulo: 'Teta ($)', ajuda: 'Valor que a opção perde por dia útil, com o resto igual' },
+  { chave: 'tetaPct', titulo: 'Teta (%)' },
+]
+
+const corVar = (v: number | null) => (v === null || v === 0 ? undefined : v > 0 ? 'var(--mc-pos)' : 'var(--danger)')
+
+function TabelaDoAtivo({ snapshot, ativo, onCriar }: { snapshot: SnapshotOpcoes; ativo: AtivoComOpcoes; onCriar: (e: EscolhaDeSeries) => void }) {
+  const hoje = snapshot.dataPregao ?? new Date().toISOString().slice(0, 10)
+  const vencimentos = useMemo(() => vencimentosDe(ativo.series), [ativo])
+  const limites = useMemo(() => limitesDeStrike(ativo.series), [ativo])
+  const [filtro, setFiltro] = useState<FiltroSeries>({ ...FILTRO_VAZIO, vencimentos: vencimentos.slice(0, 1) })
+  const [ordem, setOrdem] = useState<Ordem>({ chave: 'strike', direcao: 'asc' })
+  const [selecionadas, setSelecionadas] = useState<string[]>([])
+  const [mostradas, setMostradas] = useState(LINHAS_POR_PAGINA)
+  const idEstilo = useId()
+
+  const invertida = filtro.strikeMin !== null && filtro.strikeMax !== null && filtro.strikeMin > filtro.strikeMax
+  const filtradas = useMemo(
+    () => (invertida ? [] : filtrarSeries(ativo.series, filtro, snapshot.dataPregao)),
+    [ativo, filtro, invertida, snapshot.dataPregao],
+  )
+  const juros = jurosPadrao()
+  const linhas = useMemo(() => {
+    const calculadas = filtradas.map((s) => montarLinha(s, ativo.cotacao, hoje, juros))
+    return ordenarLinhas(calculadas, ordem)
+  }, [filtradas, ativo.cotacao, hoje, juros, ordem])
+
   const mudar = (parcial: Partial<FiltroSeries>) => {
     setFiltro((f) => ({ ...f, ...parcial }))
-    setMostrarTodas(false)
+    setMostradas(LINHAS_POR_PAGINA)
   }
+  const alternarVencimento = (v: string) =>
+    mudar({ vencimentos: filtro.vencimentos.includes(v) ? filtro.vencimentos.filter((x) => x !== v) : [...filtro.vencimentos, v].sort() })
   const perto = (pct: number) => mudar(faixaPerto(ativo.cotacao, pct))
   const faixaAtiva = (pct: number) => {
     const f = faixaPerto(ativo.cotacao, pct)
     return filtro.strikeMin === f.strikeMin && filtro.strikeMax === f.strikeMax
   }
-  const temFiltroDeStrike = filtro.strikeMin !== null || filtro.strikeMax !== null
+  const ordenarPor = (chave: ChaveOrdem) =>
+    setOrdem((o) => (o.chave === chave ? { chave, direcao: o.direcao === 'asc' ? 'desc' : 'asc' } : { chave, direcao: 'asc' }))
+  const alternarSelecao = (codigo: string) =>
+    setSelecionadas((s) => (s.includes(codigo) ? s.filter((c) => c !== codigo) : [...s, codigo]))
+  const escolhidas = ativo.series.filter((s) => selecionadas.includes(s.codigo))
+  const temFiltro =
+    filtro.tipo !== 'todas' || filtro.estilo !== 'todos' || filtro.strikeMin !== null || filtro.strikeMax !== null ||
+    filtro.soUltimoPregao || filtro.vencimentos.length !== 1 || filtro.vencimentos[0] !== vencimentos[0]
 
-  const visiveis = mostrarTodas ? filtradas : filtradas.slice(0, LIMITE_LINHAS)
-
-  const simular = (serie: SerieOpcao) => {
-    const proxima = ativo.series
-      .filter((s) => s.tipo === serie.tipo && s.vencimento === serie.vencimento && s.strike > serie.strike)
-      .sort((a, b) => a.strike - b.strike)[0] ?? null
-    onSimular({ ativo, serie, dias: Math.max(diasAte(serie.vencimento, snapshot.dataPregao ?? serie.vencimento), 1), proxima })
-  }
+  const visiveis = linhas.slice(0, mostradas)
 
   return (
     <>
-      <div className="col" style={{ gap: 8 }}>
-        <span className="small" style={{ fontWeight: 600 }}>Ativo</span>
-        <div className="grade-tickers" role="group" aria-label="Ativos com opções">
-          {snapshot.ativos.map((a) => (
-            <button
-              key={a.ticker}
-              className={`chip ${a.ticker === ativo.ticker ? 'selected' : ''}`}
-              aria-pressed={a.ticker === ativo.ticker}
-              onClick={() => trocarAtivo(a.ticker)}
-            >
-              {a.ticker}
-            </button>
-          ))}
-        </div>
-        <div className="tiny muted">
-          {ativo.ticker}: {reais(ativo.cotacao)} no fechamento. Opções negociam {formatarVolume(ativo.volumeOpcoes)} por dia.
-        </div>
-      </div>
-
-      <div className="card col" style={{ gap: 12 }} aria-label="Filtros das séries">
+      <div className="card col" style={{ gap: 12 }} role="group" aria-label="Filtros das séries">
         <span style={{ fontWeight: 700 }}>Filtros</span>
 
         <div className="row" style={{ gap: 6, flexWrap: 'wrap' }} role="group" aria-label="Tipo de opção">
@@ -186,15 +321,36 @@ function SeriesDaB3({ snapshot, onSimular }: { snapshot: SnapshotOpcoes; onSimul
           ))}
         </div>
 
-        <div className="col" style={{ gap: 4 }}>
-          <label htmlFor={idVenc} className="small" style={{ fontWeight: 600 }}>Vencimento</label>
-          <select id={idVenc} className="input-cotas" value={filtro.vencimento} onChange={(e) => mudar({ vencimento: e.target.value })}>
-            <option value="">Todos os vencimentos</option>
-            {vencimentos.map((v) => (
-              <option key={v} value={v}>{formatarData(v)}</option>
+        <div className="col" style={{ gap: 6 }}>
+          <span id={idEstilo} className="small" style={{ fontWeight: 600 }}>Modelo (exercício)</span>
+          <div className="row" style={{ gap: 6, flexWrap: 'wrap' }} role="group" aria-labelledby={idEstilo}>
+            {([['todos', 'Todas'], ['americana', 'Americanas'], ['europeia', 'Europeias']] as [FiltroEstilo, string][]).map(([v, nome]) => (
+              <button key={v} className={`chip ${filtro.estilo === v ? 'selected' : ''}`} aria-pressed={filtro.estilo === v} onClick={() => mudar({ estilo: v })}>
+                {nome}
+              </button>
             ))}
-          </select>
+          </div>
+          <span className="tiny muted">Americana pode ser exercida a qualquer momento até o vencimento; europeia, só no vencimento.</span>
         </div>
+
+        <fieldset className="col" style={{ gap: 6, border: 'none', padding: 0, margin: 0 }}>
+          <legend className="small" style={{ fontWeight: 600, padding: 0, marginBottom: 6 }}>Vencimentos</legend>
+          <div className="row" style={{ gap: 6, flexWrap: 'wrap' }}>
+            {vencimentos.map((v) => {
+              const marcado = filtro.vencimentos.includes(v)
+              return (
+                <label key={v} className={`chip ${marcado ? 'selected' : ''}`} style={{ cursor: 'pointer', display: 'inline-flex', gap: 6, alignItems: 'center' }}>
+                  <input type="checkbox" checked={marcado} onChange={() => alternarVencimento(v)} style={{ accentColor: 'currentColor' }} />
+                  {formatarData(v)} ({diasUteis(v, hoje)} d.u.)
+                </label>
+              )
+            })}
+          </div>
+          <div className="row" style={{ gap: 6, flexWrap: 'wrap' }}>
+            <button className="chip" onClick={() => mudar({ vencimentos: [...vencimentos] })}>Todos os vencimentos</button>
+            <button className="chip" onClick={() => mudar({ vencimentos: [] })}>Nenhum (mostra todos)</button>
+          </div>
+        </fieldset>
 
         <div className="col" style={{ gap: 8 }}>
           <span className="small" style={{ fontWeight: 600 }}>Faixa de strike</span>
@@ -222,65 +378,123 @@ function SeriesDaB3({ snapshot, onSimular }: { snapshot: SnapshotOpcoes; onSimul
                 Perto do preço (±{pct}%)
               </button>
             ))}
-            {(temFiltroDeStrike || filtro.tipo !== 'todas' || filtro.vencimento) && (
-              <button className="chip" onClick={() => { setFiltro(FILTRO_VAZIO); setMostrarTodas(false) }}>Limpar filtros</button>
+            {(filtro.strikeMin !== null || filtro.strikeMax !== null) && (
+              <button className="chip" onClick={() => mudar({ strikeMin: null, strikeMax: null })}>Sem limite de strike</button>
             )}
           </div>
           {limites && (
             <span className="tiny muted">Strikes disponíveis para {ativo.ticker}: de {reais(limites.min)} a {reais(limites.max)}.</span>
           )}
         </div>
+
+        <label className="small" style={{ display: 'flex', gap: 8, alignItems: 'center', cursor: 'pointer' }}>
+          <input type="checkbox" checked={filtro.soUltimoPregao} onChange={(ev) => mudar({ soUltimoPregao: ev.target.checked })} />
+          Só séries que negociaram no último pregão
+        </label>
+
+        {temFiltro && (
+          <button className="chip" style={{ alignSelf: 'flex-start' }} onClick={() => { setFiltro({ ...FILTRO_VAZIO, vencimentos: vencimentos.slice(0, 1) }); setMostradas(LINHAS_POR_PAGINA) }}>
+            Limpar filtros
+          </button>
+        )}
       </div>
 
-      <div className="col" style={{ gap: 6 }} aria-live="polite">
-        <span className="small" style={{ fontWeight: 600 }}>
-          {invertida
-            ? 'O strike mínimo é maior que o máximo.'
-            : `${filtradas.length} ${filtradas.length === 1 ? 'série' : 'séries'} de ${ativo.ticker}`}
-        </span>
+      <div className="col" style={{ gap: 8 }}>
+        <div className="row-between" style={{ alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          <span className="small" style={{ fontWeight: 600 }} aria-live="polite">
+            {invertida
+              ? 'O strike mínimo é maior que o máximo.'
+              : `${linhas.length} ${linhas.length === 1 ? 'série' : 'séries'} de ${ativo.ticker}, de um total de ${ativo.series.length}`}
+          </span>
+          <div className="row" style={{ gap: 6, flexWrap: 'wrap' }}>
+            {selecionadas.length > 0 && <button className="chip" onClick={() => setSelecionadas([])}>Limpar seleção</button>}
+            <button
+              className="chip selected"
+              disabled={escolhidas.length === 0}
+              onClick={() => onCriar({ ativo, series: escolhidas })}
+            >
+              Criar estratégia com as selecionadas ({escolhidas.length})
+            </button>
+          </div>
+        </div>
 
-        {!invertida && filtradas.length === 0 && (
+        {!invertida && linhas.length === 0 && (
           <div className="card-outline small justify" style={{ lineHeight: 1.5 }} role="status">
-            <strong>Nenhuma série nessa faixa.</strong>{' '}
-            <span className="muted">Só entram séries com negócios no último pregão. Amplie a faixa de strike ou escolha outro vencimento.</span>
+            <strong>Nenhuma série nessa combinação de filtros.</strong>{' '}
+            <span className="muted">Amplie a faixa de strike, escolha outros vencimentos ou desmarque “só o último pregão”.</span>
           </div>
         )}
 
         {visiveis.length > 0 && (
-          <div className="col" style={{ gap: 0 }}>
-            {visiveis.map((s) => (
-              <LinhaSerie key={s.codigo} serie={s} cotacao={ativo.cotacao} onSimular={() => simular(s)} />
-            ))}
+          <div style={{ overflowX: 'auto' }} className="card-outline">
+            <table className="tabela-opcoes small">
+              <thead>
+                <tr>
+                  <th scope="col"><span className="sr-only">Selecionar</span></th>
+                  {COLUNAS.map((c) => (
+                    <th
+                      key={c.chave}
+                      scope="col"
+                      aria-sort={ordem.chave === c.chave ? (ordem.direcao === 'asc' ? 'ascending' : 'descending') : 'none'}
+                      title={c.ajuda}
+                    >
+                      <button onClick={() => ordenarPor(c.chave)} className="th-ordenar">
+                        {c.titulo}
+                        <span aria-hidden="true">{ordem.chave === c.chave ? (ordem.direcao === 'asc' ? ' ▲' : ' ▼') : ''}</span>
+                      </button>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {visiveis.map((l) => (
+                  <LinhaDaTabela key={l.codigo} l={l} dataPregao={snapshot.dataPregao} marcada={selecionadas.includes(l.codigo)} onAlternar={() => alternarSelecao(l.codigo)} />
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
 
-        {!mostrarTodas && filtradas.length > LIMITE_LINHAS && (
-          <button className="chip" onClick={() => setMostrarTodas(true)}>
-            Mostrar as {filtradas.length - LIMITE_LINHAS} restantes
+        {linhas.length > mostradas && (
+          <button className="chip" onClick={() => setMostradas((m) => m + LINHAS_POR_PAGINA)}>
+            Mostrar mais ({linhas.length - mostradas} restantes)
           </button>
         )}
+
+        <span className="tiny muted justify">
+          Vol. implícita, delta, gama e teta são estimativas nossas por Black-Scholes (juro de {num(jurosPadrao(), 2)}% ao ano, dias úteis/{DIAS_UTEIS_ANO}), a
+          partir do último preço da série. Outras plataformas usam outros modelos e o preço do ativo na hora do negócio, então os números podem
+          diferir. Séries sem negócio no último pregão mostram o preço do último dia em que negociaram.
+        </span>
       </div>
     </>
   )
 }
 
-function LinhaSerie({ serie, cotacao, onSimular }: { serie: SerieOpcao; cotacao: number; onSimular: () => void }) {
-  const situacao = moneyness(serie.tipo, serie.strike, cotacao)
+function LinhaDaTabela({ l, dataPregao, marcada, onAlternar }: { l: LinhaOpcao; dataPregao: string | null; marcada: boolean; onAlternar: () => void }) {
+  const antiga = dataPregao !== null && l.dataUltimo !== dataPregao
   return (
-    <div className="tabela-bdr small" style={{ gridTemplateColumns: 'minmax(0, 1fr) auto', alignItems: 'center', gap: 8 }} data-testid="serie-opcao">
-      <span className="col" style={{ gap: 1, minWidth: 0 }}>
-        <span>
-          <strong>{serie.codigo}</strong> <span className="muted">{rotuloTipo(serie.tipo)}, strike</span> <strong>{reais(serie.strike)}</strong>
-        </span>
-        <span className="tiny muted">
-          vence {formatarData(serie.vencimento)}, {rotuloSituacao[situacao]}, {serie.negocios} negócios
-        </span>
-        <span className="tiny">
-          Prêmio <strong>{reais(serie.premio)}</strong>
-        </span>
-      </span>
-      <button className="chip" onClick={onSimular} aria-label={`Simular estratégia com ${serie.codigo}`}>Simular</button>
-    </div>
+    <tr data-testid="serie-opcao" className={marcada ? 'linha-marcada' : undefined}>
+      <td>
+        <input type="checkbox" checked={marcada} onChange={onAlternar} aria-label={`Selecionar ${l.codigo}`} />
+      </td>
+      <td style={{ fontWeight: 700 }}>{l.codigo}</td>
+      <td>{rotuloTipo(l.tipo)}</td>
+      <td>{l.estilo === 'americana' ? 'A' : 'E'}</td>
+      <td className="num">{num(l.strike)}</td>
+      <td>{l.situacao}</td>
+      <td className="num">{num(l.distanciaStrike)}</td>
+      <td className="num">{num(l.ultimo)}</td>
+      <td className="num" style={{ color: corVar(l.variacao) }}>{l.variacao === null ? '—' : `${l.variacao > 0 ? '+' : ''}${num(l.variacao)}`}</td>
+      <td className={antiga ? 'muted' : undefined} title={antiga ? 'Não negociou no último pregão' : undefined}>{dataCurta(l.dataUltimo)}</td>
+      <td className="num">{l.negocios.toLocaleString('pt-BR')}</td>
+      <td className="num">{num(l.volume)}</td>
+      <td className="num">{num(l.volImplicita, 1)}</td>
+      <td className="num">{num(l.delta, 4)}</td>
+      <td className="num">{num(l.gama, 4)}</td>
+      <td className="num">{num(l.tetaReais, 4)}</td>
+      <td className="num">{num(l.tetaPct, 2)}</td>
+    </tr>
   )
 }
 
@@ -290,100 +504,155 @@ function LinhaSerie({ serie, cotacao, onSimular }: { serie: SerieOpcao; cotacao:
 
 const DEFAULT: EntradaEstrategia = { estrategia: 'compraCall', precoAtivo: 30, strikeBaixo: 30, premioBaixo: 1.5, strikeAlto: 33, premioAlto: 0.6, quantidade: 100 }
 
-const infoEstrategia = (id: EstrategiaId) => ESTRATEGIAS.find((e) => e.id === id)!
-
-function entradaInicial(pre: Preenchimento | null): EntradaEstrategia {
-  if (!pre) return DEFAULT
-  const { ativo, serie, proxima } = pre
-  const alto = proxima ?? { strike: Math.round(serie.strike * 1.1 * 100) / 100, premio: Math.max(Math.round(serie.premio * 0.5 * 100) / 100, 0.01) }
-  return {
-    estrategia: serie.tipo === 'call' ? 'compraCall' : 'compraPut',
-    precoAtivo: ativo.cotacao,
-    strikeBaixo: serie.strike,
-    premioBaixo: serie.premio,
-    strikeAlto: alto.strike,
-    premioAlto: alto.premio,
-    quantidade: 100,
-  }
+/** Uma série escolhida na tabela, com os campos que o usuário pode mexer no simulador. */
+interface PernaEditavel {
+  codigo: string
+  tipo: 'call' | 'put'
+  strike: number
+  vencimento: string
+  premio: number
+  lado: Lado
+  quantidade: number
 }
 
-function Estrategias({ pre, dataPregao }: { pre: Preenchimento | null; dataPregao: string | null }) {
-  const [e, setE] = useState<EntradaEstrategia>(() => entradaInicial(pre))
-  const [dias, setDias] = useState(pre?.dias ?? 30)
-  const [juros, setJuros] = useState(jurosPadrao)
-  const [vol, setVol] = useState(() => {
-    if (!pre) return 35
-    const v = volatilidadeImplicita(
-      { tipo: pre.serie.tipo, s: pre.ativo.cotacao, strike: pre.serie.strike, t: Math.max(pre.dias, 1) / 365, r: Math.log(1 + jurosPadrao() / 100) },
-      pre.serie.premio,
-    )
-    return v ? Math.round(v * 1000) / 10 : 35
+function Estrategias({ escolha, dataPregao }: { escolha: EscolhaDeSeries | null; dataPregao: string | null }) {
+  const hoje = dataPregao ?? new Date().toISOString().slice(0, 10)
+  const [modo, setModo] = useState<'padrao' | 'escolhidas'>(escolha ? 'escolhidas' : 'padrao')
+  const [e, setE] = useState<EntradaEstrategia>(() => (escolha ? { ...DEFAULT, precoAtivo: escolha.ativo.cotacao } : DEFAULT))
+  const [pernas, setPernas] = useState<PernaEditavel[]>(() =>
+    (escolha?.series ?? []).map((s) => ({ codigo: s.codigo, tipo: s.tipo, strike: s.strike, vencimento: s.vencimento, premio: s.ultimo, lado: 'compra', quantidade: 100 })),
+  )
+  const [dias, setDias] = useState(() => {
+    const v = escolha?.series[0]?.vencimento
+    return v ? Math.max(diasUteis(v, hoje), 1) : 21
   })
+  const [juros, setJuros] = useState(jurosPadrao)
+  const [vol, setVol] = useState(35)
   const [diasPassados, setDiasPassados] = useState(0)
 
-  const info = infoEstrategia(e.estrategia)
+  const info = ESTRATEGIAS.find((x) => x.id === e.estrategia)!
   const mudar = (parcial: Partial<EntradaEstrategia>) => setE((x) => ({ ...x, ...parcial }))
-  const erro = validarEntrada(e)
+  const mudarPerna = (i: number, parcial: Partial<PernaEditavel>) => setPernas((p) => p.map((x, j) => (j === i ? { ...x, ...parcial } : x)))
+  const escolhidas = modo === 'escolhidas' && pernas.length > 0
+
+  const vencimentosDasPernas = [...new Set(pernas.map((p) => p.vencimento))]
+  const erro = escolhidas
+    ? vencimentosDasPernas.length > 1
+      ? 'As séries escolhidas têm vencimentos diferentes. Volte à tabela e escolha séries do mesmo vencimento.'
+      : pernas.some((p) => !(p.quantidade > 0))
+        ? 'Informe a quantidade de todas as séries.'
+        : !(e.precoAtivo > 0)
+          ? 'Informe o preço do ativo.'
+          : null
+    : validarEntrada(e)
 
   const r = Math.log(1 + juros / 100)
   const mercado = { dias: Math.max(dias, 0), r, sigma: vol / 100 }
   const passados = Math.min(diasPassados, mercado.dias)
 
+  const posicao: Posicao | null = useMemo(() => {
+    if (erro) return null
+    if (escolhidas) {
+      const lista: Perna[] = pernas.map((p) => ({ tipo: p.tipo, lado: p.lado, strike: p.strike, premio: p.premio, quantidade: p.quantidade }))
+      return { pernas: lista, acoes: 0, precoAcao: 0 }
+    }
+    return montarPosicao(e)
+  }, [erro, escolhidas, pernas, e])
+
   const volImplicita = useMemo(() => {
-    if (erro || dias <= 0) return null
-    const p = montarPosicao(e)
-    const perna = p.pernas[0]
-    const v = volatilidadeImplicita({ tipo: perna.tipo, s: e.precoAtivo, strike: perna.strike, t: dias / 365, r }, perna.premio)
+    if (!posicao || dias <= 0) return null
+    const perna = posicao.pernas[0]
+    const v = volatilidadeImplicita({ tipo: perna.tipo, s: e.precoAtivo, strike: perna.strike, t: dias / DIAS_UTEIS_ANO, r }, perna.premio)
     return v ? Math.round(v * 1000) / 10 : null
-  }, [e, erro, dias, r])
+  }, [posicao, dias, e.precoAtivo, r])
 
   const dados = useMemo(() => {
-    if (erro) return null
-    const posicao = montarPosicao(e)
+    if (!posicao) return null
     const faixa = faixaDoGrafico(posicao, e.precoAtivo)
     const analise = analisar(posicao)
+    const m = { dias: Math.max(dias, 0), r, sigma: vol / 100 }
+    const p = Math.min(diasPassados, m.dias)
     const noVenc = curva((s) => resultadoNoVencimento(posicao, s), faixa.min, faixa.max)
-    const antes = passados < mercado.dias && vol > 0
-      ? curva((s) => resultadoAntesDoVencimento(posicao, s, mercado, passados), faixa.min, faixa.max)
-      : null
-    const g = vol > 0 && mercado.dias - passados > 0 ? gregasDaPosicao(posicao, e.precoAtivo, mercado, passados) : null
+    const antes = p < m.dias && vol > 0 ? curva((s) => resultadoAntesDoVencimento(posicao, s, m, p), faixa.min, faixa.max) : null
+    const g = vol > 0 && m.dias - p > 0 ? gregasDaPosicao(posicao, e.precoAtivo, m, p) : null
     return {
-      posicao, analise, noVenc, antes, g,
+      analise, noVenc, antes, g,
       custo: custoDeMontagem(posicao),
-      hoje: antes ? resultadoAntesDoVencimento(posicao, e.precoAtivo, mercado, passados) : resultadoNoVencimento(posicao, e.precoAtivo),
+      hoje: antes ? resultadoAntesDoVencimento(posicao, e.precoAtivo, m, p) : resultadoNoVencimento(posicao, e.precoAtivo),
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [e, erro, passados, dias, juros, vol])
+  }, [posicao, e.precoAtivo, dias, r, vol, diasPassados])
 
+  const titulo = escolhidas ? 'Estratégia com as séries escolhidas' : info.titulo
+  const aviso = escolhidas
+    ? pernas.some((p) => p.lado === 'venda')
+      ? 'Há séries vendidas: a venda de opções sem cobertura pode ter perda muito maior que o prêmio recebido (na venda descoberta de call, sem limite), e a B3 exige margem de garantia.'
+      : null
+    : info.aviso ?? null
   const rotuloCurva = passados === 0 ? 'Hoje' : `Daqui a ${passados} ${passados === 1 ? 'dia' : 'dias'}`
-  const dinheiro = (v: number) => (v < 0 ? `−${reais(-v)}` : reais(v))
   const caixa = { padding: '10px 12px', borderRadius: 12, background: 'var(--surface2)' } as const
 
   return (
     <>
-      {pre && (
+      {escolha && (
         <div className="card-outline small justify" style={{ lineHeight: 1.5 }} role="note">
-          Preenchido com a série <strong>{pre.serie.codigo}</strong> ({rotuloTipo(pre.serie.tipo)}, strike {reais(pre.serie.strike)},
-          vencimento {formatarData(pre.serie.vencimento)}) do pregão de {dataPregao ? formatarData(dataPregao) : 'último dia'}. Você pode alterar qualquer campo.
+          Séries escolhidas de <strong>{escolha.ativo.ticker}</strong> ({pernas.map((p) => p.codigo).join(', ')}), com o último preço de cada uma.
+          Você pode trocar compra por venda, a quantidade e o preço de cada série.
         </div>
       )}
 
       <div className="col" style={{ gap: 8 }}>
         <span className="small" style={{ fontWeight: 600 }}>Estratégia</span>
         <div className="row" style={{ gap: 6, flexWrap: 'wrap' }} role="group" aria-label="Estratégia">
+          {pernas.length > 0 && (
+            <button className={`chip ${escolhidas ? 'selected' : ''}`} aria-pressed={escolhidas} onClick={() => { setModo('escolhidas'); setDiasPassados(0) }}>
+              Séries escolhidas ({pernas.length})
+            </button>
+          )}
           {ESTRATEGIAS.map((x) => (
-            <button key={x.id} className={`chip ${e.estrategia === x.id ? 'selected' : ''}`} aria-pressed={e.estrategia === x.id} onClick={() => { mudar({ estrategia: x.id }); setDiasPassados(0) }}>
+            <button
+              key={x.id}
+              className={`chip ${!escolhidas && e.estrategia === x.id ? 'selected' : ''}`}
+              aria-pressed={!escolhidas && e.estrategia === x.id}
+              onClick={() => { setModo('padrao'); mudar({ estrategia: x.id as EstrategiaId }); setDiasPassados(0) }}
+            >
               {x.titulo}
             </button>
           ))}
         </div>
-        <span className="small muted justify">{info.descricao}</span>
+        <span className="small muted justify">
+          {escolhidas ? 'Monte a posição série a série: cada uma pode ser comprada ou vendida.' : info.descricao}
+        </span>
       </div>
 
       <div className="card col" style={{ gap: 12 }}>
         <span style={{ fontWeight: 700 }}>Dados da operação</span>
         <CampoReais rotulo="Preço do ativo hoje" valor={e.precoAtivo} onMudar={(v) => mudar({ precoAtivo: v })} />
-        {info.doisStrikes ? (
+
+        {escolhidas ? (
+          <div className="col" style={{ gap: 12 }}>
+            {pernas.map((p, i) => (
+              <div key={p.codigo} className="card-outline col" style={{ gap: 8 }} role="group" aria-label={`Série ${p.codigo}`}>
+                <div className="row-between" style={{ alignItems: 'center', gap: 8 }}>
+                  <span>
+                    <strong>{p.codigo}</strong> <span className="muted small">{rotuloTipo(p.tipo)}, strike {num(p.strike)}, vence {formatarData(p.vencimento)}</span>
+                  </span>
+                  <button className="chip" onClick={() => setPernas((l) => l.filter((_, j) => j !== i))} aria-label={`Remover ${p.codigo}`}>Remover</button>
+                </div>
+                <div className="row" style={{ gap: 6 }} role="group" aria-label={`Lado de ${p.codigo}`}>
+                  {(['compra', 'venda'] as Lado[]).map((lado) => (
+                    <button key={lado} className={`chip ${p.lado === lado ? 'selected' : ''}`} aria-pressed={p.lado === lado} onClick={() => mudarPerna(i, { lado })}>
+                      {lado === 'compra' ? 'Comprar' : 'Vender'}
+                    </button>
+                  ))}
+                </div>
+                <div className="row" style={{ gap: 10, flexWrap: 'wrap' }}>
+                  <div style={{ flex: '1 1 130px' }}><CampoReais rotulo={`Preço de ${p.codigo}`} valor={p.premio} onMudar={(v) => mudarPerna(i, { premio: v })} /></div>
+                  <div style={{ flex: '1 1 130px' }}><CampoNumero rotulo={`Quantidade de ${p.codigo}`} valor={p.quantidade} onMudar={(v) => mudarPerna(i, { quantidade: v })} sufixo="opções" casas={0} /></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : info.doisStrikes ? (
           <>
             <div className="row" style={{ gap: 10, flexWrap: 'wrap' }}>
               <div style={{ flex: '1 1 130px' }}><CampoReais rotulo="Strike menor" valor={e.strikeBaixo} onMudar={(v) => mudar({ strikeBaixo: v })} /></div>
@@ -400,8 +669,11 @@ function Estrategias({ pre, dataPregao }: { pre: Preenchimento | null; dataPrega
             <div style={{ flex: '1 1 130px' }}><CampoReais rotulo="Prêmio por opção" valor={e.premioBaixo} onMudar={(v) => mudar({ premioBaixo: v })} /></div>
           </div>
         )}
-        <CampoNumero rotulo="Quantidade de opções" valor={e.quantidade} onMudar={(v) => mudar({ quantidade: v })} sufixo="opções" casas={0} dica="O lote padrão da B3 é de 100." />
-        <CampoNumero rotulo="Dias até o vencimento" valor={dias} onMudar={(v) => { setDias(v); setDiasPassados(0) }} sufixo="dias" casas={0} />
+
+        {!escolhidas && (
+          <CampoNumero rotulo="Quantidade de opções" valor={e.quantidade} onMudar={(v) => mudar({ quantidade: v })} sufixo="opções" casas={0} dica="O lote padrão das ações na B3 é de 100." />
+        )}
+        <CampoNumero rotulo="Dias úteis até o vencimento" valor={dias} onMudar={(v) => { setDias(v); setDiasPassados(0) }} sufixo="dias úteis" casas={0} />
 
         <details>
           <summary className="small" style={{ cursor: 'pointer', fontWeight: 600 }}>Volatilidade e juros (curva do tempo e gregas)</summary>
@@ -409,7 +681,7 @@ function Estrategias({ pre, dataPregao }: { pre: Preenchimento | null; dataPrega
             <CampoNumero rotulo="Volatilidade do ativo" valor={vol} onMudar={setVol} sufixo="% a.a." casas={1} />
             {volImplicita !== null && (
               <div className="row" style={{ gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-                <span className="tiny muted">Volatilidade implícita no prêmio digitado: <strong>{volImplicita.toLocaleString('pt-BR')}% a.a.</strong></span>
+                <span className="tiny muted">Volatilidade implícita no preço da primeira série: <strong>{volImplicita.toLocaleString('pt-BR')}% a.a.</strong></span>
                 <button className="chip" onClick={() => setVol(volImplicita)}>Usar essa</button>
               </div>
             )}
@@ -424,7 +696,13 @@ function Estrategias({ pre, dataPregao }: { pre: Preenchimento | null; dataPrega
         </div>
       ) : (
         <div id="resultado-opcoes" className="card col" style={{ gap: 14, scrollMarginTop: 12 }} aria-live="polite">
-          <span style={{ fontWeight: 700 }}>{info.titulo} no vencimento</span>
+          <span style={{ fontWeight: 700 }}>{titulo} no vencimento</span>
+
+          {aviso && (
+            <div className="card-outline small justify aviso-atraso" style={{ lineHeight: 1.5 }} role="note" data-testid="aviso-risco">
+              <strong>Atenção.</strong> <span className="muted">{aviso}</span>
+            </div>
+          )}
 
           <div className="row" style={{ gap: 10, alignItems: 'stretch', flexWrap: 'wrap' }}>
             <div className="col" style={{ ...caixa, gap: 2, flex: '1 1 120px' }}>
@@ -446,7 +724,7 @@ function Estrategias({ pre, dataPregao }: { pre: Preenchimento | null; dataPrega
           <div className="tiny muted justify">
             {dados.custo >= 0 ? 'Crédito' : 'Débito'} ao montar as opções: <strong>{reais(Math.abs(dados.custo))}</strong>
             {dados.custo >= 0 ? ' (você recebe o prêmio).' : ' (você paga o prêmio).'}
-            {e.estrategia === 'vendaCoberta' ? ` Precisa ter ${e.quantidade.toLocaleString('pt-BR')} ações do ativo, compradas a ${reais(e.precoAtivo)}.` : ''}
+            {!escolhidas && e.estrategia === 'vendaCoberta' ? ` Precisa ter ${e.quantidade.toLocaleString('pt-BR')} ações do ativo, compradas a ${reais(e.precoAtivo)}.` : ''}
           </div>
 
           <div style={{ width: '100%', maxWidth: 560, marginInline: 'auto' }}>
@@ -457,7 +735,7 @@ function Estrategias({ pre, dataPregao }: { pre: Preenchimento | null; dataPrega
               ]}
               precoAtivo={e.precoAtivo}
               equilibrios={dados.analise.equilibrios}
-              descricao={`Lucro e prejuízo da ${info.titulo.toLowerCase()} por preço do ativo no vencimento. Ganho máximo ${dados.analise.ganhoMaximo === null ? 'sem limite' : dinheiro(dados.analise.ganhoMaximo)}, perda máxima ${dados.analise.perdaMaxima === null ? 'sem limite' : dinheiro(dados.analise.perdaMaxima)}.`}
+              descricao={`Lucro e prejuízo da ${titulo.toLowerCase()} por preço do ativo no vencimento. Ganho máximo ${dados.analise.ganhoMaximo === null ? 'sem limite' : dinheiro(dados.analise.ganhoMaximo)}, perda máxima ${dados.analise.perdaMaxima === null ? 'sem limite' : dinheiro(dados.analise.perdaMaxima)}.`}
             />
           </div>
           <div className="row tiny muted" style={{ gap: 14, flexWrap: 'wrap' }}>
@@ -470,7 +748,7 @@ function Estrategias({ pre, dataPregao }: { pre: Preenchimento | null; dataPrega
           {mercado.dias > 0 && vol > 0 && (
             <div className="col" style={{ gap: 6 }}>
               <label htmlFor="dias-passados" className="small" style={{ fontWeight: 600 }}>
-                Passagem do tempo: daqui a {passados} {passados === 1 ? 'dia' : 'dias'} (faltariam {mercado.dias - passados})
+                Passagem do tempo: daqui a {passados} {passados === 1 ? 'dia útil' : 'dias úteis'} (faltariam {mercado.dias - passados})
               </label>
               <input
                 id="dias-passados"
@@ -493,17 +771,17 @@ function Estrategias({ pre, dataPregao }: { pre: Preenchimento | null; dataPrega
 
           {dados.g && (
             <div className="col" style={{ gap: 0 }}>
-              <span className="small" style={{ fontWeight: 600, marginBottom: 4 }}>Gregas da posição{passados > 0 ? ` (daqui a ${passados} dias)` : ' (hoje)'}</span>
+              <span className="small" style={{ fontWeight: 600, marginBottom: 4 }}>Gregas da posição{passados > 0 ? ` (daqui a ${passados} dias úteis)` : ' (hoje)'}</span>
               <div className="tabela-bdr small"><span className="muted">Delta (variação por R$ 1 no ativo)</span><span style={{ fontWeight: 700 }} data-testid="delta">{dados.g.delta.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}</span></div>
               <div className="tabela-bdr small"><span className="muted">Gama (variação do delta por R$ 1)</span><span style={{ fontWeight: 700 }}>{dados.g.gama.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</span></div>
-              <div className="tabela-bdr small"><span className="muted">Teta (por dia que passa)</span><span style={{ fontWeight: 700 }}>{dinheiro(dados.g.teta)}</span></div>
+              <div className="tabela-bdr small"><span className="muted">Teta (por dia útil que passa)</span><span style={{ fontWeight: 700 }}>{dinheiro(dados.g.teta)}</span></div>
               <div className="tabela-bdr small"><span className="muted">Vega (por +1 ponto de volatilidade)</span><span style={{ fontWeight: 700 }}>{dinheiro(dados.g.vega)}</span></div>
             </div>
           )}
 
           <span className="tiny muted justify">
             A curva antes do vencimento e as gregas usam o modelo de Black-Scholes (opção europeia, sem dividendos), uma
-            aproximação: opções de ações na B3 podem ser exercidas antes do vencimento. No vencimento, o resultado é exato.
+            aproximação: opções americanas podem ser exercidas antes do vencimento. No vencimento, o resultado é exato.
           </span>
         </div>
       )}

@@ -6,6 +6,9 @@
 //  - Black-Scholes (europeu, sem dividendos) para a curva "antes do vencimento" e para as gregas. Opções de ações na B3
 //    são americanas; é uma aproximação didática, e o texto da tela diz isso.
 
+/** Dias úteis num ano, a convenção do mercado brasileiro para o tempo das opções. */
+export const DIAS_UTEIS_ANO = 252
+
 export type TipoOpcao = 'call' | 'put'
 export type Lado = 'compra' | 'venda'
 
@@ -25,11 +28,13 @@ export interface Posicao {
   precoAcao: number
 }
 
-export type EstrategiaId = 'compraCall' | 'compraPut' | 'vendaCoberta' | 'travaAlta' | 'travaBaixa'
+export type EstrategiaId = 'compraCall' | 'vendaCall' | 'compraPut' | 'vendaPut' | 'vendaCoberta' | 'travaAlta' | 'travaBaixa'
 
-export const ESTRATEGIAS: { id: EstrategiaId; titulo: string; descricao: string; doisStrikes: boolean }[] = [
+export const ESTRATEGIAS: { id: EstrategiaId; titulo: string; descricao: string; doisStrikes: boolean; aviso?: string }[] = [
   { id: 'compraCall', titulo: 'Compra de call', descricao: 'Aposta na alta. Perde no máximo o prêmio pago.', doisStrikes: false },
+  { id: 'vendaCall', titulo: 'Venda de call', descricao: 'Recebe o prêmio apostando que o ativo não passa do strike. Sem ter a ação (descoberta), a perda não tem limite.', doisStrikes: false, aviso: 'Venda descoberta de call: se o ativo disparar, a perda não tem limite, e a B3 exige margem de garantia.' },
   { id: 'compraPut', titulo: 'Compra de put', descricao: 'Aposta na queda ou proteção. Perde no máximo o prêmio pago.', doisStrikes: false },
+  { id: 'vendaPut', titulo: 'Venda de put', descricao: 'Recebe o prêmio e assume comprar o ativo pelo strike se ele cair abaixo. A perda máxima é o strike menos o prêmio, se o ativo for a zero.', doisStrikes: false, aviso: 'Venda de put: você pode ser obrigado a comprar o ativo pelo strike mesmo que ele valha muito menos, e a B3 exige margem de garantia.' },
   { id: 'vendaCoberta', titulo: 'Venda coberta', descricao: 'Tem a ação e vende uma call: recebe o prêmio e limita a alta.', doisStrikes: false },
   { id: 'travaAlta', titulo: 'Trava de alta', descricao: 'Compra call de strike menor e vende call de strike maior: ganho e perda limitados.', doisStrikes: true },
   { id: 'travaBaixa', titulo: 'Trava de baixa', descricao: 'Compra put de strike maior e vende put de strike menor: ganho e perda limitados.', doisStrikes: true },
@@ -58,6 +63,10 @@ export function montarPosicao(e: EntradaEstrategia): Posicao {
       return { pernas: [{ tipo: 'call', lado: 'compra', strike: e.strikeBaixo, premio: e.premioBaixo, quantidade: q }], acoes: 0, precoAcao: 0 }
     case 'compraPut':
       return { pernas: [{ tipo: 'put', lado: 'compra', strike: e.strikeBaixo, premio: e.premioBaixo, quantidade: q }], acoes: 0, precoAcao: 0 }
+    case 'vendaCall':
+      return { pernas: [{ tipo: 'call', lado: 'venda', strike: e.strikeBaixo, premio: e.premioBaixo, quantidade: q }], acoes: 0, precoAcao: 0 }
+    case 'vendaPut':
+      return { pernas: [{ tipo: 'put', lado: 'venda', strike: e.strikeBaixo, premio: e.premioBaixo, quantidade: q }], acoes: 0, precoAcao: 0 }
     case 'vendaCoberta':
       return { pernas: [{ tipo: 'call', lado: 'venda', strike: e.strikeBaixo, premio: e.premioBaixo, quantidade: q }], acoes: q, precoAcao: e.precoAtivo }
     case 'travaAlta':
@@ -168,7 +177,7 @@ export interface ParametrosBs {
   /** Preço do ativo. */
   s: number
   strike: number
-  /** Anos até o vencimento (dias corridos / 365). */
+  /** Anos até o vencimento (dias úteis / 252). */
   t: number
   /** Juro anual contínuo (ex.: 0,14). */
   r: number
@@ -190,7 +199,7 @@ export function precoBs(x: ParametrosBs): number {
 export interface Gregas {
   delta: number
   gama: number
-  /** Variação do preço por dia corrido que passa. */
+  /** Variação do preço por dia útil que passa. */
   teta: number
   /** Variação do preço para +1 ponto percentual de volatilidade. */
   vega: number
@@ -211,7 +220,7 @@ export function gregas(x: ParametrosBs): Gregas {
   const vega = (s * pdfNormal(d1) * Math.sqrt(t)) / 100
   const termoVol = -(s * pdfNormal(d1) * sigma) / (2 * Math.sqrt(t))
   const tetaAno = tipo === 'call' ? termoVol - r * k * desconto * cdfNormal(d2) : termoVol + r * k * desconto * cdfNormal(-d2)
-  return { delta, gama, teta: tetaAno / 365, vega }
+  return { delta, gama, teta: tetaAno / DIAS_UTEIS_ANO, vega }
 }
 
 /**
@@ -233,7 +242,7 @@ export function volatilidadeImplicita(base: Omit<ParametrosBs, 'sigma'>, premio:
 
 /** Parâmetros de tempo e mercado usados na curva "antes do vencimento" e nas gregas. */
 export interface Mercado {
-  /** Dias corridos até o vencimento. */
+  /** Dias úteis até o vencimento. */
   dias: number
   r: number
   sigma: number
@@ -241,7 +250,7 @@ export interface Mercado {
 
 /** Valor da posição (lucro/prejuízo) se o ativo estiver em `s` daqui a `diasPassados` dias. */
 export function resultadoAntesDoVencimento(p: Posicao, s: number, m: Mercado, diasPassados: number): number {
-  const t = Math.max(m.dias - diasPassados, 0) / 365
+  const t = Math.max(m.dias - diasPassados, 0) / DIAS_UTEIS_ANO
   let total = p.acoes * (s - p.precoAcao)
   for (const x of p.pernas) {
     const valor = precoBs({ tipo: x.tipo, s, strike: x.strike, t, r: m.r, sigma: m.sigma })
@@ -252,7 +261,7 @@ export function resultadoAntesDoVencimento(p: Posicao, s: number, m: Mercado, di
 
 /** Gregas da posição inteira (ações contam como delta 1 cada). */
 export function gregasDaPosicao(p: Posicao, s: number, m: Mercado, diasPassados = 0): Gregas {
-  const t = Math.max(m.dias - diasPassados, 0) / 365
+  const t = Math.max(m.dias - diasPassados, 0) / DIAS_UTEIS_ANO
   const soma: Gregas = { delta: p.acoes, gama: 0, teta: 0, vega: 0 }
   for (const x of p.pernas) {
     const g = gregas({ tipo: x.tipo, s, strike: x.strike, t, r: m.r, sigma: m.sigma })

@@ -2142,3 +2142,13 @@ select option:disabled { color: #6b7280 !important; -webkit-text-fill-color: #6b
   overflow: visible;
   filter: drop-shadow(0 0 0.6px #111) drop-shadow(0 0 0.6px #111);
 }
+
+/* Simule Opções: tabela de séries (ordenável, rola na horizontal no celular). */
+.tabela-opcoes { border-collapse: collapse; min-width: 100%; white-space: nowrap; }
+.tabela-opcoes th,
+.tabela-opcoes td { padding: 6px 8px; text-align: left; border-bottom: 1px solid var(--border); }
+.tabela-opcoes td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.tabela-opcoes tbody tr:last-child td { border-bottom: none; }
+.tabela-opcoes .linha-marcada { background: var(--highlight); }
+.th-ordenar { background: none; border: none; color: inherit; font: inherit; font-weight: 600; cursor: pointer; padding: 0; text-align: left; }
+.th-ordenar:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }

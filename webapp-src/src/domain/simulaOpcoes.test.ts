@@ -22,6 +22,20 @@ describe('payoff no vencimento', () => {
     expect(analisar(p)).toEqual({ ganhoMaximo: 920, perdaMaxima: -80, equilibrios: [9.2] })
   })
 
+  it('venda de call descoberta: ganho limitado ao prêmio e perda sem limite', () => {
+    const p = pos({ estrategia: 'vendaCall', strikeBaixo: 11, premioBaixo: 0.5 })
+    expect(analisar(p)).toEqual({ ganhoMaximo: 50, perdaMaxima: null, equilibrios: [11.5] })
+    expect(resultadoNoVencimento(p, 20)).toBeCloseTo(-850)
+    expect(custoDeMontagem(p)).toBe(50)
+  })
+
+  it('venda de put: ganho limitado ao prêmio e perda máxima com o ativo a zero', () => {
+    const p = pos({ estrategia: 'vendaPut', strikeBaixo: 10, premioBaixo: 0.8 })
+    expect(analisar(p)).toEqual({ ganhoMaximo: 80, perdaMaxima: -920, equilibrios: [9.2] })
+    expect(resultadoNoVencimento(p, 12)).toBe(80)
+    expect(resultadoNoVencimento(p, 9)).toBeCloseTo(-20)
+  })
+
   it('venda coberta: ganho limitado ao strike mais o prêmio, perda se o ativo cair', () => {
     const p = pos({ estrategia: 'vendaCoberta', strikeBaixo: 11, premioBaixo: 0.5 })
     expect(resultadoNoVencimento(p, 20)).toBeCloseTo(150)
@@ -95,7 +109,7 @@ describe('antes do vencimento', () => {
   const m = { dias: 30, r: 0.12, sigma: 0.35 }
 
   it('com o prêmio justo, hoje o resultado é zero; no vencimento coincide com o payoff', () => {
-    const premio = precoBs({ tipo: 'call', s: 10, strike: 10, t: 30 / 365, r: 0.12, sigma: 0.35 })
+    const premio = precoBs({ tipo: 'call', s: 10, strike: 10, t: 30 / 252, r: 0.12, sigma: 0.35 })
     const p = pos({ premioBaixo: premio })
     expect(resultadoAntesDoVencimento(p, 10, m, 0)).toBeCloseTo(0, 6)
     expect(resultadoAntesDoVencimento(p, 13, m, 30)).toBeCloseTo(resultadoNoVencimento(p, 13), 8)
