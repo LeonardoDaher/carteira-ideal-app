@@ -821,6 +821,15 @@ button.alloc-box:active {
   --grafico-alu: var(--accent);
   --grafico-fin: oklch(72% 0.13 235);
   --grafico-con: oklch(74% 0.17 150);
+  /* Gráficos de opções (D101): uma cor por vencimento. As três primeiras são as do Simule Tesouro. */
+  --grafico-v1: var(--grafico-selic);
+  --grafico-v2: var(--grafico-ipca);
+  --grafico-v3: var(--grafico-con);
+  --grafico-v4: oklch(72% 0.15 320);
+  --grafico-v5: oklch(72% 0.16 30);
+  --grafico-v6: oklch(74% 0.12 195);
+  --grafico-v7: oklch(72% 0.14 280);
+  --grafico-v8: oklch(70% 0.03 250);
 }
 :root[data-theme='light'] {
   --grafico-selic: oklch(58% 0.15 85);
@@ -828,6 +837,11 @@ button.alloc-box:active {
   --grafico-alu: oklch(58% 0.15 85);
   --grafico-fin: oklch(50% 0.15 250);
   --grafico-con: oklch(50% 0.14 150);
+  --grafico-v4: oklch(50% 0.17 320);
+  --grafico-v5: oklch(52% 0.17 30);
+  --grafico-v6: oklch(50% 0.11 195);
+  --grafico-v7: oklch(48% 0.16 280);
+  --grafico-v8: oklch(45% 0.03 250);
 }
 
 /* Linha de um título: nome e vencimento à esquerda, taxa e preço alinhados à direita. */

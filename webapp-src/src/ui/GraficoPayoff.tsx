@@ -66,29 +66,29 @@ export function GraficoPayoff({
 
       {ticksY.map((v) => (
         <g key={`y${v}`}>
-          <line x1={L} x2={W - R} y1={y(v)} y2={y(v)} stroke="var(--border)" strokeWidth={v === 0 ? 1.2 : 0.6} />
-          <text x={L - 5} y={y(v) + 3.5} textAnchor="end" fontSize="9.5" fill="var(--text-muted)">{compacto(v)}</text>
+          <line x1={L} x2={W - R} y1={y(v)} y2={y(v)} className="grafico-juros-grade" strokeWidth={v === 0 ? 1.6 : 1} />
+          <text x={L - 5} y={y(v) + 3} textAnchor="end" className="grafico-juros-eixo">{compacto(v)}</text>
         </g>
       ))}
       {ticksX.map((s) => (
-        <text key={`x${s}`} x={x(s)} y={H - 8} textAnchor="middle" fontSize="9.5" fill="var(--text-muted)">
+        <text key={`x${s}`} x={x(s)} y={H - 8} textAnchor="middle" className="grafico-juros-eixo">
           {s.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}
         </text>
       ))}
 
-      <path d={area} fill="var(--mc-pos, #3fb950)" opacity="0.22" clipPath={`url(#${id}-acima)`} />
-      <path d={area} fill="var(--danger, #f85149)" opacity="0.22" clipPath={`url(#${id}-abaixo)`} />
+      <path d={area} fill="var(--grafico-con)" opacity="0.22" clipPath={`url(#${id}-acima)`} />
+      <path d={area} fill="var(--danger)" opacity="0.22" clipPath={`url(#${id}-abaixo)`} />
 
-      <line x1={x(precoAtivo)} x2={x(precoAtivo)} y1={T} y2={H - B} stroke="var(--text-muted)" strokeWidth="1" strokeDasharray="3 3" />
-      <text x={x(precoAtivo)} y={T - 2} textAnchor="middle" fontSize="9" fill="var(--text-muted)">hoje</text>
+      <line x1={x(precoAtivo)} x2={x(precoAtivo)} y1={T} y2={H - B} className="grafico-juros-guia" />
+      <text x={x(precoAtivo)} y={T - 2} textAnchor="middle" className="grafico-juros-eixo">hoje</text>
 
       {curvas.filter((c) => c !== principal).map((c) => (
-        <path key={c.rotulo} d={caminho(c.pontos)} fill="none" stroke="var(--grafico-ipca)" strokeWidth="2" strokeDasharray="5 3" />
+        <path key={c.rotulo} d={caminho(c.pontos)} className="grafico-juros-linha" stroke="var(--grafico-ipca)" strokeWidth="2" strokeDasharray="7 3.5" />
       ))}
-      <path d={caminho(principal.pontos)} fill="none" stroke="var(--text)" strokeWidth="2" strokeLinejoin="round" />
+      <path d={caminho(principal.pontos)} className="grafico-juros-linha" stroke="var(--grafico-selic)" strokeWidth="2.4" />
 
       {equilibrios.filter((s) => s >= xMin && s <= xMax).map((s) => (
-        <circle key={`e${s}`} cx={x(s)} cy={zero} r="3.6" fill="var(--bg)" stroke="var(--text)" strokeWidth="1.6" />
+        <circle key={`e${s}`} cx={x(s)} cy={zero} r="3.6" className="grafico-juros-ponto" fill="var(--grafico-selic)" />
       ))}
     </svg>
   )

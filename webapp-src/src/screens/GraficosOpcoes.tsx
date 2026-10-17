@@ -5,11 +5,12 @@ import { diasUteis, tipoVencimento, vencimentosDe } from '../domain/opcoes'
 import type { AtivoComOpcoes, SnapshotOpcoes } from '../domain/opcoes'
 import { formatarData } from '../domain/rendaFii'
 import { EscolhaDeAtivo } from './EscolhaDeAtivo'
-import { GraficoPorStrike } from '../ui/GraficoPorStrike'
+import { GraficoPorStrike, MarcaDaLinha } from '../ui/GraficoPorStrike'
 import type { LinhaVisual } from '../ui/GraficoPorStrike'
 
-// Uma cor por vencimento (meios-tons que se leem nos temas claro e escuro). Calls em traço cheio e puts tracejadas.
-const CORES = ['#2563eb', '#ea580c', '#059669', '#9333ea', '#db2777', '#0891b2', '#ca8a04', '#4b5563']
+// Uma cor por vencimento, da paleta dos gráficos do Simule Tesouro (âmbar, azul e verde, e depois tons da mesma família), que muda
+// com o tema claro ou escuro. Calls em traço cheio e puts tracejadas.
+const CORES = ['var(--grafico-v1)', 'var(--grafico-v2)', 'var(--grafico-v3)', 'var(--grafico-v4)', 'var(--grafico-v5)', 'var(--grafico-v6)', 'var(--grafico-v7)', 'var(--grafico-v8)']
 const dataCurta = (iso: string) => `${iso.slice(8, 10)}/${iso.slice(5, 7)}`
 const inteiro = (v: number) => Math.round(v).toLocaleString('pt-BR')
 const compacto = (v: number) => (v >= 1e6 ? `${(v / 1e6).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} mi` : v >= 1e3 ? `${Math.round(v / 1e3).toLocaleString('pt-BR')} mil` : inteiro(v))
@@ -175,7 +176,7 @@ function NegociosPorStrike({ snapshot, ativo }: { snapshot: SnapshotOpcoes; ativ
           <div className="row" style={{ gap: 12, flexWrap: 'wrap' }} aria-label="Legenda" role="group">
             {linhasVisuais.map((l) => (
               <span key={l.id} className="small" data-testid="legenda-linha">
-                <span style={{ color: l.cor, fontWeight: 700 }} aria-hidden="true">{l.tracejada ? '┅┅' : '━━'}</span> {l.rotulo}
+                <MarcaDaLinha cor={l.cor} tracejada={l.tracejada} />{l.rotulo}
               </span>
             ))}
           </div>
@@ -198,7 +199,8 @@ function NegociosPorStrike({ snapshot, ativo }: { snapshot: SnapshotOpcoes; ativ
           <div className="col" style={{ gap: 4 }} data-testid="picos">
             {dados.linhas.map((l, i) => (
               <span key={l.id} className="small">
-                <span style={{ color: linhasVisuais[i].cor, fontWeight: 700 }}>{linhasVisuais[i].rotulo || dataCurta(l.vencimento)}</span>{' '}
+                <MarcaDaLinha cor={linhasVisuais[i].cor} tracejada={linhasVisuais[i].tracejada} />
+                <strong>{linhasVisuais[i].rotulo || dataCurta(l.vencimento)}</strong>{' '}
                 {l.picoStrike === null ? (
                   <span className="muted">sem negócios no último pregão nesta faixa.</span>
                 ) : (

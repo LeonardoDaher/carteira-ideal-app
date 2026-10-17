@@ -142,9 +142,9 @@ describe('SimuleOpcoes: aba Gráficos (negócios por strike)', () => {
     expect(texto('leitura-grafico')).toMatch(/use as setas/)
     const grafico = screen.getByRole('img')
     fireEvent.keyDown(grafico, { key: 'ArrowRight' })
-    expect(texto('leitura-grafico')).toMatch(/Strike R\$ 11,00 \(\+10% do preço\): 19\/11 calls 40 · 19\/11 puts 15/)
+    expect(texto('leitura-grafico')).toMatch(/Strike R\$ 11,00 \(\+10% do preço\):\s*19\/11 calls 40\s+19\/11 puts 15/)
     fireEvent.keyDown(grafico, { key: 'Home' })
-    expect(texto('leitura-grafico')).toMatch(/Strike R\$ 8,00 \(-20% do preço\): 19\/11 calls 5 · 19\/11 puts 10/)
+    expect(texto('leitura-grafico')).toMatch(/Strike R\$ 8,00 \(-20% do preço\):\s*19\/11 calls 5\s+19\/11 puts 10/)
     fireEvent.keyDown(grafico, { key: 'End' })
     expect(texto('leitura-grafico')).toMatch(/Strike R\$ 12,00/)
   })
@@ -181,7 +181,7 @@ describe('SimuleOpcoes: aba Gráficos, escala relativa', () => {
     expect(texto('picos')).toMatch(/com 100;/) // o pico segue em valor real
     const grafico = screen.getByRole('img')
     fireEvent.keyDown(grafico, { key: 'Home' })
-    expect(texto('leitura-grafico')).toMatch(/Strike R\$ 8,00 .*19\/11 calls 5 · 19\/11 puts 10 · 18\/12 calls 0 · 18\/12 puts 0/) // valores reais, e não %
+    expect(texto('leitura-grafico')).toMatch(/Strike R\$ 8,00 .*19\/11 calls 5\s+19\/11 puts 10\s+18\/12 calls 0\s+18\/12 puts 0/) // valores reais, e não %
     fireEvent.click(screen.getByRole('button', { name: 'Valores reais' }))
     expect(screen.queryByTestId('nota-escala')).toBeNull()
   })

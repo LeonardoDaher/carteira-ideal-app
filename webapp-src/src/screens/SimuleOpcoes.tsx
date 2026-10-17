@@ -24,6 +24,7 @@ import { PorVisaoOpcoes } from './PorVisaoOpcoes'
 import { TopPremiosOpcoes } from './TopPremiosOpcoes'
 import { FaixaDeStrike } from '../ui/FaixaDeStrike'
 import { GraficoPayoff } from '../ui/GraficoPayoff'
+import { MarcaDaLinha } from '../ui/GraficoPorStrike'
 import type { AppCtx } from '../state/useAppState'
 
 type Aba = 'series' | 'premios' | 'visao' | 'graficos' | 'estrategias'
@@ -769,8 +770,8 @@ function Estrategias({ escolha, ativoAtual, dataPregao, aoVoltar }: { escolha: E
             />
           </div>
           <div className="row tiny muted" style={{ gap: 14, flexWrap: 'wrap' }}>
-            <span>━ No vencimento</span>
-            {dados.antes && <span style={{ color: 'var(--grafico-ipca)' }}>┅ {rotuloCurva}</span>}
+            <span><MarcaDaLinha cor="var(--grafico-selic)" />No vencimento</span>
+            {dados.antes && <span><MarcaDaLinha cor="var(--grafico-ipca)" tracejada />{rotuloCurva}</span>}
             <span>┆ Preço de hoje</span>
             <span>○ Equilíbrio</span>
           </div>

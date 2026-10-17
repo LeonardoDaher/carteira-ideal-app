@@ -15,7 +15,7 @@ const desenhar = (strikes: number[], preco: number) =>
       descricao="teste"
     />,
   )
-const linhaDoPreco = (c: HTMLElement) => c.querySelector('line[stroke-dasharray="3 3"]')!
+const linhaDoPreco = (c: HTMLElement) => c.querySelector('line.grafico-juros-guia')!
 const xDe = (el: Element) => Number(el.getAttribute('x1'))
 const xsDosPontos = (c: HTMLElement) => [...c.querySelectorAll('[data-testid="linha-a"] circle')].map((p) => Number(p.getAttribute('cx')))
 

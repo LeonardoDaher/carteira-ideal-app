@@ -1,9 +1,10 @@
 import { useId, useState } from 'react'
-import type { KeyboardEvent, PointerEvent } from 'react'
+import type { CSSProperties, KeyboardEvent, PointerEvent } from 'react'
 
 export interface LinhaVisual {
   id: string
   rotulo: string
+  /** Cor da linha: uma variável de cor dos gráficos (var(--grafico-v1) ...), que muda com o tema. */
   cor: string
   tracejada?: boolean
   /** Um valor por strike de `strikes`: o que o gráfico desenha. */
@@ -31,9 +32,18 @@ export function tetoDoEixo(maximo: number): number {
 
 const strikeTexto = (v: number) => v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 
+/** Marquinha de legenda no desenho do Simule Tesouro: uma barra curta na cor da linha (tracejada para as puts). */
+export function MarcaDaLinha({ cor, tracejada }: { cor: string; tracejada?: boolean }) {
+  const estilo: CSSProperties = tracejada
+    ? { background: `repeating-linear-gradient(90deg, ${cor} 0 5px, transparent 5px 7px)`, width: 17 }
+    : { background: cor }
+  return <span className="grafico-juros-marca" style={estilo} aria-hidden="true" />
+}
+
 /**
- * Gráfico de linhas com o strike no eixo horizontal (em escala de preço, e não de posição) e o valor no vertical. A linha
- * vertical tracejada é o preço do ativo no dia, e fica sempre no centro do eixo. Passar o mouse, tocar ou usar as setas (esquerda e direita, início e fim) sobre o
+ * Gráfico de linhas com o strike no eixo horizontal (em escala de preço, e não de posição) e o valor no vertical, no visual do
+ * gráfico do Simule Tesouro (mesmas classes e cores, que acompanham o tema). A linha vertical pontilhada é o preço do ativo no
+ * dia, e fica sempre no centro do eixo. Passar o mouse, tocar ou usar as setas (esquerda e direita, início e fim) sobre o
  * gráfico mostra os valores de cada linha no strike mais próximo.
  */
 export function GraficoPorStrike({
@@ -59,7 +69,7 @@ export function GraficoPorStrike({
   const yMax = tetoDoEixo(Math.max(0, ...linhas.flatMap((l) => l.valores)))
   const x = (strike: number) => L + ((strike - xMin) / (xMax - xMin)) * (W - L - R)
   const y = (valor: number) => T + (1 - valor / yMax) * (H - T - B)
-  const caminho = (valores: number[]) => valores.map((v, i) => `${i === 0 ? 'M' : 'L'}${x(strikes[i]).toFixed(1)},${y(v).toFixed(1)}`).join(' ')
+  const caminho = (valores: number[]) => valores.map((v, i) => `${i === 0 ? 'M' : 'L'}${x(strikes[i]).toFixed(1)} ${y(v).toFixed(1)}`).join('')
   const pontos = strikes.length <= 40
 
   const ticksX = [0, 0.25, 0.5, 0.75, 1].map((f) => xMin + (xMax - xMin) * f)
@@ -85,18 +95,20 @@ export function GraficoPorStrike({
   const distancia = indice === null ? null : (strikes[indice] / precoAtivo - 1) * 100
   return (
     <div className="col" style={{ gap: 6 }}>
-      <div aria-live="polite" className="small" style={{ minHeight: 40 }} data-testid="leitura-grafico">
+      <div aria-live="polite" className="grafico-juros-leitura" style={{ minHeight: 36 }} data-testid="leitura-grafico">
         {indice === null ? (
-          <span className="muted">Passe o mouse, toque ou use as setas sobre o gráfico para ler os valores de cada strike.</span>
+          <span>Passe o mouse, toque ou use as setas sobre o gráfico para ler os valores de cada strike.</span>
         ) : (
           <>
-            <strong>Strike R$ {strikeTexto(strikes[indice])}</strong>
-            <span className="muted"> ({distancia! > 0 ? '+' : ''}{distancia!.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}% do preço)</span>
-            {': '}
-            {linhas.map((l, i) => (
+            <span className="grafico-juros-mes" style={{ minWidth: 0 }}>
+              Strike R$ {strikeTexto(strikes[indice])}
+              <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}> ({distancia! > 0 ? '+' : ''}{distancia!.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}% do preço)</span>
+              {':'}
+            </span>{' '}
+            {linhas.map((l) => (
               <span key={l.id}>
-                {i > 0 ? ' · ' : ''}
-                <span style={{ color: l.cor, fontWeight: 700 }}>{l.rotulo}</span> {(formatarLeitura ?? formatarValor)((l.leitura ?? l.valores)[indice])}
+                <MarcaDaLinha cor={l.cor} tracejada={l.tracejada} />
+                {l.rotulo} <strong>{(formatarLeitura ?? formatarValor)((l.leitura ?? l.valores)[indice])}</strong>{' '}
               </span>
             ))}
           </>
@@ -107,8 +119,8 @@ export function GraficoPorStrike({
         viewBox={`0 0 ${W} ${H}`}
         role="img"
         aria-label={descricao}
+        className="grafico-juros"
         tabIndex={0}
-        style={{ width: '100%', height: 'auto', display: 'block', touchAction: 'pan-y', cursor: 'crosshair' }}
         onPointerMove={aoMover}
         onPointerDown={aoMover}
         onPointerLeave={() => setIndice(null)}
@@ -117,37 +129,35 @@ export function GraficoPorStrike({
       >
         {ticksY.map((v) => (
           <g key={`y${v}`}>
-            <line x1={L} x2={W - R} y1={y(v)} y2={y(v)} stroke="var(--border)" strokeWidth={v === 0 ? 1.2 : 0.6} />
-            <text x={L - 5} y={y(v) + 3.5} textAnchor="end" fontSize="9.5" fill="var(--text-muted)">{formatarValor(v)}</text>
+            <line x1={L} x2={W - R} y1={y(v)} y2={y(v)} className="grafico-juros-grade" />
+            <text x={L - 5} y={y(v) + 3} textAnchor="end" className="grafico-juros-eixo">{formatarValor(v)}</text>
           </g>
         ))}
         {ticksX.map((k) => (
-          <text key={`x${k}`} x={x(k)} y={H - 10} textAnchor="middle" fontSize="9.5" fill="var(--text-muted)">
+          <text key={`x${k}`} x={x(k)} y={H - 10} textAnchor="middle" className="grafico-juros-eixo">
             {k.toLocaleString('pt-BR', { maximumFractionDigits: k >= 100 ? 0 : 2 })}
           </text>
         ))}
 
-        {(
-          <g>
-            <line x1={x(precoAtivo)} x2={x(precoAtivo)} y1={T} y2={H - B} stroke="var(--text-muted)" strokeWidth="1" strokeDasharray="3 3" />
-            <text x={x(precoAtivo)} y={T - 3} textAnchor="middle" fontSize="9" fill="var(--text-muted)">preço</text>
-          </g>
-        )}
+        <g aria-hidden="true">
+          <line x1={x(precoAtivo)} x2={x(precoAtivo)} y1={T} y2={H - B} className="grafico-juros-guia" />
+          <text x={x(precoAtivo)} y={T - 3} textAnchor="middle" className="grafico-juros-eixo">preço</text>
+        </g>
 
         <defs>
           <clipPath id={idRecorte}><rect x={L} y={T - 2} width={W - L - R} height={H - T - B + 4} /></clipPath>
         </defs>
         {linhas.map((l) => (
           <g key={l.id} data-testid={`linha-${l.id}`} clipPath={`url(#${idRecorte})`}>
-            <path d={caminho(l.valores)} fill="none" stroke={l.cor} strokeWidth="2" strokeLinejoin="round" strokeDasharray={l.tracejada ? '5 3' : undefined} />
-            {pontos && l.valores.map((v, i) => <circle key={strikes[i]} cx={x(strikes[i])} cy={y(v)} r="2" fill={l.cor} />)}
+            <path d={caminho(l.valores)} className="grafico-juros-linha" stroke={l.cor} strokeWidth={2.2} strokeDasharray={l.tracejada ? '7 3.5' : undefined} />
+            {pontos && l.valores.map((v, i) => <circle key={strikes[i]} cx={x(strikes[i])} cy={y(v)} r={2} fill={l.cor} />)}
           </g>
         ))}
 
         {indice !== null && (
-          <g>
-            <line x1={x(strikes[indice])} x2={x(strikes[indice])} y1={T} y2={H - B} stroke="var(--text)" strokeWidth="1" />
-            {linhas.map((l) => <circle key={l.id} cx={x(strikes[indice])} cy={y(l.valores[indice])} r="4" fill={l.cor} stroke="var(--bg)" strokeWidth="1.5" />)}
+          <g aria-hidden="true">
+            <line x1={x(strikes[indice])} x2={x(strikes[indice])} y1={T} y2={H - B} className="grafico-juros-guia" />
+            {linhas.map((l) => <circle key={l.id} cx={x(strikes[indice])} cy={y(l.valores[indice])} r={4} className="grafico-juros-ponto" fill={l.cor} />)}
           </g>
         )}
       </svg>

@@ -1839,3 +1839,21 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 **Limites.** Os negócios são os de **um pregão** (o último), então mudam bastante de um dia para o outro; não é posição em aberto (interesse aberto), que o app não tem. O volume financeiro de cada série é o do dia do último negócio. Só os próximos 6 meses de vencimentos.
 
 **Testes.** 8 do cálculo (\`graficoNegocios.test.ts\`: separação de calls e puts, soma, faixa, volume, pico, séries paradas, vencimentos vazios), 14 da aba (\`SimuleOpcoesGraficos.test.tsx\`, incluindo escala relativa, teclado e o "voltar" do navegador) e 10 do gráfico (teto do eixo e o preço sempre no centro, inclusive com strikes só de um lado).
+
+## D101 (17/10/2026): gráficos do Simule Opções no visual e nas cores do Simule Tesouro Direto
+
+**Pedido do responsável (17/10/2026).** Os gráficos usarem as cores do que aparece no Simule Tesouro Direto.
+
+**O que o Tesouro usa.** O gráfico dele (`GraficoJuros`) tem um vocabulário próprio no `index.css`: classes `grafico-juros-*` (grade, eixo em IBM Plex Sans, linhas de ponta arredondada, guia pontilhada, ponto com contorno da cor do fundo, leitura e marquinha de legenda) e as cores `--grafico-selic` (âmbar), `--grafico-ipca` (azul) e `--grafico-con` (verde), cada uma com um tom para o tema escuro e outro, mais escuro, para o claro (o amarelo de destaque some como linha fina sobre fundo claro).
+
+**O que mudou.** Os dois gráficos de opções, o de **negócios por strike** (aba Gráficos) e o de **payoff** (aba Estratégias), passaram a usar esse mesmo vocabulário, e não mais cores fixas em hexadecimal:
+- **Negócios por strike:** uma cor por vencimento, da nova paleta `--grafico-v1` a `--grafico-v8`. As três primeiras **são** as do Tesouro (`v1` = âmbar, `v2` = azul, `v3` = verde, por referência às variáveis dele, então acompanham o tema sozinhas). As cinco seguintes (magenta, laranja, ciano, violeta e cinza) são minhas, da mesma família, com um tom para cada tema, porque o Tesouro só tem três e o gráfico aceita até oito vencimentos. Calls em traço cheio e puts com o tracejado de 7 e 3,5 que o Tesouro já usa no Simule Imóvel.
+- **Payoff:** linha do vencimento em âmbar (`--grafico-selic`), curva "daqui a N dias" em azul tracejado (`--grafico-ipca`), área de lucro em verde (`--grafico-con`, no lugar de `--mc-pos`) e de prejuízo em vermelho (`--danger`); grade, eixos e guia do preço de hoje com as mesmas classes.
+- **Legendas e leituras** com a marquinha do Tesouro (barra curta na cor da linha, tracejada nas puts), no lugar dos símbolos de texto coloridos. Isso também cumpre a regra da D90: nenhum texto amarelo, porque a cor agora fica só na marquinha, e o texto continua na cor normal.
+- A leitura do gráfico de strike passou a usar a caixa de leitura do Tesouro (`grafico-juros-leitura`); os valores continuam separados por espaço no texto, para o leitor de tela.
+
+**Conferido nos dois temas** com dados reais: no escuro, âmbar vivo, azul e verde claros; no claro, âmbar escuro, azul e verde de 50% de brilho, os mesmos valores que o Tesouro usa.
+
+**Testes.** 3 do CSS (\`graficosOpcoesCores.css.test.ts\`: as três primeiras cores herdam do Tesouro, as cinco extras existem nos dois temas e as classes reaproveitadas existem) e 5 dos componentes (\`graficosOpcoesCores.test.tsx\`: classes e variáveis em vez de cores fixas, tracejado das puts, marquinhas, payoff em âmbar e azul, nenhum hexadecimal solto).
+
+**Limites.** O Tesouro só tem três cores, então a partir do quarto vencimento no mesmo gráfico as cores são as extras (da mesma família, mas não são "do Tesouro"). O gráfico de strike mostra no máximo oito vencimentos distintos antes de repetir cores.
