@@ -338,3 +338,22 @@ export function ordenarLinhas(linhas: LinhaOpcao[], ordem: Ordem): LinhaOpcao[] 
     return c * sinal || a.codigo.localeCompare(b.codigo)
   })
 }
+
+/** Séries levadas da tabela ou do ranking de prêmios para o simulador de estratégias. */
+export interface EscolhaDeSeries {
+  ativo: AtivoComOpcoes
+  series: SerieOpcao[]
+  /** Lado inicial de cada série; sem isso, compra. */
+  lado?: 'compra' | 'venda'
+  /** Venda coberta de call: abre a estratégia "Venda coberta" (a pessoa já tem a ação), em vez de séries soltas. */
+  coberta?: boolean
+}
+
+/** Mesmo snapshot, só com séries que vencem nos próximos 6 meses; ativos sem série saem. */
+export function limitarAosProximosMeses(snapshot: SnapshotOpcoes, hojeFallback = new Date().toISOString().slice(0, 10)): SnapshotOpcoes {
+  const hoje = snapshot.dataPregao ?? hojeFallback
+  const ativos = snapshot.ativos
+    .map((a) => ({ ...a, series: seriesDosProximosMeses(a.series, hoje) }))
+    .filter((a) => a.series.length > 0)
+  return { ...snapshot, ativos }
+}

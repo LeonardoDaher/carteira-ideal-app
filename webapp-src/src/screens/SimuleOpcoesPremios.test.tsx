@@ -1,0 +1,136 @@
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { describe, expect, it, vi } from 'vitest'
+import { SimuleOpcoes } from './SimuleOpcoes'
+import type { AppCtx } from '../state/useAppState'
+import type { SerieOpcao, SnapshotOpcoes } from '../domain/opcoes'
+
+const ctx = { screen: 'simuleOpcoes', setScreen: vi.fn() } as unknown as AppCtx
+
+const serie = (codigo: string, tipo: 'call' | 'put', strike: number, vencimento: string, ultimo: number, extra: Partial<SerieOpcao> = {}): SerieOpcao => ({
+  codigo, tipo, estilo: 'europeia', strike, vencimento, ultimo, dataUltimo: '2026-10-16', variacao: null, negocios: 20, volume: 50_000, ...extra,
+})
+
+// Pregão de 16/10/2026. Vencimento de 19/11/2026: 22 dias úteis (mensal).
+const snapshot: SnapshotOpcoes = {
+  geradoEm: null,
+  dataPregao: '2026-10-16',
+  ativos: [
+    {
+      ticker: 'PETR4', nome: 'PETROBRAS', cotacao: 60, dataCotacao: '2026-10-16', variacao: 1.69, volumeOpcoes: 9_000_000, lote: 100,
+      series: [
+        serie('PETRW600', 'put', 60, '2026-11-19', 2.2),
+        serie('PETRW550', 'put', 55, '2026-11-19', 0.5),
+        serie('PETRK600', 'call', 60, '2026-11-19', 2.8),
+        serie('PETRK650', 'call', 65, '2026-11-19', 0.9),
+        serie('PETRK550', 'call', 55, '2026-11-19', 6.1), // dentro do dinheiro: fora da call coberta
+        serie('PETRL600', 'call', 60, '2026-12-18', 4.1, { dataUltimo: '2026-10-15' }), // não negociou no último pregão
+      ],
+    },
+    { ticker: 'VALE3', nome: 'VALE', cotacao: 66, volumeOpcoes: 5_000_000, lote: 100, series: [serie('VALEK660', 'call', 66, '2026-11-19', 3.3)] },
+    { ticker: 'BBAS3', nome: 'BRASIL', cotacao: 24, volumeOpcoes: 1_000_000, lote: 100, series: [serie('BBASW240', 'put', 24, '2026-11-19', 0.8)] },
+  ],
+}
+
+const abrirTop = () => fireEvent.click(screen.getByRole('tab', { name: /Top 15 prêmios/ }))
+const semLimite = () => fireEvent.click(screen.getByRole('button', { name: 'Sem limite' }))
+const linhas = () => screen.queryAllByTestId('linha-premio')
+const celulas = (l: HTMLElement) => within(l).getAllByRole('cell').map((c) => (c.textContent ?? '').replace(/ /g, ' '))
+const series = () => linhas().map((l) => celulas(l)[2])
+
+describe('SimuleOpcoes: Top 15 prêmios', () => {
+  it('abre na venda de put, com limite de risco de 25%, e avisa quando nada atende (as puts de exemplo estão no dinheiro)', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    abrirTop()
+    expect(screen.getByRole('button', { name: 'Até 25%' }).getAttribute('aria-pressed')).toBe('true')
+    expect(screen.getByRole('button', { name: 'Vender put' }).getAttribute('aria-pressed')).toBe('true')
+    // PETRW600 e BBASW240 estão no dinheiro (chance perto de 50%); só a PETRW550 fica abaixo do limite.
+    expect(series()).toEqual(['PETRW550'])
+  })
+
+  it('sem limite de risco, ordena as puts pelo rendimento em 21 dias úteis, e calcula prazo, mês e colchão', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    abrirTop()
+    semLimite()
+    expect(series()).toEqual(['PETRW600', 'BBASW240']) // uma série por ativo: a melhor de PETR4 (600) e a de BBAS3
+    const w600 = celulas(linhas()[0])
+    expect(w600[1]).toMatch(/PETR4.*R\$\s60,00/)
+    expect(w600[3]).toBe('60,00') // strike
+    expect(w600[4]).toBe('19/11/2026 (22)')
+    expect(w600[5]).toBe('2,20') // prêmio
+    expect(w600[6]).toBe('3,67') // 2,20 ÷ 60 até o vencimento
+    expect(w600[7]).toBe('3,50') // levado a 21 dias úteis: × 21 ÷ 22
+    expect(w600[8]).toBe('3,67') // colchão: a queda até o strike (zero) mais o prêmio
+  })
+
+  it('para o mesmo ativo, o limite de risco troca a série ATM por uma mais afastada, que paga menos', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    abrirTop()
+    semLimite()
+    fireEvent.click(screen.getByRole('checkbox', { name: /Só a melhor série de cada ativo/ }))
+    expect(series().filter((c) => c.startsWith('PETR'))).toEqual(['PETRW600', 'PETRW550'])
+  })
+
+  it('venda coberta de call: só calls a partir do preço, com a coluna de ganho se exercida', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    abrirTop()
+    fireEvent.click(screen.getByRole('button', { name: 'Vender call coberta' }))
+    semLimite()
+    expect(screen.getByRole('columnheader', { name: /Se exercida/ })).toBeDefined()
+    expect(series()).toEqual(['VALEK660', 'PETRK600']) // VALE3 paga 5,0% contra 4,7% da PETR4; a K550 (dentro do dinheiro) e a L600 (parada) ficam fora
+    const petr = celulas(linhas()[1])
+    expect(petr[6]).toBe('4,67') // 2,80 ÷ 60
+    expect(petr[9]).toBe('4,67') // ganho se exercida: strike igual ao preço, só o prêmio
+  })
+
+  it('filtra por vencimentos mensais e semanais', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    abrirTop()
+    semLimite()
+    fireEvent.click(screen.getByRole('button', { name: 'Semanais' }))
+    expect(screen.getByText('Nenhuma série atende aos filtros.')).toBeDefined() // todas as séries de exemplo vencem na quinta mensal
+    fireEvent.click(screen.getByRole('button', { name: 'Mensais' }))
+    expect(series()).toEqual(['PETRW600', 'BBASW240'])
+  })
+
+  it('"Simular" numa put leva às estratégias com a série já vendida e o aviso de risco', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    abrirTop()
+    semLimite()
+    fireEvent.click(screen.getByRole('button', { name: 'Simular a venda de PETRW600' }))
+    expect(screen.getByRole('button', { name: /Séries escolhidas \(1\)/ }).getAttribute('aria-pressed')).toBe('true')
+    const grupo = screen.getByRole('group', { name: 'Série PETRW600' })
+    expect(within(grupo).getByRole('button', { name: 'Vender' }).getAttribute('aria-pressed')).toBe('true')
+    expect(screen.getByTestId('aviso-risco').textContent).toMatch(/vendidas/)
+  })
+
+  it('"Simular" numa call coberta abre a venda coberta com o strike e o prêmio da série', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    abrirTop()
+    fireEvent.click(screen.getByRole('button', { name: 'Vender call coberta' }))
+    semLimite()
+    fireEvent.click(screen.getByRole('button', { name: 'Simular a venda de PETRK600' }))
+    expect(screen.getByRole('button', { name: 'Venda coberta' }).getAttribute('aria-pressed')).toBe('true')
+    expect(screen.getByText(/Venda coberta com a série/)).toBeDefined()
+    expect((screen.getByLabelText('Strike') as HTMLInputElement).value).toBe('60,00')
+    expect((screen.getByLabelText('Prêmio por opção') as HTMLInputElement).value).toBe('2,80')
+    expect((screen.getByLabelText('Preço do ativo hoje') as HTMLInputElement).value).toBe('60,00')
+  })
+
+  it('o "voltar" do navegador, a partir das estratégias abertas pelo ranking, volta ao ranking', async () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    abrirTop()
+    semLimite()
+    fireEvent.click(screen.getByRole('button', { name: 'Simular a venda de PETRW600' }))
+    expect(screen.getByTestId('ativo-estrategia')).toBeDefined()
+    window.history.back()
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Sem limite' })).toBeDefined())
+    expect(screen.queryByTestId('ativo-estrategia')).toBeNull()
+  })
+
+  it('explica o método e os limites', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    abrirTop()
+    expect(screen.getByText('Como o ranking é calculado')).toBeDefined()
+    expect(screen.getByText(/Quem paga o maior prêmio, para um mesmo risco\?/)).toBeDefined()
+  })
+})

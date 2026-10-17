@@ -1,10 +1,11 @@
 import { useEffect, useId, useMemo, useState } from 'react'
-import { SNAPSHOT_MERCADO } from '../data/snapshotMercado'
+import type { ReactNode } from 'react'
+import { jurosPadrao } from '../data/jurosOpcoes'
 import {
-  FILTRO_VAZIO, buscarAtivos, diasUteis, expandirSnapshot, faixaPerto, filtrarSeries, limitesDeStrike, montarLinha,
-  ordenarLinhas, seriesDosProximosMeses, strikesDistintos, tipoVencimento, vencimentosDe,
+  FILTRO_VAZIO, buscarAtivos, diasUteis, expandirSnapshot, faixaPerto, filtrarSeries, limitarAosProximosMeses, limitesDeStrike, montarLinha,
+  ordenarLinhas, strikesDistintos, tipoVencimento, vencimentosDe,
 } from '../domain/opcoes'
-import type { AtivoComOpcoes, ChaveOrdem, FiltroEstilo, FiltroSeries, FiltroTipo, LinhaOpcao, Ordem, SerieOpcao, SnapshotOpcoes } from '../domain/opcoes'
+import type { AtivoComOpcoes, ChaveOrdem, EscolhaDeSeries, FiltroEstilo, FiltroSeries, FiltroTipo, LinhaOpcao, Ordem, SnapshotOpcoes } from '../domain/opcoes'
 import {
   DIAS_UTEIS_ANO, ESTRATEGIAS, analisar, curva, custoDeMontagem, faixaDoGrafico, gregasDaPosicao, montarPosicao,
   resultadoAntesDoVencimento, resultadoNoVencimento, validarEntrada, volatilidadeImplicita,
@@ -17,25 +18,22 @@ import { AvisoEducacional } from '../ui/AvisoEducacional'
 import { AbasDaTela } from '../ui/AbasDaTela'
 import { CampoReais } from '../ui/CampoReais'
 import { CampoNumero } from '../ui/CampoNumero'
+import { TopPremiosOpcoes } from './TopPremiosOpcoes'
 import { FaixaDeStrike } from '../ui/FaixaDeStrike'
 import { GraficoPayoff } from '../ui/GraficoPayoff'
 import type { AppCtx } from '../state/useAppState'
 
+type Aba = 'series' | 'premios' | 'estrategias'
+
 const LINHAS_POR_PAGINA = 100
 const ATALHOS_PERTO = [5, 10, 20] as const
 const MAIS_NEGOCIADOS = 12
-const jurosPadrao = () => SNAPSHOT_MERCADO.indicadores?.selicMeta?.valor ?? 14
 
 const num = (v: number | null, casas = 2) => (v === null ? '—' : v.toLocaleString('pt-BR', { minimumFractionDigits: casas, maximumFractionDigits: casas }))
 const dinheiro = (v: number) => (v < 0 ? `−${reais(-v)}` : reais(v))
 const dataCurta = (iso: string) => `${iso.slice(8, 10)}/${iso.slice(5, 7)}`
 const rotuloTipo = (t: 'call' | 'put') => (t === 'call' ? 'CALL' : 'PUT')
 
-/** Séries escolhidas na tabela, levadas ao simulador de estratégias. */
-interface EscolhaDeSeries {
-  ativo: AtivoComOpcoes
-  series: SerieOpcao[]
-}
 
 type EstadoDados = { tipo: 'carregando' } | { tipo: 'erro' } | { tipo: 'pronto'; dados: SnapshotOpcoes }
 
@@ -80,7 +78,7 @@ export function SimuleOpcoes({ snapshot }: {
   snapshot?: SnapshotOpcoes
 }) {
   const [estado, recarregar] = useSnapshot(snapshot)
-  const [aba, setAba] = useState<'series' | 'estrategias'>('series')
+  const [aba, setAba] = useState<Aba>('series')
   const [escolha, setEscolha] = useState<(EscolhaDeSeries & { n: number }) | null>(null)
   const [ativoAtual, setAtivoAtual] = useState<AtivoComOpcoes | null>(null)
 
@@ -88,28 +86,51 @@ export function SimuleOpcoes({ snapshot }: {
   // estratégias cria uma entrada no histórico, e o popstate devolve a aba.
   useEffect(() => {
     if (window.history.state?.opcoesAba) window.history.replaceState(null, '')
-    const aoVoltar = () => setAba(window.history.state?.opcoesAba === 'estrategias' ? 'estrategias' : 'series')
+    const aoVoltar = () => {
+      const guardada = window.history.state?.opcoesAba
+      setAba(guardada === 'estrategias' || guardada === 'premios' ? guardada : 'series')
+    }
     window.addEventListener('popstate', aoVoltar)
     return () => window.removeEventListener('popstate', aoVoltar)
   }, [])
 
-  const irPara = (nova: 'series' | 'estrategias') => {
+  // `empilhar`: abrir as estratégias a partir de uma linha cria uma entrada no histórico (o "voltar" volta de onde veio);
+  // trocar de aba pelas caixinhas só troca a entrada atual.
+  const irPara = (nova: Aba, empilhar = false) => {
     if (nova === aba) return
-    if (nova === 'estrategias') {
-      window.history.pushState({ opcoesAba: 'estrategias' }, '')
-      setAba('estrategias')
-    } else if (window.history.state?.opcoesAba === 'estrategias') {
-      window.history.back() // o popstate troca a aba
-    } else {
-      setAba('series')
+    if (nova === 'series') {
+      if (window.history.state?.opcoesAba) window.history.back() // o popstate troca a aba
+      else setAba('series')
+      return
     }
+    if (aba === 'series' || empilhar) window.history.pushState({ opcoesAba: nova }, '')
+    else window.history.replaceState({ opcoesAba: nova }, '')
+    setAba(nova)
   }
 
   const dados = estado.tipo === 'pronto' ? estado.dados : null
+  // Só vencimentos dos próximos 6 meses: o resto (opções muito longas) fica fora da tela.
+  const limitado = useMemo(() => (dados ? limitarAosProximosMeses(dados) : null), [dados])
+
+  /** Mostra o conteúdo quando os dados chegaram, ou o aviso de carregando ou de erro. */
+  const comDados = (conteudo: (d: SnapshotOpcoes) => ReactNode) =>
+    limitado ? (
+      conteudo(limitado)
+    ) : estado.tipo === 'erro' ? (
+      <div className="card col" style={{ gap: 8 }} role="alert">
+        <span style={{ fontWeight: 700 }}>Não consegui carregar as séries agora.</span>
+        <span className="muted small justify">Confira a conexão e tente de novo.</span>
+        <button className="chip" onClick={recarregar} style={{ alignSelf: 'flex-start' }}>Tentar de novo</button>
+      </div>
+    ) : (
+      <div className="card col" style={{ gap: 6 }} role="status">
+        <span style={{ fontWeight: 700 }}>Carregando as séries da B3…</span>
+      </div>
+    )
 
   const criarEstrategia = (e: EscolhaDeSeries) => {
     setEscolha({ ...e, n: (escolha?.n ?? 0) + 1 })
-    irPara('estrategias')
+    irPara('estrategias', true)
   }
 
   return (
@@ -132,23 +153,14 @@ export function SimuleOpcoes({ snapshot }: {
         aoMudar={irPara}
         abas={[
           { id: 'series', emoji: '📋', titulo: 'Séries da B3', descricao: 'Strike, vencimento e prêmio' },
+          { id: 'premios', emoji: '🏆', titulo: 'Top 15 prêmios', descricao: 'Quem paga mais' },
           { id: 'estrategias', emoji: '📈', titulo: 'Estratégias', descricao: 'Payoff, tempo e gregas' },
         ] as const}
       >
         {aba === 'series' ? (
-          estado.tipo === 'pronto' ? (
-            <SeriesDaB3 snapshot={estado.dados} onCriar={criarEstrategia} onAtivo={setAtivoAtual} />
-          ) : estado.tipo === 'carregando' ? (
-            <div className="card col" style={{ gap: 6 }} role="status">
-              <span style={{ fontWeight: 700 }}>Carregando as séries da B3…</span>
-            </div>
-          ) : (
-            <div className="card col" style={{ gap: 8 }} role="alert">
-              <span style={{ fontWeight: 700 }}>Não consegui carregar as séries agora.</span>
-              <span className="muted small justify">Confira a conexão e tente de novo.</span>
-              <button className="chip" onClick={recarregar} style={{ alignSelf: 'flex-start' }}>Tentar de novo</button>
-            </div>
-          )
+          comDados((d) => <SeriesDaB3 snapshot={d} onCriar={criarEstrategia} onAtivo={setAtivoAtual} />)
+        ) : aba === 'premios' ? (
+          comDados((d) => <TopPremiosOpcoes snapshot={d} onSimular={criarEstrategia} />)
         ) : (
           <Estrategias key={escolha?.n ?? 0} escolha={escolha} ativoAtual={ativoAtual} dataPregao={dados?.dataPregao ?? null} aoVoltar={() => irPara('series')} />
         )}
@@ -171,15 +183,7 @@ export function SimuleOpcoes({ snapshot }: {
 // Aba 1: séries reais
 // ---------------------------------------------------------------------------------------
 
-function SeriesDaB3({ snapshot: completo, onCriar, onAtivo }: { snapshot: SnapshotOpcoes; onCriar: (e: EscolhaDeSeries) => void; onAtivo: (a: AtivoComOpcoes) => void }) {
-  // Só vencimentos dos próximos 6 meses: o resto (opções muito longas) fica fora da tela.
-  const snapshot = useMemo<SnapshotOpcoes>(() => {
-    const hoje = completo.dataPregao ?? new Date().toISOString().slice(0, 10)
-    const ativos = completo.ativos
-      .map((a) => ({ ...a, series: seriesDosProximosMeses(a.series, hoje) }))
-      .filter((a) => a.series.length > 0)
-    return { ...completo, ativos }
-  }, [completo])
+function SeriesDaB3({ snapshot, onCriar, onAtivo }: { snapshot: SnapshotOpcoes; onCriar: (e: EscolhaDeSeries) => void; onAtivo: (a: AtivoComOpcoes) => void }) {
   const [ticker, setTicker] = useState(snapshot.ativos[0]?.ticker ?? '')
   const ativo = snapshot.ativos.find((a) => a.ticker === ticker) ?? snapshot.ativos[0]
   useEffect(() => {
@@ -575,6 +579,14 @@ function entradaPadrao(ativo: AtivoComOpcoes | null): EntradaEstrategia {
   }
 }
 
+/** Entrada inicial; vindo do ranking de calls cobertas, já abre a venda coberta com o strike e o prêmio da série. */
+function entradaInicial(escolha: EscolhaDeSeries | null, ativo: AtivoComOpcoes | null): EntradaEstrategia {
+  const base = entradaPadrao(ativo)
+  const serie = escolha?.series[0]
+  if (!escolha?.coberta || !serie) return base
+  return { ...base, estrategia: 'vendaCoberta', precoAtivo: escolha.ativo.cotacao, strikeBaixo: serie.strike, premioBaixo: serie.ultimo }
+}
+
 const DEFAULT: EntradaEstrategia = { estrategia: 'compraCall', precoAtivo: 30, strikeBaixo: 30, premioBaixo: 1.5, strikeAlto: 33, premioAlto: 0.6, quantidade: 100 }
 
 /** Uma série escolhida na tabela, com os campos que o usuário pode mexer no simulador. */
@@ -591,10 +603,10 @@ interface PernaEditavel {
 function Estrategias({ escolha, ativoAtual, dataPregao, aoVoltar }: { escolha: EscolhaDeSeries | null; ativoAtual: AtivoComOpcoes | null; dataPregao: string | null; aoVoltar: () => void }) {
   const ativo = escolha?.ativo ?? ativoAtual
   const hoje = dataPregao ?? new Date().toISOString().slice(0, 10)
-  const [modo, setModo] = useState<'padrao' | 'escolhidas'>(escolha ? 'escolhidas' : 'padrao')
-  const [e, setE] = useState<EntradaEstrategia>(() => entradaPadrao(ativo))
+  const [modo, setModo] = useState<'padrao' | 'escolhidas'>(escolha && !escolha.coberta ? 'escolhidas' : 'padrao')
+  const [e, setE] = useState<EntradaEstrategia>(() => entradaInicial(escolha, ativo))
   const [pernas, setPernas] = useState<PernaEditavel[]>(() =>
-    (escolha?.series ?? []).map((s) => ({ codigo: s.codigo, tipo: s.tipo, strike: s.strike, vencimento: s.vencimento, premio: s.ultimo, lado: 'compra', quantidade: 100 })),
+    (escolha && !escolha.coberta ? escolha.series : []).map((s) => ({ codigo: s.codigo, tipo: s.tipo, strike: s.strike, vencimento: s.vencimento, premio: s.ultimo, lado: escolha?.lado ?? 'compra', quantidade: 100 })),
   )
   const [dias, setDias] = useState(() => {
     const v = escolha?.series[0]?.vencimento
@@ -680,7 +692,14 @@ function Estrategias({ escolha, ativoAtual, dataPregao, aoVoltar }: { escolha: E
         </div>
       )}
 
-      {escolha && (
+      {escolha?.coberta && (
+        <div className="card-outline small justify" style={{ lineHeight: 1.5 }} role="note">
+          Venda coberta com a série <strong>{escolha.series[0].codigo}</strong> de <strong>{escolha.ativo.ticker}</strong>, pelo último preço dela.
+          Você precisa ter as ações; strike e prêmio podem ser alterados.
+        </div>
+      )}
+
+      {escolha && !escolha.coberta && (
         <div className="card-outline small justify" style={{ lineHeight: 1.5 }} role="note">
           Séries escolhidas de <strong>{escolha.ativo.ticker}</strong> ({pernas.map((p) => p.codigo).join(', ')}), com o último preço de cada uma.
           Você pode trocar compra por venda, a quantidade e o preço de cada série.

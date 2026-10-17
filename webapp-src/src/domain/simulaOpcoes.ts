@@ -196,6 +196,17 @@ export function precoBs(x: ParametrosBs): number {
   return tipo === 'call' ? s * cdfNormal(d1) - k * desconto * cdfNormal(d2) : k * desconto * cdfNormal(-d2) - s * cdfNormal(-d1)
 }
 
+/**
+ * Chance de a opção terminar dentro do dinheiro (e ser exercida) segundo o modelo, com a volatilidade dada: N(d2) na
+ * call e N(−d2) na put. É uma estimativa neutra ao risco, e não uma previsão: serve para comparar séries entre si.
+ */
+export function chanceDeExercicio(x: ParametrosBs): number {
+  const { tipo, s, strike: k, t, r, sigma } = x
+  if (t <= 0 || sigma <= 0) return (tipo === 'call' ? s > k : s < k) ? 1 : 0
+  const d2 = (Math.log(s / k) + (r - (sigma * sigma) / 2) * t) / (sigma * Math.sqrt(t))
+  return tipo === 'call' ? cdfNormal(d2) : cdfNormal(-d2)
+}
+
 export interface Gregas {
   delta: number
   gama: number

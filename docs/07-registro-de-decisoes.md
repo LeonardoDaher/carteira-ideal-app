@@ -1769,3 +1769,19 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 **Limites.** O preço é o do último negócio de cada série, não o preço atual de compra e venda. Sem corretagem, emolumentos, IR nem margem. Calendário de feriados da B3 escrito à mão em `domain/opcoes.ts` (2026 a 2028): conferir a cada ano. Volatilidade histórica do ativo fica para outra etapa (exige histórico de preços). Opções sobre índice (IBOV) e sobre futuros ficaram fora.
 
 **Testes.** 35 de domínio (payoff, análise, Black-Scholes, gregas, volatilidade implícita, filtros, dias úteis, ordenação, busca), 20 da tela e 11 do job; hub e `?tela=` atualizados.
+
+## D97 (17/10/2026): Top 15 maiores prêmios de opções (aba nova do Simule Opções)
+
+**Decisão.** Terceira aba do Simule Opções, "Top 15 prêmios", que responde: **para um mesmo risco, quem paga o maior prêmio** para quem vende opção. Metodologia completa em `docs/12-metodologia-top15-premios-opcoes.md`. Descritivo e educacional, como os outros Top 15: o risco vai ao lado de cada linha (colchão, chance de exercício e volatilidade implícita), sem recomendação.
+
+**Cálculo.** Rendimento do prêmio sobre o dinheiro travado (strike na put vendida, preço do ativo na call coberta), levado a 21 dias úteis por regra de três simples. Só séries fora ou no dinheiro (nas dentro do dinheiro, parte do preço é valor intrínseco). Só séries que negociaram no último pregão, com 10 negócios ou mais e 3 dias úteis ou mais até o vencimento. Cada linha tem "Simular": a put vendida abre as Estratégias com a série vendida, e a call coberta abre a venda coberta já preenchida.
+
+**O que mudou no caminho (erro meu, corrigido).** A primeira versão ordenava por "prêmio por risco" (rendimento ÷ chance de exercício). Não serve: o prêmio cai mais rápido que o risco quando o strike se afasta, então a razão sempre favorece as opções perto do preço e não mede "pouco risco por muito prêmio". Trocou-se por um **limite de risco escolhido pela pessoa** (chance máxima de exercício: 10%, 15%, 25%, 40% ou sem limite; padrão 25%), e o ranking compara os prêmios dentro dele. Também o padrão passou a ser **só vencimentos mensais**: com os dados reais, as semanais de 4 dias úteis dominavam a lista (MGLU3 a 11,5% "ao mês") por causa da extrapolação linear e do degrau de R$ 0,01 do preço.
+
+**Resultado com dados reais (16/10/2026, vencimento de 19/11, chance de exercício até cerca de 25%).** BBAS3 rende 2,5% em 21 dias úteis, PETR4 1,9% e VALE3 1,1%; MGLU3 5,5% e ANIM3 3,1%. O topo da venda de put é de varejo, imobiliárias e locadoras, com volatilidade implícita de 100% a 170%: prêmio alto é incerteza alta, e é isso que a tela deixa visível.
+
+**Comparação com um método público.** Um vídeo de educador de opções (julho de 2026) fixa o vencimento, compara as opções na linha do dinheiro, trata o ranking como filtro e cruza com fundamentos e tendência. Coincide com nosso foco no valor extrínseco, no vencimento fixo e no ranking como filtro; difere ao comparar só a opção ATM (que ordena por volatilidade), enquanto nós fixamos a chance de exercício. O cruzamento com dívida, lucro e tendência do ativo **não está feito** (ideia: ligar às listas de ações baratas e endividadas que o app já tem).
+
+**Limites.** O preço é o do último negócio, e não o de compra e venda: o prêmio realmente recebido pode ser menor. Dividendos, corretagem, emolumentos, IR e margem de garantia ficam de fora. A chance de exercício é estimativa do modelo, e não previsão.
+
+**Testes.** 14 de cálculo do ranking (`premios.test.ts`), 3 da chance de exercício e 9 da aba (`SimuleOpcoesPremios.test.tsx`).

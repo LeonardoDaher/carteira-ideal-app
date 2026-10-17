@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
-  analisar, cdfNormal, custoDeMontagem, gregas, gregasDaPosicao, montarPosicao, precoBs, resultadoAntesDoVencimento,
+  chanceDeExercicio, analisar, cdfNormal, custoDeMontagem, gregas, gregasDaPosicao, montarPosicao, precoBs, resultadoAntesDoVencimento,
   resultadoNoVencimento, validarEntrada, volatilidadeImplicita,
 } from './simulaOpcoes'
 import type { EntradaEstrategia } from './simulaOpcoes'
@@ -128,5 +128,32 @@ describe('antes do vencimento', () => {
     expect(coberta.delta).toBeGreaterThan(0)
     expect(coberta.delta).toBeLessThan(100)
     expect(coberta.teta).toBeGreaterThan(0)
+  })
+})
+
+describe('chance de exercício', () => {
+  const base = { s: 100, strike: 100, t: 0.25, r: 0.1, sigma: 0.3 }
+
+  it('call e put no dinheiro ficam perto de metade; a put é o complemento da call', () => {
+    const c = chanceDeExercicio({ ...base, tipo: 'call' })
+    const p = chanceDeExercicio({ ...base, tipo: 'put' })
+    expect(c).toBeGreaterThan(0.4)
+    expect(c).toBeLessThan(0.6)
+    expect(c + p).toBeCloseTo(1, 10)
+  })
+
+  it('put fora do dinheiro tem chance menor, e cai mais ainda com o strike mais longe ou a volatilidade menor', () => {
+    const perto = chanceDeExercicio({ ...base, tipo: 'put', strike: 95 })
+    const longe = chanceDeExercicio({ ...base, tipo: 'put', strike: 80 })
+    const calmo = chanceDeExercicio({ ...base, tipo: 'put', strike: 95, sigma: 0.15 })
+    expect(perto).toBeLessThan(0.4)
+    expect(longe).toBeLessThan(perto)
+    expect(calmo).toBeLessThan(perto)
+  })
+
+  it('sem tempo ou sem volatilidade, é 0 ou 1 conforme o dinheiro', () => {
+    expect(chanceDeExercicio({ ...base, tipo: 'put', strike: 105, t: 0 })).toBe(1)
+    expect(chanceDeExercicio({ ...base, tipo: 'put', strike: 95, t: 0 })).toBe(0)
+    expect(chanceDeExercicio({ ...base, tipo: 'call', strike: 95, sigma: 0 })).toBe(1)
   })
 })
