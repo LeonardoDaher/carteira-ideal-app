@@ -1,6 +1,6 @@
 # Auditoria: Top 15 empresas mais endividadas
 
-Execução com preços de **2026-10-16** · metodologia **v1.0.0**. Sem rede: parte das demonstrações da CVM congeladas na auditoria das ações baratas.
+Execução com preços de **2026-10-16** · metodologia **v1.1.0**. Sem rede: parte das demonstrações da CVM congeladas na auditoria das ações baratas.
 
 ## O que tem aqui
 

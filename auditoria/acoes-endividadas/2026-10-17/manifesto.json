@@ -1,16 +1,16 @@
 {
   "esquema": 1,
-  "versaoMetodologia": "1.0.0",
-  "geradoEm": "2026-10-17T15:08:09.715Z",
+  "versaoMetodologia": "1.1.0",
+  "geradoEm": "2026-10-17T15:37:32.448Z",
   "dataExecucao": "2026-10-17",
   "dataPrecos": "2026-10-16",
   "dataCorte": "2026-10-05",
   "origemInsumos": "auditoria/acoes-baratas/2026-10-05",
   "ambiente": {
     "node": "v22.23.3",
-    "plataforma": "win32",
-    "commit": null,
-    "execucao": null
+    "plataforma": "linux",
+    "commit": "c3df8344c9b953f2d75227d97dec0287a266c30c",
+    "execucao": "39045853841"
   },
   "codigo": {
     "calculoSha256": "37d26cf294689f4f78875dd23bfd6500373265e58482aa55c60c2d2c22bfcef2",
@@ -18,16 +18,16 @@
     "baseSha256": "a74e0604268ee993f37f22c62e0a2549dcc99371c829bc2d625f9cc1573d7d24"
   },
   "hashes": {
-    "config": "09b97a3086f644dda813c75706fe43c96ed4b87a66a816c9f45efd4f44628ac9",
+    "config": "e8f089bcce1bda9a815d3b7e05fd86e7e743768be098abcd2ee67e50b24fee7c",
     "insumos": "e27441997b98724c3a98d8f019f5f9075bb55eb53a11da6a5e51050ef0b64137",
-    "resultado": "5ecac0229d3d206b79c203a60e09f1bcb8b5316c10a186763cf5c61aeb2960c8",
+    "resultado": "f4bf88747d09ff717e1acba7c40c531e46397094e8e1516053d235ce3f395da6",
     "memoria": "d27183b6c6871d0ab16b6a0b650c951e067769c95a751f3bd712d576e64718a8",
     "arquivos": {
-      "insumos.json.gz": "7e20d21f280628a2292e0d70c2c6a13899847fc9b8b3e472aa14af4a3511853f",
-      "config.json": "65bb5933b227144d3bd7b564a0e9a00aeaec9197152ea959ce56d92380973cf9",
+      "insumos.json.gz": "ca759aff899a554810e36228662aec2cf0cbfcf30974b8ec051129cb6708e854",
+      "config.json": "da6c4aca6080a80978324a1baf6b2e962f77ade812c412008b123063143c65cd",
       "config-base.json": "68da7bb4b0117b573fbdfaa3b228c0d38210694168365ef793adf124a0aef572",
-      "resultado.json": "196913da8003ca29e075b52693c3c66efb45aa18ae782f279eb5d40456dc5ab1",
-      "memoria-de-calculo.json.gz": "97139ec1e486762a8fd8a6c3d9414228bb54606cfc6d56b5df943f1ef8b5b6de",
+      "resultado.json": "8389a426a3121cf25ba4ed878612c626d9d360ef7abb1cbf80db0198b7813d6d",
+      "memoria-de-calculo.json.gz": "fb9a6fba0edb4711ef22f34e56f4bf7426a8e39ab78fe622ad6d82a8cda2f12f",
       "ranking.csv": "63a8297dd2c643d1def63d822d023ad010a121d13026ab4590c7219ccae75cfc",
       "sem-ebitda-positivo.csv": "2413192234c628c31faa56898ba2ef0326774f911a80e1082bd0e194ae806c17",
       "exclusoes.csv": "7610fd85c04f55c11ff5ac160ed72af5220e53de6673f9839942d9bf1242adc3"
@@ -84,5 +84,5 @@
       }
     ]
   },
-  "publicadoNoApp": false
+  "publicadoNoApp": true
 }
