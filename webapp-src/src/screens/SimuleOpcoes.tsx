@@ -2,7 +2,7 @@ import { useEffect, useId, useMemo, useState } from 'react'
 import { SNAPSHOT_MERCADO } from '../data/snapshotMercado'
 import {
   FILTRO_VAZIO, buscarAtivos, diasUteis, expandirSnapshot, faixaPerto, filtrarSeries, limitesDeStrike, montarLinha,
-  ordenarLinhas, vencimentosDe,
+  ordenarLinhas, seriesDosProximosMeses, tipoVencimento, vencimentosDe,
 } from '../domain/opcoes'
 import type { AtivoComOpcoes, ChaveOrdem, FiltroEstilo, FiltroSeries, FiltroTipo, LinhaOpcao, Ordem, SerieOpcao, SnapshotOpcoes } from '../domain/opcoes'
 import {
@@ -81,12 +81,34 @@ export function SimuleOpcoes({ snapshot }: {
   const [estado, recarregar] = useSnapshot(snapshot)
   const [aba, setAba] = useState<'series' | 'estrategias'>('series')
   const [escolha, setEscolha] = useState<(EscolhaDeSeries & { n: number }) | null>(null)
+  const [ativoAtual, setAtivoAtual] = useState<AtivoComOpcoes | null>(null)
+
+  // Voltar (botão do navegador ou do celular) a partir das estratégias leva às séries, e não para fora da tela: abrir as
+  // estratégias cria uma entrada no histórico, e o popstate devolve a aba.
+  useEffect(() => {
+    if (window.history.state?.opcoesAba) window.history.replaceState(null, '')
+    const aoVoltar = () => setAba(window.history.state?.opcoesAba === 'estrategias' ? 'estrategias' : 'series')
+    window.addEventListener('popstate', aoVoltar)
+    return () => window.removeEventListener('popstate', aoVoltar)
+  }, [])
+
+  const irPara = (nova: 'series' | 'estrategias') => {
+    if (nova === aba) return
+    if (nova === 'estrategias') {
+      window.history.pushState({ opcoesAba: 'estrategias' }, '')
+      setAba('estrategias')
+    } else if (window.history.state?.opcoesAba === 'estrategias') {
+      window.history.back() // o popstate troca a aba
+    } else {
+      setAba('series')
+    }
+  }
 
   const dados = estado.tipo === 'pronto' ? estado.dados : null
 
   const criarEstrategia = (e: EscolhaDeSeries) => {
     setEscolha({ ...e, n: (escolha?.n ?? 0) + 1 })
-    setAba('estrategias')
+    irPara('estrategias')
   }
 
   return (
@@ -106,7 +128,7 @@ export function SimuleOpcoes({ snapshot }: {
         prefixo="opcoes"
         rotulo="O que você quer ver"
         ativa={aba}
-        aoMudar={setAba}
+        aoMudar={irPara}
         abas={[
           { id: 'series', emoji: '📋', titulo: 'Séries da B3', descricao: 'Strike, vencimento e prêmio' },
           { id: 'estrategias', emoji: '📈', titulo: 'Estratégias', descricao: 'Payoff, tempo e gregas' },
@@ -114,7 +136,7 @@ export function SimuleOpcoes({ snapshot }: {
       >
         {aba === 'series' ? (
           estado.tipo === 'pronto' ? (
-            <SeriesDaB3 snapshot={estado.dados} onCriar={criarEstrategia} />
+            <SeriesDaB3 snapshot={estado.dados} onCriar={criarEstrategia} onAtivo={setAtivoAtual} />
           ) : estado.tipo === 'carregando' ? (
             <div className="card col" style={{ gap: 6 }} role="status">
               <span style={{ fontWeight: 700 }}>Carregando as séries da B3…</span>
@@ -127,7 +149,7 @@ export function SimuleOpcoes({ snapshot }: {
             </div>
           )
         ) : (
-          <Estrategias key={escolha?.n ?? 0} escolha={escolha} dataPregao={dados?.dataPregao ?? null} />
+          <Estrategias key={escolha?.n ?? 0} escolha={escolha} ativoAtual={ativoAtual} dataPregao={dados?.dataPregao ?? null} aoVoltar={() => irPara('series')} />
         )}
       </AbasDaTela>
 
@@ -148,9 +170,20 @@ export function SimuleOpcoes({ snapshot }: {
 // Aba 1: séries reais
 // ---------------------------------------------------------------------------------------
 
-function SeriesDaB3({ snapshot, onCriar }: { snapshot: SnapshotOpcoes; onCriar: (e: EscolhaDeSeries) => void }) {
+function SeriesDaB3({ snapshot: completo, onCriar, onAtivo }: { snapshot: SnapshotOpcoes; onCriar: (e: EscolhaDeSeries) => void; onAtivo: (a: AtivoComOpcoes) => void }) {
+  // Só vencimentos dos próximos 6 meses: o resto (opções muito longas) fica fora da tela.
+  const snapshot = useMemo<SnapshotOpcoes>(() => {
+    const hoje = completo.dataPregao ?? new Date().toISOString().slice(0, 10)
+    const ativos = completo.ativos
+      .map((a) => ({ ...a, series: seriesDosProximosMeses(a.series, hoje) }))
+      .filter((a) => a.series.length > 0)
+    return { ...completo, ativos }
+  }, [completo])
   const [ticker, setTicker] = useState(snapshot.ativos[0]?.ticker ?? '')
   const ativo = snapshot.ativos.find((a) => a.ticker === ticker) ?? snapshot.ativos[0]
+  useEffect(() => {
+    if (ativo) onAtivo(ativo)
+  }, [ativo, onAtivo])
 
   if (!ativo) {
     return (
@@ -237,8 +270,24 @@ function EscolhaDeAtivo({ snapshot, ativo, onEscolher }: { snapshot: SnapshotOpc
           </button>
         ))}
       </div>
-      <div className="tiny muted">
-        {ativo.ticker}: {reais(ativo.cotacao)} no fechamento. Opções negociam {formatarVolume(ativo.volumeOpcoes)} por dia ({ativo.series.length} séries com negócio nos últimos pregões).
+      <div className="card row-between" style={{ alignItems: 'flex-start', gap: 12 }} aria-label={`Preço de ${ativo.ticker} no mercado à vista`}>
+        <div className="col" style={{ gap: 2, minWidth: 0 }}>
+          <span className="font-display" style={{ fontWeight: 700, fontSize: 24 }}>{ativo.ticker}</span>
+          {ativo.nome && <span className="tiny muted">{ativo.nome}</span>}
+          <span className="tiny muted">
+            Opções negociam {formatarVolume(ativo.volumeOpcoes)} por dia ({ativo.series.length} séries nos próximos 6 meses).
+          </span>
+        </div>
+        <div className="col" style={{ gap: 2, alignItems: 'flex-end', flexShrink: 0 }}>
+          <span className="tiny muted">Preço à vista</span>
+          <span className="font-display" style={{ fontWeight: 700, fontSize: 24 }} data-testid="preco-ativo">{reais(ativo.cotacao)}</span>
+          {ativo.variacao != null && (
+            <span className="small" style={{ fontWeight: 700, color: corVar(ativo.variacao) }} data-testid="variacao-ativo">
+              {ativo.variacao > 0 ? '+' : ''}{num(ativo.variacao)}%
+            </span>
+          )}
+          <span className="tiny muted">fechamento de {formatarData(ativo.dataCotacao ?? snapshot.dataPregao ?? '')}</span>
+        </div>
       </div>
     </div>
   )
@@ -269,6 +318,8 @@ function TabelaDoAtivo({ snapshot, ativo, onCriar }: { snapshot: SnapshotOpcoes;
   const hoje = snapshot.dataPregao ?? new Date().toISOString().slice(0, 10)
   const vencimentos = useMemo(() => vencimentosDe(ativo.series), [ativo])
   const limites = useMemo(() => limitesDeStrike(ativo.series), [ativo])
+  const mensais = useMemo(() => vencimentos.filter((v) => tipoVencimento(v) === 'mensal'), [vencimentos])
+  const semanais = useMemo(() => vencimentos.filter((v) => tipoVencimento(v) === 'semanal'), [vencimentos])
   const [filtro, setFiltro] = useState<FiltroSeries>({ ...FILTRO_VAZIO, vencimentos: vencimentos.slice(0, 1) })
   const [ordem, setOrdem] = useState<Ordem>({ chave: 'strike', direcao: 'asc' })
   const [selecionadas, setSelecionadas] = useState<string[]>([])
@@ -333,20 +384,29 @@ function TabelaDoAtivo({ snapshot, ativo, onCriar }: { snapshot: SnapshotOpcoes;
           <span className="tiny muted">Americana pode ser exercida a qualquer momento até o vencimento; europeia, só no vencimento.</span>
         </div>
 
-        <fieldset className="col" style={{ gap: 6, border: 'none', padding: 0, margin: 0 }}>
-          <legend className="small" style={{ fontWeight: 600, padding: 0, marginBottom: 6 }}>Vencimentos</legend>
+        <fieldset className="col" style={{ gap: 8, border: 'none', padding: 0, margin: 0 }}>
+          <legend className="small" style={{ fontWeight: 600, padding: 0, marginBottom: 6 }}>Vencimentos (próximos 6 meses)</legend>
+          {([['mensal', 'Mensais (terceira sexta-feira)', mensais], ['semanal', 'Semanais', semanais]] as const).map(([grupo, titulo, lista]) =>
+            lista.length > 0 && (
+              <div key={grupo} className="col" style={{ gap: 6 }} role="group" aria-label={`Vencimentos ${grupo === 'mensal' ? 'mensais' : 'semanais'}`}>
+                <span className="tiny muted">{titulo}</span>
+                <div className="row" style={{ gap: 6, flexWrap: 'wrap' }}>
+                  {lista.map((v) => {
+                    const marcado = filtro.vencimentos.includes(v)
+                    return (
+                      <label key={v} className={`chip ${marcado ? 'selected' : ''}`} style={{ cursor: 'pointer', display: 'inline-flex', gap: 6, alignItems: 'center' }}>
+                        <input type="checkbox" checked={marcado} onChange={() => alternarVencimento(v)} style={{ accentColor: 'currentColor' }} />
+                        {formatarData(v)} ({diasUteis(v, hoje)} d.u.)
+                      </label>
+                    )
+                  })}
+                </div>
+              </div>
+            ),
+          )}
           <div className="row" style={{ gap: 6, flexWrap: 'wrap' }}>
-            {vencimentos.map((v) => {
-              const marcado = filtro.vencimentos.includes(v)
-              return (
-                <label key={v} className={`chip ${marcado ? 'selected' : ''}`} style={{ cursor: 'pointer', display: 'inline-flex', gap: 6, alignItems: 'center' }}>
-                  <input type="checkbox" checked={marcado} onChange={() => alternarVencimento(v)} style={{ accentColor: 'currentColor' }} />
-                  {formatarData(v)} ({diasUteis(v, hoje)} d.u.)
-                </label>
-              )
-            })}
-          </div>
-          <div className="row" style={{ gap: 6, flexWrap: 'wrap' }}>
+            <button className="chip" onClick={() => mudar({ vencimentos: [...mensais] })}>Só mensais</button>
+            <button className="chip" onClick={() => mudar({ vencimentos: [...semanais] })} disabled={semanais.length === 0}>Só semanais</button>
             <button className="chip" onClick={() => mudar({ vencimentos: [...vencimentos] })}>Todos os vencimentos</button>
             <button className="chip" onClick={() => mudar({ vencimentos: [] })}>Nenhum (mostra todos)</button>
           </div>
@@ -357,7 +417,6 @@ function TabelaDoAtivo({ snapshot, ativo, onCriar }: { snapshot: SnapshotOpcoes;
           <div className="row" style={{ gap: 10, flexWrap: 'wrap' }}>
             <div style={{ flex: '1 1 130px' }}>
               <CampoReais
-                key={`min-${filtro.strikeMin ?? 'x'}`}
                 rotulo="Strike mínimo"
                 valor={filtro.strikeMin ?? 0}
                 onMudar={(v) => mudar({ strikeMin: v > 0 ? v : null })}
@@ -365,7 +424,6 @@ function TabelaDoAtivo({ snapshot, ativo, onCriar }: { snapshot: SnapshotOpcoes;
             </div>
             <div style={{ flex: '1 1 130px' }}>
               <CampoReais
-                key={`max-${filtro.strikeMax ?? 'x'}`}
                 rotulo="Strike máximo"
                 valor={filtro.strikeMax ?? 0}
                 onMudar={(v) => mudar({ strikeMax: v > 0 ? v : null })}
@@ -502,6 +560,20 @@ function LinhaDaTabela({ l, dataPregao, marcada, onAlternar }: { l: LinhaOpcao; 
 // Aba 2: estratégias
 // ---------------------------------------------------------------------------------------
 
+/** Entrada inicial: com um ativo escolhido, parte do preço dele (strikes perto do preço e prêmios de exemplo). */
+function entradaPadrao(ativo: AtivoComOpcoes | null): EntradaEstrategia {
+  if (!ativo) return DEFAULT
+  const r = (v: number) => Math.round(v * 100) / 100
+  return {
+    ...DEFAULT,
+    precoAtivo: ativo.cotacao,
+    strikeBaixo: r(ativo.cotacao),
+    strikeAlto: r(ativo.cotacao * 1.1),
+    premioBaixo: r(ativo.cotacao * 0.03),
+    premioAlto: r(ativo.cotacao * 0.015),
+  }
+}
+
 const DEFAULT: EntradaEstrategia = { estrategia: 'compraCall', precoAtivo: 30, strikeBaixo: 30, premioBaixo: 1.5, strikeAlto: 33, premioAlto: 0.6, quantidade: 100 }
 
 /** Uma série escolhida na tabela, com os campos que o usuário pode mexer no simulador. */
@@ -515,10 +587,11 @@ interface PernaEditavel {
   quantidade: number
 }
 
-function Estrategias({ escolha, dataPregao }: { escolha: EscolhaDeSeries | null; dataPregao: string | null }) {
+function Estrategias({ escolha, ativoAtual, dataPregao, aoVoltar }: { escolha: EscolhaDeSeries | null; ativoAtual: AtivoComOpcoes | null; dataPregao: string | null; aoVoltar: () => void }) {
+  const ativo = escolha?.ativo ?? ativoAtual
   const hoje = dataPregao ?? new Date().toISOString().slice(0, 10)
   const [modo, setModo] = useState<'padrao' | 'escolhidas'>(escolha ? 'escolhidas' : 'padrao')
-  const [e, setE] = useState<EntradaEstrategia>(() => (escolha ? { ...DEFAULT, precoAtivo: escolha.ativo.cotacao } : DEFAULT))
+  const [e, setE] = useState<EntradaEstrategia>(() => entradaPadrao(ativo))
   const [pernas, setPernas] = useState<PernaEditavel[]>(() =>
     (escolha?.series ?? []).map((s) => ({ codigo: s.codigo, tipo: s.tipo, strike: s.strike, vencimento: s.vencimento, premio: s.ultimo, lado: 'compra', quantidade: 100 })),
   )
@@ -593,6 +666,19 @@ function Estrategias({ escolha, dataPregao }: { escolha: EscolhaDeSeries | null;
 
   return (
     <>
+      <button className="chip" onClick={aoVoltar} style={{ alignSelf: 'flex-start' }}>← Voltar às séries</button>
+
+      {ativo ? (
+        <div className="card-outline small justify" style={{ lineHeight: 1.5 }} role="note" data-testid="ativo-estrategia">
+          Ativo: <strong>{ativo.ticker}</strong>, preço à vista <strong>{reais(ativo.cotacao)}</strong>
+          {ativo.dataCotacao ? ` (fechamento de ${formatarData(ativo.dataCotacao)})` : ''}. O campo "Preço do ativo hoje" já vem com esse valor e pode ser alterado.
+        </div>
+      ) : (
+        <div className="card-outline small justify" style={{ lineHeight: 1.5 }} role="note">
+          Sem ativo escolhido: os valores abaixo são de exemplo. Escolha um ativo na aba Séries da B3 para partir do preço dele.
+        </div>
+      )}
+
       {escolha && (
         <div className="card-outline small justify" style={{ lineHeight: 1.5 }} role="note">
           Séries escolhidas de <strong>{escolha.ativo.ticker}</strong> ({pernas.map((p) => p.codigo).join(', ')}), com o último preço de cada uma.

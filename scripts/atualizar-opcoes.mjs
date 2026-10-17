@@ -44,6 +44,7 @@ export const URL_CADASTRO = (token) => `https://arquivos.b3.com.br/api/download/
 
 export const CONFIG = {
   pregoesNaJanela: 5,
+  mesesDeVencimentos: 6,
   minimoAtivosParaPublicar: 60,
   minimoSeriesParaPublicar: 5000,
   controle: ['PETR4', 'VALE3', 'BOVA11'],
@@ -67,6 +68,15 @@ const dataIso = (aaaammdd) => {
   return `${t.slice(0, 4)}-${t.slice(4, 6)}-${t.slice(6, 8)}`
 }
 
+/** Soma meses a uma data AAAA-MM-DD, limitando o dia ao último do mês de destino (31/08 + 6 meses = 28/02). */
+export function adicionarMeses(iso, meses) {
+  const total = Number(iso.slice(5, 7)) - 1 + meses
+  const alvo = new Date(Date.UTC(Number(iso.slice(0, 4)) + Math.floor(total / 12), ((total % 12) + 12) % 12, 1))
+  const ultimoDia = new Date(Date.UTC(alvo.getUTCFullYear(), alvo.getUTCMonth() + 1, 0)).getUTCDate()
+  alvo.setUTCDate(Math.min(Number(iso.slice(8, 10)), ultimoDia))
+  return alvo.toISOString().slice(0, 10)
+}
+
 /** "4,37" -> 4.37; vazio ou inválido -> null. */
 export const numeroBr = (texto) => {
   const t = String(texto ?? '').trim()
@@ -77,9 +87,10 @@ export const numeroBr = (texto) => {
 
 /**
  * Lê o cadastro (CSV com ";"). Devolve um Map código -> série, só com opções de ações e ETFs que ainda não venceram na
- * data de referência. Procura as colunas pelo nome do cabeçalho, para não quebrar se a B3 reordenar.
+ * data de referência e que vencem em até `meses` meses (a tela mostra só os próximos 6). Procura as colunas pelo nome do cabeçalho, para não quebrar se a B3 reordenar.
  */
-export function lerCadastro(texto, dataReferencia) {
+export function lerCadastro(texto, dataReferencia, meses = CONFIG.mesesDeVencimentos) {
+  const limite = adicionarMeses(dataReferencia, meses)
   const linhas = texto.split(/\r?\n/)
   const iCab = linhas.findIndex((l) => l.startsWith('RptDt;'))
   if (iCab === -1) throw new Error('Cadastro sem cabeçalho (RptDt).')
@@ -97,7 +108,7 @@ export function lerCadastro(texto, dataReferencia) {
     const strike = numeroBr(c[col.ExrcPric])
     const vencimento = c[col.XprtnDt]
     if (!tipo || !estilo || !strike || strike <= 0 || !/^\d{4}-\d{2}-\d{2}$/.test(vencimento)) continue
-    if (vencimento <= dataReferencia) continue
+    if (vencimento <= dataReferencia || vencimento > limite) continue
     series.set(c[col.TckrSymb].toUpperCase(), {
       codigo: c[col.TckrSymb].toUpperCase(),
       ativo: c[col.Asst].toUpperCase(),
@@ -177,8 +188,10 @@ export function montarSnapshot(cadastro, pregoes, agora = new Date()) {
   }
   const ativos = []
   for (const [ticker, lista] of porAtivo) {
-    const papel = pregoes.map((p) => p.vista.get(ticker)).find(Boolean)
-    if (!papel) continue
+    const iPapel = pregoes.findIndex((p) => p.vista.has(ticker))
+    if (iPapel === -1) continue
+    const papel = pregoes[iPapel].vista.get(ticker)
+    const anteriorPapel = pregoes.slice(iPapel + 1).map((p) => p.vista.get(ticker)).find(Boolean)
     lista.sort(
       (a, b) =>
         a.serie.vencimento.localeCompare(b.serie.vencimento) ||
@@ -190,6 +203,8 @@ export function montarSnapshot(cadastro, pregoes, agora = new Date()) {
       ticker,
       nome: papel.nome,
       cotacao: arredondar(papel.ultimo),
+      dataCotacao: pregoes[iPapel].data,
+      variacao: anteriorPapel ? arredondar((papel.ultimo / anteriorPapel.ultimo - 1) * 100) : null,
       volumeOpcoes: Math.round(lista.filter((x) => x.noNovo).reduce((s, x) => s + x.negocio.volume, 0)),
       lote: lista[0].serie.lote,
       series: lista.map((x) => [

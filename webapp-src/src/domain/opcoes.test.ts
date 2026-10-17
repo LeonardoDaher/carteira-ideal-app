@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
-  FILTRO_VAZIO, buscarAtivos, diasAte, diasUteis, expandirSnapshot, faixaPerto, filtrarSeries, limitesDeStrike, montarLinha,
+  FILTRO_VAZIO, adicionarMeses, buscarAtivos, diasAte, diasUteis, seriesDosProximosMeses, tipoVencimento, expandirSnapshot, faixaPerto, filtrarSeries, limitesDeStrike, montarLinha,
   moneyness, ordenarLinhas, vencimentosDe,
 } from './opcoes'
 import type { AtivoComOpcoes, SerieOpcao, SnapshotOpcoesBruto } from './opcoes'
@@ -147,5 +147,34 @@ describe('ordenarLinhas', () => {
     const linhas = [l('B', 12, 1), l('A', 10, 2)]
     expect(ordenarLinhas(linhas, { chave: 'codigo', direcao: 'asc' }).map((x) => x.codigo)).toEqual(['A', 'B'])
     expect(linhas.map((x) => x.codigo)).toEqual(['B', 'A'])
+  })
+})
+
+describe('vencimentos: 6 meses e mensal x semanal', () => {
+  it('adicionarMeses mantém o dia e limita ao fim do mês', () => {
+    expect(adicionarMeses('2026-10-16', 6)).toBe('2027-04-16')
+    expect(adicionarMeses('2026-08-31', 6)).toBe('2027-02-28')
+    expect(adicionarMeses('2026-11-30', 3)).toBe('2027-02-28')
+    expect(adicionarMeses('2026-10-16', 14)).toBe('2027-12-16')
+  })
+
+  it('seriesDosProximosMeses guarda só o que vence em até 6 meses, com o limite incluído', () => {
+    const lista = [s('A', 'call', 10, '2026-11-19'), s('B', 'call', 10, '2027-04-16'), s('C', 'call', 10, '2027-04-17'), s('D', 'call', 10, '2028-01-21')]
+    expect(codigos(seriesDosProximosMeses(lista, '2026-10-16'))).toEqual(['A', 'B'])
+  })
+
+  it('tipoVencimento: terceira sexta é mensal, as outras sextas são semanais', () => {
+    expect(tipoVencimento('2026-10-16')).toBe('mensal') // 3ª sexta de outubro
+    expect(tipoVencimento('2026-10-23')).toBe('semanal')
+    expect(tipoVencimento('2026-10-30')).toBe('semanal')
+    expect(tipoVencimento('2026-12-18')).toBe('mensal')
+    expect(tipoVencimento('2027-01-15')).toBe('mensal')
+    expect(tipoVencimento('2027-01-08')).toBe('semanal')
+  })
+
+  it('tipoVencimento: quinta antes de sexta feriada é mensal (19/11/2026, pois 20/11 é feriado)', () => {
+    expect(tipoVencimento('2026-11-19')).toBe('mensal')
+    expect(tipoVencimento('2026-11-12')).toBe('semanal') // quinta comum
+    expect(tipoVencimento('2026-11-27')).toBe('semanal')
   })
 })

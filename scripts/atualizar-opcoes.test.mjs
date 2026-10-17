@@ -3,7 +3,7 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 import {
-  CONFIG, URL_COTAHIST, URL_PEDIDO_CADASTRO, lerCadastro, lerLinha, lerPregao, montarSnapshot, motivoInvalido, numeroBr,
+  CONFIG, URL_COTAHIST, adicionarMeses, URL_PEDIDO_CADASTRO, lerCadastro, lerLinha, lerPregao, montarSnapshot, motivoInvalido, numeroBr,
 } from './atualizar-opcoes.mjs'
 
 const campo = (valor, tamanho, direita = false) => (direita ? String(valor).padStart(tamanho, '0') : String(valor).padEnd(tamanho, ' '))
@@ -66,11 +66,19 @@ describe('numeroBr e URLs', () => {
   })
 })
 
+describe('adicionarMeses', () => {
+  it('mantém o dia e limita ao fim do mês', () => {
+    assert.equal(adicionarMeses('2026-10-16', 6), '2027-04-16')
+    assert.equal(adicionarMeses('2026-08-31', 6), '2027-02-28')
+  })
+})
+
 describe('lerCadastro', () => {
   const cad = lerCadastro(cadastroTexto, '2026-10-16')
 
   it('guarda só opções de ações e ETFs que ainda não venceram, com estilo, strike e lote', () => {
     assert.deepEqual([...cad.keys()].sort(), ['BOVAW200', 'PETRK450', 'PETRK600', 'PETRW600', 'SEMPRECO', 'VALEK700'])
+    assert.ok(!cad.has('PETRK999'))
     assert.deepEqual(cad.get('PETRK600'), { codigo: 'PETRK600', ativo: 'PETR4', tipo: 'call', estilo: 'europeia', strike: 6.01, vencimento: '2026-11-19', lote: 100 })
     assert.equal(cad.get('PETRK450').estilo, 'americana')
     assert.equal(cad.get('BOVAW200').lote, 1)
@@ -124,6 +132,9 @@ describe('montarSnapshot', () => {
     const petr = snap.ativos.find((a) => a.ticker === 'PETR4')
     assert.equal(petr.volumeOpcoes, 500_000)
     assert.equal(petr.cotacao, 60)
+    assert.equal(petr.dataCotacao, '2026-10-16')
+    assert.equal(petr.variacao, 1.69) // 60 contra 59 do pregão anterior
+    assert.equal(snap.ativos.find((a) => a.ticker === 'BOVA11').variacao, null) // só apareceu hoje
     assert.equal(snap.ativos.find((a) => a.ticker === 'BOVA11').lote, 1)
     assert.equal(snap.ativos[0].ticker, 'PETR4') // ordem por volume de opções
   })

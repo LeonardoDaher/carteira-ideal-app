@@ -26,7 +26,12 @@ export interface SerieOpcao {
 export interface AtivoComOpcoes {
   ticker: string
   nome: string
+  /** Preço do ativo-objeto no mercado à vista (fechamento). */
   cotacao: number
+  /** Pregão dessa cotação, AAAA-MM-DD. */
+  dataCotacao?: string
+  /** Variação (%) da cotação contra o pregão anterior; null/ausente se não houver. */
+  variacao?: number | null
   /** Volume financeiro de opções do ativo no último pregão. */
   volumeOpcoes: number
   /** Lote de contrato (100 nas ações, 1 em alguns ETFs). */
@@ -182,6 +187,42 @@ export function diasUteis(vencimento: string, hoje: string): number {
     total++
   }
   return total
+}
+
+/** Prazo máximo dos vencimentos mostrados: os próximos 6 meses a partir do último pregão. */
+export const MESES_DE_VENCIMENTOS = 6
+
+/** Soma meses a uma data AAAA-MM-DD, limitando o dia ao último do mês de destino (31/08 + 6 meses = 28/02). */
+export function adicionarMeses(iso: string, meses: number): string {
+  const ano = +iso.slice(0, 4)
+  const mes = +iso.slice(5, 7) - 1 + meses
+  const alvo = Date.UTC(ano + Math.floor(mes / 12), ((mes % 12) + 12) % 12, 1)
+  const ultimoDia = new Date(Date.UTC(new Date(alvo).getUTCFullYear(), new Date(alvo).getUTCMonth() + 1, 0)).getUTCDate()
+  const d = new Date(alvo)
+  d.setUTCDate(Math.min(+iso.slice(8, 10), ultimoDia))
+  return d.toISOString().slice(0, 10)
+}
+
+/** Só as séries que vencem dentro dos próximos 6 meses (limite incluído). */
+export function seriesDosProximosMeses(series: SerieOpcao[], hoje: string, meses = MESES_DE_VENCIMENTOS): SerieOpcao[] {
+  const limite = adicionarMeses(hoje, meses)
+  return series.filter((s) => s.vencimento <= limite)
+}
+
+/**
+ * Vencimento mensal ou semanal. As opções mensais vencem na terceira sexta-feira do mês (na quinta, se essa sexta for
+ * feriado da B3, como em 19/11/2026); as semanais, nas outras sextas.
+ */
+export function tipoVencimento(iso: string): 'mensal' | 'semanal' {
+  const d = new Date(paraUtc(iso))
+  const diaSemana = d.getUTCDay()
+  const dia = d.getUTCDate()
+  if (diaSemana === 5 && dia >= 15 && dia <= 21) return 'mensal'
+  if (diaSemana === 4 && dia >= 14 && dia <= 20) {
+    const sexta = new Date(paraUtc(iso) + 86_400_000).toISOString().slice(0, 10)
+    if (FERIADOS_B3.has(sexta)) return 'mensal'
+  }
+  return 'semanal'
 }
 
 // ---------------------------------------------------------------------------------------
