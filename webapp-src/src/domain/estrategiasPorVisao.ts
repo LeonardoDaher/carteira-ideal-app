@@ -4,7 +4,7 @@ import { DIAS_UTEIS_ANO, analisar, custoDeMontagem, resultadoNoVencimento } from
 import type { Lado, Perna, Posicao } from './simulaOpcoes'
 import type { Visao } from './tendencia'
 
-// Motor de estruturas por visão de mercado (aba "Por visão de mercado"). Para um ativo, um vencimento e uma visão (alta,
+// Motor de estruturas por visão de mercado (aba "Tendência"). Para um ativo, um vencimento e uma visão (alta,
 // baixa, lateral ou muita oscilação), monta as estruturas que combinam com a visão usando as séries reais do último pregão e
 // mede cada candidata: custo ou crédito, ganho e perda máximos, equilíbrios, chance de lucro e retorno no cenário.
 //

@@ -1,7 +1,7 @@
 import { montarLinha } from './opcoes'
 import type { AtivoComOpcoes, TendenciaAtivo } from './opcoes'
 
-// Leitura da tendência do ativo, para a aba "Por visão de mercado". É uma leitura do PASSADO, feita com médias móveis e
+// Leitura da tendência do ativo, para a aba "Tendência". É uma leitura do PASSADO, feita com médias móveis e
 // retornos: não prevê nada, e a pessoa pode escolher outra visão.
 
 export type Visao = 'alta' | 'baixa' | 'lateral' | 'oscilacao'

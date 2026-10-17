@@ -22,7 +22,7 @@ const num = (v: number, casas = 1) => v.toLocaleString('pt-BR', { minimumFractio
 const dinheiro = (v: number) => (v < 0 ? `−${reais(-v)}` : reais(v))
 
 /**
- * Aba "Por visão de mercado": a pessoa escolhe o ativo, o app lê a tendência (do passado) e sugere uma visão; para a visão
+ * Aba "Tendência": a pessoa escolhe o ativo, o app lê a tendência (do passado) e sugere uma visão; para a visão
  * escolhida, monta as estruturas que combinam com ela com as séries reais do último pregão e mostra as candidatas de cada
  * uma, com custo, ganho, perda, equilíbrio e chance de lucro. Descritivo: não é recomendação de operação.
  */

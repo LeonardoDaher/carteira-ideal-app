@@ -10,7 +10,7 @@ const corVar = (v: number | null) => (v === null || v === 0 ? undefined : v > 0 
 
 /**
  * Busca de ativo (código ou nome), atalhos dos mais negociados em opções e o cartão com o preço à vista. Compartilhada pelas
- * abas Séries da B3 e Por visão de mercado.
+ * abas Séries da B3 e Tendência.
  */
 export function EscolhaDeAtivo({ snapshot, ativo, onEscolher }: { snapshot: SnapshotOpcoes; ativo: AtivoComOpcoes; onEscolher: (t: string) => void }) {
   const [termo, setTermo] = useState('')

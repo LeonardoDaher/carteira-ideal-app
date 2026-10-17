@@ -20,7 +20,7 @@ const AVISO_VENDA =
 
 type ModoId = ModeloId | 'livre'
 
-/** Uma série trazida de outra aba (Top 15, Por visão), que o usuário pode ajustar uma a uma. */
+/** Uma série trazida de outra aba (Top 15, Tendência), que o usuário pode ajustar uma a uma. */
 interface PernaLivre {
   codigo: string
   tipo: 'call' | 'put'

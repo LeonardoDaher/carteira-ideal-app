@@ -37,14 +37,14 @@ const snapshot: SnapshotOpcoes = {
   ],
 }
 
-const abrirVisao = () => fireEvent.click(screen.getByRole('tab', { name: /Por visão/ }))
+const abrirVisao = () => fireEvent.click(screen.getByRole('tab', { name: /Tendência/ }))
 const cartao = (id: string) => screen.getByTestId(`estrutura-${id}`)
 const candidatas = (id: string) => within(cartao(id)).queryAllByTestId('candidata')
 const celulas = (l: HTMLElement) => within(l).getAllByRole('cell').map((c) => (c.textContent ?? '').replace(/ /g, ' '))
 /** Primeiro número de um texto como "−R$ 1.234,56" ou "37,5%". */
 const numeroDe = (t: string) => Number(t.replace(/[^\d,−-]/g, '').replace('−', '-').replace(',', '.'))
 
-describe('SimuleOpcoes: aba "Por visão"', () => {
+describe('SimuleOpcoes: aba "Tendência"', () => {
   it('lê a tendência do ativo, sugere a visão e mostra as estruturas dela', () => {
     render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
     abrirVisao()
@@ -160,7 +160,7 @@ describe('SimuleOpcoes: aba "Por visão"', () => {
     expect(screen.getByRole('button', { name: 'Lateral' }).getAttribute('aria-pressed')).toBe('true')
   })
 
-  it('o ativo escolhido vale nas outras abas, e o "voltar" do navegador volta à aba Por visão', async () => {
+  it('o ativo escolhido vale nas outras abas, e o "voltar" do navegador volta à aba Tendência', async () => {
     render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
     abrirVisao()
     fireEvent.change(screen.getByLabelText('Buscar ativo por código ou nome'), { target: { value: 'late' } })
@@ -169,7 +169,7 @@ describe('SimuleOpcoes: aba "Por visão"', () => {
     await waitFor(() => expect(screen.getByTestId('preco-ativo')).toBeDefined())
     expect(screen.getByText(/LATE3, EMPRESA LATERAL|EMPRESA LATERAL/)).toBeDefined()
 
-    fireEvent.click(screen.getByRole('tab', { name: /Por visão/ }))
+    fireEvent.click(screen.getByRole('tab', { name: /Tendência/ }))
     fireEvent.click(within(candidatas('condorDeFerro')[0]).getByRole('button', { name: /^Simular Compra/ }))
     expect(screen.getByTestId('monte-estrategia')).toBeDefined()
     window.history.back()

@@ -163,7 +163,7 @@ export function SimuleOpcoes({ snapshot, endividadas, carregarBaratas, armazenam
         abas={[
           { id: 'series', emoji: '📋', titulo: 'Séries da B3', descricao: 'Strike, vencimento e prêmio' },
           { id: 'premios', emoji: '🏆', titulo: 'Top 15 prêmios', descricao: 'Quem paga mais' },
-          { id: 'visao', emoji: '🧭', titulo: 'Por visão', descricao: 'Alta, baixa, lateral' },
+          { id: 'visao', emoji: '🧭', titulo: 'Tendência', descricao: 'Alta, baixa, lateral' },
           { id: 'graficos', emoji: '📊', titulo: 'Gráficos', descricao: 'Negócios por strike' },
           { id: 'estrategias', emoji: '📈', titulo: 'Estratégias', descricao: 'Monte sua estratégia' },
         ] as const}

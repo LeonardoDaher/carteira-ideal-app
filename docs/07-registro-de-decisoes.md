@@ -1887,3 +1887,6 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 **Código.** O resultado (cartões, gráfico, tempo, gregas, volatilidade e juros) saiu da tela antiga para `PainelDaPosicao`, usado pelas duas abas. `MonteSuaEstrategia` substitui o antigo `Estrategias`; o catálogo e as regras de escolha de séries ficam no domínio, com testes.
 
 **Testes.** 9 novos para compra e venda de call e put nas séries (as quatro operações, desfazer, edição de preço e quantidade, gregas), 10 para a aba Estratégias e 14 do catálogo (escadas, degraus, ordem dos strikes, ganho e perda limitados ou não por estrutura).
+
+
+**Nome da aba (17/10/2026).** A aba "Por visão" passou a se chamar **Tendência** (só o nome na tela e nos textos; o funcionamento da D99 é o mesmo).
