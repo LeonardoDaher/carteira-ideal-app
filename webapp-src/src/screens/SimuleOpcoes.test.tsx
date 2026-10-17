@@ -178,72 +178,197 @@ describe('SimuleOpcoes: carregamento do arquivo', () => {
   })
 })
 
-describe('SimuleOpcoes: estratégias', () => {
-  const abrirEstrategias = () => fireEvent.click(screen.getByRole('tab', { name: /Estratégias/ }))
+describe('SimuleOpcoes: compra e venda de call e put montadas nas séries da B3', () => {
+  const operar = (acao: 'Comprar' | 'Vender', codigo: string) => fireEvent.click(screen.getByRole('button', { name: `${acao} ${codigo}` }))
 
-  it('compra de call padrão: perda limitada ao prêmio, ganho sem limite e equilíbrio em strike + prêmio', () => {
+  it('não há painel até clicar em C ou V, e a tabela continua na tela depois', () => {
     render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
-    abrirEstrategias()
-    // PETR4 a R$ 60,00: strike 60, prêmio de exemplo de 3% do preço (1,80), 100 opções
-    expect(txt('perda-maxima')).toBe('−R$ 180,00')
-    expect(txt('ganho-maximo')).toBe('Sem limite')
-    expect(txt('equilibrio')).toBe('R$ 61,80')
+    expect(screen.queryByTestId('operacao-da-serie')).toBeNull()
+    operar('Comprar', 'PETRK600')
+    expect(screen.getByTestId('operacao-da-serie')).toBeDefined()
+    expect(codigos().sort()).toEqual(['PETRK550', 'PETRK600', 'PETRK650', 'PETRW600']) // segue na aba das séries
+    expect(screen.getByRole('tab', { name: /Séries da B3/ }).getAttribute('aria-selected')).toBe('true')
   })
 
-  it('venda de call descoberta tem perda sem limite e mostra o aviso de risco; venda de put tem ganho limitado ao prêmio', () => {
+  it('compra de call: perda limitada ao prêmio, ganho sem limite e equilíbrio em strike + prêmio', () => {
     render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
-    abrirEstrategias()
-    fireEvent.click(screen.getByRole('button', { name: 'Venda de call' }))
+    operar('Comprar', 'PETRK600') // 100 opções a R$ 2,80, o último preço da série
+    expect(screen.getByText('Compra de call: PETRK600')).toBeDefined()
+    expect(txt('perda-maxima')).toBe('−R$ 280,00')
+    expect(txt('ganho-maximo')).toBe('Sem limite')
+    expect(txt('equilibrio')).toBe('R$ 62,80')
+    expect(screen.queryByTestId('aviso-risco')).toBeNull()
+  })
+
+  it('venda de call descoberta: ganho limitado ao prêmio, perda sem limite e aviso de risco', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    operar('Vender', 'PETRK600')
+    expect(txt('ganho-maximo')).toBe('R$ 280,00')
     expect(txt('perda-maxima')).toBe('Sem limite')
-    expect(txt('ganho-maximo')).toBe('R$ 180,00')
     expect(screen.getByTestId('aviso-risco').textContent).toMatch(/perda não tem limite/)
-    fireEvent.click(screen.getByRole('button', { name: 'Venda de put' }))
-    expect(txt('ganho-maximo')).toBe('R$ 180,00')
-    expect(txt('perda-maxima')).toBe('−R$ 5.820,00') // strike 60 menos prêmio 1,80, vezes 100
+  })
+
+  it('compra de put: ganho até o ativo ir a zero e perda limitada ao prêmio', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    operar('Comprar', 'PETRW600') // put a R$ 2,20
+    expect(screen.getByText('Compra de put: PETRW600')).toBeDefined()
+    expect(txt('perda-maxima')).toBe('−R$ 220,00')
+    expect(txt('ganho-maximo')).toBe('R$ 5.780,00')
+    expect(txt('equilibrio')).toBe('R$ 57,80')
+  })
+
+  it('venda de put: ganho limitado ao prêmio e perda grande se o ativo for a zero, com aviso', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    operar('Vender', 'PETRW600')
+    expect(txt('ganho-maximo')).toBe('R$ 220,00')
+    expect(txt('perda-maxima')).toBe('−R$ 5.780,00')
     expect(screen.getByTestId('aviso-risco').textContent).toMatch(/obrigado a comprar/)
   })
 
-  it('venda coberta e trava de alta têm ganho limitado', () => {
+  it('trocar entre comprar e vender, e clicar de novo ou em Fechar, desfaz a operação', () => {
     render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
-    abrirEstrategias()
-    fireEvent.click(screen.getByRole('button', { name: 'Trava de alta' }))
-    // 100 opções, compra 60 por 1,80 e vende 66 por 0,90: débito 90, ganho máximo 510
-    expect(txt('ganho-maximo')).toBe('R$ 510,00')
-    expect(txt('perda-maxima')).toBe('−R$ 90,00')
-    fireEvent.click(screen.getByRole('button', { name: 'Venda coberta' }))
-    expect(txt('ganho-maximo')).not.toBe('Sem limite')
-    expect(screen.getByText(/Precisa ter 100 ações/)).toBeDefined()
+    operar('Comprar', 'PETRK600')
+    operar('Vender', 'PETRK600')
+    expect(screen.getByRole('button', { name: 'Vender PETRK600' }).getAttribute('aria-pressed')).toBe('true')
+    expect(screen.getByRole('button', { name: 'Comprar PETRK600' }).getAttribute('aria-pressed')).toBe('false')
+    operar('Vender', 'PETRK600')
+    expect(screen.queryByTestId('operacao-da-serie')).toBeNull()
+    operar('Comprar', 'PETRK650')
+    fireEvent.click(screen.getByRole('button', { name: 'Fechar' }))
+    expect(screen.queryByTestId('operacao-da-serie')).toBeNull()
   })
 
-  it('seleciona séries na tabela e cria a estratégia com elas, trocando compra por venda', () => {
+  it('o prêmio, a quantidade e o preço do ativo podem ser alterados', () => {
     render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
-    expect(screen.getByRole('button', { name: /Criar estratégia com as selecionadas \(0\)/ }).hasAttribute('disabled')).toBe(true)
-    fireEvent.click(screen.getByRole('checkbox', { name: 'Selecionar PETRK600' }))
-    fireEvent.click(screen.getByRole('checkbox', { name: 'Selecionar PETRK650' }))
-    fireEvent.click(screen.getByRole('button', { name: /Criar estratégia com as selecionadas \(2\)/ }))
+    operar('Comprar', 'PETRK600')
+    digitar('Preço da série (prêmio)', '3')
+    expect(txt('perda-maxima')).toBe('−R$ 300,00')
+    digitar('Quantidade de opções', '200')
+    expect(txt('perda-maxima')).toBe('−R$ 600,00')
+    expect((screen.getByLabelText('Preço do ativo hoje') as HTMLInputElement).value).toBe('60,00') // vem do fechamento
+  })
 
-    expect(screen.getByText(/Séries escolhidas de/)).toBeDefined()
-    expect(screen.getByRole('button', { name: /Séries escolhidas \(2\)/ }).getAttribute('aria-pressed')).toBe('true')
-    // compra K600 a 2,80 e compra K650 a 0,90, 100 de cada: débito 370
-    expect(txt('perda-maxima')).toBe('−R$ 370,00')
-    expect(txt('ganho-maximo')).toBe('Sem limite')
+  it('mostra as gregas e a passagem do tempo', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    operar('Comprar', 'PETRK600')
+    expect(screen.getByText(/Gregas da posição \(hoje\)/)).toBeDefined()
+    fireEvent.change(screen.getByLabelText(/Passagem do tempo/), { target: { value: '10' } })
+    expect(screen.getByText(/Gregas da posição \(daqui a 10 dias úteis\)/)).toBeDefined()
+    expect(screen.getByText(/o resultado nesse dia seria/)).toBeDefined()
+  })
 
-    // vende a K650: trava de alta (compra 60 por 2,80, vende 65 por 0,90): débito 190, ganho máximo 310
-    const k650 = screen.getByRole('group', { name: 'Série PETRK650' })
-    fireEvent.click(within(k650).getByRole('button', { name: 'Vender' }))
+  it('não há mais "criar estratégia com as selecionadas": as estruturas ficam na aba Estratégias', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    expect(screen.queryByRole('button', { name: /Criar estratégia/ })).toBeNull()
+    expect(screen.getByText(/Travas, borboletas e condors ficam na aba Estratégias/)).toBeDefined()
+  })
+})
+
+describe('SimuleOpcoes: aba Estratégias (monte sua estratégia)', () => {
+  const abrirEstrategias = () => fireEvent.click(screen.getByRole('tab', { name: /Estratégias/ }))
+  const modelo = (nome: string) => fireEvent.click(screen.getByRole('button', { name: nome }))
+
+  it('abre na trava de alta com calls, escolhendo as séries pelo preço do ativo, com o ganho e a perda limitados', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    abrirEstrategias()
+    expect(screen.getByTestId('monte-estrategia').textContent).toMatch(/^Monte sua estratégia/)
+    expect(screen.getByRole('button', { name: 'Trava de alta (com calls)' }).getAttribute('aria-pressed')).toBe('true')
+    expect((screen.getByLabelText('Série da perna 1') as HTMLSelectElement).value).toBe('PETRK600') // strike 60 = preço
+    expect((screen.getByLabelText('Série da perna 2') as HTMLSelectElement).value).toBe('PETRK650')
+    // compra 60 a 2,80 e vende 65 a 0,90, 100 de cada: débito 190, ganho máximo 310
     expect(txt('perda-maxima')).toBe('−R$ 190,00')
     expect(txt('ganho-maximo')).toBe('R$ 310,00')
     expect(txt('equilibrio')).toBe('R$ 61,90')
   })
 
-  it('séries de vencimentos diferentes não calculam e pedem correção', () => {
+  it('só há travas, borboletas, condors, volatilidade e estruturas com ações: compra e venda simples ficam nas séries', () => {
     render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
-    todosVencimentos()
-    fireEvent.click(screen.getByRole('checkbox', { name: 'Selecionar PETRK600' }))
-    fireEvent.click(screen.getByRole('checkbox', { name: 'Selecionar PETRL600' }))
-    fireEvent.click(screen.getByRole('button', { name: /Criar estratégia com as selecionadas \(2\)/ }))
-    expect(screen.getByText(/vencimentos diferentes/)).toBeDefined()
+    abrirEstrategias()
+    for (const nome of ['Trava de alta (com puts)', 'Trava de baixa (com puts)', 'Trava de baixa (com calls)', 'Borboleta de calls', 'Borboleta de ferro', 'Condor de ferro', 'Condor de calls', 'Straddle comprado', 'Strangle vendido', 'Venda coberta', 'Collar (proteção com custo menor)'])
+      expect(screen.getByRole('button', { name: nome })).toBeDefined()
+    for (const nome of ['Compra de call', 'Venda de call', 'Compra de put', 'Venda de put']) expect(screen.queryByRole('button', { name: nome })).toBeNull()
+  })
+
+  it('borboleta de calls vende o dobro no meio e limita o ganho e a perda', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    abrirEstrategias()
+    modelo('Borboleta de calls')
+    // compra 55 a 6,10, vende 2x 60 a 2,80, compra 65 a 0,90: débito 140; ganho máximo com o ativo em 60: 500 − 140
+    expect(within(screen.getByRole('group', { name: /^Perna 2/ })).getByText('200 opções')).toBeDefined()
+    expect(txt('perda-maxima')).toBe('−R$ 140,00')
+    expect(txt('ganho-maximo')).toBe('R$ 360,00')
+  })
+
+  it('straddle comprado usa uma call e uma put, tem dois equilíbrios e só oferece vencimentos com os dois tipos', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    abrirEstrategias()
+    modelo('Straddle comprado')
+    expect(txt('perda-maxima')).toBe('−R$ 500,00')
+    expect(txt('ganho-maximo')).toBe('Sem limite')
+    expect(txt('equilibrio')).toBe('R$ 55,00 e R$ 65,00')
+    // 18/12 só tem call: não aparece para quem precisa de put
+    expect(within(screen.getByRole('group', { name: 'Vencimento da estratégia' })).getAllByRole('button')).toHaveLength(1)
+  })
+
+  it('estruturas vendidas sem proteção mostram o aviso de risco', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    abrirEstrategias()
+    expect(screen.queryByTestId('aviso-risco')).toBeNull()
+    modelo('Straddle vendido')
+    expect(screen.getByTestId('aviso-risco').textContent).toMatch(/pode ser muito maior/)
+    expect(txt('perda-maxima')).toBe('Sem limite')
+  })
+
+  it('venda coberta e collar contam as ações', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    abrirEstrategias()
+    modelo('Venda coberta')
+    expect(screen.getAllByText(/Precisa ter 100 ações/).length).toBeGreaterThan(0)
+    expect(txt('ganho-maximo')).not.toBe('Sem limite')
+    // call vendida de strike 65 a 0,90, ações a 60: ganho máximo (5 + 0,90) × 100
+    expect(txt('ganho-maximo')).toBe('R$ 590,00')
+  })
+
+  it('trocar a série de uma perna atualiza o preço, e uma ordem de strikes trocada pede correção', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    abrirEstrategias()
+    fireEvent.change(screen.getByLabelText('Série da perna 2'), { target: { value: 'PETRK550' } })
+    expect((screen.getByLabelText('Preço da perna 2') as HTMLInputElement).value).toBe('6,10')
+    expect(screen.getByText(/ordem dos strikes está trocada/)).toBeDefined()
     expect(screen.queryByTestId('ganho-maximo')).toBeNull()
+  })
+
+  it('duas pernas no mesmo strike (só há um strike de put) pedem correção em vez de calcular', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    abrirEstrategias()
+    modelo('Trava de baixa (com puts)')
+    expect(screen.getByText(/mesmo strike/)).toBeDefined()
+    expect(screen.queryByTestId('ganho-maximo')).toBeNull()
+  })
+
+  it('trocar o vencimento reescolhe as séries, e a quantidade vale para todas as pernas', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    abrirEstrategias()
+    fireEvent.click(screen.getByRole('button', { name: /18\/12\/2026 \(42 d\.u\., mensal\)/ })) // só uma call nesse vencimento
+    expect((screen.getByLabelText('Série da perna 1') as HTMLSelectElement).value).toBe('PETRL600')
+    expect((screen.getByLabelText('Série da perna 2') as HTMLSelectElement).value).toBe('PETRL600')
+    expect(screen.getByText(/mesmo strike/)).toBeDefined()
+    fireEvent.click(screen.getByRole('button', { name: /19\/11\/2026/ }))
+    digitar('Quantidade (lote)', '200')
+    expect(txt('perda-maxima')).toBe('−R$ 380,00')
+  })
+
+  it('o preço do ativo parte do que estava nas séries, e dá para trocar de ativo ali mesmo', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    fireEvent.change(screen.getByLabelText('Buscar ativo por código ou nome'), { target: { value: 'vale' } })
+    fireEvent.keyDown(screen.getByLabelText('Buscar ativo por código ou nome'), { key: 'Enter' })
+    abrirEstrategias()
+    expect((screen.getByLabelText('Preço do ativo hoje') as HTMLInputElement).value).toBe('66,00')
+    expect(txt('preco-ativo')).toBe('R$ 60,00'.replace('60', '66'))
+    fireEvent.change(screen.getByLabelText('Buscar ativo por código ou nome'), { target: { value: 'petr' } })
+    fireEvent.keyDown(screen.getByLabelText('Buscar ativo por código ou nome'), { key: 'Enter' })
+    expect((screen.getByLabelText('Preço do ativo hoje') as HTMLInputElement).value).toBe('60,00')
+    expect((screen.getByLabelText('Série da perna 1') as HTMLSelectElement).value).toBe('PETRK600')
   })
 
   it('mostra as gregas e a passagem do tempo', () => {
@@ -252,16 +377,6 @@ describe('SimuleOpcoes: estratégias', () => {
     expect(screen.getByText(/Gregas da posição \(hoje\)/)).toBeDefined()
     fireEvent.change(screen.getByLabelText(/Passagem do tempo/), { target: { value: '10' } })
     expect(screen.getByText(/Gregas da posição \(daqui a 10 dias úteis\)/)).toBeDefined()
-    expect(screen.getByText(/o resultado nesse dia seria/)).toBeDefined()
-  })
-
-  it('trava com strikes invertidos pede correção em vez de calcular', () => {
-    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
-    abrirEstrategias()
-    fireEvent.click(screen.getByRole('button', { name: 'Trava de alta' }))
-    digitar('Strike maior', '20')
-    expect(screen.getByText(/O strike maior precisa ser maior que o menor/)).toBeDefined()
-    expect(screen.queryByTestId('ganho-maximo')).toBeNull()
   })
 })
 
@@ -342,18 +457,11 @@ describe('SimuleOpcoes: preço do ativo, vencimentos, strike e voltar', () => {
   it('"Voltar" do navegador a partir das estratégias leva às séries, e não para fora da tela', async () => {
     render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
     fireEvent.click(screen.getByRole('tab', { name: /Estratégias/ }))
-    expect(screen.getByTestId('ativo-estrategia')).toBeDefined()
+    expect(screen.getByTestId('monte-estrategia')).toBeDefined()
     expect(window.history.state).toEqual({ opcoesAba: 'estrategias' })
     window.history.back()
     await waitFor(() => expect(screen.getByText(/séries de PETR4, de um total de/)).toBeDefined())
-    expect(screen.queryByTestId('ativo-estrategia')).toBeNull()
-  })
-
-  it('o botão "Voltar às séries" faz o mesmo', async () => {
-    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
-    fireEvent.click(screen.getByRole('tab', { name: /Estratégias/ }))
-    fireEvent.click(screen.getByRole('button', { name: '← Voltar às séries' }))
-    await waitFor(() => expect(screen.getByText(/séries de PETR4, de um total de/)).toBeDefined())
+    expect(screen.queryByTestId('monte-estrategia')).toBeNull()
   })
 
   it('as estratégias partem do preço do ativo que estava na tabela', () => {
@@ -361,9 +469,8 @@ describe('SimuleOpcoes: preço do ativo, vencimentos, strike e voltar', () => {
     fireEvent.change(screen.getByLabelText('Buscar ativo por código ou nome'), { target: { value: 'vale' } })
     fireEvent.keyDown(screen.getByLabelText('Buscar ativo por código ou nome'), { key: 'Enter' })
     fireEvent.click(screen.getByRole('tab', { name: /Estratégias/ }))
-    expect(screen.getByTestId('ativo-estrategia').textContent).toMatch(/VALE3.*R\$\s66,00/)
+    expect(txt('preco-ativo')).toBe('R$ 66,00')
     expect((screen.getByLabelText('Preço do ativo hoje') as HTMLInputElement).value).toBe('66,00')
-    expect((screen.getByLabelText('Strike') as HTMLInputElement).value).toBe('66,00')
   })
 })
 

@@ -111,8 +111,8 @@ describe('SimuleOpcoes: Top 15 prêmios', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Simular a venda de PETRK600' }))
     expect(screen.getByRole('button', { name: 'Venda coberta' }).getAttribute('aria-pressed')).toBe('true')
     expect(screen.getByText(/Venda coberta com a série/)).toBeDefined()
-    expect((screen.getByLabelText('Strike') as HTMLInputElement).value).toBe('60,00')
-    expect((screen.getByLabelText('Prêmio por opção') as HTMLInputElement).value).toBe('2,80')
+    expect((screen.getByLabelText('Série da perna 1') as HTMLSelectElement).value).toBe('PETRK600')
+    expect((screen.getByLabelText('Preço da perna 1') as HTMLInputElement).value).toBe('2,80')
     expect((screen.getByLabelText('Preço do ativo hoje') as HTMLInputElement).value).toBe('60,00')
   })
 
@@ -121,10 +121,10 @@ describe('SimuleOpcoes: Top 15 prêmios', () => {
     abrirTop()
     semLimite()
     fireEvent.click(screen.getByRole('button', { name: 'Simular a venda de PETRW600' }))
-    expect(screen.getByTestId('ativo-estrategia')).toBeDefined()
+    expect(screen.getByTestId('monte-estrategia')).toBeDefined()
     window.history.back()
     await waitFor(() => expect(screen.getByRole('group', { name: 'Risco máximo' })).toBeDefined())
-    expect(screen.queryByTestId('ativo-estrategia')).toBeNull()
+    expect(screen.queryByTestId('monte-estrategia')).toBeNull()
   })
 
   it('explica o método e os limites', () => {

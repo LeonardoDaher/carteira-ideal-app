@@ -171,7 +171,7 @@ describe('SimuleOpcoes: aba "Por visão"', () => {
 
     fireEvent.click(screen.getByRole('tab', { name: /Por visão/ }))
     fireEvent.click(within(candidatas('condorDeFerro')[0]).getByRole('button', { name: /^Simular Compra/ }))
-    expect(screen.getByTestId('ativo-estrategia')).toBeDefined()
+    expect(screen.getByTestId('monte-estrategia')).toBeDefined()
     window.history.back()
     await waitFor(() => expect(screen.getByRole('group', { name: 'Visão de mercado' })).toBeDefined())
   })

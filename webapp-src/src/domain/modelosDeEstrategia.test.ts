@@ -1,0 +1,117 @@
+import { describe, expect, it } from 'vitest'
+import { MODELOS, escadaDeStrikes, montarPosicaoDoModelo, seriesPadrao, validarModelo, vencimentosDoModelo } from './modelosDeEstrategia'
+import { analisar } from './simulaOpcoes'
+import type { SerieOpcao } from './opcoes'
+
+const s = (codigo: string, tipo: 'call' | 'put', strike: number, ultimo: number, negocios = 10, vencimento = '2026-11-19'): SerieOpcao => ({
+  codigo, tipo, estilo: 'americana', strike, vencimento, ultimo, dataUltimo: '2026-10-16', variacao: null, negocios, volume: 1000,
+})
+const modelo = (id: string) => MODELOS.find((m) => m.id === id)!
+
+// Escada de strikes de 50 a 70, de 2 em 2, para calls e puts.
+const strikes = [50, 52, 54, 56, 58, 60, 62, 64, 66, 68, 70]
+const series = strikes.flatMap((k) => [s(`C${k}`, 'call', k, Math.max(60 - k, 0) + 1), s(`P${k}`, 'put', k, Math.max(k - 60, 0) + 1)])
+
+describe('escadas e séries padrão', () => {
+  it('a escada tem uma série por strike e prefere a mais negociada', () => {
+    const duplas = [...series, s('CX60', 'call', 60, 3, 99)]
+    const escada = escadaDeStrikes(duplas, 'call', '2026-11-19')
+    expect(escada.map((x) => x.strike)).toEqual(strikes)
+    expect(escada.find((x) => x.strike === 60)!.codigo).toBe('CX60')
+  })
+
+  it('ignora séries sem preço e de outro vencimento', () => {
+    const escada = escadaDeStrikes([s('A', 'call', 10, 0), s('B', 'call', 11, 1, 5, '2026-12-18'), s('C', 'call', 12, 1)], 'call', '2026-11-19')
+    expect(escada.map((x) => x.codigo)).toEqual(['C'])
+  })
+
+  it('os degraus partem do strike mais perto do preço', () => {
+    const pernas = seriesPadrao(series, modelo('condorFerro'), '2026-11-19', 60.4)
+    expect(pernas.map((x) => x!.codigo)).toEqual(['P52', 'P56', 'C64', 'C68']) // 60 ± 2 e ± 4 degraus
+  })
+
+  it('perto da ponta da escada, os degraus param na última série', () => {
+    const curta = series.filter((x) => x.strike >= 58 && x.strike <= 62)
+    const pernas = seriesPadrao(curta, modelo('condorFerro'), '2026-11-19', 60)
+    expect(pernas.map((x) => x!.strike)).toEqual([58, 58, 62, 62])
+  })
+
+  it('só oferece o vencimento que tem call e put quando o modelo usa os dois', () => {
+    const mistas = [...series, s('CL', 'call', 60, 2, 10, '2026-12-18')]
+    expect(vencimentosDoModelo(mistas, modelo('straddleComprado'), ['2026-11-19', '2026-12-18'])).toEqual(['2026-11-19'])
+    expect(vencimentosDoModelo(mistas, modelo('travaAltaCall'), ['2026-11-19', '2026-12-18'])).toEqual(['2026-11-19', '2026-12-18'])
+  })
+})
+
+describe('posição montada a partir do modelo', () => {
+  const montar = (id: string, preco = 60) => {
+    const m = modelo(id)
+    const escolhidas = seriesPadrao(series, m, '2026-11-19', preco)
+    const pernas = m.pernas.map((p, i) => ({ serie: escolhidas[i]!, lado: p.lado, fator: p.fator, premio: escolhidas[i]!.ultimo }))
+    return { m, escolhidas, posicao: montarPosicaoDoModelo(m, pernas, 100, preco) }
+  }
+
+  it('todos os modelos padrão passam na validação com uma escada completa', () => {
+    for (const m of MODELOS) expect(validarModelo(m, seriesPadrao(series, m, '2026-11-19', 60)), m.id).toBeNull()
+  })
+
+  it('as travas e as estruturas de risco definido têm ganho e perda limitados', () => {
+    for (const id of ['travaAltaCall', 'travaAltaPut', 'travaBaixaPut', 'travaBaixaCall', 'borboletaCall', 'borboletaPut', 'borboletaFerro', 'condorFerro', 'condorCall']) {
+      const a = analisar(montar(id).posicao)
+      expect(a.ganhoMaximo, id).not.toBeNull()
+      expect(a.perdaMaxima, id).not.toBeNull()
+    }
+  })
+
+  it('straddle e strangle vendidos têm perda sem limite; comprados têm ganho sem limite', () => {
+    expect(analisar(montar('straddleVendido').posicao).perdaMaxima).toBeNull()
+    expect(analisar(montar('strangleVendido').posicao).perdaMaxima).toBeNull()
+    expect(analisar(montar('straddleComprado').posicao).ganhoMaximo).toBeNull()
+    expect(analisar(montar('strangleComprado').posicao).ganhoMaximo).toBeNull()
+  })
+
+  it('a borboleta usa o dobro da quantidade na perna do meio', () => {
+    const { posicao } = montar('borboletaCall')
+    expect(posicao.pernas.map((x) => x.quantidade)).toEqual([100, 200, 100])
+  })
+
+  it('só a venda coberta e o collar levam ações', () => {
+    expect(montar('vendaCoberta').posicao.acoes).toBe(100)
+    expect(montar('collar').posicao.acoes).toBe(100)
+    expect(montar('collar').posicao.precoAcao).toBe(60)
+    expect(montar('travaAltaCall').posicao.acoes).toBe(0)
+  })
+
+  it('o collar limita a perda e o ganho', () => {
+    const a = analisar(montar('collar').posicao)
+    expect(a.ganhoMaximo).not.toBeNull()
+    expect(a.perdaMaxima).not.toBeNull()
+  })
+
+  it('o condor de ferro ganha o crédito com o ativo no meio e perde no máximo a largura da asa menos o crédito', () => {
+    const { posicao } = montar('condorFerro')
+    const credito = posicao.pernas.reduce((t, x) => t + (x.lado === 'venda' ? 1 : -1) * x.premio * x.quantidade, 0)
+    const a = analisar(posicao)
+    expect(a.ganhoMaximo).toBeCloseTo(credito, 2)
+    expect(a.perdaMaxima).toBeCloseTo(-(4 * 100 - credito), 0) // asas de R$ 4,00 (52→56 e 64→68)
+  })
+})
+
+describe('validação das séries escolhidas', () => {
+  it('falta série em alguma perna', () => {
+    expect(validarModelo(modelo('travaAltaCall'), [series[0], null])).toBe('Escolha uma série para cada perna.')
+  })
+
+  it('ordem de strikes trocada e strikes iguais são recusados', () => {
+    const c = (k: number) => series.find((x) => x.codigo === `C${k}`)!
+    expect(validarModelo(modelo('travaAltaCall'), [c(64), c(60)])).toMatch(/ordem dos strikes/)
+    expect(validarModelo(modelo('travaAltaCall'), [c(60), c(60)])).toMatch(/mesmo strike/)
+    expect(validarModelo(modelo('travaAltaCall'), [c(60), c(64)])).toBeNull()
+  })
+
+  it('pernas de tipos diferentes podem ficar no mesmo strike (straddle)', () => {
+    const c = series.find((x) => x.codigo === 'C60')!
+    const p = series.find((x) => x.codigo === 'P60')!
+    expect(validarModelo(modelo('straddleComprado'), [c, p])).toBeNull()
+  })
+})
