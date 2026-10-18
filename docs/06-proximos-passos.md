@@ -196,7 +196,7 @@ A mudança para a API tirou a metodologia do código visível. Ainda assim, vale
 - [x] **Tendência** (D99, D108), **Gráficos** (D100 a D102), **Roda** (D107) e **Estratégias** com THL, diagonais, rolagem e manejo (D103 a D106).
 - [ ] **Primeiras semanas de uso:** conferir se o job diário de opções ("Atualizar opções") roda todo dia útil e se os números do app batem com o que o responsável vê na corretora (preço de último negócio, strikes, vencimentos).
 - [ ] **Comparar as estimativas com o mercado:** confrontar o prêmio estimado da call da roda e o resultado das THL e diagonais com preços reais dos dias seguintes, para saber se o modelo (Black-Scholes, sem dividendos) é razoável ou enviesado.
-- [ ] **Acompanhar uma posição que a pessoa já tem** (informando os preços de entrada), para o manejo de uma posição real. O responsável não tem posição em opções hoje, então ficou para quando houver.
+- [x] **Acompanhar uma posição que a pessoa já tem (D112):** aba "Minha posição". Falta: (1) o responsável testar com uma posição real, quando tiver, e conferir se o reconhecimento da estrutura e as saídas fazem sentido; (2) histórico da posição (hoje só há o preço do último pregão; não guardamos a evolução dia a dia); (3) aviso quando a série vencer ou sair da lista.
 - [ ] **Página pública de SEO** (como as de FII, ETF e BDR) para o Simule Opções, se o responsável quiser atrair buscas.
 - [ ] **Coluna F.M. (formador de mercado):** sem fonte oficial gratuita encontrada.
 - [ ] **Camada de linguagem natural** sobre o motor da Tendência: exigiria servidor, chave e custo; depende de decisão.

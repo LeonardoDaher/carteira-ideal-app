@@ -46,3 +46,13 @@ Um giro: **passo 1**, put coberta por caixa (caixa = strike × quantidade; rendi
 ## 6. Sobre "garantir renda"
 
 Nenhuma estrutura garante renda: a renda de opções vem de vender prêmio, e o risco que o mercado cobra por ele fica com quem vende. As telas mostram o que cada estrutura rende no cenário bom e quanto custa no ruim, e não prometem resultado.
+
+## 7. Minha posição (D112)
+
+A pessoa cadastra a posição que já montou: para cada perna, a série (do cadastro de séries do app), se comprou ou vendeu, a quantidade e o **preço da operação**; opcionalmente, as ações (quantidade e preço médio), a data da montagem e o preço do ativo na época. Os dados ficam só no aparelho (`localStorage`, chave `carteiraideal.opcoes.posicoes`, uma posição por ativo). O cálculo está em `webapp-src/src/domain/posicaoReal.ts`.
+
+- **Reconhecimento da estrutura** pelas pernas (tipo, lado, strike, vencimento e proporção) e pelas ações: compra e venda de call e de put, venda coberta, travas, straddle e strangle, collar, borboletas, condors, slide, put otimizada, booster, strangle financiado, THL e diagonais; o resto é "estrutura personalizada" e a análise vale perna a perna.
+- **Situação de hoje.** Resultado de cada perna = (último preço de hoje − preço da operação) × quantidade, com o sinal do lado; mais as ações pelo preço médio. Mostra ganho e perda máximos (exatos com um vencimento; estimados com vários), quanto do ganho máximo já foi capturado, a distância de cada strike ao preço, o delta e **pontos de atenção** (vendida dentro do dinheiro, perto do dinheiro, delta alto, poucos dias, perda sem limite, mais da metade do ganho capturado). Quando o último preço de uma série está abaixo do valor intrínseco (negócio antigo), o app avisa.
+- **Possibilidades de saída**, cada uma com o dinheiro que entra ou sai hoje, o resultado que se realiza e o novo ganho e perda máximos: manter até o vencimento; encerrar tudo; encerrar só uma perna; rolar uma perna para o vencimento seguinte (mesmo strike e, nas vendidas, um strike mais afastado); rolar a estrutura inteira; e, nas vendidas descobertas, proteger comprando uma opção mais afastada. Hoje, as duas pontas de uma rolagem valem o **último preço** de cada série. "Ver como fica" desenha o gráfico da posição que sobra.
+- **O app não diz qual escolher:** a melhor saída depende do que a pessoa pensa do ativo e de quanto aceita arriscar. Os números usam o último preço negociado (que pode estar defasado) e o modelo de Black-Scholes onde é preciso estimar; o preço real de compra e venda pode ser pior, e o crédito de uma rolagem real tende a ser menor que o mostrado.
+- Séries cadastradas que saíram da lista (venceram, sem negócio recente, além de 6 meses) ficam de fora da análise, com aviso.

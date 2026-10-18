@@ -34,8 +34,9 @@ export interface ParametrosDeManejo {
   sigmaPadrao: number
 }
 
-/** Volatilidade implícita do preço pago por uma perna hoje; sem solução, a volatilidade padrão. */
+/** Volatilidade da perna: a que ela já traz (`perna.sigma`) ou a implícita do preço pago hoje; sem solução, a padrão. */
 export function sigmaDaPerna(perna: Perna, dias: number, m: ParametrosDeManejo): number {
+  if (perna.sigma && perna.sigma > 0) return perna.sigma // já calibrada (por exemplo, no preço de mercado de hoje)
   if (!(dias > 0)) return m.sigmaPadrao
   return volatilidadeImplicita({ tipo: perna.tipo, s: m.precoHoje, strike: perna.strike, t: dias / DIAS_UTEIS_ANO, r: m.r }, perna.premio) ?? m.sigmaPadrao
 }
@@ -74,6 +75,12 @@ export interface Alvo {
   indice: number
   /** Série para onde a perna vai (mesmo tipo, vencimento e strike novos). */
   nova: SerieOpcao
+  /**
+   * Preços de mercado por opção, quando já se conhecem (hoje, o último negócio): valem no lugar da estimativa por modelo para
+   * encerrar a perna antiga e para abrir a nova. Sem eles, os dois preços são estimados no cenário.
+   */
+  precoDaAntiga?: number
+  precoDaNova?: number
 }
 
 export interface DetalheDaRolagem {
@@ -115,7 +122,7 @@ export function rolar(
 ): ResultadoDaRolagem {
   const padrao = Math.min(...pernas.map((x) => diasDe(x.perna, 0)).filter((d) => d > 0), 21)
   const sigmas = pernas.map((x) => sigmaDaPerna(x.perna, diasDe(x.perna, padrao), m))
-  const alvoDe = new Map(alvos.map((a) => [a.indice, a.nova]))
+  const alvoDe = new Map(alvos.map((a) => [a.indice, a]))
   const detalhes: DetalheDaRolagem[] = []
   const novas: Perna[] = []
   let realizado = 0
@@ -123,14 +130,15 @@ export function rolar(
   pernas.forEach(({ perna, serie }, i) => {
     const sigma = sigmas[i]
     const restam = diasDe(perna, padrao) - c.diasPassados
-    const nova = alvoDe.get(i)
-    if (nova) {
-      const valorAntigo = valorNoCenario(perna, sigma, c, m, padrao)
-      realizado += resultadoDeEncerrar(perna, sigma, c, m, padrao)
+    const alvo = alvoDe.get(i)
+    if (alvo) {
+      const nova = alvo.nova
+      const valorAntigo = alvo.precoDaAntiga ?? valorNoCenario(perna, sigma, c, m, padrao)
+      realizado += sinal(perna) * (valorAntigo - perna.premio) * perna.quantidade
       const diasNova = Math.max(diasAte(nova.vencimento), 1)
       const proto: Perna = { tipo: perna.tipo, lado: perna.lado, strike: nova.strike, premio: nova.ultimo, quantidade: perna.quantidade, dias: diasNova }
       const sigmaNova = sigmaDaPerna(proto, diasNova, m)
-      const precoNovo = valorNoCenario(proto, sigmaNova, c, m, padrao)
+      const precoNovo = alvo.precoDaNova ?? valorNoCenario(proto, sigmaNova, c, m, padrao)
       // Encerrar uma vendida custa o valor (recompra); encerrar uma comprada rende o valor (venda). Abrir é o contrário.
       const encerramento = sinal(perna) * valorAntigo * perna.quantidade
       const abertura = -sinal(perna) * precoNovo * perna.quantidade

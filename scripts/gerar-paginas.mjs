@@ -668,7 +668,7 @@ function paginaMeuMes(hubDividas) {
     ].join('\n'),
     faq: [
       { p: 'O Meu Mês é gratuito?', r: 'Sim, é gratuito e não pede cadastro.' },
-      { p: 'Meus dados financeiros ficam guardados na internet?', r: 'Não. Ficam só no seu aparelho e não são enviados a nenhum servidor. A lista de supermercado também fica só no aparelho; só o texto do que falta comprar sai dele, e apenas se você tocar em enviar pelo WhatsApp.' },
+      { p: 'Meus dados financeiros ficam guardados na internet?', r: 'Não. Ficam só no seu aparelho e não são enviados a nenhum servidor. A posição de opções que você cadastra no Simule Opções e a lista de supermercado também ficam só no aparelho; só o texto do que falta comprar sai dele, e apenas se você tocar em enviar pelo WhatsApp.' },
       { p: 'Como funciona o Meu Mês Supermercado?', r: 'Você escreve ou dita o que precisa comprar, o app separa em itens, sugere a categoria de cada um (hortifruti, açougue, mercearia, limpeza e outras) e você vai ticando no mercado. Dá para editar cada item e enviar pelo WhatsApp só o que ainda falta comprar.' },
       { p: 'Posso mandar a lista de compras para outra pessoa?', r: 'Sim. O botão "Enviar o que falta pelo WhatsApp" abre o WhatsApp com a lista pronta, só com os itens que você ainda não ticou, e você escolhe o contato. É um envio único: se a lista mudar depois, é preciso enviar de novo.' },
       { p: 'O que é o método avalanche e o método bola de neve?', r: 'No avalanche, você paga primeiro a dívida de maior juro, o que custa menos no total. Na bola de neve, você começa pela menor dívida para ganhar motivação. O app monta o plano nos dois formatos.' },

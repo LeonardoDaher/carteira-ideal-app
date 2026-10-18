@@ -30,13 +30,14 @@ Primeira tela para quem toca no link da bio do Instagram.
 - **🎓 Aprender**: abre direto a tela Aprender do app, sem questionário. O livro **Educação Financeira Infantil**, que antes ficava aqui, está no fim dessa tela (decisão D11). O link do curso de Candlesticks foi retirado do site (D22).
 - **🏢 Simule FII**: abre direto a tela Simule FII do app, sem questionário.
 - **🏛️ Simule Tesouro Direto**, **🌎 Simule BDR** e **🧺 Simule ETF**: abrem direto as respectivas telas, sem questionário.
-- **🎯 Simule Opções** (D96 a D108, `?tela=simuleOpcoes`, aberta pelo hub Simule Ativos, logo depois do Simule Ações), com seis abas, sempre educativas e sem indicar operação:
+- **🎯 Simule Opções** (D96 a D108, `?tela=simuleOpcoes`, aberta pelo hub Simule Ativos, logo depois do Simule Ações), com sete abas, sempre educativas e sem indicar operação:
   - **Séries da B3**: todas as opções de ações e ETFs com negócio nos últimos pregões e vencimento em até 6 meses, em tabela ordenável (modelo americana/europeia, gregas, volatilidade implícita), com filtros por tipo, vencimentos mensais e semanais e faixa de strike (campo e controle deslizante), e busca entre os ativos. Em cada linha, os botões **C** (verde, comprar) e **V** (vermelho, vender) montam ali mesmo a compra ou venda de call ou put, com gráfico de resultado, passagem do tempo e gregas.
   - **Top 15 prêmios** (D97 e D98): quem paga o maior prêmio para um mesmo risco, na venda de put ou de call coberta, com colchão, chance de exercício, volatilidade e dívida da empresa ao lado, cruzado com as listas de ações baratas e endividadas.
   - **Tendência** (D99 e D108): o app lê a tendência do ativo, a pessoa escolhe a visão (alta, baixa, lateral, muita oscilação) e vê as estruturas que combinam (trava, condor, borboletas, slide, booster, collar, strangle financiado e outras), montadas com as séries reais, com custo, ganho, perda e chance de lucro.
   - **Gráficos** (D100 a D102): negócios por strike nos vencimentos escolhidos, com calls (amarelo) e puts (azul) e o preço do ativo no centro.
   - **Roda** (D107): um giro da roda (wheel), com a put coberta por caixa e, se exercida, a call coberta, com rendimento, preço efetivo das ações e o manejo da put.
   - **Estratégias** (D103 a D106): "Monte sua estratégia", com travas, borboletas, condors, straddles e strangles, venda coberta, collar, THL e diagonais (vencimentos diferentes por perna, D104) e os modelos de renda e proteção do tipo Prefiro PUT; resultado, passagem do tempo, gregas e **manejo** (D105: cenários, desmontagem e rolagem).
+  - **Minha posição** (D112): a pessoa cadastra a estrutura que já montou (séries, lado, quantidade, preço da operação e, se houver, as ações; botão "+" para cada perna), e o app reconhece a estrutura, mostra como está hoje pelo último preço, desenha o gráfico e lista as saídas possíveis (manter, encerrar, fechar uma perna, rolar, proteger), cada uma com o resultado e o novo risco. Os dados ficam só no aparelho.
 - **Falar comigo por e-mail**, ícones de Instagram e YouTube, alternância de tema claro/escuro.
 
 <br clear="all">

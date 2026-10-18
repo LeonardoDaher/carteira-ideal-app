@@ -2016,3 +2016,21 @@ Cada cartão mostra, como as demais, até três candidatas ordenadas pelo crité
 **Código.** O painel da operação saiu de \`SimuleOpcoes.tsx\` para \`OperacaoDaSerie.tsx\` (agora com a opção \`coberta\`), junto com o botão \`BotaoDeLado\`, usado pelas Séries da B3 e pelo Top 15.
 
 **Testes.** 5 novos (V na frente e Simular no fim, venda de put montada ali, venda coberta, desfazer, Simular continua levando à aba Estratégias); os testes que liam as colunas do ranking foram deslocados em uma coluna.
+
+
+## D112 (18/10/2026): aba "Minha posição" no Simule Opções
+
+**Pedido do responsável (18/10/2026).** Uma aba em que a pessoa cadastra a estrutura de opções que já montou (ativo, strike, preço pago, com botão "+" para ir adicionando pernas, inclusive as ações das estruturas que usam o ativo), e o app identifica a estrutura, analisa como ela está no dia, mostra o gráfico e traz sugestões de saída caso o mercado ande contra ela: rolagem, manejo, troca de trava.
+
+**O que faz.** Cadastro de pernas (tipo, lado "Comprei" verde ou "Vendi" vermelho, vencimento, série real, quantidade e preço da operação), ações opcionais, data e preço do ativo na montagem. Reconhece a estrutura; mostra o resultado de hoje pelo último preço, ganho e perda máximos, o quanto do ganho máximo já foi capturado, tabela perna a perna (strike, A/I/OTM, distância, delta) e pontos de atenção; desenha o gráfico da posição; e lista as **possibilidades de saída** (manter, encerrar tudo, encerrar só uma perna, rolar uma perna para o vencimento seguinte no mesmo strike ou num mais afastado, rolar a estrutura inteira, proteger a vendida descoberta), cada uma com o fluxo de hoje, o resultado realizado e o novo ganho e perda máximos, e um botão "Ver como fica" que desenha o gráfico da posição resultante. Um bloco recolhível leva o manejo da D105 (cenários, desmontagem e rolagem com liberdade).
+
+**Decisões de desenho.**
+- **Sugestões sem "melhor":** o app mostra o que cada saída muda em números e não elege uma; a escolha depende do que a pessoa pensa do ativo e do risco que aceita (o mesmo critério da D99).
+- **Volatilidade no preço de mercado de hoje:** cada perna é calibrada no último preço da série, e não no preço da operação, para que as estimativas partam do mercado de hoje.
+- **Trocas de hoje pelo último preço:** nas rolagens "de hoje", as duas pontas usam o último preço de cada série, e não um valor de modelo. Isso evitou um prejuízo falso em opções muito dentro do dinheiro, cujo último preço é abaixo do valor intrínseco (negócio antigo); o app agora avisa desse caso.
+- **Dados só no aparelho:** `localStorage`, uma posição por ativo; a frase de privacidade da landing e das páginas passou a citar a posição de opções.
+- Série cadastrada que saiu da lista fica fora da análise, com aviso.
+
+**Limites.** Só há o preço do último pregão (não guardamos a evolução dia a dia da posição); preço defasado e modelo europeio sem dividendos; preço real de compra e venda pode ser pior; ignora corretagem, emolumentos e imposto. Séries fora dos próximos 6 meses ou sem negócio recente não podem ser cadastradas. O responsável não tem posição em opções hoje: a aba foi testada só com dados de teste e com séries reais do app.
+
+**Código.** `domain/posicaoReal.ts` (resolução, reconhecimento, situação de hoje e possibilidades), `screens/MinhaPosicaoOpcoes.tsx`; `Alvo` de `rolagem.ts` ganhou `precoDaAntiga` e `precoDaNova`, e `sigmaDaPerna` respeita a volatilidade que a perna já traz. 26 testes de domínio e 16 da tela, mais 4 de rolagem e de preço defasado.

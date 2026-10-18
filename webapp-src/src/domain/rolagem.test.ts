@@ -132,3 +132,26 @@ describe('cenários no primeiro vencimento', () => {
     expect(linhas[1].resultado).toBeCloseTo((65 - 60 + 1) * 100, 4) // venda coberta: ganho máximo (5 + 1) × 100
   })
 })
+
+describe('rolagem com preços de mercado conhecidos', () => {
+  const nova = serie('PETRW550', 'put', 55, '2026-12-18', 2.5)
+
+  it('os preços informados valem no lugar da estimativa por modelo, nas duas pontas', () => {
+    const c = { preco: 60, diasPassados: 0 }
+    const x = rolar(putVendida(), sem, [{ indice: 0, nova, precoDaAntiga: 2.2, precoDaNova: 2.5 }], c, m, diasAte)
+    const premio = putVendida()[0].perna.premio
+    expect(x.detalhes[0].encerramento).toBeCloseTo(-2.2 * 100, 8) // recompra a 2,20
+    expect(x.detalhes[0].abertura).toBeCloseTo(2.5 * 100, 8) // vende a nova a 2,50
+    expect(x.detalhes[0].precoNovo).toBe(2.5)
+    expect(x.liquido).toBeCloseTo(30, 8)
+    expect(x.realizado).toBeCloseTo(-(2.2 - premio) * 100, 8) // vendeu a `premio` e recomprou a 2,20
+    expect(x.posicao.pernas[0].premio).toBe(2.5)
+  })
+
+  it('quando a perna foi aberta ao preço de mercado de hoje, rolar hoje não realiza nada', () => {
+    const [{ perna, serie: s }] = putVendida()
+    const aoMercado: PernaDaEstrutura[] = [{ perna: { ...perna, premio: s.ultimo }, serie: s }]
+    const x = rolar(aoMercado, sem, [{ indice: 0, nova, precoDaAntiga: s.ultimo, precoDaNova: nova.ultimo }], { preco: 60, diasPassados: 0 }, m, diasAte)
+    expect(x.realizado).toBeCloseTo(0, 10)
+  })
+})

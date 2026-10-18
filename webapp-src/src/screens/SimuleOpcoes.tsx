@@ -17,6 +17,7 @@ import { CampoReais } from '../ui/CampoReais'
 import { EscolhaDeAtivo } from './EscolhaDeAtivo'
 import { GraficosOpcoes } from './GraficosOpcoes'
 import { BotaoDeLado, OperacaoDaSerie } from './OperacaoDaSerie'
+import { MinhaPosicaoOpcoes } from './MinhaPosicaoOpcoes'
 import { MonteSuaEstrategia } from './MonteSuaEstrategia'
 import { PorVisaoOpcoes } from './PorVisaoOpcoes'
 import { RodaOpcoes } from './RodaOpcoes'
@@ -24,10 +25,10 @@ import { TopPremiosOpcoes } from './TopPremiosOpcoes'
 import { FaixaDeStrike } from '../ui/FaixaDeStrike'
 import type { AppCtx } from '../state/useAppState'
 
-type Aba = 'series' | 'premios' | 'visao' | 'graficos' | 'roda' | 'estrategias'
+type Aba = 'series' | 'premios' | 'visao' | 'graficos' | 'roda' | 'estrategias' | 'posicao'
 
 /** Abas que, ao abrir, criam uma entrada no histórico: o "voltar" do navegador as fecha em vez de sair da tela. */
-const ABAS_COM_HISTORICO: Aba[] = ['premios', 'visao', 'graficos', 'roda', 'estrategias']
+const ABAS_COM_HISTORICO: Aba[] = ['premios', 'visao', 'graficos', 'roda', 'estrategias', 'posicao']
 
 const LINHAS_POR_PAGINA = 100
 const ATALHOS_PERTO = [5, 10, 20] as const
@@ -167,12 +168,15 @@ export function SimuleOpcoes({ snapshot, endividadas, carregarBaratas, armazenam
           { id: 'graficos', emoji: '📊', titulo: 'Gráficos', descricao: 'Negócios por strike' },
           { id: 'roda', emoji: '🔄', titulo: 'Roda', descricao: 'Put, ação e call coberta' },
           { id: 'estrategias', emoji: '📈', titulo: 'Estratégias', descricao: 'Monte sua estratégia' },
+          { id: 'posicao', emoji: '📌', titulo: 'Minha posição', descricao: 'Acompanhe e ajuste' },
         ] as const}
       >
         {aba === 'series' ? (
           comDados((d) => <SeriesDaB3 snapshot={d} ativo={ativoAtual} onEscolher={setTicker} />)
         ) : aba === 'graficos' ? (
           comDados((d) => <GraficosOpcoes snapshot={d} ativo={ativoAtual} onEscolher={setTicker} />)
+        ) : aba === 'posicao' ? (
+          comDados((d) => <MinhaPosicaoOpcoes snapshot={d} ativo={ativoAtual} onEscolher={setTicker} dataPregao={d.dataPregao} />)
         ) : aba === 'roda' ? (
           comDados((d) => <RodaOpcoes snapshot={d} ativo={ativoAtual} onEscolher={setTicker} dataPregao={d.dataPregao} />)
         ) : aba === 'visao' ? (
