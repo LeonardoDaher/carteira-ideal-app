@@ -5,6 +5,7 @@ import { agruparPorCategoria, buscarEtfs, textoCambio, textoIrCurto } from '../d
 import type { EtfBusca, EtfLista, SnapshotEtfs } from '../domain/etfs'
 import { formatarData, formatarVolume } from '../domain/rendaFii'
 import { VoltarInicio } from '../ui/VoltarInicio'
+import { FaixaCotacoes, itensDeEtfs } from '../ui/FaixaCotacoes'
 import { rolarParaResultado } from '../ui/rolarParaResultado'
 import { AvisoEducacional } from '../ui/AvisoEducacional'
 import { AbasDaTela } from '../ui/AbasDaTela'
@@ -69,6 +70,8 @@ export function SimuleEtf({
           fechamento e quantas cotas um valor compra.
         </div>
       </div>
+
+      <FaixaCotacoes itens={itensDeEtfs(snapshot)} dataPregao={snapshot.dataPregao} />
 
       <AbasDaTela
         prefixo="etf"

@@ -19,6 +19,7 @@ import {
 } from '../domain/rendaFii'
 import type { FundoFii, SnapshotRendimentosFii } from '../domain/rendaFii'
 import { VoltarInicio } from '../ui/VoltarInicio'
+import { FaixaCotacoes, itensDeFiis } from '../ui/FaixaCotacoes'
 import { rolarParaResultado } from '../ui/rolarParaResultado'
 import { AvisoEducacional } from '../ui/AvisoEducacional'
 import { Top15FiisBaratos } from './Top15FiisBaratos'
@@ -81,6 +82,11 @@ export function SimuleFii({
           rendeu por mês.
         </div>
       </div>
+
+      <FaixaCotacoes
+        itens={itensDeFiis(snapshot)}
+        dataPregao={snapshot.fundos.reduce<string | null>((m, f) => (f.dataCotacao && (!m || f.dataCotacao > m) ? f.dataCotacao : m), null)}
+      />
 
       {/* Duas caixinhas (D65): o simulador de sempre e a triagem "Top 15 FIIs baratos". */}
       <div role="tablist" aria-label="O que você quer ver" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>

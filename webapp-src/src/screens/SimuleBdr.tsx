@@ -11,6 +11,7 @@ import {
 import type { BdrBusca, BdrLista, SnapshotBdrs } from '../domain/bdrs'
 import { formatarData, formatarVolume } from '../domain/rendaFii'
 import { VoltarInicio } from '../ui/VoltarInicio'
+import { FaixaCotacoes, itensDeBdrs } from '../ui/FaixaCotacoes'
 import { rolarParaResultado } from '../ui/rolarParaResultado'
 import { AvisoEducacional } from '../ui/AvisoEducacional'
 import { AbasDaTela } from '../ui/AbasDaTela'
@@ -86,6 +87,8 @@ export function SimuleBdr({
           pelo código, e veja o preço de fechamento e quantos BDRs um valor compra.
         </div>
       </div>
+
+      <FaixaCotacoes itens={itensDeBdrs(snapshot)} dataPregao={snapshot.dataPregao} />
 
       <AbasDaTela
         prefixo="bdr"

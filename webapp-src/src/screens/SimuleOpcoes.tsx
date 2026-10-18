@@ -11,12 +11,14 @@ import type { Lado } from '../domain/simulaOpcoes'
 import { formatarData } from '../domain/rendaFii'
 import { reais } from '../domain/mercadoOficial'
 import { VoltarInicio } from '../ui/VoltarInicio'
+import { FaixaCotacoes, itensDeOpcoes } from '../ui/FaixaCotacoes'
 import { AvisoEducacional } from '../ui/AvisoEducacional'
 import { AbasDaTela } from '../ui/AbasDaTela'
 import { CampoReais } from '../ui/CampoReais'
 import { EscolhaDeAtivo } from './EscolhaDeAtivo'
 import { GraficosOpcoes } from './GraficosOpcoes'
 import { BotaoDeLado, OperacaoDaSerie } from './OperacaoDaSerie'
+import { GlossarioOpcoes } from './GlossarioOpcoes'
 import { MinhaPosicaoOpcoes } from './MinhaPosicaoOpcoes'
 import { MonteSuaEstrategia } from './MonteSuaEstrategia'
 import { PorVisaoOpcoes } from './PorVisaoOpcoes'
@@ -88,6 +90,12 @@ export function SimuleOpcoes({ snapshot, endividadas, carregarBaratas, armazenam
   const [aba, setAba] = useState<Aba>('series')
   const [escolha, setEscolha] = useState<(EscolhaDeSeries & { n: number }) | null>(null)
   const [ticker, setTicker] = useState('')
+  const [glossarioAberto, setGlossarioAberto] = useState(false)
+  const glossarioRef = useRef<HTMLDetailsElement>(null)
+  const abrirGlossario = () => {
+    setGlossarioAberto(true)
+    setTimeout(() => glossarioRef.current?.scrollIntoView?.({ behavior: 'smooth', block: 'start' }), 0)
+  }
 
   // Voltar (botão do navegador ou do celular) a partir das estratégias leva às séries, e não para fora da tela: abrir as
   // estratégias cria uma entrada no histórico, e o popstate devolve a aba.
@@ -154,7 +162,10 @@ export function SimuleOpcoes({ snapshot, endividadas, carregarBaratas, armazenam
           uma data (o vencimento). Veja as séries reais da B3, filtre por strike e monte uma estratégia para ver quanto ela
           ganha ou perde.
         </div>
+        <button className="chip" style={{ alignSelf: 'flex-start' }} onClick={abrirGlossario}>Primeira vez com opções? Abrir o glossário</button>
       </div>
+
+      {dados && <FaixaCotacoes itens={itensDeOpcoes(dados)} dataPregao={dados.dataPregao} />}
 
       <AbasDaTela
         prefixo="opcoes"
@@ -189,6 +200,8 @@ export function SimuleOpcoes({ snapshot, endividadas, carregarBaratas, armazenam
           comDados((d) => <MonteSuaEstrategia snapshot={d} ativo={ativoAtual} onEscolher={setTicker} escolha={escolha} dataPregao={d.dataPregao} />)
         )}
       </AbasDaTela>
+
+      <GlossarioOpcoes ref={glossarioRef} aberto={glossarioAberto} aoMudar={setGlossarioAberto} />
 
       <div className="card-outline small muted justify" style={{ lineHeight: 1.5 }} role="note">
         <strong>Opções têm risco alto.</strong> Quem compra pode perder todo o prêmio pago; quem vende sem ter o ativo ou uma

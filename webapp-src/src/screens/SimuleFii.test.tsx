@@ -35,7 +35,8 @@ describe('SimuleFii', () => {
   it('mostra cotação, último rendimento e a tabela com investimento necessário', () => {
     render(<SimuleFii ctx={ctx} snapshot={snapshot} />)
     expect(screen.getByText('AAAA11', { selector: '.font-display' })).toBeDefined()
-    expect(screen.getByText('R$ 9,02')).toBeDefined()
+    // A cotação aparece no cartão e também na faixa de cotações (2 cópias para o laço).
+    expect(screen.getAllByText('R$ 9,02').length).toBeGreaterThan(0)
     expect(screen.getByText('R$ 45.100,00')).toBeDefined() // 5.000 cotas
     expect(screen.getByText('R$ 500,00')).toBeDefined()
   })

@@ -1,3 +1,19 @@
+/* Faixa de cotações (Simule Ações): rola da direita para a esquerda, em laço contínuo. */
+.faixa-cotacoes { overflow: hidden; }
+.faixa-cotacoes-trilho {
+  display: flex; width: max-content; padding: 8px 0; border-radius: 12px;
+  background: var(--surface2); animation: faixa-rolar 70s linear infinite;
+}
+.faixa-cotacoes:hover .faixa-cotacoes-trilho { animation-play-state: paused; }
+.faixa-cotacoes-lista { display: flex; gap: 28px; padding: 0 14px; margin: 0; list-style: none; white-space: nowrap; }
+.faixa-alta { color: #16a34a; }
+.faixa-baixa { color: #dc2626; }
+@keyframes faixa-rolar { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) {
+  .faixa-cotacoes { overflow-x: auto; }
+  .faixa-cotacoes-trilho { animation: none; }
+}
+
 :root {
   --bg: oklch(16% 0.014 262);
   /* Mesmos tokens da landing "Link na bio": vidro sobre o degradê de fundo */
@@ -2179,19 +2195,3 @@ select option:disabled { color: #6b7280 !important; -webkit-text-fill-color: #6b
 }
 .faixa-strike input[type='range']:focus-visible::-webkit-slider-thumb { outline: 2px solid var(--accent); outline-offset: 2px; }
 .faixa-strike input[type='range']:focus-visible::-moz-range-thumb { outline: 2px solid var(--accent); outline-offset: 2px; }
-
-/* Faixa de cotações (Simule Ações): rola da direita para a esquerda, em laço contínuo. */
-.faixa-cotacoes { overflow: hidden; }
-.faixa-cotacoes-trilho {
-  display: flex; width: max-content; padding: 8px 0; border-radius: 12px;
-  background: var(--surface2); animation: faixa-rolar 70s linear infinite;
-}
-.faixa-cotacoes:hover .faixa-cotacoes-trilho { animation-play-state: paused; }
-.faixa-cotacoes-lista { display: flex; gap: 28px; padding: 0 14px; margin: 0; list-style: none; white-space: nowrap; font-size: 13.5px; }
-.faixa-alta { color: #16a34a; }
-.faixa-baixa { color: #dc2626; }
-@keyframes faixa-rolar { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-@media (prefers-reduced-motion: reduce) {
-  .faixa-cotacoes { overflow-x: auto; }
-  .faixa-cotacoes-trilho { animation: none; }
-}
