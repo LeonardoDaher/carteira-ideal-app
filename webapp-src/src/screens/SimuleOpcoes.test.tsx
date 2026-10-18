@@ -178,6 +178,39 @@ describe('SimuleOpcoes: carregamento do arquivo', () => {
   })
 })
 
+describe('SimuleOpcoes: glossário', () => {
+  it('fica recolhido no fim da tela e abre pelo botão do topo, em qualquer aba', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    const glossario = screen.getByTestId('glossario') as HTMLDetailsElement
+    expect(glossario.open).toBe(false)
+    fireEvent.click(screen.getByRole('button', { name: /Abrir o glossário/ }))
+    expect(glossario.open).toBe(true)
+    fireEvent.click(screen.getByRole('tab', { name: /Estratégias/ }))
+    expect(screen.getByTestId('glossario')).toBeDefined() // continua disponível na outra aba
+  })
+
+  it('busca por palavra, com ou sem acento, e avisa quando nada é encontrado', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    fireEvent.click(screen.getByRole('button', { name: /Abrir o glossário/ }))
+    const busca = screen.getByLabelText('Buscar no glossário')
+    expect(screen.getAllByTestId('termo-do-glossario').length).toBeGreaterThan(20)
+    fireEvent.change(busca, { target: { value: 'premio' } })
+    expect(within(screen.getAllByTestId('termo-do-glossario')[0]).getByText('Prêmio')).toBeDefined()
+    fireEvent.change(busca, { target: { value: 'xyzxyz' } })
+    expect(screen.queryAllByTestId('termo-do-glossario')).toHaveLength(0)
+    expect(screen.getByText(/Nenhum termo encontrado para/)).toBeDefined()
+  })
+
+  it('os termos trazem exemplos numéricos', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    fireEvent.change(screen.getByLabelText('Buscar no glossário'), { target: { value: 'strike' } })
+    const primeiro = screen.getAllByTestId('termo-do-glossario')[0]
+    expect(within(primeiro).getByText('Strike')).toBeDefined()
+    fireEvent.change(screen.getByLabelText('Buscar no glossário'), { target: { value: 'call' } })
+    expect(screen.getAllByTestId('termo-do-glossario')[0].textContent).toMatch(/Exemplo:.*XPTO3/)
+  })
+})
+
 describe('SimuleOpcoes: compra e venda de call e put montadas nas séries da B3', () => {
   const operar = (acao: 'Comprar' | 'Vender', codigo: string) => fireEvent.click(screen.getByRole('button', { name: `${acao} ${codigo}` }))
 

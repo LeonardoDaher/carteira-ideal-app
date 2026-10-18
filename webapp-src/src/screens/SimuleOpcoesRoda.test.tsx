@@ -73,7 +73,7 @@ describe('SimuleOpcoes: aba Roda', () => {
     expect(txt('roda-premio-call')).toMatch(/^R\$/)
     expect(txt('roda-giro')).toMatch(/Ganho total do giro/)
     expect(txt('roda-equilibrio-acoes')).toMatch(/^R\$/)
-    expect(screen.getByText(/uma estimativa/)).toBeDefined()
+    expect(within(screen.getByTestId('roda-passo2')).getByText('estimativa', { selector: 'strong' })).toBeDefined()
     expect(screen.queryByTestId('roda-aviso-call-baixa')).toBeNull()
   })
 
