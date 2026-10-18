@@ -20,14 +20,15 @@ import { GraficosOpcoes } from './GraficosOpcoes'
 import { MonteSuaEstrategia } from './MonteSuaEstrategia'
 import { PainelDaPosicao } from './PainelDaPosicao'
 import { PorVisaoOpcoes } from './PorVisaoOpcoes'
+import { RodaOpcoes } from './RodaOpcoes'
 import { TopPremiosOpcoes } from './TopPremiosOpcoes'
 import { FaixaDeStrike } from '../ui/FaixaDeStrike'
 import type { AppCtx } from '../state/useAppState'
 
-type Aba = 'series' | 'premios' | 'visao' | 'graficos' | 'estrategias'
+type Aba = 'series' | 'premios' | 'visao' | 'graficos' | 'roda' | 'estrategias'
 
 /** Abas que, ao abrir, criam uma entrada no histórico: o "voltar" do navegador as fecha em vez de sair da tela. */
-const ABAS_COM_HISTORICO: Aba[] = ['premios', 'visao', 'graficos', 'estrategias']
+const ABAS_COM_HISTORICO: Aba[] = ['premios', 'visao', 'graficos', 'roda', 'estrategias']
 
 const LINHAS_POR_PAGINA = 100
 const ATALHOS_PERTO = [5, 10, 20] as const
@@ -165,6 +166,7 @@ export function SimuleOpcoes({ snapshot, endividadas, carregarBaratas, armazenam
           { id: 'premios', emoji: '🏆', titulo: 'Top 15 prêmios', descricao: 'Quem paga mais' },
           { id: 'visao', emoji: '🧭', titulo: 'Tendência', descricao: 'Alta, baixa, lateral' },
           { id: 'graficos', emoji: '📊', titulo: 'Gráficos', descricao: 'Negócios por strike' },
+          { id: 'roda', emoji: '🔄', titulo: 'Roda', descricao: 'Put, ação e call coberta' },
           { id: 'estrategias', emoji: '📈', titulo: 'Estratégias', descricao: 'Monte sua estratégia' },
         ] as const}
       >
@@ -172,6 +174,8 @@ export function SimuleOpcoes({ snapshot, endividadas, carregarBaratas, armazenam
           comDados((d) => <SeriesDaB3 snapshot={d} ativo={ativoAtual} onEscolher={setTicker} />)
         ) : aba === 'graficos' ? (
           comDados((d) => <GraficosOpcoes snapshot={d} ativo={ativoAtual} onEscolher={setTicker} />)
+        ) : aba === 'roda' ? (
+          comDados((d) => <RodaOpcoes snapshot={d} ativo={ativoAtual} onEscolher={setTicker} dataPregao={d.dataPregao} />)
         ) : aba === 'visao' ? (
           comDados((d) => <PorVisaoOpcoes snapshot={d} ativo={ativoAtual} onEscolher={setTicker} onSimular={criarEstrategia} />)
         ) : aba === 'premios' ? (

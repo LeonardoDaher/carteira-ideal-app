@@ -1942,3 +1942,18 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 **Limites.** As quatro montagens são leituras dos textos, e não as pernas oficiais de nenhuma mesa; strikes e quantidades padrão (degraus a partir do strike mais perto do preço) são ponto de partida. As estruturas com put vendida sem proteção mostram o aviso de risco e a perda não tem teto de "poucos reais": chega perto do strike vezes a quantidade.
 
 **Testes.** 5 de domínio (pernas e strikes padrão, crédito do slide, perda máxima igual ao débito no strangle financiado, delta cerca de dois no booster, grupo) e 1 da tela.
+
+
+## D107 (17/10/2026): aba "Roda" (wheel) no Simule Opções
+
+**Pedido do responsável (17/10/2026).** Montar a roda (wheel) do material do "Prefiro PUT": vender put até ser exercida, vender call coberta sobre as ações, e voltar à put.
+
+**O que a aba mostra** (um giro, com séries reais do ativo escolhido):
+- **Passo 1, put coberta por caixa.** Vencimento e série da put (padrão: o strike mais perto de 5% abaixo do preço), quantidade, caixa reservado (strike × quantidade), prêmio, rendimento no prazo e "equivale a, por mês" (regra de três para 21 dias úteis, só para comparar), preço efetivo se for exercida (strike menos prêmio) e quanto isso está abaixo do preço de hoje, chance de exercício (modelo, volatilidade implícita do próprio preço), e o resultado da put no mesmo painel das outras estruturas.
+- **Passo 2, call coberta depois do exercício.** Vencimento (padrão: o mensal seguinte ao da put) e série da call (padrão: o primeiro strike a partir do strike da put). O prêmio da call é **estimado**: só será conhecido quando a put for exercida, com o ativo perto do strike da put, então a série é valorizada por Black-Scholes nesse cenário com a volatilidade implícita do último preço dela. Mostra prêmio estimado, chance de a ação ser vendida, equilíbrio das ações (strike da put menos os dois prêmios), ganho e rendimento do giro completo (diferença dos strikes mais os dois prêmios, sobre o caixa), aviso quando o strike da call fica abaixo do preço efetivo da ação, e o painel de resultado com as ações a partir do strike da put e o prêmio da put já somado (\`Posicao.realizado\`).
+- **Manejo da put** (cenários, desmontagem e rolagem da D105) num bloco recolhível, para o caso de o ativo cair antes do vencimento.
+- Um aviso de que a roda não elimina o risco: se a ação cair bem abaixo do strike, fica-se com um papel que vale menos do que se pagou, e a call coberta trava a recuperação.
+
+**Limites.** (1) Só um giro; não projeta vários meses (repetir o rendimento de um mês não é garantido e a tela não faz essa conta). (2) O passo 2 depende de um prêmio estimado e do ativo no strike da put; o real pode diferir. (3) Preço de último negócio e modelo europeu, sem dividendos, sem corretagem nem imposto. (4) Só vale para ativos que a pessoa aceitaria ter em carteira ao preço do strike (dito na tela).
+
+**Código.** \`domain/roda.ts\` (\`passoDaPut\`, \`passoDaCall\`), \`screens/RodaOpcoes.tsx\`, aba "Roda" com histórico de navegador como as demais. 9 testes de domínio e 10 da tela.

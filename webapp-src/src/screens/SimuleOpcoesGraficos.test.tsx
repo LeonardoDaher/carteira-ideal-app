@@ -43,9 +43,9 @@ const marcar = (v: string) => fireEvent.click(screen.getByRole('checkbox', { nam
 const texto = (id: string) => (screen.getByTestId(id).textContent ?? '').replace(/ /g, ' ')
 
 describe('SimuleOpcoes: aba Gráficos (negócios por strike)', () => {
-  it('é a quarta aba e abre com o primeiro vencimento mensal, calls e puts separadas', () => {
+  it('é uma das abas e abre com o primeiro vencimento mensal, calls e puts separadas', () => {
     render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
-    expect(screen.getAllByRole('tab')).toHaveLength(5)
+    expect(screen.getAllByRole('tab')).toHaveLength(6)
     abrirGraficos()
     expect(within(screen.getByRole('group', { name: 'Opções do gráfico' })).getByText('Negócios por strike')).toBeDefined()
     expect(legenda()).toEqual(['19/11 calls', '19/11 puts'])
