@@ -33,6 +33,8 @@ export interface Posicao {
   pernas: Perna[]
   acoes: number
   precoAcao: number
+  /** Lucro ou prejuízo já realizado (ex.: ao encerrar pernas numa rolagem), somado ao resultado de qualquer preço. */
+  realizado?: number
 }
 
 export type EstrategiaId = 'compraCall' | 'vendaCall' | 'compraPut' | 'vendaPut' | 'vendaCoberta' | 'travaAlta' | 'travaBaixa'
@@ -117,7 +119,7 @@ const valorIntrinseco = (tipo: TipoOpcao, strike: number, s: number) => (tipo ==
 
 /** Lucro (+) ou prejuízo (−) da posição inteira, no vencimento, se o ativo estiver em `s`. */
 export function resultadoNoVencimento(p: Posicao, s: number): number {
-  let total = p.acoes * (s - p.precoAcao)
+  let total = (p.realizado ?? 0) + p.acoes * (s - p.precoAcao)
   for (const x of p.pernas) total += sinal(x.lado) * (valorIntrinseco(x.tipo, x.strike, s) - x.premio) * x.quantidade
   return total
 }
@@ -268,7 +270,7 @@ export interface Mercado {
 
 /** Valor da posição (lucro/prejuízo) se o ativo estiver em `s` daqui a `diasPassados` dias. */
 export function resultadoAntesDoVencimento(p: Posicao, s: number, m: Mercado, diasPassados: number): number {
-  let total = p.acoes * (s - p.precoAcao)
+  let total = (p.realizado ?? 0) + p.acoes * (s - p.precoAcao)
   for (const x of p.pernas) {
     const t = Math.max((x.dias ?? m.dias) - diasPassados, 0) / DIAS_UTEIS_ANO
     const valor = precoBs({ tipo: x.tipo, s, strike: x.strike, t, r: m.r, sigma: x.sigma ?? m.sigma })

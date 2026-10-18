@@ -1908,3 +1908,20 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 **Limites.** (1) A estimativa usa um modelo europeu, sem dividendos; opções americanas podem ser exercidas antes. (2) Usa o último preço negociado de cada perna, que pode estar longe do preço real de compra e venda; em estruturas de dois vencimentos isso pesa mais, porque a conta depende da diferença entre dois preços. (3) A rolagem (recomprar a perna atual e vender a do vencimento seguinte) e o plano de ajuste ainda não existem: são a etapa seguinte. (4) Pernas de ativos diferentes ficam fora: o resultado por preço do ativo deixa de ter um eixo só.
 
 **Testes.** 6 de domínio para o cálculo (reconhecer vencimentos diferentes, resultado zero hoje, valor da perna longa na data da curta, máximo e mínimo limitados no calendário, perda sem limite quando cabe, e que sem prazo próprio nada muda), 6 do catálogo (perna longa no vencimento seguinte, diagonal, vencimentos oferecidos, ordem de vencimentos, débito) e 4 da tela (THL, diagonal, perna longa antes da curta, troca de vencimento numa estrutura comum).
+
+
+## D105 (17/10/2026): manejo da estrutura (cenários, desmontagem e rolagem) na aba Estratégias
+
+**Pedido do responsável (17/10/2026).** Rolagem e plano de ajuste/manejo para quando o mercado vai contra, nas estruturas montadas.
+
+**O que a aba Estratégias passou a mostrar, abaixo do resultado da estrutura** (bloco "Manejo"):
+1. **Cenários no primeiro vencimento**: ativo −10%, −5%, parado, +5% e +10%, com o resultado da estrutura inteira e quais séries vendidas ficam dentro do dinheiro (seriam exercidas). Exato com um vencimento só; estimado com vários.
+2. **"E se o mercado for contra antes do vencimento?"**: o responsável escolhe um cenário (preço do ativo e dias úteis que passam; atalhos de −10% a +10%) e vê o **resultado de desmontar tudo** nesse cenário, com o valor de cada opção.
+3. **Rolagem**: marca-se cada perna a rolar, escolhe-se o novo vencimento (só os posteriores com séries do mesmo tipo; o mensal seguinte é o padrão) e a nova série (o strike mais perto do atual é o padrão). O app mostra, por perna, o encerramento, a abertura e o **crédito ou débito líquido** da troca, avisa quando há débito ("você paga para adiar"), e abre a **posição depois da rolagem** com o mesmo painel de resultado (ganho e perda máximos, equilíbrio, gráfico, tempo, gregas), já com o prejuízo ou lucro realizado nas pernas encerradas somado.
+4. **"O que costuma ser feito"**: texto descritivo conforme as pernas (put vendida, call vendida coberta ou descoberta, trava, THL e diagonais, só comprada), e um lembrete de definir antes o gatilho do ajuste. Não é recomendação de operação.
+
+**Como se calcula** (\`domain/rolagem.ts\`). O cenário é uma data e um preço do ativo. Cada opção é valorizada por Black-Scholes com a volatilidade implícita do preço da própria série hoje (assim, hoje, cada perna vale o que custou). Rolar encerra a perna antiga pelo valor do cenário (realiza o resultado) e abre a nova, no mesmo lado e quantidade, pelo preço estimado nesse cenário, com prazo contado a partir dele. Pernas que não rolam e já venceram até o cenário são encerradas pelo valor intrínseco. A posição depois da rolagem leva um campo novo, \`Posicao.realizado\`, somado ao resultado em qualquer preço, de modo que o ganho e a perda máximos já incluem o que foi realizado.
+
+**Limites.** (1) Tudo usa o último preço negociado e um modelo europeu, sem dividendos: no dia, o preço real de compra e venda pode ser pior, e o crédito de uma rolagem real tende a ser menor que o estimado. (2) A rolagem mantém o tipo da perna (call continua call); trocar de tipo ou de lado fica fora. (3) Só estruturas montadas na aba Estratégias: acompanhar uma posição que a pessoa já tem, informando os preços de entrada, é a etapa seguinte, assim como a "roda" e os modelos do Prefiro PUT (Slide, put otimizada, booster).
+
+**Testes.** 12 de domínio (valor no cenário, desmontagem, rolagem de vendida e comprada, realizado no gráfico, pernas vencidas no caminho, ações, cenários e exercidas) e 7 da tela.

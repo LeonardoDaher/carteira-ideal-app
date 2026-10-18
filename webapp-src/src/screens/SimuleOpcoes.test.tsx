@@ -423,6 +423,89 @@ describe('SimuleOpcoes: aba Estratégias (monte sua estratégia)', () => {
   })
 })
 
+describe('SimuleOpcoes: manejo (cenários, desmontagem e rolagem)', () => {
+  const abrirEstrategias = () => fireEvent.click(screen.getByRole('tab', { name: /Estratégias/ }))
+  const celulas = (linha: HTMLElement) => within(linha).getAllByRole('cell').map((c) => (c.textContent ?? '').replace(/ /g, ' '))
+
+  it('mostra o resultado da estrutura no primeiro vencimento para variações do ativo e quais vendidas seriam exercidas', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    abrirEstrategias() // trava de alta: compra K60 a 2,80 e vende K65 a 0,90
+    const linhas = within(screen.getByTestId('cenarios')).getAllByRole('row').slice(1)
+    expect(linhas).toHaveLength(5)
+    const parado = celulas(linhas[2])
+    expect(parado[0]).toBe('Parado')
+    expect(parado[2]).toBe('−R$ 190,00')
+    expect(celulas(linhas[0])[2]).toBe('−R$ 190,00') // caiu 10%: perde o débito
+    const alta = celulas(linhas[4])
+    expect(alta[2]).toBe('R$ 310,00') // subiu 10%: ganho máximo
+    expect(alta[3]).toBe('PETRK650') // a vendida (K65) fica dentro do dinheiro
+    expect(celulas(linhas[3])[3]).toBe('—') // +5% = 63: nenhuma vendida dentro do dinheiro
+  })
+
+  it('o resultado de desmontar muda com o cenário escolhido', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    abrirEstrategias()
+    fireEvent.click(screen.getByRole('button', { name: '+10%' }))
+    expect((screen.getByLabelText('Preço do ativo no cenário') as HTMLInputElement).value).toBe('66,00')
+    expect(txt('desmontar-total')).not.toMatch(/^−/) // alta de 10%: a trava de alta está no lucro
+    fireEvent.click(screen.getAllByRole('button', { name: /10%$/ })[0]) // o primeiro atalho é a queda de 10%
+    expect(txt('desmontar-total')).toMatch(/^−/)
+  })
+
+  it('rolar uma perna leva para o vencimento seguinte, no strike mais perto, e mostra a posição que sobra', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    abrirEstrategias()
+    expect(screen.queryByTestId('resultado-rolagem')).toBeNull()
+    fireEvent.click(screen.getByRole('checkbox', { name: /Rolar PETRK600/ }))
+    expect((screen.getByLabelText('Novo vencimento de PETRK600') as HTMLSelectElement).value).toBe('2026-12-18')
+    expect((screen.getByLabelText('Nova série de PETRK600') as HTMLSelectElement).value).toBe('PETRL600')
+    expect(screen.getByTestId('resultado-rolagem').textContent).toMatch(/PETRK600 → PETRL600/)
+    // a posição depois da rolagem tem o próprio painel de resultado, sem repetir os identificadores do primeiro
+    expect(screen.getByTestId('ganho-maximo-rolagem')).toBeDefined()
+    expect(screen.getByTestId('ganho-maximo')).toBeDefined()
+    expect(screen.getByTestId('aviso-estimativa-rolagem')).toBeDefined() // vencimentos diferentes depois da rolagem
+  })
+
+  it('rolar uma perna comprada com débito avisa que se está pagando para adiar', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    abrirEstrategias()
+    fireEvent.click(screen.getByRole('checkbox', { name: /Rolar PETRK600/ })) // call comprada: vende a de novembro e compra a de dezembro
+    expect(screen.getByTestId('aviso-rolagem-debito')).toBeDefined()
+  })
+
+  it('desmarcar a perna desfaz a rolagem', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    abrirEstrategias()
+    const caixa = screen.getByRole('checkbox', { name: /Rolar PETRK600/ })
+    fireEvent.click(caixa)
+    expect(screen.getByTestId('resultado-rolagem')).toBeDefined()
+    fireEvent.click(caixa)
+    expect(screen.queryByTestId('resultado-rolagem')).toBeNull()
+  })
+
+  it('perna sem vencimento posterior com séries do mesmo tipo não pode ser rolada', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    abrirEstrategias()
+    fireEvent.click(screen.getByRole('button', { name: 'Straddle comprado' }))
+    expect(screen.getByRole('checkbox', { name: /Rolar PETRW600/ }).hasAttribute('disabled')).toBe(true) // não há put em dezembro
+    expect(screen.getByRole('checkbox', { name: /Rolar PETRK600/ }).hasAttribute('disabled')).toBe(false)
+    expect(screen.getByText(/Não há vencimento posterior/)).toBeDefined()
+  })
+
+  it('mostra o que costuma ser feito conforme as pernas vendidas', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    abrirEstrategias()
+    fireEvent.click(screen.getByRole('button', { name: 'Venda coberta' }))
+    expect(screen.getByText(/Se o ativo subir acima do strike da call vendida \(coberta\)/)).toBeDefined()
+    fireEvent.click(screen.getByRole('button', { name: 'Straddle vendido' }))
+    expect(screen.getByText('Se o ativo cair abaixo do strike da put vendida')).toBeDefined()
+    expect(screen.getByText('Se o ativo subir acima do strike da call vendida')).toBeDefined()
+    fireEvent.click(screen.getByRole('button', { name: 'Straddle comprado' }))
+    expect(screen.getByText('Estrutura só comprada')).toBeDefined()
+    expect(screen.getByText('Antes de montar')).toBeDefined()
+  })
+})
+
 describe('SimuleOpcoes: preço do ativo, vencimentos, strike e voltar', () => {
   // 23/10/2026 é uma sexta comum (semanal); 20/11 é feriado, então o mensal de novembro é quinta, 19/11; 18/12 é a terceira sexta.
   const semanal: SnapshotOpcoes = {

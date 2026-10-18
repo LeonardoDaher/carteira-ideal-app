@@ -16,7 +16,7 @@ const dinheiro = (v: number) => (v < 0 ? `−${reais(-v)}` : reais(v))
  * Resultado de uma posição já montada: ganho e perda máximos, equilíbrio, gráfico no vencimento e antes dele, passagem do
  * tempo e gregas. Compartilhado pelas Séries da B3 (compra e venda de uma call ou put) e pela aba de estratégias montadas.
  */
-export function PainelDaPosicao({ posicao: posicaoEntrada, precoAtivo, dias: diasEntrada, titulo, aviso, nota }: {
+export function PainelDaPosicao({ posicao: posicaoEntrada, precoAtivo, dias: diasEntrada, titulo, aviso, nota, sufixo = '' }: {
   posicao: Posicao
   precoAtivo: number
   /** Dias úteis até o vencimento. */
@@ -25,6 +25,8 @@ export function PainelDaPosicao({ posicao: posicaoEntrada, precoAtivo, dias: dia
   aviso?: string | null
   /** Texto extra sobre o custo (ex.: ações necessárias na venda coberta). */
   nota?: string
+  /** Para mostrar dois painéis na mesma tela sem repetir ids e identificadores de teste. */
+  sufixo?: string
 }) {
   const [juros, setJuros] = useState(jurosPadrao)
   const [vol, setVol] = useState(35)
@@ -42,7 +44,7 @@ export function PainelDaPosicao({ posicao: posicaoEntrada, precoAtivo, dias: dia
       ...posicaoEntrada,
       pernas: posicaoEntrada.pernas.map((x) => {
         const impl = x.dias && x.dias > 0 ? volatilidadeImplicita({ tipo: x.tipo, s: precoAtivo, strike: x.strike, t: x.dias / DIAS_UTEIS_ANO, r }, x.premio) : null
-        return { ...x, sigma: impl ?? vol / 100 }
+        return { ...x, sigma: x.sigma ?? impl ?? vol / 100 }
       }),
     }
   }, [multi, posicaoEntrada, precoAtivo, r, vol])
@@ -78,11 +80,11 @@ export function PainelDaPosicao({ posicao: posicaoEntrada, precoAtivo, dias: dia
 
   return (
     <>
-      <div id="resultado-opcoes" className="card col" style={{ gap: 14, scrollMarginTop: 12 }} aria-live="polite">
+      <div id={'resultado-opcoes' + sufixo} className="card col" style={{ gap: 14, scrollMarginTop: 12 }} aria-live="polite">
         <span style={{ fontWeight: 700 }}>{multi ? `${titulo} no primeiro vencimento (estimado)` : `${titulo} no vencimento`}</span>
 
         {multi && (
-          <div className="card-outline small justify" style={{ lineHeight: 1.5 }} role="note" data-testid="aviso-estimativa">
+          <div className="card-outline small justify" style={{ lineHeight: 1.5 }} role="note" data-testid={'aviso-estimativa' + sufixo}>
             <strong>Vencimentos diferentes: o resultado é uma estimativa.</strong>{' '}
             <span className="muted">
               O gráfico mostra a posição daqui a {mercado.dias} dias úteis, quando vence a perna mais curta (vale só o valor intrínseco). As
@@ -93,7 +95,7 @@ export function PainelDaPosicao({ posicao: posicaoEntrada, precoAtivo, dias: dia
         )}
 
         {aviso && (
-          <div className="card-outline small justify aviso-atraso" style={{ lineHeight: 1.5 }} role="note" data-testid="aviso-risco">
+          <div className="card-outline small justify aviso-atraso" style={{ lineHeight: 1.5 }} role="note" data-testid={'aviso-risco' + sufixo}>
             <strong>Atenção.</strong> <span className="muted">{aviso}</span>
           </div>
         )}
@@ -101,15 +103,15 @@ export function PainelDaPosicao({ posicao: posicaoEntrada, precoAtivo, dias: dia
         <div className="row" style={{ gap: 10, alignItems: 'stretch', flexWrap: 'wrap' }}>
           <div className="col" style={{ ...caixa, gap: 2, flex: '1 1 120px' }}>
             <span className="tiny muted">Ganho máximo{multi ? ' (estimado)' : ''}</span>
-            <span style={{ fontWeight: 700, fontSize: 16 }} data-testid="ganho-maximo">{semLimite(dados.analise.ganhoMaximo)}</span>
+            <span style={{ fontWeight: 700, fontSize: 16 }} data-testid={'ganho-maximo' + sufixo}>{semLimite(dados.analise.ganhoMaximo)}</span>
           </div>
           <div className="col" style={{ ...caixa, gap: 2, flex: '1 1 120px' }}>
             <span className="tiny muted">Perda máxima{multi ? ' (estimada)' : ''}</span>
-            <span style={{ fontWeight: 700, fontSize: 16 }} data-testid="perda-maxima">{semLimite(dados.analise.perdaMaxima)}</span>
+            <span style={{ fontWeight: 700, fontSize: 16 }} data-testid={'perda-maxima' + sufixo}>{semLimite(dados.analise.perdaMaxima)}</span>
           </div>
           <div className="col" style={{ ...caixa, gap: 2, flex: '1 1 120px' }}>
             <span className="tiny muted">Ponto de equilíbrio</span>
-            <span style={{ fontWeight: 700, fontSize: 16 }} data-testid="equilibrio">
+            <span style={{ fontWeight: 700, fontSize: 16 }} data-testid={'equilibrio' + sufixo}>
               {dados.analise.equilibrios.length ? dados.analise.equilibrios.map((v) => reais(v)).join(' e ') : '—'}
             </span>
           </div>
@@ -120,6 +122,11 @@ export function PainelDaPosicao({ posicao: posicaoEntrada, precoAtivo, dias: dia
           {dados.custo >= 0 ? ' (você recebe o prêmio).' : ' (você paga o prêmio).'}
           {nota ? ` ${nota}` : ''}
         </div>
+        {posicao.realizado ? (
+          <div className="tiny muted justify" data-testid={'realizado' + sufixo}>
+            Resultado já realizado nas pernas encerradas: <strong>{dinheiro(posicao.realizado)}</strong>. Ele já está somado nos números e no gráfico.
+          </div>
+        ) : null}
 
         <div style={{ width: '100%', maxWidth: 560, marginInline: 'auto' }}>
           <GraficoPayoff
@@ -141,11 +148,11 @@ export function PainelDaPosicao({ posicao: posicaoEntrada, precoAtivo, dias: dia
 
         {mercado.dias > 0 && vol > 0 && (
           <div className="col" style={{ gap: 6 }}>
-            <label htmlFor="dias-passados" className="small" style={{ fontWeight: 600 }}>
+            <label htmlFor={'dias-passados' + sufixo} className="small" style={{ fontWeight: 600 }}>
               Passagem do tempo: daqui a {passados} {passados === 1 ? 'dia útil' : 'dias úteis'} (faltariam {mercado.dias - passados})
             </label>
             <input
-              id="dias-passados"
+              id={'dias-passados' + sufixo}
               type="range"
               min={0}
               max={mercado.dias}
@@ -166,7 +173,7 @@ export function PainelDaPosicao({ posicao: posicaoEntrada, precoAtivo, dias: dia
         {dados.g && (
           <div className="col" style={{ gap: 0 }}>
             <span className="small" style={{ fontWeight: 600, marginBottom: 4 }}>Gregas da posição{passados > 0 ? ` (daqui a ${passados} dias úteis)` : ' (hoje)'}</span>
-            <div className="tabela-bdr small"><span className="muted">Delta (variação por R$ 1 no ativo)</span><span style={{ fontWeight: 700 }} data-testid="delta">{dados.g.delta.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}</span></div>
+            <div className="tabela-bdr small"><span className="muted">Delta (variação por R$ 1 no ativo)</span><span style={{ fontWeight: 700 }} data-testid={'delta' + sufixo}>{dados.g.delta.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}</span></div>
             <div className="tabela-bdr small"><span className="muted">Gama (variação do delta por R$ 1)</span><span style={{ fontWeight: 700 }}>{dados.g.gama.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</span></div>
             <div className="tabela-bdr small"><span className="muted">Teta (por dia útil que passa)</span><span style={{ fontWeight: 700 }}>{dinheiro(dados.g.teta)}</span></div>
             <div className="tabela-bdr small"><span className="muted">Vega (por +1 ponto de volatilidade)</span><span style={{ fontWeight: 700 }}>{dinheiro(dados.g.vega)}</span></div>

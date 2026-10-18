@@ -11,7 +11,9 @@ import { reais } from '../domain/mercadoOficial'
 import { CampoNumero } from '../ui/CampoNumero'
 import { CampoReais } from '../ui/CampoReais'
 import { EscolhaDeAtivo } from './EscolhaDeAtivo'
+import { ManejoDaEstrategia } from './ManejoDaEstrategia'
 import { PainelDaPosicao } from './PainelDaPosicao'
+import type { PernaDaEstrutura } from '../domain/rolagem'
 
 const num = (v: number, casas = 2) => v.toLocaleString('pt-BR', { minimumFractionDigits: casas, maximumFractionDigits: casas })
 const rotuloTipo = (t: 'call' | 'put') => (t === 'call' ? 'CALL' : 'PUT')
@@ -165,6 +167,14 @@ function Montagem({ ativo, escolha, hoje }: { ativo: AtivoComOpcoes; escolha: Es
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [erro, modelo, config, livres, quantidade, precoAtivo, hoje])
 
+  // Pernas montadas, com as séries, para o manejo (rolagem, desmontagem e cenários).
+  const manejo: PernaDaEstrutura[] = posicao
+    ? posicao.pernas.flatMap((perna, i) => {
+        const codigo = modelo ? config.codigos[i] : livres[i]?.codigo
+        const serie = ativo.series.find((x) => x.codigo === codigo)
+        return serie ? [{ perna, serie }] : []
+      })
+    : []
   const vencimentoEmUso = modelo ? config.vencimento : (vencimentosLivres[0] ?? '')
   const dias = vencimentoEmUso ? Math.max(diasUteis(vencimentoEmUso, hoje), 1) : 21
   const aviso = modelo
@@ -306,6 +316,7 @@ function Montagem({ ativo, escolha, hoje }: { ativo: AtivoComOpcoes; escolha: Es
           <strong>Falta preencher:</strong> <span className="muted">{erro}</span>
         </div>
       ) : (
+        <>
         <PainelDaPosicao
           posicao={posicao}
           precoAtivo={precoAtivo}
@@ -314,6 +325,15 @@ function Montagem({ ativo, escolha, hoje }: { ativo: AtivoComOpcoes; escolha: Es
           aviso={aviso}
           nota={modelo?.comAcoes ? `Precisa ter ${quantidade.toLocaleString('pt-BR')} ações do ativo, compradas a ${reais(precoAtivo)}.` : undefined}
         />
+        <ManejoDaEstrategia
+          key={manejo.map((x) => x.serie.codigo).join('|')}
+          ativo={ativo}
+          pernas={manejo}
+          base={{ acoes: posicao.acoes, precoAcao: posicao.precoAcao }}
+          precoAtivo={precoAtivo}
+          hoje={hoje}
+        />
+        </>
       )}
     </>
   )
