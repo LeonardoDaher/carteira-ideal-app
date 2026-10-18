@@ -1,5 +1,5 @@
 {
-  "geradoEm": "2026-10-17T06:26:32.625Z",
+  "geradoEm": "2026-10-18T17:56:13.853Z",
   "dataPregao": "2026-10-16",
   "fonte": "B3 - Boletim de Preços (BVBG.086)",
   "cadastroId": "1730fa3a55",
@@ -9,275 +9,275 @@
   "gruposOrdem": ["Petróleo, Gás e Biocombustíveis","Materiais Básicos","Bens Industriais","Utilidade Pública","Financeiro","Consumo Cíclico","Consumo não Cíclico","Saúde","Tecnologia da Informação","Comunicações"],
   "setores": [
     {"setor": "Petróleo e gás", "grupoB3": "Petróleo, Gás e Biocombustíveis", "empresas": [
-      {"ticker":"PETR4","nome":"Petrobras","cotacao":59.68,"dataCotacao":"2026-10-16","variacao3m":45.9,"volumeMedio":2454287792,"minima52":29.31,"maxima52":59.68},
-      {"ticker":"PRIO3","nome":"PRIO","cotacao":70.1,"dataCotacao":"2026-10-16","variacao3m":21.2,"volumeMedio":582964585,"minima52":34.18,"maxima52":72.98},
-      {"ticker":"CSAN3","nome":"Cosan","cotacao":4.92,"dataCotacao":"2026-10-16","variacao3m":28.1,"volumeMedio":187547780,"minima52":3.09,"maxima52":6.9},
-      {"ticker":"BRAV3","nome":"Brava Energia","cotacao":21,"dataCotacao":"2026-10-16","variacao3m":7.3,"volumeMedio":75322363,"minima52":13.29,"maxima52":22.28},
-      {"ticker":"RECV3","nome":"PetroReconcavo","cotacao":12.5,"dataCotacao":"2026-10-16","variacao3m":21.5,"volumeMedio":23342059,"minima52":9.39,"maxima52":14.64},
-      {"ticker":"OPCT3","nome":"OceanPact","cotacao":9.86,"dataCotacao":"2026-10-16","variacao3m":-12.1,"volumeMedio":17420839,"minima52":7.42,"maxima52":11.71}
+      {"ticker":"PETR4","nome":"Petrobras","cotacao":59.68,"dataCotacao":"2026-10-16","variacao3m":45.9,"variacaoDia":4.04,"volumeMedio":2454287792,"minima52":29.31,"maxima52":59.68},
+      {"ticker":"PRIO3","nome":"PRIO","cotacao":70.1,"dataCotacao":"2026-10-16","variacao3m":21.2,"variacaoDia":2.56,"volumeMedio":582964585,"minima52":34.18,"maxima52":72.98},
+      {"ticker":"CSAN3","nome":"Cosan","cotacao":4.92,"dataCotacao":"2026-10-16","variacao3m":28.1,"variacaoDia":0,"volumeMedio":187547780,"minima52":3.09,"maxima52":6.9},
+      {"ticker":"BRAV3","nome":"Brava Energia","cotacao":21,"dataCotacao":"2026-10-16","variacao3m":7.3,"variacaoDia":1.5,"volumeMedio":75322363,"minima52":13.29,"maxima52":22.28},
+      {"ticker":"RECV3","nome":"PetroReconcavo","cotacao":12.5,"dataCotacao":"2026-10-16","variacao3m":21.5,"variacaoDia":2.21,"volumeMedio":23342059,"minima52":9.39,"maxima52":14.64},
+      {"ticker":"OPCT3","nome":"OceanPact","cotacao":9.86,"dataCotacao":"2026-10-16","variacao3m":-12.1,"variacaoDia":-1.4,"volumeMedio":17420839,"minima52":7.42,"maxima52":11.71}
     ]},
     {"setor": "Distribuição de combustíveis e etanol", "grupoB3": "Petróleo, Gás e Biocombustíveis", "empresas": [
-      {"ticker":"VBBR3","nome":"Vibra Energia","cotacao":36.65,"dataCotacao":"2026-10-16","variacao3m":5,"volumeMedio":559270015,"minima52":22.98,"maxima52":41.27},
-      {"ticker":"UGPA3","nome":"Ultrapar","cotacao":39.4,"dataCotacao":"2026-10-16","variacao3m":22.9,"volumeMedio":467549307,"minima52":19.93,"maxima52":41},
-      {"ticker":"RAIZ4","nome":"Raízen","cotacao":0.37,"dataCotacao":"2026-10-16","variacao3m":27.6,"volumeMedio":6617643,"minima52":0.21,"maxima52":1.13},
-      {"ticker":"CGAS5","nome":"Comgás","cotacao":124.89,"dataCotacao":"2026-10-16","variacao3m":0.7,"volumeMedio":134583,"minima52":119.06,"maxima52":139.96}
+      {"ticker":"VBBR3","nome":"Vibra Energia","cotacao":36.65,"dataCotacao":"2026-10-16","variacao3m":5,"variacaoDia":1.1,"volumeMedio":559270015,"minima52":22.98,"maxima52":41.27},
+      {"ticker":"UGPA3","nome":"Ultrapar","cotacao":39.4,"dataCotacao":"2026-10-16","variacao3m":22.9,"variacaoDia":1.97,"volumeMedio":467549307,"minima52":19.93,"maxima52":41},
+      {"ticker":"RAIZ4","nome":"Raízen","cotacao":0.37,"dataCotacao":"2026-10-16","variacao3m":27.6,"variacaoDia":2.78,"volumeMedio":6617643,"minima52":0.21,"maxima52":1.13},
+      {"ticker":"CGAS5","nome":"Comgás","cotacao":124.89,"dataCotacao":"2026-10-16","variacao3m":0.7,"variacaoDia":0.64,"volumeMedio":134583,"minima52":119.06,"maxima52":139.96}
     ]},
     {"setor": "Mineração", "grupoB3": "Materiais Básicos", "empresas": [
-      {"ticker":"VALE3","nome":"Vale","cotacao":66.21,"dataCotacao":"2026-10-16","variacao3m":-9.2,"volumeMedio":1866805161,"minima52":59.22,"maxima52":91.62},
-      {"ticker":"BRAP4","nome":"Bradespar","cotacao":20.11,"dataCotacao":"2026-10-16","variacao3m":-5.1,"volumeMedio":75277781,"minima52":17.11,"maxima52":25.63},
-      {"ticker":"CMIN3","nome":"CSN Mineração","cotacao":4.85,"dataCotacao":"2026-10-16","variacao3m":-9,"volumeMedio":47095458,"minima52":4.08,"maxima52":7.07},
-      {"ticker":"CBAV3","nome":"CBA (Companhia Brasileira de Alumínio)","cotacao":11.31,"dataCotacao":"2026-10-16","variacao3m":4.4,"volumeMedio":45355692,"minima52":4.43,"maxima52":11.39}
+      {"ticker":"VALE3","nome":"Vale","cotacao":66.21,"dataCotacao":"2026-10-16","variacao3m":-9.2,"variacaoDia":-0.32,"volumeMedio":1866805161,"minima52":59.22,"maxima52":91.62},
+      {"ticker":"BRAP4","nome":"Bradespar","cotacao":20.11,"dataCotacao":"2026-10-16","variacao3m":-5.1,"variacaoDia":0.35,"volumeMedio":75277781,"minima52":17.11,"maxima52":25.63},
+      {"ticker":"CMIN3","nome":"CSN Mineração","cotacao":4.85,"dataCotacao":"2026-10-16","variacao3m":-9,"variacaoDia":-0.21,"volumeMedio":47095458,"minima52":4.08,"maxima52":7.07},
+      {"ticker":"CBAV3","nome":"CBA (Companhia Brasileira de Alumínio)","cotacao":11.31,"dataCotacao":"2026-10-16","variacao3m":4.4,"variacaoDia":0.09,"volumeMedio":45355692,"minima52":4.43,"maxima52":11.39}
     ]},
     {"setor": "Siderurgia e metalurgia", "grupoB3": "Materiais Básicos", "empresas": [
-      {"ticker":"GGBR4","nome":"Gerdau","cotacao":25.39,"dataCotacao":"2026-10-16","variacao3m":5.6,"volumeMedio":267089242,"minima52":16.79,"maxima52":27.13},
-      {"ticker":"CSNA3","nome":"CSN","cotacao":5.77,"dataCotacao":"2026-10-16","variacao3m":14.3,"volumeMedio":143822211,"minima52":4.19,"maxima52":11.32},
-      {"ticker":"GOAU4","nome":"Metalúrgica Gerdau","cotacao":11.51,"dataCotacao":"2026-10-16","variacao3m":9.8,"volumeMedio":119638905,"minima52":7.59,"maxima52":12.23},
-      {"ticker":"USIM5","nome":"Usiminas","cotacao":6.72,"dataCotacao":"2026-10-16","variacao3m":-18.3,"volumeMedio":80572363,"minima52":4.31,"maxima52":12.18},
-      {"ticker":"FESA4","nome":"Ferbasa","cotacao":6.23,"dataCotacao":"2026-10-16","variacao3m":6.1,"volumeMedio":8017370,"minima52":4.75,"maxima52":8.9}
+      {"ticker":"GGBR4","nome":"Gerdau","cotacao":25.39,"dataCotacao":"2026-10-16","variacao3m":5.6,"variacaoDia":-1.09,"volumeMedio":267089242,"minima52":16.79,"maxima52":27.13},
+      {"ticker":"CSNA3","nome":"CSN","cotacao":5.77,"dataCotacao":"2026-10-16","variacao3m":14.3,"variacaoDia":-3.51,"volumeMedio":143822211,"minima52":4.19,"maxima52":11.32},
+      {"ticker":"GOAU4","nome":"Metalúrgica Gerdau","cotacao":11.51,"dataCotacao":"2026-10-16","variacao3m":9.8,"variacaoDia":-0.78,"volumeMedio":119638905,"minima52":7.59,"maxima52":12.23},
+      {"ticker":"USIM5","nome":"Usiminas","cotacao":6.72,"dataCotacao":"2026-10-16","variacao3m":-18.3,"variacaoDia":0,"volumeMedio":80572363,"minima52":4.31,"maxima52":12.18},
+      {"ticker":"FESA4","nome":"Ferbasa","cotacao":6.23,"dataCotacao":"2026-10-16","variacao3m":6.1,"variacaoDia":0,"volumeMedio":8017370,"minima52":4.75,"maxima52":8.9}
     ]},
     {"setor": "Papel, celulose e madeira", "grupoB3": "Materiais Básicos", "empresas": [
-      {"ticker":"SUZB3","nome":"Suzano","cotacao":43.05,"dataCotacao":"2026-10-16","variacao3m":2.7,"volumeMedio":334310343,"minima52":39.17,"maxima52":59.65},
-      {"ticker":"KLBN11","nome":"Klabin","cotacao":18.12,"dataCotacao":"2026-10-16","variacao3m":3.1,"volumeMedio":129546177,"minima52":16.1,"maxima52":21.25},
-      {"ticker":"RANI3","nome":"Irani","cotacao":8,"dataCotacao":"2026-10-16","variacao3m":0.6,"volumeMedio":6460465,"minima52":7.55,"maxima52":10.12},
-      {"ticker":"EUCA4","nome":"Eucatex","cotacao":24.31,"dataCotacao":"2026-10-16","variacao3m":8.4,"volumeMedio":1834484,"minima52":16.4,"maxima52":28.03}
+      {"ticker":"SUZB3","nome":"Suzano","cotacao":43.05,"dataCotacao":"2026-10-16","variacao3m":2.7,"variacaoDia":1.53,"volumeMedio":334310343,"minima52":39.17,"maxima52":59.65},
+      {"ticker":"KLBN11","nome":"Klabin","cotacao":18.12,"dataCotacao":"2026-10-16","variacao3m":3.1,"variacaoDia":0.06,"volumeMedio":129546177,"minima52":16.1,"maxima52":21.25},
+      {"ticker":"RANI3","nome":"Irani","cotacao":8,"dataCotacao":"2026-10-16","variacao3m":0.6,"variacaoDia":0.63,"volumeMedio":6460465,"minima52":7.55,"maxima52":10.12},
+      {"ticker":"EUCA4","nome":"Eucatex","cotacao":24.31,"dataCotacao":"2026-10-16","variacao3m":8.4,"variacaoDia":0.45,"volumeMedio":1834484,"minima52":16.4,"maxima52":28.03}
     ]},
     {"setor": "Química e petroquímica", "grupoB3": "Materiais Básicos", "empresas": [
-      {"ticker":"BRKM5","nome":"Braskem","cotacao":4.04,"dataCotacao":"2026-10-16","variacao3m":-34.7,"volumeMedio":23484305,"minima52":3.52,"maxima52":13.78},
-      {"ticker":"UNIP6","nome":"Unipar","cotacao":60.05,"dataCotacao":"2026-10-16","variacao3m":-2.7,"volumeMedio":16503928,"minima52":55,"maxima52":78.73},
-      {"ticker":"VITT3","nome":"Vittia","cotacao":3.5,"dataCotacao":"2026-10-16","variacao3m":4.5,"volumeMedio":909719,"minima52":2.73,"maxima52":5.02},
-      {"ticker":"FHER3","nome":"Fertilizantes Heringer","cotacao":2.86,"dataCotacao":"2026-10-16","variacao3m":-24.5,"volumeMedio":38635,"minima52":2.51,"maxima52":5.4},
-      {"ticker":"CRPG6","nome":"Tronox Pigmentos","cotacao":8.89,"dataCotacao":"2026-10-08","variacao3m":-32.1,"volumeMedio":3789,"minima52":7.55,"maxima52":23.89}
+      {"ticker":"BRKM5","nome":"Braskem","cotacao":4.04,"dataCotacao":"2026-10-16","variacao3m":-34.7,"variacaoDia":-6.48,"volumeMedio":23484305,"minima52":3.52,"maxima52":13.78},
+      {"ticker":"UNIP6","nome":"Unipar","cotacao":60.05,"dataCotacao":"2026-10-16","variacao3m":-2.7,"variacaoDia":-0.07,"volumeMedio":16503928,"minima52":55,"maxima52":78.73},
+      {"ticker":"VITT3","nome":"Vittia","cotacao":3.5,"dataCotacao":"2026-10-16","variacao3m":4.5,"variacaoDia":1.45,"volumeMedio":909719,"minima52":2.73,"maxima52":5.02},
+      {"ticker":"FHER3","nome":"Fertilizantes Heringer","cotacao":2.86,"dataCotacao":"2026-10-16","variacao3m":-24.5,"variacaoDia":-1.04,"volumeMedio":38635,"minima52":2.51,"maxima52":5.4},
+      {"ticker":"CRPG6","nome":"Tronox Pigmentos","cotacao":8.89,"dataCotacao":"2026-10-08","variacao3m":-32.1,"variacaoDia":null,"volumeMedio":3789,"minima52":7.55,"maxima52":23.89}
     ]},
     {"setor": "Máquinas, equipamentos e aeroespacial", "grupoB3": "Bens Industriais", "empresas": [
-      {"ticker":"EMBJ3","nome":"Embraer","cotacao":91.65,"dataCotacao":"2026-10-16","variacao3m":null,"volumeMedio":632950858,"minima52":null,"maxima52":null},
-      {"ticker":"WEGE3","nome":"WEG","cotacao":47.99,"dataCotacao":"2026-10-16","variacao3m":10,"volumeMedio":529480246,"minima52":36.78,"maxima52":54.53},
-      {"ticker":"TUPY3","nome":"Tupy","cotacao":19.78,"dataCotacao":"2026-10-16","variacao3m":22.2,"volumeMedio":17602529,"minima52":10.59,"maxima52":20.65},
-      {"ticker":"KEPL3","nome":"Kepler Weber","cotacao":7.37,"dataCotacao":"2026-10-16","variacao3m":16.1,"volumeMedio":12538017,"minima52":5.57,"maxima52":10.52},
-      {"ticker":"MYPK3","nome":"Iochpe-Maxion","cotacao":11.02,"dataCotacao":"2026-10-16","variacao3m":17.9,"volumeMedio":9957264,"minima52":8.59,"maxima52":11.3},
-      {"ticker":"SHUL4","nome":"Schulz","cotacao":5.03,"dataCotacao":"2026-10-16","variacao3m":10.3,"volumeMedio":3392527,"minima52":4.17,"maxima52":5.74},
-      {"ticker":"ROMI3","nome":"Romi","cotacao":7.3,"dataCotacao":"2026-10-16","variacao3m":21.7,"volumeMedio":3177830,"minima52":5.43,"maxima52":8.92},
-      {"ticker":"AERI3","nome":"Aeris Energy","cotacao":2.58,"dataCotacao":"2026-10-16","variacao3m":27.7,"volumeMedio":210253,"minima52":2,"maxima52":4.3},
-      {"ticker":"EALT4","nome":"Electro Aço Altona","cotacao":11.83,"dataCotacao":"2026-10-16","variacao3m":3.3,"volumeMedio":103029,"minima52":10.25,"maxima52":14.9},
-      {"ticker":"LUPA3","nome":"Lupatech","cotacao":4.2,"dataCotacao":"2026-10-16","variacao3m":null,"volumeMedio":50635,"minima52":null,"maxima52":null},
-      {"ticker":"MTSA4","nome":"Metisa","cotacao":45.99,"dataCotacao":"2026-10-15","variacao3m":2.2,"volumeMedio":46621,"minima52":40,"maxima52":64.91}
+      {"ticker":"EMBJ3","nome":"Embraer","cotacao":91.65,"dataCotacao":"2026-10-16","variacao3m":null,"variacaoDia":-0.7,"volumeMedio":632950858,"minima52":null,"maxima52":null},
+      {"ticker":"WEGE3","nome":"WEG","cotacao":47.99,"dataCotacao":"2026-10-16","variacao3m":10,"variacaoDia":-2.24,"volumeMedio":529480246,"minima52":36.78,"maxima52":54.53},
+      {"ticker":"TUPY3","nome":"Tupy","cotacao":19.78,"dataCotacao":"2026-10-16","variacao3m":22.2,"variacaoDia":-2.9,"volumeMedio":17602529,"minima52":10.59,"maxima52":20.65},
+      {"ticker":"KEPL3","nome":"Kepler Weber","cotacao":7.37,"dataCotacao":"2026-10-16","variacao3m":16.1,"variacaoDia":-0.41,"volumeMedio":12538017,"minima52":5.57,"maxima52":10.52},
+      {"ticker":"MYPK3","nome":"Iochpe-Maxion","cotacao":11.02,"dataCotacao":"2026-10-16","variacao3m":17.9,"variacaoDia":2.51,"volumeMedio":9957264,"minima52":8.59,"maxima52":11.3},
+      {"ticker":"SHUL4","nome":"Schulz","cotacao":5.03,"dataCotacao":"2026-10-16","variacao3m":10.3,"variacaoDia":0.6,"volumeMedio":3392527,"minima52":4.17,"maxima52":5.74},
+      {"ticker":"ROMI3","nome":"Romi","cotacao":7.3,"dataCotacao":"2026-10-16","variacao3m":21.7,"variacaoDia":-0.41,"volumeMedio":3177830,"minima52":5.43,"maxima52":8.92},
+      {"ticker":"AERI3","nome":"Aeris Energy","cotacao":2.58,"dataCotacao":"2026-10-16","variacao3m":27.7,"variacaoDia":-1.9,"volumeMedio":210253,"minima52":2,"maxima52":4.3},
+      {"ticker":"EALT4","nome":"Electro Aço Altona","cotacao":11.83,"dataCotacao":"2026-10-16","variacao3m":3.3,"variacaoDia":0.25,"volumeMedio":103029,"minima52":10.25,"maxima52":14.9},
+      {"ticker":"LUPA3","nome":"Lupatech","cotacao":4.2,"dataCotacao":"2026-10-16","variacao3m":null,"variacaoDia":-3.45,"volumeMedio":50635,"minima52":null,"maxima52":null},
+      {"ticker":"MTSA4","nome":"Metisa","cotacao":45.99,"dataCotacao":"2026-10-15","variacao3m":2.2,"variacaoDia":null,"volumeMedio":46621,"minima52":40,"maxima52":64.91}
     ]},
     {"setor": "Autopeças e veículos", "grupoB3": "Bens Industriais", "empresas": [
-      {"ticker":"POMO4","nome":"Marcopolo","cotacao":4.61,"dataCotacao":"2026-10-16","variacao3m":-12,"volumeMedio":91764320,"minima52":4.03,"maxima52":8.99},
-      {"ticker":"RAPT4","nome":"Randon","cotacao":7.49,"dataCotacao":"2026-10-16","variacao3m":57.4,"volumeMedio":30672983,"minima52":4.18,"maxima52":7.9},
-      {"ticker":"LEVE3","nome":"Mahle Metal Leve","cotacao":37.2,"dataCotacao":"2026-10-16","variacao3m":18.5,"volumeMedio":12177371,"minima52":26.72,"maxima52":38.64},
-      {"ticker":"FRAS3","nome":"Fras-le","cotacao":27.77,"dataCotacao":"2026-10-16","variacao3m":35.8,"volumeMedio":8012349,"minima52":19.11,"maxima52":28.52},
-      {"ticker":"RSUL4","nome":"Recrusul","cotacao":48.92,"dataCotacao":"2026-10-16","variacao3m":8.4,"volumeMedio":363399,"minima52":37.67,"maxima52":71}
+      {"ticker":"POMO4","nome":"Marcopolo","cotacao":4.61,"dataCotacao":"2026-10-16","variacao3m":-12,"variacaoDia":-1.07,"volumeMedio":91764320,"minima52":4.03,"maxima52":8.99},
+      {"ticker":"RAPT4","nome":"Randon","cotacao":7.49,"dataCotacao":"2026-10-16","variacao3m":57.4,"variacaoDia":3.31,"volumeMedio":30672983,"minima52":4.18,"maxima52":7.9},
+      {"ticker":"LEVE3","nome":"Mahle Metal Leve","cotacao":37.2,"dataCotacao":"2026-10-16","variacao3m":18.5,"variacaoDia":2.23,"volumeMedio":12177371,"minima52":26.72,"maxima52":38.64},
+      {"ticker":"FRAS3","nome":"Fras-le","cotacao":27.77,"dataCotacao":"2026-10-16","variacao3m":35.8,"variacaoDia":0.62,"volumeMedio":8012349,"minima52":19.11,"maxima52":28.52},
+      {"ticker":"RSUL4","nome":"Recrusul","cotacao":48.92,"dataCotacao":"2026-10-16","variacao3m":8.4,"variacaoDia":-0.14,"volumeMedio":363399,"minima52":37.67,"maxima52":71}
     ]},
     {"setor": "Transporte e infraestrutura", "grupoB3": "Bens Industriais", "empresas": [
-      {"ticker":"MOTV3","nome":"Motiva (ex-CCR)","cotacao":19.81,"dataCotacao":"2026-10-16","variacao3m":35.6,"volumeMedio":311201433,"minima52":13.52,"maxima52":20.83},
-      {"ticker":"RAIL3","nome":"Rumo","cotacao":18.58,"dataCotacao":"2026-10-16","variacao3m":35.6,"volumeMedio":281545278,"minima52":12.16,"maxima52":19.37},
-      {"ticker":"ECOR3","nome":"Ecorodovias","cotacao":13.06,"dataCotacao":"2026-10-16","variacao3m":85.5,"volumeMedio":164696710,"minima52":5.84,"maxima52":14.87},
-      {"ticker":"TGMA3","nome":"Tegma","cotacao":47.97,"dataCotacao":"2026-10-16","variacao3m":52.3,"volumeMedio":21094684,"minima52":26.95,"maxima52":48.31},
-      {"ticker":"HBSA3","nome":"Hidrovias do Brasil","cotacao":3.8,"dataCotacao":"2026-10-16","variacao3m":16.2,"volumeMedio":6833929,"minima52":2.91,"maxima52":4.39},
-      {"ticker":"LOGN3","nome":"Log-In","cotacao":31,"dataCotacao":"2026-10-16","variacao3m":10.9,"volumeMedio":885833,"minima52":24.24,"maxima52":40.15}
+      {"ticker":"MOTV3","nome":"Motiva (ex-CCR)","cotacao":19.81,"dataCotacao":"2026-10-16","variacao3m":35.6,"variacaoDia":-0.15,"volumeMedio":311201433,"minima52":13.52,"maxima52":20.83},
+      {"ticker":"RAIL3","nome":"Rumo","cotacao":18.58,"dataCotacao":"2026-10-16","variacao3m":35.6,"variacaoDia":0,"volumeMedio":281545278,"minima52":12.16,"maxima52":19.37},
+      {"ticker":"ECOR3","nome":"Ecorodovias","cotacao":13.06,"dataCotacao":"2026-10-16","variacao3m":85.5,"variacaoDia":2.35,"volumeMedio":164696710,"minima52":5.84,"maxima52":14.87},
+      {"ticker":"TGMA3","nome":"Tegma","cotacao":47.97,"dataCotacao":"2026-10-16","variacao3m":52.3,"variacaoDia":0.5,"volumeMedio":21094684,"minima52":26.95,"maxima52":48.31},
+      {"ticker":"HBSA3","nome":"Hidrovias do Brasil","cotacao":3.8,"dataCotacao":"2026-10-16","variacao3m":16.2,"variacaoDia":0,"volumeMedio":6833929,"minima52":2.91,"maxima52":4.39},
+      {"ticker":"LOGN3","nome":"Log-In","cotacao":31,"dataCotacao":"2026-10-16","variacao3m":10.9,"variacaoDia":0.49,"volumeMedio":885833,"minima52":24.24,"maxima52":40.15}
     ]},
     {"setor": "Locação de veículos e frotas", "grupoB3": "Bens Industriais", "empresas": [
-      {"ticker":"RENT3","nome":"Localiza","cotacao":49.69,"dataCotacao":"2026-10-16","variacao3m":30,"volumeMedio":801927814,"minima52":31.74,"maxima52":54.87},
-      {"ticker":"MOVI3","nome":"Movida","cotacao":16.57,"dataCotacao":"2026-10-16","variacao3m":91.1,"volumeMedio":223697009,"minima52":6.44,"maxima52":19.41},
-      {"ticker":"VAMO3","nome":"Vamos","cotacao":5.67,"dataCotacao":"2026-10-16","variacao3m":78.9,"volumeMedio":152373516,"minima52":2.46,"maxima52":6.97},
-      {"ticker":"SIMH3","nome":"Simpar","cotacao":14.5,"dataCotacao":"2026-10-16","variacao3m":92.3,"volumeMedio":100998730,"minima52":null,"maxima52":null},
-      {"ticker":"ARML3","nome":"Armac","cotacao":5.88,"dataCotacao":"2026-10-16","variacao3m":78.7,"volumeMedio":8022942,"minima52":2.66,"maxima52":6.79}
+      {"ticker":"RENT3","nome":"Localiza","cotacao":49.69,"dataCotacao":"2026-10-16","variacao3m":30,"variacaoDia":-0.46,"volumeMedio":801927814,"minima52":31.74,"maxima52":54.87},
+      {"ticker":"MOVI3","nome":"Movida","cotacao":16.57,"dataCotacao":"2026-10-16","variacao3m":91.1,"variacaoDia":2.28,"volumeMedio":223697009,"minima52":6.44,"maxima52":19.41},
+      {"ticker":"VAMO3","nome":"Vamos","cotacao":5.67,"dataCotacao":"2026-10-16","variacao3m":78.9,"variacaoDia":1.07,"volumeMedio":152373516,"minima52":2.46,"maxima52":6.97},
+      {"ticker":"SIMH3","nome":"Simpar","cotacao":14.5,"dataCotacao":"2026-10-16","variacao3m":92.3,"variacaoDia":0.07,"volumeMedio":100998730,"minima52":null,"maxima52":null},
+      {"ticker":"ARML3","nome":"Armac","cotacao":5.88,"dataCotacao":"2026-10-16","variacao3m":78.7,"variacaoDia":-0.51,"volumeMedio":8022942,"minima52":2.66,"maxima52":6.79}
     ]},
     {"setor": "Serviços e locação de equipamentos", "grupoB3": "Bens Industriais", "empresas": [
-      {"ticker":"LOGG3","nome":"LOG Commercial Properties","cotacao":28.56,"dataCotacao":"2026-10-16","variacao3m":8.4,"volumeMedio":21932044,"minima52":21.12,"maxima52":31.69},
-      {"ticker":"PRNR3","nome":"Priner","cotacao":20.35,"dataCotacao":"2026-10-16","variacao3m":9.6,"volumeMedio":18335538,"minima52":14.43,"maxima52":22.96},
-      {"ticker":"MILS3","nome":"Mills","cotacao":16.1,"dataCotacao":"2026-10-16","variacao3m":4.2,"volumeMedio":17622767,"minima52":11.65,"maxima52":16.31},
-      {"ticker":"AMBP3","nome":"Ambipar","cotacao":0.15,"dataCotacao":"2026-10-16","variacao3m":null,"volumeMedio":1145823,"minima52":null,"maxima52":null}
+      {"ticker":"LOGG3","nome":"LOG Commercial Properties","cotacao":28.56,"dataCotacao":"2026-10-16","variacao3m":8.4,"variacaoDia":-1.24,"volumeMedio":21932044,"minima52":21.12,"maxima52":31.69},
+      {"ticker":"PRNR3","nome":"Priner","cotacao":20.35,"dataCotacao":"2026-10-16","variacao3m":9.6,"variacaoDia":0.25,"volumeMedio":18335538,"minima52":14.43,"maxima52":22.96},
+      {"ticker":"MILS3","nome":"Mills","cotacao":16.1,"dataCotacao":"2026-10-16","variacao3m":4.2,"variacaoDia":-0.12,"volumeMedio":17622767,"minima52":11.65,"maxima52":16.31},
+      {"ticker":"AMBP3","nome":"Ambipar","cotacao":0.15,"dataCotacao":"2026-10-16","variacao3m":null,"variacaoDia":0,"volumeMedio":1145823,"minima52":null,"maxima52":null}
     ]},
     {"setor": "Energia elétrica: geração", "grupoB3": "Utilidade Pública", "empresas": [
-      {"ticker":"AXIA3","nome":"Axia Energia (ex-Eletrobras)","cotacao":59.49,"dataCotacao":"2026-10-16","variacao3m":18.5,"volumeMedio":1235242014,"minima52":47.43,"maxima52":67.84},
-      {"ticker":"ENEV3","nome":"Eneva","cotacao":31.5,"dataCotacao":"2026-10-16","variacao3m":22.7,"volumeMedio":397531695,"minima52":16.1,"maxima52":32.02},
-      {"ticker":"EGIE3","nome":"Engie Brasil","cotacao":31.32,"dataCotacao":"2026-10-16","variacao3m":4.5,"volumeMedio":116750874,"minima52":27.3,"maxima52":44.53},
-      {"ticker":"AURE3","nome":"Auren Energia","cotacao":14.82,"dataCotacao":"2026-10-16","variacao3m":27.9,"volumeMedio":76119989,"minima52":9.98,"maxima52":16.36},
-      {"ticker":"GEPA4","nome":"Rio Paranapanema Energia","cotacao":38,"dataCotacao":"2026-10-16","variacao3m":0,"volumeMedio":9749,"minima52":31,"maxima52":42.5}
+      {"ticker":"AXIA3","nome":"Axia Energia (ex-Eletrobras)","cotacao":59.49,"dataCotacao":"2026-10-16","variacao3m":18.5,"variacaoDia":0.59,"volumeMedio":1235242014,"minima52":47.43,"maxima52":67.84},
+      {"ticker":"ENEV3","nome":"Eneva","cotacao":31.5,"dataCotacao":"2026-10-16","variacao3m":22.7,"variacaoDia":0.25,"volumeMedio":397531695,"minima52":16.1,"maxima52":32.02},
+      {"ticker":"EGIE3","nome":"Engie Brasil","cotacao":31.32,"dataCotacao":"2026-10-16","variacao3m":4.5,"variacaoDia":-0.13,"volumeMedio":116750874,"minima52":27.3,"maxima52":44.53},
+      {"ticker":"AURE3","nome":"Auren Energia","cotacao":14.82,"dataCotacao":"2026-10-16","variacao3m":27.9,"variacaoDia":-0.2,"volumeMedio":76119989,"minima52":9.98,"maxima52":16.36},
+      {"ticker":"GEPA4","nome":"Rio Paranapanema Energia","cotacao":38,"dataCotacao":"2026-10-16","variacao3m":0,"variacaoDia":-0.55,"volumeMedio":9749,"minima52":31,"maxima52":42.5}
     ]},
     {"setor": "Energia elétrica: transmissão", "grupoB3": "Utilidade Pública", "empresas": [
-      {"ticker":"CMIG4","nome":"Cemig","cotacao":11.83,"dataCotacao":"2026-10-16","variacao3m":6.4,"volumeMedio":211834040,"minima52":9.87,"maxima52":13.87},
-      {"ticker":"ISAE4","nome":"ISA Energia","cotacao":28.48,"dataCotacao":"2026-10-16","variacao3m":1.7,"volumeMedio":151042969,"minima52":23.78,"maxima52":32.19},
-      {"ticker":"TAEE11","nome":"Taesa","cotacao":44.56,"dataCotacao":"2026-10-16","variacao3m":9,"volumeMedio":102590007,"minima52":35.7,"maxima52":46.91},
-      {"ticker":"ALUP11","nome":"Alupar","cotacao":38.46,"dataCotacao":"2026-10-16","variacao3m":15.6,"volumeMedio":57229777,"minima52":30.58,"maxima52":40.95}
+      {"ticker":"CMIG4","nome":"Cemig","cotacao":11.83,"dataCotacao":"2026-10-16","variacao3m":6.4,"variacaoDia":0.6,"volumeMedio":211834040,"minima52":9.87,"maxima52":13.87},
+      {"ticker":"ISAE4","nome":"ISA Energia","cotacao":28.48,"dataCotacao":"2026-10-16","variacao3m":1.7,"variacaoDia":-0.84,"volumeMedio":151042969,"minima52":23.78,"maxima52":32.19},
+      {"ticker":"TAEE11","nome":"Taesa","cotacao":44.56,"dataCotacao":"2026-10-16","variacao3m":9,"variacaoDia":-0.2,"volumeMedio":102590007,"minima52":35.7,"maxima52":46.91},
+      {"ticker":"ALUP11","nome":"Alupar","cotacao":38.46,"dataCotacao":"2026-10-16","variacao3m":15.6,"variacaoDia":0.23,"volumeMedio":57229777,"minima52":30.58,"maxima52":40.95}
     ]},
     {"setor": "Energia elétrica: distribuição", "grupoB3": "Utilidade Pública", "empresas": [
-      {"ticker":"EQTL3","nome":"Equatorial","cotacao":48.41,"dataCotacao":"2026-10-16","variacao3m":22.6,"volumeMedio":661165319,"minima52":33.61,"maxima52":51.26},
-      {"ticker":"CPLE3","nome":"Copel","cotacao":17.7,"dataCotacao":"2026-10-16","variacao3m":19.6,"volumeMedio":406873577,"minima52":11.58,"maxima52":18},
-      {"ticker":"ENGI11","nome":"Energisa","cotacao":65.29,"dataCotacao":"2026-10-16","variacao3m":32.6,"volumeMedio":273504016,"minima52":42.38,"maxima52":69.05},
-      {"ticker":"CPFE3","nome":"CPFL Energia","cotacao":49.36,"dataCotacao":"2026-10-16","variacao3m":5.3,"volumeMedio":103537602,"minima52":37.95,"maxima52":57.21},
-      {"ticker":"LIGT3","nome":"Light","cotacao":3.82,"dataCotacao":"2026-10-16","variacao3m":18.3,"volumeMedio":12251834,"minima52":2.41,"maxima52":6.49},
-      {"ticker":"CLSC4","nome":"Celesc","cotacao":190.78,"dataCotacao":"2026-10-16","variacao3m":37.7,"volumeMedio":1346744,"minima52":99.89,"maxima52":197.01},
-      {"ticker":"CEEB3","nome":"Coelba","cotacao":47,"dataCotacao":"2026-10-15","variacao3m":1.1,"volumeMedio":41709,"minima52":34.7,"maxima52":50.75},
-      {"ticker":"ENMT3","nome":"Energisa Mato Grosso","cotacao":38.31,"dataCotacao":"2026-10-16","variacao3m":4.7,"volumeMedio":29296,"minima52":31.53,"maxima52":59.9},
-      {"ticker":"EKTR4","nome":"Elektro","cotacao":39.39,"dataCotacao":"2026-10-16","variacao3m":0.5,"volumeMedio":12019,"minima52":36.03,"maxima52":44.99}
+      {"ticker":"EQTL3","nome":"Equatorial","cotacao":48.41,"dataCotacao":"2026-10-16","variacao3m":22.6,"variacaoDia":0.54,"volumeMedio":661165319,"minima52":33.61,"maxima52":51.26},
+      {"ticker":"CPLE3","nome":"Copel","cotacao":17.7,"dataCotacao":"2026-10-16","variacao3m":19.6,"variacaoDia":1.9,"volumeMedio":406873577,"minima52":11.58,"maxima52":18},
+      {"ticker":"ENGI11","nome":"Energisa","cotacao":65.29,"dataCotacao":"2026-10-16","variacao3m":32.6,"variacaoDia":0.35,"volumeMedio":273504016,"minima52":42.38,"maxima52":69.05},
+      {"ticker":"CPFE3","nome":"CPFL Energia","cotacao":49.36,"dataCotacao":"2026-10-16","variacao3m":5.3,"variacaoDia":-0.62,"volumeMedio":103537602,"minima52":37.95,"maxima52":57.21},
+      {"ticker":"LIGT3","nome":"Light","cotacao":3.82,"dataCotacao":"2026-10-16","variacao3m":18.3,"variacaoDia":-0.52,"volumeMedio":12251834,"minima52":2.41,"maxima52":6.49},
+      {"ticker":"CLSC4","nome":"Celesc","cotacao":190.78,"dataCotacao":"2026-10-16","variacao3m":37.7,"variacaoDia":0.52,"volumeMedio":1346744,"minima52":99.89,"maxima52":197.01},
+      {"ticker":"CEEB3","nome":"Coelba","cotacao":47,"dataCotacao":"2026-10-15","variacao3m":1.1,"variacaoDia":null,"volumeMedio":41709,"minima52":34.7,"maxima52":50.75},
+      {"ticker":"ENMT3","nome":"Energisa Mato Grosso","cotacao":38.31,"dataCotacao":"2026-10-16","variacao3m":4.7,"variacaoDia":-0.18,"volumeMedio":29296,"minima52":31.53,"maxima52":59.9},
+      {"ticker":"EKTR4","nome":"Elektro","cotacao":39.39,"dataCotacao":"2026-10-16","variacao3m":0.5,"variacaoDia":null,"volumeMedio":12019,"minima52":36.03,"maxima52":44.99}
     ]},
     {"setor": "Saneamento e resíduos", "grupoB3": "Utilidade Pública", "empresas": [
-      {"ticker":"SBSP3","nome":"Sabesp","cotacao":32.2,"dataCotacao":"2026-10-16","variacao3m":10.2,"volumeMedio":810574689,"minima52":null,"maxima52":null},
-      {"ticker":"CSMG3","nome":"Copasa","cotacao":61.61,"dataCotacao":"2026-10-16","variacao3m":-3.1,"volumeMedio":325287530,"minima52":33.42,"maxima52":67.82},
-      {"ticker":"SAPR11","nome":"Sanepar","cotacao":40,"dataCotacao":"2026-10-16","variacao3m":7.7,"volumeMedio":95427108,"minima52":31.13,"maxima52":48.72},
-      {"ticker":"ORVR3","nome":"Orizon","cotacao":20,"dataCotacao":"2026-10-16","variacao3m":null,"volumeMedio":77391044,"minima52":null,"maxima52":null}
+      {"ticker":"SBSP3","nome":"Sabesp","cotacao":32.2,"dataCotacao":"2026-10-16","variacao3m":10.2,"variacaoDia":1.04,"volumeMedio":810574689,"minima52":null,"maxima52":null},
+      {"ticker":"CSMG3","nome":"Copasa","cotacao":61.61,"dataCotacao":"2026-10-16","variacao3m":-3.1,"variacaoDia":-0.63,"volumeMedio":325287530,"minima52":33.42,"maxima52":67.82},
+      {"ticker":"SAPR11","nome":"Sanepar","cotacao":40,"dataCotacao":"2026-10-16","variacao3m":7.7,"variacaoDia":1.47,"volumeMedio":95427108,"minima52":31.13,"maxima52":48.72},
+      {"ticker":"ORVR3","nome":"Orizon","cotacao":20,"dataCotacao":"2026-10-16","variacao3m":null,"variacaoDia":-2.39,"volumeMedio":77391044,"minima52":null,"maxima52":null}
     ]},
     {"setor": "Bancos", "grupoB3": "Financeiro", "empresas": [
-      {"ticker":"ITUB4","nome":"Itaú Unibanco","cotacao":48.09,"dataCotacao":"2026-10-16","variacao3m":14.6,"volumeMedio":1698254228,"minima52":37.01,"maxima52":50.85},
-      {"ticker":"BBDC4","nome":"Bradesco","cotacao":20.36,"dataCotacao":"2026-10-16","variacao3m":11.3,"volumeMedio":1330816935,"minima52":15.68,"maxima52":23},
-      {"ticker":"BBAS3","nome":"Banco do Brasil","cotacao":23.63,"dataCotacao":"2026-10-16","variacao3m":15.3,"volumeMedio":1227684714,"minima52":17.79,"maxima52":27.81},
-      {"ticker":"BPAC11","nome":"BTG Pactual","cotacao":76.75,"dataCotacao":"2026-10-16","variacao3m":36.6,"volumeMedio":1177003035,"minima52":45.12,"maxima52":84.59},
-      {"ticker":"SANB11","nome":"Santander Brasil","cotacao":28.37,"dataCotacao":"2026-10-16","variacao3m":6.5,"volumeMedio":151470795,"minima52":25.18,"maxima52":37.83},
-      {"ticker":"BRSR6","nome":"Banrisul","cotacao":17.41,"dataCotacao":"2026-10-16","variacao3m":26.1,"volumeMedio":46751368,"minima52":11.7,"maxima52":19.2},
-      {"ticker":"ABCB4","nome":"ABC Brasil","cotacao":28.66,"dataCotacao":"2026-10-16","variacao3m":21.9,"volumeMedio":21077069,"minima52":21.31,"maxima52":29.56},
-      {"ticker":"PINE4","nome":"Banco Pine","cotacao":15.8,"dataCotacao":"2026-10-16","variacao3m":39,"volumeMedio":15522783,"minima52":8.25,"maxima52":16.24},
-      {"ticker":"BMGB4","nome":"Banco BMG","cotacao":6.95,"dataCotacao":"2026-10-16","variacao3m":35.5,"volumeMedio":10521325,"minima52":3.84,"maxima52":7.15},
-      {"ticker":"BAZA3","nome":"Banco da Amazônia","cotacao":77.4,"dataCotacao":"2026-10-16","variacao3m":30.4,"volumeMedio":244849,"minima52":56.08,"maxima52":89.5},
-      {"ticker":"BEES3","nome":"Banestes","cotacao":9.8,"dataCotacao":"2026-10-16","variacao3m":12.5,"volumeMedio":117987,"minima52":7.77,"maxima52":10},
-      {"ticker":"BSLI4","nome":"BRB Banco de Brasília","cotacao":2.26,"dataCotacao":"2026-10-16","variacao3m":-24.7,"volumeMedio":43099,"minima52":2.26,"maxima52":9.76},
-      {"ticker":"BNBR3","nome":"Banco do Nordeste","cotacao":114.01,"dataCotacao":"2026-10-14","variacao3m":1.8,"volumeMedio":22701,"minima52":97.52,"maxima52":129.74}
+      {"ticker":"ITUB4","nome":"Itaú Unibanco","cotacao":48.09,"dataCotacao":"2026-10-16","variacao3m":14.6,"variacaoDia":-0.54,"volumeMedio":1698254228,"minima52":37.01,"maxima52":50.85},
+      {"ticker":"BBDC4","nome":"Bradesco","cotacao":20.36,"dataCotacao":"2026-10-16","variacao3m":11.3,"variacaoDia":-1.78,"volumeMedio":1330816935,"minima52":15.68,"maxima52":23},
+      {"ticker":"BBAS3","nome":"Banco do Brasil","cotacao":23.63,"dataCotacao":"2026-10-16","variacao3m":15.3,"variacaoDia":-0.55,"volumeMedio":1227684714,"minima52":17.79,"maxima52":27.81},
+      {"ticker":"BPAC11","nome":"BTG Pactual","cotacao":76.75,"dataCotacao":"2026-10-16","variacao3m":36.6,"variacaoDia":-0.49,"volumeMedio":1177003035,"minima52":45.12,"maxima52":84.59},
+      {"ticker":"SANB11","nome":"Santander Brasil","cotacao":28.37,"dataCotacao":"2026-10-16","variacao3m":6.5,"variacaoDia":-0.28,"volumeMedio":151470795,"minima52":25.18,"maxima52":37.83},
+      {"ticker":"BRSR6","nome":"Banrisul","cotacao":17.41,"dataCotacao":"2026-10-16","variacao3m":26.1,"variacaoDia":1.63,"volumeMedio":46751368,"minima52":11.7,"maxima52":19.2},
+      {"ticker":"ABCB4","nome":"ABC Brasil","cotacao":28.66,"dataCotacao":"2026-10-16","variacao3m":21.9,"variacaoDia":-0.97,"volumeMedio":21077069,"minima52":21.31,"maxima52":29.56},
+      {"ticker":"PINE4","nome":"Banco Pine","cotacao":15.8,"dataCotacao":"2026-10-16","variacao3m":39,"variacaoDia":3.54,"volumeMedio":15522783,"minima52":8.25,"maxima52":16.24},
+      {"ticker":"BMGB4","nome":"Banco BMG","cotacao":6.95,"dataCotacao":"2026-10-16","variacao3m":35.5,"variacaoDia":-1.7,"volumeMedio":10521325,"minima52":3.84,"maxima52":7.15},
+      {"ticker":"BAZA3","nome":"Banco da Amazônia","cotacao":77.4,"dataCotacao":"2026-10-16","variacao3m":30.4,"variacaoDia":1.16,"volumeMedio":244849,"minima52":56.08,"maxima52":89.5},
+      {"ticker":"BEES3","nome":"Banestes","cotacao":9.8,"dataCotacao":"2026-10-16","variacao3m":12.5,"variacaoDia":-1.51,"volumeMedio":117987,"minima52":7.77,"maxima52":10},
+      {"ticker":"BSLI4","nome":"BRB Banco de Brasília","cotacao":2.26,"dataCotacao":"2026-10-16","variacao3m":-24.7,"variacaoDia":0,"volumeMedio":43099,"minima52":2.26,"maxima52":9.76},
+      {"ticker":"BNBR3","nome":"Banco do Nordeste","cotacao":114.01,"dataCotacao":"2026-10-14","variacao3m":1.8,"variacaoDia":null,"volumeMedio":22701,"minima52":97.52,"maxima52":129.74}
     ]},
     {"setor": "Seguros e previdência", "grupoB3": "Financeiro", "empresas": [
-      {"ticker":"BBSE3","nome":"BB Seguridade","cotacao":42.08,"dataCotacao":"2026-10-16","variacao3m":2.3,"volumeMedio":290479551,"minima52":31.68,"maxima52":42.98},
-      {"ticker":"CXSE3","nome":"Caixa Seguridade","cotacao":21.66,"dataCotacao":"2026-10-16","variacao3m":-1.8,"volumeMedio":169599621,"minima52":14.53,"maxima52":22.54},
-      {"ticker":"PSSA3","nome":"Porto Seguro","cotacao":53.07,"dataCotacao":"2026-10-16","variacao3m":-3.8,"volumeMedio":108707101,"minima52":45.09,"maxima52":55.72},
-      {"ticker":"IRBR3","nome":"IRB Brasil RE","cotacao":70,"dataCotacao":"2026-10-16","variacao3m":22.8,"volumeMedio":72783777,"minima52":45.86,"maxima52":71.5},
-      {"ticker":"WIZC3","nome":"Wiz Soluções","cotacao":8.82,"dataCotacao":"2026-10-16","variacao3m":4.9,"volumeMedio":3387841,"minima52":7.33,"maxima52":10.37}
+      {"ticker":"BBSE3","nome":"BB Seguridade","cotacao":42.08,"dataCotacao":"2026-10-16","variacao3m":2.3,"variacaoDia":1.23,"volumeMedio":290479551,"minima52":31.68,"maxima52":42.98},
+      {"ticker":"CXSE3","nome":"Caixa Seguridade","cotacao":21.66,"dataCotacao":"2026-10-16","variacao3m":-1.8,"variacaoDia":2.12,"volumeMedio":169599621,"minima52":14.53,"maxima52":22.54},
+      {"ticker":"PSSA3","nome":"Porto Seguro","cotacao":53.07,"dataCotacao":"2026-10-16","variacao3m":-3.8,"variacaoDia":0.63,"volumeMedio":108707101,"minima52":45.09,"maxima52":55.72},
+      {"ticker":"IRBR3","nome":"IRB Brasil RE","cotacao":70,"dataCotacao":"2026-10-16","variacao3m":22.8,"variacaoDia":0.36,"volumeMedio":72783777,"minima52":45.86,"maxima52":71.5},
+      {"ticker":"WIZC3","nome":"Wiz Soluções","cotacao":8.82,"dataCotacao":"2026-10-16","variacao3m":4.9,"variacaoDia":-0.56,"volumeMedio":3387841,"minima52":7.33,"maxima52":10.37}
     ]},
     {"setor": "Bolsa, holdings e serviços financeiros", "grupoB3": "Financeiro", "empresas": [
-      {"ticker":"B3SA3","nome":"B3","cotacao":22.11,"dataCotacao":"2026-10-16","variacao3m":45.5,"volumeMedio":1226629710,"minima52":12.3,"maxima52":24.28},
-      {"ticker":"ITSA4","nome":"Itaúsa","cotacao":15.43,"dataCotacao":"2026-10-16","variacao3m":13.4,"volumeMedio":592308200,"minima52":10.88,"maxima52":16.63},
-      {"ticker":"CASH3","nome":"Méliuz","cotacao":4.99,"dataCotacao":"2026-10-16","variacao3m":15.5,"volumeMedio":9139076,"minima52":3.21,"maxima52":6}
+      {"ticker":"B3SA3","nome":"B3","cotacao":22.11,"dataCotacao":"2026-10-16","variacao3m":45.5,"variacaoDia":-0.5,"volumeMedio":1226629710,"minima52":12.3,"maxima52":24.28},
+      {"ticker":"ITSA4","nome":"Itaúsa","cotacao":15.43,"dataCotacao":"2026-10-16","variacao3m":13.4,"variacaoDia":-0.84,"volumeMedio":592308200,"minima52":10.88,"maxima52":16.63},
+      {"ticker":"CASH3","nome":"Méliuz","cotacao":4.99,"dataCotacao":"2026-10-16","variacao3m":15.5,"variacaoDia":-0.2,"volumeMedio":9139076,"minima52":3.21,"maxima52":6}
     ]},
     {"setor": "Shoppings e imóveis comerciais", "grupoB3": "Financeiro", "empresas": [
-      {"ticker":"MULT3","nome":"Multiplan","cotacao":37.21,"dataCotacao":"2026-10-16","variacao3m":30.4,"volumeMedio":274208247,"minima52":26.13,"maxima52":39.38},
-      {"ticker":"ALOS3","nome":"Allos","cotacao":34.5,"dataCotacao":"2026-10-16","variacao3m":26.3,"volumeMedio":265137386,"minima52":23.44,"maxima52":36.1},
-      {"ticker":"IGTI11","nome":"Iguatemi","cotacao":31.36,"dataCotacao":"2026-10-16","variacao3m":24.3,"volumeMedio":134766194,"minima52":22.49,"maxima52":33.6},
-      {"ticker":"JHSF3","nome":"JHSF","cotacao":12.96,"dataCotacao":"2026-10-16","variacao3m":18.6,"volumeMedio":57038255,"minima52":5.86,"maxima52":14.73}
+      {"ticker":"MULT3","nome":"Multiplan","cotacao":37.21,"dataCotacao":"2026-10-16","variacao3m":30.4,"variacaoDia":-0.91,"volumeMedio":274208247,"minima52":26.13,"maxima52":39.38},
+      {"ticker":"ALOS3","nome":"Allos","cotacao":34.5,"dataCotacao":"2026-10-16","variacao3m":26.3,"variacaoDia":-0.4,"volumeMedio":265137386,"minima52":23.44,"maxima52":36.1},
+      {"ticker":"IGTI11","nome":"Iguatemi","cotacao":31.36,"dataCotacao":"2026-10-16","variacao3m":24.3,"variacaoDia":-1.72,"volumeMedio":134766194,"minima52":22.49,"maxima52":33.6},
+      {"ticker":"JHSF3","nome":"JHSF","cotacao":12.96,"dataCotacao":"2026-10-16","variacao3m":18.6,"variacaoDia":-1.44,"volumeMedio":57038255,"minima52":5.86,"maxima52":14.73}
     ]},
     {"setor": "Construção civil e incorporação", "grupoB3": "Consumo Cíclico", "empresas": [
-      {"ticker":"CYRE3","nome":"Cyrela","cotacao":32.2,"dataCotacao":"2026-10-16","variacao3m":48.9,"volumeMedio":327519660,"minima52":19.76,"maxima52":39.06},
-      {"ticker":"CURY3","nome":"Cury","cotacao":30.93,"dataCotacao":"2026-10-16","variacao3m":0.8,"volumeMedio":180955852,"minima52":26.63,"maxima52":41.76},
-      {"ticker":"TEND3","nome":"Tenda","cotacao":26.97,"dataCotacao":"2026-10-16","variacao3m":-14.8,"volumeMedio":166917496,"minima52":21.64,"maxima52":37.94},
-      {"ticker":"DIRR3","nome":"Direcional","cotacao":10.5,"dataCotacao":"2026-10-16","variacao3m":-12.8,"volumeMedio":161826051,"minima52":9.56,"maxima52":19.04},
-      {"ticker":"MRVE3","nome":"MRV","cotacao":7.22,"dataCotacao":"2026-10-16","variacao3m":54.3,"volumeMedio":107347882,"minima52":4.2,"maxima52":10.53},
-      {"ticker":"EZTC3","nome":"EZTEC","cotacao":18.05,"dataCotacao":"2026-10-16","variacao3m":50.3,"volumeMedio":65605068,"minima52":10.17,"maxima52":21.26},
-      {"ticker":"MDNE3","nome":"Moura Dubeux","cotacao":28.96,"dataCotacao":"2026-10-16","variacao3m":17.1,"volumeMedio":56782960,"minima52":22.54,"maxima52":34.28},
-      {"ticker":"PLPL3","nome":"Plano&Plano","cotacao":7.26,"dataCotacao":"2026-10-16","variacao3m":-4.2,"volumeMedio":29687920,"minima52":6.31,"maxima52":16.56},
-      {"ticker":"LAVV3","nome":"Lavvi","cotacao":14.54,"dataCotacao":"2026-10-16","variacao3m":31.5,"volumeMedio":16152697,"minima52":9.1,"maxima52":18.98},
-      {"ticker":"EVEN3","nome":"Even","cotacao":5.59,"dataCotacao":"2026-10-16","variacao3m":12,"volumeMedio":8722019,"minima52":3.94,"maxima52":9.17},
-      {"ticker":"MTRE3","nome":"Mitre Realty","cotacao":3.81,"dataCotacao":"2026-10-16","variacao3m":29.2,"volumeMedio":3044838,"minima52":2.81,"maxima52":4.32},
-      {"ticker":"HBOR3","nome":"Helbor","cotacao":2.59,"dataCotacao":"2026-10-16","variacao3m":30.8,"volumeMedio":3013225,"minima52":1.65,"maxima52":4.29},
-      {"ticker":"TRIS3","nome":"Trisul","cotacao":6.34,"dataCotacao":"2026-10-16","variacao3m":55.4,"volumeMedio":2663612,"minima52":3.85,"maxima52":9.06},
-      {"ticker":"MELK3","nome":"Melnick","cotacao":3.16,"dataCotacao":"2026-10-16","variacao3m":5.7,"volumeMedio":1977494,"minima52":2.68,"maxima52":4.22},
-      {"ticker":"TCSA3","nome":"Tecnisa","cotacao":0.8,"dataCotacao":"2026-10-16","variacao3m":14.3,"volumeMedio":219223,"minima52":0.61,"maxima52":1.93}
+      {"ticker":"CYRE3","nome":"Cyrela","cotacao":32.2,"dataCotacao":"2026-10-16","variacao3m":48.9,"variacaoDia":-0.31,"volumeMedio":327519660,"minima52":19.76,"maxima52":39.06},
+      {"ticker":"CURY3","nome":"Cury","cotacao":30.93,"dataCotacao":"2026-10-16","variacao3m":0.8,"variacaoDia":-0.29,"volumeMedio":180955852,"minima52":26.63,"maxima52":41.76},
+      {"ticker":"TEND3","nome":"Tenda","cotacao":26.97,"dataCotacao":"2026-10-16","variacao3m":-14.8,"variacaoDia":-2.49,"volumeMedio":166917496,"minima52":21.64,"maxima52":37.94},
+      {"ticker":"DIRR3","nome":"Direcional","cotacao":10.5,"dataCotacao":"2026-10-16","variacao3m":-12.8,"variacaoDia":-0.76,"volumeMedio":161826051,"minima52":9.56,"maxima52":19.04},
+      {"ticker":"MRVE3","nome":"MRV","cotacao":7.22,"dataCotacao":"2026-10-16","variacao3m":54.3,"variacaoDia":1.4,"volumeMedio":107347882,"minima52":4.2,"maxima52":10.53},
+      {"ticker":"EZTC3","nome":"EZTEC","cotacao":18.05,"dataCotacao":"2026-10-16","variacao3m":50.3,"variacaoDia":-0.28,"volumeMedio":65605068,"minima52":10.17,"maxima52":21.26},
+      {"ticker":"MDNE3","nome":"Moura Dubeux","cotacao":28.96,"dataCotacao":"2026-10-16","variacao3m":17.1,"variacaoDia":-0.31,"volumeMedio":56782960,"minima52":22.54,"maxima52":34.28},
+      {"ticker":"PLPL3","nome":"Plano&Plano","cotacao":7.26,"dataCotacao":"2026-10-16","variacao3m":-4.2,"variacaoDia":-1.49,"volumeMedio":29687920,"minima52":6.31,"maxima52":16.56},
+      {"ticker":"LAVV3","nome":"Lavvi","cotacao":14.54,"dataCotacao":"2026-10-16","variacao3m":31.5,"variacaoDia":0.35,"volumeMedio":16152697,"minima52":9.1,"maxima52":18.98},
+      {"ticker":"EVEN3","nome":"Even","cotacao":5.59,"dataCotacao":"2026-10-16","variacao3m":12,"variacaoDia":-0.18,"volumeMedio":8722019,"minima52":3.94,"maxima52":9.17},
+      {"ticker":"MTRE3","nome":"Mitre Realty","cotacao":3.81,"dataCotacao":"2026-10-16","variacao3m":29.2,"variacaoDia":2.7,"volumeMedio":3044838,"minima52":2.81,"maxima52":4.32},
+      {"ticker":"HBOR3","nome":"Helbor","cotacao":2.59,"dataCotacao":"2026-10-16","variacao3m":30.8,"variacaoDia":-0.38,"volumeMedio":3013225,"minima52":1.65,"maxima52":4.29},
+      {"ticker":"TRIS3","nome":"Trisul","cotacao":6.34,"dataCotacao":"2026-10-16","variacao3m":55.4,"variacaoDia":0.48,"volumeMedio":2663612,"minima52":3.85,"maxima52":9.06},
+      {"ticker":"MELK3","nome":"Melnick","cotacao":3.16,"dataCotacao":"2026-10-16","variacao3m":5.7,"variacaoDia":0.96,"volumeMedio":1977494,"minima52":2.68,"maxima52":4.22},
+      {"ticker":"TCSA3","nome":"Tecnisa","cotacao":0.8,"dataCotacao":"2026-10-16","variacao3m":14.3,"variacaoDia":-11.11,"volumeMedio":219223,"minima52":0.61,"maxima52":1.93}
     ]},
     {"setor": "Materiais de construção e acabamento", "grupoB3": "Consumo Cíclico", "empresas": [
-      {"ticker":"DXCO3","nome":"Dexco","cotacao":7.44,"dataCotacao":"2026-10-16","variacao3m":46.2,"volumeMedio":31714044,"minima52":4.45,"maxima52":7.8},
-      {"ticker":"PTBL3","nome":"Portobello","cotacao":2.55,"dataCotacao":"2026-10-16","variacao3m":47.4,"volumeMedio":1536706,"minima52":1.3,"maxima52":3.88},
-      {"ticker":"ETER3","nome":"Eternit","cotacao":3.55,"dataCotacao":"2026-10-16","variacao3m":-6.6,"volumeMedio":462050,"minima52":3.4,"maxima52":4.56}
+      {"ticker":"DXCO3","nome":"Dexco","cotacao":7.44,"dataCotacao":"2026-10-16","variacao3m":46.2,"variacaoDia":-0.13,"volumeMedio":31714044,"minima52":4.45,"maxima52":7.8},
+      {"ticker":"PTBL3","nome":"Portobello","cotacao":2.55,"dataCotacao":"2026-10-16","variacao3m":47.4,"variacaoDia":1.19,"volumeMedio":1536706,"minima52":1.3,"maxima52":3.88},
+      {"ticker":"ETER3","nome":"Eternit","cotacao":3.55,"dataCotacao":"2026-10-16","variacao3m":-6.6,"variacaoDia":-1.39,"volumeMedio":462050,"minima52":3.4,"maxima52":4.56}
     ]},
     {"setor": "Moda e vestuário", "grupoB3": "Consumo Cíclico", "empresas": [
-      {"ticker":"LREN3","nome":"Lojas Renner","cotacao":13.5,"dataCotacao":"2026-10-16","variacao3m":0.6,"volumeMedio":354255697,"minima52":10.48,"maxima52":16.25},
-      {"ticker":"CEAB3","nome":"C&A","cotacao":12.56,"dataCotacao":"2026-10-16","variacao3m":28.8,"volumeMedio":134860749,"minima52":7.19,"maxima52":18.74},
-      {"ticker":"AZZA3","nome":"Azzas 2154","cotacao":23.4,"dataCotacao":"2026-10-16","variacao3m":25.9,"volumeMedio":110929501,"minima52":14.3,"maxima52":30.7},
-      {"ticker":"VIVA3","nome":"Vivara","cotacao":26.69,"dataCotacao":"2026-10-16","variacao3m":18.9,"volumeMedio":107311319,"minima52":20.04,"maxima52":36.65},
-      {"ticker":"TFCO4","nome":"Track&Field","cotacao":13.8,"dataCotacao":"2026-10-16","variacao3m":-3.2,"volumeMedio":20722996,"minima52":12.31,"maxima52":18.47},
-      {"ticker":"AMAR3","nome":"Marisa","cotacao":0.75,"dataCotacao":"2026-10-16","variacao3m":27.1,"volumeMedio":185450,"minima52":0.45,"maxima52":1.27},
-      {"ticker":"CGRA4","nome":"Grazziotin","cotacao":25.39,"dataCotacao":"2026-10-16","variacao3m":4.1,"volumeMedio":153528,"minima52":22.36,"maxima52":34.29}
+      {"ticker":"LREN3","nome":"Lojas Renner","cotacao":13.5,"dataCotacao":"2026-10-16","variacao3m":0.6,"variacaoDia":-0.81,"volumeMedio":354255697,"minima52":10.48,"maxima52":16.25},
+      {"ticker":"CEAB3","nome":"C&A","cotacao":12.56,"dataCotacao":"2026-10-16","variacao3m":28.8,"variacaoDia":3.46,"volumeMedio":134860749,"minima52":7.19,"maxima52":18.74},
+      {"ticker":"AZZA3","nome":"Azzas 2154","cotacao":23.4,"dataCotacao":"2026-10-16","variacao3m":25.9,"variacaoDia":-0.89,"volumeMedio":110929501,"minima52":14.3,"maxima52":30.7},
+      {"ticker":"VIVA3","nome":"Vivara","cotacao":26.69,"dataCotacao":"2026-10-16","variacao3m":18.9,"variacaoDia":-3.09,"volumeMedio":107311319,"minima52":20.04,"maxima52":36.65},
+      {"ticker":"TFCO4","nome":"Track&Field","cotacao":13.8,"dataCotacao":"2026-10-16","variacao3m":-3.2,"variacaoDia":1.1,"volumeMedio":20722996,"minima52":12.31,"maxima52":18.47},
+      {"ticker":"AMAR3","nome":"Marisa","cotacao":0.75,"dataCotacao":"2026-10-16","variacao3m":27.1,"variacaoDia":-5.06,"volumeMedio":185450,"minima52":0.45,"maxima52":1.27},
+      {"ticker":"CGRA4","nome":"Grazziotin","cotacao":25.39,"dataCotacao":"2026-10-16","variacao3m":4.1,"variacaoDia":3.04,"volumeMedio":153528,"minima52":22.36,"maxima52":34.29}
     ]},
     {"setor": "Calçados e artigos esportivos", "grupoB3": "Consumo Cíclico", "empresas": [
-      {"ticker":"ALPA4","nome":"Alpargatas (Havaianas)","cotacao":17.88,"dataCotacao":"2026-10-16","variacao3m":47.6,"volumeMedio":43571737,"minima52":9.29,"maxima52":18.33},
-      {"ticker":"VULC3","nome":"Vulcabras","cotacao":15.07,"dataCotacao":"2026-10-16","variacao3m":5,"volumeMedio":35985574,"minima52":12.72,"maxima52":23.55},
-      {"ticker":"GRND3","nome":"Grendene","cotacao":4.5,"dataCotacao":"2026-10-16","variacao3m":16.9,"volumeMedio":11375949,"minima52":3.4,"maxima52":5.68},
-      {"ticker":"CAMB3","nome":"Cambuci","cotacao":8.68,"dataCotacao":"2026-10-16","variacao3m":-4.1,"volumeMedio":451733,"minima52":7.78,"maxima52":10.5}
+      {"ticker":"ALPA4","nome":"Alpargatas (Havaianas)","cotacao":17.88,"dataCotacao":"2026-10-16","variacao3m":47.6,"variacaoDia":-1.49,"volumeMedio":43571737,"minima52":9.29,"maxima52":18.33},
+      {"ticker":"VULC3","nome":"Vulcabras","cotacao":15.07,"dataCotacao":"2026-10-16","variacao3m":5,"variacaoDia":-0.53,"volumeMedio":35985574,"minima52":12.72,"maxima52":23.55},
+      {"ticker":"GRND3","nome":"Grendene","cotacao":4.5,"dataCotacao":"2026-10-16","variacao3m":16.9,"variacaoDia":0.45,"volumeMedio":11375949,"minima52":3.4,"maxima52":5.68},
+      {"ticker":"CAMB3","nome":"Cambuci","cotacao":8.68,"dataCotacao":"2026-10-16","variacao3m":-4.1,"variacaoDia":2.36,"volumeMedio":451733,"minima52":7.78,"maxima52":10.5}
     ]},
     {"setor": "Varejo de eletro, móveis e e-commerce", "grupoB3": "Consumo Cíclico", "empresas": [
-      {"ticker":"MGLU3","nome":"Magazine Luiza","cotacao":11.11,"dataCotacao":"2026-10-16","variacao3m":125.8,"volumeMedio":417118425,"minima52":3.76,"maxima52":12.7},
-      {"ticker":"BHIA3","nome":"Casas Bahia","cotacao":1.14,"dataCotacao":"2026-10-16","variacao3m":8.6,"volumeMedio":21410610,"minima52":0.29,"maxima52":4.17},
-      {"ticker":"AMER3","nome":"Americanas","cotacao":5.58,"dataCotacao":"2026-10-16","variacao3m":39.5,"volumeMedio":10900938,"minima52":3.37,"maxima52":7.89},
-      {"ticker":"LJQQ3","nome":"Lojas Quero-Quero","cotacao":2.48,"dataCotacao":"2026-10-16","variacao3m":108.4,"volumeMedio":10121562,"minima52":0.94,"maxima52":2.93},
-      {"ticker":"ESPA3","nome":"Espaçolaser","cotacao":7.5,"dataCotacao":"2026-10-16","variacao3m":-11.7,"volumeMedio":1788551,"minima52":null,"maxima52":null},
-      {"ticker":"ENJU3","nome":"Enjoei","cotacao":7.43,"dataCotacao":"2026-10-16","variacao3m":null,"volumeMedio":859076,"minima52":null,"maxima52":null}
+      {"ticker":"MGLU3","nome":"Magazine Luiza","cotacao":11.11,"dataCotacao":"2026-10-16","variacao3m":125.8,"variacaoDia":6.93,"volumeMedio":417118425,"minima52":3.76,"maxima52":12.7},
+      {"ticker":"BHIA3","nome":"Casas Bahia","cotacao":1.14,"dataCotacao":"2026-10-16","variacao3m":8.6,"variacaoDia":2.7,"volumeMedio":21410610,"minima52":0.29,"maxima52":4.17},
+      {"ticker":"AMER3","nome":"Americanas","cotacao":5.58,"dataCotacao":"2026-10-16","variacao3m":39.5,"variacaoDia":-1.06,"volumeMedio":10900938,"minima52":3.37,"maxima52":7.89},
+      {"ticker":"LJQQ3","nome":"Lojas Quero-Quero","cotacao":2.48,"dataCotacao":"2026-10-16","variacao3m":108.4,"variacaoDia":-0.4,"volumeMedio":10121562,"minima52":0.94,"maxima52":2.93},
+      {"ticker":"ESPA3","nome":"Espaçolaser","cotacao":7.5,"dataCotacao":"2026-10-16","variacao3m":-11.7,"variacaoDia":1.35,"volumeMedio":1788551,"minima52":null,"maxima52":null},
+      {"ticker":"ENJU3","nome":"Enjoei","cotacao":7.43,"dataCotacao":"2026-10-16","variacao3m":null,"variacaoDia":3.05,"volumeMedio":859076,"minima52":null,"maxima52":null}
     ]},
     {"setor": "Têxtil e eletrodomésticos", "grupoB3": "Consumo Cíclico", "empresas": [
-      {"ticker":"WHRL4","nome":"Whirlpool","cotacao":3.94,"dataCotacao":"2026-10-16","variacao3m":-1.3,"volumeMedio":58793,"minima52":3.5,"maxima52":5},
-      {"ticker":"TXRX4","nome":"Têxtil Renauxview","cotacao":2.19,"dataCotacao":"2026-10-13","variacao3m":32.7,"volumeMedio":5383,"minima52":1.51,"maxima52":2.43}
+      {"ticker":"WHRL4","nome":"Whirlpool","cotacao":3.94,"dataCotacao":"2026-10-16","variacao3m":-1.3,"variacaoDia":1.81,"volumeMedio":58793,"minima52":3.5,"maxima52":5},
+      {"ticker":"TXRX4","nome":"Têxtil Renauxview","cotacao":2.19,"dataCotacao":"2026-10-13","variacao3m":32.7,"variacaoDia":null,"volumeMedio":5383,"minima52":1.51,"maxima52":2.43}
     ]},
     {"setor": "Educação", "grupoB3": "Consumo Cíclico", "empresas": [
-      {"ticker":"COGN3","nome":"Cogna","cotacao":2.89,"dataCotacao":"2026-10-16","variacao3m":29.6,"volumeMedio":146700161,"minima52":1.99,"maxima52":4.75},
-      {"ticker":"YDUQ3","nome":"Yduqs","cotacao":13.64,"dataCotacao":"2026-10-16","variacao3m":58.4,"volumeMedio":81142100,"minima52":7.02,"maxima52":15.29},
-      {"ticker":"ANIM3","nome":"Ânima","cotacao":5.1,"dataCotacao":"2026-10-16","variacao3m":126.7,"volumeMedio":37024424,"minima52":1.92,"maxima52":5.49},
-      {"ticker":"SEER3","nome":"Ser Educacional","cotacao":16.8,"dataCotacao":"2026-10-16","variacao3m":41.3,"volumeMedio":16220239,"minima52":8.35,"maxima52":18.06},
-      {"ticker":"CSED3","nome":"Cruzeiro do Sul Educacional","cotacao":6.71,"dataCotacao":"2026-10-16","variacao3m":71.2,"volumeMedio":2739593,"minima52":3.39,"maxima52":7.31}
+      {"ticker":"COGN3","nome":"Cogna","cotacao":2.89,"dataCotacao":"2026-10-16","variacao3m":29.6,"variacaoDia":-0.34,"volumeMedio":146700161,"minima52":1.99,"maxima52":4.75},
+      {"ticker":"YDUQ3","nome":"Yduqs","cotacao":13.64,"dataCotacao":"2026-10-16","variacao3m":58.4,"variacaoDia":1.34,"volumeMedio":81142100,"minima52":7.02,"maxima52":15.29},
+      {"ticker":"ANIM3","nome":"Ânima","cotacao":5.1,"dataCotacao":"2026-10-16","variacao3m":126.7,"variacaoDia":-2.86,"volumeMedio":37024424,"minima52":1.92,"maxima52":5.49},
+      {"ticker":"SEER3","nome":"Ser Educacional","cotacao":16.8,"dataCotacao":"2026-10-16","variacao3m":41.3,"variacaoDia":-4.55,"volumeMedio":16220239,"minima52":8.35,"maxima52":18.06},
+      {"ticker":"CSED3","nome":"Cruzeiro do Sul Educacional","cotacao":6.71,"dataCotacao":"2026-10-16","variacao3m":71.2,"variacaoDia":-1.9,"volumeMedio":2739593,"minima52":3.39,"maxima52":7.31}
     ]},
     {"setor": "Turismo, lazer e restaurantes", "grupoB3": "Consumo Cíclico", "empresas": [
-      {"ticker":"SMFT3","nome":"Smart Fit","cotacao":24.49,"dataCotacao":"2026-10-16","variacao3m":20.4,"volumeMedio":254428264,"minima52":16.45,"maxima52":27.56},
-      {"ticker":"CVCB3","nome":"CVC","cotacao":1.47,"dataCotacao":"2026-10-16","variacao3m":20.5,"volumeMedio":26418728,"minima52":1.06,"maxima52":2.79},
-      {"ticker":"MEAL3","nome":"IMC Alimentação","cotacao":0.92,"dataCotacao":"2026-10-16","variacao3m":27.8,"volumeMedio":340157,"minima52":0.56,"maxima52":1.34}
+      {"ticker":"SMFT3","nome":"Smart Fit","cotacao":24.49,"dataCotacao":"2026-10-16","variacao3m":20.4,"variacaoDia":1.24,"volumeMedio":254428264,"minima52":16.45,"maxima52":27.56},
+      {"ticker":"CVCB3","nome":"CVC","cotacao":1.47,"dataCotacao":"2026-10-16","variacao3m":20.5,"variacaoDia":0,"volumeMedio":26418728,"minima52":1.06,"maxima52":2.79},
+      {"ticker":"MEAL3","nome":"IMC Alimentação","cotacao":0.92,"dataCotacao":"2026-10-16","variacao3m":27.8,"variacaoDia":2.22,"volumeMedio":340157,"minima52":0.56,"maxima52":1.34}
     ]},
     {"setor": "Carnes e proteínas", "grupoB3": "Consumo não Cíclico", "empresas": [
-      {"ticker":"MBRF3","nome":"MBRF (BRF + Marfrig)","cotacao":18.98,"dataCotacao":"2026-10-16","variacao3m":26.3,"volumeMedio":114302132,"minima52":14.49,"maxima52":26.83},
-      {"ticker":"BEEF3","nome":"Minerva","cotacao":4.16,"dataCotacao":"2026-10-16","variacao3m":15.6,"volumeMedio":108282736,"minima52":2.97,"maxima52":7.58}
+      {"ticker":"MBRF3","nome":"MBRF (BRF + Marfrig)","cotacao":18.98,"dataCotacao":"2026-10-16","variacao3m":26.3,"variacaoDia":2.59,"volumeMedio":114302132,"minima52":14.49,"maxima52":26.83},
+      {"ticker":"BEEF3","nome":"Minerva","cotacao":4.16,"dataCotacao":"2026-10-16","variacao3m":15.6,"variacaoDia":1.46,"volumeMedio":108282736,"minima52":2.97,"maxima52":7.58}
     ]},
     {"setor": "Alimentos e bebidas", "grupoB3": "Consumo não Cíclico", "empresas": [
-      {"ticker":"ABEV3","nome":"Ambev","cotacao":16.84,"dataCotacao":"2026-10-16","variacao3m":7.7,"volumeMedio":552732764,"minima52":11.75,"maxima52":17.04},
-      {"ticker":"MDIA3","nome":"M. Dias Branco","cotacao":19.9,"dataCotacao":"2026-10-16","variacao3m":11.5,"volumeMedio":21143590,"minima52":16.02,"maxima52":29.96},
-      {"ticker":"CAML3","nome":"Camil","cotacao":6.44,"dataCotacao":"2026-10-16","variacao3m":48,"volumeMedio":9212022,"minima52":4.1,"maxima52":7.4},
-      {"ticker":"MNPR3","nome":"Minupar","cotacao":3.99,"dataCotacao":"2026-10-16","variacao3m":-2.4,"volumeMedio":66550,"minima52":null,"maxima52":null}
+      {"ticker":"ABEV3","nome":"Ambev","cotacao":16.84,"dataCotacao":"2026-10-16","variacao3m":7.7,"variacaoDia":0.9,"volumeMedio":552732764,"minima52":11.75,"maxima52":17.04},
+      {"ticker":"MDIA3","nome":"M. Dias Branco","cotacao":19.9,"dataCotacao":"2026-10-16","variacao3m":11.5,"variacaoDia":1.27,"volumeMedio":21143590,"minima52":16.02,"maxima52":29.96},
+      {"ticker":"CAML3","nome":"Camil","cotacao":6.44,"dataCotacao":"2026-10-16","variacao3m":48,"variacaoDia":0.31,"volumeMedio":9212022,"minima52":4.1,"maxima52":7.4},
+      {"ticker":"MNPR3","nome":"Minupar","cotacao":3.99,"dataCotacao":"2026-10-16","variacao3m":-2.4,"variacaoDia":3.37,"volumeMedio":66550,"minima52":null,"maxima52":null}
     ]},
     {"setor": "Agronegócio, açúcar e etanol", "grupoB3": "Consumo não Cíclico", "empresas": [
-      {"ticker":"SLCE3","nome":"SLC Agrícola","cotacao":17.02,"dataCotacao":"2026-10-16","variacao3m":25.8,"volumeMedio":44513009,"minima52":12.58,"maxima52":19.48},
-      {"ticker":"SMTO3","nome":"São Martinho","cotacao":20.79,"dataCotacao":"2026-10-16","variacao3m":34.6,"volumeMedio":39248554,"minima52":12.91,"maxima52":21.91},
-      {"ticker":"TTEN3","nome":"3tentos","cotacao":13,"dataCotacao":"2026-10-16","variacao3m":-16.5,"volumeMedio":29211335,"minima52":9.61,"maxima52":17.9},
-      {"ticker":"AGRO3","nome":"BrasilAgro","cotacao":18.43,"dataCotacao":"2026-10-16","variacao3m":-5.1,"volumeMedio":5699320,"minima52":17.41,"maxima52":22.75},
-      {"ticker":"JALL3","nome":"Jalles Machado","cotacao":3.05,"dataCotacao":"2026-10-16","variacao3m":51,"volumeMedio":3210340,"minima52":1.88,"maxima52":3.81},
-      {"ticker":"AGXY3","nome":"AgroGalaxy","cotacao":0.62,"dataCotacao":"2026-10-16","variacao3m":-64.4,"volumeMedio":63695,"minima52":0.57,"maxima52":6.07}
+      {"ticker":"SLCE3","nome":"SLC Agrícola","cotacao":17.02,"dataCotacao":"2026-10-16","variacao3m":25.8,"variacaoDia":-1.79,"volumeMedio":44513009,"minima52":12.58,"maxima52":19.48},
+      {"ticker":"SMTO3","nome":"São Martinho","cotacao":20.79,"dataCotacao":"2026-10-16","variacao3m":34.6,"variacaoDia":-1.79,"volumeMedio":39248554,"minima52":12.91,"maxima52":21.91},
+      {"ticker":"TTEN3","nome":"3tentos","cotacao":13,"dataCotacao":"2026-10-16","variacao3m":-16.5,"variacaoDia":2.2,"volumeMedio":29211335,"minima52":9.61,"maxima52":17.9},
+      {"ticker":"AGRO3","nome":"BrasilAgro","cotacao":18.43,"dataCotacao":"2026-10-16","variacao3m":-5.1,"variacaoDia":0.11,"volumeMedio":5699320,"minima52":17.41,"maxima52":22.75},
+      {"ticker":"JALL3","nome":"Jalles Machado","cotacao":3.05,"dataCotacao":"2026-10-16","variacao3m":51,"variacaoDia":0.33,"volumeMedio":3210340,"minima52":1.88,"maxima52":3.81},
+      {"ticker":"AGXY3","nome":"AgroGalaxy","cotacao":0.62,"dataCotacao":"2026-10-16","variacao3m":-64.4,"variacaoDia":0,"volumeMedio":63695,"minima52":0.57,"maxima52":6.07}
     ]},
     {"setor": "Varejo alimentar", "grupoB3": "Consumo não Cíclico", "empresas": [
-      {"ticker":"ASAI3","nome":"Assaí","cotacao":12.84,"dataCotacao":"2026-10-16","variacao3m":51.1,"volumeMedio":236027351,"minima52":6.91,"maxima52":13.8},
-      {"ticker":"GMAT3","nome":"Grupo Mateus","cotacao":5.17,"dataCotacao":"2026-10-16","variacao3m":33.2,"volumeMedio":40769979,"minima52":3.43,"maxima52":6.64},
-      {"ticker":"PCAR3","nome":"Grupo Pão de Açúcar","cotacao":2.93,"dataCotacao":"2026-10-16","variacao3m":12.7,"volumeMedio":25320797,"minima52":1.4,"maxima52":4.19}
+      {"ticker":"ASAI3","nome":"Assaí","cotacao":12.84,"dataCotacao":"2026-10-16","variacao3m":51.1,"variacaoDia":4.22,"volumeMedio":236027351,"minima52":6.91,"maxima52":13.8},
+      {"ticker":"GMAT3","nome":"Grupo Mateus","cotacao":5.17,"dataCotacao":"2026-10-16","variacao3m":33.2,"variacaoDia":0.39,"volumeMedio":40769979,"minima52":3.43,"maxima52":6.64},
+      {"ticker":"PCAR3","nome":"Grupo Pão de Açúcar","cotacao":2.93,"dataCotacao":"2026-10-16","variacao3m":12.7,"variacaoDia":0.69,"volumeMedio":25320797,"minima52":1.4,"maxima52":4.19}
     ]},
     {"setor": "Farmácias, higiene e beleza", "grupoB3": "Consumo não Cíclico", "empresas": [
-      {"ticker":"RADL3","nome":"RaiaDrogasil","cotacao":20.56,"dataCotacao":"2026-10-16","variacao3m":10.8,"volumeMedio":270276825,"minima52":16.21,"maxima52":27.42},
-      {"ticker":"NATU3","nome":"Natura","cotacao":7.05,"dataCotacao":"2026-10-16","variacao3m":-17.5,"volumeMedio":93950974,"minima52":6.42,"maxima52":11.15},
-      {"ticker":"PGMN3","nome":"Pague Menos","cotacao":5.13,"dataCotacao":"2026-10-16","variacao3m":49.1,"volumeMedio":53490561,"minima52":3.09,"maxima52":7.62},
-      {"ticker":"PNVL3","nome":"Panvel (Dimed)","cotacao":15.22,"dataCotacao":"2026-10-16","variacao3m":36.4,"volumeMedio":17536004,"minima52":9.01,"maxima52":16.57}
+      {"ticker":"RADL3","nome":"RaiaDrogasil","cotacao":20.56,"dataCotacao":"2026-10-16","variacao3m":10.8,"variacaoDia":-0.15,"volumeMedio":270276825,"minima52":16.21,"maxima52":27.42},
+      {"ticker":"NATU3","nome":"Natura","cotacao":7.05,"dataCotacao":"2026-10-16","variacao3m":-17.5,"variacaoDia":1.59,"volumeMedio":93950974,"minima52":6.42,"maxima52":11.15},
+      {"ticker":"PGMN3","nome":"Pague Menos","cotacao":5.13,"dataCotacao":"2026-10-16","variacao3m":49.1,"variacaoDia":5.12,"volumeMedio":53490561,"minima52":3.09,"maxima52":7.62},
+      {"ticker":"PNVL3","nome":"Panvel (Dimed)","cotacao":15.22,"dataCotacao":"2026-10-16","variacao3m":36.4,"variacaoDia":1.2,"volumeMedio":17536004,"minima52":9.01,"maxima52":16.57}
     ]},
     {"setor": "Hospitais, planos e diagnósticos", "grupoB3": "Saúde", "empresas": [
-      {"ticker":"RDOR3","nome":"Rede D'Or","cotacao":42.57,"dataCotacao":"2026-10-16","variacao3m":19,"volumeMedio":374229533,"minima52":32.27,"maxima52":48.41},
-      {"ticker":"FLRY3","nome":"Fleury","cotacao":27.11,"dataCotacao":"2026-10-16","variacao3m":63.4,"volumeMedio":130753939,"minima52":13.9,"maxima52":27.95},
-      {"ticker":"HAPV3","nome":"Hapvida","cotacao":8.29,"dataCotacao":"2026-10-16","variacao3m":-27.2,"volumeMedio":81753330,"minima52":6.01,"maxima52":34.52},
-      {"ticker":"ONCO3","nome":"Oncoclínicas","cotacao":1.04,"dataCotacao":"2026-10-16","variacao3m":33.3,"volumeMedio":9218445,"minima52":0.53,"maxima52":3.07},
-      {"ticker":"QUAL3","nome":"Qualicorp","cotacao":2,"dataCotacao":"2026-10-16","variacao3m":25.8,"volumeMedio":8627179,"minima52":1.37,"maxima52":2.82},
-      {"ticker":"DASA3","nome":"Dasa","cotacao":4.66,"dataCotacao":"2026-10-16","variacao3m":66.4,"volumeMedio":6654213,"minima52":1.28,"maxima52":5.29},
-      {"ticker":"MATD3","nome":"Mater Dei","cotacao":6.1,"dataCotacao":"2026-10-16","variacao3m":27.1,"volumeMedio":1896362,"minima52":4.13,"maxima52":6.85},
-      {"ticker":"VVEO3","nome":"Viveo","cotacao":0.97,"dataCotacao":"2026-10-16","variacao3m":73.2,"volumeMedio":1212140,"minima52":0.56,"maxima52":1.86},
-      {"ticker":"AALR3","nome":"Alliar","cotacao":3,"dataCotacao":"2026-10-16","variacao3m":-11,"volumeMedio":244219,"minima52":2.36,"maxima52":6.19}
+      {"ticker":"RDOR3","nome":"Rede D'Or","cotacao":42.57,"dataCotacao":"2026-10-16","variacao3m":19,"variacaoDia":-0.65,"volumeMedio":374229533,"minima52":32.27,"maxima52":48.41},
+      {"ticker":"FLRY3","nome":"Fleury","cotacao":27.11,"dataCotacao":"2026-10-16","variacao3m":63.4,"variacaoDia":-0.51,"volumeMedio":130753939,"minima52":13.9,"maxima52":27.95},
+      {"ticker":"HAPV3","nome":"Hapvida","cotacao":8.29,"dataCotacao":"2026-10-16","variacao3m":-27.2,"variacaoDia":-2.7,"volumeMedio":81753330,"minima52":6.01,"maxima52":34.52},
+      {"ticker":"ONCO3","nome":"Oncoclínicas","cotacao":1.04,"dataCotacao":"2026-10-16","variacao3m":33.3,"variacaoDia":5.05,"volumeMedio":9218445,"minima52":0.53,"maxima52":3.07},
+      {"ticker":"QUAL3","nome":"Qualicorp","cotacao":2,"dataCotacao":"2026-10-16","variacao3m":25.8,"variacaoDia":-2.91,"volumeMedio":8627179,"minima52":1.37,"maxima52":2.82},
+      {"ticker":"DASA3","nome":"Dasa","cotacao":4.66,"dataCotacao":"2026-10-16","variacao3m":66.4,"variacaoDia":2.64,"volumeMedio":6654213,"minima52":1.28,"maxima52":5.29},
+      {"ticker":"MATD3","nome":"Mater Dei","cotacao":6.1,"dataCotacao":"2026-10-16","variacao3m":27.1,"variacaoDia":0.49,"volumeMedio":1896362,"minima52":4.13,"maxima52":6.85},
+      {"ticker":"VVEO3","nome":"Viveo","cotacao":0.97,"dataCotacao":"2026-10-16","variacao3m":73.2,"variacaoDia":-4.9,"volumeMedio":1212140,"minima52":0.56,"maxima52":1.86},
+      {"ticker":"AALR3","nome":"Alliar","cotacao":3,"dataCotacao":"2026-10-16","variacao3m":-11,"variacaoDia":2.04,"volumeMedio":244219,"minima52":2.36,"maxima52":6.19}
     ]},
     {"setor": "Medicamentos e saúde animal", "grupoB3": "Saúde", "empresas": [
-      {"ticker":"HYPE3","nome":"Hypera Pharma","cotacao":25.6,"dataCotacao":"2026-10-16","variacao3m":20.8,"volumeMedio":117155580,"minima52":19.88,"maxima52":30},
-      {"ticker":"BLAU3","nome":"Blau Farmacêutica","cotacao":12.21,"dataCotacao":"2026-10-16","variacao3m":34,"volumeMedio":3409542,"minima52":8.28,"maxima52":14.84},
-      {"ticker":"PFRM3","nome":"Profarma","cotacao":9.25,"dataCotacao":"2026-10-16","variacao3m":36.6,"volumeMedio":1689332,"minima52":6.11,"maxima52":9.7},
-      {"ticker":"BIOM3","nome":"Biomm","cotacao":5.9,"dataCotacao":"2026-10-16","variacao3m":-3.1,"volumeMedio":489439,"minima52":4.82,"maxima52":10.3},
-      {"ticker":"OFSA3","nome":"Ouro Fino Saúde Animal","cotacao":29.65,"dataCotacao":"2026-10-16","variacao3m":17.2,"volumeMedio":125754,"minima52":20.9,"maxima52":34.69}
+      {"ticker":"HYPE3","nome":"Hypera Pharma","cotacao":25.6,"dataCotacao":"2026-10-16","variacao3m":20.8,"variacaoDia":0.59,"volumeMedio":117155580,"minima52":19.88,"maxima52":30},
+      {"ticker":"BLAU3","nome":"Blau Farmacêutica","cotacao":12.21,"dataCotacao":"2026-10-16","variacao3m":34,"variacaoDia":-2.32,"volumeMedio":3409542,"minima52":8.28,"maxima52":14.84},
+      {"ticker":"PFRM3","nome":"Profarma","cotacao":9.25,"dataCotacao":"2026-10-16","variacao3m":36.6,"variacaoDia":0.22,"volumeMedio":1689332,"minima52":6.11,"maxima52":9.7},
+      {"ticker":"BIOM3","nome":"Biomm","cotacao":5.9,"dataCotacao":"2026-10-16","variacao3m":-3.1,"variacaoDia":-3.28,"volumeMedio":489439,"minima52":4.82,"maxima52":10.3},
+      {"ticker":"OFSA3","nome":"Ouro Fino Saúde Animal","cotacao":29.65,"dataCotacao":"2026-10-16","variacao3m":17.2,"variacaoDia":-0.24,"volumeMedio":125754,"minima52":20.9,"maxima52":34.69}
     ]},
     {"setor": "Software e serviços de TI", "grupoB3": "Tecnologia da Informação", "empresas": [
-      {"ticker":"TOTS3","nome":"Totvs","cotacao":40.29,"dataCotacao":"2026-10-16","variacao3m":38,"volumeMedio":230254164,"minima52":26.76,"maxima52":48.4},
-      {"ticker":"BMOB3","nome":"Bemobi","cotacao":31.83,"dataCotacao":"2026-10-16","variacao3m":32.5,"volumeMedio":34601588,"minima52":20.87,"maxima52":34.8},
-      {"ticker":"LWSA3","nome":"Locaweb","cotacao":5.19,"dataCotacao":"2026-10-16","variacao3m":32.4,"volumeMedio":22323891,"minima52":3.28,"maxima52":5.83},
-      {"ticker":"DOTZ3","nome":"Dotz","cotacao":13.45,"dataCotacao":"2026-10-16","variacao3m":246.6,"volumeMedio":262569,"minima52":2.65,"maxima52":13.6}
+      {"ticker":"TOTS3","nome":"Totvs","cotacao":40.29,"dataCotacao":"2026-10-16","variacao3m":38,"variacaoDia":0.95,"volumeMedio":230254164,"minima52":26.76,"maxima52":48.4},
+      {"ticker":"BMOB3","nome":"Bemobi","cotacao":31.83,"dataCotacao":"2026-10-16","variacao3m":32.5,"variacaoDia":-1.91,"volumeMedio":34601588,"minima52":20.87,"maxima52":34.8},
+      {"ticker":"LWSA3","nome":"Locaweb","cotacao":5.19,"dataCotacao":"2026-10-16","variacao3m":32.4,"variacaoDia":0.39,"volumeMedio":22323891,"minima52":3.28,"maxima52":5.83},
+      {"ticker":"DOTZ3","nome":"Dotz","cotacao":13.45,"dataCotacao":"2026-10-16","variacao3m":246.6,"variacaoDia":6.83,"volumeMedio":262569,"minima52":2.65,"maxima52":13.6}
     ]},
     {"setor": "Hardware e eletrônicos", "grupoB3": "Tecnologia da Informação", "empresas": [
-      {"ticker":"INTB3","nome":"Intelbras","cotacao":18.21,"dataCotacao":"2026-10-16","variacao3m":36.4,"volumeMedio":25483441,"minima52":10.49,"maxima52":19.96},
-      {"ticker":"MLAS3","nome":"Multilaser","cotacao":2.38,"dataCotacao":"2026-10-16","variacao3m":39.2,"volumeMedio":5872868,"minima52":0.83,"maxima52":2.46},
-      {"ticker":"POSI3","nome":"Positivo","cotacao":4.62,"dataCotacao":"2026-10-16","variacao3m":21.6,"volumeMedio":4841740,"minima52":3.18,"maxima52":5.09},
-      {"ticker":"PDTC3","nome":"Padtec","cotacao":1.94,"dataCotacao":"2026-10-16","variacao3m":-4.4,"volumeMedio":102418,"minima52":0.95,"maxima52":2.09}
+      {"ticker":"INTB3","nome":"Intelbras","cotacao":18.21,"dataCotacao":"2026-10-16","variacao3m":36.4,"variacaoDia":2.59,"volumeMedio":25483441,"minima52":10.49,"maxima52":19.96},
+      {"ticker":"MLAS3","nome":"Multilaser","cotacao":2.38,"dataCotacao":"2026-10-16","variacao3m":39.2,"variacaoDia":0,"volumeMedio":5872868,"minima52":0.83,"maxima52":2.46},
+      {"ticker":"POSI3","nome":"Positivo","cotacao":4.62,"dataCotacao":"2026-10-16","variacao3m":21.6,"variacaoDia":-0.43,"volumeMedio":4841740,"minima52":3.18,"maxima52":5.09},
+      {"ticker":"PDTC3","nome":"Padtec","cotacao":1.94,"dataCotacao":"2026-10-16","variacao3m":-4.4,"variacaoDia":-1.02,"volumeMedio":102418,"minima52":0.95,"maxima52":2.09}
     ]},
     {"setor": "Telecomunicações", "grupoB3": "Comunicações", "empresas": [
-      {"ticker":"VIVT3","nome":"Vivo (Telefônica Brasil)","cotacao":31.78,"dataCotacao":"2026-10-16","variacao3m":-10.5,"volumeMedio":203321479,"minima52":28.99,"maxima52":43.47},
-      {"ticker":"TIMS3","nome":"TIM","cotacao":18.93,"dataCotacao":"2026-10-16","variacao3m":-16.2,"volumeMedio":179621210,"minima52":17.85,"maxima52":28.74},
-      {"ticker":"DESK3","nome":"Desktop","cotacao":19.4,"dataCotacao":"2026-10-16","variacao3m":8.4,"volumeMedio":15300729,"minima52":11.49,"maxima52":19.73},
-      {"ticker":"FIQE3","nome":"Unifique","cotacao":6.24,"dataCotacao":"2026-10-16","variacao3m":11.6,"volumeMedio":12354316,"minima52":4.23,"maxima52":7.76},
-      {"ticker":"TELB4","nome":"Telebras","cotacao":12.96,"dataCotacao":"2026-10-16","variacao3m":76.1,"volumeMedio":135146,"minima52":7.2,"maxima52":13.86}
+      {"ticker":"VIVT3","nome":"Vivo (Telefônica Brasil)","cotacao":31.78,"dataCotacao":"2026-10-16","variacao3m":-10.5,"variacaoDia":1.79,"volumeMedio":203321479,"minima52":28.99,"maxima52":43.47},
+      {"ticker":"TIMS3","nome":"TIM","cotacao":18.93,"dataCotacao":"2026-10-16","variacao3m":-16.2,"variacaoDia":1.56,"volumeMedio":179621210,"minima52":17.85,"maxima52":28.74},
+      {"ticker":"DESK3","nome":"Desktop","cotacao":19.4,"dataCotacao":"2026-10-16","variacao3m":8.4,"variacaoDia":0.31,"volumeMedio":15300729,"minima52":11.49,"maxima52":19.73},
+      {"ticker":"FIQE3","nome":"Unifique","cotacao":6.24,"dataCotacao":"2026-10-16","variacao3m":11.6,"variacaoDia":0.65,"volumeMedio":12354316,"minima52":4.23,"maxima52":7.76},
+      {"ticker":"TELB4","nome":"Telebras","cotacao":12.96,"dataCotacao":"2026-10-16","variacao3m":76.1,"variacaoDia":-1.07,"volumeMedio":135146,"minima52":7.2,"maxima52":13.86}
     ]}
   ],
   "busca": [
