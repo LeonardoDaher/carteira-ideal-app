@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { jurosPadrao } from '../data/jurosOpcoes'
 import { SNAPSHOT_ACOES_ENDIVIDADAS } from '../data/snapshotAcoesEndividadas'
 import { storage } from '../data/storage'
@@ -14,6 +14,7 @@ import {
   TAMANHO_DO_TOP, calcularTopPremios,
 } from '../domain/premios'
 import type { FiltroPremios, FiltroVencimentos, LinhaPremio, Operacao, OrdemPremio } from '../domain/premios'
+import { BotaoDeLado, OperacaoDaSerie } from './OperacaoDaSerie'
 
 const num = (v: number, casas = 2) => v.toLocaleString('pt-BR', { minimumFractionDigits: casas, maximumFractionDigits: casas })
 
@@ -84,6 +85,17 @@ export function TopPremiosOpcoes({
     [snapshot, filtro, juros, fundamentos, raizesBaratas],
   )
   const coberta = filtro.operacao === 'callCoberta'
+
+  // V (vender) monta a operação ali mesmo, abaixo da tabela: clicar de novo no mesmo botão desfaz. "Simular" leva a série à aba
+  // Estratégias, para montar estruturas com esse strike.
+  const [vendida, setVendida] = useState<string | null>(null)
+  const painelRef = useRef<HTMLDivElement>(null)
+  const vender = (codigo: string) => {
+    const repetido = vendida === codigo
+    setVendida(repetido ? null : codigo)
+    if (!repetido) setTimeout(() => painelRef.current?.scrollIntoView?.({ behavior: 'smooth', block: 'start' }), 0)
+  }
+  const linhaVendida = vendida ? (linhas.find((l) => l.serie.codigo === vendida) ?? null) : null
 
   const simular = (l: LinhaPremio) => onSimular({ ativo: l.ativo, series: [l.serie], lado: 'venda', coberta })
 
@@ -222,6 +234,7 @@ export function TopPremiosOpcoes({
             <table className="tabela-opcoes small">
               <thead>
                 <tr>
+                  <th scope="col" title="Vender esta série: monta a operação aqui mesmo">Vender</th>
                   <th scope="col">#</th>
                   <th scope="col">Ativo</th>
                   <th scope="col">Série</th>
@@ -236,7 +249,7 @@ export function TopPremiosOpcoes({
                   <th scope="col" title="Volatilidade implícita no último preço">Vol. impl. (%)</th>
                   {fundamentos && <th scope="col" title="Dívida líquida dividida pelo EBITDA dos últimos 12 meses, e a posição na lista das mais endividadas">Dív. líq./EBITDA</th>}
                   <th scope="col">Neg.</th>
-                  <th scope="col"><span className="sr-only">Simular</span></th>
+                  <th scope="col" title="Levar esta série para a aba Estratégias, para montar estruturas com esse strike">Estruturas</th>
                 </tr>
               </thead>
               <tbody>
@@ -244,7 +257,10 @@ export function TopPremiosOpcoes({
                   const f = fundamentoDoAtivo(fundamentos, l.ativo.ticker)
                   const barata = raizesBaratas?.has(raizDoTicker(l.ativo.ticker)) ?? false
                   return (
-                    <tr key={l.serie.codigo} data-testid="linha-premio">
+                    <tr key={l.serie.codigo} data-testid="linha-premio" className={vendida === l.serie.codigo ? 'linha-marcada' : undefined}>
+                      <td style={{ whiteSpace: 'nowrap' }}>
+                        <BotaoDeLado lado="venda" codigo={l.serie.codigo} escolhido={vendida === l.serie.codigo} onClick={() => vender(l.serie.codigo)} />
+                      </td>
                       <td>{i + 1}</td>
                       <td>
                         <strong>{l.ativo.ticker}</strong> <span className="muted">{reais(l.ativo.cotacao)}</span>
@@ -293,6 +309,24 @@ export function TopPremiosOpcoes({
             </table>
           </div>
         )}
+
+        {linhaVendida && (
+          <div ref={painelRef} className="col" style={{ gap: 10, scrollMarginTop: 12 }} data-testid="operacao-da-serie">
+            <OperacaoDaSerie
+              key={linhaVendida.serie.codigo + (coberta ? ':coberta' : '')}
+              ativo={linhaVendida.ativo}
+              serie={linhaVendida.serie}
+              lado="venda"
+              coberta={coberta}
+              hoje={snapshot.dataPregao ?? new Date().toISOString().slice(0, 10)}
+              aoFechar={() => setVendida(null)}
+            />
+          </div>
+        )}
+
+        <span className="tiny muted justify">
+          <strong>V</strong> monta a venda da série aqui mesmo, com o gráfico. <strong>Simular</strong> leva a série para a aba Estratégias, para montar travas e outras estruturas com esse strike.
+        </span>
 
         <details className="card-outline small justify" style={{ lineHeight: 1.5 }}>
           <summary style={{ cursor: 'pointer', fontWeight: 600 }}>Como o ranking é calculado</summary>

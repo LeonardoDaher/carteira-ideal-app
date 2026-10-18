@@ -5,20 +5,19 @@ import {
   FILTRO_VAZIO, diasUteis, expandirSnapshot, faixaPerto, filtrarSeries, limitarAosProximosMeses, limitesDeStrike, montarLinha,
   ordenarLinhas, strikesDistintos, tipoVencimento, vencimentosDe,
 } from '../domain/opcoes'
-import type { AtivoComOpcoes, ChaveOrdem, EscolhaDeSeries, FiltroEstilo, FiltroSeries, FiltroTipo, LinhaOpcao, Ordem, SerieOpcao, SnapshotOpcoes } from '../domain/opcoes'
+import type { AtivoComOpcoes, ChaveOrdem, EscolhaDeSeries, FiltroEstilo, FiltroSeries, FiltroTipo, LinhaOpcao, Ordem, SnapshotOpcoes } from '../domain/opcoes'
 import { DIAS_UTEIS_ANO } from '../domain/simulaOpcoes'
-import type { Lado, Posicao } from '../domain/simulaOpcoes'
+import type { Lado } from '../domain/simulaOpcoes'
 import { formatarData } from '../domain/rendaFii'
 import { reais } from '../domain/mercadoOficial'
 import { VoltarInicio } from '../ui/VoltarInicio'
 import { AvisoEducacional } from '../ui/AvisoEducacional'
 import { AbasDaTela } from '../ui/AbasDaTela'
 import { CampoReais } from '../ui/CampoReais'
-import { CampoNumero } from '../ui/CampoNumero'
 import { EscolhaDeAtivo } from './EscolhaDeAtivo'
 import { GraficosOpcoes } from './GraficosOpcoes'
+import { BotaoDeLado, OperacaoDaSerie } from './OperacaoDaSerie'
 import { MonteSuaEstrategia } from './MonteSuaEstrategia'
-import { PainelDaPosicao } from './PainelDaPosicao'
 import { PorVisaoOpcoes } from './PorVisaoOpcoes'
 import { RodaOpcoes } from './RodaOpcoes'
 import { TopPremiosOpcoes } from './TopPremiosOpcoes'
@@ -468,22 +467,7 @@ function LinhaDaTabela({ l, dataPregao, lado, onOperar }: { l: LinhaOpcao; dataP
     <tr data-testid="serie-opcao" className={lado ? 'linha-marcada' : undefined}>
       <td style={{ whiteSpace: 'nowrap' }}>
         {(['compra', 'venda'] as Lado[]).map((x) => (
-          <button
-            key={x}
-            className="chip"
-            data-lado={x}
-            style={{
-              padding: '2px 9px', minHeight: 0, marginRight: x === 'compra' ? 4 : 0, fontWeight: 700,
-              // compra em verde e venda em vermelho; escolhida fica cheia, as outras só com contorno e letra coloridos
-              ...(() => { const cor = x === 'compra' ? 'var(--mc-pos)' : 'var(--danger)'; return lado === x ? { background: cor, borderColor: cor, color: '#fff' } : { borderColor: cor, color: cor } })(),
-            }}
-            aria-pressed={lado === x}
-            aria-label={`${x === 'compra' ? 'Comprar' : 'Vender'} ${l.codigo}`}
-            title={x === 'compra' ? 'Comprar' : 'Vender'}
-            onClick={() => onOperar(x)}
-          >
-            {x === 'compra' ? 'C' : 'V'}
-          </button>
+          <BotaoDeLado key={x} lado={x} codigo={l.codigo} escolhido={lado === x} onClick={() => onOperar(x)} />
         ))}
       </td>
       <td style={{ fontWeight: 700 }}>{l.codigo}</td>
@@ -503,53 +487,5 @@ function LinhaDaTabela({ l, dataPregao, lado, onOperar }: { l: LinhaOpcao; dataP
       <td className="num">{num(l.tetaReais, 4)}</td>
       <td className="num">{num(l.tetaPct, 2)}</td>
     </tr>
-  )
-}
-
-/**
- * Compra ou venda de uma call ou put já montada na própria tabela: preço da série, quantidade e preço do ativo editáveis, e o
- * resultado (gráfico, ganho e perda máximos, passagem do tempo e gregas) logo abaixo.
- */
-function OperacaoDaSerie({ ativo, serie, lado, hoje, aoFechar }: { ativo: AtivoComOpcoes; serie: SerieOpcao; lado: Lado; hoje: string; aoFechar: () => void }) {
-  const lote = ativo.lote >= 100 ? ativo.lote : 100
-  const [premio, setPremio] = useState(serie.ultimo)
-  const [quantidade, setQuantidade] = useState(lote)
-  const [precoAtivo, setPrecoAtivo] = useState(ativo.cotacao)
-  const dias = Math.max(diasUteis(serie.vencimento, hoje), 1)
-  const nome = `${lado === 'compra' ? 'Compra' : 'Venda'} de ${serie.tipo === 'call' ? 'call' : 'put'}`
-  const erro = !(precoAtivo > 0) ? 'Informe o preço do ativo.' : !(quantidade > 0) ? 'Informe a quantidade de opções.' : !(premio >= 0) ? 'O preço da série não pode ser negativo.' : null
-  const posicao: Posicao | null = erro ? null : { pernas: [{ tipo: serie.tipo, lado, strike: serie.strike, premio, quantidade }], acoes: 0, precoAcao: 0 }
-  const aviso =
-    lado === 'venda'
-      ? serie.tipo === 'call'
-        ? 'Venda descoberta de call: se o ativo disparar, a perda não tem limite, e a B3 exige margem de garantia.'
-        : 'Venda de put: você pode ser obrigado a comprar o ativo pelo strike mesmo que ele valha muito menos, e a B3 exige margem de garantia.'
-      : null
-
-  return (
-    <>
-      <div className="card col" style={{ gap: 12 }}>
-        <div className="row-between" style={{ alignItems: 'center', gap: 8 }}>
-          <span style={{ fontWeight: 700 }}>{nome}: {serie.codigo}</span>
-          <button className="chip" onClick={aoFechar}>Fechar</button>
-        </div>
-        <span className="small muted">
-          {rotuloTipo(serie.tipo)} de {ativo.ticker}, strike {num(serie.strike)}, vence em {formatarData(serie.vencimento)} ({diasUteis(serie.vencimento, hoje)} dias úteis).
-          O preço já vem do último negócio da série e pode ser alterado.
-        </span>
-        <div className="row" style={{ gap: 10, flexWrap: 'wrap' }}>
-          <div style={{ flex: '1 1 130px' }}><CampoReais rotulo="Preço da série (prêmio)" valor={premio} onMudar={setPremio} /></div>
-          <div style={{ flex: '1 1 130px' }}><CampoNumero rotulo="Quantidade de opções" valor={quantidade} onMudar={setQuantidade} sufixo="opções" casas={0} dica={`O lote padrão de ${ativo.ticker} na B3 é de ${lote}.`} /></div>
-          <div style={{ flex: '1 1 130px' }}><CampoReais rotulo="Preço do ativo hoje" valor={precoAtivo} onMudar={setPrecoAtivo} /></div>
-        </div>
-      </div>
-      {erro || !posicao ? (
-        <div className="card-outline small justify" role="status">
-          <strong>Falta preencher:</strong> <span className="muted">{erro}</span>
-        </div>
-      ) : (
-        <PainelDaPosicao posicao={posicao} precoAtivo={precoAtivo} dias={dias} titulo={nome} aviso={aviso} />
-      )}
-    </>
   )
 }

@@ -2001,3 +2001,18 @@ Cada cartão mostra, como as demais, até três candidatas ordenadas pelo crité
 - **Documentação:** \`docs/04\` (jornada: Simule Ativos na landing e as seis abas do Simule Opções), \`docs/05\` (nova seção 5.12, operação diária das opções), \`docs/06\` (nova seção 13, o que falta), \`docs/13\` (nome Tendência e as estruturas da D108) e novo \`docs/14-metodologia-estrategias-montadas.md\` (catálogo, vencimentos diferentes, manejo, roda e a ressalva de que nenhuma estrutura garante renda).
 
 **Fora.** Página pública de SEO para o Simule Opções (como as de FII, ETF e BDR) não foi criada; está em \`docs/06\` como decisão do responsável. O Simule Ações também não tem página própria.
+
+
+## D111 (17/10/2026): Top 15 prêmios ganha o botão V (vender) na frente de cada linha; o Simular continua no fim
+
+**Pedido do responsável (17/10/2026).** O Top 15 prêmios deveria seguir a lógica das Séries da B3 (botões com cor, operação montada ali mesmo, em vez de jogar para outra aba). Em seguida, o responsável ponderou que a pessoa também pode querer montar estruturas com aquele strike, então o **Simular fica**. E, como o ranking é de quem vende, **só o V** (sem o C).
+
+**Como ficou.**
+- **V (vermelho), na primeira coluna.** Monta a venda da série ali mesmo, abaixo da tabela, sem sair do ranking, com o mesmo painel das Séries (preço da série, quantidade e preço do ativo editáveis; ganho e perda máximos, equilíbrio, gráfico, passagem do tempo, gregas e aviso de risco). Clicar de novo no V, ou em Fechar, desfaz.
+- **No ranking de puts**, o V é a venda de put. **No ranking de calls cobertas**, o V é a **venda coberta** (entram as ações, compradas ao preço do ativo, e some o aviso de perda sem limite), e não a venda descoberta de call.
+- **Simular**, na última coluna (agora com o título "Estruturas"), segue levando a série para a aba Estratégias, para montar travas e outras estruturas com aquele strike.
+- Uma linha de texto explica a diferença entre os dois botões.
+
+**Código.** O painel da operação saiu de \`SimuleOpcoes.tsx\` para \`OperacaoDaSerie.tsx\` (agora com a opção \`coberta\`), junto com o botão \`BotaoDeLado\`, usado pelas Séries da B3 e pelo Top 15.
+
+**Testes.** 5 novos (V na frente e Simular no fim, venda de put montada ali, venda coberta, desfazer, Simular continua levando à aba Estratégias); os testes que liam as colunas do ranking foram deslocados em uma coluna.

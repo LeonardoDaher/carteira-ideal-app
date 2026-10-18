@@ -42,7 +42,7 @@ const abrirTop = () => {
   fireEvent.click(within(screen.getByRole('group', { name: 'Risco máximo' })).getByRole('button', { name: 'Sem limite' }))
 }
 const linhas = () => screen.queryAllByTestId('linha-premio')
-const series = () => linhas().map((l) => within(l).getAllByRole('cell')[2].textContent)
+const series = () => linhas().map((l) => within(l).getAllByRole('cell')[3].textContent)
 const dividas = () => screen.queryAllByTestId('celula-divida').map((c) => (c.textContent ?? '').replace(/ /g, ' '))
 
 describe('Top 15 prêmios cruzado com a dívida das empresas', () => {
