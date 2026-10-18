@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { jurosPadrao } from '../data/jurosOpcoes'
 import {
-  DIAS_UTEIS_ANO, analisar, curva, custoDeMontagem, faixaDoGrafico, gregasDaPosicao, resultadoAntesDoVencimento,
+  DIAS_UTEIS_ANO, analisar, analisarEstimado, curva, diasAtePrimeiroVencimento, temVariosVencimentos, custoDeMontagem, faixaDoGrafico, gregasDaPosicao, resultadoAntesDoVencimento,
   resultadoNoVencimento, volatilidadeImplicita,
 } from '../domain/simulaOpcoes'
 import type { Posicao } from '../domain/simulaOpcoes'
@@ -16,7 +16,7 @@ const dinheiro = (v: number) => (v < 0 ? `−${reais(-v)}` : reais(v))
  * Resultado de uma posição já montada: ganho e perda máximos, equilíbrio, gráfico no vencimento e antes dele, passagem do
  * tempo e gregas. Compartilhado pelas Séries da B3 (compra e venda de uma call ou put) e pela aba de estratégias montadas.
  */
-export function PainelDaPosicao({ posicao, precoAtivo, dias, titulo, aviso, nota }: {
+export function PainelDaPosicao({ posicao: posicaoEntrada, precoAtivo, dias: diasEntrada, titulo, aviso, nota }: {
   posicao: Posicao
   precoAtivo: number
   /** Dias úteis até o vencimento. */
@@ -31,20 +31,38 @@ export function PainelDaPosicao({ posicao, precoAtivo, dias, titulo, aviso, nota
   const [diasPassados, setDiasPassados] = useState(0)
 
   const r = Math.log(1 + juros / 100)
+  // Pernas com vencimentos diferentes: o resultado só é exato até o primeiro vencimento. Cada perna leva a volatilidade
+  // implícita do próprio preço (assim, hoje, a posição vale o que custou) e o gráfico "no vencimento" passa a ser uma
+  // estimativa na data do primeiro.
+  const multi = temVariosVencimentos(posicaoEntrada)
+  const dias = multi ? Math.max(diasAtePrimeiroVencimento(posicaoEntrada, diasEntrada), 1) : diasEntrada
+  const posicao = useMemo<Posicao>(() => {
+    if (!multi) return posicaoEntrada
+    return {
+      ...posicaoEntrada,
+      pernas: posicaoEntrada.pernas.map((x) => {
+        const impl = x.dias && x.dias > 0 ? volatilidadeImplicita({ tipo: x.tipo, s: precoAtivo, strike: x.strike, t: x.dias / DIAS_UTEIS_ANO, r }, x.premio) : null
+        return { ...x, sigma: impl ?? vol / 100 }
+      }),
+    }
+  }, [multi, posicaoEntrada, precoAtivo, r, vol])
   const mercado = useMemo(() => ({ dias: Math.max(dias, 0), r, sigma: vol / 100 }), [dias, r, vol])
   const passados = Math.min(diasPassados, mercado.dias)
 
   const volImplicita = useMemo(() => {
     const perna = posicao.pernas[0]
-    if (!perna || dias <= 0) return null
-    const v = volatilidadeImplicita({ tipo: perna.tipo, s: precoAtivo, strike: perna.strike, t: dias / DIAS_UTEIS_ANO, r }, perna.premio)
+    const diasPerna = perna?.dias ?? dias
+    if (!perna || diasPerna <= 0) return null
+    const v = volatilidadeImplicita({ tipo: perna.tipo, s: precoAtivo, strike: perna.strike, t: diasPerna / DIAS_UTEIS_ANO, r }, perna.premio)
     return v ? Math.round(v * 1000) / 10 : null
   }, [posicao, dias, precoAtivo, r])
 
   const dados = useMemo(() => {
     const faixa = faixaDoGrafico(posicao, precoAtivo)
-    const analise = analisar(posicao)
-    const noVenc = curva((s) => resultadoNoVencimento(posicao, s), faixa.min, faixa.max)
+    const analise = multi ? analisarEstimado(posicao, precoAtivo, mercado) : analisar(posicao)
+    const noVenc = multi
+      ? curva((s) => resultadoAntesDoVencimento(posicao, s, mercado, mercado.dias), faixa.min, faixa.max)
+      : curva((s) => resultadoNoVencimento(posicao, s), faixa.min, faixa.max)
     const antes = passados < mercado.dias && vol > 0 ? curva((s) => resultadoAntesDoVencimento(posicao, s, mercado, passados), faixa.min, faixa.max) : null
     const g = vol > 0 && mercado.dias - passados > 0 ? gregasDaPosicao(posicao, precoAtivo, mercado, passados) : null
     return {
@@ -52,7 +70,7 @@ export function PainelDaPosicao({ posicao, precoAtivo, dias, titulo, aviso, nota
       custo: custoDeMontagem(posicao),
       hoje: antes ? resultadoAntesDoVencimento(posicao, precoAtivo, mercado, passados) : resultadoNoVencimento(posicao, precoAtivo),
     }
-  }, [posicao, precoAtivo, mercado, passados, vol])
+  }, [posicao, precoAtivo, mercado, passados, vol, multi])
 
   const rotuloCurva = passados === 0 ? 'Hoje' : `Daqui a ${passados} ${passados === 1 ? 'dia' : 'dias'}`
   const caixa = { padding: '10px 12px', borderRadius: 12, background: 'var(--surface2)' } as const
@@ -61,7 +79,18 @@ export function PainelDaPosicao({ posicao, precoAtivo, dias, titulo, aviso, nota
   return (
     <>
       <div id="resultado-opcoes" className="card col" style={{ gap: 14, scrollMarginTop: 12 }} aria-live="polite">
-        <span style={{ fontWeight: 700 }}>{titulo} no vencimento</span>
+        <span style={{ fontWeight: 700 }}>{multi ? `${titulo} no primeiro vencimento (estimado)` : `${titulo} no vencimento`}</span>
+
+        {multi && (
+          <div className="card-outline small justify" style={{ lineHeight: 1.5 }} role="note" data-testid="aviso-estimativa">
+            <strong>Vencimentos diferentes: o resultado é uma estimativa.</strong>{' '}
+            <span className="muted">
+              O gráfico mostra a posição daqui a {mercado.dias} dias úteis, quando vence a perna mais curta (vale só o valor intrínseco). As
+              pernas mais longas ainda terão valor de tempo, que o app estima pelo modelo de Black-Scholes, usando a volatilidade implícita
+              do preço de cada perna. Se a volatilidade mudar, o resultado muda. Ganho e perda máximos são, por isso, estimados.
+            </span>
+          </div>
+        )}
 
         {aviso && (
           <div className="card-outline small justify aviso-atraso" style={{ lineHeight: 1.5 }} role="note" data-testid="aviso-risco">
@@ -71,11 +100,11 @@ export function PainelDaPosicao({ posicao, precoAtivo, dias, titulo, aviso, nota
 
         <div className="row" style={{ gap: 10, alignItems: 'stretch', flexWrap: 'wrap' }}>
           <div className="col" style={{ ...caixa, gap: 2, flex: '1 1 120px' }}>
-            <span className="tiny muted">Ganho máximo</span>
+            <span className="tiny muted">Ganho máximo{multi ? ' (estimado)' : ''}</span>
             <span style={{ fontWeight: 700, fontSize: 16 }} data-testid="ganho-maximo">{semLimite(dados.analise.ganhoMaximo)}</span>
           </div>
           <div className="col" style={{ ...caixa, gap: 2, flex: '1 1 120px' }}>
-            <span className="tiny muted">Perda máxima</span>
+            <span className="tiny muted">Perda máxima{multi ? ' (estimada)' : ''}</span>
             <span style={{ fontWeight: 700, fontSize: 16 }} data-testid="perda-maxima">{semLimite(dados.analise.perdaMaxima)}</span>
           </div>
           <div className="col" style={{ ...caixa, gap: 2, flex: '1 1 120px' }}>
@@ -95,7 +124,7 @@ export function PainelDaPosicao({ posicao, precoAtivo, dias, titulo, aviso, nota
         <div style={{ width: '100%', maxWidth: 560, marginInline: 'auto' }}>
           <GraficoPayoff
             curvas={[
-              { rotulo: 'No vencimento', pontos: dados.noVenc, principal: true },
+              { rotulo: multi ? 'No 1º vencimento (estimado)' : 'No vencimento', pontos: dados.noVenc, principal: true },
               ...(dados.antes ? [{ rotulo: rotuloCurva, pontos: dados.antes }] : []),
             ]}
             precoAtivo={precoAtivo}
@@ -104,7 +133,7 @@ export function PainelDaPosicao({ posicao, precoAtivo, dias, titulo, aviso, nota
           />
         </div>
         <div className="row tiny muted" style={{ gap: 14, flexWrap: 'wrap' }}>
-          <span><MarcaDaLinha cor="var(--grafico-selic)" />No vencimento</span>
+          <span><MarcaDaLinha cor="var(--grafico-selic)" />{multi ? 'No 1º vencimento (estimado)' : 'No vencimento'}</span>
           {dados.antes && <span><MarcaDaLinha cor="var(--grafico-ipca)" traco="7 3.5" />{rotuloCurva}</span>}
           <span>┆ Preço de hoje</span>
           <span>○ Equilíbrio</span>
@@ -147,6 +176,7 @@ export function PainelDaPosicao({ posicao, precoAtivo, dias, titulo, aviso, nota
         <details>
           <summary className="small" style={{ cursor: 'pointer', fontWeight: 600 }}>Volatilidade e juros (curva do tempo e gregas)</summary>
           <div className="col" style={{ gap: 10, marginTop: 10 }}>
+            {multi && <span className="tiny muted justify">Com vencimentos diferentes, cada perna usa a volatilidade implícita do próprio preço; este valor só entra se alguma perna não tiver implícita.</span>}
             <CampoNumero rotulo="Volatilidade do ativo" valor={vol} onMudar={setVol} sufixo="% a.a." casas={1} />
             {volImplicita !== null && (
               <div className="row" style={{ gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>

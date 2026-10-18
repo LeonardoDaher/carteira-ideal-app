@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import {
-  chanceDeExercicio, analisar, cdfNormal, custoDeMontagem, gregas, gregasDaPosicao, montarPosicao, precoBs, resultadoAntesDoVencimento,
-  resultadoNoVencimento, validarEntrada, volatilidadeImplicita,
+  DIAS_UTEIS_ANO, analisarEstimado, chanceDeExercicio, analisar, cdfNormal, custoDeMontagem, diasAtePrimeiroVencimento, gregas, gregasDaPosicao,
+  montarPosicao, precoBs, resultadoAntesDoVencimento, resultadoNoVencimento, temVariosVencimentos, validarEntrada, volatilidadeImplicita,
 } from './simulaOpcoes'
-import type { EntradaEstrategia } from './simulaOpcoes'
+import type { EntradaEstrategia, Posicao } from './simulaOpcoes'
 
 const base: EntradaEstrategia = { estrategia: 'compraCall', precoAtivo: 10, strikeBaixo: 10, premioBaixo: 1, strikeAlto: 12, premioAlto: 0.5, quantidade: 100 }
 const pos = (o: Partial<EntradaEstrategia>) => montarPosicao({ ...base, ...o })
@@ -155,5 +155,64 @@ describe('chance de exercício', () => {
     expect(chanceDeExercicio({ ...base, tipo: 'put', strike: 105, t: 0 })).toBe(1)
     expect(chanceDeExercicio({ ...base, tipo: 'put', strike: 95, t: 0 })).toBe(0)
     expect(chanceDeExercicio({ ...base, tipo: 'call', strike: 95, sigma: 0 })).toBe(1)
+  })
+})
+
+describe('posições com vencimentos diferentes (calendário)', () => {
+  const r = Math.log(1.14)
+  const sigma = 0.3
+  const preco = (dias: number) => precoBs({ tipo: 'call', s: 60, strike: 60, t: dias / DIAS_UTEIS_ANO, r, sigma })
+  const calendario: Posicao = {
+    pernas: [
+      { tipo: 'call', lado: 'compra', strike: 60, premio: preco(120), quantidade: 100, dias: 120, sigma },
+      { tipo: 'call', lado: 'venda', strike: 60, premio: preco(22), quantidade: 100, dias: 22, sigma },
+    ],
+    acoes: 0,
+    precoAcao: 0,
+  }
+  const mercado = { dias: 22, r, sigma }
+
+  it('reconhece vencimentos diferentes e o primeiro deles', () => {
+    expect(temVariosVencimentos(calendario)).toBe(true)
+    expect(diasAtePrimeiroVencimento(calendario, 99)).toBe(22)
+    expect(temVariosVencimentos({ ...calendario, pernas: calendario.pernas.map((x) => ({ ...x, dias: 22 })) })).toBe(false)
+    expect(temVariosVencimentos({ ...calendario, pernas: calendario.pernas.map((x) => ({ ...x, dias: undefined })) })).toBe(false)
+  })
+
+  it('hoje, com os preços do próprio modelo, o resultado é zero (cada perna usa o seu prazo)', () => {
+    expect(resultadoAntesDoVencimento(calendario, 60, mercado, 0)).toBeCloseTo(0, 6)
+  })
+
+  it('na data do primeiro vencimento a perna curta vale o intrínseco e a longa ainda tem valor: ganho no strike, perda limitada longe dele', () => {
+    const noMeio = resultadoAntesDoVencimento(calendario, 60, mercado, 22)
+    expect(noMeio).toBeGreaterThan(0)
+    const longe = resultadoAntesDoVencimento(calendario, 30, mercado, 22)
+    const debito = (preco(120) - preco(22)) * 100
+    expect(longe).toBeCloseTo(-debito, 0)
+  })
+
+  it('o máximo e o mínimo estimados são limitados, com dois equilíbrios', () => {
+    const a = analisarEstimado(calendario, 60, mercado)
+    expect(a.ganhoMaximo).not.toBeNull()
+    expect(a.perdaMaxima).not.toBeNull()
+    expect(a.ganhoMaximo!).toBeGreaterThan(0)
+    expect(a.perdaMaxima!).toBeLessThan(0)
+    expect(a.equilibrios).toHaveLength(2)
+    expect(a.equilibrios[0]).toBeLessThan(60)
+    expect(a.equilibrios[1]).toBeGreaterThan(60)
+  })
+
+  it('com a call longa vendida e a curta comprada, a perda é sem limite', () => {
+    const invertido: Posicao = { ...calendario, pernas: calendario.pernas.map((x) => ({ ...x, lado: x.lado === 'compra' ? 'venda' : 'compra' })) }
+    expect(analisarEstimado(invertido, 60, mercado).ganhoMaximo).not.toBeNull()
+    const soVendida: Posicao = { ...calendario, pernas: [calendario.pernas[0]].map((x) => ({ ...x, lado: 'venda' as const })) }
+    expect(analisarEstimado(soVendida, 60, { ...mercado, dias: 120 }).perdaMaxima).toBeNull()
+  })
+
+  it('sem prazo próprio nas pernas, o resultado é o de sempre', () => {
+    const simples: Posicao = { pernas: [{ tipo: 'call', lado: 'compra', strike: 60, premio: 2, quantidade: 100 }], acoes: 0, precoAcao: 0 }
+    const a = resultadoAntesDoVencimento(simples, 62, { dias: 10, r, sigma }, 4)
+    const b = resultadoAntesDoVencimento({ pernas: [{ ...simples.pernas[0], dias: 10 }], acoes: 0, precoAcao: 0 }, 62, { dias: 10, r, sigma }, 4)
+    expect(a).toBeCloseTo(b, 10)
   })
 })

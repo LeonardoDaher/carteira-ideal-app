@@ -284,7 +284,7 @@ describe('SimuleOpcoes: aba Estratégias (monte sua estratégia)', () => {
   it('só há travas, borboletas, condors, volatilidade e estruturas com ações: compra e venda simples ficam nas séries', () => {
     render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
     abrirEstrategias()
-    for (const nome of ['Trava de alta (com puts)', 'Trava de baixa (com puts)', 'Trava de baixa (com calls)', 'Borboleta de calls', 'Borboleta de ferro', 'Condor de ferro', 'Condor de calls', 'Straddle comprado', 'Strangle vendido', 'Venda coberta', 'Collar (proteção com custo menor)'])
+    for (const nome of ['Trava de alta (com puts)', 'Trava de baixa (com puts)', 'Trava de baixa (com calls)', 'Borboleta de calls', 'Borboleta de ferro', 'Condor de ferro', 'Condor de calls', 'Trava horizontal de puts (THL)', 'Trava diagonal de puts', 'Straddle comprado', 'Strangle vendido', 'Venda coberta', 'Collar (proteção com custo menor)'])
       expect(screen.getByRole('button', { name: nome })).toBeDefined()
     for (const nome of ['Compra de call', 'Venda de call', 'Compra de put', 'Venda de put']) expect(screen.queryByRole('button', { name: nome })).toBeNull()
   })
@@ -369,6 +369,49 @@ describe('SimuleOpcoes: aba Estratégias (monte sua estratégia)', () => {
     fireEvent.keyDown(screen.getByLabelText('Buscar ativo por código ou nome'), { key: 'Enter' })
     expect((screen.getByLabelText('Preço do ativo hoje') as HTMLInputElement).value).toBe('60,00')
     expect((screen.getByLabelText('Série da perna 1') as HTMLSelectElement).value).toBe('PETRK600')
+  })
+
+  it('THL: a call longa vai para o vencimento seguinte e o resultado vira estimativa, com perda limitada ao débito', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    abrirEstrategias()
+    expect(screen.queryByTestId('aviso-estimativa')).toBeNull() // mesmo vencimento: resultado exato
+    modelo('Trava horizontal de calls (THL)')
+    expect((screen.getByLabelText('Vencimento da perna 1') as HTMLSelectElement).value).toBe('2026-12-18') // longa
+    expect((screen.getByLabelText('Vencimento da perna 2') as HTMLSelectElement).value).toBe('2026-11-19') // curta
+    expect((screen.getByLabelText('Série da perna 1') as HTMLSelectElement).value).toBe('PETRL600')
+    expect((screen.getByLabelText('Série da perna 2') as HTMLSelectElement).value).toBe('PETRK600')
+    expect(screen.getByTestId('aviso-estimativa').textContent).toMatch(/Vencimentos diferentes: o resultado é uma estimativa/)
+    expect(screen.getByText('Ganho máximo (estimado)')).toBeDefined()
+    expect(txt('ganho-maximo')).not.toBe('Sem limite')
+    expect(txt('perda-maxima')).toBe('−R$ 130,00') // o débito: longe do strike as duas opções valem zero
+    expect(screen.getByText(/Débito ao montar as opções:/).textContent).toContain('130,00') // 4,10 menos 2,80, vezes 100
+  })
+
+  it('trava diagonal de calls usa strikes e vencimentos diferentes', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    abrirEstrategias()
+    modelo('Trava diagonal de calls')
+    expect((screen.getByLabelText('Série da perna 1') as HTMLSelectElement).value).toBe('PETRL600')
+    expect((screen.getByLabelText('Série da perna 2') as HTMLSelectElement).value).toBe('PETRK650')
+    expect(screen.getByTestId('aviso-estimativa')).toBeDefined()
+  })
+
+  it('a perna longa não pode vencer antes da curta', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    abrirEstrategias()
+    modelo('Trava horizontal de calls (THL)')
+    fireEvent.change(screen.getByLabelText('Vencimento da perna 1'), { target: { value: '2026-11-19' } })
+    expect(screen.getByText(/perna longa precisa vencer depois da perna curta/)).toBeDefined()
+    expect(screen.queryByTestId('ganho-maximo')).toBeNull()
+  })
+
+  it('qualquer estrutura aceita trocar o vencimento de uma perna, e então o resultado passa a ser estimado', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    abrirEstrategias()
+    expect(screen.queryByTestId('aviso-estimativa')).toBeNull()
+    fireEvent.change(screen.getByLabelText('Vencimento da perna 1'), { target: { value: '2026-12-18' } }) // compra a call de dezembro
+    expect((screen.getByLabelText('Série da perna 1') as HTMLSelectElement).value).toBe('PETRL600')
+    expect(screen.getByTestId('aviso-estimativa')).toBeDefined()
   })
 
   it('mostra as gregas e a passagem do tempo', () => {

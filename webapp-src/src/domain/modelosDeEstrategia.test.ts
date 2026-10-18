@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { MODELOS, escadaDeStrikes, montarPosicaoDoModelo, seriesPadrao, validarModelo, vencimentosDoModelo } from './modelosDeEstrategia'
+import { MODELOS, escadaDeStrikes, montarPosicaoDoModelo, proximoVencimento, seriesPadrao, validarModelo, vencimentosDoModelo } from './modelosDeEstrategia'
 import { analisar } from './simulaOpcoes'
 import type { SerieOpcao } from './opcoes'
 
@@ -10,7 +10,10 @@ const modelo = (id: string) => MODELOS.find((m) => m.id === id)!
 
 // Escada de strikes de 50 a 70, de 2 em 2, para calls e puts.
 const strikes = [50, 52, 54, 56, 58, 60, 62, 64, 66, 68, 70]
-const series = strikes.flatMap((k) => [s(`C${k}`, 'call', k, Math.max(60 - k, 0) + 1), s(`P${k}`, 'put', k, Math.max(k - 60, 0) + 1)])
+const em = (v: string, pre: string, extra: number) =>
+  strikes.flatMap((k) => [s(`${pre}C${k}`, 'call', k, Math.max(60 - k, 0) + 1 + extra, 10, v), s(`${pre}P${k}`, 'put', k, Math.max(k - 60, 0) + 1 + extra, 10, v)])
+// Dois vencimentos: o de novembro (curto) e o de janeiro (longo, com prêmios maiores).
+const series = [...strikes.flatMap((k) => [s(`C${k}`, 'call', k, Math.max(60 - k, 0) + 1), s(`P${k}`, 'put', k, Math.max(k - 60, 0) + 1)]), ...em('2027-01-15', 'L', 1)]
 
 describe('escadas e séries padrão', () => {
   it('a escada tem uma série por strike e prefere a mais negociada', () => {
@@ -113,5 +116,44 @@ describe('validação das séries escolhidas', () => {
     const c = series.find((x) => x.codigo === 'C60')!
     const p = series.find((x) => x.codigo === 'P60')!
     expect(validarModelo(modelo('straddleComprado'), [c, p])).toBeNull()
+  })
+})
+
+describe('estruturas com vencimentos diferentes', () => {
+  it('a perna longa vai para o vencimento seguinte ao escolhido', () => {
+    const pernas = seriesPadrao(series, modelo('thlCall'), '2026-11-19', 60)
+    expect(pernas.map((x) => [x!.codigo, x!.vencimento])).toEqual([['LC60', '2027-01-15'], ['C60', '2026-11-19']])
+  })
+
+  it('a diagonal usa strikes diferentes nas duas pernas', () => {
+    const pernas = seriesPadrao(series, modelo('diagonalCall'), '2026-11-19', 60)
+    expect(pernas.map((x) => x!.strike)).toEqual([60, 64])
+    expect(pernas.map((x) => x!.vencimento)).toEqual(['2027-01-15', '2026-11-19'])
+  })
+
+  it('o próximo vencimento prefere o mensal; sem posterior, é null', () => {
+    expect(proximoVencimento(series, 'call', '2026-11-19')).toBe('2027-01-15')
+    expect(proximoVencimento(series, 'call', '2027-01-15')).toBeNull()
+  })
+
+  it('só oferece como vencimento curto os que têm outro depois', () => {
+    expect(vencimentosDoModelo(series, modelo('thlCall'), ['2026-11-19', '2027-01-15'])).toEqual(['2026-11-19'])
+    expect(vencimentosDoModelo(series, modelo('travaAltaCall'), ['2026-11-19', '2027-01-15'])).toEqual(['2026-11-19', '2027-01-15'])
+  })
+
+  it('a perna longa precisa vencer depois da curta', () => {
+    const [longa, curta] = seriesPadrao(series, modelo('thlCall'), '2026-11-19', 60)
+    expect(validarModelo(modelo('thlCall'), [longa, curta])).toBeNull()
+    expect(validarModelo(modelo('thlCall'), [curta, longa])).toMatch(/perna longa precisa vencer depois/)
+    expect(validarModelo(modelo('thlCall'), [curta, curta])).toMatch(/perna longa precisa vencer depois/)
+  })
+
+  it('a THL é um débito com perda limitada ao que foi pago, sem ganho ou perda sem limite', () => {
+    const m = modelo('thlCall')
+    const escolhidas = seriesPadrao(series, m, '2026-11-19', 60)
+    const pernas = m.pernas.map((p, i) => ({ serie: escolhidas[i]!, lado: p.lado, fator: p.fator, premio: escolhidas[i]!.ultimo, dias: i === 0 ? 55 : 22 }))
+    const posicao = montarPosicaoDoModelo(m, pernas, 100, 60)
+    expect(posicao.pernas.map((x) => x.dias)).toEqual([55, 22])
+    expect(posicao.pernas.reduce((t, x) => t + (x.lado === 'compra' ? -1 : 1) * x.premio * x.quantidade, 0)).toBeLessThan(0) // débito
   })
 })

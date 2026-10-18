@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { diasUteis, tipoVencimento, vencimentosDe } from '../domain/opcoes'
 import type { AtivoComOpcoes, EscolhaDeSeries, SnapshotOpcoes } from '../domain/opcoes'
 import {
-  GRUPOS_DE_MODELOS, MODELOS, escadaDeStrikes, montarPosicaoDoModelo, seriesPadrao, validarModelo, vencimentosDoModelo,
+  GRUPOS_DE_MODELOS, MODELOS, escadaDeStrikes, indiceDoMaisPerto, montarPosicaoDoModelo, seriesPadrao, validarModelo, vencimentosDoModelo,
 } from '../domain/modelosDeEstrategia'
 import type { Modelo, ModeloId, PernaMontada } from '../domain/modelosDeEstrategia'
 import type { Lado, Perna, Posicao } from '../domain/simulaOpcoes'
@@ -120,6 +120,15 @@ function Montagem({ ativo, escolha, hoje }: { ativo: AtivoComOpcoes; escolha: Es
       premios: c.premios.map((x, j) => (j === i ? (serie?.ultimo ?? x) : x)),
     }))
   }
+  // Cada perna pode ter o seu vencimento: ao trocar, fica o strike mais perto do que estava.
+  const trocarVencimentoDaPerna = (i: number, vencimento: string) => {
+    const pm = modelo?.pernas[i]
+    const atual = ativo.series.find((x) => x.codigo === config.codigos[i])
+    if (!pm) return
+    const escada = escadaDeStrikes(ativo.series, pm.tipo, vencimento)
+    if (escada.length === 0) return
+    trocarSerie(i, escada[indiceDoMaisPerto(escada, atual?.strike ?? ativo.cotacao)].codigo)
+  }
   const trocarPremio = (i: number, valor: number) => setConfig((c) => ({ ...c, premios: c.premios.map((x, j) => (j === i ? valor : x)) }))
   const mudarLivre = (i: number, parcial: Partial<PernaLivre>) => setLivres((l) => l.map((x, j) => (j === i ? { ...x, ...parcial } : x)))
 
@@ -139,7 +148,6 @@ function Montagem({ ativo, escolha, hoje }: { ativo: AtivoComOpcoes; escolha: Es
   const erroLivre = (() => {
     if (modelo) return null
     if (livres.length === 0) return 'Todas as séries foram removidas. Escolha um modelo acima para montar de novo.'
-    if (vencimentosLivres.length > 1) return 'As séries escolhidas têm vencimentos diferentes. Escolha séries do mesmo vencimento.'
     if (livres.some((p) => !(p.quantidade > 0))) return 'Informe a quantidade de todas as séries.'
     if (!(precoAtivo > 0)) return 'Informe o preço do ativo.'
     return null
@@ -149,13 +157,13 @@ function Montagem({ ativo, escolha, hoje }: { ativo: AtivoComOpcoes; escolha: Es
   const posicao: Posicao | null = useMemo(() => {
     if (erro) return null
     if (modelo) {
-      const pernas: PernaMontada[] = modelo.pernas.map((pm, i) => ({ serie: seriesEscolhidas[i]!, lado: pm.lado, fator: pm.fator, premio: config.premios[i] }))
+      const pernas: PernaMontada[] = modelo.pernas.map((pm, i) => ({ serie: seriesEscolhidas[i]!, lado: pm.lado, fator: pm.fator, premio: config.premios[i], dias: Math.max(diasUteis(seriesEscolhidas[i]!.vencimento, hoje), 1) }))
       return montarPosicaoDoModelo(modelo, pernas, quantidade, precoAtivo)
     }
-    const pernas: Perna[] = livres.map((x) => ({ tipo: x.tipo, lado: x.lado, strike: x.strike, premio: x.premio, quantidade: x.quantidade }))
+    const pernas: Perna[] = livres.map((x) => ({ tipo: x.tipo, lado: x.lado, strike: x.strike, premio: x.premio, quantidade: x.quantidade, dias: Math.max(diasUteis(x.vencimento, hoje), 1) }))
     return { pernas, acoes: 0, precoAcao: 0 }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [erro, modelo, config, livres, quantidade, precoAtivo])
+  }, [erro, modelo, config, livres, quantidade, precoAtivo, hoje])
 
   const vencimentoEmUso = modelo ? config.vencimento : (vencimentosLivres[0] ?? '')
   const dias = vencimentoEmUso ? Math.max(diasUteis(vencimentoEmUso, hoje), 1) : 21
@@ -207,7 +215,7 @@ function Montagem({ ativo, escolha, hoje }: { ativo: AtivoComOpcoes; escolha: Es
 
       {modelo && (
         <div className="col" style={{ gap: 6 }} role="group" aria-label="Vencimento da estratégia">
-          <span className="small" style={{ fontWeight: 600 }}>Vencimento (próximos 6 meses)</span>
+          <span className="small" style={{ fontWeight: 600 }}>{modelo.pernas.some((x) => x.longa) ? 'Vencimento da perna curta (a longa vai para o seguinte)' : 'Vencimento (próximos 6 meses)'}</span>
           <div className="row" style={{ gap: 6, flexWrap: 'wrap' }}>
             {vencimentosValidos.map((v) => (
               <button key={v} className={`chip ${config.vencimento === v ? 'selected' : ''}`} aria-pressed={config.vencimento === v} onClick={() => escolherVencimento(v)}>
@@ -228,12 +236,20 @@ function Montagem({ ativo, escolha, hoje }: { ativo: AtivoComOpcoes; escolha: Es
               <span className="tiny muted justify">Você precisa ter {quantidade.toLocaleString('pt-BR')} ações de {ativo.ticker}, compradas a {reais(precoAtivo)} (o preço acima).</span>
             )}
             {modelo.pernas.map((pm, i) => {
-              const escada = escadaDeStrikes(ativo.series, pm.tipo, config.vencimento)
+              const escada = escadaDeStrikes(ativo.series, pm.tipo, ativo.series.find((x) => x.codigo === config.codigos[i])?.vencimento ?? config.vencimento)
               const atual = config.codigos[i]
               const rotulo = `${pm.lado === 'compra' ? 'Compra' : 'Venda'}${pm.fator > 1 ? ` de ${pm.fator}x` : ''} de ${pm.tipo === 'call' ? 'call' : 'put'}`
               return (
                 <div key={i} className="card-outline col" style={{ gap: 8 }} role="group" aria-label={`Perna ${i + 1}: ${rotulo}`}>
                   <span><strong>{rotulo}</strong> <span className="muted small">(perna {i + 1})</span></span>
+                  <label className="col" style={{ gap: 4 }}>
+                    <span className="small" style={{ fontWeight: 600 }}>Vencimento da perna {i + 1}</span>
+                    <select value={ativo.series.find((x) => x.codigo === atual)?.vencimento ?? ''} onChange={(ev) => trocarVencimentoDaPerna(i, ev.target.value)} aria-label={'Vencimento da perna ' + (i + 1)}>
+                      {vencimentos.filter((v) => escadaDeStrikes(ativo.series, pm.tipo, v).length > 0).map((v) => (
+                        <option key={v} value={v}>{formatarData(v)} ({diasUteis(v, hoje)} d.u., {tipoVencimento(v)})</option>
+                      ))}
+                    </select>
+                  </label>
                   <label className="col" style={{ gap: 4 }}>
                     <span className="small" style={{ fontWeight: 600 }}>Série da perna {i + 1}</span>
                     <select value={atual ?? ''} onChange={(ev) => trocarSerie(i, ev.target.value)} aria-label={`Série da perna ${i + 1}`}>

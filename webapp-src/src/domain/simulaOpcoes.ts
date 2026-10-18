@@ -19,6 +19,13 @@ export interface Perna {
   /** Prêmio por unidade, em reais. */
   premio: number
   quantidade: number
+  /**
+   * Dias úteis até o vencimento desta perna, quando a posição mistura vencimentos. Sem ele, vale o prazo único da posição.
+   * Com vencimentos diferentes, o resultado só é exato até o primeiro; depois disso as pernas mais longas são estimadas.
+   */
+  dias?: number
+  /** Volatilidade (ex.: 0,35) própria desta perna, na estimativa antes do vencimento. Sem ela, vale a da posição. */
+  sigma?: number
 }
 
 /** Posição completa: opções mais, se houver, ações compradas ao `precoAcao` (venda coberta). */
@@ -261,10 +268,10 @@ export interface Mercado {
 
 /** Valor da posição (lucro/prejuízo) se o ativo estiver em `s` daqui a `diasPassados` dias. */
 export function resultadoAntesDoVencimento(p: Posicao, s: number, m: Mercado, diasPassados: number): number {
-  const t = Math.max(m.dias - diasPassados, 0) / DIAS_UTEIS_ANO
   let total = p.acoes * (s - p.precoAcao)
   for (const x of p.pernas) {
-    const valor = precoBs({ tipo: x.tipo, s, strike: x.strike, t, r: m.r, sigma: m.sigma })
+    const t = Math.max((x.dias ?? m.dias) - diasPassados, 0) / DIAS_UTEIS_ANO
+    const valor = precoBs({ tipo: x.tipo, s, strike: x.strike, t, r: m.r, sigma: x.sigma ?? m.sigma })
     total += sinal(x.lado) * (valor - x.premio) * x.quantidade
   }
   return total
@@ -272,10 +279,10 @@ export function resultadoAntesDoVencimento(p: Posicao, s: number, m: Mercado, di
 
 /** Gregas da posição inteira (ações contam como delta 1 cada). */
 export function gregasDaPosicao(p: Posicao, s: number, m: Mercado, diasPassados = 0): Gregas {
-  const t = Math.max(m.dias - diasPassados, 0) / DIAS_UTEIS_ANO
   const soma: Gregas = { delta: p.acoes, gama: 0, teta: 0, vega: 0 }
   for (const x of p.pernas) {
-    const g = gregas({ tipo: x.tipo, s, strike: x.strike, t, r: m.r, sigma: m.sigma })
+    const t = Math.max((x.dias ?? m.dias) - diasPassados, 0) / DIAS_UTEIS_ANO
+    const g = gregas({ tipo: x.tipo, s, strike: x.strike, t, r: m.r, sigma: x.sigma ?? m.sigma })
     const f = sinal(x.lado) * x.quantidade
     soma.delta += g.delta * f
     soma.gama += g.gama * f
@@ -301,4 +308,42 @@ export function curva(f: (s: number) => number, min: number, max: number, pontos
     const s = min + ((max - min) * i) / (pontos - 1)
     return { s, v: f(s) }
   })
+}
+
+/** Verdadeiro quando as pernas vencem em datas diferentes (o resultado no primeiro vencimento passa a ser estimado). */
+export function temVariosVencimentos(p: Posicao): boolean {
+  const dias = new Set(p.pernas.map((x) => x.dias).filter((d): d is number => d !== undefined))
+  return dias.size > 1
+}
+
+/** Dias úteis até o primeiro vencimento da posição (o da perna mais curta); `padrao` para pernas sem prazo próprio. */
+export function diasAtePrimeiroVencimento(p: Posicao, padrao: number): number {
+  return Math.min(...p.pernas.map((x) => x.dias ?? padrao))
+}
+
+/**
+ * Máximo, mínimo e equilíbrios de uma posição com vencimentos diferentes, olhando a data do primeiro vencimento: a perna
+ * curta vale o valor intrínseco e as longas valem o preço do modelo. Varre os preços do ativo de perto de zero a três vezes
+ * o maior entre preço e strikes. O ganho (ou a perda) é "sem limite" (null) quando a posição termina com calls líquidas
+ * compradas (ou vendidas), como em `analisar`. Tudo é estimativa: depende da volatilidade e dos juros.
+ */
+export function analisarEstimado(p: Posicao, precoAtivo: number, m: Mercado): Analise {
+  const horizonte = diasAtePrimeiroVencimento(p, m.dias)
+  const topo = Math.max(precoAtivo, ...p.pernas.map((x) => x.strike)) * 3
+  const f = (s: number) => resultadoAntesDoVencimento(p, s, m, horizonte)
+  const pontos = 600
+  const xs = Array.from({ length: pontos + 1 }, (_, i) => 0.01 + ((topo - 0.01) * i) / pontos)
+  const ys = xs.map(f)
+  const inclinacaoFinal = p.acoes + p.pernas.reduce((t, x) => t + (x.tipo === 'call' ? sinal(x.lado) * x.quantidade : 0), 0)
+  const arred = (v: number) => Math.round(v * 100) / 100
+  const equilibrios: number[] = []
+  for (let i = 0; i < pontos; i++) {
+    if (ys[i] === 0) equilibrios.push(xs[i])
+    else if (ys[i] * ys[i + 1] < 0) equilibrios.push(xs[i] + ((xs[i + 1] - xs[i]) * Math.abs(ys[i])) / (Math.abs(ys[i]) + Math.abs(ys[i + 1])))
+  }
+  return {
+    ganhoMaximo: inclinacaoFinal > 1e-9 ? null : arred(Math.max(...ys)),
+    perdaMaxima: inclinacaoFinal < -1e-9 ? null : arred(Math.min(...ys)),
+    equilibrios: equilibrios.map(arred),
+  }
 }

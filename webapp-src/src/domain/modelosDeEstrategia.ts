@@ -1,3 +1,4 @@
+import { tipoVencimento } from './opcoes'
 import type { SerieOpcao } from './opcoes'
 import type { Lado, Perna, Posicao, TipoOpcao } from './simulaOpcoes'
 
@@ -11,6 +12,7 @@ export type ModeloId =
   | 'borboletaCall' | 'borboletaPut' | 'borboletaFerro' | 'condorFerro' | 'condorCall'
   | 'straddleComprado' | 'strangleComprado' | 'straddleVendido' | 'strangleVendido'
   | 'vendaCoberta' | 'collar'
+  | 'thlCall' | 'thlPut' | 'diagonalCall' | 'diagonalPut'
 
 export interface PernaDoModelo {
   tipo: TipoOpcao
@@ -19,12 +21,14 @@ export interface PernaDoModelo {
   fator: number
   /** Degraus de strike em relação ao mais perto do preço. */
   degrau: number
+  /** Perna de vencimento mais longo (o seguinte ao escolhido para a estrutura). Sem isso, vale o vencimento escolhido. */
+  longa?: boolean
 }
 
 export interface Modelo {
   id: ModeloId
   titulo: string
-  grupo: 'Travas' | 'Borboletas e condors' | 'Volatilidade' | 'Com ações'
+  grupo: 'Travas' | 'Borboletas e condors' | 'Volatilidade' | 'Com ações' | 'Vários vencimentos'
   /** Uma frase sobre quando faz sentido e como o resultado é limitado. */
   descricao: string
   pernas: PernaDoModelo[]
@@ -35,6 +39,8 @@ export interface Modelo {
 
 const c = (lado: Lado, degrau: number, fator = 1): PernaDoModelo => ({ tipo: 'call', lado, degrau, fator })
 const p = (lado: Lado, degrau: number, fator = 1): PernaDoModelo => ({ tipo: 'put', lado, degrau, fator })
+const cl = (lado: Lado, degrau: number): PernaDoModelo => ({ tipo: 'call', lado, degrau, fator: 1, longa: true })
+const pl = (lado: Lado, degrau: number): PernaDoModelo => ({ tipo: 'put', lado, degrau, fator: 1, longa: true })
 
 const AVISO_DESCOBERTA =
   'Venda de opções sem limitar o risco: se o ativo andar muito para o lado errado a perda pode ser muito maior que o prêmio recebido (e, na call, sem limite). A B3 exige margem de garantia.'
@@ -55,9 +61,13 @@ export const MODELOS: Modelo[] = [
   { id: 'strangleVendido', titulo: 'Strangle vendido', grupo: 'Volatilidade', descricao: 'Vende uma put abaixo e uma call acima do preço: recebe os prêmios se o ativo ficar entre os strikes.', pernas: [p('venda', -2), c('venda', 2)], aviso: AVISO_DESCOBERTA },
   { id: 'vendaCoberta', titulo: 'Venda coberta', grupo: 'Com ações', descricao: 'Tem as ações e vende uma call: recebe o prêmio e limita a alta.', pernas: [c('venda', 1)], comAcoes: true },
   { id: 'collar', titulo: 'Collar (proteção com custo menor)', grupo: 'Com ações', descricao: 'Tem as ações, compra uma put de proteção e vende uma call para pagar parte dela. Limita a perda e também o ganho.', pernas: [p('compra', -2), c('venda', 2)], comAcoes: true },
+  { id: 'thlCall', titulo: 'Trava horizontal de calls (THL)', grupo: 'Vários vencimentos', descricao: 'Compra uma call de vencimento mais longo e vende outra, no mesmo strike, de vencimento mais curto. Colhe o valor de tempo da opção curta, que perde valor mais rápido; ganha mais se o ativo estiver perto do strike no primeiro vencimento. A perda é no máximo o débito pago.', pernas: [cl('compra', 0), c('venda', 0)] },
+  { id: 'thlPut', titulo: 'Trava horizontal de puts (THL)', grupo: 'Vários vencimentos', descricao: 'Mesma ideia com puts: compra a de vencimento mais longo e vende a mais curta no mesmo strike. A perda é no máximo o débito pago.', pernas: [pl('compra', 0), p('venda', 0)] },
+  { id: 'diagonalCall', titulo: 'Trava diagonal de calls', grupo: 'Vários vencimentos', descricao: 'Compra uma call de vencimento mais longo e vende outra, de strike maior, de vencimento mais curto. Combina a trava de alta com a colheita do valor de tempo.', pernas: [cl('compra', 0), c('venda', 2)] },
+  { id: 'diagonalPut', titulo: 'Trava diagonal de puts', grupo: 'Vários vencimentos', descricao: 'Compra uma put de vencimento mais longo e vende outra, de strike menor, de vencimento mais curto. Combina a trava de baixa com a colheita do valor de tempo.', pernas: [pl('compra', 0), p('venda', -2)] },
 ]
 
-export const GRUPOS_DE_MODELOS: Modelo['grupo'][] = ['Travas', 'Borboletas e condors', 'Volatilidade', 'Com ações']
+export const GRUPOS_DE_MODELOS: Modelo['grupo'][] = ['Travas', 'Borboletas e condors', 'Volatilidade', 'Com ações', 'Vários vencimentos']
 
 /**
  * Escada de strikes de um tipo no vencimento: uma série por strike, a mais negociada quando há americana e europeia no
@@ -73,6 +83,16 @@ export function escadaDeStrikes(series: SerieOpcao[], tipo: TipoOpcao, venciment
   return [...porStrike.values()].sort((a, b) => a.strike - b.strike)
 }
 
+/**
+ * Vencimento da perna longa: o primeiro mensal depois de `depois` que tenha séries do tipo; sem mensal, o primeiro de qualquer
+ * tipo. null quando não há vencimento posterior.
+ */
+export function proximoVencimento(series: SerieOpcao[], tipo: TipoOpcao, depois: string): string | null {
+  const todos = [...new Set(series.filter((x) => x.tipo === tipo && x.vencimento > depois).map((x) => x.vencimento))].sort()
+  const comEscada = todos.filter((v) => escadaDeStrikes(series, tipo, v).length > 0)
+  return comEscada.find((v) => tipoVencimento(v) === 'mensal') ?? comEscada[0] ?? null
+}
+
 /** Índice do strike mais perto do preço (o de baixo, em caso de empate). */
 export function indiceDoMaisPerto(escada: SerieOpcao[], preco: number): number {
   let melhor = 0
@@ -86,7 +106,9 @@ export function indiceDoMaisPerto(escada: SerieOpcao[], preco: number): number {
  */
 export function seriesPadrao(series: SerieOpcao[], modelo: Modelo, vencimento: string, preco: number): (SerieOpcao | null)[] {
   return modelo.pernas.map((perna) => {
-    const escada = escadaDeStrikes(series, perna.tipo, vencimento)
+    const venc = perna.longa ? proximoVencimento(series, perna.tipo, vencimento) : vencimento
+    if (!venc) return null
+    const escada = escadaDeStrikes(series, perna.tipo, venc)
     if (escada.length === 0) return null
     const i = Math.min(Math.max(indiceDoMaisPerto(escada, preco) + perna.degrau, 0), escada.length - 1)
     return escada[i]
@@ -95,8 +117,9 @@ export function seriesPadrao(series: SerieOpcao[], modelo: Modelo, vencimento: s
 
 /** Vencimentos em que o modelo tem pelo menos uma série para cada tipo de perna que usa. */
 export function vencimentosDoModelo(series: SerieOpcao[], modelo: Modelo, vencimentos: string[]): string[] {
-  const tipos = [...new Set(modelo.pernas.map((x) => x.tipo))]
-  return vencimentos.filter((v) => tipos.every((t) => escadaDeStrikes(series, t, v).length > 0))
+  return vencimentos.filter((v) =>
+    modelo.pernas.every((x) => (x.longa ? proximoVencimento(series, x.tipo, v) !== null : escadaDeStrikes(series, x.tipo, v).length > 0)),
+  )
 }
 
 export interface PernaMontada {
@@ -104,11 +127,13 @@ export interface PernaMontada {
   lado: Lado
   fator: number
   premio: number
+  /** Dias úteis até o vencimento desta perna. */
+  dias?: number
 }
 
 /** Posição a partir das pernas escolhidas. `lote` é o número de opções de cada unidade; `precoAcao` vale na venda coberta e no collar. */
 export function montarPosicaoDoModelo(modelo: Modelo, pernas: PernaMontada[], lote: number, precoAcao: number): Posicao {
-  const lista: Perna[] = pernas.map((x) => ({ tipo: x.serie.tipo, lado: x.lado, strike: x.serie.strike, premio: x.premio, quantidade: lote * x.fator }))
+  const lista: Perna[] = pernas.map((x) => ({ tipo: x.serie.tipo, lado: x.lado, strike: x.serie.strike, premio: x.premio, quantidade: lote * x.fator, dias: x.dias }))
   return { pernas: lista, acoes: modelo.comAcoes ? lote : 0, precoAcao: modelo.comAcoes ? precoAcao : 0 }
 }
 
@@ -118,6 +143,9 @@ export function montarPosicaoDoModelo(modelo: Modelo, pernas: PernaMontada[], lo
  */
 export function validarModelo(modelo: Modelo, pernas: (SerieOpcao | null)[]): string | null {
   if (pernas.some((x) => x === null)) return 'Escolha uma série para cada perna.'
+  const curtas = modelo.pernas.flatMap((x, i) => (x.longa ? [] : [pernas[i]!.vencimento]))
+  const longas = modelo.pernas.flatMap((x, i) => (x.longa ? [pernas[i]!.vencimento] : []))
+  if (longas.length > 0 && curtas.length > 0 && longas.some((l) => curtas.some((c) => l <= c))) return 'A perna longa precisa vencer depois da perna curta.'
   const strikes = pernas.map((x) => x!.strike)
   const esperado = modelo.pernas.map((x) => x.degrau)
   for (let i = 0; i < strikes.length; i++) {

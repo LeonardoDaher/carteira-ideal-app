@@ -1890,3 +1890,21 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 
 
 **Nome da aba (17/10/2026).** A aba "Por visão" passou a se chamar **Tendência** (só o nome na tela e nos textos; o funcionamento da D99 é o mesmo).
+
+
+## D104 (17/10/2026): estruturas com vencimentos diferentes (THL, diagonais) na aba Estratégias
+
+**Pedido do responsável (17/10/2026).** O motor exigia o mesmo vencimento em todas as pernas. O responsável quer montar, com o mesmo ativo, estruturas com strikes e vencimentos diferentes (a THL e a malha de renda do "Prefiro PUT", diagonais, calendários).
+
+**Por que antes não dava.** O gráfico "no vencimento" é exato porque, nessa data, cada opção vale só o valor intrínseco. Com vencimentos diferentes não existe data em que todas as pernas já venceram: na data da perna curta, a longa ainda vale mais que o intrínseco, e esse valor só pode ser estimado.
+
+**Como ficou.**
+- Cada perna tem o seu prazo (\`Perna.dias\`) e, opcionalmente, a sua volatilidade (\`Perna.sigma\`). Sem prazo próprio, tudo funciona como antes.
+- Quando os prazos diferem, o gráfico principal passa a mostrar a posição **na data do primeiro vencimento** (o da perna curta): a curta vale o intrínseco e as longas valem o preço de Black-Scholes com o prazo que resta. Cada perna usa a **volatilidade implícita do próprio preço**, de modo que, hoje, a posição vale o que custou (resultado zero) e a estimativa não nasce enviesada.
+- Ganho e perda máximos e equilíbrios viram **estimados** (\`analisarEstimado\`: varre o preço do ativo de perto de zero a três vezes o maior valor de referência; "sem limite" quando sobram calls líquidas compradas ou vendidas, como no cálculo exato). A tela diz, em destaque, que é estimativa e que, se a volatilidade mudar, o resultado muda.
+- Na aba Estratégias, **cada perna escolhe o próprio vencimento** (e a série dentro dele; ao trocar o vencimento fica o strike mais perto do anterior). As séries trazidas do Top 15 e da Tendência também podem ter vencimentos diferentes (antes davam erro).
+- Novos modelos, no grupo "Vários vencimentos": **Trava horizontal de calls (THL)**, **Trava horizontal de puts (THL)**, **Trava diagonal de calls** e **Trava diagonal de puts**. A perna longa vai para o vencimento mensal seguinte ao escolhido para a curta, e o app confere que a longa vence depois da curta.
+
+**Limites.** (1) A estimativa usa um modelo europeu, sem dividendos; opções americanas podem ser exercidas antes. (2) Usa o último preço negociado de cada perna, que pode estar longe do preço real de compra e venda; em estruturas de dois vencimentos isso pesa mais, porque a conta depende da diferença entre dois preços. (3) A rolagem (recomprar a perna atual e vender a do vencimento seguinte) e o plano de ajuste ainda não existem: são a etapa seguinte. (4) Pernas de ativos diferentes ficam fora: o resultado por preço do ativo deixa de ter um eixo só.
+
+**Testes.** 6 de domínio para o cálculo (reconhecer vencimentos diferentes, resultado zero hoje, valor da perna longa na data da curta, máximo e mínimo limitados no calendário, perda sem limite quando cabe, e que sem prazo próprio nada muda), 6 do catálogo (perna longa no vencimento seguinte, diagonal, vencimentos oferecidos, ordem de vencimentos, débito) e 4 da tela (THL, diagonal, perna longa antes da curta, troca de vencimento numa estrutura comum).
