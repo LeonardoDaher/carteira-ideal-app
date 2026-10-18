@@ -286,7 +286,7 @@ describe('atualizar-etfs: itens, validação e seleção', () => {
     const ivvb = montarItem('IVVB11', historico, CONFIG)
     assert.deepEqual(
       { ...ivvb.item },
-      { ticker: 'IVVB11', nome: 'iShares S&P 500', categoria: 'Bolsa exterior', indice: 'S&P 500', cambio: true, cotacao: 453, dataCotacao: pregoes[20], volumeMedio: 40_000_000, variacao3m: null, minima52: null, maxima52: null },
+      { ticker: 'IVVB11', nome: 'iShares S&P 500', categoria: 'Bolsa exterior', indice: 'S&P 500', cambio: true, cotacao: 453, dataCotacao: pregoes[20], volumeMedio: 40_000_000, variacao3m: null, variacaoDia: 0, minima52: null, maxima52: null },
     )
     assert.deepEqual(ivvb.faltou, { categoria: false, indice: false, cambio: false })
     const spxh = montarItem('SPXH11', historico, CONFIG)
@@ -320,5 +320,15 @@ describe('atualizar-etfs: itens, validação e seleção', () => {
     const busca = montarBusca(itens)
     assert.deepEqual(busca.map((b) => b.ticker), ['BOVA11', 'SPXH11'])
     assert.deepEqual(Object.keys(busca[0]), ['ticker', 'nome', 'categoria', 'cotacao', 'dataCotacao', 'volumeMedio'])
+  })
+})
+
+describe('atualizar-etfs: variação do dia', () => {
+  it('compara o último pregão com o anterior e some se o ETF não negociou no último', () => {
+    const pregoes = serieDePregoes(3)
+    const com = metricas({ pregoes, nomes: {}, ativos: { BOVA11: [[10, 9, 11, 1000], [10, 9, 11, 1000], [10.5, 9, 11, 1000]] } }, 'BOVA11')
+    assert.equal(com.variacaoDia, 5)
+    const sem = metricas({ pregoes, nomes: {}, ativos: { BOVA11: [[10, 9, 11, 1000], [10.5, 9, 11, 1000], null] } }, 'BOVA11')
+    assert.equal(sem.variacaoDia, null)
   })
 })

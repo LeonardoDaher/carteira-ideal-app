@@ -276,6 +276,21 @@ export function detectarSaltos(serie, datas, janela = SESSOES_52_SEMANAS) {
   return saltos
 }
 
+/**
+ * Variação (%) do último pregão contra o anterior, para colorir a faixa de cotações. Só existe quando o
+ * ativo negociou nos DOIS últimos pregões do histórico (senão seria uma variação de vários dias) e sem
+ * salto suspeito de desdobramento entre eles (`saltoRecente`). Caso contrário, `null`.
+ */
+export function variacaoDoDia(serie, ultimo, saltoRecente = false) {
+  if (saltoRecente || ultimo !== serie.length - 1 || ultimo < 1) return null
+  const atual = serie[ultimo]
+  const anterior = serie[ultimo - 1]
+  if (!atual || !anterior || !(anterior[0] > 0)) return null
+  const razao = atual[0] / anterior[0]
+  if (razao <= SALTO_QUEDA || razao >= SALTO_ALTA) return null // provável desdobramento, não variação
+  return arredondar((atual[0] / anterior[0] - 1) * 100, 2)
+}
+
 /** Volume médio (R$) dos últimos 21 pregões; dia sem negócio conta como zero (régua da D23). */
 export function volumeMedio(serie, totalPregoes) {
   const janela = Math.min(SESSOES_LIQUIDEZ, totalPregoes)
@@ -313,6 +328,8 @@ export function metricas(historico, ticker, config = {}) {
     if (base > 0) variacao3m = arredondar((serie[ultimo][0] / base - 1) * 100, 1)
   }
 
+  const variacaoDia = variacaoDoDia(serie, ultimo, saltoEm(1))
+
   let minima52 = null
   let maxima52 = null
   if (pregoes.length >= MINIMO_PARA_52_SEMANAS && serie.length >= MINIMO_PARA_52_SEMANAS && !saltoEm(SESSOES_52_SEMANAS)) {
@@ -325,6 +342,7 @@ export function metricas(historico, ticker, config = {}) {
     cotacao: arredondar(serie[ultimo][0]),
     dataCotacao: datas[ultimo],
     variacao3m,
+    variacaoDia,
     volumeMedio: volumeMedio(serie, pregoes.length),
     minima52,
     maxima52,
@@ -347,6 +365,7 @@ export function montarItem(ticker, tipo, historico, config) {
       cotacao: resto.cotacao,
       dataCotacao: resto.dataCotacao,
       variacao3m: resto.variacao3m,
+      variacaoDia: resto.variacaoDia,
       volumeMedio: resto.volumeMedio,
       minima52: resto.minima52,
       maxima52: resto.maxima52,

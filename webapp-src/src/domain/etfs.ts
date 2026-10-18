@@ -15,6 +15,8 @@ export interface EtfLista {
   volumeMedio: number
   /** Variação (%) do fechamento em 63 pregões; null com histórico curto. */
   variacao3m: number | null
+  /** Variação (%) do último pregão contra o anterior; ausente em arquivos antigos, `null` se não negociou nos dois. */
+  variacaoDia?: number | null
   minima52: number | null
   maxima52: number | null
 }

@@ -9,6 +9,8 @@ export interface BdrLista {
   dataCotacao: string
   /** Variação (%) entre o primeiro e o último fechamento dos últimos 3 meses. */
   variacao3m: number | null
+  /** Variação (%) do último pregão contra o anterior; ausente em arquivos antigos, `null` se não negociou nos dois. */
+  variacaoDia?: number | null
   /** Volume financeiro médio (R$) dos últimos 21 pregões completos. */
   volumeMedio: number
   minima52: number | null

@@ -27,6 +27,8 @@ interface ComVolume {
   ticker: string
   cotacao: number | null
   volumeMedio?: number | null
+  /** Variação do último pregão, quando o arquivo traz (verde/vermelho na faixa). */
+  variacaoDia?: number | null
 }
 
 /** Os de maior volume negociado, no último fechamento. */
@@ -35,7 +37,7 @@ function maisNegociados(lista: ComVolume[]): ItemCotacao[] {
     .filter((a): a is ComVolume & { cotacao: number } => a.cotacao != null)
     .sort((a, b) => (b.volumeMedio ?? 0) - (a.volumeMedio ?? 0))
     .slice(0, QUANTIDADE)
-    .map((a) => ({ rotulo: a.ticker, cotacao: a.cotacao }))
+    .map((a) => ({ rotulo: a.ticker, cotacao: a.cotacao, variacao: a.variacaoDia ?? null }))
 }
 
 export const itensDeAcoes = (s: SnapshotAcoes) => maisNegociados(s.setores.flatMap((x) => x.empresas))

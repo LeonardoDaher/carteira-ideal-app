@@ -27,6 +27,7 @@ import {
   historicoVazio,
   incorporarPregao,
   metricas,
+  variacaoDoDia,
   montarBusca,
   montarItem,
   motivoInvalido,
@@ -214,7 +215,7 @@ describe('metricas', () => {
     assert.equal(item.acoesPorBdr, 0.05)
     assert.equal(semMapa, false)
     assert.equal(semNome, false)
-    assert.deepEqual(Object.keys(item), ['ticker', 'nome', 'setor', 'cotacao', 'dataCotacao', 'variacao3m', 'volumeMedio', 'minima52', 'maxima52', 'acoesPorBdr'])
+    assert.deepEqual(Object.keys(item), ['ticker', 'nome', 'setor', 'cotacao', 'dataCotacao', 'variacao3m', 'variacaoDia', 'volumeMedio', 'minima52', 'maxima52', 'acoesPorBdr'])
     const semCadastro = montarItem('AAPL34', 'acao', { ...h, cadastro: {} }, CONFIG)
     assert.equal(semCadastro.item.nome, 'AAPL34')
     assert.equal(semCadastro.semNome, true)
@@ -499,5 +500,29 @@ describe('ponta a ponta com boletins sintéticos', () => {
   it('para sem gravar se o histórico for curto demais', async () => {
     const outra = prepararRaiz()
     await assert.rejects(() => executar({ raiz: outra.raiz, agora: AGORA, argv: [], token: undefined, ...dependencias(), baixar: async () => null }), /Rode a carga inicial/)
+  })
+})
+
+describe('variacaoDoDia', () => {
+  const dia = (fechamento) => [fechamento, fechamento, fechamento, 1e6]
+
+  it('compara o último pregão com o anterior, em %', () => {
+    assert.equal(variacaoDoDia([dia(100), dia(102)], 1), 2)
+    assert.equal(variacaoDoDia([dia(100), dia(98.5)], 1), -1.5)
+  })
+  it('sem negócio no último pregão ou no anterior, não há variação do dia', () => {
+    assert.equal(variacaoDoDia([dia(100), dia(101), null], 1), null) // último negócio foi há um pregão
+    assert.equal(variacaoDoDia([dia(100), null, dia(101)], 2), null) // não negociou no dia anterior
+    assert.equal(variacaoDoDia([dia(100)], 0), null)
+  })
+  it('salto de desdobramento não vira variação do dia', () => {
+    assert.equal(variacaoDoDia([dia(200), dia(20)], 1), null)
+    assert.equal(variacaoDoDia([dia(100), dia(102)], 1, true), null)
+  })
+  it('metricas publica variacaoDia', () => {
+    const h = historicoVazio()
+    h.pregoes = ['2026-01-02', '2026-01-05']
+    h.ativos.AAPL34 = [dia(100), dia(101)]
+    assert.equal(metricas(h, 'AAPL34').variacaoDia, 1)
   })
 })
