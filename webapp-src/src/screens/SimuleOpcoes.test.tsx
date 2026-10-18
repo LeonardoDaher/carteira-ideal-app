@@ -338,6 +338,37 @@ describe('SimuleOpcoes: aba Estratégias (monte sua estratégia)', () => {
     expect(screen.getByText(/definição mais comum/)).toBeDefined()
   })
 
+  it('o passo a passo por objetivo: escolhe o que quer, vê as estruturas com a razão e o risco, e monta a escolhida', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    abrirEstrategias()
+    const caixa = within(screen.getByTestId('objetivos'))
+    expect(screen.queryByTestId('sugestoes-do-objetivo')).toBeNull()
+    fireEvent.click(caixa.getByRole('button', { name: 'Renda com prêmios' }))
+    const sugestoes = within(screen.getByTestId('sugestoes-do-objetivo'))
+    expect(sugestoes.getByText('Condor de ferro')).toBeDefined()
+    expect(sugestoes.getByText('Venda coberta')).toBeDefined()
+    expect(sugestoes.getAllByText('Exige ter as ações').length).toBeGreaterThan(0)
+    expect(sugestoes.getAllByText('Risco grande se for contra').length).toBeGreaterThan(0) // slide e put otimizada
+    expect(screen.getByTestId('cuidado-do-objetivo').textContent).toMatch(/Nenhuma estrutura garante renda/)
+    fireEvent.click(sugestoes.getByRole('button', { name: 'Montar Venda coberta' }))
+    expect(screen.getByRole('button', { name: 'Venda coberta' }).getAttribute('aria-pressed')).toBe('true') // na lista completa
+    expect(sugestoes.getByRole('button', { name: 'Montar Venda coberta' }).textContent).toBe('Em montagem')
+    expect(screen.getAllByText(/Precisa ter 100 ações/).length).toBeGreaterThan(0)
+  })
+
+  it('trocar de objetivo troca a lista, e clicar de novo no mesmo objetivo recolhe', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    abrirEstrategias()
+    const caixa = within(screen.getByTestId('objetivos'))
+    fireEvent.click(caixa.getByRole('button', { name: 'Apostar na alta' }))
+    expect(within(screen.getByTestId('sugestoes-do-objetivo')).getByText('Trava de alta (com calls)')).toBeDefined()
+    fireEvent.click(caixa.getByRole('button', { name: 'Lucrar com movimento forte' }))
+    expect(within(screen.getByTestId('sugestoes-do-objetivo')).getByText('Straddle comprado')).toBeDefined()
+    expect(within(screen.getByTestId('sugestoes-do-objetivo')).queryByText('Trava de alta (com calls)')).toBeNull()
+    fireEvent.click(caixa.getByRole('button', { name: 'Lucrar com movimento forte' }))
+    expect(screen.queryByTestId('sugestoes-do-objetivo')).toBeNull()
+  })
+
   it('trocar a série de uma perna atualiza o preço, e uma ordem de strikes trocada pede correção', () => {
     render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
     abrirEstrategias()

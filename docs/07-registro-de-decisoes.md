@@ -2034,3 +2034,14 @@ Cada cartão mostra, como as demais, até três candidatas ordenadas pelo crité
 **Limites.** Só há o preço do último pregão (não guardamos a evolução dia a dia da posição); preço defasado e modelo europeio sem dividendos; preço real de compra e venda pode ser pior; ignora corretagem, emolumentos e imposto. Séries fora dos próximos 6 meses ou sem negócio recente não podem ser cadastradas. O responsável não tem posição em opções hoje: a aba foi testada só com dados de teste e com séries reais do app.
 
 **Código.** `domain/posicaoReal.ts` (resolução, reconhecimento, situação de hoje e possibilidades), `screens/MinhaPosicaoOpcoes.tsx`; `Alvo` de `rolagem.ts` ganhou `precoDaAntiga` e `precoDaNova`, e `sigmaDaPerna` respeita a volatilidade que a perna já traz. 26 testes de domínio e 16 da tela, mais 4 de rolagem e de preço defasado.
+
+
+## D113 (18/10/2026): passo a passo por objetivo no início da aba Estratégias
+
+**Pedido do responsável (18/10/2026).** Seguir com os próximos passos que o assistente tinha apontado; o primeiro foi um passo a passo para escolher a estrutura pelo objetivo, porque o catálogo da aba Estratégias é uma lista longa de nomes.
+
+**Como ficou.** Um cartão "Não sabe por onde começar? Qual é o seu objetivo?" abre a aba, com seis objetivos: **renda com prêmios**, **proteger o que já tenho**, **apostar na alta**, **apostar na queda**, **lucrar com o ativo parado** e **lucrar com movimento forte**. Cada um mostra uma frase na voz da pessoa, um resumo de como o objetivo costuma ser buscado com opções, e as estruturas que costumam servir, cada uma com uma frase de razão, uma etiqueta de risco (risco limitado; perda limitada ao prêmio pago; exige ter as ações; vencimentos diferentes, com resultado estimado; risco grande se for contra) e o botão **Montar**, que seleciona o modelo na lista completa, logo abaixo. Objetivos com uma estrutura simples de uma perna (compra de call ou put) avisam que ela se monta em Séries da B3, com o botão C; renda e Roda apontam para a aba Roda.
+
+**Decisões.** (1) O passo a passo **não elege** a melhor estrutura: lista as que costumam servir e mostra o risco de cada uma, no mesmo espírito da D99. (2) Straddle e strangle vendidos não aparecem em nenhum objetivo (risco ilimitado). (3) Os textos nunca prometem resultado: um teste barra "garantido", "sem risco", "certeza", "lucro certo" e "melhor estratégia"; o objetivo de renda diz que nenhuma estrutura garante renda.
+
+**Código.** `domain/objetivosDeEstrategia.ts` (objetivos e etiqueta de perfil) e o cartão em `MonteSuaEstrategia.tsx`. 5 testes de domínio e 2 da tela.

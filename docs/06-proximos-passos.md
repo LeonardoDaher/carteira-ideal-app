@@ -200,4 +200,5 @@ A mudança para a API tirou a metodologia do código visível. Ainda assim, vale
 - [ ] **Página pública de SEO** (como as de FII, ETF e BDR) para o Simule Opções, se o responsável quiser atrair buscas.
 - [ ] **Coluna F.M. (formador de mercado):** sem fonte oficial gratuita encontrada.
 - [ ] **Camada de linguagem natural** sobre o motor da Tendência: exigiria servidor, chave e custo; depende de decisão.
-- [ ] **Passo a passo** no início da aba Estratégias, para escolher a estrutura pelo objetivo (renda, proteção, alta ou baixa), e revisão dos textos em linguagem mais simples.
+- [x] **Passo a passo por objetivo (D113)** no início da aba Estratégias.
+- [ ] **Revisão dos textos** das abas novas do Simule Opções em linguagem mais simples para iniciantes (glossário de call, put, strike, prêmio, exercício, crédito e débito, por exemplo).

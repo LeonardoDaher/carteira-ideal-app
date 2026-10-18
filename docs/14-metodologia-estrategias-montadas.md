@@ -11,6 +11,8 @@ Abas "Estratégias" e "Roda" do Simule Opções (D103 a D107). Descritivas e edu
 
 ## 2. Catálogo da aba Estratégias
 
+A aba abre com o passo a passo **"Qual é o seu objetivo?"** (D113): renda com prêmios, proteger o que já tem, apostar na alta, apostar na queda, lucrar com o ativo parado e lucrar com movimento forte. Cada objetivo lista as estruturas que costumam servir, com uma frase sobre por que, uma etiqueta de risco (risco limitado, exige as ações, vencimentos diferentes, risco grande se for contra) e o botão "Montar". As vendas a descoberto de straddle e strangle não são sugeridas por nenhum objetivo. Os textos descrevem caminhos e nunca prometem resultado (há um teste que barra palavras como "garantido" e "sem risco").
+
 Cada modelo define as pernas (call ou put, compra ou venda, múltiplo do lote) e o **degrau** de strike a partir do strike mais perto do preço do ativo (0 é o mais perto, +1 o seguinte acima, −1 o abaixo). É só o ponto de partida: o usuário troca a série (e o vencimento) de cada perna.
 
 | Grupo | Modelos |

@@ -11,6 +11,8 @@ import { reais } from '../domain/mercadoOficial'
 import { CampoNumero } from '../ui/CampoNumero'
 import { CampoReais } from '../ui/CampoReais'
 import { EscolhaDeAtivo } from './EscolhaDeAtivo'
+import { OBJETIVOS, perfilDoModelo } from '../domain/objetivosDeEstrategia'
+import type { ObjetivoId } from '../domain/objetivosDeEstrategia'
 import { ManejoDaEstrategia } from './ManejoDaEstrategia'
 import { PainelDaPosicao } from './PainelDaPosicao'
 import type { PernaDaEstrutura } from '../domain/rolagem'
@@ -110,6 +112,8 @@ function Montagem({ ativo, escolha, hoje }: { ativo: AtivoComOpcoes; escolha: Es
   )
   const [quantidade, setQuantidade] = useState(lote)
   const [precoAtivo, setPrecoAtivo] = useState(ativo.cotacao)
+  const [objetivoId, setObjetivoId] = useState<ObjetivoId | null>(null)
+  const objetivo = OBJETIVOS.find((o) => o.id === objetivoId) ?? null
 
   const modelo = config.modo === 'livre' ? null : (MODELOS.find((m) => m.id === config.modo) ?? MODELOS[0])
   const vencimentos = useMemo(() => vencimentosDe(ativo.series), [ativo])
@@ -200,8 +204,45 @@ function Montagem({ ativo, escolha, hoje }: { ativo: AtivoComOpcoes; escolha: Es
         </div>
       )}
 
+      <div className="card col" style={{ gap: 10 }} data-testid="objetivos">
+        <span style={{ fontWeight: 700 }}>Não sabe por onde começar? Qual é o seu objetivo?</span>
+        <div className="row" style={{ gap: 6, flexWrap: 'wrap' }} role="group" aria-label="Objetivo">
+          {OBJETIVOS.map((o) => (
+            <button key={o.id} className={`chip ${objetivoId === o.id ? 'selected' : ''}`} aria-pressed={objetivoId === o.id} onClick={() => setObjetivoId(objetivoId === o.id ? null : o.id)}>
+              {o.titulo}
+            </button>
+          ))}
+        </div>
+        {objetivo ? (
+          <div className="col" style={{ gap: 8 }} data-testid="sugestoes-do-objetivo">
+            <span className="small" style={{ fontWeight: 600 }}>“{objetivo.frase}”</span>
+            <span className="small muted justify">{objetivo.resumo}</span>
+            {objetivo.modelos.map((x) => {
+              const m = MODELOS.find((y) => y.id === x.id)!
+              const perfil = perfilDoModelo(m)
+              return (
+                <div key={x.id} className="card-outline col" style={{ gap: 4 }}>
+                  <div className="row-between" style={{ alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    <span style={{ fontWeight: 700 }}>{m.titulo}</span>
+                    <button className={`chip ${modelo?.id === m.id ? 'selected' : ''}`} style={{ flex: '0 0 auto', width: 'auto', paddingInline: 16 }} aria-label={`Montar ${m.titulo}`} aria-pressed={modelo?.id === m.id} onClick={() => escolherModelo(m)}>
+                      {modelo?.id === m.id ? 'Em montagem' : 'Montar'}
+                    </button>
+                  </div>
+                  <span className="small muted justify">{x.porque}</span>
+                  <span className="tiny" style={{ color: perfil.tom === 'atencao' ? 'var(--danger)' : undefined, fontWeight: 600 }}>{perfil.rotulo}</span>
+                </div>
+              )
+            })}
+            {objetivo.cuidado && <span className="tiny muted justify" data-testid="cuidado-do-objetivo">{objetivo.cuidado}</span>}
+            <span className="tiny muted justify">São caminhos que costumam servir ao objetivo, e não uma recomendação: cada estrutura tem um risco, e ele aparece no resultado depois de montar.</span>
+          </div>
+        ) : (
+          <span className="small muted justify">Escolha o que você quer e veja as estruturas que costumam servir, com o risco de cada uma. Quem já sabe o que quer pode usar a lista completa logo abaixo.</span>
+        )}
+      </div>
+
       <div className="col" style={{ gap: 10 }}>
-        <span className="small" style={{ fontWeight: 600 }}>Escolha a estrutura</span>
+        <span className="small" style={{ fontWeight: 600 }}>Escolha a estrutura (lista completa)</span>
         {escolha && !escolha.coberta && !escolha.modelo && livres.length > 0 && (
           <div className="row" style={{ gap: 6, flexWrap: 'wrap' }}>
             <button className={`chip ${!modelo ? 'selected' : ''}`} aria-pressed={!modelo} onClick={() => setConfig((c) => ({ ...c, modo: 'livre' }))}>
