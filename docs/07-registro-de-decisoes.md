@@ -1981,3 +1981,10 @@ Cada cartão mostra, como as demais, até três candidatas ordenadas pelo crité
 **Limites.** O slide e a put otimizada têm put vendida sem proteção: a perda máxima é grande diante do ganho e a chance de lucro costuma ser alta, o que é o perfil dessas estruturas e não sinal de que "valem a pena" (a tela já diz que nenhuma tem vantagem esperada).
 
 **Testes.** 8 de domínio (catálogo e visão certa, candidatas de risco limitado, pernas e lados de cada uma, encaminhamento do collar e do booster) e 3 da tela.
+
+
+## D109 (17/10/2026): na landing, o cartão Simule Ativos sobe para logo abaixo do botão principal
+
+**Pedido do responsável (17/10/2026).** Na landing, o cartão **Simule Ativos** passa a ficar logo abaixo do botão "Descobrir meu perfil e carteira de referência" (ou "Ver minha carteira de referência").
+
+**Nova ordem dos cartões:** botão principal, **Simule Ativos**, Meus Ativos, Meu Mês, Aprender, Simule Bens, e-mail. Antes, o Simule Ativos vinha depois do Aprender. Só mudou a posição no HTML (\`index.html\`); o endereço (\`?tela=simuleAtivos\`), o texto e o desenho do cartão são os mesmos. Esta decisão substitui a posição descrita na D42 e nos comentários de D25 e D44 (o Simule Bens agora fica depois do Aprender).
