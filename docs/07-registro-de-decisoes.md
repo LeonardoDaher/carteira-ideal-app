@@ -1988,3 +1988,16 @@ Cada cartão mostra, como as demais, até três candidatas ordenadas pelo crité
 **Pedido do responsável (17/10/2026).** Na landing, o cartão **Simule Ativos** passa a ficar logo abaixo do botão "Descobrir meu perfil e carteira de referência" (ou "Ver minha carteira de referência").
 
 **Nova ordem dos cartões:** botão principal, **Simule Ativos**, Meus Ativos, Meu Mês, Aprender, Simule Bens, e-mail. Antes, o Simule Ativos vinha depois do Aprender. Só mudou a posição no HTML (\`index.html\`); o endereço (\`?tela=simuleAtivos\`), o texto e o desenho do cartão são os mesmos. Esta decisão substitui a posição descrita na D42 e nos comentários de D25 e D44 (o Simule Bens agora fica depois do Aprender).
+
+
+## D110 (17/10/2026): Simule Opções entra nos textos da landing, nos metadados e na documentação; no hub, vem depois do Simule Ações
+
+**Pedido do responsável (17/10/2026).** Incluir as opções no cartão da landing e nos demais campos e documentações do app; dentro do Simule Ativos, o Simule Opções fica logo depois do Simule Ações.
+
+**O que mudou.**
+- **Hub Simule Ativos:** nova ordem Simule Ações, **Simule Opções**, Simule FII, Simule Tesouro Direto, Simule BDR, Simule ETF. A descrição do cartão passou a citar compra e venda, travas, THL, roda e rolagem.
+- **Landing:** o texto do cartão Simule Ativos agora diz "Ações, opções, FII, Tesouro Direto, BDR e ETF: quanto cada um rende"; as descrições (meta, Open Graph e JSON-LD) da landing e do \`webapp-src/index.html\` citam ações e opções.
+- **Páginas estáticas** (\`scripts/gerar-paginas.mjs\`): atalhos para as ferramentas e a página "Metodologia e fontes" passaram a citar ações e opções; nela, a lista "De onde vêm os dados dos simuladores" ganhou o item das opções (cadastro de instrumentos e COTAHIST da B3, estimativas de Black-Scholes) e um parágrafo diz que o Simule Opções descreve, que o Top 15 prêmios e a Tendência ordenam sempre por um critério escolhido pela pessoa e que nada ali é recomendação.
+- **Documentação:** \`docs/04\` (jornada: Simule Ativos na landing e as seis abas do Simule Opções), \`docs/05\` (nova seção 5.12, operação diária das opções), \`docs/06\` (nova seção 13, o que falta), \`docs/13\` (nome Tendência e as estruturas da D108) e novo \`docs/14-metodologia-estrategias-montadas.md\` (catálogo, vencimentos diferentes, manejo, roda e a ressalva de que nenhuma estrutura garante renda).
+
+**Fora.** Página pública de SEO para o Simule Opções (como as de FII, ETF e BDR) não foi criada; está em \`docs/06\` como decisão do responsável. O Simule Ações também não tem página própria.

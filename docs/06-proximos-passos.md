@@ -188,3 +188,16 @@ A mudança para a API tirou a metodologia do código visível. Ainda assim, vale
 - [ ] **Veto e carteiras (D78), decisões do responsável:** (a) **feito na D82:** qualquer veto limita o prazo ao médio (20% em risco, e não 30%); (b) **feito na D84:** passivo em dólar saiu da opção [A] do Pilar 2 (foi para a [B]); (c) unificar reserva e reação (suitability x Pilares 1 e 4), o que muda 14 para 12 ou 13 perguntas e o texto do site; (d) **feito na D83:** o P3 pergunta quanto será sacado (pergunta de complemento, só para quem marcou [A]). O teste de propriedade já existe (D80); as que sobram: (c), mais o nome do perfil 3, a opção C do piso e decidir se a dívida em dólar deve continuar ligando o Modo Recuperação do Meu Mês.
 - [x] **Teste de propriedade do motor e verificação a cada envio (D80):** feitos; o motor viola a propriedade em ~1% dos casos (máx. 8 pontos); correção proposta na D80 aguarda decisão.
 - [ ] **Painel de métricas (D78):** conferir no ar que o painel soma "(Falso Arrojado)" e "(Quase Arrojado)" na mesma barra.
+
+## 13. Simule Opções (decisões D96 a D108)
+
+- [x] **Séries reais da B3** com modelo americana/europeia, gregas, volatilidade implícita, filtros de vencimento e strike, e compra/venda de call e put montadas na própria tabela (D96, D103).
+- [x] **Top 15 prêmios** (D97) e **cruzamento com ações baratas e endividadas** (D98).
+- [x] **Tendência** (D99, D108), **Gráficos** (D100 a D102), **Roda** (D107) e **Estratégias** com THL, diagonais, rolagem e manejo (D103 a D106).
+- [ ] **Primeiras semanas de uso:** conferir se o job diário de opções ("Atualizar opções") roda todo dia útil e se os números do app batem com o que o responsável vê na corretora (preço de último negócio, strikes, vencimentos).
+- [ ] **Comparar as estimativas com o mercado:** confrontar o prêmio estimado da call da roda e o resultado das THL e diagonais com preços reais dos dias seguintes, para saber se o modelo (Black-Scholes, sem dividendos) é razoável ou enviesado.
+- [ ] **Acompanhar uma posição que a pessoa já tem** (informando os preços de entrada), para o manejo de uma posição real. O responsável não tem posição em opções hoje, então ficou para quando houver.
+- [ ] **Página pública de SEO** (como as de FII, ETF e BDR) para o Simule Opções, se o responsável quiser atrair buscas.
+- [ ] **Coluna F.M. (formador de mercado):** sem fonte oficial gratuita encontrada.
+- [ ] **Camada de linguagem natural** sobre o motor da Tendência: exigiria servidor, chave e custo; depende de decisão.
+- [ ] **Passo a passo** no início da aba Estratégias, para escolher a estrutura pelo objetivo (renda, proteção, alta ou baixa), e revisão dos textos em linguagem mais simples.

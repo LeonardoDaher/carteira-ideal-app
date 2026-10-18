@@ -78,7 +78,7 @@ const TELAS_PELA_URL: Record<string, Screen> = {
   simuleOpcoes: 'simuleOpcoes',
   // Simule Ações (D43): setores da B3 com as principais empresas de cada um; dados oficiais da B3.
   simuleAcoes: 'simuleAcoes',
-  // Simule Ativos (D42): hub único que reúne FII, Tesouro, BDR e ETF; a landing só tem este botão.
+  // Simule Ativos (D42): hub único que reúne Ações, Opções, FII, Tesouro, BDR e ETF; a landing só tem este botão.
   simuleAtivos: 'simuleAtivos',
   // Simule Imóvel (D44): financiar × alugar × consórcio; cartão próprio na landing.
   simuleImovel: 'simuleImovel',

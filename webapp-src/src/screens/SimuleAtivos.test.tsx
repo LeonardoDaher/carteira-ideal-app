@@ -28,6 +28,12 @@ describe('SimuleAtivos (hub)', () => {
     expect(SIMULADORES).toHaveLength(6)
   })
 
+  it('o Simule Opções vem logo depois do Simule Ações', () => {
+    const ordem = SIMULADORES.map((s) => s.titulo)
+    expect(ordem.indexOf('Simule Opções')).toBe(ordem.indexOf('Simule Ações') + 1)
+    expect(ordem.slice(0, 2)).toEqual(['Simule Ações', 'Simule Opções'])
+  })
+
   it('volta para a landing e não mostra a barra de abas do questionário', () => {
     const { container } = render(<SimuleAtivos ctx={ctx} />)
     expect(screen.getByRole('link', { name: '← Início' }).getAttribute('href')).toBe('../')

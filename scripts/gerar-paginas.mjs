@@ -2,7 +2,7 @@
 //
 // O app é uma página só, renderizada por JavaScript. Para o Google ele parece vazio. Este script
 // gera, a cada build, páginas HTML comuns, com texto pronto no código-fonte, para:
-//   - cada ferramenta (teste de perfil, simuladores de Tesouro, FII, BDR e ETF, Meu Mês);
+//   - cada ferramenta (teste de perfil, simuladores de Tesouro, FII, BDR, ETF, ações e opções, Meu Mês);
 //   - a trilha "Sair das dívidas" (9 aulas, lidas de data/trilhas.ts);
 //   - um guia por classe de ativo (11, lidos de data/analises/*.ts);
 //   - "Taxas do Tesouro Direto hoje" (lida de mercadoOficial.json, atualizado toda semana).
@@ -331,7 +331,7 @@ function paginaPerfil() {
 <li><strong>Um dos 9 perfis de carteira</strong>, que combina o que você diz que tolera com o que a sua situação permite.</li>
 <li><strong>Uma carteira de referência em percentuais</strong>, distribuída em 11 classes de ativos, do Tesouro Selic às criptomoedas, com a explicação do papel de cada uma.</li>
 <li><strong>Um simulador em reais</strong>, para ver quanto de cada fatia seria o seu dinheiro.</li>
-<li><strong>Atalhos para as ferramentas</strong> do site: simuladores de Tesouro Direto, FII, BDR e ETF e o Meu Mês, para organizar as contas do mês.</li>
+<li><strong>Atalhos para as ferramentas</strong> do site: simuladores de Tesouro Direto, FII, BDR, ETF, ações e opções e o Meu Mês, para organizar as contas do mês.</li>
 </ul>`,
       ),
       secao(
@@ -992,10 +992,12 @@ function paginaMetodologia() {
 <li><strong>Tesouro Direto:</strong> taxas e preços do Tesouro Transparente; Selic, CDI, IPCA, dólar e Boletim Focus do Banco Central. Atualizados uma vez por semana.</li>
 <li><strong>FIIs:</strong> Informe Mensal Estruturado da CVM, com cotação e volume de mercado. Atualizados uma vez por mês.</li>
 <li><strong>BDRs e ETFs:</strong> Boletim de Preços oficial da B3, nos dias úteis à noite. Nome, setor e proporção dos BDRs vêm de cadastros de mercado.</li>
+<li><strong>Opções:</strong> cadastro de instrumentos e Boletim de Preços (COTAHIST) oficiais da B3, nos dias úteis à noite, com as séries de ações e ETFs que negociaram nos últimos pregões e vencem em até seis meses. Gregas, volatilidade implícita e chances são estimativas do próprio simulador (modelo de Black-Scholes), a partir do último preço negociado de cada série.</li>
 <li><strong>Financiar, alugar ou consórcio:</strong> não usa cadastro de produtos. Parte das taxas que você informa e, como sugestão inicial, da projeção de longo prazo de Selic e IPCA do Boletim Focus, do Banco Central.</li>
 <li><strong>Imposto de Renda e custódia:</strong> regras vigentes na data da última revisão, que mudam com a legislação.</li>
 </ul>
 <p>Os simuladores de ativos <strong>descrevem</strong> dados: ordenam por vencimento ou por liquidez, agrupam por setor ou categoria e não fazem valor justo nem recomendação de compra. A única exceção é a caixa <strong>Top 15 mais baratas</strong>, dentro do Simule Ações: uma triagem estritamente contábil, que aplica uma fórmula única e igual para todos às demonstrações financeiras que as próprias empresas divulgam à CVM e ordena as empresas por rendimentos contábeis. Ela não considera o perfil de ninguém, não estima valor justo e não é recomendação de compra. A metodologia fica documentada e cada atualização guarda a trilha de auditoria dos dados e do cálculo.</p>
+<p>O <strong>Simule Opções</strong> também descreve: mostra o resultado de cada estrutura (travas, borboletas, condors, straddles, venda coberta, collar, THL, roda e rolagem) em cada preço do ativo, com ganho e perda máximos. Duas abas ordenam, e sempre por um critério que a pessoa escolhe: o <strong>Top 15 prêmios</strong> compara o prêmio recebido com o caixa travado, dentro de um limite de risco que a pessoa define, e a <strong>Tendência</strong> mostra estruturas que combinam com a visão escolhida, ordenadas por chance de lucro, retorno no cenário ou menor risco, sem eleger uma "melhor", porque, no modelo, nenhuma tem vantagem esperada. Nada disso é recomendação de operação. Quem vende opção sem proteção pode perder muito mais do que recebeu, e a B3 exige margem. As contas ignoram corretagem, emolumentos e imposto de renda.</p>
 <p>O comparativo <a href="/financiar-alugar-ou-consorcio/">Comprar à vista, financiar, consórcio ou alugar</a> é diferente: é uma conta que ordena os <strong>caminhos</strong> (comprar à vista, financiar, consórcio e alugar) pelo patrimônio líquido final, com as taxas que você informa. Ele nunca ordena bancos, administradoras ou produtos, e o resultado muda quando as premissas mudam. O comparativo de <a href="/carro-a-vista-financiar-consorcio-ou-sem-carro/">carro</a> segue a mesma regra: ordena os caminhos pelo custo de mobilidade e pelo patrimônio final, que são a mesma conta vista de dois lados, e nunca ordena bancos, administradoras, locadoras, aplicativos ou produtos. O de <a href="/moto-a-vista-financiar-consorcio-ou-sem-moto/">moto</a> também.</p>`,
       ),
       secao(

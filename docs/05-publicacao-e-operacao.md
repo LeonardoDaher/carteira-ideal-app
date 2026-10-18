@@ -277,3 +277,12 @@ A cada `npm run build`, o `scripts/build-site.mjs` chama o `scripts/gerar-pagina
 
 **Autor e páginas Sobre (Etapa 4).** O nome e a formação do autor ficam na constante `AUTOR` do `scripts/gerar-paginas.mjs` e no JSON-LD (`founder`) do `index.html` da raiz. Se mudar, mude nos dois. As páginas `/sobre/` e `/metodologia-e-fontes/` também são geradas no build. Nunca acrescentar certificação ou registro que o autor não tenha: o `npm test` barra as siglas (CNPI, CEA, CFP, CPA, ANBIMA, OAB).
 
+## 5.12 Operação diária das opções (decisão D96)
+
+**O que roda.** O workflow "Atualizar opções" (`.github/workflows/atualizar-opcoes.yml`) roda de terça a sábado às 01h15 UTC (22h15 de Brasília, depois do pregão) e chama `scripts/atualizar-opcoes.mjs`. Ele baixa da B3 o cadastro de instrumentos (opções de ações e ETFs, estilo americana ou europeia, strike e vencimento) e o Boletim de Preços (COTAHIST) dos últimos pregões, junta as duas fontes, calcula a leitura de tendência com o histórico que os jobs de ações e ETFs já guardam e grava `webapp-src/public/dados/opcoes.json` (cerca de 1,3 MB: ~160 ativos e ~18 mil séries com vencimento em até 6 meses). Se algo mudou, faz o commit "dados: Opções (AAAA-MM-DD)"; em feriado da B3 ou sem dados novos, não muda nada.
+
+**Rodar fora do horário.** Actions > **Atualizar opções** > **Run workflow**. A opção **forcar** reprocessa um dia já processado (útil depois de corrigir o script).
+
+**O que conferir.** No log, as linhas com o número de ativos e de séries e a data do pregão; os ativos de controle (PETR4, VALE3 e BOVA11) precisam ter séries. Se o job recusar o arquivo (poucos ativos, séries demais sem preço ou controle ausente), o site continua com o arquivo anterior: rodar de novo mais tarde e, se repetir por dias, enviar o log para quem desenvolve. A tela lê o arquivo no navegador (`dados/opcoes.json`); não há servidor nem código de acesso.
+
+**Cuidados.** O arquivo muda quase todo dia útil e entra no histórico do GitHub; o job não grava o horário de geração a menos que os dados mudem.

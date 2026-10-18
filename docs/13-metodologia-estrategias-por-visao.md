@@ -1,6 +1,6 @@
 # Metodologia: estratégias por visão de mercado (Simule Opções)
 
-Aba "Por visão" do Simule Opções (D99). Descritiva e educacional: para um ativo, lê a tendência do passado, pergunta a visão da pessoa e monta, com as séries reais do último pregão, as estruturas de opções que combinam com essa visão. Não indica operação. O cálculo roda no navegador (`webapp-src/src/domain/estrategiasPorVisao.ts` e `tendencia.ts`); não usa modelo de linguagem.
+Aba "Tendência" (antes "Por visão") do Simule Opções (D99). Descritiva e educacional: para um ativo, lê a tendência do passado, pergunta a visão da pessoa e monta, com as séries reais do último pregão, as estruturas de opções que combinam com essa visão. Não indica operação. O cálculo roda no navegador (`webapp-src/src/domain/estrategiasPorVisao.ts` e `tendencia.ts`); não usa modelo de linguagem.
 
 ## 1. Leitura da tendência (passado, não previsão)
 
@@ -62,3 +62,7 @@ A única informação que dá alguma inclinação é a comparação da **volatil
 ## 7. Sobre "IA"
 
 O motor é determinístico: o mesmo ativo e os mesmos dados dão sempre a mesma lista. **Não usa um modelo de linguagem.** Um assistente em linguagem natural ("quero renda com BBAS3, acho que lateraliza") é possível como camada por cima: o modelo traduziria o pedido em visão, vencimento e critério, e explicaria o resultado, com o motor como única fonte dos números. Isso pede servidor (a chave não pode ir ao navegador), limite de uso, custo e uma regra firme: o texto do modelo nunca inventa preço, strike nem probabilidade, e nunca recomenda operação. Não está feito.
+
+## Estruturas acrescentadas (D108)
+
+Além das estruturas da D99, a aba passou a montar, no mesmo motor (mesmo vencimento, risco limitado, séries que negociaram no último pregão): **slide com put** e **booster** (alta), **collar** (baixa), **borboleta com puts**, **borboleta de ferro**, **condor com calls** e **put vendida otimizada** (lateral) e **strangle comprado financiado** (muita oscilação). As definições das pernas estão em `docs/14-metodologia-estrategias-montadas.md`. O piso de "débito precisa render 25% do risco" só vale quando o débito é a maior parte do risco; nas estruturas de custo quase zero (slide e booster) ele não se aplica. "Simular" no collar e no booster abre o modelo próprio na aba Estratégias. THL e diagonais ficam fora desta aba, porque têm vencimentos diferentes e resultado estimado.
