@@ -30,7 +30,7 @@ import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { baixarBoletim, datasCandidatas, lerBoletim } from './b3-boletim.mjs'
 import { formatarSnapshot } from './atualizar-rendimentos-fii.mjs'
-import { variacaoDoDia } from './atualizar-bdrs.mjs'
+import { semVariacaoDia, variacaoDoDia } from './atualizar-bdrs.mjs'
 
 const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const ARQUIVO_CONFIG = path.join(RAIZ, 'config', 'etfs.json')
@@ -419,7 +419,7 @@ async function main() {
   }
 
   const saidaAtual = lerJson(ARQUIVO_SAIDA, null)
-  if (novos === 0 && saidaAtual?.dataPregao) {
+  if (novos === 0 && saidaAtual?.dataPregao && !semVariacaoDia(saidaAtual)) {
     console.log(`Sem pregão novo desde ${historico.pregoes[historico.pregoes.length - 1] ?? 'nenhum'}${semPregao ? ' (feriado ou fim de semana)' : ''}: arquivos mantidos.`)
     return
   }

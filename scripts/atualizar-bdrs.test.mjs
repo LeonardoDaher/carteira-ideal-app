@@ -28,6 +28,7 @@ import {
   incorporarPregao,
   metricas,
   variacaoDoDia,
+  semVariacaoDia,
   montarBusca,
   montarItem,
   motivoInvalido,
@@ -524,5 +525,18 @@ describe('variacaoDoDia', () => {
     h.pregoes = ['2026-01-02', '2026-01-05']
     h.ativos.AAPL34 = [dia(100), dia(101)]
     assert.equal(metricas(h, 'AAPL34').variacaoDia, 1)
+  })
+})
+
+describe('semVariacaoDia', () => {
+  it('reconhece o arquivo publicado do formato antigo nos três formatos', () => {
+    assert.equal(semVariacaoDia({ acoes: [{ ticker: 'A' }], etfs: [] }), true)
+    assert.equal(semVariacaoDia({ etfs: [{ ticker: 'B', variacaoDia: null }] }), false)
+    assert.equal(semVariacaoDia({ setores: [{ empresas: [{ ticker: 'C' }] }] }), true)
+    assert.equal(semVariacaoDia({ setores: [{ empresas: [{ ticker: 'C', variacaoDia: 1.2 }] }] }), false)
+  })
+  it('arquivo vazio ou ausente não força regravação', () => {
+    assert.equal(semVariacaoDia(null), false)
+    assert.equal(semVariacaoDia({ acoes: [], etfs: [] }), false)
   })
 })

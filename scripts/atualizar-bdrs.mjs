@@ -291,6 +291,16 @@ export function variacaoDoDia(serie, ultimo, saltoRecente = false) {
   return arredondar((atual[0] / anterior[0] - 1) * 100, 2)
 }
 
+/**
+ * true se o arquivo publicado ainda é do formato antigo, sem `variacaoDia` nos itens. Serve para regravar o
+ * arquivo mesmo sem pregão novo, uma única vez, quando o campo passou a existir. Aceita os três formatos:
+ * lista `etfs`/`acoes` na raiz (BDRs e ETFs) ou `setores[].empresas` (ações).
+ */
+export function semVariacaoDia(saida) {
+  const itens = [...(saida?.acoes ?? []), ...(saida?.etfs ?? []), ...(saida?.setores ?? []).flatMap((s) => s.empresas ?? [])]
+  return itens.length > 0 && itens.some((i) => !('variacaoDia' in i))
+}
+
 /** Volume médio (R$) dos últimos 21 pregões; dia sem negócio conta como zero (régua da D23). */
 export function volumeMedio(serie, totalPregoes) {
   const janela = Math.min(SESSOES_LIQUIDEZ, totalPregoes)
@@ -777,7 +787,7 @@ export async function executar({
   if (recusados.length) {
     log.info(`[info] O arquivo publicado tem ${recusados.length} códigos que não passam no filtro atual (ex.: ${recusados.slice(0, 3).map((i) => i.ticker).join(', ')}): será regravado.`)
   }
-  if (novos === 0 && saidaAtual?.dataPregao && saidaAtual?.fonte === FONTE && recusados.length === 0) {
+  if (novos === 0 && saidaAtual?.dataPregao && saidaAtual?.fonte === FONTE && recusados.length === 0 && !semVariacaoDia(saidaAtual)) {
     log.info(`Sem pregão novo desde ${historico.pregoes[historico.pregoes.length - 1] ?? 'nenhum'}${semPregao ? ' (feriado ou fim de semana)' : ''}: arquivos mantidos.`)
     return { publicado: false, motivo: 'sem pregão novo' }
   }

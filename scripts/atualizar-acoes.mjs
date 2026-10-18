@@ -34,7 +34,7 @@ import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { baixarBoletim, dataEmBrasilia, datasCandidatas, lerBoletim } from './b3-boletim.mjs'
 import { datasAProcessar } from './atualizar-etfs.mjs'
-import { MAXIMO_PREGOES_GUARDADOS, SESSOES_LIQUIDEZ, incorporarPregao, metricas } from './atualizar-bdrs.mjs'
+import { MAXIMO_PREGOES_GUARDADOS, SESSOES_LIQUIDEZ, incorporarPregao, metricas, semVariacaoDia } from './atualizar-bdrs.mjs'
 
 const RAIZ_PADRAO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 
@@ -330,7 +330,7 @@ export async function executar({
 
   // Sem pregão novo e com o mesmo cadastro: nada a fazer.
   const saidaAtual = lerJson(arquivoSaida, null)
-  if (novos === 0 && saidaAtual?.dataPregao && saidaAtual?.fonte === FONTE && saidaAtual?.cadastroId === cadastroId) {
+  if (novos === 0 && saidaAtual?.dataPregao && saidaAtual?.fonte === FONTE && saidaAtual?.cadastroId === cadastroId && !semVariacaoDia(saidaAtual)) {
     log.info(`Sem pregão novo desde ${historico.pregoes[historico.pregoes.length - 1] ?? 'nenhum'}${semPregao ? ' (feriado ou fim de semana)' : ''}: arquivos mantidos.`)
     return { publicado: false, motivo: 'sem pregão novo' }
   }
