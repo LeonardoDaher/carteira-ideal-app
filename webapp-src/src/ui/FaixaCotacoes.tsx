@@ -20,7 +20,7 @@ interface CotacaoAoVivo {
 }
 
 const QUANTIDADE_ACOES = 14
-const INTERVALO_MS = 5 * 60_000
+const INTERVALO_MS = 60_000
 
 function brl(v: number, casas = 2) {
   return v.toLocaleString('pt-BR', { minimumFractionDigits: casas, maximumFractionDigits: casas })
@@ -57,7 +57,7 @@ function lerAoVivo(corpo: unknown): { itens: CotacaoAoVivo[]; atualizadoEm: stri
   return itens.length > 0 ? { itens, atualizadoEm: c.atualizadoEm } : null
 }
 
-/** Busca /api/cotacoes ao abrir e a cada 5 minutos; devolve null enquanto não houver dado ao vivo. */
+/** Busca /api/cotacoes ao abrir e a cada minuto; devolve null enquanto não houver dado ao vivo. */
 function useCotacoesAoVivo() {
   const [dados, setDados] = useState<{ itens: CotacaoAoVivo[]; atualizadoEm: string } | null>(null)
   useEffect(() => {

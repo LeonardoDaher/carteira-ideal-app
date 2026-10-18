@@ -5,7 +5,7 @@
 // aqui: ninguém consegue usar a função como proxy para códigos arbitrários. Cada código é pedido em
 // separado, porque os planos gratuitos da brapi limitam quantos códigos cabem em uma chamada.
 
-export const CODIGOS_FAIXA: readonly string[] = ['PETR4', 'VALE3', 'ITUB4', 'BBDC4']
+export const CODIGOS_FAIXA: readonly string[] = ['PETR4', 'VALE3', 'ITUB4', 'BBDC4', 'BBAS3', 'B3SA3', 'ABEV3', 'WEGE3', 'MGLU3', 'ELET3']
 
 export interface CotacaoFaixa {
   rotulo: string
