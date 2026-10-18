@@ -23,6 +23,8 @@ export interface FundoFii {
   volumeMedio?: number | null
   /** Última cotação obtida na atualização mensal (R$). `null` se a cotação falhou. */
   cotacao: number | null
+  /** Variação (%) do último pregão contra o anterior (preço diário); ausente se não houver. */
+  variacaoDia?: number | null
   /** Data da cotação, no formato AAAA-MM-DD. */
   dataCotacao: string | null
   /**
@@ -262,4 +264,25 @@ export const TEXTO_MOTIVO_INDISPONIVEL: Record<MotivoIndisponivel, string> = {
   'sem-rendimento': 'o fundo não distribuiu rendimento no mês de referência',
   'sem-cotacao': 'não conseguimos obter a cotação do fundo nesta atualização',
   'fora-da-faixa': 'o rendimento estimado ficou fora de uma faixa plausível diante da cotação, o que indica erro no dado',
+}
+
+/** Arquivo diário de preços (webapp-src/src/data/fiisPreco.json): TICKER -> [cotação, variação do dia | null, data]. */
+export interface PrecosDiariosFii {
+  dataPregao: string | null
+  fundos: Record<string, [number, number | null, string]>
+}
+
+/**
+ * Troca a cotação mensal do job de rendimentos pelo último fechamento diário (B3), com a data e a variação do
+ * dia. Fundo sem preço diário mantém a cotação do arquivo mensal. O rendimento por cota segue o do job mensal.
+ */
+export function aplicarPrecoDiario(snapshot: SnapshotRendimentosFii, precos: PrecosDiariosFii | null | undefined): SnapshotRendimentosFii {
+  if (!precos || !precos.fundos) return snapshot
+  return {
+    ...snapshot,
+    fundos: snapshot.fundos.map((f) => {
+      const p = precos.fundos[f.ticker]
+      return p ? { ...f, cotacao: p[0], variacaoDia: p[1], dataCotacao: p[2] } : f
+    }),
+  }
 }

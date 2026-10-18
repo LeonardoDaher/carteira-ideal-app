@@ -1,5 +1,6 @@
 import { useId, useState } from 'react'
 import dadosRendimentos from '../data/rendimentosFii.json'
+import dadosPrecos from '../data/fiisPreco.json'
 import {
   QUANTIDADES_PADRAO,
   TEXTO_MOTIVO_CONFIANCA,
@@ -17,7 +18,8 @@ import {
   tabelaSimulacao,
   ultimoRendimento,
 } from '../domain/rendaFii'
-import type { FundoFii, SnapshotRendimentosFii } from '../domain/rendaFii'
+import { aplicarPrecoDiario } from '../domain/rendaFii'
+import type { FundoFii, PrecosDiariosFii, SnapshotRendimentosFii } from '../domain/rendaFii'
 import { VoltarInicio } from '../ui/VoltarInicio'
 import { FaixaCotacoes, itensDeFiis } from '../ui/FaixaCotacoes'
 import { rolarParaResultado } from '../ui/rolarParaResultado'
@@ -26,7 +28,7 @@ import { Top15FiisBaratos } from './Top15FiisBaratos'
 import { Top15FiisMaisNegociados, Top15IfixMaioresPesos } from './Top15EtfsMaisNegociados'
 import type { AppCtx } from '../state/useAppState'
 
-const SNAPSHOT_PADRAO = dadosRendimentos as SnapshotRendimentosFii
+const SNAPSHOT_PADRAO = aplicarPrecoDiario(dadosRendimentos as SnapshotRendimentosFii, dadosPrecos as unknown as PrecosDiariosFii)
 
 function reais(valor: number, casas: { min?: number; max?: number } = {}) {
   return valor.toLocaleString('pt-BR', {

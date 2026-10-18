@@ -4,7 +4,7 @@ import path from 'node:path'
 import test from 'node:test'
 import { fileURLToPath } from 'node:url'
 import { datasAProcessar, historicoVazio, incorporarPregao } from './atualizar-etfs.mjs'
-import { barrasDaBrapi, candidatosReserva, complementarComBrapi, formatarHistorico, preencherComBarras, universoDosFiis, ultimosPregoes } from './atualizar-fiis-historico.mjs'
+import { barrasDaBrapi, candidatosReserva, complementarComBrapi, formatarHistorico, formatarPrecos, precosDoDia, preencherComBarras, universoDosFiis, ultimosPregoes } from './atualizar-fiis-historico.mjs'
 
 const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const cfg = JSON.parse(fs.readFileSync(path.join(RAIZ, 'config', 'fiis-preco.json'), 'utf8'))
@@ -179,4 +179,31 @@ test('datas a processar: no dia a dia, só as que faltam, da mais antiga para a 
   assert.deepEqual(datasAProcessar(candidatas, ['2026-10-02', '2026-10-01']), ['2026-10-05', '2026-10-06'])
   assert.deepEqual(datasAProcessar(candidatas, ['2026-10-06']), [])
   assert.deepEqual(datasAProcessar(candidatas, [], true), candidatas)
+})
+
+test('precosDoDia (cotação do dia para o app)', async (t) => {
+  const dia = (fechamento) => [fechamento, fechamento, fechamento, 1e6]
+  const hist = (ativos) => ({ pregoes: ['2026-10-14', '2026-10-15', '2026-10-16'], nomes: {}, ativos })
+
+  await t.test('último fechamento, data e variação do último pregão contra o anterior', () => {
+    const p = precosDoDia(hist({ HGLG11: [dia(100), dia(101), dia(102.02)] }))
+    assert.equal(p.dataPregao, '2026-10-16')
+    assert.deepEqual(p.fundos.HGLG11, [102.02, 1.01, '2026-10-16'])
+  })
+  await t.test('fundo que não negociou no último pregão mantém o último preço, com a data dele e sem variação', () => {
+    const p = precosDoDia(hist({ XPLG11: [dia(10), dia(10.5), null] }))
+    assert.deepEqual(p.fundos.XPLG11, [10.5, null, '2026-10-15'])
+  })
+  await t.test('sem negócio no dia anterior ou salto de desdobramento: sem variação; fundo sem preço some', () => {
+    const p = precosDoDia(hist({ AAAA11: [dia(10), null, dia(11)], BBBB11: [dia(100), dia(100), dia(10)], CCCC11: [null, null, null] }))
+    assert.equal(p.fundos.AAAA11[1], null)
+    assert.equal(p.fundos.BBBB11[1], null)
+    assert.equal(p.fundos.CCCC11, undefined)
+  })
+  await t.test('o arquivo do app é JSON válido, um fundo por linha', () => {
+    const p = precosDoDia(hist({ HGLG11: [dia(100), dia(101), dia(102)], XPLG11: [dia(10), dia(10), dia(10)] }))
+    const texto = formatarPrecos(p, '2026-10-17T00:00:00.000Z')
+    assert.deepEqual(JSON.parse(texto).fundos.XPLG11, [10, 0, '2026-10-16'])
+    assert.equal(texto.split('\n').filter((l) => l.includes('11"')).length, 2)
+  })
 })

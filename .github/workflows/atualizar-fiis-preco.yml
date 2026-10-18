@@ -2,7 +2,8 @@
 # Boletim de Preços oficial da B3 (BVBG.086), sem chave e sem cota (o mesmo módulo dos jobs de Ações, BDRs e
 # ETFs). Alimenta a triagem "FIIs baratos" com preço do dia, no lugar do preço mensal da brapi.
 #
-# Grava SÓ historico/fiis.json. Não toca no app: não há build nem deploy.
+# Grava historico/fiis.json e webapp-src/src/data/fiisPreco.json (último fechamento e variação do dia, que o
+# Simule FII mostra). O commit dispara o deploy da Vercel.
 #
 # Segunda a sexta às 22h15 de Brasília (01h15 UTC do dia seguinte): a última versão do boletim do dia sai por
 # volta das 20h30. Não coincide com os outros jobs (ETFs 22h, BDRs 22h30).
@@ -52,13 +53,13 @@ jobs:
 
       - name: Publicar (commit) se houver mudança
         run: |
-          if [ -z "$(git status --porcelain historico/fiis.json)" ]; then
+          if [ -z "$(git status --porcelain historico/fiis.json webapp-src/src/data/fiisPreco.json)" ]; then
             echo "Sem mudanças nos dados."
             exit 0
           fi
           git config user.name "${{ vars.COMMIT_AUTOR_NOME || 'github-actions[bot]' }}"
           git config user.email "${{ vars.COMMIT_AUTOR_EMAIL || '41898283+github-actions[bot]@users.noreply.github.com' }}"
-          git add historico/fiis.json
+          git add historico/fiis.json webapp-src/src/data/fiisPreco.json
           git commit -m "dados: preço diário dos FIIs ($(date -u +%Y-%m-%d))"
           git pull --rebase
           git push

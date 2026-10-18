@@ -5,7 +5,7 @@
 //
 // Fonte: Boletim de Preços oficial da B3 (BVBG.086), sem chave e sem cota (o mesmo módulo b3-boletim.mjs
 // dos jobs de ações, BDRs e ETFs). O universo é a lista de fundos de webapp-src/src/data/rendimentosFii.json.
-// Grava SÓ historico/fiis.json: cada fundo tem um valor por pregão, alinhado com "pregoes":
+// Grava historico/fiis.json e webapp-src/src/data/fiisPreco.json (cotação e variação do dia para o app): cada fundo tem um valor por pregão, alinhado com "pregoes":
 // [fechamento, mínima, máxima, volume em reais] ou null (não negociou). Não altera nada do app.
 //
 // Se algo estiver errado (boletim com data inesperada, poucos fundos no boletim, B3 fora do ar), o job falha SEM
@@ -67,6 +67,45 @@ export function ultimosPregoes(historico, ticker, n) {
   if (!serieCompleta) return { datas, serie: null }
   const serie = serieCompleta.slice(Math.max(0, serieCompleta.length - datas.length)).map((v) => (v && v[0] > 0 ? [v[0], v[3] ?? 0] : null))
   return { datas, serie }
+}
+
+// ---------------------------------------------------------------------------------------
+// Preço do dia para o app (Simule FII)
+// ---------------------------------------------------------------------------------------
+
+/**
+ * Último fechamento de cada fundo e a variação do último pregão contra o anterior, para o app mostrar a cotação
+ * do dia (e não a mensal do job de rendimentos). A variação só existe se o fundo negociou nos DOIS últimos
+ * pregões do histórico e sem salto de desdobramento entre eles.
+ * Formato: { dataPregao, fundos: { TICKER: [cotacao, variacaoDia | null, dataDaCotacao] } }.
+ */
+export function precosDoDia(historico) {
+  const pregoes = historico?.pregoes ?? []
+  const fundos = {}
+  for (const [ticker, serie] of Object.entries(historico?.ativos ?? {})) {
+    let ultimo = -1
+    for (let i = serie.length - 1; i >= 0; i--) {
+      if (serie[i] && serie[i][0] > 0) {
+        ultimo = i
+        break
+      }
+    }
+    if (ultimo === -1) continue
+    const data = pregoes[pregoes.length - serie.length + ultimo]
+    if (!data) continue
+    const anterior = ultimo === serie.length - 1 ? serie[ultimo - 1] : null
+    const razao = anterior && anterior[0] > 0 ? serie[ultimo][0] / anterior[0] : null
+    const variacao = razao !== null && razao > 0.55 && razao < 1.8 ? Math.round((razao - 1) * 10_000) / 100 : null
+    fundos[ticker] = [Math.round(serie[ultimo][0] * 100) / 100, variacao, data]
+  }
+  return { dataPregao: pregoes.at(-1) ?? null, fundos }
+}
+
+/** Arquivo do app: um fundo por linha, para o diff ficar legível no GitHub. */
+export function formatarPrecos(precos, geradoEm) {
+  const linhas = Object.entries(precos.fundos).map(([t, v]) => `    ${JSON.stringify(t)}: ${JSON.stringify(v)}`)
+  const cabecalho = ['{', `  "geradoEm": ${JSON.stringify(geradoEm)},`, `  "dataPregao": ${JSON.stringify(precos.dataPregao)},`, '  "fundos": {']
+  return [...cabecalho, linhas.join(',\n'), '  }', '}', ''].join('\n')
 }
 
 // ---------------------------------------------------------------------------------------
@@ -171,6 +210,7 @@ function argumentoCarga(argv, maximo) {
 export async function main({ argv = process.argv, agora = new Date(), raiz = RAIZ, fetchImpl = fetch } = {}) {
   const config = JSON.parse(fs.readFileSync(path.join(raiz, 'config', 'fiis-preco.json'), 'utf8'))
   const arquivoHistorico = path.join(raiz, 'historico', 'fiis.json')
+  const arquivoPrecos = path.join(raiz, 'webapp-src', 'src', 'data', 'fiisPreco.json')
   const snapshot = JSON.parse(fs.readFileSync(path.join(raiz, 'webapp-src', 'src', 'data', 'rendimentosFii.json'), 'utf8'))
   const universo = universoDosFiis(snapshot, config.tickersExtras)
   if (universo.size < config.minimoFiisNoBoletim) throw new Error(`O universo tem só ${universo.size} FIIs (mínimo ${config.minimoFiisNoBoletim}): rode antes o job de FIIs. Arquivo NÃO atualizado.`)
@@ -247,12 +287,13 @@ export async function main({ argv = process.argv, agora = new Date(), raiz = RAI
     preenchimentos = r.completados.length
   }
 
-  if (novos === 0 && preenchimentos === 0) {
+  if (novos === 0 && preenchimentos === 0 && fs.existsSync(arquivoPrecos)) {
     console.log(`Sem pregão novo desde ${historico.pregoes.at(-1) ?? 'nenhum'}${semPregao ? ' (feriado ou fim de semana)' : ''}: arquivo mantido.`)
     return { novos, historico }
   }
   fs.mkdirSync(path.dirname(arquivoHistorico), { recursive: true })
   fs.writeFileSync(arquivoHistorico, formatarHistorico(historico, [...complementados]))
+  fs.writeFileSync(arquivoPrecos, formatarPrecos(precosDoDia(historico), agora.toISOString()))
   const ultimo = historico.pregoes.at(-1)
   const diasDesdePregao = (agora.getTime() - Date.parse(`${ultimo}T21:00:00Z`)) / 86_400_000
   console.log(`historico/fiis.json atualizado: ${historico.pregoes.length} pregões (${novos} novos), último de ${ultimo}, ${Object.keys(historico.ativos).length} fundos com preço.`)

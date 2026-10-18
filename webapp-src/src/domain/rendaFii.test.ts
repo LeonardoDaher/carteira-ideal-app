@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   agruparPorSetor,
+  aplicarPrecoDiario,
   estaNaLista,
   formatarVolume,
   acharIndisponivel,
@@ -171,5 +172,27 @@ describe('lista por liquidez e setor (D13)', () => {
     expect(formatarVolume(1_500_000)).toBe('R$ 1,5 milhão')
     expect(formatarVolume(12_345_678)).toBe('R$ 12 milhões')
     expect(formatarVolume(350_000)).toBe('R$ 350 mil')
+  })
+})
+
+describe('aplicarPrecoDiario', () => {
+  const base = {
+    geradoEm: '2026-10-07T12:00:00.000Z',
+    fundos: [
+      { ticker: 'AAAA11', nome: 'A', cotacao: 9.02, dataCotacao: '2026-10-06' },
+      { ticker: 'BBBB11', nome: 'B', cotacao: 50, dataCotacao: '2026-10-06' },
+    ],
+  } as unknown as SnapshotRendimentosFii
+
+  it('troca a cotação mensal pelo fechamento diário, com data e variação do dia', () => {
+    const r = aplicarPrecoDiario(base, { dataPregao: '2026-10-16', fundos: { AAAA11: [9.5, -1.2, '2026-10-16'] } })
+    expect(r.fundos[0]).toMatchObject({ cotacao: 9.5, variacaoDia: -1.2, dataCotacao: '2026-10-16' })
+  })
+  it('fundo sem preço diário mantém a cotação do arquivo mensal', () => {
+    const r = aplicarPrecoDiario(base, { dataPregao: '2026-10-16', fundos: { AAAA11: [9.5, 0, '2026-10-16'] } })
+    expect(r.fundos[1]).toEqual(base.fundos[1])
+  })
+  it('sem arquivo de preços, devolve o mesmo snapshot', () => {
+    expect(aplicarPrecoDiario(base, null)).toBe(base)
   })
 })
