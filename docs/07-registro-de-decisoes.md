@@ -2045,3 +2045,14 @@ Cada cartão mostra, como as demais, até três candidatas ordenadas pelo crité
 **Decisões.** (1) O passo a passo **não elege** a melhor estrutura: lista as que costumam servir e mostra o risco de cada uma, no mesmo espírito da D99. (2) Straddle e strangle vendidos não aparecem em nenhum objetivo (risco ilimitado). (3) Os textos nunca prometem resultado: um teste barra "garantido", "sem risco", "certeza", "lucro certo" e "melhor estratégia"; o objetivo de renda diz que nenhuma estrutura garante renda.
 
 **Código.** `domain/objetivosDeEstrategia.ts` (objetivos e etiqueta de perfil) e o cartão em `MonteSuaEstrategia.tsx`. 5 testes de domínio e 2 da tela.
+
+
+## D114 (18/10/2026): glossário em linguagem simples no Simule Opções
+
+**Pedido do responsável (18/10/2026).** Seguir com o próximo passo: a revisão dos textos em linguagem mais simples para quem está começando; combinou-se começar por um glossário curto.
+
+**Como ficou.** Um glossário recolhível no fim da tela (aparece em todas as abas), com **30 termos** (opção, call, put, strike, prêmio, vencimento, exercício, americana e europeia, comprar e vender, dentro e fora do dinheiro, valor intrínseco e de tempo, crédito e débito, perna, trava, estrutura, ponto de equilíbrio, ganho e perda máximos, payoff, venda coberta e descoberta, margem de garantia, rolagem, roda, colchão, volatilidade implícita, delta, gama, teta, vega, lote e último preço). Cada termo tem uma explicação curta e, quando ajuda, um exemplo com números inventados (ativo "XPTO3"). Há **busca** (ignora acento e maiúscula; acha pelo nome, por sinônimos como "opção de compra", "theta" ou "ITM" e pelo texto da explicação, com o nome exato primeiro) e um botão **"Primeira vez com opções? Abrir o glossário"** no topo da tela, que abre e leva até ele.
+
+**Decisões.** Os textos descrevem e não prometem resultado (há um teste que barra "garantido", "sem risco" e afins); a explicação de "último preço" diz que ele pode estar defasado, que é a razão de os números do app serem estimativas; a explicação de "margem de garantia" diz que o app não a calcula.
+
+**Código.** `domain/glossarioOpcoes.ts` (termos e busca) e `screens/GlossarioOpcoes.tsx`. 6 testes de domínio e 3 da tela.
