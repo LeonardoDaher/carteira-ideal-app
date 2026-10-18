@@ -7,6 +7,7 @@ import { formatarData, formatarVolume } from '../domain/rendaFii'
 import { VoltarInicio } from '../ui/VoltarInicio'
 import { rolarParaResultado } from '../ui/rolarParaResultado'
 import { AvisoEducacional } from '../ui/AvisoEducacional'
+import { FaixaCotacoes } from '../ui/FaixaCotacoes'
 import { Top15Baratas } from './Top15Baratas'
 import { Top15AcoesMaisNegociadas, Top15IbovMaioresPesos } from './Top15EtfsMaisNegociados'
 import { Top15Endividadas } from './Top15Endividadas'
@@ -77,6 +78,8 @@ export function SimuleAcoes({
           pelo código, e descubra o preço de fechamento e quantas ações um valor compra.
         </div>
       </div>
+
+      <FaixaCotacoes snapshot={snapshot} />
 
       <div role="tablist" aria-label="O que você quer ver" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
         {(
