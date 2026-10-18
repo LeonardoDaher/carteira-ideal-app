@@ -1925,3 +1925,20 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 **Limites.** (1) Tudo usa o último preço negociado e um modelo europeu, sem dividendos: no dia, o preço real de compra e venda pode ser pior, e o crédito de uma rolagem real tende a ser menor que o estimado. (2) A rolagem mantém o tipo da perna (call continua call); trocar de tipo ou de lado fica fora. (3) Só estruturas montadas na aba Estratégias: acompanhar uma posição que a pessoa já tem, informando os preços de entrada, é a etapa seguinte, assim como a "roda" e os modelos do Prefiro PUT (Slide, put otimizada, booster).
 
 **Testes.** 12 de domínio (valor no cenário, desmontagem, rolagem de vendida e comprada, realizado no gráfico, pernas vencidas no caminho, ações, cenários e exercidas) e 7 da tela.
+
+
+## D106 (17/10/2026): modelos do tipo "Prefiro PUT" no catálogo (slide, put otimizada, strangle financiado, booster)
+
+**Pedido do responsável (17/10/2026).** Incluir as estruturas descritas em material do canal Prefiro PUT. O responsável não tinha as pernas exatas, então valem as definições dos textos e as mais comuns de mercado, e isso está escrito na tela de cada modelo ("confira e ajuste as séries").
+
+**Modelos** (grupo "Renda e proteção (Prefiro PUT)", na aba Estratégias; todas as séries podem ser trocadas):
+- **Slide com put**: compra uma put de strike maior e vende duas puts de strikes menores (intermediária e inferior). Costuma sair com crédito; aviso de put vendida sem proteção.
+- **Put vendida otimizada**: put vendida mais trava de baixa com calls (vende uma call e compra outra de strike maior). O crédito das calls soma ao da put; o risco de baixo continua o da put.
+- **Strangle comprado financiado**: strangle comprado com opções mais afastadas vendidas (condor de ferro comprado). Perda máxima é o débito; o ganho fica limitado.
+- **Booster**: ações, trava de alta com calls financiada por uma put vendida abaixo. Dentro da faixa das calls, ganho cerca do dobro da ação sozinha.
+
+**Fora desta rodada.** A "roda" (sequência put, exercício, venda coberta) e o acompanhamento de uma posição já existente. Os demais modelos de vários vencimentos (THL e diagonais) já estão na D104.
+
+**Limites.** As quatro montagens são leituras dos textos, e não as pernas oficiais de nenhuma mesa; strikes e quantidades padrão (degraus a partir do strike mais perto do preço) são ponto de partida. As estruturas com put vendida sem proteção mostram o aviso de risco e a perda não tem teto de "poucos reais": chega perto do strike vezes a quantidade.
+
+**Testes.** 5 de domínio (pernas e strikes padrão, crédito do slide, perda máxima igual ao débito no strangle financiado, delta cerca de dois no booster, grupo) e 1 da tela.

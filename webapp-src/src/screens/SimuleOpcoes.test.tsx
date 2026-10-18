@@ -284,7 +284,7 @@ describe('SimuleOpcoes: aba Estratégias (monte sua estratégia)', () => {
   it('só há travas, borboletas, condors, volatilidade e estruturas com ações: compra e venda simples ficam nas séries', () => {
     render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
     abrirEstrategias()
-    for (const nome of ['Trava de alta (com puts)', 'Trava de baixa (com puts)', 'Trava de baixa (com calls)', 'Borboleta de calls', 'Borboleta de ferro', 'Condor de ferro', 'Condor de calls', 'Trava horizontal de puts (THL)', 'Trava diagonal de puts', 'Straddle comprado', 'Strangle vendido', 'Venda coberta', 'Collar (proteção com custo menor)'])
+    for (const nome of ['Trava de alta (com puts)', 'Trava de baixa (com puts)', 'Trava de baixa (com calls)', 'Borboleta de calls', 'Borboleta de ferro', 'Condor de ferro', 'Condor de calls', 'Trava horizontal de puts (THL)', 'Trava diagonal de puts', 'Slide com put', 'Put vendida otimizada (put + trava de baixa com calls)', 'Strangle comprado financiado (risco menor)', 'Booster (ações + trava de alta financiada por put)', 'Straddle comprado', 'Strangle vendido', 'Venda coberta', 'Collar (proteção com custo menor)'])
       expect(screen.getByRole('button', { name: nome })).toBeDefined()
     for (const nome of ['Compra de call', 'Venda de call', 'Compra de put', 'Venda de put']) expect(screen.queryByRole('button', { name: nome })).toBeNull()
   })
@@ -327,6 +327,15 @@ describe('SimuleOpcoes: aba Estratégias (monte sua estratégia)', () => {
     expect(txt('ganho-maximo')).not.toBe('Sem limite')
     // call vendida de strike 65 a 0,90, ações a 60: ganho máximo (5 + 0,90) × 100
     expect(txt('ganho-maximo')).toBe('R$ 590,00')
+  })
+
+  it('o booster leva ações, avisa do risco da put vendida e diz que a montagem segue a definição mais comum', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    abrirEstrategias()
+    modelo('Booster (ações + trava de alta financiada por put)')
+    expect(screen.getAllByText(/Precisa ter 100 ações/).length).toBeGreaterThan(0)
+    expect(screen.getByTestId('aviso-risco').textContent).toMatch(/put vendida sem proteção/)
+    expect(screen.getByText(/definição mais comum/)).toBeDefined()
   })
 
   it('trocar a série de uma perna atualiza o preço, e uma ordem de strikes trocada pede correção', () => {

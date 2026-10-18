@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { MODELOS, escadaDeStrikes, montarPosicaoDoModelo, proximoVencimento, seriesPadrao, validarModelo, vencimentosDoModelo } from './modelosDeEstrategia'
-import { analisar } from './simulaOpcoes'
+import { analisar, resultadoNoVencimento } from './simulaOpcoes'
 import type { SerieOpcao } from './opcoes'
 
 const s = (codigo: string, tipo: 'call' | 'put', strike: number, ultimo: number, negocios = 10, vencimento = '2026-11-19'): SerieOpcao => ({
@@ -155,5 +155,52 @@ describe('estruturas com vencimentos diferentes', () => {
     const posicao = montarPosicaoDoModelo(m, pernas, 100, 60)
     expect(posicao.pernas.map((x) => x.dias)).toEqual([55, 22])
     expect(posicao.pernas.reduce((t, x) => t + (x.lado === 'compra' ? -1 : 1) * x.premio * x.quantidade, 0)).toBeLessThan(0) // débito
+  })
+})
+
+describe('estruturas de renda e proteção (Prefiro PUT)', () => {
+  const montar = (id: string) => {
+    const m = modelo(id)
+    const escolhidas = seriesPadrao(series, m, '2026-11-19', 60)
+    const pernas = m.pernas.map((p, i) => ({ serie: escolhidas[i]!, lado: p.lado, fator: p.fator, premio: escolhidas[i]!.ultimo, dias: 22 }))
+    return { m, escolhidas, posicao: montarPosicaoDoModelo(m, pernas, 100, 60) }
+  }
+
+  it('o slide compra uma put e vende duas, mais abaixo, e começa com crédito', () => {
+    const { m, escolhidas, posicao } = montar('slidePut')
+    expect(m.pernas.map((p) => p.lado)).toEqual(['compra', 'venda', 'venda'])
+    expect(escolhidas.map((x) => x!.strike)).toEqual([60, 56, 54])
+    const credito = posicao.pernas.reduce((t, x) => t + (x.lado === 'venda' ? 1 : -1) * x.premio * x.quantidade, 0)
+    expect(credito).toBeGreaterThan(0)
+    expect(m.aviso).toMatch(/put vendida sem proteção/)
+  })
+
+  it('a put otimizada soma o crédito da trava de baixa com calls ao da put', () => {
+    const { m, escolhidas, posicao } = montar('putOtimizada')
+    expect(m.pernas.map((p) => [p.tipo, p.lado])).toEqual([['put', 'venda'], ['call', 'venda'], ['call', 'compra']])
+    expect(escolhidas.map((x) => x!.strike)).toEqual([56, 64, 68])
+    const a = analisar(posicao)
+    expect(a.ganhoMaximo).not.toBeNull()
+    expect(a.perdaMaxima).not.toBeNull()
+  })
+
+  it('o strangle financiado tem ganho e perda limitados, com perda máxima igual ao débito', () => {
+    const { posicao } = montar('strangleFinanciado')
+    const a = analisar(posicao)
+    const debito = -posicao.pernas.reduce((t, x) => t + (x.lado === 'venda' ? 1 : -1) * x.premio * x.quantidade, 0)
+    expect(a.ganhoMaximo).not.toBeNull()
+    expect(a.perdaMaxima).toBeCloseTo(-debito, 2)
+  })
+
+  it('o booster leva as ações e rende cerca do dobro da ação sozinha dentro da faixa das calls', () => {
+    const { posicao, m } = montar('booster')
+    expect(m.comAcoes).toBe(true)
+    expect(posicao.acoes).toBe(100)
+    // entre os strikes das calls (60 e 64), cada R$ 1 a mais no ativo rende R$ 200 (ação e call comprada)
+    expect(resultadoNoVencimento(posicao, 63) - resultadoNoVencimento(posicao, 62)).toBeCloseTo(200, 6)
+  })
+
+  it('os quatro estão no grupo próprio', () => {
+    expect(MODELOS.filter((x) => x.grupo === 'Renda e proteção (Prefiro PUT)').map((x) => x.id)).toEqual(['slidePut', 'putOtimizada', 'strangleFinanciado', 'booster'])
   })
 })
