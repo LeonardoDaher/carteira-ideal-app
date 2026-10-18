@@ -369,6 +369,8 @@ export interface EscolhaDeSeries {
   detalhes?: Record<string, { lado: 'compra' | 'venda'; fator: number }>
   /** Venda coberta de call: abre a estratégia "Venda coberta" (a pessoa já tem a ação), em vez de séries soltas. */
   coberta?: boolean
+  /** Estrutura com ações e mais de uma perna (collar, booster): abre o modelo correspondente, com as séries na ordem das pernas dele. */
+  modelo?: 'collar' | 'booster'
 }
 
 /** Mesmo snapshot, só com séries que vencem nos próximos 6 meses; ativos sem série saem. */

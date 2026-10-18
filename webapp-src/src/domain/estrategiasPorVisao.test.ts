@@ -244,3 +244,82 @@ describe('texto e escolha para o simulador', () => {
     expect(e.coberta).toBe(false)
   })
 })
+
+describe('estruturas acrescentadas à Tendência (borboletas, condor de calls, put otimizada, slide, strangle financiado, collar e booster)', () => {
+  const novas: [EstruturaId, Visao][] = [
+    ['borboletaPut', 'lateral'], ['borboletaFerro', 'lateral'], ['condorCall', 'lateral'], ['putOtimizada', 'lateral'],
+    ['slidePut', 'alta'], ['booster', 'alta'], ['collar', 'baixa'], ['strangleFinanciado', 'oscilacao'],
+  ]
+
+  it('estão no catálogo e na visão certa', () => {
+    for (const [id, visao] of novas) {
+      expect(ESTRUTURAS[id].id).toBe(id)
+      expect(ESTRUTURAS_DA_VISAO[visao]).toContain(id)
+    }
+  })
+
+  it('cada uma gera candidatas com as séries de teste, todas de risco limitado', () => {
+    for (const [id, visao] of novas) {
+      const lista = candidatas(id, visao)
+      expect(lista.length, id).toBeGreaterThan(0)
+      for (const c of lista) expect(c.perdaMaxima, id).toBeLessThan(0)
+    }
+  })
+
+  it('borboleta de ferro: crédito, strikes iguais nas vendidas e asas de largura igual', () => {
+    const c = candidatas('borboletaFerro', 'lateral')[0]
+    const [putAsa, putVendida, callVendida, callAsa] = c.pernas.map((p) => p.serie)
+    expect(c.pernas.map((p) => p.lado)).toEqual(['compra', 'venda', 'venda', 'compra'])
+    expect(putVendida.strike).toBeCloseTo(callVendida.strike, 8)
+    expect(putVendida.strike - putAsa.strike).toBeCloseTo(callAsa.strike - callVendida.strike, 8)
+    expect(c.credito).toBeGreaterThan(0)
+  })
+
+  it('borboleta com puts e condor com calls: débito, ganho limitado', () => {
+    for (const [id, pernas] of [['borboletaPut', 3], ['condorCall', 4]] as [EstruturaId, number][]) {
+      const c = candidatas(id, 'lateral')[0]
+      expect(c.pernas).toHaveLength(pernas)
+      expect(c.credito).toBeLessThan(0)
+      expect(c.ganhoMaximo).not.toBeNull()
+    }
+  })
+
+  it('put otimizada: put vendida mais trava de baixa com calls, tudo em crédito', () => {
+    const c = candidatas('putOtimizada', 'lateral')[0]
+    expect(c.pernas.map((p) => [p.serie.tipo, p.lado])).toEqual([['put', 'venda'], ['call', 'venda'], ['call', 'compra']])
+    expect(c.credito).toBeGreaterThan(0)
+  })
+
+  it('slide: compra uma put e vende duas mais baixas, com crédito ou custo baixo', () => {
+    const c = candidatas('slidePut', 'alta')[0]
+    const [alta, meio, baixa] = c.pernas.map((p) => p.serie.strike)
+    expect(c.pernas.map((p) => p.lado)).toEqual(['compra', 'venda', 'venda'])
+    expect(alta).toBeGreaterThan(meio)
+    expect(meio).toBeGreaterThan(baixa)
+    expect(c.credito).toBeGreaterThanOrEqual(-0.25 * c.pernas[0].serie.ultimo * Q)
+  })
+
+  it('strangle financiado: débito, com as asas vendidas mais afastadas e ganho limitado', () => {
+    const c = candidatas('strangleFinanciado', 'oscilacao')[0]
+    expect(c.pernas.map((p) => p.lado)).toEqual(['compra', 'venda', 'compra', 'venda'])
+    expect(c.credito).toBeLessThan(0)
+    expect(c.ganhoMaximo).not.toBeNull()
+  })
+
+  it('collar e booster levam as ações e abrem o próprio modelo na aba Estratégias; a venda coberta continua com o atalho', () => {
+    const collar = candidatas('collar', 'baixa')[0]
+    expect(collar.comAcoes).toBe(true)
+    expect(collar.pernas.map((p) => [p.serie.tipo, p.lado])).toEqual([['put', 'compra'], ['call', 'venda']])
+    expect(escolhaDaCandidata(ativo, collar)).toMatchObject({ modelo: 'collar', coberta: false })
+
+    const booster = candidatas('booster', 'alta')[0]
+    expect(booster.comAcoes).toBe(true)
+    expect(booster.pernas.map((p) => [p.serie.tipo, p.lado])).toEqual([['call', 'compra'], ['call', 'venda'], ['put', 'venda']])
+    expect(booster.ganhoMaximo).toBeNull() // a ação continua subindo acima da call vendida
+    expect(escolhaDaCandidata(ativo, booster)).toMatchObject({ modelo: 'booster', coberta: false })
+
+    const coberta = candidatas('vendaCoberta', 'lateral')[0]
+    expect(escolhaDaCandidata(ativo, coberta)).toMatchObject({ coberta: true })
+    expect(escolhaDaCandidata(ativo, coberta)).not.toHaveProperty('modelo')
+  })
+})

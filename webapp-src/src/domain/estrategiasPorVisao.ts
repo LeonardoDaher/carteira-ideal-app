@@ -18,6 +18,8 @@ export type EstruturaId =
   | 'compraPut' | 'travaBaixaDebito' | 'travaBaixaCredito'
   | 'condorDeFerro' | 'borboleta' | 'vendaCoberta'
   | 'straddleComprado' | 'strangleComprado'
+  | 'borboletaPut' | 'borboletaFerro' | 'condorCall' | 'putOtimizada' | 'slidePut'
+  | 'strangleFinanciado' | 'collar' | 'booster'
 
 export interface InfoEstrutura {
   id: EstruturaId
@@ -40,15 +42,26 @@ export const ESTRUTURAS: Record<EstruturaId, InfoEstrutura> = {
   vendaCoberta: { id: 'vendaCoberta', titulo: 'Venda coberta', descricao: 'Para quem já tem a ação: vende uma call, recebe prêmio e abre mão da alta acima do strike.', perfil: ['Crédito', 'Exige ter a ação'] },
   straddleComprado: { id: 'straddleComprado', titulo: 'Straddle comprado', descricao: 'Compra call e put do mesmo strike. Ganha se o ativo se mexer bastante, para qualquer lado.', perfil: ['Débito', 'Perda limitada ao prêmio'] },
   strangleComprado: { id: 'strangleComprado', titulo: 'Strangle comprado', descricao: 'Compra uma put abaixo e uma call acima do preço. Mais barato que o straddle, exige um movimento maior.', perfil: ['Débito', 'Perda limitada ao prêmio'] },
+  borboletaPut: { id: 'borboletaPut', titulo: 'Borboleta com puts', descricao: 'Compra uma put abaixo, vende duas no meio e compra outra acima. Igual à de calls: ganha mais se o ativo terminar no strike do meio.', perfil: ['Débito', 'Ganho e perda limitados', '3 séries'] },
+  borboletaFerro: { id: 'borboletaFerro', titulo: 'Borboleta de ferro', descricao: 'Vende uma call e uma put no mesmo strike e compra uma call acima e uma put abaixo como proteção. Recebe crédito e ganha mais com o ativo parado.', perfil: ['Crédito', 'Ganho e perda limitados', '4 séries'] },
+  condorCall: { id: 'condorCall', titulo: 'Condor com calls', descricao: 'Compra uma call baixa, vende duas intermediárias e compra uma alta. Ganha se o ativo terminar entre os strikes do meio.', perfil: ['Débito', 'Ganho e perda limitados', '4 séries'] },
+  putOtimizada: { id: 'putOtimizada', titulo: 'Put vendida otimizada', descricao: 'Vende uma put e uma trava de baixa com calls. O crédito das calls soma ao da put; o risco de baixo continua o da put vendida.', perfil: ['Crédito', 'Perda limitada ao strike menos o crédito', '3 séries'] },
+  slidePut: { id: 'slidePut', titulo: 'Slide com put', descricao: 'Compra uma put de strike maior e vende duas de strikes menores. Sai com crédito ou custo baixo e lucra com o ativo parado ou caindo pouco; arrisca se ele cair abaixo dos strikes vendidos.', perfil: ['Crédito ou custo baixo', 'Perda limitada ao strike menos o crédito', '3 séries'] },
+  strangleFinanciado: { id: 'strangleFinanciado', titulo: 'Strangle comprado financiado', descricao: 'Compra um strangle e vende opções mais afastadas para pagar parte dele: custa menos, mas o ganho também tem teto.', perfil: ['Débito', 'Ganho e perda limitados', '4 séries'] },
+  collar: { id: 'collar', titulo: 'Collar', descricao: 'Para quem já tem a ação: compra uma put de proteção e vende uma call para pagar parte dela. Limita a perda e também o ganho.', perfil: ['Exige ter a ação', 'Ganho e perda limitados'] },
+  booster: { id: 'booster', titulo: 'Booster', descricao: 'Para quem já tem a ação: compra uma call perto do preço, vende outra acima e paga o débito com uma put vendida abaixo. Dobra a alta dentro da faixa; abaixo da put, a perda aumenta.', perfil: ['Exige ter a ação', 'Débito próximo de zero', '3 séries'] },
 }
 
 /** Estruturas que combinam com cada visão, na ordem em que aparecem na tela. */
 export const ESTRUTURAS_DA_VISAO: Record<Visao, EstruturaId[]> = {
-  alta: ['compraCall', 'travaAltaDebito', 'travaAltaCredito', 'vendaPut'],
-  baixa: ['compraPut', 'travaBaixaDebito', 'travaBaixaCredito'],
-  lateral: ['condorDeFerro', 'borboleta', 'vendaCoberta'],
-  oscilacao: ['straddleComprado', 'strangleComprado'],
+  alta: ['compraCall', 'travaAltaDebito', 'travaAltaCredito', 'vendaPut', 'slidePut', 'booster'],
+  baixa: ['compraPut', 'travaBaixaDebito', 'travaBaixaCredito', 'collar'],
+  lateral: ['condorDeFerro', 'borboleta', 'borboletaPut', 'borboletaFerro', 'condorCall', 'putOtimizada', 'vendaCoberta'],
+  oscilacao: ['straddleComprado', 'strangleComprado', 'strangleFinanciado'],
 }
+
+/** Estruturas que, ao serem enviadas à aba Estratégias, abrem o modelo correspondente (as pernas seguem a ordem do modelo). */
+export const MODELO_DA_ESTRUTURA: Partial<Record<EstruturaId, 'collar' | 'booster'>> = { collar: 'collar', booster: 'booster' }
 
 export interface PernaCandidata {
   serie: SerieOpcao
@@ -244,6 +257,112 @@ function rascunhosDe(estrutura: EstruturaId, calls: SerieOpcao[], puts: SerieOpc
     case 'vendaCoberta':
       for (const c of calls) if (m(c) >= 1.0 && m(c) <= 1.1) add([venda(c)], true)
       break
+    case 'borboletaPut':
+      for (const p2 of puts) {
+        if (m(p2) < 0.97 || m(p2) > 1.05) continue
+        for (const p1 of puts) {
+          const largura = p2.strike - p1.strike
+          if (largura <= 0 || largura > 0.12 * preco) continue
+          const p3 = puts.find((p) => Math.abs(p.strike - (p2.strike + largura)) < TOLERANCIA)
+          if (!p3) continue
+          const debito = p1.ultimo - 2 * p2.ultimo + p3.ultimo
+          if (debito > 0 && debito < largura) add([compra(p1), venda(p2, 2), compra(p3)])
+        }
+      }
+      break
+    case 'borboletaFerro':
+      for (const c2 of calls) {
+        if (m(c2) < 0.97 || m(c2) > 1.05) continue
+        const p2 = puts.find((p) => Math.abs(p.strike - c2.strike) < TOLERANCIA)
+        if (!p2) continue
+        for (const c3 of calls) {
+          const largura = c3.strike - c2.strike
+          if (largura <= 0 || largura > 0.12 * preco) continue
+          const p1 = puts.find((p) => Math.abs(p.strike - (c2.strike - largura)) < TOLERANCIA)
+          if (!p1) continue
+          const credito = p2.ultimo + c2.ultimo - p1.ultimo - c3.ultimo
+          if (credito > 0 && credito < largura) add([compra(p1), venda(p2), venda(c2), compra(c3)])
+        }
+      }
+      break
+    case 'condorCall':
+      for (const c2 of calls) {
+        if (m(c2) < 0.95 || m(c2) > 1.04) continue
+        for (const c3 of calls) {
+          const meio = c3.strike - c2.strike
+          if (meio <= 0 || meio > 0.08 * preco) continue
+          for (const c1 of calls) {
+            const largura = c2.strike - c1.strike
+            if (largura <= 0 || largura > 0.1 * preco) continue
+            const c4 = calls.find((c) => Math.abs(c.strike - (c3.strike + largura)) < TOLERANCIA)
+            if (!c4) continue
+            const debito = c1.ultimo - c2.ultimo - c3.ultimo + c4.ultimo
+            if (debito > 0 && debito < largura) add([compra(c1), venda(c2), venda(c3), compra(c4)])
+          }
+        }
+      }
+      break
+    case 'putOtimizada':
+      for (const p of puts) {
+        if (m(p) < 0.85 || m(p) > 1.0) continue
+        for (const c1 of calls) {
+          if (m(c1) < 1.02 || m(c1) > 1.1) continue
+          for (const c2 of calls) {
+            const largura = c2.strike - c1.strike
+            if (largura <= 0 || largura > 0.1 * preco) continue
+            if (c1.ultimo - c2.ultimo > 0) add([venda(p), venda(c1), compra(c2)])
+          }
+        }
+      }
+      break
+    case 'slidePut':
+      for (const alta of puts) {
+        if (m(alta) < 0.97 || m(alta) > 1.02) continue
+        for (const meio of puts) {
+          if (meio.strike >= alta.strike || m(meio) < 0.88) continue
+          for (const baixa of puts) {
+            if (baixa.strike >= meio.strike || m(baixa) < 0.8 || alta.strike - baixa.strike > larguraMax) continue
+            // crédito ou custo baixo (até 25% do prêmio da put comprada)
+            if (alta.ultimo - meio.ultimo - baixa.ultimo <= 0.25 * alta.ultimo) add([compra(alta), venda(meio), venda(baixa)])
+          }
+        }
+      }
+      break
+    case 'strangleFinanciado':
+      for (const pA of puts) {
+        if (m(pA) < 0.9 || m(pA) > 0.99) continue
+        for (const cA of calls) {
+          if (m(cA) < 1.01 || m(cA) > 1.1) continue
+          for (const pB of puts) {
+            const largura = pA.strike - pB.strike
+            if (largura <= 0 || largura > 0.1 * preco) continue
+            const cB = calls.find((c) => Math.abs(c.strike - (cA.strike + largura)) < TOLERANCIA)
+            if (!cB) continue
+            if (pA.ultimo - pB.ultimo + cA.ultimo - cB.ultimo > 0) add([compra(pA), venda(pB), compra(cA), venda(cB)])
+          }
+        }
+      }
+      break
+    case 'collar':
+      for (const p of puts) {
+        if (m(p) < 0.9 || m(p) > 0.99) continue
+        for (const c of calls) if (m(c) >= 1.02 && m(c) <= 1.12) add([compra(p), venda(c)], true)
+      }
+      break
+    case 'booster':
+      for (const c1 of calls) {
+        if (m(c1) < 0.97 || m(c1) > 1.03) continue
+        for (const c2 of calls) {
+          const largura = c2.strike - c1.strike
+          if (largura <= 0 || largura > larguraMax) continue
+          for (const p of puts) {
+            if (m(p) < 0.85 || m(p) > 0.97) continue
+            // "sem desembolso": o débito da trava de alta é coberto, ou quase, pelo prêmio da put vendida
+            if (c1.ultimo - c2.ultimo - p.ultimo <= 0.02) add([compra(c1), venda(c2), venda(p)], true)
+          }
+        }
+      }
+      break
     case 'straddleComprado':
       for (const c of calls) {
         if (m(c) < 0.97 || m(c) > 1.03) continue
@@ -294,7 +413,8 @@ export function gerarCandidatas(ativo: AtivoComOpcoes, estrutura: EstruturaId, v
     if (!(risco > 0)) continue
     if (analise.ganhoMaximo !== null && analise.ganhoMaximo < RETORNO_MINIMO_SOBRE_RISCO * risco) continue
     const credito = custoDeMontagem(posicao)
-    if (credito < 0 && analise.ganhoMaximo !== null && analise.ganhoMaximo < RETORNO_MINIMO_DEBITO * risco) continue
+    // Só vale para estruturas em que o débito é a maior parte do risco (travas, borboletas, strangle financiado); nas de custo quase zero (slide, booster) o risco vem das pernas vendidas.
+    if (credito < 0 && -credito >= 0.5 * risco && analise.ganhoMaximo !== null && analise.ganhoMaximo < RETORNO_MINIMO_DEBITO * risco) continue
 
     const sigma = volMedia / 100
     const movimento = sigma * Math.sqrt(du / DIAS_UTEIS_ANO)
@@ -350,10 +470,13 @@ export function descreverPernas(c: Candidata): string {
 
 /** Faz uma candidata virar a escolha de séries do simulador de estratégias. */
 export function escolhaDaCandidata(ativo: AtivoComOpcoes, c: Candidata) {
+  const modelo = MODELO_DA_ESTRUTURA[c.estrutura]
   return {
     ativo,
     series: c.pernas.map((p) => p.serie),
     detalhes: Object.fromEntries(c.pernas.map((p) => [p.serie.codigo, { lado: p.lado, fator: p.fator }])),
-    coberta: c.comAcoes,
+    // Só a venda coberta (uma call) usa o atalho "coberta"; collar e booster abrem o próprio modelo, com as ações.
+    coberta: c.comAcoes && !modelo,
+    ...(modelo ? { modelo } : {}),
   }
 }

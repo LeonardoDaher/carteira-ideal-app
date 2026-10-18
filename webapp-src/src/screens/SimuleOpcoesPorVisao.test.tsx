@@ -176,6 +176,38 @@ describe('SimuleOpcoes: aba "Tendência"', () => {
     await waitFor(() => expect(screen.getByRole('group', { name: 'Visão de mercado' })).toBeDefined())
   })
 
+  it('mostra as estruturas novas em cada visão (slide, booster, borboletas, condor de calls, put otimizada, strangle financiado e collar)', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    abrirVisao()
+    for (const id of ['slidePut', 'booster']) expect(candidatas(id).length, id).toBeGreaterThan(0) // alta
+    fireEvent.click(screen.getByRole('button', { name: 'Baixa' }))
+    expect(candidatas('collar').length).toBeGreaterThan(0)
+    fireEvent.click(screen.getByRole('button', { name: 'Lateral' }))
+    for (const id of ['borboletaPut', 'borboletaFerro', 'condorCall', 'putOtimizada']) expect(candidatas(id).length, id).toBeGreaterThan(0)
+    fireEvent.click(screen.getByRole('button', { name: /Muita oscilação/ }))
+    expect(candidatas('strangleFinanciado').length).toBeGreaterThan(0)
+  })
+
+  it('"Simular" no collar abre o modelo Collar na aba Estratégias, com as ações e as séries do cartão', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    abrirVisao()
+    fireEvent.click(screen.getByRole('button', { name: 'Baixa' }))
+    fireEvent.click(within(candidatas('collar')[0]).getByRole('button', { name: /^Simular/ }))
+    expect(screen.getByRole('button', { name: /^Collar/ }).getAttribute('aria-pressed')).toBe('true')
+    expect((screen.getByLabelText('Série da perna 1') as HTMLSelectElement).value).toMatch(/^P/) // put comprada
+    expect((screen.getByLabelText('Série da perna 2') as HTMLSelectElement).value).toMatch(/^C/) // call vendida
+    expect(screen.getAllByText(/Precisa ter 100 ações/).length).toBeGreaterThan(0)
+  })
+
+  it('"Simular" no booster abre o modelo Booster, com a put vendida', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    abrirVisao()
+    fireEvent.click(within(candidatas('booster')[0]).getByRole('button', { name: /^Simular/ }))
+    expect(screen.getByRole('button', { name: /^Booster/ }).getAttribute('aria-pressed')).toBe('true')
+    expect((screen.getByLabelText('Série da perna 3') as HTMLSelectElement).value).toMatch(/^P/)
+    expect(screen.getByTestId('aviso-risco').textContent).toMatch(/put vendida sem proteção/)
+  })
+
   it('explica como as candidatas são montadas, sem chamar nenhuma de "melhor"', () => {
     render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
     abrirVisao()

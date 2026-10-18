@@ -1957,3 +1957,27 @@ Conferido em navegador (390 px, temas claro e escuro) com dados simulados no for
 **Limites.** (1) Só um giro; não projeta vários meses (repetir o rendimento de um mês não é garantido e a tela não faz essa conta). (2) O passo 2 depende de um prêmio estimado e do ativo no strike da put; o real pode diferir. (3) Preço de último negócio e modelo europeu, sem dividendos, sem corretagem nem imposto. (4) Só vale para ativos que a pessoa aceitaria ter em carteira ao preço do strike (dito na tela).
 
 **Código.** \`domain/roda.ts\` (\`passoDaPut\`, \`passoDaCall\`), \`screens/RodaOpcoes.tsx\`, aba "Roda" com histórico de navegador como as demais. 9 testes de domínio e 10 da tela.
+
+
+## D108 (17/10/2026): novas estruturas na aba Tendência
+
+**Pedido do responsável (17/10/2026).** As estruturas novas do catálogo da aba Estratégias deveriam entrar também na aba Tendência.
+
+**O que entrou**, no mesmo motor da D99 (mesmo vencimento, risco limitado, séries que negociaram no último pregão):
+- **Alta:** Slide com put e Booster (além de compra de call, travas e venda de put).
+- **Baixa:** Collar (para quem tem a ação).
+- **Lateral:** Borboleta com puts, Borboleta de ferro, Condor com calls e Put vendida otimizada (além do condor de ferro, borboleta com calls e venda coberta).
+- **Muita oscilação:** Strangle comprado financiado (além de straddle e strangle comprados).
+
+Cada cartão mostra, como as demais, até três candidatas ordenadas pelo critério escolhido (chance de lucro, retorno no cenário ou menor risco), com custo ou crédito, ganho e perda máximos, equilíbrio e chance de lucro. As definições das pernas são as do catálogo da D104 e da D106 (as do Prefiro PUT seguem as leituras explicadas na D106).
+
+**Ajustes no motor.**
+- O piso de "débito precisa render 25% do risco" (D99) passou a valer só quando o débito é a maior parte do risco (travas, borboletas, strangle financiado). Em estruturas de custo quase zero, como o slide e o booster, o risco vem das pernas vendidas e o piso as eliminava sem motivo.
+- Slide: aceita crédito ou custo de até 25% do prêmio da put comprada (com os preços reais, o crédito puro quase nunca aparece). Booster: o débito da trava de alta precisa ser coberto, ou quase (até R$ 0,02 por opção), pela put vendida.
+- "Simular" no **Collar** e no **Booster** abre o modelo próprio na aba Estratégias, com as ações e as séries do cartão na ordem das pernas (antes, só a venda coberta, de uma perna, tinha esse caminho); as demais continuam abrindo como "Séries escolhidas".
+
+**Fora.** THL e diagonais ficam fora da Tendência: o motor dela compara estruturas no mesmo vencimento, e as de vencimentos diferentes têm resultado estimado (D104), que não se compara com o exato das demais. A venda de straddle e de strangle também não entra: a Tendência só mostra risco limitado.
+
+**Limites.** O slide e a put otimizada têm put vendida sem proteção: a perda máxima é grande diante do ganho e a chance de lucro costuma ser alta, o que é o perfil dessas estruturas e não sinal de que "valem a pena" (a tela já diz que nenhuma tem vantagem esperada).
+
+**Testes.** 8 de domínio (catálogo e visão certa, candidatas de risco limitado, pernas e lados de cada uma, encaminhamento do collar e do booster) e 3 da tela.

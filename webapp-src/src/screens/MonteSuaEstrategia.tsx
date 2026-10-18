@@ -95,11 +95,14 @@ function Montagem({ ativo, escolha, hoje }: { ativo: AtivoComOpcoes; escolha: Es
     if (escolha?.coberta && serie) {
       return { modo: 'vendaCoberta', vencimento: serie.vencimento, codigos: [serie.codigo], premios: [serie.ultimo] }
     }
+    if (escolha?.modelo && serie) {
+      return { modo: escolha.modelo, vencimento: serie.vencimento, codigos: escolha.series.map((x) => x.codigo), premios: escolha.series.map((x) => x.ultimo) }
+    }
     if (escolha) return { modo: 'livre', vencimento: serie?.vencimento ?? '', codigos: [], premios: [] }
     return configurar(ativo, MODELOS[0], null, hoje)
   })
   const [livres, setLivres] = useState<PernaLivre[]>(() =>
-    (escolha && !escolha.coberta ? escolha.series : []).map((s) => ({
+    (escolha && !escolha.coberta && !escolha.modelo ? escolha.series : []).map((s) => ({
       codigo: s.codigo, tipo: s.tipo, strike: s.strike, vencimento: s.vencimento, premio: s.ultimo,
       lado: escolha?.detalhes?.[s.codigo]?.lado ?? escolha?.lado ?? 'compra',
       quantidade: lote * (escolha?.detalhes?.[s.codigo]?.fator ?? 1),
@@ -190,7 +193,7 @@ function Montagem({ ativo, escolha, hoje }: { ativo: AtivoComOpcoes; escolha: Es
           Você precisa ter as ações; a série e o preço podem ser alterados.
         </div>
       )}
-      {escolha && !escolha.coberta && (
+      {escolha && !escolha.coberta && !escolha.modelo && (
         <div className="card-outline small justify" style={{ lineHeight: 1.5 }} role="note">
           Séries escolhidas de <strong>{escolha.ativo.ticker}</strong> ({escolha.series.map((s) => s.codigo).join(', ')}), com o último preço de cada uma.
           Você pode trocar compra por venda, a quantidade e o preço de cada série.
@@ -199,7 +202,7 @@ function Montagem({ ativo, escolha, hoje }: { ativo: AtivoComOpcoes; escolha: Es
 
       <div className="col" style={{ gap: 10 }}>
         <span className="small" style={{ fontWeight: 600 }}>Escolha a estrutura</span>
-        {escolha && !escolha.coberta && livres.length > 0 && (
+        {escolha && !escolha.coberta && !escolha.modelo && livres.length > 0 && (
           <div className="row" style={{ gap: 6, flexWrap: 'wrap' }}>
             <button className={`chip ${!modelo ? 'selected' : ''}`} aria-pressed={!modelo} onClick={() => setConfig((c) => ({ ...c, modo: 'livre' }))}>
               Séries escolhidas ({livres.length})
