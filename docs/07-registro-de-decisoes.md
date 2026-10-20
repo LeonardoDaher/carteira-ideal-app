@@ -2064,3 +2064,11 @@ Cada cartão mostra, como as demais, até três candidatas ordenadas pelo crité
 **Decisões.** Os filtros e a ordem são os mesmos do Top 15: a continuação é só o resto da lista, calculada de uma vez (100 posições) e fatiada, então a ordem das 15 primeiras não muda. O limite é 100 porque, mais abaixo, o rendimento já é baixo e a liquidez, fraca; o card avisa para conferir "Neg." e a chance de exercício. Sem mais de 15 séries, o card não aparece. O painel do botão V abre logo abaixo da tabela em que está a linha escolhida.
 
 **Código.** `TAMANHO_MAXIMO_DO_RANKING` em `domain/premios.ts`; `screens/TopPremiosOpcoes.tsx`. 4 testes novos em `SimuleOpcoesPremios.test.tsx`.
+
+## D116 (20/10/2026): escolha do vencimento no Top 15 de prêmios (mensal específico e W1 a W5)
+
+**O que mudou.** Em **Mensais**, aparecem botões com **Todos** e um por vencimento mensal ainda a correr na base (até 6), com a data e os dias úteis (ex.: "19/11/2026 · 24 d.u."); o primeiro é o próximo vencimento. Em **Semanais**, aparecem **Todos, W1, W2, W4 e W5**. O padrão continua sendo mensais, todos.
+
+**Decisões.** W é a ordem da sexta-feira no mês (1ª sexta = W1); se a sexta é feriado e o vencimento cai na quinta, vale a sexta seguinte. Não há W3: a 3ª sexta é o vencimento mensal. "Próximos 6 meses" e "Todos" dariam o mesmo resultado (a base só traz 6 meses), então só há "Todos". O filtro vale também para o card "Ver mais" (D115).
+
+**Código.** `semanaDoMes`, `SEMANAS_DO_MES` e os campos `mensal` e `semana` do filtro em `domain/premios.ts`; botões em `screens/TopPremiosOpcoes.tsx`. 3 testes novos.

@@ -30,9 +30,26 @@ export type Operacao = 'putVendida' | 'callCoberta'
 export type OrdemPremio = 'mes' | 'prazo'
 export type FiltroVencimentos = 'todos' | 'mensais' | 'semanais'
 
+/** Semanas do mês com vencimento semanal na B3: a 3ª sexta é o vencimento mensal, então não há W3. */
+export const SEMANAS_DO_MES = [1, 2, 4, 5] as const
+
+/**
+ * Número da semana (W1 a W5) de um vencimento: a ordem da sexta-feira no mês (1ª sexta = W1). Quando a sexta é feriado e o
+ * vencimento cai na quinta, vale a sexta seguinte. A 3ª sexta (W3) é a mensal.
+ */
+export function semanaDoMes(iso: string): number {
+  const d = new Date(Date.UTC(+iso.slice(0, 4), +iso.slice(5, 7) - 1, +iso.slice(8, 10)))
+  if (d.getUTCDay() === 4) d.setUTCDate(d.getUTCDate() + 1)
+  return Math.floor((d.getUTCDate() - 1) / 7) + 1
+}
+
 export interface FiltroPremios {
   operacao: Operacao
   vencimentos: FiltroVencimentos
+  /** Com 'mensais': um vencimento mensal específico (data ISO); null = todos os mensais. */
+  mensal: string | null
+  /** Com 'semanais': só a semana W1, W2, W4 ou W5; null = todas. */
+  semana: number | null
   ordem: OrdemPremio
   /** Chance máxima de exercício (%) aceita; null = sem limite de risco. */
   chanceMaxima: number | null
@@ -47,7 +64,7 @@ export interface FiltroPremios {
 }
 
 export const FILTRO_PREMIOS_PADRAO: FiltroPremios = {
-  operacao: 'putVendida', vencimentos: 'mensais', ordem: 'mes', chanceMaxima: 25, poucoLiquidas: false, umPorAtivo: true,
+  operacao: 'putVendida', vencimentos: 'mensais', mensal: null, semana: null, ordem: 'mes', chanceMaxima: 25, poucoLiquidas: false, umPorAtivo: true,
   dividaMaxima: null, soBaratas: false,
 }
 
@@ -144,6 +161,8 @@ export function calcularTopPremios(
     for (const serie of ativo.series) {
       if (serie.dataUltimo !== hoje || serie.negocios < minimoNegocios) continue
       if (filtro.vencimentos !== 'todos' && tipoVencimento(serie.vencimento) !== (filtro.vencimentos === 'mensais' ? 'mensal' : 'semanal')) continue
+      if (filtro.vencimentos === 'mensais' && filtro.mensal !== null && serie.vencimento !== filtro.mensal) continue
+      if (filtro.vencimentos === 'semanais' && filtro.semana !== null && semanaDoMes(serie.vencimento) !== filtro.semana) continue
       const linha = linhaDePremio(ativo, serie, filtro.operacao, hoje, jurosAnual)
       if (!linha) continue
       if (filtro.dividaMaxima !== null && contexto.fundamentos) {

@@ -8,10 +8,11 @@ import type { SnapshotAcoesEndividadas } from '../domain/acoesEndividadas'
 import { LIMITES_DE_DIVIDA, fundamentoDoAtivo, montarIndiceFundamentos, raizDoTicker } from '../domain/fundamentosPremios'
 import { formatarData } from '../domain/rendaFii'
 import { reais } from '../domain/mercadoOficial'
+import { diasUteis, tipoVencimento, vencimentosDe } from '../domain/opcoes'
 import type { EscolhaDeSeries, SnapshotOpcoes } from '../domain/opcoes'
 import {
   DIAS_DO_MES, DIAS_UTEIS_MINIMOS, FILTRO_PREMIOS_PADRAO, LIMITES_DE_CHANCE, NEGOCIOS_MINIMOS, NEGOCIOS_MINIMOS_FLEXIVEL,
-  TAMANHO_DO_TOP, TAMANHO_MAXIMO_DO_RANKING, calcularTopPremios,
+  SEMANAS_DO_MES, TAMANHO_DO_TOP, TAMANHO_MAXIMO_DO_RANKING, calcularTopPremios,
 } from '../domain/premios'
 import type { FiltroPremios, FiltroVencimentos, LinhaPremio, Operacao, OrdemPremio } from '../domain/premios'
 import { BotaoDeLado, OperacaoDaSerie } from './OperacaoDaSerie'
@@ -79,6 +80,11 @@ export function TopPremiosOpcoes({
   const fundamentos = useMemo(() => montarIndiceFundamentos(endividadas), [endividadas])
   const baratas = useBaratas(carregarBaratas, armazenamento)
   const raizesBaratas = baratas.tipo === 'ok' ? baratas.raizes : null
+  const hojeDaBase = snapshot.dataPregao ?? new Date().toISOString().slice(0, 10)
+  const mensaisDaBase = useMemo(
+    () => vencimentosDe(snapshot.ativos.flatMap((a) => a.series)).filter((v) => tipoVencimento(v) === 'mensal' && v > hojeDaBase).slice(0, 6),
+    [snapshot, hojeDaBase],
+  )
   const mudar = (parcial: Partial<FiltroPremios>) => setFiltro((f) => ({ ...f, ...parcial }))
   // O ranking vai até 100 posições: as 15 primeiras ficam na tabela principal e o resto no card "Ver mais".
   const ranking = useMemo(
@@ -255,7 +261,39 @@ export function TopPremiosOpcoes({
                 </button>
               ))}
             </div>
-            <span className="tiny muted">Mensais comparam melhor: o rendimento das semanais, levado a {DIAS_DO_MES} dias úteis, fica exagerado.</span>
+            {filtro.vencimentos === 'mensais' && (
+              <div className="row" style={{ gap: 6, flexWrap: 'wrap' }} role="group" aria-label="Vencimento mensal">
+                <button className={`chip ${filtro.mensal === null ? 'selected' : ''}`} aria-pressed={filtro.mensal === null} onClick={() => mudar({ mensal: null })}>Todos</button>
+                {mensaisDaBase.map((v, i) => (
+                  <button
+                    key={v}
+                    className={`chip ${filtro.mensal === v ? 'selected' : ''}`}
+                    aria-pressed={filtro.mensal === v}
+                    onClick={() => mudar({ mensal: v })}
+                    title={i === 0 ? 'Próximo vencimento mensal' : undefined}
+                  >
+                    {formatarData(v)} · {diasUteis(v, hojeDaBase)} d.u.
+                  </button>
+                ))}
+              </div>
+            )}
+            {filtro.vencimentos === 'semanais' && (
+              <div className="row" style={{ gap: 6, flexWrap: 'wrap' }} role="group" aria-label="Semana do vencimento">
+                <button className={`chip ${filtro.semana === null ? 'selected' : ''}`} aria-pressed={filtro.semana === null} onClick={() => mudar({ semana: null })}>Todos</button>
+                {SEMANAS_DO_MES.map((w) => (
+                  <button
+                    key={w}
+                    className={`chip ${filtro.semana === w ? 'selected' : ''}`}
+                    aria-pressed={filtro.semana === w}
+                    onClick={() => mudar({ semana: w })}
+                    title={`Vencimentos semanais da ${w}ª sexta-feira do mês`}
+                  >
+                    W{w}
+                  </button>
+                ))}
+              </div>
+            )}
+            <span className="tiny muted">Mensais comparam melhor: o rendimento das semanais, levado a {DIAS_DO_MES} dias úteis, fica exagerado. W1, W2, W4 e W5 são a 1ª, 2ª, 4ª e 5ª sexta do mês; a 3ª é a mensal, por isso não há W3.</span>
           </div>
           <div className="col" style={{ gap: 6 }}>
             <span className="small" style={{ fontWeight: 600 }}>Ordenar por</span>

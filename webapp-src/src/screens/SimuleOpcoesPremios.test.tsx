@@ -252,3 +252,57 @@ describe('SimuleOpcoes: Top 15 prêmios, card "Ver mais"', () => {
     expect(screen.queryByTestId('ver-mais')).toBeNull()
   })
 })
+
+describe('SimuleOpcoes: Top 15 prêmios, escolha do vencimento (mensal e W1 a W5)', () => {
+  const venc = ['2026-10-23', '2026-11-06', '2026-11-13', '2026-11-19', '2026-12-18'] // W4, W1, W2, mensal, mensal
+  const base: SnapshotOpcoes = {
+    geradoEm: null,
+    dataPregao: '2026-10-16',
+    ativos: venc.map((v, i) => ({
+      ticker: `VVV${i}3`, nome: `EMPRESA ${i}`, cotacao: 20, volumeOpcoes: 1_000_000, lote: 100,
+      series: [serie(`VVV${i}W200`, 'put', 20, v, 0.5)],
+    })),
+  }
+  const grupo = (nome: string) => within(screen.getByRole('group', { name: nome }))
+
+  it('semanais: botões Todos, W1, W2, W4 e W5 (sem W3), e cada W filtra a sua semana', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={base} />)
+    abrirTop()
+    semLimite()
+    fireEvent.click(screen.getByRole('button', { name: 'Semanais' }))
+    expect(grupo('Semana do vencimento').getAllByRole('button').map((b) => b.textContent)).toEqual(['Todos', 'W1', 'W2', 'W4', 'W5'])
+    expect(series()).toHaveLength(3)
+    fireEvent.click(grupo('Semana do vencimento').getByRole('button', { name: 'W1' }))
+    expect(series()).toEqual(['VVV1W200']) // 06/11
+    fireEvent.click(grupo('Semana do vencimento').getByRole('button', { name: 'W4' }))
+    expect(series()).toEqual(['VVV0W200']) // 23/10
+    fireEvent.click(grupo('Semana do vencimento').getByRole('button', { name: 'W5' }))
+    expect(screen.getByText('Nenhuma série atende aos filtros.')).toBeDefined()
+    fireEvent.click(grupo('Semana do vencimento').getByRole('button', { name: 'Todos' }))
+    expect(series()).toHaveLength(3)
+  })
+
+  it('mensais: um botão por vencimento mensal, com a data e os dias úteis, e Todos', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={base} />)
+    abrirTop()
+    semLimite()
+    const botoes = grupo('Vencimento mensal').getAllByRole('button').map((b) => b.textContent ?? '')
+    expect(botoes[0]).toBe('Todos')
+    expect(botoes[1]).toMatch(/^19\/11\/2026 · \d+ d\.u\.$/)
+    expect(botoes[2]).toMatch(/^18\/12\/2026 · \d+ d\.u\.$/)
+    expect(botoes).toHaveLength(3)
+    expect(series()).toEqual(['VVV3W200', 'VVV4W200'])
+    fireEvent.click(grupo('Vencimento mensal').getByRole('button', { name: /^18\/12\/2026/ }))
+    expect(series()).toEqual(['VVV4W200'])
+    fireEvent.click(grupo('Vencimento mensal').getByRole('button', { name: 'Todos' }))
+    expect(series()).toHaveLength(2)
+  })
+
+  it('os botões de mensal e de semana só aparecem no tipo de vencimento certo', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={base} />)
+    abrirTop()
+    expect(screen.queryByRole('group', { name: 'Semana do vencimento' })).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Semanais' }))
+    expect(screen.queryByRole('group', { name: 'Vencimento mensal' })).toBeNull()
+  })
+})
