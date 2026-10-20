@@ -11,7 +11,7 @@
 # (webapp-src/src/data/fiiBaratos.json) traz só o cabeçalho, sem nenhum fundo; a lista fica em
 # dados-privados/fii-baratos.json, entregue por api/top15-fiis só a quem tem o código.
 #
-# Roda TODO DIA ÚTIL (D89), depois do preço diário dos FIIs (22h15 de Brasília), e sob demanda. Na primeira execução do mês
+# Roda TODO DIA ÚTIL (D89), depois do preço diário dos FIIs (21h45 de Brasília), e sob demanda. Na primeira execução do mês
 # (ou se os parâmetros ou o código de cálculo mudarem, ou com "auditoria completa" marcada) baixa o informe da CVM e grava a
 # pasta de auditoria completa; nos outros dias reaproveita o informe congelado nessa pasta, troca só o preço diário e CONFERE o
 # cálculo de forma independente em memória antes de publicar (sem pasta nova). Se a cotação for mais velha que
@@ -25,7 +25,7 @@ name: Atualizar FIIs Baratos
 
 on:
   schedule:
-    - cron: '45 2 * * 2-6' # terça a sábado, 02h45 UTC = segunda a sexta, 23h45 de Brasília
+    - cron: '0 2 * * 2-6' # terça a sábado, 02h UTC = segunda a sexta, 23h de Brasília
   workflow_dispatch:
     inputs:
       auditoria_completa:

@@ -343,7 +343,7 @@ export async function principal() {
   const pasta = fs.mkdtempSync(path.join(os.tmpdir(), 'opcoes-'))
   try {
     const pregoes = []
-    for (const data of datasCandidatas(new Date(), CONFIG.diasProcura, '20:00')) {
+    for (const data of datasCandidatas(new Date(), CONFIG.diasProcura, '19:30')) {
       if (pregoes.length >= CONFIG.pregoesNaJanela) break
       const texto = await baixarCotahist(data, pasta)
       if (!texto) {

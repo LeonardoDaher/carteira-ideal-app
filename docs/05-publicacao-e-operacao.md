@@ -162,12 +162,12 @@ o job publica com o cadastro guardado em `historico/bdrs.json` e avisa no log.
    30 minutos). Ela grava `historico/bdrs.json` e publica `webapp-src/src/data/bdrs.json`. O
    histórico é publicado mesmo se a execução falhar; rodar de novo só baixa o que falta.
 3. Ler no log da carga as linhas `[desdobramento]` e `N BDRs negociados de M no boletim`
-   (tabela abaixo). A partir daí, "Atualizar BDRs" roda sozinho de segunda a sexta, às 22h30.
+   (tabela abaixo). A partir daí, "Atualizar BDRs" roda sozinho de segunda a sexta, às 22h.
 
 Até a carga rodar, o job diário falha com "Rode a carga inicial" e a aba continua com o último
 arquivo gerado pela brapi.
 
-**Rotina automática.** De segunda a sexta, às 22h30 de Brasília, o GitHub roda "Atualizar BDRs":
+**Rotina automática.** De segunda a sexta, às 22h de Brasília, o GitHub roda "Atualizar BDRs":
 baixa o boletim do dia, acrescenta o pregão ao histórico, grava `bdrs.json` (os 40 da lista e a
 busca), confere se o site compila e faz um commit "dados: BDRs (AAAA-MM-DD)". Em feriado da B3
 nada muda e nada é publicado.
@@ -279,10 +279,31 @@ A cada `npm run build`, o `scripts/build-site.mjs` chama o `scripts/gerar-pagina
 
 ## 5.12 Operação diária das opções (decisão D96)
 
-**O que roda.** O workflow "Atualizar opções" (`.github/workflows/atualizar-opcoes.yml`) roda de terça a sábado às 01h15 UTC (22h15 de Brasília, depois do pregão) e chama `scripts/atualizar-opcoes.mjs`. Ele baixa da B3 o cadastro de instrumentos (opções de ações e ETFs, estilo americana ou europeia, strike e vencimento) e o Boletim de Preços (COTAHIST) dos últimos pregões, junta as duas fontes, calcula a leitura de tendência com o histórico que os jobs de ações e ETFs já guardam e grava `webapp-src/public/dados/opcoes.json` (cerca de 1,3 MB: ~160 ativos e ~18 mil séries com vencimento em até 6 meses). Se algo mudou, faz o commit "dados: Opções (AAAA-MM-DD)"; em feriado da B3 ou sem dados novos, não muda nada.
+**O que roda.** O workflow "Atualizar opções" (`.github/workflows/atualizar-opcoes.yml`) roda de segunda a sexta às 23h UTC (20h de Brasília, a primeira da noite: o arquivo do dia sai por volta das 19h) e chama `scripts/atualizar-opcoes.mjs`. Ele baixa da B3 o cadastro de instrumentos (opções de ações e ETFs, estilo americana ou europeia, strike e vencimento) e o Boletim de Preços (COTAHIST) dos últimos pregões, junta as duas fontes, calcula a leitura de tendência com o histórico que os jobs de ações e ETFs já guardam e grava `webapp-src/public/dados/opcoes.json` (cerca de 1,3 MB: ~160 ativos e ~18 mil séries com vencimento em até 6 meses). Se algo mudou, faz o commit "dados: Opções (AAAA-MM-DD)"; em feriado da B3 ou sem dados novos, não muda nada.
 
 **Rodar fora do horário.** Actions > **Atualizar opções** > **Run workflow**. A opção **forcar** reprocessa um dia já processado (útil depois de corrigir o script).
 
 **O que conferir.** No log, as linhas com o número de ativos e de séries e a data do pregão; os ativos de controle (PETR4, VALE3 e BOVA11) precisam ter séries. Se o job recusar o arquivo (poucos ativos, séries demais sem preço ou controle ausente), o site continua com o arquivo anterior: rodar de novo mais tarde e, se repetir por dias, enviar o log para quem desenvolve. A tela lê o arquivo no navegador (`dados/opcoes.json`); não há servidor nem código de acesso.
 
 **Cuidados.** O arquivo muda quase todo dia útil e entra no histórico do GitHub; o job não grava o horário de geração a menos que os dados mudem.
+
+## Horários dos jobs diários (segunda a sexta, Brasília)
+
+Os dados de mercado saem do Boletim de Preços da B3, cuja versão final do dia fica pronta por volta das 20h30; por isso
+o corte (`horarioCorteBoletim`) é 20:45 e nenhum job de preço roda antes das 21h30. As Opções usam outro arquivo da B3
+(COTAHIST, por volta das 19h) e rodam às 20h.
+
+| Hora | Job |
+|---|---|
+| 20h00 | Opções |
+| 21h30 | ETFs |
+| 21h45 | Preço diário dos FIIs |
+| 22h00 | BDRs |
+| 22h15 | Ações |
+| 22h45 | Top 15 mercado |
+| 23h00 | FIIs baratos |
+| 23h15 | Ações baratas |
+| 23h45 | Ações endividadas |
+
+Cada job que muda dados faz um commit, que dispara o deploy da Vercel; o app mostra o novo dia poucos minutos depois.
+Os jobs que dependem de outros (Top 15, baratas, endividadas) ficam depois dos de preço.

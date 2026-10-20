@@ -12,7 +12,7 @@
 # CÓDIGO do mês próprio (TOP15_BDRS_CODIGOS): o arquivo público (webapp-src/src/data/bdrsDesconto.json) traz só o
 # cabeçalho, sem nenhum BDR; a lista fica em dados-privados/bdr-desconto.json, entregue por api/top15-bdrs.
 #
-# Roda TODO DIA ÚTIL (D89), depois dos jobs de preço (ETFs 22h, FIIs 22h15, BDRs 22h30, ações 23h de Brasília), e sob demanda.
+# Roda TODO DIA ÚTIL (D89), depois dos jobs de preço (ETFs 21h30, FIIs 21h45, BDRs 22h, ações 22h15 de Brasília), e sob demanda.
 # Auditoria: a pasta completa em auditoria/top15-<classe>/<data>/ só é gravada na primeira execução do mês (ou se os
 # parâmetros ou o código de cálculo mudarem, ou com "auditoria completa" marcada na execução manual). Nos outros dias o
 # ranking é recalculado com o preço do dia e CONFERIDO de forma independente em memória antes de publicar.
@@ -23,7 +23,7 @@ name: Atualizar Top 15 ETFs e BDRs
 
 on:
   schedule:
-    - cron: '30 2 * * 2-6' # terça a sábado, 02h30 UTC = segunda a sexta, 23h30 de Brasília
+    - cron: '45 1 * * 2-6' # terça a sábado, 01h45 UTC = segunda a sexta, 22h45 de Brasília
   workflow_dispatch:
     inputs:
       auditoria_completa:

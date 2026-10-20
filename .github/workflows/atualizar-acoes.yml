@@ -6,7 +6,7 @@
 # arquivo dos jobs de ETFs (D23) e BDRs (D24). Setor e nome vêm do cadastro do repositório.
 # Este job NÃO usa a brapi: não há token nem cota, e a lista pode crescer à vontade.
 #
-# Segunda a sexta às 23h de Brasília (02h UTC do dia seguinte): depois do job de BDRs (22h30), para
+# Segunda a sexta às 22h15 de Brasília (01h15 UTC do dia seguinte): depois do job de BDRs (22h), para
 # os três não disputarem o commit.
 #
 # Antes da primeira execução diária, rode UMA VEZ o workflow "Carga inicial de Ações".
@@ -19,7 +19,7 @@ name: Atualizar Ações
 
 on:
   schedule:
-    - cron: '0 2 * * 2-6' # terça a sábado, 02h UTC = segunda a sexta, 23h de Brasília
+    - cron: '15 1 * * 2-6' # terça a sábado, 01h15 UTC = segunda a sexta, 22h15 de Brasília
   workflow_dispatch: {} # botão "Run workflow" para rodar manualmente
 
 permissions:

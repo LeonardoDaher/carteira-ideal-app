@@ -3,8 +3,8 @@
 #
 # Fontes: cadastro de instrumentos e COTAHIST diário da B3, ambos oficiais, sem cota e sem secret.
 #
-# Segunda a sexta às 22h15 de Brasília (01h15 UTC do dia seguinte), depois do job de ETFs (22h): o arquivo do dia sai
-# por volta das 19h. Se o script achar algo errado (poucos ativos, ativos de controle ausentes, série inválida), o job
+# Segunda a sexta às 20h de Brasília (23h UTC do mesmo dia), a primeira da noite: o arquivo do dia sai
+# por volta das 19h (o script só considera o dia de hoje a partir das 19h30). Se o script achar algo errado (poucos ativos, ativos de controle ausentes, série inválida), o job
 # falha SEM alterar os arquivos: o app continua com o último dia bom e o GitHub envia um e-mail avisando. Feriado da B3
 # (arquivo ausente) ou pregão já processado: nada muda, sem commit e sem deploy.
 
@@ -12,7 +12,7 @@ name: Atualizar Opções
 
 on:
   schedule:
-    - cron: '15 1 * * 2-6' # terça a sábado, 01h15 UTC = segunda a sexta, 22h15 de Brasília
+    - cron: '0 23 * * 1-5' # segunda a sexta, 23h UTC = 20h de Brasília
   workflow_dispatch:
     inputs:
       forcar:

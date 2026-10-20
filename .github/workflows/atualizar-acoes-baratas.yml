@@ -5,7 +5,7 @@
 # (manifesto com sha256 das fontes, insumos congelados, memória de cálculo por empresa, exclusões).
 # Em seguida refaz o cálculo a partir dos insumos gravados (--verificar) e só então publica.
 #
-# Roda TODO DIA ÚTIL (D89), depois do job de Ações (23h de Brasília), e sob demanda. Na primeira execução do mês (ou se os
+# Roda TODO DIA ÚTIL (D89), depois do job de Ações (22h15 de Brasília), e sob demanda. Na primeira execução do mês (ou se os
 # parâmetros ou o código de cálculo mudarem, ou com data de corte manual, ou com "auditoria completa" marcada) baixa a CVM e grava
 # a pasta de auditoria completa; nos outros dias reaproveita as demonstrações congeladas nessa pasta, troca só o preço e CONFERE
 # o cálculo de forma independente em memória antes de publicar (sem pasta nova). Os demonstrativos mudam só em março, maio,
@@ -24,7 +24,7 @@ name: Atualizar Top 15 Ações Baratas
 
 on:
   schedule:
-    - cron: '0 3 * * 2-6' # terça a sábado, 03h UTC = segunda a sexta, 00h de Brasília
+    - cron: '15 2 * * 2-6' # terça a sábado, 02h15 UTC = segunda a sexta, 23h15 de Brasília
   workflow_dispatch:
     inputs:
       auditoria_completa:

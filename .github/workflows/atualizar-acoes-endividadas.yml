@@ -1,7 +1,7 @@
 # "Top 15 empresas mais endividadas" (decisão D94), dívida líquida ÷ EBITDA.
 #
 # SEM REDE. Parte das demonstrações da CVM que a triagem de ações baratas já congelou em auditoria/acoes-baratas/ e troca só o preço do
-# dia (historico/acoes.json). Roda TODO DIA ÚTIL, depois do job "Atualizar Top 15 Ações Baratas" (00h de Brasília), e sob demanda.
+# dia (historico/acoes.json). Roda TODO DIA ÚTIL, depois do job "Atualizar Top 15 Ações Baratas" (23h15 de Brasília), e sob demanda.
 # Auditoria (desenho da D89): a pasta completa em auditoria/acoes-endividadas/<data>/ só é gravada na primeira execução do mês (ou
 # se os parâmetros, o código de cálculo ou os insumos de origem das ações baratas mudarem, ou com "auditoria completa" marcada na
 # execução manual). Nos outros dias o ranking é recalculado e CONFERIDO de forma independente em memória antes de publicar.
@@ -14,7 +14,7 @@ name: Atualizar Top 15 Empresas Endividadas
 
 on:
   schedule:
-    - cron: '30 3 * * 2-6' # terça a sábado, 03h30 UTC = segunda a sexta, 00h30 de Brasília (depois das ações baratas, 00h)
+    - cron: '45 2 * * 2-6' # terça a sábado, 02h45 UTC = segunda a sexta, 23h45 de Brasília (depois das ações baratas, 23h15)
   workflow_dispatch:
     inputs:
       auditoria_completa:

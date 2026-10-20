@@ -6,8 +6,8 @@
 # secret. A brapi (BRAPI_TOKEN) só informa quais códigos são ETF e o nome oficial, em 3
 # requisições por execução (~66 por mês); se falhar, o job usa o universo guardado.
 #
-# Segunda a sexta às 22h de Brasília (01h UTC do dia seguinte): a última versão do boletim do
-# dia sai por volta das 20h30. Não coincide com os outros jobs (BDRs 22h30, FIIs dia 20, mercado
+# Segunda a sexta às 21h30 de Brasília (00h30 UTC do dia seguinte): a última versão do boletim do
+# dia sai por volta das 20h30. Não coincide com os outros jobs (BDRs 22h, FIIs dia 20, mercado
 # terça).
 #
 # Antes da primeira execução diária, rode UMA VEZ o workflow "Carga inicial de ETFs".
@@ -20,7 +20,7 @@ name: Atualizar ETFs
 
 on:
   schedule:
-    - cron: '0 1 * * 2-6' # terça a sábado, 01h UTC = segunda a sexta, 22h de Brasília
+    - cron: '30 0 * * 2-6' # terça a sábado, 00h30 UTC = segunda a sexta, 21h30 de Brasília
   workflow_dispatch: {}
 
 permissions:
