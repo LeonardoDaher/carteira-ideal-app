@@ -2,8 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { jurosPadrao } from '../data/jurosOpcoes'
 import { SNAPSHOT_ACOES_ENDIVIDADAS } from '../data/snapshotAcoesEndividadas'
 import { storage } from '../data/storage'
-import { CHAVE_CODIGO_TOP15, buscarTop15 } from '../domain/acessoTop15'
-import type { RespostaTop15 } from '../domain/acessoTop15'
+import { CHAVE_CODIGO_TOP15, CHAVE_CODIGO_TOP15_OPCOES, buscarTop15, buscarTop15Opcoes } from '../domain/acessoTop15'
+import type { RespostaTop15, RespostaTop15Opcoes } from '../domain/acessoTop15'
 import type { SnapshotAcoesEndividadas } from '../domain/acoesEndividadas'
 import { LIMITES_DE_DIVIDA, fundamentoDoAtivo, montarIndiceFundamentos, raizDoTicker } from '../domain/fundamentosPremios'
 import { formatarData } from '../domain/rendaFii'
@@ -15,6 +15,7 @@ import {
   SEMANAS_DO_MES, TAMANHO_DO_TOP, TAMANHO_MAXIMO_DO_RANKING, calcularTopPremios,
 } from '../domain/premios'
 import type { FiltroPremios, FiltroVencimentos, LinhaPremio, Operacao, OrdemPremio } from '../domain/premios'
+import { PortaoPorCodigo } from '../ui/PortaoPorCodigo'
 import { BotaoDeLado, OperacaoDaSerie } from './OperacaoDaSerie'
 
 const num = (v: number, casas = 2) => v.toLocaleString('pt-BR', { minimumFractionDigits: casas, maximumFractionDigits: casas })
@@ -59,22 +60,59 @@ function useBaratas(carregar: CarregarBaratas, armazenamento: Armazenamento): Es
   return estado
 }
 
-/**
- * Top 15 dos maiores prêmios para quem vende opção: rendimento do prêmio sobre o dinheiro travado, com o risco ao lado
- * (colchão, chance de exercício e volatilidade). O risco é um limite escolhido pela pessoa; o ranking compara os prêmios
- * dentro dele. Cruzado com a dívida da empresa (lista das mais endividadas, aberta) e, para quem liberou, com o Top 15
- * mais baratas. Descritivo: não é recomendação de operação.
- */
-export function TopPremiosOpcoes({
-  snapshot, onSimular, endividadas = SNAPSHOT_ACOES_ENDIVIDADAS, carregarBaratas = buscarTop15, armazenamento = storage,
-}: {
+type PropsDaLista = {
   snapshot: SnapshotOpcoes
   onSimular: (e: EscolhaDeSeries) => void
   /** Injetáveis nos testes. */
   endividadas?: SnapshotAcoesEndividadas
   carregarBaratas?: CarregarBaratas
   armazenamento?: Armazenamento
+}
+
+/**
+ * Porta do Top 15 de prêmios: como as demais listas (D50, D65, D70), só abre com o código do mês, próprio desta lista (D66,
+ * variável TOP15_OPCOES_CODIGOS da Vercel). A porta confere o código no servidor; o ranking em si é calculado aqui, com o
+ * arquivo de opções, que é aberto (ver D117).
+ */
+export function TopPremiosOpcoes({
+  semPortao = false, carregarAcesso = buscarTop15Opcoes, armazenamentoDoAcesso = storage, ...resto
+}: PropsDaLista & {
+  /** Só para testes e telas internas: pula a porta do código. */
+  semPortao?: boolean
+  carregarAcesso?: (codigo: string) => Promise<RespostaTop15Opcoes>
+  armazenamentoDoAcesso?: Pick<typeof storage, 'getItem' | 'setItem' | 'removeItem'>
 }) {
+  if (semPortao) return <ListaDePremios {...resto} />
+  return (
+    <PortaoPorCodigo
+      titulo="Top 15 prêmios de opções: acesso por código"
+      oQueLibera="Com ele você vê o ranking dos maiores prêmios para quem vende put ou call coberta, com o risco de cada série ao lado."
+      instagram="acarteiraideal"
+      carregar={carregarAcesso}
+      armazenamento={armazenamentoDoAcesso}
+      chaveArmazenamento={CHAVE_CODIGO_TOP15_OPCOES}
+      idDeTeste="top15-opcoes-codigo"
+      renderizar={(_liberado, sair) => (
+        <>
+          <ListaDePremios {...resto} />
+          <button type="button" className="btn btn-outline" onClick={sair} style={{ alignSelf: 'flex-start' }}>
+            Sair e trocar o código
+          </button>
+        </>
+      )}
+    />
+  )
+}
+
+/**
+ * Top 15 dos maiores prêmios para quem vende opção: rendimento do prêmio sobre o dinheiro travado, com o risco ao lado
+ * (colchão, chance de exercício e volatilidade). O risco é um limite escolhido pela pessoa; o ranking compara os prêmios
+ * dentro dele. Cruzado com a dívida da empresa (lista das mais endividadas, aberta) e, para quem liberou, com o Top 15
+ * mais baratas. Descritivo: não é recomendação de operação.
+ */
+function ListaDePremios({
+  snapshot, onSimular, endividadas = SNAPSHOT_ACOES_ENDIVIDADAS, carregarBaratas = buscarTop15, armazenamento = storage,
+}: PropsDaLista) {
   const [filtro, setFiltro] = useState<FiltroPremios>(FILTRO_PREMIOS_PADRAO)
   const juros = jurosPadrao()
   const fundamentos = useMemo(() => montarIndiceFundamentos(endividadas), [endividadas])

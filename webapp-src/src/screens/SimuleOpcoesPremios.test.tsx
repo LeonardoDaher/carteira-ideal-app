@@ -39,7 +39,7 @@ const series = () => linhas().map((l) => celulas(l)[3])
 
 describe('SimuleOpcoes: Top 15 prêmios', () => {
   it('abre na venda de put, com limite de risco de 25%, e avisa quando nada atende (as puts de exemplo estão no dinheiro)', () => {
-    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    render(<SimuleOpcoes semPortaoNoTop15 ctx={ctx} snapshot={snapshot} />)
     abrirTop()
     expect(screen.getByRole('button', { name: 'Até 25%' }).getAttribute('aria-pressed')).toBe('true')
     expect(screen.getByRole('button', { name: 'Vender put' }).getAttribute('aria-pressed')).toBe('true')
@@ -48,7 +48,7 @@ describe('SimuleOpcoes: Top 15 prêmios', () => {
   })
 
   it('sem limite de risco, ordena as puts pelo rendimento em 21 dias úteis, e calcula prazo, mês e colchão', () => {
-    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    render(<SimuleOpcoes semPortaoNoTop15 ctx={ctx} snapshot={snapshot} />)
     abrirTop()
     semLimite()
     expect(series()).toEqual(['PETRW600', 'BBASW240']) // uma série por ativo: a melhor de PETR4 (600) e a de BBAS3
@@ -63,7 +63,7 @@ describe('SimuleOpcoes: Top 15 prêmios', () => {
   })
 
   it('para o mesmo ativo, o limite de risco troca a série ATM por uma mais afastada, que paga menos', () => {
-    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    render(<SimuleOpcoes semPortaoNoTop15 ctx={ctx} snapshot={snapshot} />)
     abrirTop()
     semLimite()
     fireEvent.click(screen.getByRole('checkbox', { name: /Só a melhor série de cada ativo/ }))
@@ -71,7 +71,7 @@ describe('SimuleOpcoes: Top 15 prêmios', () => {
   })
 
   it('venda coberta de call: só calls a partir do preço, com a coluna de ganho se exercida', () => {
-    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    render(<SimuleOpcoes semPortaoNoTop15 ctx={ctx} snapshot={snapshot} />)
     abrirTop()
     fireEvent.click(screen.getByRole('button', { name: 'Vender call coberta' }))
     semLimite()
@@ -83,7 +83,7 @@ describe('SimuleOpcoes: Top 15 prêmios', () => {
   })
 
   it('filtra por vencimentos mensais e semanais', () => {
-    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    render(<SimuleOpcoes semPortaoNoTop15 ctx={ctx} snapshot={snapshot} />)
     abrirTop()
     semLimite()
     fireEvent.click(screen.getByRole('button', { name: 'Semanais' }))
@@ -93,7 +93,7 @@ describe('SimuleOpcoes: Top 15 prêmios', () => {
   })
 
   it('"Simular" numa put leva às estratégias com a série já vendida e o aviso de risco', () => {
-    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    render(<SimuleOpcoes semPortaoNoTop15 ctx={ctx} snapshot={snapshot} />)
     abrirTop()
     semLimite()
     fireEvent.click(screen.getByRole('button', { name: 'Simular a venda de PETRW600' }))
@@ -104,7 +104,7 @@ describe('SimuleOpcoes: Top 15 prêmios', () => {
   })
 
   it('"Simular" numa call coberta abre a venda coberta com o strike e o prêmio da série', () => {
-    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    render(<SimuleOpcoes semPortaoNoTop15 ctx={ctx} snapshot={snapshot} />)
     abrirTop()
     fireEvent.click(screen.getByRole('button', { name: 'Vender call coberta' }))
     semLimite()
@@ -117,7 +117,7 @@ describe('SimuleOpcoes: Top 15 prêmios', () => {
   })
 
   it('o "voltar" do navegador, a partir das estratégias abertas pelo ranking, volta ao ranking', async () => {
-    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    render(<SimuleOpcoes semPortaoNoTop15 ctx={ctx} snapshot={snapshot} />)
     abrirTop()
     semLimite()
     fireEvent.click(screen.getByRole('button', { name: 'Simular a venda de PETRW600' }))
@@ -128,7 +128,7 @@ describe('SimuleOpcoes: Top 15 prêmios', () => {
   })
 
   it('explica o método e os limites', () => {
-    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    render(<SimuleOpcoes semPortaoNoTop15 ctx={ctx} snapshot={snapshot} />)
     abrirTop()
     expect(screen.getByText('Como o ranking é calculado')).toBeDefined()
     expect(screen.getByText(/Quem paga o maior prêmio, para um mesmo risco\?/)).toBeDefined()
@@ -140,7 +140,7 @@ describe('SimuleOpcoes: Top 15 prêmios, venda montada na própria linha (V)', (
   const vender = (codigo: string) => fireEvent.click(screen.getByRole('button', { name: `Vender ${codigo}` }))
 
   it('cada linha tem o V (vermelho) na frente e o Simular continua no fim', () => {
-    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    render(<SimuleOpcoes semPortaoNoTop15 ctx={ctx} snapshot={snapshot} />)
     abrirTop()
     semLimite()
     const primeira = linhas()[0]
@@ -150,7 +150,7 @@ describe('SimuleOpcoes: Top 15 prêmios, venda montada na própria linha (V)', (
   })
 
   it('V numa put monta a venda ali mesmo, sem sair do ranking, com ganho limitado ao prêmio', () => {
-    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    render(<SimuleOpcoes semPortaoNoTop15 ctx={ctx} snapshot={snapshot} />)
     abrirTop()
     semLimite()
     expect(screen.queryByTestId('operacao-da-serie')).toBeNull()
@@ -164,7 +164,7 @@ describe('SimuleOpcoes: Top 15 prêmios, venda montada na própria linha (V)', (
   })
 
   it('V numa call do ranking de calls cobertas monta a venda coberta, com as ações', () => {
-    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    render(<SimuleOpcoes semPortaoNoTop15 ctx={ctx} snapshot={snapshot} />)
     abrirTop()
     fireEvent.click(screen.getByRole('button', { name: 'Vender call coberta' }))
     semLimite()
@@ -177,7 +177,7 @@ describe('SimuleOpcoes: Top 15 prêmios, venda montada na própria linha (V)', (
   })
 
   it('clicar de novo no V, ou em Fechar, desfaz a operação', () => {
-    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    render(<SimuleOpcoes semPortaoNoTop15 ctx={ctx} snapshot={snapshot} />)
     abrirTop()
     semLimite()
     vender('PETRW600')
@@ -190,7 +190,7 @@ describe('SimuleOpcoes: Top 15 prêmios, venda montada na própria linha (V)', (
   })
 
   it('o Simular continua levando a série para a aba Estratégias', () => {
-    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    render(<SimuleOpcoes semPortaoNoTop15 ctx={ctx} snapshot={snapshot} />)
     abrirTop()
     semLimite()
     fireEvent.click(screen.getByRole('button', { name: 'Simular a venda de PETRW600' }))
@@ -212,7 +212,7 @@ describe('SimuleOpcoes: Top 15 prêmios, card "Ver mais"', () => {
   const extras = () => screen.queryAllByTestId('linha-premio-extra')
 
   it('o Top 15 fica na tabela principal e a continuação, fechada, só avisa quantas séries há', () => {
-    render(<SimuleOpcoes ctx={ctx} snapshot={grande} />)
+    render(<SimuleOpcoes semPortaoNoTop15 ctx={ctx} snapshot={grande} />)
     abrirTop()
     semLimite()
     expect(linhas()).toHaveLength(15)
@@ -221,7 +221,7 @@ describe('SimuleOpcoes: Top 15 prêmios, card "Ver mais"', () => {
   })
 
   it('"Ver mais" mostra as posições 16 em diante na mesma ordem, e "Mostrar menos" recolhe', () => {
-    render(<SimuleOpcoes ctx={ctx} snapshot={grande} />)
+    render(<SimuleOpcoes semPortaoNoTop15 ctx={ctx} snapshot={grande} />)
     abrirTop()
     semLimite()
     fireEvent.click(screen.getByRole('button', { name: 'Ver mais' }))
@@ -234,7 +234,7 @@ describe('SimuleOpcoes: Top 15 prêmios, card "Ver mais"', () => {
   })
 
   it('o V de uma linha da continuação monta a venda abaixo dela', () => {
-    render(<SimuleOpcoes ctx={ctx} snapshot={grande} />)
+    render(<SimuleOpcoes semPortaoNoTop15 ctx={ctx} snapshot={grande} />)
     abrirTop()
     semLimite()
     fireEvent.click(screen.getByRole('button', { name: 'Ver mais' }))
@@ -246,7 +246,7 @@ describe('SimuleOpcoes: Top 15 prêmios, card "Ver mais"', () => {
   })
 
   it('com 15 séries ou menos, o card não aparece', () => {
-    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    render(<SimuleOpcoes semPortaoNoTop15 ctx={ctx} snapshot={snapshot} />)
     abrirTop()
     semLimite()
     expect(screen.queryByTestId('ver-mais')).toBeNull()
@@ -266,7 +266,7 @@ describe('SimuleOpcoes: Top 15 prêmios, escolha do vencimento (mensal e W1 a W5
   const grupo = (nome: string) => within(screen.getByRole('group', { name: nome }))
 
   it('semanais: botões Todos, W1, W2, W4 e W5 (sem W3), e cada W filtra a sua semana', () => {
-    render(<SimuleOpcoes ctx={ctx} snapshot={base} />)
+    render(<SimuleOpcoes semPortaoNoTop15 ctx={ctx} snapshot={base} />)
     abrirTop()
     semLimite()
     fireEvent.click(screen.getByRole('button', { name: 'Semanais' }))
@@ -283,7 +283,7 @@ describe('SimuleOpcoes: Top 15 prêmios, escolha do vencimento (mensal e W1 a W5
   })
 
   it('mensais: um botão por vencimento mensal, com a data e os dias úteis, e Todos', () => {
-    render(<SimuleOpcoes ctx={ctx} snapshot={base} />)
+    render(<SimuleOpcoes semPortaoNoTop15 ctx={ctx} snapshot={base} />)
     abrirTop()
     semLimite()
     const botoes = grupo('Vencimento mensal').getAllByRole('button').map((b) => b.textContent ?? '')
@@ -299,10 +299,63 @@ describe('SimuleOpcoes: Top 15 prêmios, escolha do vencimento (mensal e W1 a W5
   })
 
   it('os botões de mensal e de semana só aparecem no tipo de vencimento certo', () => {
-    render(<SimuleOpcoes ctx={ctx} snapshot={base} />)
+    render(<SimuleOpcoes semPortaoNoTop15 ctx={ctx} snapshot={base} />)
     abrirTop()
     expect(screen.queryByRole('group', { name: 'Semana do vencimento' })).toBeNull()
     fireEvent.click(screen.getByRole('button', { name: 'Semanais' }))
     expect(screen.queryByRole('group', { name: 'Vencimento mensal' })).toBeNull()
+  })
+})
+
+describe('SimuleOpcoes: Top 15 prêmios, acesso por código (D117)', () => {
+  const memoria = (inicial: string | null) => {
+    let valor = inicial
+    return {
+      getItem: vi.fn(async () => valor),
+      setItem: vi.fn(async (_c: string, v: string) => { valor = v }),
+      removeItem: vi.fn(async () => { valor = null }),
+    }
+  }
+  const abrir = (acesso: ReturnType<typeof memoria>, carregarAcesso: (c: string) => Promise<{ ok: true; snapshot: { publicado: true } } | { ok: false; motivo: 'invalido' }>) => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} carregarAcesso={carregarAcesso} armazenamentoDoAcesso={acesso} />)
+    abrirTop()
+  }
+
+  it('sem código salvo, pede o código e não mostra o ranking', async () => {
+    abrir(memoria(null), async () => ({ ok: false, motivo: 'invalido' }))
+    expect(await screen.findByTestId('top15-opcoes-codigo')).toBeDefined()
+    expect(screen.queryByRole('group', { name: 'Filtros do ranking de prêmios' })).toBeNull()
+    expect(linhas()).toHaveLength(0)
+  })
+
+  it('código errado mostra o aviso e segue fechado', async () => {
+    abrir(memoria(null), async () => ({ ok: false, motivo: 'invalido' }))
+    fireEvent.change(await screen.findByLabelText('Código do mês'), { target: { value: 'CIAAAABBBB' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Ver a lista' }))
+    expect((await screen.findByRole('alert')).textContent).toMatch(/Código inválido ou vencido/)
+    expect(linhas()).toHaveLength(0)
+  })
+
+  it('código certo abre o ranking, fica salvo, e "Sair" apaga o código e volta a pedir', async () => {
+    const acesso = memoria(null)
+    abrir(acesso, async () => ({ ok: true, snapshot: { publicado: true } }))
+    fireEvent.change(await screen.findByLabelText('Código do mês'), { target: { value: 'CIAAAABBBB' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Ver a lista' }))
+    expect(await screen.findByRole('group', { name: 'Filtros do ranking de prêmios' })).toBeDefined()
+    expect(acesso.setItem).toHaveBeenCalledWith('carteiraideal.top15opcoes.codigo', 'CIAAAABBBB')
+    fireEvent.click(screen.getByRole('button', { name: 'Sair e trocar o código' }))
+    expect(await screen.findByTestId('top15-opcoes-codigo')).toBeDefined()
+    expect(acesso.removeItem).toHaveBeenCalledWith('carteiraideal.top15opcoes.codigo')
+  })
+
+  it('com o código já salvo e válido, abre direto; se venceu, avisa e pede o novo', async () => {
+    abrir(memoria('CI-AAAA-BBBB'), async () => ({ ok: true, snapshot: { publicado: true } }))
+    expect(await screen.findByRole('group', { name: 'Filtros do ranking de prêmios' })).toBeDefined()
+  })
+
+  it('código salvo vencido: avisa e pede o novo', async () => {
+    abrir(memoria('CI-AAAA-BBBB'), async () => ({ ok: false, motivo: 'invalido' }))
+    expect((await screen.findByRole('alert')).textContent).toMatch(/venceu/)
+    expect(screen.getByTestId('top15-opcoes-codigo')).toBeDefined()
   })
 })

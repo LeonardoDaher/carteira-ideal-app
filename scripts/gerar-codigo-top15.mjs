@@ -5,6 +5,7 @@
 //   npm run codigo-top15 -- --classe acoes     (lembra onde colocar: TOP15_CODIGOS)
 //   npm run codigo-top15 -- --classe fiis      (lembra onde colocar: TOP15_FIIS_CODIGOS)
 //   npm run codigo-top15 -- --classe bdrs      (lembra onde colocar: TOP15_BDRS_CODIGOS)
+//   npm run codigo-top15 -- --classe opcoes    (lembra onde colocar: TOP15_OPCOES_CODIGOS)
 //
 // Formato CI-XXXX-XXXX com 8 caracteres sorteados de 24 símbolos, sem os que se confundem (0/O, 1/I/L,
 // 2/Z, 5/S, 8/B): 24^8 ≈ 1,1 × 10^11 combinações (~36,7 bits). Com o limite de 10 tentativas erradas
@@ -22,13 +23,13 @@ export function gerarCodigo(sorteio = crypto.randomInt) {
   return `CI-${sorteados.slice(0, 4).join('')}-${sorteados.slice(4).join('')}`
 }
 
-export const VARIAVEL_POR_CLASSE = { acoes: 'TOP15_CODIGOS', fiis: 'TOP15_FIIS_CODIGOS', bdrs: 'TOP15_BDRS_CODIGOS' }
+export const VARIAVEL_POR_CLASSE = { acoes: 'TOP15_CODIGOS', fiis: 'TOP15_FIIS_CODIGOS', bdrs: 'TOP15_BDRS_CODIGOS', opcoes: 'TOP15_OPCOES_CODIGOS' }
 
 /** Lê "--classe acoes|fiis|bdrs" e a quantidade (1 a 5). Sem --classe, não indica variável (comportamento antigo). */
 export function lerArgumentos(argv) {
   const i = argv.indexOf('--classe')
   const classe = i >= 0 ? argv[i + 1] : undefined
-  if (i >= 0 && !Object.hasOwn(VARIAVEL_POR_CLASSE, classe)) throw new Error('Classe inválida. Use --classe acoes, --classe fiis ou --classe bdrs.')
+  if (i >= 0 && !Object.hasOwn(VARIAVEL_POR_CLASSE, classe)) throw new Error('Classe inválida. Use --classe acoes, --classe fiis, --classe bdrs ou --classe opcoes.')
   const numeros = argv.filter((a, k) => !a.startsWith('--') && argv[k - 1] !== '--classe')
   return { classe, quantidade: Math.min(Math.max(Number(numeros[0]) || 1, 1), 5) }
 }

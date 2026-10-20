@@ -2072,3 +2072,13 @@ Cada cartão mostra, como as demais, até três candidatas ordenadas pelo crité
 **Decisões.** W é a ordem da sexta-feira no mês (1ª sexta = W1); se a sexta é feriado e o vencimento cai na quinta, vale a sexta seguinte. Não há W3: a 3ª sexta é o vencimento mensal. "Próximos 6 meses" e "Todos" dariam o mesmo resultado (a base só traz 6 meses), então só há "Todos". O filtro vale também para o card "Ver mais" (D115).
 
 **Código.** `semanaDoMes`, `SEMANAS_DO_MES` e os campos `mensal` e `semana` do filtro em `domain/premios.ts`; botões em `screens/TopPremiosOpcoes.tsx`. 3 testes novos.
+
+## D117 (20/10/2026): Top 15 prêmios de opções passa a abrir com código do mês
+
+**O que mudou.** A aba Top 15 prêmios pede o **código do mês**, no mesmo molde do Top 15 de ações, FIIs e BDRs (D50, D65, D70): campo "CI-XXXX-XXXX", código salvo neste aparelho, aviso quando o salvo venceu, botão "Sair e trocar o código". Código próprio da lista (D66), em **`TOP15_OPCOES_CODIGOS`** na Vercel; o das outras listas não abre esta, e vice-versa. O gerador aceita `npm run codigo-top15 -- --classe opcoes`.
+
+**Decisão que precisa de atenção.** Nas outras listas o ranking só existe no servidor. Aqui ele é **calculado no próprio app** a partir do arquivo de opções (`opcoes.json`), que é público e usado pelas demais abas. Por isso a função `api/top15-opcoes.ts` só **confere o código** e devolve a confirmação (`dados-privados/opcoes-premios.json`): o código controla o acesso à tela, mas **não esconde os dados de opções**, que continuam abertos. Proteger o ranking de fato exigiria calculá-lo no servidor (trabalho à parte). As abas Séries, Tendência, Gráficos, Roda, Estratégias e Minha posição continuam abertas.
+
+**Operação.** Enquanto `TOP15_OPCOES_CODIGOS` não estiver configurada, a porta fica fechada (resposta 503: "A lista ainda não está disponível"), como nas outras listas. O filtro "só as mais baratas" dentro do ranking continua usando o código das ações (D98).
+
+**Código.** `api/top15-opcoes.ts`, `dados-privados/opcoes-premios.json`, `vercel.json`, `acessoTop15.ts` (`buscarTop15Opcoes`, `CHAVE_CODIGO_TOP15_OPCOES`), `TopPremiosOpcoes.tsx` (porta + lista), `scripts/gerar-codigo-top15.mjs`. Testes: 1 de API, 5 de tela.

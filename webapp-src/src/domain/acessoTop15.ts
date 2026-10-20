@@ -16,6 +16,9 @@ export const CHAVE_CODIGO_TOP15_FIIS = 'carteiraideal.top15fiis.codigo'
 /** Código dos BDRs (D70). Os ETFs não têm código: o ranking é aberto. */
 export const CHAVE_CODIGO_TOP15_BDRS = 'carteiraideal.top15bdrs.codigo'
 
+/** Código do Top 15 de prêmios de opções. Lista própria, com código próprio (D66). */
+export const CHAVE_CODIGO_TOP15_OPCOES = 'carteiraideal.top15opcoes.codigo'
+
 export type MotivoFalhaTop15 = 'invalido' | 'limite' | 'indisponivel' | 'nao_configurado' | 'rede' | 'resposta'
 
 /** Resposta de uma das listas protegidas por código. O campo se chama `snapshot` nas duas. */
@@ -24,6 +27,9 @@ export type RespostaLista<T> = { ok: true; snapshot: T } | { ok: false; motivo: 
 export type RespostaTop15 = RespostaLista<SnapshotAcoesBaratas>
 export type RespostaTop15Fiis = RespostaLista<SnapshotFiiBaratos>
 export type RespostaTop15Bdrs = RespostaLista<SnapshotBdrsDesconto>
+/** Resposta de api/top15-opcoes: só confirma que o código vale (o ranking é calculado no próprio app, com o arquivo de opções). */
+export interface LiberacaoTop15Opcoes { publicado: true }
+export type RespostaTop15Opcoes = RespostaLista<LiberacaoTop15Opcoes>
 
 /** Só para conforto de quem digita: aceita minúsculas, espaços e com ou sem hífen. O servidor normaliza de novo. */
 export function limparCodigoDigitado(texto: string): string {
@@ -76,6 +82,10 @@ export async function buscarTop15Fiis(codigo: string, fetchImpl: typeof fetch = 
 
 export async function buscarTop15Bdrs(codigo: string, fetchImpl: typeof fetch = fetch): Promise<RespostaTop15Bdrs> {
   return pedirLista('/api/top15-bdrs', codigo, (s): s is SnapshotBdrsDesconto => !!s && (s as SnapshotBdrsDesconto).publicado === true && Array.isArray((s as SnapshotBdrsDesconto).ranking) && Array.isArray((s as SnapshotBdrsDesconto).aConferir), fetchImpl)
+}
+
+export async function buscarTop15Opcoes(codigo: string, fetchImpl: typeof fetch = fetch): Promise<RespostaTop15Opcoes> {
+  return pedirLista('/api/top15-opcoes', codigo, (s): s is LiberacaoTop15Opcoes => !!s && (s as LiberacaoTop15Opcoes).publicado === true, fetchImpl)
 }
 
 export function mensagemDaFalha(r: { motivo: MotivoFalhaTop15; espera?: number }): string {

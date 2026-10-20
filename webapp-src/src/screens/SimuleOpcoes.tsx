@@ -76,7 +76,7 @@ function useSnapshot(injetado?: SnapshotOpcoes): [EstadoDados, () => void] {
  * ordenável, com filtro por tipo, estilo, vencimentos e faixa de strike) e "Estratégias" (payoff no vencimento, curva
  * antes do vencimento e gregas). Tela descritiva, sem indicação de operação: educacional.
  */
-export function SimuleOpcoes({ snapshot, endividadas, carregarBaratas, armazenamento }: {
+export function SimuleOpcoes({ snapshot, endividadas, carregarBaratas, armazenamento, semPortaoNoTop15, carregarAcesso, armazenamentoDoAcesso }: {
   /** Recebido como as demais telas avulsas; esta tela só volta ao hub. */
   ctx: AppCtx
   /** Permite injetar dados nos testes. No app, vem do arquivo gerado pelo job diário. */
@@ -85,6 +85,10 @@ export function SimuleOpcoes({ snapshot, endividadas, carregarBaratas, armazenam
   endividadas?: ComponentProps<typeof TopPremiosOpcoes>['endividadas']
   carregarBaratas?: ComponentProps<typeof TopPremiosOpcoes>['carregarBaratas']
   armazenamento?: ComponentProps<typeof TopPremiosOpcoes>['armazenamento']
+  /** Só nos testes: abre o Top 15 de prêmios sem pedir o código do mês. */
+  semPortaoNoTop15?: boolean
+  carregarAcesso?: ComponentProps<typeof TopPremiosOpcoes>['carregarAcesso']
+  armazenamentoDoAcesso?: ComponentProps<typeof TopPremiosOpcoes>['armazenamentoDoAcesso']
 }) {
   const [estado, recarregar] = useSnapshot(snapshot)
   const [aba, setAba] = useState<Aba>('series')
@@ -194,7 +198,7 @@ export function SimuleOpcoes({ snapshot, endividadas, carregarBaratas, armazenam
           comDados((d) => <PorVisaoOpcoes snapshot={d} ativo={ativoAtual} onEscolher={setTicker} onSimular={criarEstrategia} />)
         ) : aba === 'premios' ? (
           comDados((d) => (
-            <TopPremiosOpcoes snapshot={d} onSimular={criarEstrategia} endividadas={endividadas} carregarBaratas={carregarBaratas} armazenamento={armazenamento} />
+            <TopPremiosOpcoes snapshot={d} onSimular={criarEstrategia} endividadas={endividadas} carregarBaratas={carregarBaratas} armazenamento={armazenamento} semPortao={semPortaoNoTop15} carregarAcesso={carregarAcesso} armazenamentoDoAcesso={armazenamentoDoAcesso} />
           ))
         ) : (
           comDados((d) => <MonteSuaEstrategia snapshot={d} ativo={ativoAtual} onEscolher={setTicker} escolha={escolha} dataPregao={d.dataPregao} />)

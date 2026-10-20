@@ -6,7 +6,7 @@ import { carregarTs } from './ts-loader.mjs'
 import { ALFABETO, VARIAVEL_POR_CLASSE, gerarCodigo, lerArgumentos } from './gerar-codigo-top15.mjs'
 
 const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
-const { modulos, limpar } = await carregarTs(path.join(RAIZ, 'api'), ['_top15.ts', 'top15.ts', 'top15-fiis.ts', 'top15-bdrs.ts'])
+const { modulos, limpar } = await carregarTs(path.join(RAIZ, 'api'), ['_top15.ts', 'top15.ts', 'top15-fiis.ts', 'top15-bdrs.ts', 'top15-opcoes.ts'])
 test.after(() => limpar())
 const A = modulos['_top15.ts']
 
@@ -215,7 +215,7 @@ test('FIIs (api/top15-fiis.ts): sem TOP15_FIIS_CODIGOS a porta responde 503; com
 test('vercel.json inclui dados-privados nas três funções do Top 15 (ações, FIIs e BDRs)', async () => {
   const fs = await import('node:fs')
   const v = JSON.parse(fs.readFileSync(path.join(RAIZ, 'vercel.json'), 'utf8'))
-  for (const f of ['api/top15.ts', 'api/top15-fiis.ts', 'api/top15-bdrs.ts']) assert.equal(v.functions[f].includeFiles, 'dados-privados/**', f)
+  for (const f of ['api/top15.ts', 'api/top15-fiis.ts', 'api/top15-bdrs.ts', 'api/top15-opcoes.ts']) assert.equal(v.functions[f].includeFiles, 'dados-privados/**', f)
 })
 
 test('gerador de código: formato, alfabeto sem símbolos ambíguos, sem repetição e atende ao tamanho mínimo do servidor', () => {
@@ -233,7 +233,7 @@ test('gerador de código: formato, alfabeto sem símbolos ambíguos, sem repeti�
 })
 
 test('gerador de código por classe (D66): --classe acoes|fiis aponta a variável certa, aceita a quantidade e recusa classe desconhecida', () => {
-  assert.deepEqual(VARIAVEL_POR_CLASSE, { acoes: 'TOP15_CODIGOS', fiis: 'TOP15_FIIS_CODIGOS', bdrs: 'TOP15_BDRS_CODIGOS' })
+  assert.deepEqual(VARIAVEL_POR_CLASSE, { acoes: 'TOP15_CODIGOS', fiis: 'TOP15_FIIS_CODIGOS', bdrs: 'TOP15_BDRS_CODIGOS', opcoes: 'TOP15_OPCOES_CODIGOS' })
   assert.deepEqual(lerArgumentos(['--classe', 'bdrs']), { classe: 'bdrs', quantidade: 1 })
   assert.deepEqual(lerArgumentos([]), { classe: undefined, quantidade: 1 })
   assert.deepEqual(lerArgumentos(['--classe', 'fiis']), { classe: 'fiis', quantidade: 1 })
@@ -295,6 +295,42 @@ test('BDRs (api/top15-bdrs.ts): variável própria TOP15_BDRS_CODIGOS; os códig
   } finally {
     process.chdir(anterior.cwd)
     for (const [chave, valor] of [['TOP15_BDRS_CODIGOS', anterior.b], ['TOP15_FIIS_CODIGOS', anterior.f], ['TOP15_CODIGOS', anterior.a]]) {
+      if (valor === undefined) delete process.env[chave]
+      else process.env[chave] = valor
+    }
+    fs.rmSync(pasta, { recursive: true, force: true })
+  }
+})
+test('Opções (api/top15-opcoes.ts): variável própria TOP15_OPCOES_CODIGOS; só confirma o código, sem devolver ranking; os outros códigos não abrem (D117)', async () => {
+  const fs = await import('node:fs')
+  const os = await import('node:os')
+  const opcoes = modulos['top15-opcoes.ts'].default
+  const anterior = { cwd: process.cwd(), o: process.env.TOP15_OPCOES_CODIGOS, b: process.env.TOP15_BDRS_CODIGOS, a: process.env.TOP15_CODIGOS }
+  const pasta = fs.mkdtempSync(path.join(os.tmpdir(), 'top15-opcoes-'))
+  try {
+    delete process.env.TOP15_OPCOES_CODIGOS
+    process.env.TOP15_CODIGOS = 'CI-ACOE-SSSS'
+    process.env.TOP15_BDRS_CODIGOS = 'CI-BDRS-BDRS'
+    const fechada = await chamar(opcoes, { codigo: 'CI-ACOE-SSSS' })
+    assert.deepEqual([fechada.statusCode, fechada.corpo.motivo], [503, 'nao_configurado'])
+
+    process.env.TOP15_OPCOES_CODIGOS = 'CI-OPCO-OPCO'
+    fs.mkdirSync(path.join(pasta, 'dados-privados'))
+    process.chdir(pasta)
+    const semArquivo = await chamar(opcoes, { codigo: 'CI-OPCO-OPCO' }, { ip: '203.0.113.21' })
+    assert.deepEqual([semArquivo.statusCode, semArquivo.corpo.motivo], [503, 'indisponivel'])
+    fs.writeFileSync(path.join(pasta, 'dados-privados', 'opcoes-premios.json'), JSON.stringify({ publicado: true }))
+    const ok = await chamar(opcoes, { codigo: 'ci opco opco' }, { ip: '203.0.113.22' })
+    assert.equal(ok.statusCode, 200)
+    assert.deepEqual(ok.corpo, { publicado: true })
+    for (const [codigo, ip] of [['CI-ACOE-SSSS', '203.0.113.23'], ['CI-BDRS-BDRS', '203.0.113.24']]) {
+      const r = await chamar(opcoes, { codigo }, { ip })
+      assert.deepEqual([r.statusCode, r.corpo.motivo], [401, 'invalido'], `${codigo} não abre as opções`)
+    }
+    assert.equal((await chamar(opcoes, {}, { metodo: 'GET' })).statusCode, 405)
+  } finally {
+    process.chdir(anterior.cwd)
+    for (const [chave, valor] of [['TOP15_OPCOES_CODIGOS', anterior.o], ['TOP15_BDRS_CODIGOS', anterior.b], ['TOP15_CODIGOS', anterior.a]]) {
       if (valor === undefined) delete process.env[chave]
       else process.env[chave] = valor
     }
