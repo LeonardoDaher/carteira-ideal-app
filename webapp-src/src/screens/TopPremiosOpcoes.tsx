@@ -11,7 +11,7 @@ import { reais } from '../domain/mercadoOficial'
 import type { EscolhaDeSeries, SnapshotOpcoes } from '../domain/opcoes'
 import {
   DIAS_DO_MES, DIAS_UTEIS_MINIMOS, FILTRO_PREMIOS_PADRAO, LIMITES_DE_CHANCE, NEGOCIOS_MINIMOS, NEGOCIOS_MINIMOS_FLEXIVEL,
-  TAMANHO_DO_TOP, calcularTopPremios,
+  TAMANHO_DO_TOP, TAMANHO_MAXIMO_DO_RANKING, calcularTopPremios,
 } from '../domain/premios'
 import type { FiltroPremios, FiltroVencimentos, LinhaPremio, Operacao, OrdemPremio } from '../domain/premios'
 import { BotaoDeLado, OperacaoDaSerie } from './OperacaoDaSerie'
@@ -80,10 +80,14 @@ export function TopPremiosOpcoes({
   const baratas = useBaratas(carregarBaratas, armazenamento)
   const raizesBaratas = baratas.tipo === 'ok' ? baratas.raizes : null
   const mudar = (parcial: Partial<FiltroPremios>) => setFiltro((f) => ({ ...f, ...parcial }))
-  const linhas = useMemo(
-    () => calcularTopPremios(snapshot, filtro, juros, TAMANHO_DO_TOP, { fundamentos, baratas: raizesBaratas }),
+  // O ranking vai até 100 posições: as 15 primeiras ficam na tabela principal e o resto no card "Ver mais".
+  const ranking = useMemo(
+    () => calcularTopPremios(snapshot, filtro, juros, TAMANHO_MAXIMO_DO_RANKING, { fundamentos, baratas: raizesBaratas }),
     [snapshot, filtro, juros, fundamentos, raizesBaratas],
   )
+  const linhas = ranking.slice(0, TAMANHO_DO_TOP)
+  const resto = ranking.slice(TAMANHO_DO_TOP)
+  const [verMais, setVerMais] = useState(false)
   const coberta = filtro.operacao === 'callCoberta'
 
   // V (vender) monta a operação ali mesmo, abaixo da tabela: clicar de novo no mesmo botão desfaz. "Simular" leva a série à aba
@@ -95,9 +99,107 @@ export function TopPremiosOpcoes({
     setVendida(repetido ? null : codigo)
     if (!repetido) setTimeout(() => painelRef.current?.scrollIntoView?.({ behavior: 'smooth', block: 'start' }), 0)
   }
-  const linhaVendida = vendida ? (linhas.find((l) => l.serie.codigo === vendida) ?? null) : null
+  const linhaVendida = vendida ? (ranking.find((l) => l.serie.codigo === vendida) ?? null) : null
 
   const simular = (l: LinhaPremio) => onSimular({ ativo: l.ativo, series: [l.serie], lado: 'venda', coberta })
+
+  // A mesma tabela serve ao Top 15 e à continuação do ranking (posições 16 em diante).
+  const tabela = (lista: LinhaPremio[], inicio: number, testid: string) => (
+    <div style={{ overflowX: 'auto' }} className="card-outline">
+      <table className="tabela-opcoes small">
+        <thead>
+          <tr>
+            <th scope="col" title="Vender esta série: monta a operação aqui mesmo">Vender</th>
+            <th scope="col">#</th>
+            <th scope="col">Ativo</th>
+            <th scope="col">Série</th>
+            <th scope="col">Strike</th>
+            <th scope="col">Vence (d.u.)</th>
+            <th scope="col">Prêmio</th>
+            <th scope="col" title="Prêmio sobre o dinheiro travado, até o vencimento">Rend. no prazo (%)</th>
+            <th scope="col" title={`Rendimento levado a ${DIAS_DO_MES} dias úteis`}>Rend. {DIAS_DO_MES} d.u. (%)</th>
+            <th scope="col" title="Quanto o ativo pode cair antes de dar prejuízo no vencimento">Colchão (%)</th>
+            {coberta && <th scope="col" title="Ganho se o ativo subir até o strike e a ação for vendida, contando o prêmio">Se exercida (%)</th>}
+            <th scope="col" title="Chance de a opção ser exercida, pelo modelo">Chance exerc. (%)</th>
+            <th scope="col" title="Volatilidade implícita no último preço">Vol. impl. (%)</th>
+            {fundamentos && <th scope="col" title="Dívida líquida dividida pelo EBITDA dos últimos 12 meses, e a posição na lista das mais endividadas">Dív. líq./EBITDA</th>}
+            <th scope="col">Neg.</th>
+            <th scope="col" title="Levar esta série para a aba Estratégias, para montar estruturas com esse strike">Estruturas</th>
+          </tr>
+        </thead>
+        <tbody>
+          {lista.map((l, k) => {
+            const f = fundamentoDoAtivo(fundamentos, l.ativo.ticker)
+            const barata = raizesBaratas?.has(raizDoTicker(l.ativo.ticker)) ?? false
+            return (
+              <tr key={l.serie.codigo} data-testid={testid} className={vendida === l.serie.codigo ? 'linha-marcada' : undefined}>
+                <td style={{ whiteSpace: 'nowrap' }}>
+                  <BotaoDeLado lado="venda" codigo={l.serie.codigo} escolhido={vendida === l.serie.codigo} onClick={() => vender(l.serie.codigo)} />
+                </td>
+                <td>{inicio + k + 1}</td>
+                <td>
+                  <strong>{l.ativo.ticker}</strong> <span className="muted">{reais(l.ativo.cotacao)}</span>
+                  {barata && (
+                    <div className="tiny" style={{ color: 'var(--mc-pos)', fontWeight: 700 }} data-testid="selo-barata">Top 15 mais baratas</div>
+                  )}
+                </td>
+                <td style={{ fontWeight: 700 }}>{l.serie.codigo}</td>
+                <td className="num">{num(l.serie.strike)}</td>
+                <td>{formatarData(l.serie.vencimento)} ({l.diasUteis})</td>
+                <td className="num">{num(l.serie.ultimo)}</td>
+                <td className="num">{num(l.rendimentoPrazo)}</td>
+                <td className="num" style={{ fontWeight: 700 }}>{num(l.rendimentoMes)}</td>
+                <td className="num">{num(l.colchao)}</td>
+                {coberta && <td className="num">{l.ganhoSeExercida === null ? '—' : num(l.ganhoSeExercida)}</td>}
+                <td className="num">{num(l.chanceExercicio, 1)}</td>
+                <td className="num">{num(l.volImplicita, 1)}</td>
+                {fundamentos && (
+                  <td data-testid="celula-divida">
+                    {!f ? (
+                      <span className="muted" title="Fora da lista: banco, seguradora, ETF, pouca liquidez ou setor excluído">—</span>
+                    ) : f.semEbitdaPositivo ? (
+                      <span style={{ color: 'var(--danger)', fontWeight: 700 }}>sem EBITDA positivo</span>
+                    ) : (
+                      <>
+                        {num(f.dlEbitda ?? 0, 1)}x{' '}
+                        {f.noTop ? (
+                          <span className="tiny" style={{ color: 'var(--danger)', fontWeight: 700 }}>
+                            {f.posicao}ª mais endividada
+                          </span>
+                        ) : (
+                          <span className="tiny muted">({f.posicao}ª de {fundamentos.total})</span>
+                        )}
+                      </>
+                    )}
+                  </td>
+                )}
+                <td className="num">{l.serie.negocios.toLocaleString('pt-BR')}</td>
+                <td>
+                  <button className="chip" onClick={() => simular(l)} aria-label={`Simular a venda de ${l.serie.codigo}`}>Simular</button>
+                </td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
+    </div>
+  )
+
+  // O painel da venda (botão V) aparece logo abaixo da tabela em que está a linha escolhida.
+  const vendidaNoTop = !linhaVendida || linhas.some((l) => l.serie.codigo === linhaVendida.serie.codigo)
+  const painel = linhaVendida && (
+    <div ref={painelRef} className="col" style={{ gap: 10, scrollMarginTop: 12 }} data-testid="operacao-da-serie">
+      <OperacaoDaSerie
+        key={linhaVendida.serie.codigo + (coberta ? ':coberta' : '')}
+        ativo={linhaVendida.ativo}
+        serie={linhaVendida.serie}
+        lado="venda"
+        coberta={coberta}
+        hoje={snapshot.dataPregao ?? new Date().toISOString().slice(0, 10)}
+        aoFechar={() => setVendida(null)}
+      />
+    </div>
+  )
 
   return (
     <>
@@ -229,100 +331,34 @@ export function TopPremiosOpcoes({
           </div>
         )}
 
-        {linhas.length > 0 && (
-          <div style={{ overflowX: 'auto' }} className="card-outline">
-            <table className="tabela-opcoes small">
-              <thead>
-                <tr>
-                  <th scope="col" title="Vender esta série: monta a operação aqui mesmo">Vender</th>
-                  <th scope="col">#</th>
-                  <th scope="col">Ativo</th>
-                  <th scope="col">Série</th>
-                  <th scope="col">Strike</th>
-                  <th scope="col">Vence (d.u.)</th>
-                  <th scope="col">Prêmio</th>
-                  <th scope="col" title="Prêmio sobre o dinheiro travado, até o vencimento">Rend. no prazo (%)</th>
-                  <th scope="col" title={`Rendimento levado a ${DIAS_DO_MES} dias úteis`}>Rend. {DIAS_DO_MES} d.u. (%)</th>
-                  <th scope="col" title="Quanto o ativo pode cair antes de dar prejuízo no vencimento">Colchão (%)</th>
-                  {coberta && <th scope="col" title="Ganho se o ativo subir até o strike e a ação for vendida, contando o prêmio">Se exercida (%)</th>}
-                  <th scope="col" title="Chance de a opção ser exercida, pelo modelo">Chance exerc. (%)</th>
-                  <th scope="col" title="Volatilidade implícita no último preço">Vol. impl. (%)</th>
-                  {fundamentos && <th scope="col" title="Dívida líquida dividida pelo EBITDA dos últimos 12 meses, e a posição na lista das mais endividadas">Dív. líq./EBITDA</th>}
-                  <th scope="col">Neg.</th>
-                  <th scope="col" title="Levar esta série para a aba Estratégias, para montar estruturas com esse strike">Estruturas</th>
-                </tr>
-              </thead>
-              <tbody>
-                {linhas.map((l, i) => {
-                  const f = fundamentoDoAtivo(fundamentos, l.ativo.ticker)
-                  const barata = raizesBaratas?.has(raizDoTicker(l.ativo.ticker)) ?? false
-                  return (
-                    <tr key={l.serie.codigo} data-testid="linha-premio" className={vendida === l.serie.codigo ? 'linha-marcada' : undefined}>
-                      <td style={{ whiteSpace: 'nowrap' }}>
-                        <BotaoDeLado lado="venda" codigo={l.serie.codigo} escolhido={vendida === l.serie.codigo} onClick={() => vender(l.serie.codigo)} />
-                      </td>
-                      <td>{i + 1}</td>
-                      <td>
-                        <strong>{l.ativo.ticker}</strong> <span className="muted">{reais(l.ativo.cotacao)}</span>
-                        {barata && (
-                          <div className="tiny" style={{ color: 'var(--mc-pos)', fontWeight: 700 }} data-testid="selo-barata">Top 15 mais baratas</div>
-                        )}
-                      </td>
-                      <td style={{ fontWeight: 700 }}>{l.serie.codigo}</td>
-                      <td className="num">{num(l.serie.strike)}</td>
-                      <td>{formatarData(l.serie.vencimento)} ({l.diasUteis})</td>
-                      <td className="num">{num(l.serie.ultimo)}</td>
-                      <td className="num">{num(l.rendimentoPrazo)}</td>
-                      <td className="num" style={{ fontWeight: 700 }}>{num(l.rendimentoMes)}</td>
-                      <td className="num">{num(l.colchao)}</td>
-                      {coberta && <td className="num">{l.ganhoSeExercida === null ? '—' : num(l.ganhoSeExercida)}</td>}
-                      <td className="num">{num(l.chanceExercicio, 1)}</td>
-                      <td className="num">{num(l.volImplicita, 1)}</td>
-                      {fundamentos && (
-                        <td data-testid="celula-divida">
-                          {!f ? (
-                            <span className="muted" title="Fora da lista: banco, seguradora, ETF, pouca liquidez ou setor excluído">—</span>
-                          ) : f.semEbitdaPositivo ? (
-                            <span style={{ color: 'var(--danger)', fontWeight: 700 }}>sem EBITDA positivo</span>
-                          ) : (
-                            <>
-                              {num(f.dlEbitda ?? 0, 1)}x{' '}
-                              {f.noTop ? (
-                                <span className="tiny" style={{ color: 'var(--danger)', fontWeight: 700 }}>
-                                  {f.posicao}ª mais endividada
-                                </span>
-                              ) : (
-                                <span className="tiny muted">({f.posicao}ª de {fundamentos.total})</span>
-                              )}
-                            </>
-                          )}
-                        </td>
-                      )}
-                      <td className="num">{l.serie.negocios.toLocaleString('pt-BR')}</td>
-                      <td>
-                        <button className="chip" onClick={() => simular(l)} aria-label={`Simular a venda de ${l.serie.codigo}`}>Simular</button>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
+        {linhas.length > 0 && tabela(linhas, 0, 'linha-premio')}
+
+        {vendidaNoTop && painel}
+
+        {resto.length > 0 && (
+          <div className="card col" style={{ gap: 10 }} data-testid="ver-mais">
+            <div className="row" style={{ gap: 10, flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span className="small" style={{ fontWeight: 600 }}>
+                {verMais
+                  ? `Continuação do ranking: posições ${TAMANHO_DO_TOP + 1} a ${TAMANHO_DO_TOP + resto.length}`
+                  : `Mais ${resto.length} ${resto.length === 1 ? 'série' : 'séries'} no ranking, até a ${TAMANHO_DO_TOP + resto.length}ª posição`}
+              </span>
+              <button className="chip" aria-expanded={verMais} onClick={() => setVerMais((v) => !v)}>
+                {verMais ? 'Mostrar menos' : 'Ver mais'}
+              </button>
+            </div>
+            {verMais && (
+              <>
+                <span className="tiny muted justify">
+                  Mesmos filtros e mesma ordem, até {TAMANHO_MAXIMO_DO_RANKING} resultados. Quanto mais abaixo, menor o rendimento: confira o número de negócios (Neg.) e a chance de exercício antes de olhar só o prêmio.
+                </span>
+                {tabela(resto, TAMANHO_DO_TOP, 'linha-premio-extra')}
+              </>
+            )}
           </div>
         )}
 
-        {linhaVendida && (
-          <div ref={painelRef} className="col" style={{ gap: 10, scrollMarginTop: 12 }} data-testid="operacao-da-serie">
-            <OperacaoDaSerie
-              key={linhaVendida.serie.codigo + (coberta ? ':coberta' : '')}
-              ativo={linhaVendida.ativo}
-              serie={linhaVendida.serie}
-              lado="venda"
-              coberta={coberta}
-              hoje={snapshot.dataPregao ?? new Date().toISOString().slice(0, 10)}
-              aoFechar={() => setVendida(null)}
-            />
-          </div>
-        )}
+        {!vendidaNoTop && painel}
 
         <span className="tiny muted justify">
           <strong>V</strong> monta a venda da série aqui mesmo, com o gráfico. <strong>Simular</strong> leva a série para a aba Estratégias, para montar travas e outras estruturas com esse strike.

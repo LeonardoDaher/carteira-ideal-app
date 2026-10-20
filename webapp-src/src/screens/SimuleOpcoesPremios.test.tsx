@@ -198,3 +198,57 @@ describe('SimuleOpcoes: Top 15 prêmios, venda montada na própria linha (V)', (
     expect(screen.getByRole('button', { name: /Séries escolhidas \(1\)/ }).getAttribute('aria-pressed')).toBe('true')
   })
 })
+
+describe('SimuleOpcoes: Top 15 prêmios, card "Ver mais"', () => {
+  // 40 ativos com uma put cada, de prêmios crescentes: o ranking tem 40 posições
+  const grande: SnapshotOpcoes = {
+    geradoEm: null,
+    dataPregao: '2026-10-16',
+    ativos: Array.from({ length: 40 }, (_, i) => ({
+      ticker: `AAA${String(i).padStart(2, '0')}3`, nome: `EMPRESA ${i}`, cotacao: 20, volumeOpcoes: 1_000_000, lote: 100,
+      series: [serie(`AAA${String(i).padStart(2, '0')}W200`, 'put', 20, '2026-11-19', 0.5 + i * 0.05)],
+    })),
+  }
+  const extras = () => screen.queryAllByTestId('linha-premio-extra')
+
+  it('o Top 15 fica na tabela principal e a continuação, fechada, só avisa quantas séries há', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={grande} />)
+    abrirTop()
+    semLimite()
+    expect(linhas()).toHaveLength(15)
+    expect(extras()).toHaveLength(0)
+    expect(within(screen.getByTestId('ver-mais')).getByText(/Mais 25 séries no ranking, até a 40ª posição/)).toBeDefined()
+  })
+
+  it('"Ver mais" mostra as posições 16 em diante na mesma ordem, e "Mostrar menos" recolhe', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={grande} />)
+    abrirTop()
+    semLimite()
+    fireEvent.click(screen.getByRole('button', { name: 'Ver mais' }))
+    expect(extras()).toHaveLength(25)
+    expect(celulas(extras()[0])[1]).toBe('16')
+    expect(celulas(extras()[24])[1]).toBe('40')
+    expect(celulas(linhas()[0])[3]).toBe('AAA39W200') // a de maior prêmio continua na 1ª posição
+    fireEvent.click(screen.getByRole('button', { name: 'Mostrar menos' }))
+    expect(extras()).toHaveLength(0)
+  })
+
+  it('o V de uma linha da continuação monta a venda abaixo dela', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={grande} />)
+    abrirTop()
+    semLimite()
+    fireEvent.click(screen.getByRole('button', { name: 'Ver mais' }))
+    const codigo = celulas(extras()[0])[3]
+    fireEvent.click(screen.getByRole('button', { name: `Vender ${codigo}` }))
+    const painel = screen.getByTestId('operacao-da-serie')
+    const card = screen.getByTestId('ver-mais')
+    expect(painel.compareDocumentPosition(card) & Node.DOCUMENT_POSITION_PRECEDING).toBeTruthy() // o painel vem depois do card
+  })
+
+  it('com 15 séries ou menos, o card não aparece', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    abrirTop()
+    semLimite()
+    expect(screen.queryByTestId('ver-mais')).toBeNull()
+  })
+})

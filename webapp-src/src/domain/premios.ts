@@ -55,6 +55,8 @@ export const FILTRO_PREMIOS_PADRAO: FiltroPremios = {
 export const LIMITES_DE_CHANCE: (number | null)[] = [10, 15, 25, 40, null]
 
 export const TAMANHO_DO_TOP = 15
+/** Até onde o ranking continua no card "Ver mais" (posições 16 a 100). */
+export const TAMANHO_MAXIMO_DO_RANKING = 100
 export const DIAS_DO_MES = 21
 export const DIAS_UTEIS_MINIMOS = 3
 export const NEGOCIOS_MINIMOS = 10

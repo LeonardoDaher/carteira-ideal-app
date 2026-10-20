@@ -2056,3 +2056,11 @@ Cada cartão mostra, como as demais, até três candidatas ordenadas pelo crité
 **Decisões.** Os textos descrevem e não prometem resultado (há um teste que barra "garantido", "sem risco" e afins); a explicação de "último preço" diz que ele pode estar defasado, que é a razão de os números do app serem estimativas; a explicação de "margem de garantia" diz que o app não a calcula.
 
 **Código.** `domain/glossarioOpcoes.ts` (termos e busca) e `screens/GlossarioOpcoes.tsx`. 6 testes de domínio e 3 da tela.
+
+## D115 (20/10/2026): "Ver mais" no Top 15 de prêmios, com a continuação do ranking até 100
+
+**O que mudou.** Abaixo da tabela do Top 15 há um card com o botão **Ver mais**, que mostra as posições 16 em diante do mesmo ranking, na mesma tabela (mesmas colunas, V e Simular), até **100 resultados**. Fechado, o card só diz quantas séries há a mais. **Mostrar menos** recolhe.
+
+**Decisões.** Os filtros e a ordem são os mesmos do Top 15: a continuação é só o resto da lista, calculada de uma vez (100 posições) e fatiada, então a ordem das 15 primeiras não muda. O limite é 100 porque, mais abaixo, o rendimento já é baixo e a liquidez, fraca; o card avisa para conferir "Neg." e a chance de exercício. Sem mais de 15 séries, o card não aparece. O painel do botão V abre logo abaixo da tabela em que está a linha escolhida.
+
+**Código.** `TAMANHO_MAXIMO_DO_RANKING` em `domain/premios.ts`; `screens/TopPremiosOpcoes.tsx`. 4 testes novos em `SimuleOpcoesPremios.test.tsx`.
