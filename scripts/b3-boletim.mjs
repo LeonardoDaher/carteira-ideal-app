@@ -146,47 +146,57 @@ function descompactar(zip, pasta, apenas = null) {
  * devolver o zip vazio (dia sem pregão). Extrai só o XML necessário, para não ocupar ~540 MB
  * em disco por dia.
  */
-export async function baixarBoletim(data, pastaTemp, { fetchImpl = fetch, limiteMs = 180_000, tentativas = 4, pausaMs = 15_000 } = {}) {
+export async function baixarBoletim(data, pastaTemp, { fetchImpl = fetch, limiteMs = 180_000, tentativas = 4, pausaMs = 15_000, tentativasZip = 3 } = {}) {
   const codigo = codigoBoletim(data)
-  let conteudo
-  for (let tentativa = 1; ; tentativa++) {
-    try {
-      // Limite de tempo por arquivo: sem ele, uma resposta presa da B3 segura o job até o
-      // tempo máximo do workflow.
-      const resposta = await fetchImpl(URL_BOLETIM(codigo), {
-        headers: { 'User-Agent': 'carteira-ideal (github actions)' },
-        signal: AbortSignal.timeout(limiteMs),
-      })
-      if (!resposta.ok) throw new Error(`B3 respondeu ${resposta.status} para o boletim ${codigo}.`)
-      conteudo = Buffer.from(await resposta.arrayBuffer())
-      break
-    } catch (erro) {
-      const motivo = erro?.name === 'TimeoutError' ? `sem resposta da B3 em ${limiteMs / 1000} s para o boletim ${codigo}.` : erro.message
-      if (tentativa >= tentativas) throw new Error(motivo)
-      console.warn(`[aviso] ${motivo} Nova tentativa.`)
-      await new Promise((r) => setTimeout(r, pausaMs * tentativa))
+  const baixar = async () => {
+    for (let tentativa = 1; ; tentativa++) {
+      try {
+        // Limite de tempo por arquivo: sem ele, uma resposta presa da B3 segura o job até o
+        // tempo máximo do workflow.
+        const resposta = await fetchImpl(URL_BOLETIM(codigo), {
+          headers: { 'User-Agent': 'carteira-ideal (github actions)' },
+          signal: AbortSignal.timeout(limiteMs),
+        })
+        if (!resposta.ok) throw new Error(`B3 respondeu ${resposta.status} para o boletim ${codigo}.`)
+        return Buffer.from(await resposta.arrayBuffer())
+      } catch (erro) {
+        const motivo = erro?.name === 'TimeoutError' ? `sem resposta da B3 em ${limiteMs / 1000} s para o boletim ${codigo}.` : erro.message
+        if (tentativa >= tentativas) throw new Error(motivo)
+        console.warn(`[aviso] ${motivo} Nova tentativa.`)
+        await new Promise((r) => setTimeout(r, pausaMs * tentativa))
+      }
     }
   }
-  if (conteudo.length < TAMANHO_MINIMO_ZIP) return null
-  const pasta = path.join(pastaTemp, codigo)
-  const externo = path.join(pastaTemp, `${codigo}-download.zip`)
-  fs.writeFileSync(externo, conteudo)
-  try {
-    // O download é um zip com outro zip dentro; aceita também o XML direto, por segurança.
-    let nomes = execFileSync('unzip', ['-Z1', externo], { encoding: 'utf8' }).split('\n').filter(Boolean)
-    let zipDosXmls = externo
-    const interno = nomes.find((n) => /\.zip$/i.test(n))
-    if (interno) {
-      descompactar(externo, pasta, interno)
-      zipDosXmls = path.join(pasta, interno)
-      nomes = execFileSync('unzip', ['-Z1', zipDosXmls], { encoding: 'utf8' }).split('\n').filter(Boolean)
+  // A B3 às vezes serve o zip corrompido ou ainda sendo gravado (o unzip falha com "End-of-central-directory
+  // signature not found"). Download e extração são repetidos juntos, com pausa, antes de desistir.
+  for (let tentativaZip = 1; ; tentativaZip++) {
+    const conteudo = await baixar()
+    if (conteudo.length < TAMANHO_MINIMO_ZIP) return null
+    const pasta = path.join(pastaTemp, codigo)
+    const externo = path.join(pastaTemp, `${codigo}-download.zip`)
+    fs.writeFileSync(externo, conteudo)
+    try {
+      // O download é um zip com outro zip dentro; aceita também o XML direto, por segurança.
+      let nomes = execFileSync('unzip', ['-Z1', externo], { encoding: 'utf8' }).split('\n').filter(Boolean)
+      let zipDosXmls = externo
+      const interno = nomes.find((n) => /\.zip$/i.test(n))
+      if (interno) {
+        descompactar(externo, pasta, interno)
+        zipDosXmls = path.join(pasta, interno)
+        nomes = execFileSync('unzip', ['-Z1', zipDosXmls], { encoding: 'utf8' }).split('\n').filter(Boolean)
+      }
+      const ultima = escolherUltimaVersao(nomes)
+      if (!ultima) throw new Error(`O boletim ${codigo} não trouxe nenhum XML BVBG.086.01.`)
+      descompactar(zipDosXmls, pasta, ultima)
+      if (zipDosXmls !== externo) fs.rmSync(zipDosXmls, { force: true })
+      return path.join(pasta, ultima)
+    } catch (erro) {
+      fs.rmSync(pasta, { recursive: true, force: true })
+      if (tentativaZip >= tentativasZip || /não trouxe nenhum XML/.test(erro.message)) throw erro
+      console.warn(`[aviso] boletim ${codigo} corrompido (${String(erro.message).split('\n')[0].slice(0, 80)}). Baixando de novo (${tentativaZip}/${tentativasZip - 1}).`)
+      await new Promise((r) => setTimeout(r, pausaMs * tentativaZip))
+    } finally {
+      fs.rmSync(externo, { force: true })
     }
-    const ultima = escolherUltimaVersao(nomes)
-    if (!ultima) throw new Error(`O boletim ${codigo} não trouxe nenhum XML BVBG.086.01.`)
-    descompactar(zipDosXmls, pasta, ultima)
-    if (zipDosXmls !== externo) fs.rmSync(zipDosXmls, { force: true })
-    return path.join(pasta, ultima)
-  } finally {
-    fs.rmSync(externo, { force: true })
   }
 }
