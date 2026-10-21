@@ -17,11 +17,16 @@
 # job falha SEM alterar o arquivo e o GitHub envia e-mail. Feriado da B3 (zip vazio) ou pregão já processado:
 # nada muda, sem commit.
 
+# ATENÇÃO: o GitHub atrasa ou até perde disparos agendados (principalmente em minutos redondos, como :00 e :30). Por isso cada
+# job tem 3 horários, fora do minuto cheio: a execução da noite, uma repetição e uma passada às 9h, antes da abertura. Rodar
+# de novo sem pregão novo não altera nada (sem commit e sem deploy).
 name: Atualizar preço diário dos FIIs
 
 on:
   schedule:
-    - cron: '45 0 * * 2-6' # terça a sábado, 00h45 UTC = segunda a sexta, 21h45 de Brasília
+    - cron: '52 0 * * 2-6' # terça a sábado, 00h52 UTC = segunda a sexta, 21h52 de Brasília
+    - cron: '52 2 * * 2-6' # 23h52 de Brasília (repetição)
+    - cron: '15 12 * * 2-6' # 9h15 de Brasília (passada antes da abertura)
   workflow_dispatch: {}
 
 permissions:

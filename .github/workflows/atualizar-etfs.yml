@@ -16,15 +16,24 @@
 # dados do último dia bom e o GitHub envia um e-mail avisando da falha. Feriado da B3 (zip
 # vazio) ou pregão já processado: nada muda, sem commit e sem deploy.
 
+# ATENÇÃO: o GitHub atrasa ou até perde disparos agendados (principalmente em minutos redondos, como :00 e :30). Por isso cada
+# job tem 3 horários, fora do minuto cheio: a execução da noite, uma repetição e uma passada às 9h, antes da abertura. Rodar
+# de novo sem pregão novo não altera nada (sem commit e sem deploy).
 name: Atualizar ETFs
 
 on:
   schedule:
-    - cron: '30 0 * * 2-6' # terça a sábado, 00h30 UTC = segunda a sexta, 21h30 de Brasília
+    - cron: '37 0 * * 2-6' # terça a sábado, 00h37 UTC = segunda a sexta, 21h37 de Brasília
+    - cron: '37 2 * * 2-6' # 23h37 de Brasília (repetição)
+    - cron: '10 12 * * 2-6' # 9h10 de Brasília (passada antes da abertura)
   workflow_dispatch: {}
 
 permissions:
   contents: write
+
+concurrency:
+  group: etfs # nunca duas execuções ao mesmo tempo (as repetições não se sobrepõem)
+  cancel-in-progress: false
 
 jobs:
   atualizar:

@@ -17,15 +17,24 @@
 # dados do último dia bom e o GitHub envia um e-mail avisando da falha. Feriado da B3 (zip
 # vazio) ou pregão já processado: nada muda, sem commit e sem deploy.
 
+# ATENÇÃO: o GitHub atrasa ou até perde disparos agendados (principalmente em minutos redondos, como :00 e :30). Por isso cada
+# job tem 3 horários, fora do minuto cheio: a execução da noite, uma repetição e uma passada às 9h, antes da abertura. Rodar
+# de novo sem pregão novo não altera nada (sem commit e sem deploy).
 name: Atualizar BDRs
 
 on:
   schedule:
-    - cron: '0 1 * * 2-6' # terça a sábado, 01h UTC = segunda a sexta, 22h de Brasília
+    - cron: '7 1 * * 2-6' # terça a sábado, 01h07 UTC = segunda a sexta, 22h07 de Brasília
+    - cron: '7 3 * * 2-6' # 00h07 de Brasília (repetição)
+    - cron: '20 12 * * 2-6' # 9h20 de Brasília (passada antes da abertura)
   workflow_dispatch: {} # botão "Run workflow" para rodar manualmente
 
 permissions:
   contents: write
+
+concurrency:
+  group: bdrs # nunca duas execuções ao mesmo tempo (as repetições não se sobrepõem)
+  cancel-in-progress: false
 
 jobs:
   atualizar:

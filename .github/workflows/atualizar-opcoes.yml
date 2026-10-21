@@ -8,11 +8,16 @@
 # falha SEM alterar os arquivos: o app continua com o último dia bom e o GitHub envia um e-mail avisando. Feriado da B3
 # (arquivo ausente) ou pregão já processado: nada muda, sem commit e sem deploy.
 
+# ATENÇÃO: o GitHub atrasa ou até perde disparos agendados (principalmente em minutos redondos, como :00 e :30). Por isso cada
+# job tem 3 horários, fora do minuto cheio: a execução da noite, uma repetição e uma passada às 9h, antes da abertura. Rodar
+# de novo sem pregão novo não altera nada (sem commit e sem deploy).
 name: Atualizar Opções
 
 on:
   schedule:
-    - cron: '0 23 * * 1-5' # segunda a sexta, 23h UTC = 20h de Brasília
+    - cron: '7 23 * * 1-5' # segunda a sexta, 23h07 UTC = 20h07 de Brasília (primeira tentativa do dia)
+    - cron: '37 1 * * 2-6' # terça a sábado, 01h37 UTC = segunda a sexta, 22h37 de Brasília (repetição, se a primeira foi perdida)
+    - cron: '5 12 * * 2-6' # terça a sábado, 12h05 UTC = 9h05 de Brasília (passada antes da abertura, se a noite falhou)
   workflow_dispatch:
     inputs:
       forcar:
@@ -22,6 +27,10 @@ on:
 
 permissions:
   contents: write
+
+concurrency:
+  group: opcoes # nunca duas execuções ao mesmo tempo (as repetições não se sobrepõem)
+  cancel-in-progress: false
 
 jobs:
   atualizar:
