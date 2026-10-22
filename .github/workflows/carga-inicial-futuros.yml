@@ -1,0 +1,60 @@
+# Carga inicial do histórico dos futuros (Simule Futuros). Rodar UMA VEZ, à mão, antes do job diário
+# "Atualizar futuros" (e de novo só se o arquivo historico/futuros.json se perder).
+#
+# Antes: confira config/futuros.json e marque "conferidoPeloResponsavel": true.
+#
+# Baixa os boletins de preços da B3 dos pregões mais recentes (padrão: 260, o suficiente para a
+# faixa de 52 semanas), um por vez. O histórico é publicado MESMO se a execução falhar ou for
+# interrompida: rodar de novo só baixa o que falta. O arquivo do app (futuros.json) só é
+# publicado se o site compilar.
+
+name: Carga inicial de futuros
+
+on:
+  workflow_dispatch:
+    inputs:
+      pregoes:
+        description: 'Quantos pregões carregar (máximo 260)'
+        required: true
+        default: '260'
+
+permissions:
+  contents: write
+
+jobs:
+  carga:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Baixar os boletins e montar o histórico
+        run: node scripts/atualizar-futuros.mjs --carga-inicial=${{ github.event.inputs.pregoes }}
+
+      - name: Conferir se o site compila com os dados novos
+        id: build
+        run: |
+          npm ci
+          npm run build
+
+      - name: Publicar (commit) o que foi carregado
+        if: always()
+        run: |
+          if [ "${{ steps.build.outcome }}" != "success" ]; then
+            git checkout -- webapp-src/src/data/futuros.json 2>/dev/null || true
+          fi
+          if [ ! -f historico/futuros.json ]; then
+            echo "Nenhum histórico gravado."
+            exit 0
+          fi
+          git config user.name "${{ vars.COMMIT_AUTOR_NOME || 'github-actions[bot]' }}"
+          git config user.email "${{ vars.COMMIT_AUTOR_EMAIL || '41898283+github-actions[bot]@users.noreply.github.com' }}"
+          git add historico/futuros.json webapp-src/src/data/futuros.json
+          git commit -m "dados: carga inicial de futuros ($(date -u +%Y-%m-%d))" || { echo "Nada a publicar."; exit 0; }
+          git pull --rebase
+          git push
