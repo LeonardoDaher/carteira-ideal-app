@@ -444,7 +444,7 @@ function Tendencia({ produto }: { produto: ProdutoFuturo }) {
       <div className="card col" style={{ gap: 6 }} role="status">
         <span style={{ fontWeight: 700 }}>Histórico ainda curto para {produto.apelido}.</span>
         <span className="muted small justify">
-          São {produto.serie.length} candles; a leitura precisa de pelo menos 63. O histórico cresce um candle por pregão.
+          São {produto.serie.length} candles; a leitura precisa de pelo menos 80. O histórico cresce um candle por pregão.
         </span>
       </div>
     )
