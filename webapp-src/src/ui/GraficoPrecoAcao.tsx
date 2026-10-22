@@ -18,8 +18,10 @@ const H = BASE_VOLUME + B
 const COR_ALTA = 'var(--success)'
 const COR_BAIXA = 'var(--danger)'
 const COR_MM21 = 'var(--accent)'
-const COR_MM50 = 'oklch(72% 0.13 235)'
+const COR_MM50 = 'oklch(86% 0.22 135)'
 const COR_MM200 = 'oklch(70% 0.14 320)'
+const COR_SUPORTE = 'oklch(66% 0.19 250)'
+const COR_RESISTENCIA = 'oklch(60% 0.24 25)'
 
 export interface OpcoesDoGrafico {
   mm21: boolean
@@ -37,11 +39,11 @@ function passoRedondo(amplitude: number, linhas = 4) {
 }
 
 /**
- * Preço da ação: fechamento (linha), faixa do dia da mínima à máxima, médias de 21, 50 e 200 pregões, zonas de suporte e resistência
- * e volume financeiro. O Boletim de Preços da B3 não traz a abertura, então o desenho NÃO é de candles: a faixa vertical vai da mínima
- * à máxima e a linha liga os fechamentos. Toque, arraste ou use as setas para ler cada dia.
+ * Preço da ação em candles, médias de 21, 50 e 200 pregões, zonas de suporte (azul) e resistência (vermelho) e volume financeiro.
+ * O Boletim de Preços da B3 não traz a abertura: o corpo do candle vai do fechamento do pregão anterior ao fechamento do dia
+ * (o gap de abertura não aparece) e o pavio vai da mínima à máxima. Toque, arraste ou use as setas para ler cada dia.
  */
-export function GraficoPrecoAcao({ barras, zonas, nome, janela = 120, opcoes }: { barras: Barra[]; zonas: ZonaPreco[]; nome: string; janela?: number; opcoes: OpcoesDoGrafico }) {
+export function GraficoPrecoAcao({ barras, zonas, nome, janela = 120, opcoes, periodicidade = 'diario' }: { barras: Barra[]; zonas: ZonaPreco[]; nome: string; janela?: number; opcoes: OpcoesDoGrafico; periodicidade?: 'diario' | 'semanal' | 'mensal' }) {
   const [indice, setIndice] = useState<number | null>(null)
   const svgRef = useRef<SVGSVGElement>(null)
   const idLeitura = useId()
@@ -58,7 +60,7 @@ export function GraficoPrecoAcao({ barras, zonas, nome, janela = 120, opcoes }: 
     const v50 = m50.slice(inicio)
     const v200 = m200.slice(inicio)
     const relevantes = [
-      ...vis.flatMap((b) => [b.max, b.min]),
+      ...vis.flatMap((b, k) => [b.max, b.min, ...(k > 0 ? [vis[k - 1].fech] : [])]),
       ...(opcoes.mm21 ? v21 : []),
       ...(opcoes.mm50 ? v50 : []),
       ...(opcoes.mm200 ? v200 : []),
@@ -88,7 +90,7 @@ export function GraficoPrecoAcao({ barras, zonas, nome, janela = 120, opcoes }: 
     const marcas = [0, Math.floor((n - 1) / 2), n - 1].filter((v, i, a) => v >= 0 && a.indexOf(v) === i)
     return {
       vis, n, largura, x, y, yVol, grade, marcas, zonasVisiveis, minimo, maximo,
-      fechamentos: linha(vis.map((b) => b.fech)), c21: linha(v21), c50: linha(v50), c200: linha(v200),
+      c21: linha(v21), c50: linha(v50), c200: linha(v200),
     }
   }, [barras, zonas, janela, opcoes.mm21, opcoes.mm50, opcoes.mm200, opcoes.zonas])
 
@@ -98,7 +100,8 @@ export function GraficoPrecoAcao({ barras, zonas, nome, janela = 120, opcoes }: 
   const atual = vis[i]
   const anterior = i > 0 ? vis[i - 1].fech : null
   const variacao = anterior ? (atual.fech / anterior - 1) * 100 : null
-  const resumo = `Gráfico de preço de ${nome}, ${n} pregões, de ${dataLonga(vis[0].data)} a ${dataLonga(vis[n - 1].data)}. Último fechamento ${reais(vis[n - 1].fech)}, mínima do período ${reais(dados.minimo)} e máxima ${reais(dados.maximo)}.`
+  const unidade = periodicidade === 'mensal' ? 'meses' : periodicidade === 'semanal' ? 'semanas' : 'pregões'
+  const resumo = `Gráfico de candles ${periodicidade === 'mensal' ? 'mensais' : periodicidade === 'semanal' ? 'semanais' : 'diários'} de ${nome}, ${n} ${unidade}, de ${dataLonga(vis[0].data)} a ${dataLonga(vis[n - 1].data)}. Último fechamento ${reais(vis[n - 1].fech)}, mínima do período ${reais(dados.minimo)} e máxima ${reais(dados.maximo)}.`
   const estiloEixo = { fill: 'var(--text-muted)', fontSize: 9, fontVariantNumeric: 'tabular-nums' } as const
 
   function escolherPorPonteiro(e: PointerEvent<SVGSVGElement>) {
@@ -151,29 +154,36 @@ export function GraficoPrecoAcao({ barras, zonas, nome, janela = 120, opcoes }: 
         ))}
 
         {dados.zonasVisiveis.map((z, k) => {
-          const cor = z.tipo === 'suporte' ? COR_ALTA : COR_BAIXA
+          const cor = z.tipo === 'suporte' ? COR_SUPORTE : COR_RESISTENCIA
           const topo = y(z.superior)
+          const yLinha = y(z.tipo === 'suporte' ? z.superior : z.inferior)
           return (
             <g key={`${z.tipo}-${k}`}>
               <rect x={L} y={topo} width={W - R - L} height={Math.max(2, y(z.inferior) - topo)} fill={cor} opacity={0.14} />
-              <line x1={L} x2={W - R} y1={y(z.tipo === 'suporte' ? z.superior : z.inferior)} y2={y(z.tipo === 'suporte' ? z.superior : z.inferior)} stroke={cor} strokeWidth={1} strokeDasharray="4 3" opacity={0.7} />
+              <line x1={L} x2={W - R} y1={yLinha} y2={yLinha} stroke={cor} strokeWidth={1.6} />
             </g>
           )
         })}
 
-        {vis.map((b, k) => (
-          <g key={b.data}>
-            <line x1={x(k)} x2={x(k)} y1={y(b.max)} y2={y(b.min)} stroke="var(--text-muted)" strokeWidth={Math.max(0.8, largura * 0.35)} opacity={0.4} />
-            {opcoes.volume && (
-              <rect x={x(k) - largura * 0.31} y={yVol(b.vol)} width={Math.max(1, largura * 0.62)} height={Math.max(0, BASE_VOLUME - yVol(b.vol))} fill={k > 0 && b.fech < vis[k - 1].fech ? COR_BAIXA : COR_ALTA} opacity={0.45} />
-            )}
-          </g>
-        ))}
+        {vis.map((b, k) => {
+          const abertura = k > 0 ? vis[k - 1].fech : b.fech
+          const cor = b.fech < abertura ? COR_BAIXA : COR_ALTA
+          const yCorpoTopo = y(Math.max(abertura, b.fech))
+          const yCorpoBase = y(Math.min(abertura, b.fech))
+          return (
+            <g key={b.data}>
+              {opcoes.volume && (
+                <rect x={x(k) - largura * 0.31} y={yVol(b.vol)} width={Math.max(1, largura * 0.62)} height={Math.max(0, BASE_VOLUME - yVol(b.vol))} fill={cor} opacity={0.45} />
+              )}
+              <line x1={x(k)} x2={x(k)} y1={y(Math.max(b.max, abertura))} y2={y(Math.min(b.min, abertura))} stroke={cor} strokeWidth={1} />
+              <rect x={x(k) - largura * 0.36} y={yCorpoTopo} width={Math.max(1, largura * 0.72)} height={Math.max(1, yCorpoBase - yCorpoTopo)} fill={cor} />
+            </g>
+          )
+        })}
 
         {opcoes.mm200 && <path d={dados.c200} fill="none" stroke={COR_MM200} strokeWidth={1.4} strokeDasharray="2 3" strokeLinejoin="round" />}
         {opcoes.mm50 && <path d={dados.c50} fill="none" stroke={COR_MM50} strokeWidth={1.5} strokeDasharray="5 3" strokeLinejoin="round" />}
         {opcoes.mm21 && <path d={dados.c21} fill="none" stroke={COR_MM21} strokeWidth={1.5} strokeLinejoin="round" />}
-        <path d={dados.fechamentos} fill="none" stroke="var(--text)" strokeWidth={1.6} strokeLinejoin="round" />
 
         {dados.marcas.map((k) => (
           <text key={k} x={x(k)} y={H - 5} textAnchor={k === 0 ? 'start' : k === n - 1 ? 'end' : 'middle'} style={estiloEixo}>{dataCurta(vis[k].data)}</text>
@@ -181,16 +191,15 @@ export function GraficoPrecoAcao({ barras, zonas, nome, janela = 120, opcoes }: 
 
         <g aria-hidden="true">
           <line x1={x(i)} x2={x(i)} y1={T} y2={T + ALTURA_PRECO} stroke="var(--text-muted)" strokeWidth={1} opacity={0.6} />
-          <circle cx={x(i)} cy={y(atual.fech)} r={3} fill="var(--text)" />
         </g>
       </svg>
 
       <div className="small muted" style={{ display: 'flex', flexWrap: 'wrap', gap: '2px 14px', lineHeight: 1.4 }}>
-        <span><svg width="18" height="8" aria-hidden="true"><line x1="1" x2="17" y1="4" y2="4" stroke="var(--text)" strokeWidth="2" /></svg> Fechamento</span>
+        <span><svg width="10" height="12" aria-hidden="true"><rect x="2" y="2" width="6" height="8" fill={COR_ALTA} /></svg> Alta <svg width="10" height="12" aria-hidden="true"><rect x="2" y="2" width="6" height="8" fill={COR_BAIXA} /></svg> Baixa</span>
         {opcoes.mm21 && <span><svg width="18" height="8" aria-hidden="true"><line x1="1" x2="17" y1="4" y2="4" stroke={COR_MM21} strokeWidth="2" /></svg> Média 21</span>}
         {opcoes.mm50 && <span><svg width="18" height="8" aria-hidden="true"><line x1="1" x2="17" y1="4" y2="4" stroke={COR_MM50} strokeWidth="2" strokeDasharray="4 2" /></svg> Média 50</span>}
         {opcoes.mm200 && <span><svg width="18" height="8" aria-hidden="true"><line x1="1" x2="17" y1="4" y2="4" stroke={COR_MM200} strokeWidth="2" strokeDasharray="2 2" /></svg> Média 200</span>}
-        {opcoes.zonas && <span><svg width="14" height="8" aria-hidden="true"><rect width="14" height="8" fill={COR_ALTA} opacity="0.4" /></svg> Suporte <svg width="14" height="8" aria-hidden="true"><rect width="14" height="8" fill={COR_BAIXA} opacity="0.4" /></svg> Resistência</span>}
+        {opcoes.zonas && <span><svg width="18" height="8" aria-hidden="true"><line x1="1" x2="17" y1="4" y2="4" stroke={COR_SUPORTE} strokeWidth="2" /></svg> Suporte <svg width="18" height="8" aria-hidden="true"><line x1="1" x2="17" y1="4" y2="4" stroke={COR_RESISTENCIA} strokeWidth="2" /></svg> Resistência</span>}
       </div>
     </div>
   )

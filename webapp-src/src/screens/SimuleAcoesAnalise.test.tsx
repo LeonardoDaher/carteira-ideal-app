@@ -105,7 +105,7 @@ describe('Simule Ações: abas de análise', () => {
     abrir(/Análise técnica/)
     expect(screen.getByTestId('escolha-da-analise').textContent).toContain('ALFA3')
     expect(screen.getByTestId('resumo-tecnico')).toBeTruthy()
-    expect(screen.getByRole('img', { name: /Gráfico de preço de ALFA3/ })).toBeTruthy()
+    expect(screen.getByRole('img', { name: /Gráfico de candles diários de ALFA3/ })).toBeTruthy()
     for (const p of ['diario', 'semanal', 'mensal']) expect(screen.getByTestId(`tendencia-${p}`)).toBeTruthy()
     for (const c of ['altista', 'neutro', 'baixista']) expect(screen.getByTestId(`cenario-${c}`)).toBeTruthy()
     expect(screen.getByText(/Pontuação técnica e confiança/)).toBeTruthy()
@@ -135,9 +135,21 @@ describe('Simule Ações: abas de análise', () => {
     expect(screen.getByRole('button', { name: '60 pregões' }).getAttribute('aria-pressed')).toBe('true')
   })
 
+  it('o gráfico troca entre candles diários, semanais e mensais', () => {
+    abrir(/Análise técnica/)
+    expect(screen.getByRole('img', { name: /candles diários de ALFA3/ })).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Semanal' }))
+    expect(screen.getByRole('img', { name: /candles semanais de ALFA3, \d+ semanas/ })).toBeTruthy()
+    expect(screen.getByRole('button', { name: '26 semanas' }).getAttribute('aria-pressed')).toBe('true')
+    fireEvent.click(screen.getByRole('button', { name: 'Mensal' }))
+    expect(screen.getByRole('img', { name: /candles mensais de ALFA3, \d+ meses/ })).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Diário' }))
+    expect(screen.getByRole('img', { name: /candles diários de ALFA3/ })).toBeTruthy()
+  })
+
   it('o gráfico responde ao teclado e mostra a data lida', () => {
     abrir(/Análise técnica/)
-    const g = screen.getByRole('img', { name: /Gráfico de preço de ALFA3/ })
+    const g = screen.getByRole('img', { name: /Gráfico de candles diários de ALFA3/ })
     const antes = g.parentElement!.textContent
     fireEvent.keyDown(g, { key: 'Home' })
     expect(g.parentElement!.textContent).not.toBe(antes)
