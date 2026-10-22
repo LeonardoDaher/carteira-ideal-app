@@ -20,7 +20,7 @@ const B = 18
 const COR_ALTA = 'var(--success)'
 const COR_BAIXA = 'var(--danger)'
 const COR_MM21 = 'var(--accent)'
-const COR_MM80 = 'oklch(80% 0.14 355)'
+const COR_MM80 = 'oklch(72% 0.13 235)'
 const COR_MM200 = 'oklch(62% 0.27 328)'
 const COR_SUPORTE = 'oklch(66% 0.19 250)'
 const COR_RESISTENCIA = 'oklch(60% 0.24 25)'
@@ -71,7 +71,7 @@ function passoRedondo(amplitude: number, linhas = 4) {
 }
 
 /**
- * Preço da ação em candles, médias simples de 21 (amarela), 80 (rosa) e 200 (fúcsia tracejada) candles, zonas de suporte (azul) e
+ * Preço da ação em candles, médias simples de 21 (amarela), 80 (azul) e 200 (fúcsia tracejada) candles, zonas de suporte (azul) e
  * resistência (vermelho) com o preço na ponta da linha, volume financeiro, IFR, MACD e estocástico pleno.
  * Com o histórico longo do COTAHIST (`abe`) o corpo vai da abertura real ao fechamento; sem ele (Boletim de Preços, que não traz a
  * abertura) vai do fechamento do pregão anterior ao do dia, e o gap de abertura não aparece. O pavio vai da mínima à máxima. Toque, arraste ou use as setas para ler cada dia.
