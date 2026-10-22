@@ -11,10 +11,6 @@
 name: Carga inicial de futuros
 
 on:
-  # TEMPORÁRIO (branch feat/simule-futuros): workflow novo não pode ser disparado à mão antes de estar no main. Remover antes do merge.
-  push:
-    branches: [feat/simule-futuros]
-    paths: ['.github/workflows/carga-inicial-futuros.yml']
   workflow_dispatch:
     inputs:
       pregoes:
@@ -38,7 +34,7 @@ jobs:
           cache: npm
 
       - name: Baixar os boletins e montar o histórico
-        run: node scripts/atualizar-futuros.mjs --carga-inicial=${{ github.event.inputs.pregoes || '260' }}
+        run: node scripts/atualizar-futuros.mjs --carga-inicial=${{ github.event.inputs.pregoes }}
 
       - name: Conferir se o site compila com os dados novos
         id: build
