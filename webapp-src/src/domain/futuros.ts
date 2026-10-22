@@ -370,14 +370,14 @@ export interface AnaliseGrafica {
   motivos: string[]
 }
 
-/** Retorno mínimo de 80 candles (%) para a leitura deixar de ser lateral, mesmo limiar das ações (tendencia.ts), agora sobre 80 candles. */
+/** Retorno mínimo de 80 candles (%) para a leitura deixar de ser lateral, mesmo limiar da análise das ações (tendencia.ts). */
 export const RETORNO_MINIMO_PCT = 3
 
 const pct = (v: number, sinal = false) => `${sinal && v > 0 ? '+' : ''}${v.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`
 const num = (v: number, casas = 2) => v.toLocaleString('pt-BR', { minimumFractionDigits: casas, maximumFractionDigits: casas })
 
 /**
- * Leitura do passado do contínuo, com a regra da aba Tendência das ações, só que sobre a média de 80 (a das ações usa 63): alta = preço acima da média de 21, que está
+ * Leitura do passado do contínuo, com a mesma regra da aba Tendência das ações (média e retorno de 80 candles): alta = preço acima da média de 21, que está
  * acima da de 80, com retorno de 80 candles de pelo menos +3%; baixa = o inverso; o resto é lateral. No DI, o retorno é da
  * taxa. Precisa de pelo menos 80 candles; com menos, devolve null.
  */
