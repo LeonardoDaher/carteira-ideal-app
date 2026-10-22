@@ -1,0 +1,60 @@
+# Histórico longo das ações (decisão D120): até 5 anos de candles diários COM abertura real, para o gráfico da análise técnica do
+# Simule Ações. Fonte: COTAHIST, arquivo oficial e gratuito de séries históricas da B3 (um zip por ano, cerca de 80 MB cada). O job
+# grava um arquivo por ação em webapp-src/public/dados/acoes-historico/ (o app baixa só o da ação que está na tela), ajustado a
+# desdobramentos e grupamentos (os de config/acoes.json e os detectados pelo preço, pela quantidade e pelo volume).
+#
+# O histórico de 12 meses do job "Atualizar Ações" continua alimentando a análise técnica e cobre os pregões mais recentes: o app
+# usa o arquivo longo até o último dia dele e a série diária depois disso. Por isso a cadência semanal basta.
+#
+# Se o script achar algo errado (poucas ações com histórico, B3 fora do ar), o job falha SEM alterar os arquivos.
+
+# ATENÇÃO: o GitHub atrasa ou até perde disparos agendados (principalmente em minutos redondos). O minuto abaixo foge do :00 e :30.
+name: Atualizar Histórico das Ações
+
+on:
+  schedule:
+    - cron: '23 6 * * 6' # sábado, 06h23 UTC = 03h23 de Brasília (o pregão de sexta já está no arquivo da B3)
+  workflow_dispatch: {} # botão "Run workflow" para a primeira carga e para rodar manualmente
+
+permissions:
+  contents: write
+
+concurrency:
+  group: historico-acoes # nunca duas execuções ao mesmo tempo
+  cancel-in-progress: false
+
+jobs:
+  atualizar:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Testes do histórico
+        run: node --test scripts/historico-cotahist.test.mjs
+
+      - name: Baixar o COTAHIST e gerar os arquivos por ação
+        run: node scripts/atualizar-historico-acoes.mjs --anos=5
+
+      - name: Conferir se o site compila com os dados novos
+        run: |
+          npm ci
+          npm run build
+
+      - name: Publicar (commit) se houver mudança
+        run: |
+          git add -A webapp-src/public/dados/acoes-historico
+          if git diff --cached --quiet; then
+            echo "Sem mudanças nos dados."
+            exit 0
+          fi
+          git config user.name "${{ vars.COMMIT_AUTOR_NOME || 'github-actions[bot]' }}"
+          git config user.email "${{ vars.COMMIT_AUTOR_EMAIL || '41898283+github-actions[bot]@users.noreply.github.com' }}"
+          git commit -m "dados: Histórico das ações ($(date -u +%Y-%m-%d))"
+          git pull --rebase
+          git push

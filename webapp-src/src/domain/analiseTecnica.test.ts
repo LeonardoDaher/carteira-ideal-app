@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import {
   adxSerie, agregar, analisarTecnica, atrSerie, detectarPadroes, ema, estocasticoSerie, macdSerie, montarBarras, pivos, rsiSerie, tendenciaDoPeriodo,
-  vieSDaNota, zonasDePreco,
+  mesclarHistorico, vieSDaNota, zonasDePreco,
 } from './analiseTecnica'
-import type { Barra, PontoSerie } from './analiseTecnica'
+import type { Barra, HistoricoLongo, PontoSerie } from './analiseTecnica'
 
 /** Dias úteis consecutivos (sem feriados) a partir de 2025-10-06. */
 function datas(n: number): string[] {
@@ -66,6 +66,38 @@ describe('indicadores', () => {
     expect(m.hist[i]).toBeCloseTo((m.linha[i] as number) - (m.sinal[i] as number), 10)
     expect(m.linha[24]).toBeNull()
     expect(m.linha[25]).not.toBeNull()
+  })
+
+  it('mesclarHistorico: histórico longo com abertura seguido só das barras recentes posteriores', () => {
+    const longo: HistoricoLongo = { ticker: 'X', de: '2025-01-02', ate: '2025-01-03', ajustes: [], saltosRestantes: [], barras: [['2025-01-02', 10, 11, 9, 10.5, 100], ['2025-01-03', 10.5, 12, 10, 11, 100]] }
+    const recentes: Barra[] = [
+      { data: '2025-01-03', fech: 11.05, min: 10, max: 12, vol: 100 },
+      { data: '2025-01-06', fech: 11.5, min: 11, max: 12, vol: 100 },
+    ]
+    const r = mesclarHistorico(longo, recentes)
+    expect(r.usouLongo).toBe(true)
+    expect(r.barras.map((b) => b.data)).toEqual(['2025-01-02', '2025-01-03', '2025-01-06'])
+    expect(r.barras[0].abe).toBe(10)
+    expect(r.barras[2].abe).toBeUndefined()
+  })
+
+  it('mesclarHistorico: fechamentos de escalas diferentes na data em comum descartam o histórico longo', () => {
+    const longo: HistoricoLongo = { ticker: 'X', de: '2025-01-02', ate: '2025-01-03', ajustes: [], saltosRestantes: [], barras: [['2025-01-03', 30, 33, 29, 31, 100]] }
+    const recentes: Barra[] = [{ data: '2025-01-03', fech: 10.3, min: 10, max: 11, vol: 100 }]
+    const r = mesclarHistorico(longo, recentes)
+    expect(r.usouLongo).toBe(false)
+    expect(r.barras).toBe(recentes)
+  })
+
+  it('agregar mantém a abertura real da primeira barra do período', () => {
+    const b: Barra[] = [
+      { data: '2025-01-06', abe: 10, fech: 11, min: 9, max: 12, vol: 1 },
+      { data: '2025-01-07', abe: 11, fech: 12, min: 10, max: 13, vol: 1 },
+    ]
+    const [semana] = agregar(b, 'semana')
+    expect(semana.abe).toBe(10)
+    expect(semana.fech).toBe(12)
+    expect(agregar([{ data: '2025-01-06', fech: 1, min: 1, max: 1, vol: 1 }], 'semana')[0].abe).toBeUndefined()
   })
 
   it('estocástico pleno: 100 quando fecha na máxima da janela, 0 na mínima, e começa só com a janela cheia', () => {

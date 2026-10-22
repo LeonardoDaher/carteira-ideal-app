@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react'
 import type { DadosDaAnalise } from './useAnaliseDaAcao'
 import { ROTULO_LEITURA, ROTULO_VIES, agregar } from '../domain/analiseTecnica'
-import type { AnaliseTecnica, Horizonte, Leitura, Viés } from '../domain/analiseTecnica'
+import type { AnaliseTecnica, Barra, Horizonte, Leitura, Viés } from '../domain/analiseTecnica'
+import type { EstadoHistoricoLongo } from '../data/useHistoricoLongo'
 import { ROTULO_HORIZONTE } from '../domain/confluencia'
 import { GraficoPrecoAcao } from '../ui/GraficoPrecoAcao'
 import type { OpcoesDoGrafico } from '../ui/GraficoPrecoAcao'
@@ -14,12 +15,41 @@ const PERIODICIDADES: { chave: Periodicidade; rotulo: string }[] = [{ chave: 'di
 /** Janelas do gráfico por periodicidade, em candles; a última (0) mostra todo o histórico guardado. */
 const JANELAS: Record<Periodicidade, { n: number; rotulo: string }[]> = {
   diario: [{ n: 60, rotulo: '60 pregões' }, { n: 120, rotulo: '120 pregões' }, { n: 260, rotulo: '1 ano' }, { n: 520, rotulo: '2 anos' }, { n: 1300, rotulo: '5 anos' }, { n: 0, rotulo: 'Tudo' }],
-  semanal: [{ n: 26, rotulo: '26 semanas' }, { n: 52, rotulo: '1 ano' }, { n: 260, rotulo: '5 anos' }, { n: 0, rotulo: 'Tudo' }],
-  mensal: [{ n: 0, rotulo: 'Tudo' }],
+  semanal: [{ n: 26, rotulo: '26 semanas' }, { n: 52, rotulo: '1 ano' }, { n: 104, rotulo: '2 anos' }, { n: 260, rotulo: '5 anos' }, { n: 0, rotulo: 'Tudo' }],
+  mensal: [{ n: 12, rotulo: '1 ano' }, { n: 24, rotulo: '2 anos' }, { n: 60, rotulo: '5 anos' }, { n: 0, rotulo: 'Tudo' }],
 }
 
 export const tomDoVies = (v: Viés): Tom => (v === 'altista' || v === 'moderadamente-altista' ? 'positivo' : v === 'baixista' || v === 'moderadamente-baixista' ? 'negativo' : 'neutro')
 const tomDaLeitura = (l: Leitura): Tom => (l === 'alta' ? 'positivo' : l === 'baixa' ? 'negativo' : 'neutro')
+
+const textoDoFator = (f: number) => (f >= 1 ? `${f}:1 desdobramento` : `1:${Math.round(1 / f)} grupamento`)
+
+/** Diz de onde vêm os candles e o que foi ajustado: abertura real do COTAHIST ou aproximada, desdobramentos e grupamentos aplicados. */
+function NotaDoHistorico({ barras, estado }: { barras: Barra[]; estado: EstadoHistoricoLongo }) {
+  const comAbertura = barras.filter((b) => b.abe !== undefined)
+  if (estado.tipo === 'carregando') return <span className="tiny muted" role="status">Carregando o histórico longo…</span>
+  if (!comAbertura.length) {
+    return (
+      <span className="tiny muted justify">
+        Histórico de 12 meses do Boletim de Preços da B3, que não traz o preço de abertura: o corpo do candle vai do fechamento anterior ao fechamento do dia, e martelo, engolfo, doji e gaps de abertura não podem ser lidos.
+      </span>
+    )
+  }
+  const ultimaReal = comAbertura[comAbertura.length - 1].data
+  const ajustes = estado.tipo === 'pronto' ? estado.dados.ajustes : []
+  return (
+    <span className="tiny muted justify" data-testid="nota-historico-longo">
+      Candles com abertura real do COTAHIST da B3, de {dataLonga(comAbertura[0].data)} a {dataLonga(ultimaReal)}
+      {barras[barras.length - 1].data > ultimaReal ? '; depois disso a abertura é aproximada pelo fechamento anterior' : ''}.{' '}
+      {ajustes.length
+        ? `Preços ajustados a ${ajustes.length === 1 ? 'um evento' : `${ajustes.length} eventos`}: ${ajustes.map((a) => `${dataLonga(a.data)} (${textoDoFator(a.fator)}${a.origem === 'detectado' ? ', detectado pelo preço e pelo volume' : ''})`).join('; ')}.`
+        : 'Nenhum desdobramento ou grupamento no período.'}
+      {estado.tipo === 'pronto' && estado.dados.saltosRestantes.length
+        ? ` Atenção: há saltos de preço que não foram reconhecidos como desdobramento (${estado.dados.saltosRestantes.map((s) => dataLonga(s.data)).join(', ')}), então o gráfico pode estar distorcido nessas datas.`
+        : ''}
+    </span>
+  )
+}
 
 /** Aba "Análise técnica": leitura gráfica calculada por regra (tendência, médias, IFR, MACD, volume, zonas, padrões, risco, cenários e nota). */
 export function AnaliseTecnicaAcao({ dados, ticker, nome, horizonte }: { dados: DadosDaAnalise; ticker: string; nome: string | null; horizonte: Horizonte }) {
@@ -27,11 +57,12 @@ export function AnaliseTecnicaAcao({ dados, ticker, nome, horizonte }: { dados: 
   const [janela, setJanela] = useState(120)
   const [opcoes, setOpcoes] = useState<OpcoesDoGrafico>({ mm21: true, mm80: true, mm200: false, zonas: true, volume: true, ifr: true, macd: true, estocastico: true })
   const barrasDoGrafico = useMemo(() => {
-    const b = dados.barras ?? []
+    const b = dados.barrasDoGrafico ?? []
     return periodicidade === 'diario' ? b : agregar(b, periodicidade === 'semanal' ? 'semana' : 'mes')
-  }, [dados.barras, periodicidade])
-  // Só oferece janelas menores que o histórico disponível (o que passar disso é "Tudo").
-  const janelas = JANELAS[periodicidade].filter((j) => j.n === 0 || j.n < barrasDoGrafico.length)
+  }, [dados.barrasDoGrafico, periodicidade])
+  // Só oferece janelas que cabem no histórico disponível; "Tudo" some quando a última janela já o cobre.
+  const caben = JANELAS[periodicidade].filter((j) => j.n !== 0 && j.n < barrasDoGrafico.length * 1.1)
+  const janelas = caben.length && caben[caben.length - 1].n >= barrasDoGrafico.length * 0.95 ? caben : [...caben, { n: 0, rotulo: 'Tudo' }]
   const janelaAtiva = janelas.some((j) => j.n === janela) ? janela : janelas[0].n
   function trocarPeriodicidade(p: Periodicidade) {
     setPeriodicidade(p)
@@ -78,9 +109,8 @@ export function AnaliseTecnicaAcao({ dados, ticker, nome, horizonte }: { dados: 
           ))}
         </div>
         <GraficoPrecoAcao key={`${ticker}-${periodicidade}-${janelaAtiva}`} barras={barrasDoGrafico} zonas={t.zonas} nome={ticker} periodicidade={periodicidade} janela={janelaAtiva === 0 ? barrasDoGrafico.length : Math.min(janelaAtiva, barrasDoGrafico.length)} opcoes={opcoes} />
-        <span className="tiny muted justify">
-          Candles aproximados: o Boletim de Preços da B3 não traz o preço de abertura, então o corpo vai do fechamento anterior ao fechamento do dia. Martelo, engolfo, doji e gaps de abertura não podem ser lidos. O volume é financeiro (R$).
-        </span>
+        <NotaDoHistorico barras={barrasDoGrafico} estado={dados.historicoLongo} />
+        <span className="tiny muted justify">Todo o histórico de preços vem de arquivos da B3. O volume é financeiro (R$), não quantidade de ações. Dividendos não ajustam o preço.</span>
       </Modulo>
 
       <Modulo titulo="Tendência por período" subtitulo={`horizonte de ${ROTULO_HORIZONTE[horizonte].toLowerCase()}`} aberto>

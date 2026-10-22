@@ -4,8 +4,10 @@ import type { EstadoArquivo } from '../data/useArquivoDados'
 import type { AnaliseFundamentalista, Premissas, SnapshotFundamentos } from '../domain/analiseFundamentalista'
 import { analisarFundamentos, premissasDaSelic } from '../domain/analiseFundamentalista'
 import type { AnaliseTecnica, Horizonte, SnapshotSeries } from '../domain/analiseTecnica'
-import { analisarTecnica, montarBarras } from '../domain/analiseTecnica'
-import type { Barra } from '../domain/analiseTecnica'
+import { analisarTecnica, mesclarHistorico, montarBarras } from '../domain/analiseTecnica'
+import type { Barra, HistoricoLongo } from '../domain/analiseTecnica'
+import { useHistoricoLongo } from '../data/useHistoricoLongo'
+import type { EstadoHistoricoLongo } from '../data/useHistoricoLongo'
 import { analisarConfluencia } from '../domain/confluencia'
 import type { Confluencia } from '../domain/confluencia'
 import type { SnapshotAcoes } from '../domain/acoes'
@@ -20,6 +22,9 @@ export interface DadosDaAnalise {
   recarregarSeries: () => void
   recarregarFundamentos: () => void
   barras: Barra[] | null
+  /** Barras do gráfico: histórico longo do COTAHIST (até 5 anos, com abertura) seguido das barras recentes; igual a `barras` sem o arquivo. */
+  barrasDoGrafico: Barra[] | null
+  historicoLongo: EstadoHistoricoLongo
   tecnica: AnaliseTecnica | null
   fundamentalista: AnaliseFundamentalista | null
   confluencia: Confluencia | null
@@ -43,7 +48,7 @@ function premissasDoMercado(): Partial<Premissas> {
  * quando uma das abas de análise está aberta. `precoDe` vem do arquivo de ações do app (cotação de fechamento por código).
  */
 export function useAnaliseDaAcao({
-  ticker, horizonte, ativo, precoDe, snapshot, seriesInjetadas, fundamentosInjetados, premissas,
+  ticker, horizonte, ativo, precoDe, snapshot, seriesInjetadas, fundamentosInjetados, historicoInjetado, premissas,
 }: {
   ticker: string | null
   horizonte: Horizonte
@@ -52,6 +57,7 @@ export function useAnaliseDaAcao({
   snapshot: SnapshotAcoes
   seriesInjetadas?: SnapshotSeries
   fundamentosInjetados?: SnapshotFundamentos
+  historicoInjetado?: Record<string, HistoricoLongo>
   premissas?: Partial<Premissas>
 }): DadosDaAnalise {
   const [series, recarregarSeries] = useArquivoDados<SnapshotSeries>(CAMINHO_SERIES, ativo, seriesInjetadas)
@@ -60,6 +66,12 @@ export function useAnaliseDaAcao({
 
   const sequencia = series.tipo === 'pronto' && ticker ? series.dados.ativos[ticker] : undefined
   const barras = useMemo(() => (series.tipo === 'pronto' && sequencia ? montarBarras(series.dados.pregoes, sequencia).barras : null), [series, sequencia])
+
+  const historicoLongo = useHistoricoLongo(ticker, ativo, historicoInjetado)
+  const barrasDoGrafico = useMemo(() => {
+    if (!barras) return null
+    return historicoLongo.tipo === 'pronto' ? mesclarHistorico(historicoLongo.dados, barras).barras : barras
+  }, [barras, historicoLongo])
 
   const tecnica = useMemo(() => {
     if (series.tipo !== 'pronto' || !ticker || !sequencia) return null
@@ -103,5 +115,5 @@ export function useAnaliseDaAcao({
         ? 'Dados insuficientes para conclusão: a CVM não traz exercícios completos desta empresa.'
         : null
 
-  return { series, fundamentos, recarregarSeries, recarregarFundamentos, barras, tecnica, fundamentalista, confluencia, premissas: premissasEfetivas, semSerie, semFundamentos }
+  return { series, fundamentos, recarregarSeries, recarregarFundamentos, barras, barrasDoGrafico, historicoLongo, tecnica, fundamentalista, confluencia, premissas: premissasEfetivas, semSerie, semFundamentos }
 }

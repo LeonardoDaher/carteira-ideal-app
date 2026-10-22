@@ -27,6 +27,8 @@ export interface SnapshotSeries {
 
 export interface Barra {
   data: string
+  /** Abertura real (só nas barras do histórico longo do COTAHIST); sem ela o gráfico usa o fechamento anterior. */
+  abe?: number
   fech: number
   min: number
   max: number
@@ -277,6 +279,31 @@ export function montarBarras(pregoes: string[], pontos: PontoSerie[]): { barras:
   return { barras, diasSemNegocio: semNegocio }
 }
 
+/** acoes-historico/<TICKER>.json (COTAHIST da B3, até 5 anos, ajustado a desdobramentos e grupamentos). Linha: [data, abertura, máxima, mínima, fechamento, volume R$ mil]. */
+export interface HistoricoLongo {
+  ticker: string
+  de: string
+  ate: string
+  ajustes: { data: string; fator: number; origem: 'config' | 'detectado' }[]
+  saltosRestantes: { data: string; de: number; para: number }[]
+  barras: [string, number, number, number, number, number][]
+}
+
+/**
+ * Histórico longo (com abertura real) seguido das barras recentes do app, só as posteriores ao último dia do histórico longo.
+ * Se o fechamento das duas fontes na data em comum diferir mais de 2%, os preços estão em escalas diferentes (por exemplo, um
+ * desdobramento posterior à geração do arquivo): nesse caso fica só a série recente.
+ */
+export function mesclarHistorico(longo: HistoricoLongo, recentes: Barra[]): { barras: Barra[]; usouLongo: boolean } {
+  const antigas: Barra[] = longo.barras.map(([data, abe, max, min, fech, vol]) => ({ data, abe, fech, min, max, vol }))
+  if (!antigas.length) return { barras: recentes, usouLongo: false }
+  const ultimaAntiga = antigas[antigas.length - 1]
+  const emComum = recentes.find((b) => b.data === ultimaAntiga.data)
+  if (emComum && Math.abs(emComum.fech / ultimaAntiga.fech - 1) > 0.02) return { barras: recentes, usouLongo: false }
+  const depois = recentes.filter((b) => b.data > ultimaAntiga.data)
+  return { barras: [...antigas, ...depois], usouLongo: true }
+}
+
 function chaveDaSemana(data: string) {
   const d = new Date(`${data}T12:00:00Z`)
   const dia = (d.getUTCDay() + 6) % 7 // segunda = 0
@@ -295,6 +322,7 @@ export function agregar(barras: Barra[], por: 'semana' | 'mes'): Barra[] {
   }
   return [...grupos.values()].map((g) => ({
     data: ultimo(g).data,
+    ...(g[0].abe !== undefined ? { abe: g[0].abe } : {}),
     fech: ultimo(g).fech,
     min: Math.min(...g.map((b) => b.min)),
     max: Math.max(...g.map((b) => b.max)),

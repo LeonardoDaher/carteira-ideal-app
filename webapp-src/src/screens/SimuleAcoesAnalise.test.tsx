@@ -2,7 +2,7 @@ import { fireEvent, render, screen, within } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { SimuleAcoes } from './SimuleAcoes'
 import type { SnapshotAcoes } from '../domain/acoes'
-import type { SnapshotSeries, PontoSerie } from '../domain/analiseTecnica'
+import type { HistoricoLongo, SnapshotSeries, PontoSerie } from '../domain/analiseTecnica'
 import type { EmpresaFundamentos, PeriodoFundamental, SnapshotFundamentos } from '../domain/analiseFundamentalista'
 import type { AppCtx } from '../state/useAppState'
 
@@ -87,8 +87,26 @@ const fundamentos: SnapshotFundamentos = {
   empresas: { ALFA3: empresa('ALFA3'), PAR1: empresa('PAR1'), PAR2: empresa('PAR2'), PAR3: empresa('PAR3'), PAR4: empresa('PAR4') },
 }
 
-function abrir(aba: RegExp) {
-  render(<SimuleAcoes ctx={ctx} snapshot={snapshot} series={series} fundamentos={fundamentos} />)
+/** Histórico longo (COTAHIST) de ALFA3: 540 pregões antes da série de 12 meses, com abertura, terminando no mesmo dia e no mesmo preço. */
+function historicoLongoDeAlfa(ajustes: HistoricoLongo['ajustes'] = []): Record<string, HistoricoLongo> {
+  const antes: string[] = []
+  const d = new Date(`${pregoes[0]}T12:00:00Z`)
+  while (antes.length < 540) {
+    d.setUTCDate(d.getUTCDate() - 1)
+    if (d.getUTCDay() !== 0 && d.getUTCDay() !== 6) antes.unshift(d.toISOString().slice(0, 10))
+  }
+  const barras: HistoricoLongo['barras'] = [
+    ...antes.map((data): HistoricoLongo['barras'][number] => [data, 19.5, 20.4, 19.2, 20, 25_000]),
+    ...pregoes.map((data, i): HistoricoLongo['barras'][number] => {
+      const p = subindo[i] as [number, number, number, number]
+      return [data, p[0] * 0.998, p[2], p[1], p[0], p[3]]
+    }),
+  ]
+  return { ALFA3: { ticker: 'ALFA3', de: barras[0][0], ate: barras[barras.length - 1][0], ajustes, saltosRestantes: [], barras } }
+}
+
+function abrir(aba: RegExp, historico: Record<string, HistoricoLongo> = {}) {
+  render(<SimuleAcoes ctx={ctx} snapshot={snapshot} series={series} fundamentos={fundamentos} historico={historico} />)
   fireEvent.click(screen.getByRole('tab', { name: aba }))
 }
 
@@ -145,6 +163,24 @@ describe('Simule Ações: abas de análise', () => {
     expect(screen.getByRole('img', { name: /candles mensais de ALFA3, \d+ meses/ })).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: 'Diário' }))
     expect(screen.getByRole('img', { name: /candles diários de ALFA3/ })).toBeTruthy()
+  })
+
+  it('sem o histórico longo, o gráfico avisa que a abertura é aproximada e só oferece até 1 ano', () => {
+    abrir(/Análise técnica/)
+    expect(screen.queryByRole('button', { name: '2 anos' })).toBeNull()
+    expect(screen.queryByTestId('nota-historico-longo')).toBeNull()
+  })
+
+  it('com o histórico longo, mostra abertura real, os eventos ajustados e períodos de anos', () => {
+    abrir(/Análise técnica/, historicoLongoDeAlfa([{ data: '2025-03-03', fator: 3, origem: 'detectado' }]))
+    const nota = screen.getByTestId('nota-historico-longo').textContent ?? ''
+    expect(nota).toContain('abertura real do COTAHIST')
+    expect(nota).toContain('03/03/2025 (3:1 desdobramento, detectado pelo preço e pelo volume)')
+    fireEvent.click(screen.getByRole('button', { name: '2 anos' }))
+    expect(screen.getByRole('img', { name: /candles diários de ALFA3, 520 pregões/ })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Tudo' })).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Tudo' }))
+    expect(screen.getByRole('img', { name: /candles diários de ALFA3, 800 pregões/ })).toBeTruthy()
   })
 
   it('o gráfico responde ao teclado e mostra a data lida', () => {

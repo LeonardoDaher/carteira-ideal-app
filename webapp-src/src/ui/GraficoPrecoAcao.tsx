@@ -73,8 +73,8 @@ function passoRedondo(amplitude: number, linhas = 4) {
 /**
  * Preço da ação em candles, médias simples de 21 (amarela), 80 (rosa) e 200 (fúcsia tracejada) candles, zonas de suporte (azul) e
  * resistência (vermelho) com o preço na ponta da linha, volume financeiro, IFR, MACD e estocástico pleno.
- * O Boletim de Preços da B3 não traz a abertura: o corpo do candle vai do fechamento do pregão anterior ao fechamento do dia
- * (o gap de abertura não aparece) e o pavio vai da mínima à máxima. Toque, arraste ou use as setas para ler cada dia.
+ * Com o histórico longo do COTAHIST (`abe`) o corpo vai da abertura real ao fechamento; sem ele (Boletim de Preços, que não traz a
+ * abertura) vai do fechamento do pregão anterior ao do dia, e o gap de abertura não aparece. O pavio vai da mínima à máxima. Toque, arraste ou use as setas para ler cada dia.
  */
 export function GraficoPrecoAcao({ barras, zonas, nome, janela = 120, opcoes, periodicidade = 'diario' }: { barras: Barra[]; zonas: ZonaPreco[]; nome: string; janela?: number; opcoes: OpcoesDoGrafico; periodicidade?: 'diario' | 'semanal' | 'mensal' }) {
   const [indice, setIndice] = useState<number | null>(null)
@@ -115,7 +115,7 @@ export function GraficoPrecoAcao({ barras, zonas, nome, janela = 120, opcoes, pe
     const v80 = ind.m80.slice(inicio, fim)
     const v200 = ind.m200.slice(inicio, fim)
     const relevantes = [
-      ...vis.flatMap((b, k) => [b.max, b.min, ...(k > 0 ? [vis[k - 1].fech] : [])]),
+      ...vis.flatMap((b, k) => [b.max, b.min, b.abe ?? (k > 0 ? vis[k - 1].fech : b.fech)]),
       ...(opcoes.mm21 ? v21 : []),
       ...(opcoes.mm80 ? v80 : []),
       ...(opcoes.mm200 ? v200 : []),
@@ -168,7 +168,14 @@ export function GraficoPrecoAcao({ barras, zonas, nome, janela = 120, opcoes, pe
     const linha = (serie: (number | null)[], escala: (v: number) => number = y) => serie.map((v, i) => (v === null ? '' : `${i === 0 || serie[i - 1] === null ? 'M' : 'L'}${x(i).toFixed(1)} ${escala(v).toFixed(1)}`)).join('')
     const grade: number[] = []
     for (let v = yMin; v <= yMax + passo / 2; v += passo) grade.push(v)
-    const marcas = [0, Math.floor((n - 1) / 2), n - 1].filter((v, i, a) => v >= 0 && a.indexOf(v) === i)
+    // Datas do eixo: mais de um ano na tela mostra a virada de cada ano (marcada com o ano); até um ano, cinco datas igualmente espaçadas.
+    const anos = vis.map((b) => b.data.slice(0, 4))
+    const viradas = vis.flatMap((_, k) => (k > 0 && anos[k] !== anos[k - 1] ? [{ k, texto: anos[k], ano: true }] : []))
+    const passoAno = Math.ceil(viradas.length / 6) || 1
+    const marcas: { k: number; texto: string; ano: boolean }[] =
+      viradas.length >= 1 && new Date(vis[n - 1].data).getTime() - new Date(vis[0].data).getTime() > 400 * 86_400_000
+        ? viradas.filter((_, j) => j % passoAno === 0)
+        : [0, 1, 2, 3, 4].map((j) => Math.round(((n - 1) * j) / 4)).filter((v, i, a) => a.indexOf(v) === i).map((k) => ({ k, texto: dataCurta(vis[k].data), ano: false }))
     // Preço escrito na ponta de cada zona (azul/vermelho); afasta os rótulos que ficariam um sobre o outro e some com os da grade que colidem.
     const rotulosZona = zonasVisiveis
       .map((z) => ({ tipo: z.tipo, valor: z.tipo === 'suporte' ? z.superior : z.inferior, y: y(z.tipo === 'suporte' ? z.superior : z.inferior) }))
@@ -291,7 +298,7 @@ export function GraficoPrecoAcao({ barras, zonas, nome, janela = 120, opcoes, pe
         ))}
 
         {vis.map((b, k) => {
-          const abertura = k > 0 ? vis[k - 1].fech : b.fech
+          const abertura = b.abe ?? (k > 0 ? vis[k - 1].fech : b.fech)
           const cor = b.fech < abertura ? COR_BAIXA : COR_ALTA
           const yCorpoTopo = y(Math.max(abertura, b.fech))
           const yCorpoBase = y(Math.min(abertura, b.fech))
@@ -353,8 +360,11 @@ export function GraficoPrecoAcao({ barras, zonas, nome, janela = 120, opcoes, pe
           </g>
         )}
 
-        {dados.marcas.map((k) => (
-          <text key={k} x={x(k)} y={H - 5} textAnchor={k === 0 ? 'start' : k === n - 1 ? 'end' : 'middle'} style={estiloEixo}>{dataCurta(vis[k].data)}</text>
+        {dados.marcas.map((m) => (
+          <g key={m.k}>
+            {m.ano && <line x1={x(m.k) - largura / 2} x2={x(m.k) - largura / 2} y1={T} y2={dados.fundoPaineis} stroke="var(--border)" strokeWidth={1} strokeDasharray="2 3" />}
+            <text x={m.ano ? x(m.k) - largura / 2 + 3 : x(m.k)} y={H - 5} textAnchor={m.ano ? 'start' : m.k === 0 ? 'start' : m.k === n - 1 ? 'end' : 'middle'} style={estiloEixo}>{m.texto}</text>
+          </g>
         ))}
 
         <g aria-hidden="true">
