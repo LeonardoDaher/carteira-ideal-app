@@ -93,8 +93,8 @@ function serie(fechamentos: number[]): Candle[] {
 }
 
 describe('analisarSerie', () => {
-  it('precisa de pelo menos 63 candles', () => {
-    expect(analisarSerie(serie(Array.from({ length: 62 }, (_, i) => 100 + i)))).toBeNull()
+  it('precisa de pelo menos 80 candles', () => {
+    expect(analisarSerie(serie(Array.from({ length: 79 }, (_, i) => 100 + i)))).toBeNull()
   })
 
   it('preço subindo de forma consistente é leitura de alta', () => {

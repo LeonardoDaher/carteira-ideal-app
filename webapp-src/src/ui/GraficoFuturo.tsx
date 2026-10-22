@@ -17,6 +17,12 @@ const H = BASE_VOLUME + B
 
 const COR_ALTA = 'var(--success)'
 const COR_BAIXA = 'var(--danger)'
+// Mesmas cores das zonas da análise técnica das ações (GraficoPrecoAcao): suporte azul e resistência vermelha, em linha fina.
+const COR_SUPORTE = 'oklch(66% 0.19 250)'
+const COR_RESISTENCIA = 'oklch(60% 0.24 25)'
+const COR_MM80 = 'oklch(72% 0.13 235)'
+// Contorno na cor do fundo: o texto sobre a linha continua legível quando cruza candles e médias.
+const HALO = { paintOrder: 'stroke', stroke: 'var(--bg)', strokeWidth: 3, strokeLinejoin: 'round' } as const
 
 function passoRedondo(amplitude: number, linhas = 4) {
   const bruto = amplitude / linhas || 1
@@ -29,7 +35,7 @@ const dataCurta = (d: string) => `${d.slice(8, 10)}/${d.slice(5, 7)}`
 const dataLonga = (d: string) => `${d.slice(8, 10)}/${d.slice(5, 7)}/${d.slice(0, 4)}`
 
 /**
- * Candles do contínuo com médias de 21 e 63 candles, suporte e resistência (mínima e máxima de 20 candles) e volume.
+ * Candles do contínuo com médias de 21 (amarela) e 80 (azul, contínua) candles, suporte e resistência (mínima e máxima de 20 candles) e volume.
  * Toque, arraste ou use as setas para ver abertura, máxima, mínima e fechamento de cada dia. Verde = fechou acima da
  * abertura; vermelho = abaixo (a forma do corpo também muda, cheio ou vazado, para não depender só da cor).
  */
@@ -42,16 +48,16 @@ export function GraficoFuturo({ candles, nome, casas = 2, janela = 120 }: { cand
   const dados = useMemo(() => {
     const fech = candles.map((c) => c[4])
     const sma21 = mediaMovel(fech, 21)
-    const sma63 = mediaMovel(fech, 63)
+    const sma80 = mediaMovel(fech, 80)
     const inicio = Math.max(0, candles.length - janela)
     const vis = candles.slice(inicio)
     const n = vis.length
     const visSma21 = sma21.slice(inicio)
-    const visSma63 = sma63.slice(inicio)
+    const visSma80 = sma80.slice(inicio)
     const ult20 = vis.slice(-20)
     const suporte = Math.min(...ult20.map((c) => c[3]))
     const resistencia = Math.max(...ult20.map((c) => c[2]))
-    const todos = [...vis.flatMap((c) => [c[2], c[3]]), ...visSma21.filter((v): v is number => v !== null), ...visSma63.filter((v): v is number => v !== null)]
+    const todos = [...vis.flatMap((c) => [c[2], c[3]]), ...visSma21.filter((v): v is number => v !== null), ...visSma80.filter((v): v is number => v !== null)]
     const minimo = Math.min(...todos)
     const maximo = Math.max(...todos)
     const passo = passoRedondo(maximo - minimo || 1)
@@ -67,7 +73,7 @@ export function GraficoFuturo({ candles, nome, casas = 2, janela = 120 }: { cand
     const grade: number[] = []
     for (let v = yMin; v <= yMax + passo / 2; v += passo) grade.push(v)
     const marcas = [0, Math.floor((n - 1) / 2), n - 1].filter((v, i, a) => v >= 0 && a.indexOf(v) === i)
-    return { vis, n, largura, x, y, yVol, caminho21: linha(visSma21), caminho63: linha(visSma63), suporte, resistencia, grade, marcas, minimo, maximo }
+    return { vis, n, largura, x, y, yVol, caminho21: linha(visSma21), caminho80: linha(visSma80), suporte, resistencia, grade, marcas, minimo, maximo }
   }, [candles, janela])
 
   const { vis, n, x, y, yVol, largura } = dados
@@ -130,8 +136,10 @@ export function GraficoFuturo({ candles, nome, casas = 2, janela = 120 }: { cand
           </g>
         ))}
 
-        <line x1={L} x2={W - R} y1={y(dados.resistencia)} y2={y(dados.resistencia)} stroke={COR_BAIXA} strokeWidth={1} strokeDasharray="4 3" opacity={0.8} />
-        <line x1={L} x2={W - R} y1={y(dados.suporte)} y2={y(dados.suporte)} stroke={COR_ALTA} strokeWidth={1} strokeDasharray="4 3" opacity={0.8} />
+        <line x1={L} x2={W - R} y1={y(dados.resistencia)} y2={y(dados.resistencia)} stroke={COR_RESISTENCIA} strokeWidth={0.5} />
+        <line x1={L} x2={W - R} y1={y(dados.suporte)} y2={y(dados.suporte)} stroke={COR_SUPORTE} strokeWidth={0.5} />
+        <text x={W - R + 4} y={y(dados.resistencia) + 3} style={{ ...estiloEixo, fill: COR_RESISTENCIA, fontWeight: 700 }}>{fmt(dados.resistencia)}</text>
+        <text x={W - R + 4} y={y(dados.suporte) + 3} style={{ ...estiloEixo, fill: COR_SUPORTE, fontWeight: 700 }}>{fmt(dados.suporte)}</text>
 
         {vis.map((c, k) => {
           const cor = corDe(c)
@@ -149,7 +157,9 @@ export function GraficoFuturo({ candles, nome, casas = 2, janela = 120 }: { cand
         })}
 
         <path d={dados.caminho21} fill="none" stroke="var(--accent)" strokeWidth={1.6} strokeLinejoin="round" />
-        <path d={dados.caminho63} fill="none" stroke="oklch(72% 0.13 235)" strokeWidth={1.6} strokeDasharray="5 3" strokeLinejoin="round" />
+        <path d={dados.caminho80} fill="none" stroke={COR_MM80} strokeWidth={1.6} strokeLinejoin="round" />
+        <text x={L + 3} y={y(dados.resistencia) - 3} style={{ ...estiloEixo, ...HALO, fill: COR_RESISTENCIA, fontWeight: 700 }}>Resistência {fmt(dados.resistencia)}</text>
+        <text x={L + 3} y={y(dados.suporte) + 10} style={{ ...estiloEixo, ...HALO, fill: COR_SUPORTE, fontWeight: 700 }}>Suporte {fmt(dados.suporte)}</text>
 
         {dados.marcas.map((k) => (
           <text key={k} x={x(k)} y={H - 5} textAnchor={k === 0 ? 'start' : k === n - 1 ? 'end' : 'middle'} style={estiloEixo}>{dataCurta(vis[k][0])}</text>
@@ -162,9 +172,9 @@ export function GraficoFuturo({ candles, nome, casas = 2, janela = 120 }: { cand
 
       <div className="small muted" style={{ display: 'flex', flexWrap: 'wrap', gap: '2px 14px', lineHeight: 1.4 }}>
         <span><svg width="18" height="8" aria-hidden="true"><line x1="1" x2="17" y1="4" y2="4" stroke="var(--accent)" strokeWidth="2" /></svg> Média de 21</span>
-        <span><svg width="18" height="8" aria-hidden="true"><line x1="1" x2="17" y1="4" y2="4" stroke="oklch(72% 0.13 235)" strokeWidth="2" strokeDasharray="4 2" /></svg> Média de 63</span>
-        <span><svg width="18" height="8" aria-hidden="true"><line x1="1" x2="17" y1="4" y2="4" stroke={COR_ALTA} strokeWidth="1.5" strokeDasharray="3 2" /></svg> Suporte (mín. 20)</span>
-        <span><svg width="18" height="8" aria-hidden="true"><line x1="1" x2="17" y1="4" y2="4" stroke={COR_BAIXA} strokeWidth="1.5" strokeDasharray="3 2" /></svg> Resistência (máx. 20)</span>
+        <span><svg width="18" height="8" aria-hidden="true"><line x1="1" x2="17" y1="4" y2="4" stroke={COR_MM80} strokeWidth="2" /></svg> Média de 80</span>
+        <span><svg width="18" height="8" aria-hidden="true"><line x1="1" x2="17" y1="4" y2="4" stroke={COR_SUPORTE} strokeWidth="1" /></svg> Suporte (mín. 20)</span>
+        <span><svg width="18" height="8" aria-hidden="true"><line x1="1" x2="17" y1="4" y2="4" stroke={COR_RESISTENCIA} strokeWidth="1" /></svg> Resistência (máx. 20)</span>
       </div>
     </div>
   )

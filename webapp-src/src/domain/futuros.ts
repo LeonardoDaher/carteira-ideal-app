@@ -350,10 +350,10 @@ export interface AnaliseGrafica {
   leitura: LeituraGrafica
   fechamento: number
   sma21: number | null
-  sma63: number | null
-  /** Retorno em 21 e 63 candles, em %. */
+  sma80: number | null
+  /** Retorno em 21 e 80 candles, em %. */
   retorno21: number | null
-  retorno63: number | null
+  retorno80: number | null
   ifr14: number | null
   atr14Pct: number | null
   /** Suporte e resistência: mínima e máxima dos últimos 20 candles e da janela de até 252. */
@@ -370,26 +370,26 @@ export interface AnaliseGrafica {
   motivos: string[]
 }
 
-/** Retorno mínimo de 63 candles (%) para a leitura deixar de ser lateral, igual ao das ações (tendencia.ts). */
+/** Retorno mínimo de 80 candles (%) para a leitura deixar de ser lateral, mesmo limiar das ações (tendencia.ts), agora sobre 80 candles. */
 export const RETORNO_MINIMO_PCT = 3
 
 const pct = (v: number, sinal = false) => `${sinal && v > 0 ? '+' : ''}${v.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`
 const num = (v: number, casas = 2) => v.toLocaleString('pt-BR', { minimumFractionDigits: casas, maximumFractionDigits: casas })
 
 /**
- * Leitura do passado do contínuo, com a mesma regra da aba Tendência das ações: alta = preço acima da média de 21, que está
- * acima da de 63, com retorno de 63 candles de pelo menos +3%; baixa = o inverso; o resto é lateral. No DI, o retorno é da
- * taxa. Precisa de pelo menos 63 candles; com menos, devolve null.
+ * Leitura do passado do contínuo, com a regra da aba Tendência das ações, só que sobre a média de 80 (a das ações usa 63): alta = preço acima da média de 21, que está
+ * acima da de 80, com retorno de 80 candles de pelo menos +3%; baixa = o inverso; o resto é lateral. No DI, o retorno é da
+ * taxa. Precisa de pelo menos 80 candles; com menos, devolve null.
  */
 export function analisarSerie(candles: Candle[], unidade: 'preco' | 'taxa' = 'preco'): AnaliseGrafica | null {
-  if (candles.length < 63) return null
+  if (candles.length < 80) return null
   const fech = candles.map((c) => c[4])
   const ultimo = fech[fech.length - 1]
   const sma21 = mediaMovel(fech, 21)[fech.length - 1]
-  const sma63 = mediaMovel(fech, 63)[fech.length - 1]
+  const sma80 = mediaMovel(fech, 80)[fech.length - 1]
   const retorno = (n: number) => (fech.length > n && fech[fech.length - 1 - n] > 0 ? (ultimo / fech[fech.length - 1 - n] - 1) * 100 : null)
   const retorno21 = retorno(21)
-  const retorno63 = retorno(63)
+  const retorno80 = retorno(80)
   const ult20 = candles.slice(-20)
   const janela = candles.slice(-252)
   const minima20 = Math.min(...ult20.map((c) => c[3]))
@@ -400,21 +400,21 @@ export function analisarSerie(candles: Candle[], unidade: 'preco' | 'taxa' = 'pr
   const mediaVol = mediaMovel(candles.map((c) => c[5]), 21)[candles.length - 1]
   const volumeRelativo = mediaVol && mediaVol > 0 ? candles[candles.length - 1][5] / mediaVol : null
 
-  const acima = sma21 !== null && sma63 !== null && ultimo > sma21 && sma21 > sma63
-  const abaixo = sma21 !== null && sma63 !== null && ultimo < sma21 && sma21 < sma63
-  const r63 = retorno63 ?? 0
-  const leitura: LeituraGrafica = acima && r63 >= RETORNO_MINIMO_PCT ? 'alta' : abaixo && r63 <= -RETORNO_MINIMO_PCT ? 'baixa' : 'lateral'
+  const acima = sma21 !== null && sma80 !== null && ultimo > sma21 && sma21 > sma80
+  const abaixo = sma21 !== null && sma80 !== null && ultimo < sma21 && sma21 < sma80
+  const r80 = retorno80 ?? 0
+  const leitura: LeituraGrafica = acima && r80 >= RETORNO_MINIMO_PCT ? 'alta' : abaixo && r80 <= -RETORNO_MINIMO_PCT ? 'baixa' : 'lateral'
   const nome = unidade === 'taxa' ? 'taxa' : 'preço'
   const casas = unidade === 'taxa' ? 3 : 2
 
   const motivos = [
-    `Último fechamento ${num(ultimo, casas)}, média de 21 candles ${sma21 === null ? '-' : num(sma21, casas)} e de 63 candles ${sma63 === null ? '-' : num(sma63, casas)}.`,
-    `Variação ${unidade === 'taxa' ? 'da taxa' : 'do preço'} de ${retorno21 === null ? '-' : pct(retorno21, true)} em 21 candles e de ${retorno63 === null ? '-' : pct(retorno63, true)} em 63.`,
+    `Último fechamento ${num(ultimo, casas)}, média de 21 candles ${sma21 === null ? '-' : num(sma21, casas)} e de 80 candles ${sma80 === null ? '-' : num(sma80, casas)}.`,
+    `Variação ${unidade === 'taxa' ? 'da taxa' : 'do preço'} de ${retorno21 === null ? '-' : pct(retorno21, true)} em 21 candles e de ${retorno80 === null ? '-' : pct(retorno80, true)} em 80.`,
     `Suporte recente ${num(minima20, casas)} e resistência recente ${num(maxima20, casas)} (mínima e máxima dos últimos 20 candles).`,
     `Na faixa dos últimos ${janela.length} candles, o ${nome} está em ${posicao52s.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}% (0% é a mínima, 100% a máxima).`,
   ]
   if (leitura === 'lateral') {
-    motivos.push(acima || abaixo ? `As médias apontam ${acima ? 'alta' : 'baixa'}, mas o movimento de 63 candles é pequeno (menos de ${RETORNO_MINIMO_PCT}%): leitura lateral.` : 'Preço e médias não estão alinhados em uma direção: leitura lateral.')
+    motivos.push(acima || abaixo ? `As médias apontam ${acima ? 'alta' : 'baixa'}, mas o movimento de 80 candles é pequeno (menos de ${RETORNO_MINIMO_PCT}%): leitura lateral.` : 'Preço e médias não estão alinhados em uma direção: leitura lateral.')
   }
   const rsi = ifr(fech)
   if (rsi !== null) motivos.push(`IFR de 14 candles em ${num(rsi, 0)}${rsi >= 70 ? ' (região de sobrecompra, acima de 70)' : rsi <= 30 ? ' (região de sobrevenda, abaixo de 30)' : ''}.`)
@@ -422,7 +422,7 @@ export function analisarSerie(candles: Candle[], unidade: 'preco' | 'taxa' = 'pr
   if (atr !== null) motivos.push(`Amplitude média diária de ${pct(atr)} do preço (ATR de 14 candles): é o tamanho típico de um dia, útil para medir risco.`)
   if (volumeRelativo !== null) motivos.push(`Negociação do último candle em ${num(volumeRelativo, 1)}× a média de 21.`)
 
-  return { leitura, fechamento: ultimo, sma21, sma63, retorno21, retorno63, ifr14: rsi, atr14Pct: atr, minima20, maxima20, minima52s, maxima52s, posicao52s, candlesNaJanela: janela.length, volumeRelativo, motivos }
+  return { leitura, fechamento: ultimo, sma21, sma80, retorno21, retorno80, ifr14: rsi, atr14Pct: atr, minima20, maxima20, minima52s, maxima52s, posicao52s, candlesNaJanela: janela.length, volumeRelativo, motivos }
 }
 
 export const ROTULO_LEITURA: Record<LeituraGrafica, string> = { alta: 'Alta', baixa: 'Baixa', lateral: 'Lateral' }
