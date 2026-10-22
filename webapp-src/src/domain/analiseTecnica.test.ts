@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
-  adxSerie, agregar, analisarTecnica, atrSerie, detectarPadroes, ema, macdSerie, montarBarras, pivos, rsiSerie, tendenciaDoPeriodo,
+  adxSerie, agregar, analisarTecnica, atrSerie, detectarPadroes, ema, estocasticoSerie, macdSerie, montarBarras, pivos, rsiSerie, tendenciaDoPeriodo,
   vieSDaNota, zonasDePreco,
 } from './analiseTecnica'
 import type { Barra, PontoSerie } from './analiseTecnica'
@@ -66,6 +66,20 @@ describe('indicadores', () => {
     expect(m.hist[i]).toBeCloseTo((m.linha[i] as number) - (m.sinal[i] as number), 10)
     expect(m.linha[24]).toBeNull()
     expect(m.linha[25]).not.toBeNull()
+  })
+
+  it('estocástico pleno: 100 quando fecha na máxima da janela, 0 na mínima, e começa só com a janela cheia', () => {
+    const alta: Barra[] = Array.from({ length: 30 }, (_, i) => ({ data: `d${i}`, fech: 10 + i, min: 9 + i, max: 10 + i, vol: 1 }))
+    const e = estocasticoSerie(alta)
+    expect(e.k[14]).toBeNull()
+    expect(e.k[15]).not.toBeNull()
+    expect(e.d[16]).toBeNull()
+    expect(e.d[17]).not.toBeNull()
+    expect(e.k[29] as number).toBeGreaterThan(90)
+    const baixa = alta.map((b, i) => ({ ...b, fech: 40 - i, min: 39 - i, max: 40 - i }))
+    expect(estocasticoSerie(baixa).k[29] as number).toBeLessThan(10)
+    const plano = alta.map((b) => ({ ...b, fech: 10, min: 10, max: 10 }))
+    expect(estocasticoSerie(plano).k[29]).toBe(50)
   })
 
   it('ATR de barras com amplitude constante de 2 é 2', () => {

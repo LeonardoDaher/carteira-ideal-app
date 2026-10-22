@@ -357,6 +357,36 @@ export function macdSerie(fech: number[], rapida = 12, lenta = 26, sinal = 9) {
   return { linha, sinal: sig, hist }
 }
 
+/** Média simples de uma série com lacunas iniciais (null): só calcula onde a janela inteira está preenchida. */
+function mediaSimplesComLacunas(valores: (number | null)[], periodo: number): (number | null)[] {
+  return valores.map((_, i) => {
+    if (i < periodo - 1) return null
+    let soma = 0
+    for (let j = i - periodo + 1; j <= i; j++) {
+      const v = valores[j]
+      if (v === null) return null
+      soma += v
+    }
+    return soma / periodo
+  })
+}
+
+/** Estocástico pleno (full): %K bruto de `periodo` candles suavizado em `suavK`, e %D como média de `suavD` do %K. Escala de 0 a 100. */
+export function estocasticoSerie(b: Barra[], periodo = 14, suavK = 3, suavD = 3) {
+  const bruto = b.map((_, i): number | null => {
+    if (i < periodo - 1) return null
+    let alta = -Infinity
+    let baixa = Infinity
+    for (let j = i - periodo + 1; j <= i; j++) {
+      alta = Math.max(alta, b[j].max)
+      baixa = Math.min(baixa, b[j].min)
+    }
+    return alta === baixa ? 50 : ((b[i].fech - baixa) / (alta - baixa)) * 100
+  })
+  const k = mediaSimplesComLacunas(bruto, suavK)
+  return { k, d: mediaSimplesComLacunas(k, suavD) }
+}
+
 /** Amplitude média verdadeira (suavização de Wilder) em cada ponto. */
 export function atrSerie(b: Barra[], periodo = 14): (number | null)[] {
   const saida: (number | null)[] = b.map(() => null)

@@ -13,9 +13,9 @@ type Periodicidade = 'diario' | 'semanal' | 'mensal'
 const PERIODICIDADES: { chave: Periodicidade; rotulo: string }[] = [{ chave: 'diario', rotulo: 'Diário' }, { chave: 'semanal', rotulo: 'Semanal' }, { chave: 'mensal', rotulo: 'Mensal' }]
 /** Janelas do gráfico por periodicidade, em candles; a última (0) mostra todo o histórico guardado. */
 const JANELAS: Record<Periodicidade, { n: number; rotulo: string }[]> = {
-  diario: [{ n: 60, rotulo: '60 pregões' }, { n: 120, rotulo: '120 pregões' }, { n: 0, rotulo: 'Tudo (≈12 meses)' }],
-  semanal: [{ n: 26, rotulo: '26 semanas' }, { n: 0, rotulo: 'Tudo (≈12 meses)' }],
-  mensal: [{ n: 0, rotulo: 'Tudo (≈12 meses)' }],
+  diario: [{ n: 60, rotulo: '60 pregões' }, { n: 120, rotulo: '120 pregões' }, { n: 260, rotulo: '1 ano' }, { n: 520, rotulo: '2 anos' }, { n: 1300, rotulo: '5 anos' }, { n: 0, rotulo: 'Tudo' }],
+  semanal: [{ n: 26, rotulo: '26 semanas' }, { n: 52, rotulo: '1 ano' }, { n: 260, rotulo: '5 anos' }, { n: 0, rotulo: 'Tudo' }],
+  mensal: [{ n: 0, rotulo: 'Tudo' }],
 }
 
 export const tomDoVies = (v: Viés): Tom => (v === 'altista' || v === 'moderadamente-altista' ? 'positivo' : v === 'baixista' || v === 'moderadamente-baixista' ? 'negativo' : 'neutro')
@@ -25,12 +25,13 @@ const tomDaLeitura = (l: Leitura): Tom => (l === 'alta' ? 'positivo' : l === 'ba
 export function AnaliseTecnicaAcao({ dados, ticker, nome, horizonte }: { dados: DadosDaAnalise; ticker: string; nome: string | null; horizonte: Horizonte }) {
   const [periodicidade, setPeriodicidade] = useState<Periodicidade>('diario')
   const [janela, setJanela] = useState(120)
-  const [opcoes, setOpcoes] = useState<OpcoesDoGrafico>({ mm21: true, mm50: true, mm200: false, zonas: true, volume: true, ifr: true, macd: true })
+  const [opcoes, setOpcoes] = useState<OpcoesDoGrafico>({ mm21: true, mm80: true, mm200: false, zonas: true, volume: true, ifr: true, macd: true, estocastico: true })
   const barrasDoGrafico = useMemo(() => {
     const b = dados.barras ?? []
     return periodicidade === 'diario' ? b : agregar(b, periodicidade === 'semanal' ? 'semana' : 'mes')
   }, [dados.barras, periodicidade])
-  const janelas = JANELAS[periodicidade]
+  // Só oferece janelas menores que o histórico disponível (o que passar disso é "Tudo").
+  const janelas = JANELAS[periodicidade].filter((j) => j.n === 0 || j.n < barrasDoGrafico.length)
   const janelaAtiva = janelas.some((j) => j.n === janela) ? janela : janelas[0].n
   function trocarPeriodicidade(p: Periodicidade) {
     setPeriodicidade(p)
@@ -54,7 +55,7 @@ export function AnaliseTecnicaAcao({ dados, ticker, nome, horizonte }: { dados: 
     <div className="col" style={{ gap: 14 }} data-testid="analise-tecnica">
       <ResumoTecnico t={t} nome={nome} />
 
-      <Modulo titulo="Gráfico de preço" subtitulo="candles, médias, zonas, volume, IFR e MACD" aberto>
+      <Modulo titulo="Gráfico de preço" subtitulo="candles, médias, zonas, volume, IFR, MACD e estocástico" aberto>
         <div className="row" style={{ gap: 6, flexWrap: 'wrap' }} role="group" aria-label="Periodicidade do gráfico">
           {PERIODICIDADES.map((p) => (
             <button key={p.chave} className={`chip ${periodicidade === p.chave ? 'selected' : ''}`} aria-pressed={periodicidade === p.chave} onClick={() => trocarPeriodicidade(p.chave)}>
@@ -70,13 +71,13 @@ export function AnaliseTecnicaAcao({ dados, ticker, nome, horizonte }: { dados: 
           ))}
         </div>
         <div className="row" style={{ gap: 6, flexWrap: 'wrap' }} role="group" aria-label="Indicadores do gráfico">
-          {([['mm21', 'Média 21'], ['mm50', 'Média 50'], ['mm200', 'Média 200'], ['zonas', 'Suportes e resistências'], ['volume', 'Volume'], ['ifr', 'IFR'], ['macd', 'MACD']] as const).map(([chave, rotulo]) => (
+          {([['mm21', 'Média 21'], ['mm80', 'Média 80'], ['mm200', 'Média 200'], ['zonas', 'Suportes e resistências'], ['volume', 'Volume'], ['ifr', 'IFR'], ['macd', 'MACD'], ['estocastico', 'Estocástico']] as const).map(([chave, rotulo]) => (
             <button key={chave} className={`chip ${opcoes[chave] ? 'selected' : ''}`} aria-pressed={opcoes[chave]} onClick={() => setOpcoes({ ...opcoes, [chave]: !opcoes[chave] })}>
               {rotulo}
             </button>
           ))}
         </div>
-        <GraficoPrecoAcao barras={barrasDoGrafico} zonas={t.zonas} nome={ticker} periodicidade={periodicidade} janela={janelaAtiva === 0 ? barrasDoGrafico.length : Math.min(janelaAtiva, barrasDoGrafico.length)} opcoes={opcoes} />
+        <GraficoPrecoAcao key={`${ticker}-${periodicidade}-${janelaAtiva}`} barras={barrasDoGrafico} zonas={t.zonas} nome={ticker} periodicidade={periodicidade} janela={janelaAtiva === 0 ? barrasDoGrafico.length : Math.min(janelaAtiva, barrasDoGrafico.length)} opcoes={opcoes} />
         <span className="tiny muted justify">
           Candles aproximados: o Boletim de Preços da B3 não traz o preço de abertura, então o corpo vai do fechamento anterior ao fechamento do dia. Martelo, engolfo, doji e gaps de abertura não podem ser lidos. O volume é financeiro (R$).
         </span>
