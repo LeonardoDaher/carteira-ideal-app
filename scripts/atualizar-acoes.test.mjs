@@ -14,6 +14,8 @@ import {
   formatarHistorico,
   historicoVazio,
   idDoCadastro,
+  formatarSeries,
+  montarSeries,
   montarBusca,
   montarCadastro,
   montarSetores,
@@ -241,6 +243,29 @@ describe('execução de ponta a ponta (boletins simulados)', () => {
     assert.equal(hist.ativos.PETR4.length, 5)
   })
 
+  it('grava as séries da análise técnica em public/dados/acoes-series.json: empresas do cadastro, alinhadas pela direita, volume em R$ mil', async () => {
+    const raiz = montarRaiz()
+    await executar({ raiz, ...dependencias() })
+    const s = JSON.parse(fs.readFileSync(path.join(raiz, 'webapp-src', 'public', 'dados', 'acoes-series.json'), 'utf8'))
+    assert.deepEqual(s.pregoes, PREGOES)
+    assert.equal(s.dataPregao, '2026-10-01')
+    assert.deepEqual(Object.keys(s.ativos).sort(), ['ITUB4', 'PETR4', 'PRIO3', 'SANB11', 'VALE3'])
+    assert.ok(!('ABCD3' in s.ativos), 'código fora do cadastro não entra nas séries')
+    assert.equal(s.ativos.PETR4.length, 5)
+    assert.deepEqual(s.ativos.PETR4.at(-1), [44, 43.56, 44.44, 1]) // fechamento 40 + 4; volume 1000 reais = 1 mil
+    assert.equal(s.referencia, null) // sem historico/etfs.json, não há referência de mercado
+  })
+
+  it('segunda execução sem pregão novo refaz as séries se o arquivo sumiu', async () => {
+    const raiz = montarRaiz()
+    await executar({ raiz, ...dependencias() })
+    const arquivo = path.join(raiz, 'webapp-src', 'public', 'dados', 'acoes-series.json')
+    fs.rmSync(arquivo)
+    const r = await executar({ raiz, ...dependencias() })
+    assert.equal(r.publicado, true)
+    assert.ok(fs.existsSync(arquivo))
+  })
+
   it('segunda execução sem pregão novo não muda nada', async () => {
     const raiz = montarRaiz()
     await executar({ raiz, ...dependencias() })
@@ -280,5 +305,54 @@ describe('execução de ponta a ponta (boletins simulados)', () => {
     const dep = dependencias()
     dep.ler = async (xml, aceitar) => ({ instrumentos: new Map([...boletim('2026-10-01')].filter(([t]) => aceitar(t))), datas: ['2020-01-01'], blocos: 1 })
     await assert.rejects(executar({ raiz, ...dep }), /trouxe a\(s\) data/)
+  })
+})
+
+describe('séries para a análise técnica', () => {
+  const cadastro = montarCadastro({ setores: [{ setor: 'S', grupoB3: 'G', empresas: [{ ticker: 'AAAA3', nome: 'A' }, { ticker: 'BBBB3', nome: 'B' }] }] })
+  const pregoes = ['2026-01-02', '2026-01-05', '2026-01-06', '2026-01-07', '2026-01-08']
+  const hist = (ativos) => ({ pregoes, ativos, ultimoNegocio: {} })
+
+  it('aplica o desdobramento confirmado aos preços anteriores e mantém o volume', () => {
+    const h = hist({ AAAA3: [[40, 39, 41, 8_000], [40, 39, 41, 8_000], [10, 9.8, 10.2, 8_000], [10.5, 10, 11, 8_000], [11, 10.5, 11.5, 8_000]] })
+    const s = montarSeries(h, cadastro, { desdobramentos: { AAAA3: [{ data: '2026-01-06', fator: 4 }] } })
+    assert.deepEqual(s.ativos.AAAA3[0], [10, 9.75, 10.25, 8])
+    assert.deepEqual(s.ativos.AAAA3[2], [10, 9.8, 10.2, 8])
+    assert.deepEqual(s.alertas, {}, 'salto resolvido não gera alerta')
+  })
+
+  it('salto de preço não confirmado vira alerta, e a série segue sem ajuste', () => {
+    const h = hist({ AAAA3: [[40, 39, 41, 8_000], [40, 39, 41, 8_000], [10, 9.8, 10.2, 8_000], [10.5, 10, 11, 8_000], [11, 10.5, 11.5, 8_000]] })
+    const s = montarSeries(h, cadastro, { desdobramentos: {} })
+    assert.equal(s.ativos.AAAA3[0][0], 40)
+    assert.deepEqual(s.alertas.AAAA3, [{ data: '2026-01-06', de: 40, para: 10 }])
+  })
+
+  it('dia sem negócio fica null, e o ticker sem nenhum negócio não entra', () => {
+    const h = hist({ AAAA3: [null, [10, 9, 11, 1_000], null, [10, 9, 11, 1_000], [10, 9, 11, 1_000]], BBBB3: [null, null, null, null, null] })
+    const s = montarSeries(h, cadastro, {})
+    assert.equal(s.ativos.AAAA3[0], null)
+    assert.ok(!('BBBB3' in s.ativos))
+  })
+
+  it('referência de mercado vem do histórico dos ETFs, alinhada pelas datas dos pregões das ações', () => {
+    const h = hist({ AAAA3: [[10, 9, 11, 1_000], [10, 9, 11, 1_000], [10, 9, 11, 1_000], [10, 9, 11, 1_000], [10, 9, 11, 1_000]] })
+    const etfs = {
+      pregoes: ['2026-01-05', '2026-01-06', '2026-01-07', '2026-01-08', '2026-01-09'],
+      ativos: { BOVA11: [[100, 99, 101, 5_000_000], [101, 100, 102, 5_000_000], [102, 101, 103, 5_000_000], [103, 102, 104, 5_000_000], [104, 103, 105, 5_000_000]] },
+    }
+    const s = montarSeries(h, cadastro, {}, etfs)
+    assert.equal(s.referencia.ticker, 'BOVA11')
+    assert.equal(s.referencia.serie[0], null) // 02/01 não existe no histórico dos ETFs
+    assert.deepEqual(s.referencia.serie[1], [100, 99, 101, 5_000])
+    assert.deepEqual(s.referencia.serie[4], [103, 102, 104, 5_000])
+  })
+
+  it('formatarSeries gera JSON válido, uma série por linha e em ordem alfabética', () => {
+    const h = hist({ BBBB3: [[10, 9, 11, 1_000], [10, 9, 11, 1_000], [10, 9, 11, 1_000], [10, 9, 11, 1_000], [10, 9, 11, 1_000]], AAAA3: [[10, 9, 11, 1_000], [10, 9, 11, 1_000], [10, 9, 11, 1_000], [10, 9, 11, 1_000], [10, 9, 11, 1_000]] })
+    const texto = formatarSeries({ geradoEm: 'x', dataPregao: '2026-01-08', fonte: 'B3', series: montarSeries(h, cadastro, {}) })
+    const obj = JSON.parse(texto)
+    assert.deepEqual(Object.keys(obj.ativos), ['AAAA3', 'BBBB3'])
+    assert.ok(texto.split('\n').some((l) => l.trim().startsWith('"AAAA3":')))
   })
 })

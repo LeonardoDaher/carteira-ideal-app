@@ -112,7 +112,7 @@ describe('abas "Top 15 do IFIX" e "Top 15 do Ibovespa"', () => {
 
   it('Simule FII: quatro abas; a do IFIX abre o ranking do índice e não o dos mais negociados', () => {
     render(<SimuleFii ctx={ctx} snapshot={{ geradoEm: null, vigenciaIfix: null, fundos: [] } as never} />)
-    expect(screen.getAllByRole('tab')).toHaveLength(4)
+    expect(within(screen.getByRole('tablist', { name: 'O que você quer ver' })).getAllByRole('tab')).toHaveLength(4)
     fireEvent.click(screen.getByRole('tab', { name: /Top 15 do IFIX/ }))
     expect(screen.getByRole('tab', { name: /Top 15 do IFIX/ }).getAttribute('aria-selected')).toBe('true')
     expect(screen.queryByTestId('top15-ifix-validacao') ?? screen.queryByTestId('top15-ifix')).toBeTruthy()
@@ -123,7 +123,7 @@ describe('abas "Top 15 do IFIX" e "Top 15 do Ibovespa"', () => {
 
   it('Simule Ações: cinco abas; a do Ibovespa abre o ranking do índice', () => {
     render(<SimuleAcoes ctx={ctx} snapshot={{ geradoEm: null, dataPregao: null, fonte: null, cadastroId: null, pregoesNoHistorico: 0, sessoesLiquidez: 21, totais: { setores: 0, empresas: 0 }, gruposOrdem: [], setores: [], busca: [] } as never} />)
-    expect(screen.getAllByRole('tab')).toHaveLength(5)
+    expect(within(screen.getByRole('tablist', { name: 'O que você quer ver' })).getAllByRole('tab')).toHaveLength(5)
     fireEvent.click(screen.getByRole('tab', { name: /Top 15 do Ibovespa/ }))
     expect(screen.getByRole('tab', { name: /Top 15 do Ibovespa/ }).getAttribute('aria-selected')).toBe('true')
     expect(screen.queryByTestId('top15-ibov-validacao') ?? screen.queryByTestId('top15-ibov')).toBeTruthy()

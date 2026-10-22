@@ -1,0 +1,64 @@
+# Atualiza os fundamentos das empresas do cadastro (config/acoes.json) para as abas "Análise fundamentalista" e "Confluência" do
+# Simule Ações (decisão D119): os últimos 5 exercícios (DFP) e os 12 meses mais recentes (ITR) de cada empresa, em R$ mil, e a
+# quantidade de ações por classe, a partir dos dados abertos da CVM (sem chave, sem cota).
+#
+# Os demonstrativos só mudam quando as empresas publicam (março, maio, agosto e novembro). Mesmo assim o job roda toda semana de
+# terça a sábado, de madrugada: baixa cerca de 110 MB da CVM, leva poucos minutos e, sem mudança nos dados, não gera commit nem
+# deploy. O preço, os múltiplos e as notas são calculados no app, com o preço do dia.
+#
+# Roda depois do job de Ações (que mantém historico/acoes.json, usado para o preço e para conferir a unidade da quantidade de ações).
+# Se o script achar algo errado (layout da CVM mudou, poucas empresas com dado), o job falha SEM alterar o arquivo: o app continua com
+# a última versão boa e o GitHub envia um e-mail avisando.
+
+# ATENÇÃO: o GitHub atrasa ou até perde disparos agendados (principalmente em minutos redondos, como :00 e :30). Por isso o job tem
+# dois horários, fora do minuto cheio. Rodar de novo sem mudança nos dados não altera nada.
+name: Atualizar Fundamentos
+
+on:
+  schedule:
+    - cron: '47 4 * * 2-6' # terça a sábado, 04h47 UTC = segunda a sexta, 01h47 de Brasília
+    - cron: '17 13 * * 2-6' # terça a sábado, 13h17 UTC = 10h17 de Brasília (repetição, se a primeira foi perdida)
+  workflow_dispatch: {} # botão "Run workflow" para rodar manualmente
+
+permissions:
+  contents: write
+
+concurrency:
+  group: fundamentos # nunca duas execuções ao mesmo tempo
+  cancel-in-progress: false
+
+jobs:
+  atualizar:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Testes do cálculo de fundamentos
+        run: node --test scripts/fundamentos.test.mjs
+
+      - name: Baixar a CVM e gerar fundamentos.json
+        run: node scripts/atualizar-fundamentos.mjs
+
+      - name: Conferir se o site compila com os dados novos
+        run: |
+          npm ci
+          npm run build
+
+      - name: Publicar (commit) se houver mudança
+        run: |
+          if [ -z "$(git status --porcelain webapp-src/public/dados/fundamentos.json)" ]; then
+            echo "Sem mudanças nos dados."
+            exit 0
+          fi
+          git config user.name "${{ vars.COMMIT_AUTOR_NOME || 'github-actions[bot]' }}"
+          git config user.email "${{ vars.COMMIT_AUTOR_EMAIL || '41898283+github-actions[bot]@users.noreply.github.com' }}"
+          git add webapp-src/public/dados/fundamentos.json
+          git commit -m "dados: Fundamentos ($(date -u +%Y-%m-%d))"
+          git pull --rebase
+          git push

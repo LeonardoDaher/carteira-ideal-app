@@ -1,4 +1,4 @@
-import { useId, useState } from 'react'
+import { useId, useMemo, useState } from 'react'
 import { SNAPSHOT_ACOES } from '../data/snapshotAcoes'
 import { agruparPorGrupo, buscarAcoes, simularCompraAcoes, totaisDe } from '../domain/acoes'
 import type { Acao, AcaoBusca, SnapshotAcoes } from '../domain/acoes'
@@ -11,6 +11,13 @@ import { FaixaCotacoes, itensDeAcoes } from '../ui/FaixaCotacoes'
 import { Top15Baratas } from './Top15Baratas'
 import { Top15AcoesMaisNegociadas, Top15IbovMaioresPesos } from './Top15EtfsMaisNegociados'
 import { Top15Endividadas } from './Top15Endividadas'
+import { AnaliseTecnicaAcao } from './AnaliseTecnicaAcao'
+import { AnaliseFundamentalistaAcao } from './AnaliseFundamentalistaAcao'
+import { ConfluenciaAcao } from './ConfluenciaAcao'
+import { useAnaliseDaAcao } from './useAnaliseDaAcao'
+import { ROTULO_HORIZONTE } from '../domain/confluencia'
+import type { Horizonte, SnapshotSeries } from '../domain/analiseTecnica'
+import type { SnapshotFundamentos } from '../domain/analiseFundamentalista'
 import type { AppCtx } from '../state/useAppState'
 
 function reais(valor: number) {
@@ -24,6 +31,10 @@ function inteiro(valor: number) {
 /** O que está aberto no cartão: uma empresa do cadastro (dado completo) ou um código da busca (resumido). */
 type Selecao = { origem: 'lista'; acao: Acao; setor: string } | { origem: 'busca'; acao: AcaoBusca }
 
+type AbaAcoes = 'simulador' | 'top15' | 'negociadas' | 'ibov' | 'endividadas' | 'tecnica' | 'fundamentalista' | 'confluencia'
+const ABAS_DE_ANALISE: AbaAcoes[] = ['tecnica', 'fundamentalista', 'confluencia']
+const HORIZONTES: Horizonte[] = ['curto', 'medio', 'longo']
+
 /**
  * Aba "Simule Ações" (D43), com duas caixinhas (D49).
  *  - Simulador: tela estritamente descritiva. As principais empresas de cada setor da B3 (com a
@@ -31,14 +42,22 @@ type Selecao = { origem: 'lista'; acao: Acao; setor: string } | { origem: 'busca
  *    outro código. Sem ranking, sem múltiplos de avaliação, sem projeção de retorno (D19).
  *  - Top 15 mais baratas: EXCEÇÃO declarada à D19. Triagem quantitativa com metodologia pública e
  *    trilha de auditoria; só aparece com ranking depois da aprovação do responsável (D49).
+ *  - Análise de uma ação (D119): análise técnica, análise fundamentalista e confluência, outra EXCEÇÃO declarada à D19, pedida
+ *    pelo responsável. Cálculo por regra, no app, a partir de dados verificáveis (docs/15-metodologia-analise-acoes.md); os
+ *    arquivos de dados só são baixados ao abrir uma dessas abas.
  */
 export function SimuleAcoes({
   snapshot = SNAPSHOT_ACOES,
+  series,
+  fundamentos,
 }: {
   /** Recebido como as demais telas avulsas; esta tela só volta ao Simule Ativos. */
   ctx: AppCtx
   /** Permite injetar dados nos testes. No app, usa o arquivo gerado pelo job diário. */
   snapshot?: SnapshotAcoes
+  /** Só nos testes: séries de preço e fundamentos injetados (no app, baixados ao abrir uma aba de análise). */
+  series?: SnapshotSeries
+  fundamentos?: SnapshotFundamentos
 }) {
   const grupos = agruparPorGrupo(snapshot.setores, snapshot.gruposOrdem)
   const totais = totaisDe(snapshot.setores)
@@ -48,7 +67,18 @@ export function SimuleAcoes({
   const [valorLivre, setValorLivre] = useState('')
   const [valorEscolhido, setValorEscolhido] = useState<number>(VALORES_PADRAO[1])
   // Duas caixinhas (D49): o simulador de sempre e a triagem "Top 15 mais baratas".
-  const [aba, setAba] = useState<'simulador' | 'top15' | 'negociadas' | 'ibov' | 'endividadas'>('simulador')
+  const [aba, setAba] = useState<AbaAcoes>('simulador')
+  const [horizonte, setHorizonte] = useState<Horizonte>('medio')
+  const emAnalise = ABAS_DE_ANALISE.includes(aba)
+
+  // Preço de fechamento por código (lista por setor e busca), para o valor de mercado e os múltiplos da análise fundamentalista.
+  const precoDe = useMemo(() => {
+    const m = new Map<string, number>()
+    for (const b of snapshot.busca) m.set(b.ticker, b.cotacao)
+    for (const st of snapshot.setores) for (const e of st.empresas) m.set(e.ticker, e.cotacao)
+    return (t: string) => m.get(t) ?? null
+  }, [snapshot])
+  const maisNegociadas = useMemo(() => snapshot.setores.flatMap((st) => st.empresas).sort((a, b) => b.volumeMedio - a.volumeMedio).slice(0, 10), [snapshot])
 
   const levarAoCartao = () => rolarParaResultado('cartao-acao')
 
@@ -66,6 +96,16 @@ export function SimuleAcoes({
   }
 
   const selecionado = selecao?.acao.ticker
+  const dadosDaAnalise = useAnaliseDaAcao({ ticker: selecionado ?? null, horizonte, ativo: emAnalise, precoDe, snapshot, seriesInjetadas: series, fundamentosInjetados: fundamentos })
+
+  // Na análise, escolher uma ação não rola a tela até o cartão de simulação.
+  const escolherParaAnalise = (b: AcaoBusca) => {
+    for (const st of snapshot.setores) {
+      const naLista = st.empresas.find((e) => e.ticker === b.ticker)
+      if (naLista) return setSelecao({ origem: 'lista', acao: naLista, setor: st.setor })
+    }
+    setSelecao({ origem: 'busca', acao: b })
+  }
 
   return (
     <div className="screen">
@@ -107,8 +147,62 @@ export function SimuleAcoes({
         ))}
       </div>
 
+      <div className="col" style={{ gap: 6 }}>
+        <span className="small muted" style={{ fontWeight: 700 }}>Análise de uma ação</span>
+        <div role="tablist" aria-label="Análise de uma ação" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 10 }}>
+          {(
+            [
+              { id: 'tecnica', emoji: '📈', titulo: 'Análise técnica', descricao: 'Tendência, níveis e risco' },
+              { id: 'fundamentalista', emoji: '🧾', titulo: 'Análise fundamentalista', descricao: 'Balanços, valor justo e notas' },
+              { id: 'confluencia', emoji: '🎯', titulo: 'Confluência', descricao: 'Fundamentos × gráfico' },
+            ] as const
+          ).map((c) => (
+            <button
+              key={c.id}
+              role="tab"
+              id={`aba-acoes-${c.id}`}
+              aria-selected={aba === c.id}
+              aria-controls="painel-acoes"
+              className={`vehicle-card ${aba === c.id ? 'selected' : ''}`}
+              onClick={() => setAba(c.id)}
+            >
+              <span aria-hidden="true" style={{ fontSize: 24, lineHeight: 1 }}>{c.emoji}</span>
+              <span style={{ fontSize: 14 }}>{c.titulo}</span>
+              <span style={{ fontSize: 11.5, fontWeight: 400, opacity: 0.85 }}>{c.descricao}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div id="painel-acoes" role="tabpanel" aria-labelledby={`aba-acoes-${aba}`} className="col" style={{ gap: 'inherit' }}>
-      {aba === 'top15' ? (
+      {emAnalise ? (
+        !selecao ? (
+          <div className="card col" style={{ gap: 6 }} role="status">
+            <span style={{ fontWeight: 700 }}>Os dados das ações ainda não foram carregados.</span>
+            <span className="muted small justify">As cotações são atualizadas nos dias úteis, depois do fechamento da B3. Volte mais tarde.</span>
+          </div>
+        ) : (
+          <>
+            <EscolhaDaAnalise
+              busca={snapshot.busca}
+              onSelecionar={escolherParaAnalise}
+              atual={selecao.acao}
+              rapidas={maisNegociadas}
+              horizonte={horizonte}
+              onHorizonte={setHorizonte}
+              usaHorizonte={aba !== 'fundamentalista'}
+              dataPregao={snapshot.dataPregao}
+            />
+            {aba === 'tecnica' ? (
+              <AnaliseTecnicaAcao dados={dadosDaAnalise} ticker={selecao.acao.ticker} nome={selecao.acao.nome} horizonte={horizonte} />
+            ) : aba === 'fundamentalista' ? (
+              <AnaliseFundamentalistaAcao dados={dadosDaAnalise} ticker={selecao.acao.ticker} nome={selecao.acao.nome} />
+            ) : (
+              <ConfluenciaAcao dados={dadosDaAnalise} ticker={selecao.acao.ticker} horizonte={horizonte} />
+            )}
+          </>
+        )
+      ) : aba === 'top15' ? (
         <Top15Baratas />
       ) : aba === 'ibov' ? (
         <Top15IbovMaioresPesos />
@@ -219,6 +313,54 @@ export function SimuleAcoes({
       </div>
 
       <AvisoEducacional />
+    </div>
+  )
+}
+
+/** Escolha da ação e do horizonte das abas de análise: busca, atalhos para as mais negociadas e o horizonte (curto, médio, longo). */
+function EscolhaDaAnalise({
+  busca, onSelecionar, atual, rapidas, horizonte, onHorizonte, usaHorizonte, dataPregao,
+}: {
+  busca: AcaoBusca[]
+  onSelecionar: (b: AcaoBusca) => void
+  atual: Acao | AcaoBusca
+  rapidas: Acao[]
+  horizonte: Horizonte
+  onHorizonte: (h: Horizonte) => void
+  usaHorizonte: boolean
+  dataPregao: string | null
+}) {
+  return (
+    <div className="card col" style={{ gap: 10 }} data-testid="escolha-da-analise">
+      <div className="row-between" style={{ alignItems: 'baseline', gap: 8 }}>
+        <span style={{ fontWeight: 700 }}>Ação analisada: <span style={{ color: 'var(--accent)' }}>{atual.ticker}</span></span>
+        <span className="tiny muted">{reais(atual.cotacao)}{dataPregao ? ` · fechamento de ${formatarData(dataPregao)}` : ''}</span>
+      </div>
+      <BuscaAcoes busca={busca} onSelecionar={onSelecionar} />
+      <div className="grade-tickers" role="group" aria-label="Ações mais negociadas">
+        {rapidas.map((e) => (
+          <button
+            key={e.ticker}
+            className={`chip ${e.ticker === atual.ticker ? 'selected' : ''}`}
+            aria-pressed={e.ticker === atual.ticker}
+            onClick={() => onSelecionar({ ticker: e.ticker, nome: e.nome, setor: '', cotacao: e.cotacao, dataCotacao: e.dataCotacao, volumeDia: 0 })}
+          >
+            {e.ticker}
+          </button>
+        ))}
+      </div>
+      {usaHorizonte && (
+        <div className="col" style={{ gap: 4 }}>
+          <span className="tiny muted">Horizonte da leitura: define quanto peso cada período do gráfico (e, na confluência, os fundamentos) recebe.</span>
+          <div className="row" style={{ gap: 6, flexWrap: 'wrap' }} role="group" aria-label="Horizonte da análise">
+            {HORIZONTES.map((h) => (
+              <button key={h} className={`chip ${horizonte === h ? 'selected' : ''}`} aria-pressed={horizonte === h} onClick={() => onHorizonte(h)}>
+                {ROTULO_HORIZONTE[h]}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -34,7 +34,7 @@ import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { baixarBoletim, dataEmBrasilia, datasCandidatas, lerBoletim } from './b3-boletim.mjs'
 import { datasAProcessar } from './atualizar-etfs.mjs'
-import { MAXIMO_PREGOES_GUARDADOS, SESSOES_LIQUIDEZ, incorporarPregao, metricas, semVariacaoDia } from './atualizar-bdrs.mjs'
+import { MAXIMO_PREGOES_GUARDADOS, SESSOES_LIQUIDEZ, aplicarDesdobramentos, detectarSaltos, incorporarPregao, metricas, semVariacaoDia } from './atualizar-bdrs.mjs'
 
 const RAIZ_PADRAO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 
@@ -212,6 +212,68 @@ export function montarBusca(historico, cadastro, config) {
 }
 
 // ---------------------------------------------------------------------------------------
+// Séries para a análise técnica (D119)
+// ---------------------------------------------------------------------------------------
+
+/** Referência de mercado da análise técnica: o BOVA11 (ETF do Ibovespa), lido do histórico próprio dos ETFs. */
+export const REFERENCIA_DE_MERCADO = 'BOVA11'
+
+const casasDoPreco = (v) => (v < 1 ? 3 : 2)
+const arredondaPreco = (v) => Number(v.toFixed(casasDoPreco(v)))
+
+/** [fechamento, mínima, máxima, volume em R$ mil], ou null (sem negócio). Preço ajustado a desdobramentos. */
+function pontoDaSerie(v) {
+  return v ? [arredondaPreco(v[0]), arredondaPreco(v[1]), arredondaPreco(v[2]), Math.round(v[3] / 1000)] : null
+}
+
+/**
+ * Séries diárias das empresas do cadastro (até 260 pregões), com os desdobramentos confirmados aplicados, para a análise
+ * técnica do app. Salto de preço ainda não confirmado entra em "alertas": a série não é ajustável e o app avisa que o gráfico
+ * pode estar distorcido. A referência de mercado vem do histórico dos ETFs, alinhada pelas datas dos pregões das ações.
+ */
+export function montarSeries(historico, cadastro, config, historicoEtfs = null) {
+  const ativos = {}
+  const alertas = {}
+  for (const [ticker] of cadastro) {
+    const bruta = historico.ativos[ticker]
+    if (!bruta?.length) continue
+    const datas = historico.pregoes.slice(historico.pregoes.length - bruta.length)
+    const serie = aplicarDesdobramentos(bruta, datas, config.desdobramentos?.[ticker])
+    if (!serie.some(Boolean)) continue
+    ativos[ticker] = serie.map(pontoDaSerie)
+    const saltos = detectarSaltos(serie, datas, serie.length)
+    if (saltos.length) alertas[ticker] = saltos.map((s) => ({ data: s.data, de: s.de, para: s.para }))
+  }
+  let referencia = null
+  const etf = historicoEtfs?.ativos?.[REFERENCIA_DE_MERCADO]
+  if (etf?.length && Array.isArray(historicoEtfs.pregoes)) {
+    const datasEtf = historicoEtfs.pregoes.slice(historicoEtfs.pregoes.length - etf.length)
+    const porData = new Map(datasEtf.map((d, i) => [d, etf[i]]))
+    const alinhada = historico.pregoes.map((d) => porData.get(d) ?? null)
+    if (alinhada.some(Boolean)) referencia = { ticker: REFERENCIA_DE_MERCADO, serie: alinhada.map(pontoDaSerie) }
+  }
+  return { pregoes: historico.pregoes, ativos, alertas, referencia }
+}
+
+/** acoes-series.json: uma série por linha, para o diff do GitHub continuar legível. */
+export function formatarSeries({ geradoEm, dataPregao, fonte, series }) {
+  const bloco = (objeto) => Object.keys(objeto).sort().map((t) => `    ${JSON.stringify(t)}: ${JSON.stringify(objeto[t])}`).join(',\n')
+  return [
+    '{',
+    `  "geradoEm": ${JSON.stringify(geradoEm)},`,
+    `  "dataPregao": ${JSON.stringify(dataPregao)},`,
+    `  "fonte": ${JSON.stringify(fonte)},`,
+    '  "_leia": "Séries diárias para a análise técnica (D119), geradas por scripts/atualizar-acoes.mjs. Alinhadas pela DIREITA com \\"pregoes\\". Cada ponto: [fechamento, mínima, máxima, volume em R$ mil] ou null (sem negócio). Não há preço de abertura no Boletim de Preços. Desdobramentos confirmados já aplicados. Não editar à mão.",',
+    `  "pregoes": ${JSON.stringify(series.pregoes)},`,
+    `  "referencia": ${JSON.stringify(series.referencia)},`,
+    `  "alertas": ${JSON.stringify(series.alertas)},`,
+    `  "ativos": {\n${bloco(series.ativos)}\n  }`,
+    '}',
+    '',
+  ].join('\n')
+}
+
+// ---------------------------------------------------------------------------------------
 // Entrada/saída
 // ---------------------------------------------------------------------------------------
 
@@ -246,6 +308,8 @@ export async function executar({
   const arquivoConfig = path.join(raiz, 'config', 'acoes.json')
   const arquivoHistorico = path.join(raiz, 'historico', 'acoes.json')
   const arquivoSaida = path.join(raiz, 'webapp-src', 'src', 'data', 'acoes.json')
+  const arquivoSeries = path.join(raiz, 'webapp-src', 'public', 'dados', 'acoes-series.json')
+  const arquivoHistoricoEtfs = path.join(raiz, 'historico', 'etfs.json')
   const gravarHistorico = (h) => {
     fs.mkdirSync(path.dirname(arquivoHistorico), { recursive: true })
     fs.writeFileSync(arquivoHistorico, formatarHistorico(h))
@@ -330,7 +394,7 @@ export async function executar({
 
   // Sem pregão novo e com o mesmo cadastro: nada a fazer.
   const saidaAtual = lerJson(arquivoSaida, null)
-  if (novos === 0 && saidaAtual?.dataPregao && saidaAtual?.fonte === FONTE && saidaAtual?.cadastroId === cadastroId && !semVariacaoDia(saidaAtual)) {
+  if (novos === 0 && saidaAtual?.dataPregao && saidaAtual?.fonte === FONTE && saidaAtual?.cadastroId === cadastroId && !semVariacaoDia(saidaAtual) && fs.existsSync(arquivoSeries)) {
     log.info(`Sem pregão novo desde ${historico.pregoes[historico.pregoes.length - 1] ?? 'nenhum'}${semPregao ? ' (feriado ou fim de semana)' : ''}: arquivos mantidos.`)
     return { publicado: false, motivo: 'sem pregão novo' }
   }
@@ -396,6 +460,10 @@ export async function executar({
   }
   gravarHistorico(historico)
   fs.writeFileSync(arquivoSaida, formatarAcoes(snapshot))
+  const series = montarSeries(historico, cadastro, config, lerJson(arquivoHistoricoEtfs, null))
+  fs.mkdirSync(path.dirname(arquivoSeries), { recursive: true })
+  fs.writeFileSync(arquivoSeries, formatarSeries({ geradoEm: agora.toISOString(), dataPregao, fonte: FONTE, series }))
+  log.info(`[info] acoes-series.json: ${Object.keys(series.ativos).length} séries${series.referencia ? `, referência ${REFERENCIA_DE_MERCADO}` : ', sem referência de mercado'}${Object.keys(series.alertas).length ? `, ${Object.keys(series.alertas).length} com salto de preço não confirmado` : ''}.`)
   log.info(`acoes.json atualizado: ${montado.setores.length} setores, ${publicadas} empresas, ${busca.length} na busca, pregão de ${dataPregao}, ${historico.pregoes.length} pregões no histórico (${novos} novos).`)
   return { publicado: true, snapshot, historico }
 }

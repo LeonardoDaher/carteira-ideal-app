@@ -178,7 +178,7 @@ describe('Simule Ações: as caixinhas (simulador, mais baratas, mais negociadas
 
   it('abre no simulador e troca para o Top 15 e de volta', async () => {
     render(<SimuleAcoes ctx={ctx} snapshot={base} />)
-    const abas = screen.getAllByRole('tab')
+    const abas = within(screen.getByRole('tablist', { name: 'O que você quer ver' })).getAllByRole('tab')
     expect(abas.map((a) => a.textContent)).toEqual([expect.stringContaining('Simulador'), expect.stringContaining('Top 15 mais baratas'), expect.stringContaining('Top 15 mais negociadas'), expect.stringContaining('Top 15 do Ibovespa'), expect.stringContaining('Top 15 mais endividadas')])
     expect(abas[0].getAttribute('aria-selected')).toBe('true')
     expect(screen.getByText('Quantas ações esse valor compra')).toBeTruthy()
