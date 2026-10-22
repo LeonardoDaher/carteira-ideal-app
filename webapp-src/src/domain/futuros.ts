@@ -118,25 +118,70 @@ export function cenariosDePreco(entrada: number, pcts = [-3, -2, -1, 1, 2, 3], t
 export const VALOR_FACE_DI = 100_000
 export const DIAS_UTEIS_ANO = 252
 
-/** Dias úteis entre duas datas AAAA-MM-DD (exclui a inicial, inclui a final), contando só sábado e domingo como não úteis. */
+const DIA_MS = 86_400_000
+const chaveData = (d: Date) => d.toISOString().slice(0, 10)
+
+/** Domingo de Páscoa (algoritmo de Meeus/Jones/Butcher), ao meio-dia UTC. */
+function pascoa(ano: number): Date {
+  const a = ano % 19
+  const b = Math.floor(ano / 100)
+  const c = ano % 100
+  const d = Math.floor(b / 4)
+  const e = b % 4
+  const f = Math.floor((b + 8) / 25)
+  const g = Math.floor((b - f + 1) / 3)
+  const h = (19 * a + b - d - g + 15) % 30
+  const i = Math.floor(c / 4)
+  const k = c % 4
+  const l = (32 + 2 * e + 2 * i - h - k) % 7
+  const m = Math.floor((a + 11 * h + 22 * l) / 451)
+  const mes = Math.floor((h + l - 7 * m + 114) / 31)
+  const dia = ((h + l - 7 * m + 114) % 31) + 1
+  return new Date(Date.UTC(ano, mes - 1, dia, 12))
+}
+
+const feriadosEmCache = new Map<number, Set<string>>()
+
+/**
+ * Feriados nacionais que fecham a B3 e não contam como dia útil no DI: Ano Novo, Carnaval (segunda e terça), Sexta-feira
+ * Santa, Tiradentes, Dia do Trabalho, Corpus Christi, Independência, Nossa Senhora Aparecida, Finados, Proclamação da
+ * República, Consciência Negra (nacional desde 2024) e Natal. 24 e 31 de dezembro contam como dias úteis. Lei nova ou
+ * feriado extraordinário não entram: por isso a contagem é uma boa aproximação, não a da B3.
+ */
+export function feriadosNacionais(ano: number): Set<string> {
+  const guardado = feriadosEmCache.get(ano)
+  if (guardado) return guardado
+  const p = pascoa(ano).getTime()
+  const fixos = ['01-01', '04-21', '05-01', '09-07', '10-12', '11-02', '11-15', '12-25']
+  if (ano >= 2024) fixos.push('11-20')
+  const conjunto = new Set<string>(fixos.map((md) => `${ano}-${md}`))
+  for (const dias of [-48, -47, -2, 60]) conjunto.add(chaveData(new Date(p + dias * DIA_MS)))
+  feriadosEmCache.set(ano, conjunto)
+  return conjunto
+}
+
+/** Segunda a sexta que não é feriado nacional. */
+export function ehDiaUtil(data: Date): boolean {
+  const dia = data.getUTCDay()
+  return dia !== 0 && dia !== 6 && !feriadosNacionais(data.getUTCFullYear()).has(chaveData(data))
+}
+
+/** Dias úteis entre duas datas AAAA-MM-DD (exclui a inicial, inclui a final), sem fim de semana e sem feriados nacionais. */
 export function diasUteisAproximados(inicio: string, fim: string): number {
   const a = Date.parse(`${inicio}T12:00:00Z`)
   const b = Date.parse(`${fim}T12:00:00Z`)
   if (!(b > a)) return 0
   let n = 0
-  for (let t = a + 86_400_000; t <= b; t += 86_400_000) {
-    const dia = new Date(t).getUTCDay()
-    if (dia !== 0 && dia !== 6) n++
-  }
+  for (let t = a + DIA_MS; t <= b; t += DIA_MS) if (ehDiaUtil(new Date(t))) n++
   return n
 }
 
-/** Primeiro dia útil (sem feriados) do mês de vencimento AAAA-MM. */
+/** Primeiro dia útil do mês de vencimento AAAA-MM, sem fim de semana e sem feriados nacionais. */
 export function dataVencimentoDI(vencimento: string): string {
   const [ano, mes] = vencimento.split('-').map(Number)
   const d = new Date(Date.UTC(ano, mes - 1, 1, 12))
-  while (d.getUTCDay() === 0 || d.getUTCDay() === 6) d.setUTCDate(d.getUTCDate() + 1)
-  return d.toISOString().slice(0, 10)
+  while (!ehDiaUtil(d)) d.setUTCDate(d.getUTCDate() + 1)
+  return chaveData(d)
 }
 
 /** Preço unitário (PU) do DI para uma taxa (% ao ano) e dias úteis até o vencimento. */
@@ -147,6 +192,68 @@ export function puDI(taxaPct: number, diasUteis: number): number {
 /** Taxa (% ao ano) que corresponde a um PU. */
 export function taxaDoPU(pu: number, diasUteis: number): number {
   return (Math.pow(VALOR_FACE_DI / pu, DIAS_UTEIS_ANO / diasUteis) - 1) * 100
+}
+
+/** Vencimentos com menos dias úteis que isso ficam fora da curva: a taxa implícita no PU fica instável. */
+export const MINIMO_DIAS_CURVA = 5
+
+export interface PontoCurvaDI {
+  ticker: string
+  vencimento: string
+  /** Data do vencimento (primeiro dia útil do mês). */
+  data: string
+  diasUteis: number
+  /** Taxa implícita no PU de ajuste, % ao ano (base 252). */
+  taxa: number
+  /** Taxa a termo, % ao ano, entre o vencimento anterior e este. null no primeiro. */
+  taxaATermo: number | null
+  /** Último negócio do dia, % ao ano, quando o vencimento negociou. */
+  taxaUltimo: number | null
+}
+
+/** Taxa a termo (% ao ano) entre dois vértices, a partir das taxas e dos dias úteis de cada um. */
+export function taxaATermo(taxa1: number, du1: number, taxa2: number, du2: number): number | null {
+  if (du2 <= du1) return null
+  const fator = Math.pow(1 + taxa2 / 100, du2 / DIAS_UTEIS_ANO) / Math.pow(1 + taxa1 / 100, du1 / DIAS_UTEIS_ANO)
+  return (Math.pow(fator, DIAS_UTEIS_ANO / (du2 - du1)) - 1) * 100
+}
+
+/**
+ * Curva de juros do DI1: a taxa de cada vencimento, tirada do PU de ajuste do pregão (o mesmo critério para todos os
+ * vencimentos, negociados ou não), e a taxa a termo entre vértices vizinhos. Ordenada por vencimento.
+ */
+export function curvaDI(contratos: ContratoFuturo[], dataPregao: string): PontoCurvaDI[] {
+  const base = [...contratos]
+    .sort((a, b) => a.vencimento.localeCompare(b.vencimento))
+    .map((c) => {
+      const data = dataVencimentoDI(c.vencimento)
+      return { c, data, diasUteis: diasUteisAproximados(dataPregao, data) }
+    })
+    .filter((p) => p.diasUteis >= MINIMO_DIAS_CURVA && p.c.ajuste > 0)
+  return base.map((p, i) => {
+    const taxa = taxaDoPU(p.c.ajuste, p.diasUteis)
+    const anterior = i > 0 ? base[i - 1] : null
+    return {
+      ticker: p.c.ticker,
+      vencimento: p.c.vencimento,
+      data: p.data,
+      diasUteis: p.diasUteis,
+      taxa,
+      taxaATermo: anterior ? taxaATermo(taxaDoPU(anterior.c.ajuste, anterior.diasUteis), anterior.diasUteis, taxa, p.diasUteis) : null,
+      taxaUltimo: p.c.ultimo,
+    }
+  })
+}
+
+export type FormatoCurva = 'inclinada para cima' | 'inclinada para baixo' | 'plana'
+
+/** Formato da curva: compara o primeiro vértice com pelo menos 21 dias úteis e o último; até 0,25 ponto percentual é "plana". */
+export function resumoCurva(curva: PontoCurvaDI[]): { curto: PontoCurvaDI; longo: PontoCurvaDI; spread: number; formato: FormatoCurva } | null {
+  const curto = curva.find((p) => p.diasUteis >= 21)
+  const longo = curva[curva.length - 1]
+  if (!curto || !longo || curto === longo) return null
+  const spread = longo.taxa - curto.taxa
+  return { curto, longo, spread, formato: spread > 0.25 ? 'inclinada para cima' : spread < -0.25 ? 'inclinada para baixo' : 'plana' }
 }
 
 export interface EntradaDI {

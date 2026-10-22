@@ -22,7 +22,11 @@ const win: ProdutoFuturo = {
 const di: ProdutoFuturo = {
   codigo: 'DI1', apelido: 'DI1FUT', nome: 'Juros (DI de 1 dia)', grupo: 'Juros', tipo: 'taxa', multiplicador: 1, moeda: 'BRL', tick: 0.005,
   especificacao: 'R$ 100.000 no vencimento.', vertice: 'DI1F28',
-  contratos: [{ ticker: 'DI1F28', vencimento: '2028-01', ajuste: 82_000, ajusteAnterior: 81_900, abertura: 12.5, maxima: 12.6, minima: 12.4, ultimo: 12.5, volume: 100, posicaoAberta: 5000 }],
+  contratos: [
+    { ticker: 'DI1F27', vencimento: '2027-01', ajuste: 97_570, ajusteAnterior: 97_560, abertura: null, maxima: null, minima: null, ultimo: 13.47, volume: 100, posicaoAberta: 9000 },
+    { ticker: 'DI1N27', vencimento: '2027-07', ajuste: 91_000, ajusteAnterior: 90_950, abertura: null, maxima: null, minima: null, ultimo: null, volume: null, posicaoAberta: 3000 },
+    { ticker: 'DI1F28', vencimento: '2028-01', ajuste: 82_000, ajusteAnterior: 81_900, abertura: 12.5, maxima: 12.6, minima: 12.4, ultimo: 12.5, volume: 100, posicaoAberta: 5000 },
+  ],
   serie: serie(100).map((c) => [c[0], 12, 12.5, 11.5, 12.2, 10] as Candle),
 }
 
@@ -70,5 +74,32 @@ describe('SimuleFuturos', () => {
     render(<SimuleFuturos ctx={ctx} snapshot={curto} />)
     fireEvent.click(screen.getByRole('tab', { name: /Tendência/ }))
     expect(screen.getByText(/Histórico ainda curto/)).toBeTruthy()
+  })
+})
+
+describe('SimuleFuturos: curva de juros do DI1', () => {
+  it('só o DI1 tem a aba Curva de juros', () => {
+    render(<SimuleFuturos ctx={ctx} snapshot={snapshot} />)
+    expect(screen.queryByRole('tab', { name: /Curva de juros/ })).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'DI1FUT' }))
+    expect(screen.getByRole('tab', { name: /Curva de juros/ })).toBeTruthy()
+  })
+
+  it('mostra o gráfico, o formato da curva e a tabela de vencimentos', () => {
+    render(<SimuleFuturos ctx={ctx} snapshot={snapshot} />)
+    fireEvent.click(screen.getByRole('button', { name: 'DI1FUT' }))
+    fireEvent.click(screen.getByRole('tab', { name: /Curva de juros/ }))
+    expect(screen.getByRole('img', { name: /Curva de juros do DI1, 3 vencimentos/ })).toBeTruthy()
+    expect(screen.getByText('Formato da curva')).toBeTruthy()
+    expect(screen.getByText('Taxa de cada vencimento')).toBeTruthy()
+  })
+
+  it('ao trocar para um contrato sem curva, volta ao simulador', () => {
+    render(<SimuleFuturos ctx={ctx} snapshot={snapshot} />)
+    fireEvent.click(screen.getByRole('button', { name: 'DI1FUT' }))
+    fireEvent.click(screen.getByRole('tab', { name: /Curva de juros/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'WINFUT' }))
+    expect(screen.queryByRole('tab', { name: /Curva de juros/ })).toBeNull()
+    expect(screen.getByLabelText('Vencimento')).toBeTruthy()
   })
 })

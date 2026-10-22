@@ -1,19 +1,23 @@
 import { useState } from 'react'
 import { SNAPSHOT_FUTUROS } from '../data/snapshotFuturos'
 import {
-  ROTULO_LEITURA, analisarSerie, cenariosDePreco, dataVencimentoDI, diasUteisAproximados, moedaDe, puDI, resultadoDI,
-  resultadoPosicao, rotuloVencimento, taxaDoPU,
+  ROTULO_LEITURA, analisarSerie, cenariosDePreco, curvaDI, dataVencimentoDI, diasUteisAproximados, moedaDe, puDI, resultadoDI,
+  resultadoPosicao, resumoCurva, rotuloVencimento, taxaDoPU,
 } from '../domain/futuros'
 import type { ContratoFuturo, Lado, ProdutoFuturo, SnapshotFuturos } from '../domain/futuros'
 import { formatarData } from '../domain/rendaFii'
 import { VoltarInicio } from '../ui/VoltarInicio'
 import { AvisoEducacional } from '../ui/AvisoEducacional'
 import { AbasDaTela } from '../ui/AbasDaTela'
+import type { AbaDaTela } from '../ui/AbasDaTela'
 import { CampoNumero } from '../ui/CampoNumero'
+import { GraficoCurvaDI } from '../ui/GraficoCurvaDI'
 import { GraficoFuturo } from '../ui/GraficoFuturo'
 import type { AppCtx } from '../state/useAppState'
 
 const JANELAS = [60, 120, 252] as const
+
+type AbaFuturos = 'simulador' | 'tendencia' | 'curva'
 
 const numero = (v: number, casas = 2) => v.toLocaleString('pt-BR', { minimumFractionDigits: casas, maximumFractionDigits: casas })
 const casasDoTick = (tick: number) => (tick >= 1 ? 0 : tick >= 0.1 ? 1 : tick >= 0.01 ? 2 : 3)
@@ -30,9 +34,10 @@ function agruparPorGrupo(produtos: ProdutoFuturo[]) {
 }
 
 /**
- * Simule Futuros: contratos futuros da B3 (índice, dólar, juros e agro, cheios e minis). Duas abas: o simulador de resultado
- * (lucro ou prejuízo de uma posição, sobre a margem que a pessoa informa) e a Tendência, com a análise gráfica do contínuo
- * (candles, médias, suporte e resistência). Estritamente descritivo (D19): sem previsão, sem recomendação de operar.
+ * Simule Futuros: contratos futuros da B3 (índice, dólar, juros e agro, cheios e minis). Abas: o simulador de resultado
+ * (lucro ou prejuízo de uma posição, sobre a margem que a pessoa informa), a Tendência, com a análise gráfica do contínuo
+ * (candles, médias, suporte e resistência) e, só no DI1, a curva de juros. Estritamente descritivo (D19): sem previsão,
+ * sem recomendação de operar.
  */
 export function SimuleFuturos({
   snapshot = SNAPSHOT_FUTUROS,
@@ -43,9 +48,16 @@ export function SimuleFuturos({
   snapshot?: SnapshotFuturos
 }) {
   const [codigo, setCodigo] = useState(snapshot.produtos[0]?.codigo)
-  const [aba, setAba] = useState<'simulador' | 'tendencia'>('simulador')
+  const [aba, setAba] = useState<AbaFuturos>('simulador')
   const produto = snapshot.produtos.find((p) => p.codigo === codigo) ?? snapshot.produtos[0]
   const grupos = agruparPorGrupo(snapshot.produtos)
+  const abas: AbaDaTela<AbaFuturos>[] = [
+    { id: 'simulador', emoji: '🧮', titulo: 'Simulador', descricao: 'Resultado e margem da posição' },
+    { id: 'tendencia', emoji: '📈', titulo: 'Tendência', descricao: 'Análise gráfica do contínuo' },
+    ...(produto?.tipo === 'taxa' ? [{ id: 'curva' as const, emoji: '〰️', titulo: 'Curva de juros', descricao: 'Taxa por vencimento' }] : []),
+  ]
+  // A aba da curva só existe no DI1: ao trocar de contrato, quem estava nela volta ao simulador.
+  const abaAtiva: AbaFuturos = aba === 'curva' && produto?.tipo !== 'taxa' ? 'simulador' : aba
 
   return (
     <div className="screen">
@@ -89,14 +101,17 @@ export function SimuleFuturos({
           <AbasDaTela
             prefixo="futuros"
             rotulo="O que você quer ver"
-            ativa={aba}
+            ativa={abaAtiva}
             aoMudar={setAba}
-            abas={[
-              { id: 'simulador', emoji: '🧮', titulo: 'Simulador', descricao: 'Resultado e margem da posição' },
-              { id: 'tendencia', emoji: '📈', titulo: 'Tendência', descricao: 'Análise gráfica do contínuo' },
-            ] as const}
+            abas={abas}
           >
-            {aba === 'simulador' ? <Simulador key={produto.codigo} produto={produto} dataPregao={snapshot.dataPregao} /> : <Tendencia key={produto.codigo} produto={produto} />}
+            {abaAtiva === 'simulador' ? (
+              <Simulador key={produto.codigo} produto={produto} dataPregao={snapshot.dataPregao} />
+            ) : abaAtiva === 'tendencia' ? (
+              <Tendencia key={produto.codigo} produto={produto} />
+            ) : (
+              <CurvaDeJuros key={produto.codigo} produto={produto} dataPregao={snapshot.dataPregao} />
+            )}
           </AbasDaTela>
         </>
       )}
@@ -341,6 +356,79 @@ function TabelaVencimentos({ produto }: { produto: ProdutoFuturo }) {
         </table>
       </div>
     </details>
+  )
+}
+
+/** Curva de juros do DI1: taxa de cada vencimento (do PU de ajuste do pregão) e taxa a termo entre vencimentos vizinhos. */
+function CurvaDeJuros({ produto, dataPregao }: { produto: ProdutoFuturo; dataPregao: string | null }) {
+  const curva = dataPregao ? curvaDI(produto.contratos, dataPregao) : []
+  const resumo = resumoCurva(curva)
+
+  if (curva.length < 3) {
+    return (
+      <div className="card col" style={{ gap: 6 }} role="status">
+        <span style={{ fontWeight: 700 }}>Vencimentos insuficientes para desenhar a curva.</span>
+      </div>
+    )
+  }
+
+  return (
+    <div className="col" style={{ gap: 14 }}>
+      <div className="desk-split">
+        <div className="desk-main col" style={{ gap: 10 }}>
+          <span className="small" style={{ fontWeight: 600 }}>Curva do DI1 em {formatarData(dataPregao ?? '')}</span>
+          <GraficoCurvaDI curva={curva} />
+        </div>
+
+        <div className="desk-side col" style={{ gap: 12 }}>
+          {resumo && (
+            <div className="card col" style={{ gap: 8 }}>
+              <span className="small muted">Formato da curva</span>
+              <span className="font-display" style={{ fontSize: 22, fontWeight: 700 }}>{resumo.formato[0].toUpperCase() + resumo.formato.slice(1)}</span>
+              <span className="small" style={{ lineHeight: 1.5 }}>
+                De {numero(resumo.curto.taxa, 3)}% em {rotuloVencimento(resumo.curto.vencimento)} para {numero(resumo.longo.taxa, 3)}% em{' '}
+                {rotuloVencimento(resumo.longo.vencimento)}: {resumo.spread > 0 ? '+' : ''}{numero(resumo.spread)} ponto percentual entre o
+                vencimento mais curto (a partir de 21 dias úteis) e o mais longo.
+              </span>
+            </div>
+          )}
+          <div className="small muted justify" style={{ lineHeight: 1.5 }}>
+            A taxa de cada vencimento vem do preço de ajuste (PU) do pregão, o mesmo critério para todos, negociados ou não, por isso
+            pode diferir em alguns centésimos do último negócio. A <strong>taxa a termo</strong> é a taxa que o mercado embute entre
+            um vencimento e o anterior. A contagem de dias úteis considera os feriados nacionais, sem lei nova ou feriado extraordinário.
+            É uma leitura do que o mercado precifica hoje, não uma previsão.
+          </div>
+        </div>
+      </div>
+
+      <details className="card-outline">
+        <summary className="small" style={{ fontWeight: 600, cursor: 'pointer' }}>Taxa de cada vencimento</summary>
+        <div style={{ overflowX: 'auto', marginTop: 8 }}>
+          <table className="small" style={{ width: '100%', borderCollapse: 'collapse', fontVariantNumeric: 'tabular-nums' }}>
+            <thead>
+              <tr className="muted">
+                <th align="left">Contrato</th>
+                <th align="right">Dias úteis</th>
+                <th align="right">Taxa</th>
+                <th align="right">A termo</th>
+                <th align="right">Último</th>
+              </tr>
+            </thead>
+            <tbody>
+              {curva.map((p) => (
+                <tr key={p.ticker} style={{ borderTop: '1px solid var(--border)' }}>
+                  <td>{p.ticker} <span className="muted">{rotuloVencimento(p.vencimento)}</span></td>
+                  <td align="right">{p.diasUteis.toLocaleString('pt-BR')}</td>
+                  <td align="right">{numero(p.taxa, 3)}%</td>
+                  <td align="right">{p.taxaATermo === null ? '-' : `${numero(p.taxaATermo, 3)}%`}</td>
+                  <td align="right">{p.taxaUltimo === null ? '-' : `${numero(p.taxaUltimo, 3)}%`}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </details>
+    </div>
   )
 }
 
