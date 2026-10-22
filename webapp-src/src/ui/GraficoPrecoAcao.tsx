@@ -1,6 +1,7 @@
 import { useId, useMemo, useRef, useState } from 'react'
 import type { KeyboardEvent, PointerEvent } from 'react'
 import type { Barra, ZonaPreco } from '../domain/analiseTecnica'
+import { macdSerie, rsiSerie } from '../domain/analiseTecnica'
 import { mediaMovel } from '../domain/futuros'
 import { dataCurta, dataLonga, numero, reais } from './formatoAnalise'
 
@@ -11,9 +12,9 @@ const T = 8
 const ALTURA_PRECO = 180
 const ALTURA_VOLUME = 34
 const FOLGA = 14
+const ALTURA_IFR = 46
+const ALTURA_MACD = 52
 const B = 18
-const BASE_VOLUME = T + ALTURA_PRECO + FOLGA + ALTURA_VOLUME
-const H = BASE_VOLUME + B
 
 const COR_ALTA = 'var(--success)'
 const COR_BAIXA = 'var(--danger)'
@@ -22,6 +23,8 @@ const COR_MM50 = 'oklch(86% 0.22 135)'
 const COR_MM200 = 'oklch(70% 0.14 320)'
 const COR_SUPORTE = 'oklch(66% 0.19 250)'
 const COR_RESISTENCIA = 'oklch(60% 0.24 25)'
+const COR_MACD = 'oklch(72% 0.13 235)'
+const COR_SINAL = 'oklch(75% 0.16 60)'
 
 export interface OpcoesDoGrafico {
   mm21: boolean
@@ -29,6 +32,8 @@ export interface OpcoesDoGrafico {
   mm200: boolean
   zonas: boolean
   volume: boolean
+  ifr: boolean
+  macd: boolean
 }
 
 function passoRedondo(amplitude: number, linhas = 4) {
@@ -83,18 +88,43 @@ export function GraficoPrecoAcao({ barras, zonas, nome, janela = 120, opcoes, pe
     const x = (i: number) => L + largura * (i + 0.5)
     const y = (v: number) => T + ((yMax - v) / (yMax - yMin || 1)) * ALTURA_PRECO
     const volMax = Math.max(...vis.map((b) => b.vol), 1)
-    const yVol = (v: number) => BASE_VOLUME - (v / volMax) * ALTURA_VOLUME
-    const linha = (serie: (number | null)[]) => serie.map((v, i) => (v === null ? '' : `${i === 0 || serie[i - 1] === null ? 'M' : 'L'}${x(i).toFixed(1)} ${y(v).toFixed(1)}`)).join('')
+    // Painéis empilhados sob o preço, na mesma escala horizontal: volume, IFR e MACD (só os ligados ocupam espaço).
+    let cursor = T + ALTURA_PRECO
+    const painel = (ligado: boolean, altura: number) => {
+      if (!ligado) return null
+      const topo = cursor + FOLGA
+      cursor = topo + altura
+      return { topo, base: cursor }
+    }
+    const pVolume = painel(opcoes.volume, ALTURA_VOLUME)
+    const pIfr = painel(opcoes.ifr, ALTURA_IFR)
+    const pMacd = painel(opcoes.macd, ALTURA_MACD)
+    const fundoPaineis = cursor
+    const H = cursor + B
+    const yVol = (v: number) => (pVolume ? pVolume.base - (v / volMax) * ALTURA_VOLUME : 0)
+    const ifr = rsiSerie(fech).slice(inicio)
+    const yIfr = (v: number) => (pIfr ? pIfr.base - (v / 100) * ALTURA_IFR : 0)
+    const macd = macdSerie(fech)
+    const mLinha = macd.linha.slice(inicio)
+    const mSinal = macd.sinal.slice(inicio)
+    const mHist = macd.hist.slice(inicio)
+    const mValores = [...mLinha, ...mSinal, ...mHist, 0].filter((v): v is number => v !== null)
+    const mMax = Math.max(...mValores)
+    const mMin = Math.min(...mValores)
+    const yMacd = (v: number) => (pMacd ? pMacd.topo + ((mMax - v) / (mMax - mMin || 1)) * ALTURA_MACD : 0)
+    const linha = (serie: (number | null)[], escala: (v: number) => number = y) => serie.map((v, i) => (v === null ? '' : `${i === 0 || serie[i - 1] === null ? 'M' : 'L'}${x(i).toFixed(1)} ${escala(v).toFixed(1)}`)).join('')
     const grade: number[] = []
     for (let v = yMin; v <= yMax + passo / 2; v += passo) grade.push(v)
     const marcas = [0, Math.floor((n - 1) / 2), n - 1].filter((v, i, a) => v >= 0 && a.indexOf(v) === i)
     return {
-      vis, n, largura, x, y, yVol, grade, marcas, zonasVisiveis, minimo, maximo,
+      vis, n, largura, x, y, yVol, grade, marcas, zonasVisiveis, minimo, maximo, H, fundoPaineis,
+      pVolume, pIfr, pMacd, yIfr, yMacd, ifr, mLinha, mSinal, mHist,
       c21: linha(v21), c50: linha(v50), c200: linha(v200),
+      cIfr: linha(ifr, yIfr), cMacd: linha(mLinha, yMacd), cSinal: linha(mSinal, yMacd),
     }
-  }, [barras, zonas, janela, opcoes.mm21, opcoes.mm50, opcoes.mm200, opcoes.zonas])
+  }, [barras, zonas, janela, opcoes.mm21, opcoes.mm50, opcoes.mm200, opcoes.zonas, opcoes.volume, opcoes.ifr, opcoes.macd])
 
-  const { vis, n, x, y, yVol, largura } = dados
+  const { vis, n, x, y, yVol, largura, H, pVolume, pIfr, pMacd } = dados
   if (n < 2) return <div className="small muted" role="status">Histórico insuficiente para o gráfico.</div>
   const i = indice !== null && indice < n ? indice : n - 1
   const atual = vis[i]
@@ -132,6 +162,8 @@ export function GraficoPrecoAcao({ barras, zonas, nome, janela = 120, opcoes, pe
         <span>Mín <strong>{numero(atual.min, 2)}</strong></span>
         {variacao !== null && <span style={{ color: variacao >= 0 ? COR_ALTA : COR_BAIXA }}>{variacao > 0 ? '+' : ''}{numero(variacao, 2)}%</span>}
         <span className="muted">R$ {numero(atual.vol / 1000, 1)} mi negociados</span>
+        {pIfr && dados.ifr[i] !== null && <span>IFR <strong>{numero(dados.ifr[i] as number, 0)}</strong></span>}
+        {pMacd && dados.mHist[i] !== null && <span>MACD <strong>{numero(dados.mLinha[i] as number, 2)}</strong> sinal <strong>{numero(dados.mSinal[i] as number, 2)}</strong></span>}
       </div>
 
       <svg
@@ -160,7 +192,7 @@ export function GraficoPrecoAcao({ barras, zonas, nome, janela = 120, opcoes, pe
           return (
             <g key={`${z.tipo}-${k}`}>
               <rect x={L} y={topo} width={W - R - L} height={Math.max(2, y(z.inferior) - topo)} fill={cor} opacity={0.14} />
-              <line x1={L} x2={W - R} y1={yLinha} y2={yLinha} stroke={cor} strokeWidth={1.6} />
+              <line x1={L} x2={W - R} y1={yLinha} y2={yLinha} stroke={cor} strokeWidth={0.8} />
             </g>
           )
         })}
@@ -172,8 +204,8 @@ export function GraficoPrecoAcao({ barras, zonas, nome, janela = 120, opcoes, pe
           const yCorpoBase = y(Math.min(abertura, b.fech))
           return (
             <g key={b.data}>
-              {opcoes.volume && (
-                <rect x={x(k) - largura * 0.31} y={yVol(b.vol)} width={Math.max(1, largura * 0.62)} height={Math.max(0, BASE_VOLUME - yVol(b.vol))} fill={cor} opacity={0.45} />
+              {pVolume && (
+                <rect x={x(k) - largura * 0.31} y={yVol(b.vol)} width={Math.max(1, largura * 0.62)} height={Math.max(0, pVolume.base - yVol(b.vol))} fill={cor} opacity={0.45} />
               )}
               <line x1={x(k)} x2={x(k)} y1={y(Math.max(b.max, abertura))} y2={y(Math.min(b.min, abertura))} stroke={cor} strokeWidth={1} />
               <rect x={x(k) - largura * 0.36} y={yCorpoTopo} width={Math.max(1, largura * 0.72)} height={Math.max(1, yCorpoBase - yCorpoTopo)} fill={cor} />
@@ -185,12 +217,41 @@ export function GraficoPrecoAcao({ barras, zonas, nome, janela = 120, opcoes, pe
         {opcoes.mm50 && <path d={dados.c50} fill="none" stroke={COR_MM50} strokeWidth={1.5} strokeDasharray="5 3" strokeLinejoin="round" />}
         {opcoes.mm21 && <path d={dados.c21} fill="none" stroke={COR_MM21} strokeWidth={1.5} strokeLinejoin="round" />}
 
+        {pVolume && <text x={L + 2} y={pVolume.topo + 8} style={estiloEixo}>Volume</text>}
+
+        {pIfr && (
+          <g>
+            <text x={L + 2} y={pIfr.topo + 8} style={estiloEixo}>IFR 14</text>
+            {[30, 70].map((v) => (
+              <g key={v}>
+                <line x1={L} x2={W - R} y1={dados.yIfr(v)} y2={dados.yIfr(v)} stroke="var(--border)" strokeWidth={1} strokeDasharray="3 3" />
+                <text x={W - R + 4} y={dados.yIfr(v) + 3} style={estiloEixo}>{v}</text>
+              </g>
+            ))}
+            <path d={dados.cIfr} fill="none" stroke={COR_MM21} strokeWidth={1.3} strokeLinejoin="round" />
+          </g>
+        )}
+
+        {pMacd && (
+          <g>
+            <text x={L + 2} y={pMacd.topo + 8} style={estiloEixo}>MACD 12, 26, 9</text>
+            <line x1={L} x2={W - R} y1={dados.yMacd(0)} y2={dados.yMacd(0)} stroke="var(--border)" strokeWidth={1} />
+            {dados.mHist.map((v, k) =>
+              v === null ? null : (
+                <rect key={vis[k].data} x={x(k) - largura * 0.35} y={Math.min(dados.yMacd(v), dados.yMacd(0))} width={Math.max(1, largura * 0.7)} height={Math.max(0.5, Math.abs(dados.yMacd(v) - dados.yMacd(0)))} fill={v >= 0 ? COR_ALTA : COR_BAIXA} opacity={0.6} />
+              ),
+            )}
+            <path d={dados.cMacd} fill="none" stroke={COR_MACD} strokeWidth={1.2} strokeLinejoin="round" />
+            <path d={dados.cSinal} fill="none" stroke={COR_SINAL} strokeWidth={1.2} strokeLinejoin="round" />
+          </g>
+        )}
+
         {dados.marcas.map((k) => (
           <text key={k} x={x(k)} y={H - 5} textAnchor={k === 0 ? 'start' : k === n - 1 ? 'end' : 'middle'} style={estiloEixo}>{dataCurta(vis[k].data)}</text>
         ))}
 
         <g aria-hidden="true">
-          <line x1={x(i)} x2={x(i)} y1={T} y2={T + ALTURA_PRECO} stroke="var(--text-muted)" strokeWidth={1} opacity={0.6} />
+          <line x1={x(i)} x2={x(i)} y1={T} y2={dados.fundoPaineis} stroke="var(--text-muted)" strokeWidth={1} opacity={0.6} />
         </g>
       </svg>
 
@@ -199,7 +260,8 @@ export function GraficoPrecoAcao({ barras, zonas, nome, janela = 120, opcoes, pe
         {opcoes.mm21 && <span><svg width="18" height="8" aria-hidden="true"><line x1="1" x2="17" y1="4" y2="4" stroke={COR_MM21} strokeWidth="2" /></svg> Média 21</span>}
         {opcoes.mm50 && <span><svg width="18" height="8" aria-hidden="true"><line x1="1" x2="17" y1="4" y2="4" stroke={COR_MM50} strokeWidth="2" strokeDasharray="4 2" /></svg> Média 50</span>}
         {opcoes.mm200 && <span><svg width="18" height="8" aria-hidden="true"><line x1="1" x2="17" y1="4" y2="4" stroke={COR_MM200} strokeWidth="2" strokeDasharray="2 2" /></svg> Média 200</span>}
-        {opcoes.zonas && <span><svg width="18" height="8" aria-hidden="true"><line x1="1" x2="17" y1="4" y2="4" stroke={COR_SUPORTE} strokeWidth="2" /></svg> Suporte <svg width="18" height="8" aria-hidden="true"><line x1="1" x2="17" y1="4" y2="4" stroke={COR_RESISTENCIA} strokeWidth="2" /></svg> Resistência</span>}
+        {opcoes.zonas && <span><svg width="18" height="8" aria-hidden="true"><line x1="1" x2="17" y1="4" y2="4" stroke={COR_SUPORTE} strokeWidth="1" /></svg> Suporte <svg width="18" height="8" aria-hidden="true"><line x1="1" x2="17" y1="4" y2="4" stroke={COR_RESISTENCIA} strokeWidth="1" /></svg> Resistência</span>}
+        {opcoes.macd && <span><svg width="18" height="8" aria-hidden="true"><line x1="1" x2="17" y1="4" y2="4" stroke={COR_MACD} strokeWidth="2" /></svg> MACD <svg width="18" height="8" aria-hidden="true"><line x1="1" x2="17" y1="4" y2="4" stroke={COR_SINAL} strokeWidth="2" /></svg> Sinal</span>}
       </div>
     </div>
   )

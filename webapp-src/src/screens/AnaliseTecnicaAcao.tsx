@@ -1,11 +1,10 @@
 import { useMemo, useState } from 'react'
 import type { DadosDaAnalise } from './useAnaliseDaAcao'
-import { ROTULO_LEITURA, ROTULO_VIES, agregar, macdSerie, rsiSerie } from '../domain/analiseTecnica'
+import { ROTULO_LEITURA, ROTULO_VIES, agregar } from '../domain/analiseTecnica'
 import type { AnaliseTecnica, Horizonte, Leitura, Viés } from '../domain/analiseTecnica'
 import { ROTULO_HORIZONTE } from '../domain/confluencia'
 import { GraficoPrecoAcao } from '../ui/GraficoPrecoAcao'
 import type { OpcoesDoGrafico } from '../ui/GraficoPrecoAcao'
-import { MiniGrafico } from '../ui/MiniGrafico'
 import { AvisoDaAnalise, BarraDeNota, EstadoDoArquivo, Linha, Modulo, Selo } from '../ui/BlocosDeAnalise'
 import type { Tom } from '../ui/BlocosDeAnalise'
 import { dataLonga, numero, percentual, reais } from '../ui/formatoAnalise'
@@ -26,7 +25,7 @@ const tomDaLeitura = (l: Leitura): Tom => (l === 'alta' ? 'positivo' : l === 'ba
 export function AnaliseTecnicaAcao({ dados, ticker, nome, horizonte }: { dados: DadosDaAnalise; ticker: string; nome: string | null; horizonte: Horizonte }) {
   const [periodicidade, setPeriodicidade] = useState<Periodicidade>('diario')
   const [janela, setJanela] = useState(120)
-  const [opcoes, setOpcoes] = useState<OpcoesDoGrafico>({ mm21: true, mm50: true, mm200: false, zonas: true, volume: true })
+  const [opcoes, setOpcoes] = useState<OpcoesDoGrafico>({ mm21: true, mm50: true, mm200: false, zonas: true, volume: true, ifr: true, macd: true })
   const barrasDoGrafico = useMemo(() => {
     const b = dados.barras ?? []
     return periodicidade === 'diario' ? b : agregar(b, periodicidade === 'semanal' ? 'semana' : 'mes')
@@ -55,7 +54,7 @@ export function AnaliseTecnicaAcao({ dados, ticker, nome, horizonte }: { dados: 
     <div className="col" style={{ gap: 14 }} data-testid="analise-tecnica">
       <ResumoTecnico t={t} nome={nome} />
 
-      <Modulo titulo="Gráfico de preço" subtitulo="fechamento, médias, zonas e volume" aberto>
+      <Modulo titulo="Gráfico de preço" subtitulo="candles, médias, zonas, volume, IFR e MACD" aberto>
         <div className="row" style={{ gap: 6, flexWrap: 'wrap' }} role="group" aria-label="Periodicidade do gráfico">
           {PERIODICIDADES.map((p) => (
             <button key={p.chave} className={`chip ${periodicidade === p.chave ? 'selected' : ''}`} aria-pressed={periodicidade === p.chave} onClick={() => trocarPeriodicidade(p.chave)}>
@@ -71,7 +70,7 @@ export function AnaliseTecnicaAcao({ dados, ticker, nome, horizonte }: { dados: 
           ))}
         </div>
         <div className="row" style={{ gap: 6, flexWrap: 'wrap' }} role="group" aria-label="Indicadores do gráfico">
-          {([['mm21', 'Média 21'], ['mm50', 'Média 50'], ['mm200', 'Média 200'], ['zonas', 'Suportes e resistências'], ['volume', 'Volume']] as const).map(([chave, rotulo]) => (
+          {([['mm21', 'Média 21'], ['mm50', 'Média 50'], ['mm200', 'Média 200'], ['zonas', 'Suportes e resistências'], ['volume', 'Volume'], ['ifr', 'IFR'], ['macd', 'MACD']] as const).map(([chave, rotulo]) => (
             <button key={chave} className={`chip ${opcoes[chave] ? 'selected' : ''}`} aria-pressed={opcoes[chave]} onClick={() => setOpcoes({ ...opcoes, [chave]: !opcoes[chave] })}>
               {rotulo}
             </button>
@@ -129,7 +128,7 @@ export function AnaliseTecnicaAcao({ dados, ticker, nome, horizonte }: { dados: 
         <span className="tiny muted justify">Um cruzamento isolado não é sinal definitivo de compra ou venda; vale junto da tendência e do volume.</span>
       </Modulo>
 
-      <Momentum t={t} barras={dados.barras} />
+      <Momentum t={t} />
 
       <Modulo titulo="Volume e liquidez">
         <div className="col" style={{ gap: 0 }}>
@@ -354,22 +353,16 @@ function ResumoTecnico({ t, nome }: { t: AnaliseTecnica; nome: string | null }) 
   )
 }
 
-function Momentum({ t, barras }: { t: AnaliseTecnica; barras: { fech: number }[] }) {
-  const { rsi, hist } = useMemo(() => {
-    const fech = barras.map((b) => b.fech)
-    const m = macdSerie(fech)
-    return { rsi: rsiSerie(fech).slice(-120), hist: m.hist.slice(-120) }
-  }, [barras])
+/** Leitura em texto do IFR e do MACD; os desenhos ficam no gráfico de preço, abaixo do volume. */
+function Momentum({ t }: { t: AnaliseTecnica }) {
   return (
     <Modulo titulo="IFR e MACD">
       <div className="col" style={{ gap: 6 }}>
         <strong className="small">IFR de 14 pregões</strong>
-        <MiniGrafico valores={rsi} referencias={[30, 70]} rotulo="IFR dos últimos 120 pregões" casas={0} />
         <span className="small muted justify">{t.momentum.rsi.leitura}</span>
       </div>
       <div className="col" style={{ gap: 6 }}>
-        <strong className="small">MACD (12, 26, 9): histograma</strong>
-        <MiniGrafico valores={hist} tipo="barras" rotulo="Histograma do MACD dos últimos 120 pregões" casas={2} />
+        <strong className="small">MACD (12, 26, 9)</strong>
         <span className="small muted justify">{t.momentum.macd.leitura}</span>
       </div>
       <span className="tiny muted justify">IFR acima de 70 não é ordem de venda, nem abaixo de 30 é ordem de compra: em tendências fortes o indicador permanece nessas regiões por semanas.</span>
