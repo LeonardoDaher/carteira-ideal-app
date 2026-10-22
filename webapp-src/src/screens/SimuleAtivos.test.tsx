@@ -19,13 +19,14 @@ describe('SimuleAtivos (hub)', () => {
       'Simule Tesouro Direto': './?tela=simuleTesouro',
       'Simule BDR': './?tela=simuleBdr',
       'Simule ETF': './?tela=simuleEtf',
+      'Simule Futuros': './?tela=simuleFuturos',
       'Simule Opções': './?tela=simuleOpcoes',
     }
     for (const [titulo, href] of Object.entries(esperado)) {
       const link = screen.getByRole('link', { name: new RegExp(titulo) })
       expect(link.getAttribute('href')).toBe(href)
     }
-    expect(SIMULADORES).toHaveLength(6)
+    expect(SIMULADORES).toHaveLength(7)
   })
 
   it('o Simule Opções vem logo depois do Simule Ações', () => {

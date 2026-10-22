@@ -66,7 +66,7 @@ const numeroOuNull = (texto) => {
   return Number.isFinite(n) ? n : null
 }
 
-const lerTag = (bloco, tag) => {
+export const lerTag = (bloco, tag) => {
   const achado = new RegExp(`<${tag}(?:\\s[^>]*)?>([^<]*)</${tag}>`).exec(bloco)
   return achado ? achado[1].trim() : null
 }
@@ -104,7 +104,7 @@ export function escolherUltimaVersao(nomes) {
  * Lê o XML em fluxo e devolve um Map ticker -> instrumento, só com os códigos aceitos por
  * `aceitar` (função). Também devolve a data do pregão e quantos blocos foram lidos.
  */
-export async function lerBoletim(caminhoXml, aceitar = () => true) {
+export async function lerBoletim(caminhoXml, aceitar = () => true, extrair = extrairPricRpt) {
   const instrumentos = new Map()
   const datas = new Set()
   let blocos = 0
@@ -123,7 +123,7 @@ export async function lerBoletim(caminhoXml, aceitar = () => true) {
     // Filtro barato antes do parse completo: o código vem logo no começo do bloco.
     const ticker = lerTag(bloco, 'TckrSymb')
     if (!ticker || !aceitar(ticker.toUpperCase())) continue
-    const item = extrairPricRpt(bloco)
+    const item = extrair(bloco)
     if (!item) continue
     instrumentos.set(item.ticker, item)
     datas.add(item.data)

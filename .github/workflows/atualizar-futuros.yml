@@ -1,0 +1,61 @@
+# Atualiza nos dias úteis os dados do Simule Futuros: índice, dólar, juros e agro da B3, com
+# preço de ajuste, vencimentos e o histórico dos candles do contínuo (INDFUT, WINFUT, DOLFUT...).
+#
+# Fonte: Boletim de Preços oficial da B3 (BVBG.086), sem cota e sem secret.
+#
+# Antes da primeira execução diária: confira config/futuros.json (marque "conferidoPeloResponsavel": true)
+# e rode UMA VEZ o workflow "Carga inicial de futuros".
+#
+# Se o script encontrar algo errado, o job falha SEM alterar os arquivos. Feriado (zip vazio) ou pregão
+# já processado: nada muda, sem commit e sem deploy.
+
+# ATENÇÃO: o GitHub atrasa ou até perde disparos agendados (principalmente em minutos redondos). Por isso cada
+# job tem 3 horários, fora do minuto cheio: a execução da noite, uma repetição e uma passada às 9h.
+name: Atualizar futuros
+
+on:
+  schedule:
+    - cron: '47 0 * * 2-6' # terça a sábado, 00h47 UTC = segunda a sexta, 21h47 de Brasília
+    - cron: '47 2 * * 2-6' # 23h47 de Brasília (repetição)
+    - cron: '20 12 * * 2-6' # 9h20 de Brasília (passada antes da abertura)
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: futuros
+  cancel-in-progress: false
+
+jobs:
+  atualizar:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Buscar o boletim da B3 e gerar futuros.json
+        run: node scripts/atualizar-futuros.mjs
+
+      - name: Conferir se o site compila com os dados novos
+        run: |
+          npm ci
+          npm run build
+
+      - name: Publicar (commit) se houver mudança
+        run: |
+          if [ -z "$(git status --porcelain webapp-src/src/data/futuros.json historico)" ]; then
+            echo "Sem mudanças nos dados."
+            exit 0
+          fi
+          git config user.name "${{ vars.COMMIT_AUTOR_NOME || 'github-actions[bot]' }}"
+          git config user.email "${{ vars.COMMIT_AUTOR_EMAIL || '41898283+github-actions[bot]@users.noreply.github.com' }}"
+          git add webapp-src/src/data/futuros.json historico/futuros.json
+          git commit -m "dados: Futuros ($(date -u +%Y-%m-%d))"
+          git pull --rebase
+          git push

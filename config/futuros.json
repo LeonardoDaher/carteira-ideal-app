@@ -1,0 +1,19 @@
+{
+  "_leia": "Configuração do job diário dos contratos futuros da B3 (Simule Futuros). Preço de ajuste, abertura, máxima, mínima, último preço e posição em aberto vêm do Boletim de Preços oficial da B3 (BVBG.086), o mesmo dos ETFs e BDRs, guardados em historico/futuros.json. O job só publica com 'conferidoPeloResponsavel': true: os valores de multiplicador, moeda e tick foram conferidos em 22/10/2026 nas fichas do produto no site da B3 (WIN, WDO, DOL, DI1, BGI, CCM e ICF); só o IND (R$ 1,00 por ponto) não tem ficha própria no site e se apoia em material educacional da B3 e de corretoras. Reconfira se a B3 mudar alguma especificação. O contrato contínuo (INDFUT, WINFUT, DOLFUT, WDOFUT, DI1FUT, BGIFUT, CCMFUT, ICFFUT) é o vencimento de maior posição em aberto de cada dia, com os vencimentos anteriores ajustados pela razão entre os preços de ajuste na troca (sem ajuste no DI, que é taxa).",
+  "conferidoPeloResponsavel": true,
+  "horarioCorteBoletim": "20:45",
+  "diasProcuraBoletim": 5,
+  "pausaEntreDownloadsMs": 1000,
+  "minimoPregoesHistorico": 21,
+  "minimoContratosPorProduto": 3,
+  "produtos": [
+    { "codigo": "IND", "apelido": "INDFUT", "nome": "Índice Bovespa (cheio)", "grupo": "Índice", "tipo": "pontos", "multiplicador": 1, "moeda": "BRL", "tick": 5, "especificacao": "R$ 1,00 por ponto; variação mínima de 5 pontos." },
+    { "codigo": "WIN", "apelido": "WINFUT", "nome": "Mini índice", "grupo": "Índice", "tipo": "pontos", "multiplicador": 0.2, "moeda": "BRL", "tick": 5, "especificacao": "R$ 0,20 por ponto; variação mínima de 5 pontos (R$ 1,00)." },
+    { "codigo": "DOL", "apelido": "DOLFUT", "nome": "Dólar (cheio)", "grupo": "Dólar", "tipo": "pontos", "multiplicador": 50, "moeda": "BRL", "tick": 0.5, "especificacao": "US$ 50.000, cotado em reais por US$ 1.000: R$ 50,00 por ponto; variação mínima de 0,5 ponto." },
+    { "codigo": "WDO", "apelido": "WDOFUT", "nome": "Mini dólar", "grupo": "Dólar", "tipo": "pontos", "multiplicador": 10, "moeda": "BRL", "tick": 0.5, "especificacao": "US$ 10.000, cotado em reais por US$ 1.000: R$ 10,00 por ponto; variação mínima de 0,5 ponto (R$ 5,00)." },
+    { "codigo": "DI1", "apelido": "DI1FUT", "nome": "Juros (DI de 1 dia)", "grupo": "Juros", "tipo": "taxa", "multiplicador": 1, "moeda": "BRL", "tick": 0.005, "especificacao": "Valor de R$ 100.000 no vencimento, negociado pela taxa efetiva ao ano (base 252 dias úteis); variação mínima de 0,001 ponto de taxa nos vencimentos de até 3 meses e de 0,005 acima disso; o ajuste diário usa o preço unitário (PU)." },
+    { "codigo": "BGI", "apelido": "BGIFUT", "nome": "Boi gordo", "grupo": "Agro", "tipo": "preco", "multiplicador": 330, "moeda": "BRL", "tick": 0.05, "especificacao": "330 arrobas, cotado em R$ por arroba: R$ 330,00 para cada R$ 1,00; variação mínima de R$ 0,05." },
+    { "codigo": "CCM", "apelido": "CCMFUT", "nome": "Milho", "grupo": "Agro", "tipo": "preco", "multiplicador": 450, "moeda": "BRL", "tick": 0.01, "especificacao": "450 sacas de 60 kg, cotado em R$ por saca: R$ 450,00 para cada R$ 1,00; variação mínima de R$ 0,01." },
+    { "codigo": "ICF", "apelido": "ICFFUT", "nome": "Café arábica", "grupo": "Agro", "tipo": "preco", "multiplicador": 100, "moeda": "USD", "tick": 0.05, "especificacao": "100 sacas de 60 kg, cotado em US$ por saca: US$ 100,00 para cada US$ 1,00; variação mínima de US$ 0,05." }
+  ]
+}
