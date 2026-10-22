@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
-  analisarSerie, atrPct, cenariosDePreco, dataVencimentoDI, diasUteisAproximados, ifr, mediaMovel, puDI, resultadoDI,
-  resultadoPosicao, rotuloVencimento, taxaDoPU,
+  analisarSerie, atrPct, cenariosDePreco, curvaDI, dataVencimentoDI, diasUteisAproximados, ehDiaUtil, feriadosNacionais, ifr, mediaMovel, puDI, resultadoDI,
+  resultadoPosicao, resumoCurva, rotuloVencimento, taxaATermo, taxaDoPU,
 } from './futuros'
 import type { Candle } from './futuros'
 
@@ -52,7 +52,7 @@ describe('DI1', () => {
   })
 
   it('o vencimento é o primeiro dia útil do mês', () => {
-    expect(dataVencimentoDI('2027-01')).toBe('2027-01-01') // sexta (feriado ignorado de propósito)
+    expect(dataVencimentoDI('2027-01')).toBe('2027-01-04') // 1º/01 é feriado (sexta); o próximo dia útil é segunda
     expect(dataVencimentoDI('2026-08')).toBe('2026-08-03') // 1º/08/2026 é sábado
   })
 
@@ -124,5 +124,78 @@ describe('rotuloVencimento', () => {
   it('abrevia o mês', () => {
     expect(rotuloVencimento('2026-12')).toBe('dez/26')
     expect(rotuloVencimento('2027-01')).toBe('jan/27')
+  })
+})
+
+describe('dias úteis e feriados', () => {
+  it('feriados móveis de 2026 seguem a Páscoa de 5 de abril', () => {
+    const f = feriadosNacionais(2026)
+    expect(f.has('2026-02-16')).toBe(true) // segunda de Carnaval
+    expect(f.has('2026-02-17')).toBe(true) // terça de Carnaval
+    expect(f.has('2026-04-03')).toBe(true) // sexta-feira santa
+    expect(f.has('2026-06-04')).toBe(true) // Corpus Christi
+  })
+
+  it('Consciência Negra é feriado nacional só a partir de 2024; 24 e 31 de dezembro são dias úteis', () => {
+    expect(feriadosNacionais(2026).has('2026-11-20')).toBe(true)
+    expect(feriadosNacionais(2023).has('2023-11-20')).toBe(false)
+    expect(ehDiaUtil(new Date('2026-12-24T12:00:00Z'))).toBe(true)
+    expect(ehDiaUtil(new Date('2026-12-25T12:00:00Z'))).toBe(false)
+  })
+
+  it('conta os dias úteis descontando feriados e fim de semana', () => {
+    // 24, 28, 29, 30, 31 de dezembro e 4 de janeiro (25/12 e 1º/01 são feriados)
+    expect(diasUteisAproximados('2026-12-23', '2027-01-04')).toBe(6)
+  })
+})
+
+describe('taxaATermo', () => {
+  it('curva plana tem taxa a termo igual à taxa', () => {
+    expect(taxaATermo(10, 252, 10, 504)).toBeCloseTo(10, 6)
+  })
+
+  it('de 10% em 1 ano para 11% em 2 anos, a termo é cerca de 12,01%', () => {
+    expect(taxaATermo(10, 252, 11, 504)).toBeCloseTo(12.0091, 3)
+  })
+
+  it('sem prazo entre os vértices, não há taxa a termo', () => {
+    expect(taxaATermo(10, 252, 11, 252)).toBeNull()
+  })
+})
+
+describe('curvaDI', () => {
+  const dataPregao = '2026-10-21'
+  const contrato = (ticker: string, vencimento: string, taxa: number) => ({
+    ticker,
+    vencimento,
+    ajuste: puDI(taxa, diasUteisAproximados(dataPregao, dataVencimentoDI(vencimento))),
+    ajusteAnterior: null,
+    abertura: null,
+    maxima: null,
+    minima: null,
+    ultimo: null,
+    volume: null,
+    posicaoAberta: null,
+  })
+
+  it('recupera a taxa de cada vencimento a partir do PU de ajuste, em ordem de vencimento', () => {
+    const curva = curvaDI([contrato('DI1F28', '2028-01', 12), contrato('DI1F27', '2027-01', 12), contrato('DI1N27', '2027-07', 12)], dataPregao)
+    expect(curva.map((p) => p.ticker)).toEqual(['DI1F27', 'DI1N27', 'DI1F28'])
+    for (const p of curva) expect(p.taxa).toBeCloseTo(12, 6)
+    expect(curva[0].taxaATermo).toBeNull()
+    expect(curva[1].taxaATermo).toBeCloseTo(12, 5)
+  })
+
+  it('deixa de fora vencimentos com menos de 5 dias úteis e descreve a curva plana', () => {
+    const curva = curvaDI([contrato('DI1V26', '2026-10', 12), contrato('DI1F27', '2027-01', 12), contrato('DI1N27', '2027-07', 12.1)], dataPregao)
+    expect(curva.map((p) => p.ticker)).toEqual(['DI1F27', 'DI1N27'])
+    expect(resumoCurva(curva)?.formato).toBe('plana')
+  })
+
+  it('curva que sobe é inclinada para cima; que desce, para baixo', () => {
+    const sobe = curvaDI([contrato('DI1F27', '2027-01', 12), contrato('DI1N27', '2027-07', 13), contrato('DI1F28', '2028-01', 14)], dataPregao)
+    expect(resumoCurva(sobe)?.formato).toBe('inclinada para cima')
+    const desce = curvaDI([contrato('DI1F27', '2027-01', 14), contrato('DI1N27', '2027-07', 13), contrato('DI1F28', '2028-01', 12)], dataPregao)
+    expect(resumoCurva(desce)?.formato).toBe('inclinada para baixo')
   })
 })
