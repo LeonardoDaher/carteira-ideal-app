@@ -2129,7 +2129,8 @@ Pedido do responsável: o gráfico da análise técnica passou de linha para **c
 **Junção com a série de 12 meses.** O gráfico usa o arquivo longo até o último dia dele e a série diária depois. Se os fechamentos das duas fontes na data em comum diferirem mais de 2%, descarta o arquivo longo (escalas diferentes).
 
 **Fica para depois: gráfico de 60 minutos.** Não há fonte gratuita no projeto: a brapi, testada com o token do projeto em 22/10/2026, só libera o intervalo diário e períodos de até 3 meses no plano gratuito (60 minutos exige o plano Startup, R$ 119,99 por mês; vários anos de diário, o Pro). Sem fonte, a aba de 60 minutos e o 60 minutos na "Tendência por período" não foram feitos.
-## D120 (23/10/2026): Sua HP12C no Simule Bens (resolvedor por voz/texto, banco de questões e calculadora RPN)
+
+## D121 (23/10/2026): Sua HP12C no Simule Bens (resolvedor por voz/texto, banco de questões e calculadora RPN)
 
 **Decisão.** O hub Simule Bens ganha o cartão **Sua HP12C** (`?tela=suaHp12c`), tela avulsa com duas abas. **Resolver problema:** a pessoa fala (reconhecimento de voz do navegador, pt-BR) ou escreve o enunciado; `domain/hp12cInterpretador.ts` descobre o tema por palavras-chave e números ("10 mil", "1,5% ao mês", "dois anos"), preenche os campos e `domain/matematicaFinanceira.ts` resolve mostrando a fórmula. São 13 temas (juros simples, compostos, exatos e contínuos; taxa equivalente, nominal/efetiva, acumulada e real; desconto racional/comercial, simples/composto; HP12C n-i-PV-PMT-FV; renda perpétua e diferida; VPL, TIR, TIRM, payback e lucratividade; SAC, Price, SAM e Americano) e 28 questões prontas filtráveis por assunto. **Calculadora HP-12C (RPN):** `domain/hp12cEmulador.ts` (motor) e `ui/Hp12cEmulador.tsx` (teclado), com pilha X-Y-Z-T, LAST X, STO/RCL 0–9, f/g, BEGIN/END, n/i/PV/PMT/FV, 12×/12÷, INT, %, Δ%, %T, yˣ, 1/x, √x, eˣ, LN, FRAC, INTG, x², n!, CFo/CFj/Nj, NPV e IRR.
 
