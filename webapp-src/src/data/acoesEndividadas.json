@@ -1,19 +1,19 @@
 {
   "publicado": true,
   "versaoMetodologia": "1.1.0",
-  "geradoEm": "2026-10-22T07:59:04.231Z",
-  "dataExecucao": "2026-10-22",
-  "dataPrecos": "2026-10-21",
+  "geradoEm": "2026-10-23T07:57:33.956Z",
+  "dataExecucao": "2026-10-23",
+  "dataPrecos": "2026-10-22",
   "dataCorte": "2026-10-05",
   "pastaAuditoria": "auditoria/acoes-endividadas/2026-10-17",
-  "hashResultado": "f8871e1e77f1d568a1f9e18a157384adabdf3f01708f52484099e4f9771259f3",
-  "hashInsumos": "e4630b632bedb71d0207e37c6f15ed3f6b92fa89b96499ff259ac506a5930a69",
+  "hashResultado": "9cae29b2db3388ff49af777d7f68a3c077344851d690bc774df2e384aa250c6b",
+  "hashInsumos": "be45194abf18e75cbe0b06101827e6cde2c79aae406920b463be67c9f0c068b5",
   "hashConfig": "e8f089bcce1bda9a815d3b7e05fd86e7e743768be098abcd2ee67e50b24fee7c",
   "modoAuditoria": "diaria",
   "auditoriaCompletaEm": "2026-10-17",
   "tamanhoDaLista": 15,
   "universo": 226,
-  "avaliadas": 129,
+  "avaliadas": 130,
   "aviso": "Não é recomendação de investimento. Esta lista ordena as empresas pela razão entre a dívida líquida e o EBITDA dos últimos 12 meses, com dados das demonstrações financeiras publicadas na CVM, pela mesma fórmula para todas, sem nota nem opinião nossa. Dívida alta não quer dizer que a empresa está em risco, nem que a ação está barata ou cara: o endividamento convive com setores de investimento pesado (energia, saneamento, concessões) e com dívida de longo prazo e barata. A medida não captura prazo, custo, moeda nem garantias da dívida, e o EBITDA de 12 meses pode estar deprimido ou inflado por eventos pontuais. Empresas financeiras (bancos, seguradoras) ficam fora porque dívida é a matéria-prima do negócio delas. Leia as demonstrações e o formulário de referência antes de investir. Rentabilidade passada não garante rentabilidade futura e investir em ações pode causar perda de parte ou de todo o dinheiro aplicado. Converse com um profissional certificado antes de investir.",
   "parametros": {
     "indicador": "dlEbitda",
@@ -27,9 +27,9 @@
     ]
   },
   "contagens": {
-    "ranking": 109,
+    "ranking": 110,
     "semEbitdaPositivo": 0,
-    "exclusoes": 117
+    "exclusoes": 116
   },
   "etapas": [
     {
@@ -42,24 +42,24 @@
       "id": "liquidez",
       "descricao": "Liquidez média diária do emissor abaixo de R$ 3.000.000 (21 pregões)",
       "entram": 172,
-      "saem": 41
+      "saem": 40
     },
     {
       "id": "dados_contabeis",
       "descricao": "Demonstrações da CVM completas, atuais e coerentes (balanço fecha, DRE fecha, descrição das contas, capital plausível)",
-      "entram": 131,
+      "entram": 132,
       "saem": 2
     },
     {
       "id": "endividamento",
       "descricao": "Sem EBITDA calculável (DVA sem a linha de depreciação) ou com caixa maior que a dívida (dívida líquida ≤ 0)",
-      "entram": 129,
+      "entram": 130,
       "saem": 20
     },
     {
       "id": "ranking",
       "descricao": "Dívida líquida ÷ EBITDA, ordem decrescente (EBITDA positivo); EBITDA zero ou negativo vai para a lista à parte",
-      "entram": 109,
+      "entram": 110,
       "saem": 0
     }
   ],
@@ -68,8 +68,8 @@
       "ticker": "AGRO3",
       "nome": "BrasilAgro",
       "setor": "Agronegócio, açúcar e etanol",
-      "cotacao": 18.53,
-      "dataCotacao": "2026-10-21",
+      "cotacao": 18.5,
+      "dataCotacao": "2026-10-22",
       "dlEbitda": 35.2712,
       "dividaLiquida": 1247013000,
       "dividaBruta": 1431865000,
@@ -77,7 +77,7 @@
       "ebitda": 35355000,
       "ebitAjustado": -44185000,
       "plControladores": 2025309000,
-      "mktcap": 1845874418.21,
+      "mktcap": 1842885954.5,
       "coberturaJuros": -0.0748,
       "semDespesaFinanceira": false,
       "alertas": [],
@@ -138,8 +138,8 @@
       "ticker": "AMER3",
       "nome": "Americanas",
       "setor": "Varejo de eletro, móveis e e-commerce",
-      "cotacao": 6.4,
-      "dataCotacao": "2026-10-21",
+      "cotacao": 5.94,
+      "dataCotacao": "2026-10-22",
       "dlEbitda": 24.2286,
       "dividaLiquida": 1696000000,
       "dividaBruta": 2152000000,
@@ -147,7 +147,7 @@
       "ebitda": 70000000,
       "ebitAjustado": -697000000,
       "plControladores": 4155000000,
-      "mktcap": 1281569312,
+      "mktcap": 1189456517.7,
       "coberturaJuros": -0.6174,
       "semDespesaFinanceira": false,
       "alertas": [],
@@ -208,8 +208,8 @@
       "ticker": "HBOR3",
       "nome": "Helbor",
       "setor": "Construção civil e incorporação",
-      "cotacao": 2.63,
-      "dataCotacao": "2026-10-21",
+      "cotacao": 2.6,
+      "dataCotacao": "2026-10-22",
       "dlEbitda": 11.6089,
       "dividaLiquida": 1772958000,
       "dividaBruta": 2011505000,
@@ -217,7 +217,7 @@
       "ebitda": 152724000,
       "ebitAjustado": 137990000,
       "plControladores": 1448249000,
-      "mktcap": 348985220,
+      "mktcap": 345004400,
       "coberturaJuros": 1.7268,
       "semDespesaFinanceira": false,
       "alertas": [],
@@ -278,8 +278,8 @@
       "ticker": "ONCO3",
       "nome": "Oncoclínicas",
       "setor": "Hospitais, planos e diagnósticos",
-      "cotacao": 1.05,
-      "dataCotacao": "2026-10-21",
+      "cotacao": 1,
+      "dataCotacao": "2026-10-22",
       "dlEbitda": 9.7035,
       "dividaLiquida": 3671814000,
       "dividaBruta": 3817084000,
@@ -287,7 +287,7 @@
       "ebitda": 378400000,
       "ebitAjustado": 84222000,
       "plControladores": 16457000,
-      "mktcap": 1178749093.2,
+      "mktcap": 1122618184,
       "coberturaJuros": 0.0602,
       "semDespesaFinanceira": false,
       "alertas": [
@@ -350,8 +350,8 @@
       "ticker": "LOGG3",
       "nome": "LOG Commercial Properties",
       "setor": "Serviços e locação de equipamentos",
-      "cotacao": 30.41,
-      "dataCotacao": "2026-10-21",
+      "cotacao": 29.76,
+      "dataCotacao": "2026-10-22",
       "dlEbitda": 8.6103,
       "dividaLiquida": 1700745000,
       "dividaBruta": 2130316000,
@@ -359,7 +359,7 @@
       "ebitda": 197525000,
       "ebitAjustado": 191662000,
       "plControladores": 3519573000,
-      "mktcap": 2659080810,
+      "mktcap": 2602244160,
       "coberturaJuros": 0.5668,
       "semDespesaFinanceira": false,
       "alertas": [],
@@ -420,8 +420,8 @@
       "ticker": "BRKM5",
       "nome": "Braskem",
       "setor": "Química e petroquímica",
-      "cotacao": 4.05,
-      "dataCotacao": "2026-10-21",
+      "cotacao": 4,
+      "dataCotacao": "2026-10-22",
       "dlEbitda": 7.5729,
       "dividaLiquida": 43408000000,
       "dividaBruta": 49336000000,
@@ -429,7 +429,7 @@
       "ebitda": 5732000000,
       "ebitAjustado": 1158000000,
       "plControladores": -12586000000,
-      "mktcap": 3251274941.6,
+      "mktcap": 3188831120,
       "coberturaJuros": 0.3037,
       "semDespesaFinanceira": false,
       "alertas": [],
@@ -490,8 +490,8 @@
       "ticker": "AURE3",
       "nome": "Auren Energia",
       "setor": "Energia elétrica: geração",
-      "cotacao": 15.23,
-      "dataCotacao": "2026-10-21",
+      "cotacao": 14.83,
+      "dataCotacao": "2026-10-22",
       "dlEbitda": 7.5298,
       "dividaLiquida": 20015416000,
       "dividaBruta": 23654224000,
@@ -499,7 +499,7 @@
       "ebitda": 2658146000,
       "ebitAjustado": 1105142000,
       "plControladores": 11507333000,
-      "mktcap": 15909791050,
+      "mktcap": 15491937050,
       "coberturaJuros": 0.3123,
       "semDespesaFinanceira": false,
       "alertas": [],
@@ -560,8 +560,8 @@
       "ticker": "TTEN3",
       "nome": "3tentos",
       "setor": "Agronegócio, açúcar e etanol",
-      "cotacao": 13.69,
-      "dataCotacao": "2026-10-21",
+      "cotacao": 13.65,
+      "dataCotacao": "2026-10-22",
       "dlEbitda": 6.9087,
       "dividaLiquida": 3699114000,
       "dividaBruta": 5121164000,
@@ -569,7 +569,7 @@
       "ebitda": 535432000,
       "ebitAjustado": 390812000,
       "plControladores": 5000523000,
-      "mktcap": 6851029719.43,
+      "mktcap": 6831012101.55,
       "coberturaJuros": 1.0806,
       "semDespesaFinanceira": false,
       "alertas": [],
@@ -630,8 +630,8 @@
       "ticker": "CAML3",
       "nome": "Camil",
       "setor": "Alimentos e bebidas",
-      "cotacao": 6.5,
-      "dataCotacao": "2026-10-21",
+      "cotacao": 6.6,
+      "dataCotacao": "2026-10-22",
       "dlEbitda": 5.6928,
       "dividaLiquida": 4491145000,
       "dividaBruta": 5946954000,
@@ -639,7 +639,7 @@
       "ebitda": 788913000,
       "ebitAjustado": 499383000,
       "plControladores": 2988672000,
-      "mktcap": 2216963008,
+      "mktcap": 2251070131.2,
       "coberturaJuros": 0.5353,
       "semDespesaFinanceira": false,
       "alertas": [],
@@ -700,8 +700,8 @@
       "ticker": "ROMI3",
       "nome": "Romi",
       "setor": "Máquinas, equipamentos e aeroespacial",
-      "cotacao": 7.82,
-      "dataCotacao": "2026-10-21",
+      "cotacao": 7.55,
+      "dataCotacao": "2026-10-22",
       "dlEbitda": 4.3338,
       "dividaLiquida": 581249000,
       "dividaBruta": 949534000,
@@ -709,7 +709,7 @@
       "ebitda": 134119000,
       "ebitAjustado": 60748000,
       "plControladores": 1248996000,
-      "mktcap": 728595241.54,
+      "mktcap": 703439139.85,
       "coberturaJuros": 2.3764,
       "semDespesaFinanceira": false,
       "alertas": [],
@@ -770,8 +770,8 @@
       "ticker": "ECOR3",
       "nome": "Ecorodovias",
       "setor": "Transporte e infraestrutura",
-      "cotacao": 13.33,
-      "dataCotacao": "2026-10-21",
+      "cotacao": 12.72,
+      "dataCotacao": "2026-10-22",
       "dlEbitda": 4.2817,
       "dividaLiquida": 23724203000,
       "dividaBruta": 28851494000,
@@ -779,7 +779,7 @@
       "ebitda": 5540793000,
       "ebitAjustado": 3921017000,
       "plControladores": 4113688000,
-      "mktcap": 9272627930,
+      "mktcap": 8848299120,
       "coberturaJuros": 1.1229,
       "semDespesaFinanceira": false,
       "alertas": [],
@@ -840,8 +840,8 @@
       "ticker": "EQTL3",
       "nome": "Equatorial",
       "setor": "Energia elétrica: distribuição",
-      "cotacao": 48.63,
-      "dataCotacao": "2026-10-21",
+      "cotacao": 48.17,
+      "dataCotacao": "2026-10-22",
       "dlEbitda": 4.1328,
       "dividaLiquida": 54149470000,
       "dividaBruta": 63369492000,
@@ -849,7 +849,7 @@
       "ebitda": 13102446000,
       "ebitAjustado": 10132312000,
       "plControladores": 26126664000,
-      "mktcap": 61032170903.25,
+      "mktcap": 60454856516.75,
       "coberturaJuros": 0.8428,
       "semDespesaFinanceira": false,
       "alertas": [],
@@ -910,8 +910,8 @@
       "ticker": "TAEE11",
       "nome": "Taesa",
       "setor": "Energia elétrica: transmissão",
-      "cotacao": 45.24,
-      "dataCotacao": "2026-10-21",
+      "cotacao": 44.9,
+      "dataCotacao": "2026-10-22",
       "dlEbitda": 4.1279,
       "dividaLiquida": 10413735000,
       "dividaBruta": 10957895000,
@@ -919,7 +919,7 @@
       "ebitda": 2522791000,
       "ebitAjustado": 2438663000,
       "plControladores": 8070915000,
-      "mktcap": 15585074160,
+      "mktcap": 15456636790,
       "coberturaJuros": 1.9085,
       "semDespesaFinanceira": false,
       "alertas": [],
@@ -980,8 +980,8 @@
       "ticker": "TUPY3",
       "nome": "Tupy",
       "setor": "Máquinas, equipamentos e aeroespacial",
-      "cotacao": 20.58,
-      "dataCotacao": "2026-10-21",
+      "cotacao": 20.68,
+      "dataCotacao": "2026-10-22",
       "dlEbitda": 4.0814,
       "dividaLiquida": 1904545000,
       "dividaBruta": 3941316000,
@@ -989,7 +989,7 @@
       "ebitda": 466639000,
       "ebitAjustado": 88517000,
       "plControladores": 2287507000,
-      "mktcap": 2697646980,
+      "mktcap": 2710755080,
       "coberturaJuros": 0.2042,
       "semDespesaFinanceira": false,
       "alertas": [],
@@ -1050,8 +1050,8 @@
       "ticker": "ORVR3",
       "nome": "Orizon",
       "setor": "Saneamento e resíduos",
-      "cotacao": 20.5,
-      "dataCotacao": "2026-10-21",
+      "cotacao": 20.01,
+      "dataCotacao": "2026-10-22",
       "dlEbitda": 4.0616,
       "dividaLiquida": 2227039000,
       "dividaBruta": 3762090000,
@@ -1059,7 +1059,7 @@
       "ebitda": 548316000,
       "ebitAjustado": 349456000,
       "plControladores": 4851724000,
-      "mktcap": 11260568000,
+      "mktcap": 10991412960,
       "coberturaJuros": 1.0164,
       "semDespesaFinanceira": false,
       "alertas": [],
@@ -1203,577 +1203,584 @@
       "dlEbitda": 3.3079
     },
     {
+      "ticker": "CLSC4",
+      "nome": "Celesc",
+      "setor": "Energia elétrica: distribuição",
+      "posicao": 28,
+      "dlEbitda": 3.273
+    },
+    {
       "ticker": "MOTV3",
       "nome": "Motiva (ex-CCR)",
       "setor": "Transporte e infraestrutura",
-      "posicao": 28,
+      "posicao": 29,
       "dlEbitda": 3.2714
     },
     {
       "ticker": "KLBN11",
       "nome": "Klabin",
       "setor": "Papel, celulose e madeira",
-      "posicao": 29,
+      "posicao": 30,
       "dlEbitda": 3.2667
     },
     {
       "ticker": "EVEN3",
       "nome": "Even",
       "setor": "Construção civil e incorporação",
-      "posicao": 30,
+      "posicao": 31,
       "dlEbitda": 3.2184
     },
     {
       "ticker": "MOVI3",
       "nome": "Movida",
       "setor": "Locação de veículos e frotas",
-      "posicao": 31,
+      "posicao": 32,
       "dlEbitda": 3.1279
     },
     {
       "ticker": "SLCE3",
       "nome": "SLC Agrícola",
       "setor": "Agronegócio, açúcar e etanol",
-      "posicao": 32,
+      "posicao": 33,
       "dlEbitda": 3.1139
     },
     {
       "ticker": "ARML3",
       "nome": "Armac",
       "setor": "Locação de veículos e frotas",
-      "posicao": 33,
+      "posicao": 34,
       "dlEbitda": 2.9905
     },
     {
       "ticker": "BEEF3",
       "nome": "Minerva",
       "setor": "Carnes e proteínas",
-      "posicao": 34,
+      "posicao": 35,
       "dlEbitda": 2.9865
     },
     {
       "ticker": "LIGT3",
       "nome": "Light",
       "setor": "Energia elétrica: distribuição",
-      "posicao": 35,
+      "posicao": 36,
       "dlEbitda": 2.9736
     },
     {
       "ticker": "VAMO3",
       "nome": "Vamos",
       "setor": "Locação de veículos e frotas",
-      "posicao": 36,
+      "posicao": 37,
       "dlEbitda": 2.9343
     },
     {
       "ticker": "ALUP11",
       "nome": "Alupar",
       "setor": "Energia elétrica: transmissão",
-      "posicao": 37,
+      "posicao": 38,
       "dlEbitda": 2.9323
     },
     {
       "ticker": "RAPT4",
       "nome": "Randon",
       "setor": "Autopeças e veículos",
-      "posicao": 38,
+      "posicao": 39,
       "dlEbitda": 2.9165
     },
     {
       "ticker": "CPLE3",
       "nome": "Copel",
       "setor": "Energia elétrica: distribuição",
-      "posicao": 39,
+      "posicao": 40,
       "dlEbitda": 2.8573
     },
     {
       "ticker": "HBSA3",
       "nome": "Hidrovias do Brasil",
       "setor": "Transporte e infraestrutura",
-      "posicao": 40,
+      "posicao": 41,
       "dlEbitda": 2.7461
     },
     {
       "ticker": "DASA3",
       "nome": "Dasa",
       "setor": "Hospitais, planos e diagnósticos",
-      "posicao": 41,
+      "posicao": 42,
       "dlEbitda": 2.6607
     },
     {
       "ticker": "CYRE3",
       "nome": "Cyrela",
       "setor": "Construção civil e incorporação",
-      "posicao": 42,
+      "posicao": 43,
       "dlEbitda": 2.6283
     },
     {
       "ticker": "MYPK3",
       "nome": "Iochpe-Maxion",
       "setor": "Máquinas, equipamentos e aeroespacial",
-      "posicao": 43,
+      "posicao": 44,
       "dlEbitda": 2.5591
     },
     {
       "ticker": "CMIG4",
       "nome": "Cemig",
       "setor": "Energia elétrica: transmissão",
-      "posicao": 44,
+      "posicao": 45,
       "dlEbitda": 2.5473
     },
     {
       "ticker": "HAPV3",
       "nome": "Hapvida",
       "setor": "Hospitais, planos e diagnósticos",
-      "posicao": 45,
+      "posicao": 46,
       "dlEbitda": 2.525
     },
     {
       "ticker": "ANIM3",
       "nome": "Ânima",
       "setor": "Educação",
-      "posicao": 46,
+      "posicao": 47,
       "dlEbitda": 2.5135
     },
     {
       "ticker": "YDUQ3",
       "nome": "Yduqs",
       "setor": "Educação",
-      "posicao": 47,
+      "posicao": 48,
       "dlEbitda": 2.4887
     },
     {
       "ticker": "CSMG3",
       "nome": "Copasa",
       "setor": "Saneamento e resíduos",
-      "posicao": 48,
+      "posicao": 49,
       "dlEbitda": 2.4178
     },
     {
       "ticker": "RENT3",
       "nome": "Localiza",
       "setor": "Locação de veículos e frotas",
-      "posicao": 49,
+      "posicao": 50,
       "dlEbitda": 2.3422
     },
     {
       "ticker": "DXCO3",
       "nome": "Dexco",
       "setor": "Materiais de construção e acabamento",
-      "posicao": 50,
+      "posicao": 51,
       "dlEbitda": 2.3255
     },
     {
       "ticker": "UNIP6",
       "nome": "Unipar",
       "setor": "Química e petroquímica",
-      "posicao": 51,
+      "posicao": 52,
       "dlEbitda": 2.3227
     },
     {
       "ticker": "PRNR3",
       "nome": "Priner",
       "setor": "Serviços e locação de equipamentos",
-      "posicao": 52,
+      "posicao": 53,
       "dlEbitda": 2.292
     },
     {
       "ticker": "SBSP3",
       "nome": "Sabesp",
       "setor": "Saneamento e resíduos",
-      "posicao": 53,
+      "posicao": 54,
       "dlEbitda": 2.2555
     },
     {
       "ticker": "POSI3",
       "nome": "Positivo",
       "setor": "Hardware e eletrônicos",
-      "posicao": 54,
+      "posicao": 55,
       "dlEbitda": 2.2024
     },
     {
       "ticker": "RAIL3",
       "nome": "Rumo",
       "setor": "Transporte e infraestrutura",
-      "posicao": 55,
+      "posicao": 56,
       "dlEbitda": 2.179
     },
     {
       "ticker": "PNVL3",
       "nome": "Panvel (Dimed)",
       "setor": "Farmácias, higiene e beleza",
-      "posicao": 56,
+      "posicao": 57,
       "dlEbitda": 2.1749
     },
     {
       "ticker": "HYPE3",
       "nome": "Hypera Pharma",
       "setor": "Medicamentos e saúde animal",
-      "posicao": 57,
+      "posicao": 58,
       "dlEbitda": 2.0827
     },
     {
       "ticker": "SMTO3",
       "nome": "São Martinho",
       "setor": "Agronegócio, açúcar e etanol",
-      "posicao": 58,
+      "posicao": 59,
       "dlEbitda": 2.0157
     },
     {
       "ticker": "OPCT3",
       "nome": "OceanPact",
       "setor": "Petróleo e gás",
-      "posicao": 59,
+      "posicao": 60,
       "dlEbitda": 2.0079
     },
     {
       "ticker": "CPFE3",
       "nome": "CPFL Energia",
       "setor": "Energia elétrica: distribuição",
-      "posicao": 60,
+      "posicao": 61,
       "dlEbitda": 1.9774
     },
     {
       "ticker": "IGTI11",
       "nome": "Iguatemi",
       "setor": "Shoppings e imóveis comerciais",
-      "posicao": 61,
+      "posicao": 62,
       "dlEbitda": 1.976
     },
     {
       "ticker": "RANI3",
       "nome": "Irani",
       "setor": "Papel, celulose e madeira",
-      "posicao": 62,
+      "posicao": 63,
       "dlEbitda": 1.8897
     },
     {
       "ticker": "CBAV3",
       "nome": "CBA (Companhia Brasileira de Alumínio)",
       "setor": "Mineração",
-      "posicao": 63,
+      "posicao": 64,
       "dlEbitda": 1.8623
     },
     {
       "ticker": "DESK3",
       "nome": "Desktop",
       "setor": "Telecomunicações",
-      "posicao": 64,
+      "posicao": 65,
       "dlEbitda": 1.8482
     },
     {
       "ticker": "MULT3",
       "nome": "Multiplan",
       "setor": "Shoppings e imóveis comerciais",
-      "posicao": 65,
+      "posicao": 66,
       "dlEbitda": 1.8452
     },
     {
       "ticker": "COGN3",
       "nome": "Cogna",
       "setor": "Educação",
-      "posicao": 66,
+      "posicao": 67,
       "dlEbitda": 1.7807
     },
     {
       "ticker": "BRAV3",
       "nome": "Brava Energia",
       "setor": "Petróleo e gás",
-      "posicao": 67,
+      "posicao": 68,
       "dlEbitda": 1.7657
     },
     {
       "ticker": "BHIA3",
       "nome": "Casas Bahia",
       "setor": "Varejo de eletro, móveis e e-commerce",
-      "posicao": 68,
+      "posicao": 69,
       "dlEbitda": 1.7174
     },
     {
       "ticker": "VBBR3",
       "nome": "Vibra Energia",
       "setor": "Distribuição de combustíveis e etanol",
-      "posicao": 69,
+      "posicao": 70,
       "dlEbitda": 1.6853
     },
     {
       "ticker": "PRIO3",
       "nome": "PRIO",
       "setor": "Petróleo e gás",
-      "posicao": 70,
+      "posicao": 71,
       "dlEbitda": 1.6848
     },
     {
       "ticker": "FLRY3",
       "nome": "Fleury",
       "setor": "Hospitais, planos e diagnósticos",
-      "posicao": 71,
+      "posicao": 72,
       "dlEbitda": 1.5334
     },
     {
       "ticker": "AZZA3",
       "nome": "Azzas 2154",
       "setor": "Moda e vestuário",
-      "posicao": 72,
+      "posicao": 73,
       "dlEbitda": 1.4866
     },
     {
       "ticker": "LAVV3",
       "nome": "Lavvi",
       "setor": "Construção civil e incorporação",
-      "posicao": 73,
+      "posicao": 74,
       "dlEbitda": 1.4851
     },
     {
       "ticker": "ASAI3",
       "nome": "Assaí",
       "setor": "Varejo alimentar",
-      "posicao": 74,
+      "posicao": 75,
       "dlEbitda": 1.3941
     },
     {
       "ticker": "PCAR3",
       "nome": "Grupo Pão de Açúcar",
       "setor": "Varejo alimentar",
-      "posicao": 75,
+      "posicao": 76,
       "dlEbitda": 1.3246
     },
     {
       "ticker": "NATU3",
       "nome": "Natura",
       "setor": "Farmácias, higiene e beleza",
-      "posicao": 76,
+      "posicao": 77,
       "dlEbitda": 1.2667
     },
     {
       "ticker": "MILS3",
       "nome": "Mills",
       "setor": "Serviços e locação de equipamentos",
-      "posicao": 77,
+      "posicao": 78,
       "dlEbitda": 1.2138
     },
     {
       "ticker": "POMO4",
       "nome": "Marcopolo",
       "setor": "Autopeças e veículos",
-      "posicao": 78,
+      "posicao": 79,
       "dlEbitda": 1.1857
     },
     {
       "ticker": "FRAS3",
       "nome": "Fras-le",
       "setor": "Autopeças e veículos",
-      "posicao": 79,
+      "posicao": 80,
       "dlEbitda": 1.1742
     },
     {
       "ticker": "SMFT3",
       "nome": "Smart Fit",
       "setor": "Turismo, lazer e restaurantes",
-      "posicao": 80,
+      "posicao": 81,
       "dlEbitda": 1.1642
     },
     {
       "ticker": "MGLU3",
       "nome": "Magazine Luiza",
       "setor": "Varejo de eletro, móveis e e-commerce",
-      "posicao": 81,
+      "posicao": 82,
       "dlEbitda": 1.1412
     },
     {
       "ticker": "UGPA3",
       "nome": "Ultrapar",
       "setor": "Distribuição de combustíveis e etanol",
-      "posicao": 82,
+      "posicao": 83,
       "dlEbitda": 1.0969
     },
     {
       "ticker": "RECV3",
       "nome": "PetroReconcavo",
       "setor": "Petróleo e gás",
-      "posicao": 83,
+      "posicao": 84,
       "dlEbitda": 1.0865
     },
     {
       "ticker": "LEVE3",
       "nome": "Mahle Metal Leve",
       "setor": "Autopeças e veículos",
-      "posicao": 84,
+      "posicao": 85,
       "dlEbitda": 1.0343
     },
     {
       "ticker": "TOTS3",
       "nome": "Totvs",
       "setor": "Software e serviços de TI",
-      "posicao": 85,
+      "posicao": 86,
       "dlEbitda": 1.0242
     },
     {
       "ticker": "PGMN3",
       "nome": "Pague Menos",
       "setor": "Farmácias, higiene e beleza",
-      "posicao": 86,
+      "posicao": 87,
       "dlEbitda": 0.987
     },
     {
       "ticker": "JHSF3",
       "nome": "JHSF",
       "setor": "Shoppings e imóveis comerciais",
-      "posicao": 87,
+      "posicao": 88,
       "dlEbitda": 0.9864
     },
     {
       "ticker": "PETR4",
       "nome": "Petrobras",
       "setor": "Petróleo e gás",
-      "posicao": 88,
+      "posicao": 89,
       "dlEbitda": 0.971
     },
     {
       "ticker": "QUAL3",
       "nome": "Qualicorp",
       "setor": "Hospitais, planos e diagnósticos",
-      "posicao": 89,
+      "posicao": 90,
       "dlEbitda": 0.928
     },
     {
       "ticker": "SAPR11",
       "nome": "Sanepar",
       "setor": "Saneamento e resíduos",
-      "posicao": 90,
+      "posicao": 91,
       "dlEbitda": 0.8058
     },
     {
       "ticker": "GGBR4",
       "nome": "Gerdau",
       "setor": "Siderurgia e metalurgia",
-      "posicao": 91,
+      "posicao": 92,
       "dlEbitda": 0.7551
     },
     {
       "ticker": "VALE3",
       "nome": "Vale",
       "setor": "Mineração",
-      "posicao": 92,
+      "posicao": 93,
       "dlEbitda": 0.7551
     },
     {
       "ticker": "VULC3",
       "nome": "Vulcabras",
       "setor": "Calçados e artigos esportivos",
-      "posicao": 93,
+      "posicao": 94,
       "dlEbitda": 0.7383
     },
     {
       "ticker": "RDOR3",
       "nome": "Rede D'Or",
       "setor": "Hospitais, planos e diagnósticos",
-      "posicao": 94,
+      "posicao": 95,
       "dlEbitda": 0.6098
     },
     {
       "ticker": "FIQE3",
       "nome": "Unifique",
       "setor": "Telecomunicações",
-      "posicao": 95,
+      "posicao": 96,
       "dlEbitda": 0.5581
     },
     {
       "ticker": "RADL3",
       "nome": "RaiaDrogasil",
       "setor": "Farmácias, higiene e beleza",
-      "posicao": 96,
+      "posicao": 97,
       "dlEbitda": 0.5473
     },
     {
       "ticker": "SEER3",
       "nome": "Ser Educacional",
       "setor": "Educação",
-      "posicao": 97,
+      "posicao": 98,
       "dlEbitda": 0.5399
     },
     {
       "ticker": "CVCB3",
       "nome": "CVC",
       "setor": "Turismo, lazer e restaurantes",
-      "posicao": 98,
+      "posicao": 99,
       "dlEbitda": 0.5276
     },
     {
       "ticker": "ALPA4",
       "nome": "Alpargatas (Havaianas)",
       "setor": "Calçados e artigos esportivos",
-      "posicao": 99,
+      "posicao": 100,
       "dlEbitda": 0.4714
     },
     {
       "ticker": "DIRR3",
       "nome": "Direcional",
       "setor": "Construção civil e incorporação",
-      "posicao": 100,
+      "posicao": 101,
       "dlEbitda": 0.4566
     },
     {
       "ticker": "VIVT3",
       "nome": "Vivo (Telefônica Brasil)",
       "setor": "Telecomunicações",
-      "posicao": 101,
+      "posicao": 102,
       "dlEbitda": 0.4378
     },
     {
       "ticker": "GMAT3",
       "nome": "Grupo Mateus",
       "setor": "Varejo alimentar",
-      "posicao": 102,
+      "posicao": 103,
       "dlEbitda": 0.4298
     },
     {
       "ticker": "TEND3",
       "nome": "Tenda",
       "setor": "Construção civil e incorporação",
-      "posicao": 103,
+      "posicao": 104,
       "dlEbitda": 0.3335
     },
     {
       "ticker": "MDNE3",
       "nome": "Moura Dubeux",
       "setor": "Construção civil e incorporação",
-      "posicao": 104,
+      "posicao": 105,
       "dlEbitda": 0.3243
     },
     {
       "ticker": "PLPL3",
       "nome": "Plano&Plano",
       "setor": "Construção civil e incorporação",
-      "posicao": 105,
+      "posicao": 106,
       "dlEbitda": 0.2041
     },
     {
       "ticker": "CMIN3",
       "nome": "CSN Mineração",
       "setor": "Mineração",
-      "posicao": 106,
+      "posicao": 107,
       "dlEbitda": 0.1655
     },
     {
       "ticker": "CEAB3",
       "nome": "C&A",
       "setor": "Moda e vestuário",
-      "posicao": 107,
+      "posicao": 108,
       "dlEbitda": 0.1252
     },
     {
       "ticker": "VIVA3",
       "nome": "Vivara",
       "setor": "Moda e vestuário",
-      "posicao": 108,
+      "posicao": 109,
       "dlEbitda": 0.1012
     },
     {
       "ticker": "TGMA3",
       "nome": "Tegma",
       "setor": "Transporte e infraestrutura",
-      "posicao": 109,
+      "posicao": 110,
       "dlEbitda": 0.0734
     }
   ],
@@ -1785,7 +1792,7 @@
       "setor": "Hospitais, planos e diagnósticos",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume médio diário de R$ 253.307 abaixo do mínimo."
+      "motivo": "Volume médio diário de R$ 241.463 abaixo do mínimo."
     },
     {
       "ticker": "ABCB4",
@@ -1809,7 +1816,7 @@
       "setor": "Máquinas, equipamentos e aeroespacial",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume médio diário de R$ 320.949 abaixo do mínimo."
+      "motivo": "Volume médio diário de R$ 325.854 abaixo do mínimo."
     },
     {
       "ticker": "AESB3",
@@ -1825,7 +1832,7 @@
       "setor": "Agronegócio, açúcar e etanol",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume médio diário de R$ 25.779 abaixo do mínimo."
+      "motivo": "Volume médio diário de R$ 23.637 abaixo do mínimo."
     },
     {
       "ticker": "ALOS3",
@@ -1849,7 +1856,7 @@
       "setor": "Serviços e locação de equipamentos",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume médio diário de R$ 1.074.986 abaixo do mínimo."
+      "motivo": "Volume médio diário de R$ 1.049.298 abaixo do mínimo."
     },
     {
       "ticker": "APER3",
@@ -1865,7 +1872,7 @@
       "setor": "Transporte e infraestrutura",
       "etapa": "universo",
       "codigo": "sem_preco",
-      "motivo": "Sem preço recente: último negócio em 2025-12-22, há mais de 10 dias do último pregão (2026-10-21)."
+      "motivo": "Sem preço recente: último negócio em 2025-12-22, há mais de 10 dias do último pregão (2026-10-22)."
     },
     {
       "ticker": "B3SA3",
@@ -1921,7 +1928,7 @@
       "setor": "Medicamentos e saúde animal",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume médio diário de R$ 444.037 abaixo do mínimo."
+      "motivo": "Volume médio diário de R$ 456.280 abaixo do mínimo."
     },
     {
       "ticker": "BLAU3",
@@ -2009,7 +2016,7 @@
       "setor": "Calçados e artigos esportivos",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume médio diário de R$ 495.322 abaixo do mínimo."
+      "motivo": "Volume médio diário de R$ 499.705 abaixo do mínimo."
     },
     {
       "ticker": "CASH3",
@@ -2033,7 +2040,7 @@
       "setor": "Energia elétrica: distribuição",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume médio diário de R$ 40.184 abaixo do mínimo."
+      "motivo": "Volume médio diário de R$ 45.236 abaixo do mínimo."
     },
     {
       "ticker": "CGAS5",
@@ -2041,7 +2048,7 @@
       "setor": "Distribuição de combustíveis e etanol",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume médio diário de R$ 112.599 abaixo do mínimo."
+      "motivo": "Volume médio diário de R$ 105.258 abaixo do mínimo."
     },
     {
       "ticker": "CGRA4",
@@ -2049,15 +2056,7 @@
       "setor": "Moda e vestuário",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume médio diário de R$ 187.239 abaixo do mínimo."
-    },
-    {
-      "ticker": "CLSC4",
-      "nome": "Celesc",
-      "setor": "Energia elétrica: distribuição",
-      "etapa": "liquidez",
-      "codigo": "liquidez_baixa",
-      "motivo": "Volume médio diário de R$ 2.594.471 abaixo do mínimo."
+      "motivo": "Volume médio diário de R$ 191.132 abaixo do mínimo."
     },
     {
       "ticker": "CRFB3",
@@ -2073,7 +2072,7 @@
       "setor": "Química e petroquímica",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume médio diário de R$ 115.751 abaixo do mínimo."
+      "motivo": "Volume médio diário de R$ 108.796 abaixo do mínimo."
     },
     {
       "ticker": "CSED3",
@@ -2081,7 +2080,7 @@
       "setor": "Educação",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume médio diário de R$ 2.795.316 abaixo do mínimo."
+      "motivo": "Volume médio diário de R$ 2.767.558 abaixo do mínimo."
     },
     {
       "ticker": "CTNM4",
@@ -2129,7 +2128,7 @@
       "setor": "Software e serviços de TI",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume médio diário de R$ 297.548 abaixo do mínimo."
+      "motivo": "Volume médio diário de R$ 305.113 abaixo do mínimo."
     },
     {
       "ticker": "EALT4",
@@ -2137,7 +2136,7 @@
       "setor": "Máquinas, equipamentos e aeroespacial",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume médio diário de R$ 117.482 abaixo do mínimo."
+      "motivo": "Volume médio diário de R$ 118.336 abaixo do mínimo."
     },
     {
       "ticker": "EKTR4",
@@ -2145,7 +2144,7 @@
       "setor": "Energia elétrica: distribuição",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume médio diário de R$ 13.091 abaixo do mínimo."
+      "motivo": "Volume médio diário de R$ 12.910 abaixo do mínimo."
     },
     {
       "ticker": "EMBR3",
@@ -2161,7 +2160,7 @@
       "setor": "Varejo de eletro, móveis e e-commerce",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume médio diário de R$ 1.020.485 abaixo do mínimo."
+      "motivo": "Volume médio diário de R$ 1.054.103 abaixo do mínimo."
     },
     {
       "ticker": "ENMT3",
@@ -2169,7 +2168,7 @@
       "setor": "Energia elétrica: distribuição",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume médio diário de R$ 39.227 abaixo do mínimo."
+      "motivo": "Volume médio diário de R$ 39.403 abaixo do mínimo."
     },
     {
       "ticker": "ESPA3",
@@ -2177,7 +2176,7 @@
       "setor": "Varejo de eletro, móveis e e-commerce",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume médio diário de R$ 1.825.491 abaixo do mínimo."
+      "motivo": "Volume médio diário de R$ 1.817.603 abaixo do mínimo."
     },
     {
       "ticker": "ETER3",
@@ -2185,7 +2184,7 @@
       "setor": "Materiais de construção e acabamento",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume médio diário de R$ 545.594 abaixo do mínimo."
+      "motivo": "Volume médio diário de R$ 571.558 abaixo do mínimo."
     },
     {
       "ticker": "EUCA4",
@@ -2193,7 +2192,7 @@
       "setor": "Papel, celulose e madeira",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume médio diário de R$ 1.835.146 abaixo do mínimo."
+      "motivo": "Volume médio diário de R$ 1.854.311 abaixo do mínimo."
     },
     {
       "ticker": "EZTC3",
@@ -2217,7 +2216,7 @@
       "setor": "Química e petroquímica",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume médio diário de R$ 38.364 abaixo do mínimo."
+      "motivo": "Volume médio diário de R$ 39.131 abaixo do mínimo."
     },
     {
       "ticker": "GEPA4",
@@ -2225,7 +2224,7 @@
       "setor": "Energia elétrica: geração",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume médio diário de R$ 9.720 abaixo do mínimo."
+      "motivo": "Volume médio diário de R$ 10.576 abaixo do mínimo."
     },
     {
       "ticker": "GOAU4",
@@ -2249,7 +2248,7 @@
       "setor": "Moda e vestuário",
       "etapa": "universo",
       "codigo": "sem_preco",
-      "motivo": "Sem preço recente: último negócio em 2026-02-04, há mais de 10 dias do último pregão (2026-10-21)."
+      "motivo": "Sem preço recente: último negócio em 2026-02-04, há mais de 10 dias do último pregão (2026-10-22)."
     },
     {
       "ticker": "INTB3",
@@ -2321,7 +2320,7 @@
       "setor": "Transporte e infraestrutura",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume médio diário de R$ 708.813 abaixo do mínimo."
+      "motivo": "Volume médio diário de R$ 718.011 abaixo do mínimo."
     },
     {
       "ticker": "LREN3",
@@ -2337,7 +2336,7 @@
       "setor": "Máquinas, equipamentos e aeroespacial",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume médio diário de R$ 79.292 abaixo do mínimo."
+      "motivo": "Volume médio diário de R$ 112.004 abaixo do mínimo."
     },
     {
       "ticker": "LWSA3",
@@ -2353,7 +2352,7 @@
       "setor": "Hospitais, planos e diagnósticos",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume médio diário de R$ 1.945.154 abaixo do mínimo."
+      "motivo": "Volume médio diário de R$ 2.020.131 abaixo do mínimo."
     },
     {
       "ticker": "MBLY3",
@@ -2385,7 +2384,7 @@
       "setor": "Turismo, lazer e restaurantes",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume médio diário de R$ 314.051 abaixo do mínimo."
+      "motivo": "Volume médio diário de R$ 311.396 abaixo do mínimo."
     },
     {
       "ticker": "MELK3",
@@ -2393,7 +2392,7 @@
       "setor": "Construção civil e incorporação",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume médio diário de R$ 2.107.604 abaixo do mínimo."
+      "motivo": "Volume médio diário de R$ 2.118.175 abaixo do mínimo."
     },
     {
       "ticker": "MERC4",
@@ -2417,7 +2416,7 @@
       "setor": "Alimentos e bebidas",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume médio diário de R$ 68.754 abaixo do mínimo."
+      "motivo": "Volume médio diário de R$ 67.613 abaixo do mínimo."
     },
     {
       "ticker": "MTSA4",
@@ -2425,7 +2424,7 @@
       "setor": "Máquinas, equipamentos e aeroespacial",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume médio diário de R$ 39.918 abaixo do mínimo."
+      "motivo": "Volume médio diário de R$ 36.067 abaixo do mínimo."
     },
     {
       "ticker": "MWET4",
@@ -2433,7 +2432,7 @@
       "setor": "Autopeças e veículos",
       "etapa": "universo",
       "codigo": "sem_preco",
-      "motivo": "Sem preço recente: último negócio em 2026-09-08, há mais de 10 dias do último pregão (2026-10-21)."
+      "motivo": "Sem preço recente: último negócio em 2026-09-08, há mais de 10 dias do último pregão (2026-10-22)."
     },
     {
       "ticker": "NEOE3",
@@ -2441,7 +2440,7 @@
       "setor": "Energia elétrica: distribuição",
       "etapa": "universo",
       "codigo": "sem_preco",
-      "motivo": "Sem preço recente: último negócio em 2026-05-04, há mais de 10 dias do último pregão (2026-10-21)."
+      "motivo": "Sem preço recente: último negócio em 2026-05-04, há mais de 10 dias do último pregão (2026-10-22)."
     },
     {
       "ticker": "NGRD3",
@@ -2449,7 +2448,7 @@
       "setor": "Software e serviços de TI",
       "etapa": "universo",
       "codigo": "sem_preco",
-      "motivo": "Sem preço recente: último negócio em 2026-07-13, há mais de 10 dias do último pregão (2026-10-21)."
+      "motivo": "Sem preço recente: último negócio em 2026-07-13, há mais de 10 dias do último pregão (2026-10-22)."
     },
     {
       "ticker": "ODER4",
@@ -2465,7 +2464,7 @@
       "setor": "Hospitais, planos e diagnósticos",
       "etapa": "universo",
       "codigo": "sem_preco",
-      "motivo": "Sem preço recente: último negócio em 2026-05-04, há mais de 10 dias do último pregão (2026-10-21)."
+      "motivo": "Sem preço recente: último negócio em 2026-05-04, há mais de 10 dias do último pregão (2026-10-22)."
     },
     {
       "ticker": "OFSA3",
@@ -2473,7 +2472,7 @@
       "setor": "Medicamentos e saúde animal",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume médio diário de R$ 132.732 abaixo do mínimo."
+      "motivo": "Volume médio diário de R$ 129.410 abaixo do mínimo."
     },
     {
       "ticker": "PDTC3",
@@ -2481,7 +2480,7 @@
       "setor": "Hardware e eletrônicos",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume médio diário de R$ 106.688 abaixo do mínimo."
+      "motivo": "Volume médio diário de R$ 112.841 abaixo do mínimo."
     },
     {
       "ticker": "PETZ3",
@@ -2489,7 +2488,7 @@
       "setor": "Varejo de eletro, móveis e e-commerce",
       "etapa": "universo",
       "codigo": "sem_preco",
-      "motivo": "Sem preço recente: último negócio em 2026-01-02, há mais de 10 dias do último pregão (2026-10-21)."
+      "motivo": "Sem preço recente: último negócio em 2026-01-02, há mais de 10 dias do último pregão (2026-10-22)."
     },
     {
       "ticker": "PFRM3",
@@ -2497,7 +2496,7 @@
       "setor": "Medicamentos e saúde animal",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume médio diário de R$ 1.858.808 abaixo do mínimo."
+      "motivo": "Volume médio diário de R$ 1.876.512 abaixo do mínimo."
     },
     {
       "ticker": "PINE4",
@@ -2521,7 +2520,7 @@
       "setor": "Materiais de construção e acabamento",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume médio diário de R$ 1.728.974 abaixo do mínimo."
+      "motivo": "Volume médio diário de R$ 1.793.965 abaixo do mínimo."
     },
     {
       "ticker": "RAIZ4",
@@ -2537,7 +2536,7 @@
       "setor": "Construção civil e incorporação",
       "etapa": "universo",
       "codigo": "sem_preco",
-      "motivo": "Sem preço recente: último negócio em 2025-12-16, há mais de 10 dias do último pregão (2026-10-21)."
+      "motivo": "Sem preço recente: último negócio em 2025-12-16, há mais de 10 dias do último pregão (2026-10-22)."
     },
     {
       "ticker": "RPMG3",
@@ -2545,7 +2544,7 @@
       "setor": "Petróleo e gás",
       "etapa": "universo",
       "codigo": "sem_preco",
-      "motivo": "Sem preço recente: último negócio em 2026-08-10, há mais de 10 dias do último pregão (2026-10-21)."
+      "motivo": "Sem preço recente: último negócio em 2026-08-10, há mais de 10 dias do último pregão (2026-10-22)."
     },
     {
       "ticker": "RSUL4",
@@ -2553,7 +2552,7 @@
       "setor": "Autopeças e veículos",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume médio diário de R$ 246.070 abaixo do mínimo."
+      "motivo": "Volume médio diário de R$ 231.622 abaixo do mínimo."
     },
     {
       "ticker": "SANB11",
@@ -2569,7 +2568,7 @@
       "setor": "Turismo, lazer e restaurantes",
       "etapa": "universo",
       "codigo": "sem_preco",
-      "motivo": "Sem preço recente: último negócio em 2026-09-01, há mais de 10 dias do último pregão (2026-10-21)."
+      "motivo": "Sem preço recente: último negócio em 2026-09-01, há mais de 10 dias do último pregão (2026-10-22)."
     },
     {
       "ticker": "SHUL4",
@@ -2585,7 +2584,7 @@
       "setor": "Energia elétrica: geração",
       "etapa": "universo",
       "codigo": "sem_preco",
-      "motivo": "Sem preço recente: último negócio em 2025-11-13, há mais de 10 dias do último pregão (2026-10-21)."
+      "motivo": "Sem preço recente: último negócio em 2025-11-13, há mais de 10 dias do último pregão (2026-10-22)."
     },
     {
       "ticker": "STBP3",
@@ -2601,7 +2600,7 @@
       "setor": "Construção civil e incorporação",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume médio diário de R$ 237.821 abaixo do mínimo."
+      "motivo": "Volume médio diário de R$ 249.261 abaixo do mínimo."
     },
     {
       "ticker": "TEKA4",
@@ -2617,7 +2616,7 @@
       "setor": "Telecomunicações",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume médio diário de R$ 246.059 abaixo do mínimo."
+      "motivo": "Volume médio diário de R$ 252.885 abaixo do mínimo."
     },
     {
       "ticker": "TFCO4",
@@ -2641,7 +2640,7 @@
       "setor": "Siderurgia e metalurgia",
       "etapa": "universo",
       "codigo": "sem_preco",
-      "motivo": "Sem preço recente: último negócio em 2026-04-22, há mais de 10 dias do último pregão (2026-10-21)."
+      "motivo": "Sem preço recente: último negócio em 2026-04-22, há mais de 10 dias do último pregão (2026-10-22)."
     },
     {
       "ticker": "TRIS3",
@@ -2649,7 +2648,7 @@
       "setor": "Construção civil e incorporação",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume médio diário de R$ 2.811.630 abaixo do mínimo."
+      "motivo": "Volume médio diário de R$ 2.929.401 abaixo do mínimo."
     },
     {
       "ticker": "TXRX4",
@@ -2657,7 +2656,7 @@
       "setor": "Têxtil e eletrodomésticos",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume médio diário de R$ 3.321 abaixo do mínimo."
+      "motivo": "Volume médio diário de R$ 3.124 abaixo do mínimo."
     },
     {
       "ticker": "USIM5",
@@ -2673,7 +2672,7 @@
       "setor": "Química e petroquímica",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume médio diário de R$ 979.674 abaixo do mínimo."
+      "motivo": "Volume médio diário de R$ 998.684 abaixo do mínimo."
     },
     {
       "ticker": "VVEO3",
@@ -2681,7 +2680,7 @@
       "setor": "Hospitais, planos e diagnósticos",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume médio diário de R$ 1.832.610 abaixo do mínimo."
+      "motivo": "Volume médio diário de R$ 1.929.268 abaixo do mínimo."
     },
     {
       "ticker": "WEGE3",
@@ -2697,7 +2696,7 @@
       "setor": "Têxtil e eletrodomésticos",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume médio diário de R$ 80.476 abaixo do mínimo."
+      "motivo": "Volume médio diário de R$ 82.121 abaixo do mínimo."
     },
     {
       "ticker": "WIZC3",
@@ -2713,7 +2712,7 @@
       "setor": "Turismo, lazer e restaurantes",
       "etapa": "universo",
       "codigo": "sem_preco",
-      "motivo": "Sem preço recente: último negócio em 2025-12-02, há mais de 10 dias do último pregão (2026-10-21)."
+      "motivo": "Sem preço recente: último negócio em 2025-12-02, há mais de 10 dias do último pregão (2026-10-22)."
     }
   ]
 }
