@@ -10,6 +10,7 @@ export const BENS: { tela: string; emoji: string; titulo: string; descricao: str
   { tela: 'simuleImovel', emoji: '🏠', titulo: 'Imóvel', descricao: 'Comprar à vista, financiar, consórcio ou alugar: qual rota deixa o maior patrimônio', disponivel: true },
   { tela: 'simuleCarro', emoji: '🚗', titulo: 'Carro', descricao: 'À vista, financiar, consórcio ou ficar sem carro: quanto cada caminho custa e qual deixa o maior patrimônio', disponivel: true },
   { tela: 'simuleMoto', emoji: '🏍️', titulo: 'Moto', descricao: 'À vista, financiar, consórcio ou ficar sem moto: o mesmo comparativo, com os custos de uma moto de uso pessoal', disponivel: true },
+  { tela: 'suaHp12c', emoji: '🧮', titulo: 'Sua HP12C', descricao: 'Fale ou escreva qualquer problema de matemática financeira e veja a conta resolvida, com um banco de questões prontas', disponivel: true },
 ]
 
 /**

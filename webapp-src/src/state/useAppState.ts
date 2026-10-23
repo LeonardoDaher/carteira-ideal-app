@@ -32,6 +32,7 @@ export type Screen =
   | 'simuleCarro'
   | 'simuleMoto'
   | 'simuleBens'
+  | 'suaHp12c'
   | 'meuMes'
   | 'minhaCarteira'
 
@@ -48,7 +49,7 @@ export const CHAVE_TEMA_COMPARTILHADA = 'theme'
  * depender do questionário. Ficam fora da barra de abas e nunca são salvas como "última
  * tela": assim o botão amarelo da landing (./app/) continua devolvendo a pessoa ao ponto
  * em que parou no fluxo do questionário/resultado, e não à aula que ela viu por último. */
-export const TELAS_AVULSAS: readonly Screen[] = ['aprender', 'trilha', 'aprenderVideo', 'simuleFii', 'simuleTesouro', 'simuleBdr', 'simuleEtf', 'simuleFuturos', 'simuleOpcoes', 'simuleAcoes', 'simuleAtivos', 'simuleImovel', 'simuleCarro', 'simuleMoto', 'simuleBens', 'meuMes', 'minhaCarteira']
+export const TELAS_AVULSAS: readonly Screen[] = ['aprender', 'trilha', 'aprenderVideo', 'simuleFii', 'simuleTesouro', 'simuleBdr', 'simuleEtf', 'simuleFuturos', 'simuleOpcoes', 'simuleAcoes', 'simuleAtivos', 'simuleImovel', 'simuleCarro', 'simuleMoto', 'simuleBens', 'suaHp12c', 'meuMes', 'minhaCarteira']
 
 export function ehTelaAvulsa(tela: Screen) {
   return TELAS_AVULSAS.includes(tela)
@@ -91,6 +92,8 @@ const TELAS_PELA_URL: Record<string, Screen> = {
   simuleMoto: 'simuleMoto',
   // Simule Bens (D45): hub do comparativo de imóvel (e, depois, carro e moto); é o que o cartão da landing abre.
   simuleBens: 'simuleBens',
+  // Sua HP12C: problemas de matemática financeira falados ou digitados, com banco de questões; aberto pelo hub Simule Bens.
+  suaHp12c: 'suaHp12c',
   // Meu Mês (D21): botão na landing desde a Etapa 4; também aberto pelo resultado e pela
   // trilha "Sair das dívidas".
   meuMes: 'meuMes',

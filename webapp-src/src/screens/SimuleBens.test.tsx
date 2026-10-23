@@ -27,15 +27,21 @@ describe('SimuleBens (hub)', () => {
     expect(within(link).getByText(/ficar sem moto/)).toBeTruthy()
   })
 
-  it('com os três bens no ar, nenhum cartão fica como "Em breve"', () => {
+  it('com todos os cartões no ar, nenhum cartão fica como "Em breve"', () => {
     render(<SimuleBens ctx={ctx} />)
     expect(screen.queryByText('Em breve')).toBeNull()
     expect(document.querySelector('[aria-disabled="true"]')).toBeNull()
   })
 
-  it('a lista tem os três bens e todos estão disponíveis', () => {
-    expect(BENS.map((b) => b.titulo)).toEqual(['Imóvel', 'Carro', 'Moto'])
-    expect(BENS.filter((b) => b.disponivel).map((b) => b.tela)).toEqual(['simuleImovel', 'simuleCarro', 'simuleMoto'])
+  it('a lista tem os três bens e a Sua HP12C, todos disponíveis', () => {
+    expect(BENS.map((b) => b.titulo)).toEqual(['Imóvel', 'Carro', 'Moto', 'Sua HP12C'])
+    expect(BENS.filter((b) => b.disponivel).map((b) => b.tela)).toEqual(['simuleImovel', 'simuleCarro', 'simuleMoto', 'suaHp12c'])
+  })
+
+  it('a Sua HP12C é um link para a calculadora de matemática financeira', () => {
+    render(<SimuleBens ctx={ctx} />)
+    const link = screen.getByRole('link', { name: /Sua HP12C/ })
+    expect(link.getAttribute('href')).toBe('./?tela=suaHp12c')
   })
 
   it('diz que é conta matemática e não indica banco, consórcio nem produto', () => {

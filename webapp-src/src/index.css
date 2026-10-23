@@ -2195,3 +2195,44 @@ select option:disabled { color: #6b7280 !important; -webkit-text-fill-color: #6b
 }
 .faixa-strike input[type='range']:focus-visible::-webkit-slider-thumb { outline: 2px solid var(--accent); outline-offset: 2px; }
 .faixa-strike input[type='range']:focus-visible::-moz-range-thumb { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Sua HP12C: campos em grade, resultado e planilha de amortização. */
+.hp-grade { display: grid; grid-template-columns: 1fr; gap: 10px; }
+@media (min-width: 640px) { .hp-grade { grid-template-columns: 1fr 1fr; } }
+.hp-grade select.input-cotas, .hp-grade input.input-cotas { width: 100%; box-sizing: border-box; }
+.hp-resultado { border-top: 1px solid var(--stroke); padding-top: 10px; }
+.hp-linha { gap: 12px; }
+.hp-aviso { border: 1px solid var(--stroke); border-radius: 8px; padding: 8px 10px; }
+.hp-tabela-rolagem { overflow-x: auto; }
+.hp-tabela { width: 100%; border-collapse: collapse; font-size: 12.5px; font-variant-numeric: tabular-nums; }
+.hp-tabela th, .hp-tabela td { padding: 5px 8px; text-align: right; border-bottom: 1px solid var(--stroke); white-space: nowrap; }
+.hp-tabela th:first-child, .hp-tabela td:first-child { text-align: left; }
+.hp-questao { display: flex; flex-direction: column; gap: 2px; text-align: left; width: 100%; font: inherit; color: inherit; cursor: pointer; }
+.hp-questao:hover { border-color: var(--accent); }
+.hp-questao:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Sua HP12C: teclado da calculadora. Corpo escuro nos dois temas, como o aparelho. */
+.hp12c-corpo { background: #1c1c1e; border: 1px solid #3a3a3c; border-radius: 12px; padding: 10px; outline: none; color: #f2f2f2; }
+.hp12c-corpo:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.hp12c-visor { background: #b9c6a8; color: #1b2314; border-radius: 6px; padding: 6px 10px 8px; margin-bottom: 10px; box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.35); }
+.hp12c-anuncios { display: flex; gap: 12px; font-size: 10px; font-weight: 700; letter-spacing: 0.04em; min-height: 12px; }
+.hp12c-anuncios span { opacity: 0.15; }
+.hp12c-anuncios span.on { opacity: 1; }
+.hp12c-numero { font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace; font-size: 28px; text-align: right; line-height: 1.15; font-variant-numeric: tabular-nums; overflow: hidden; white-space: nowrap; }
+.hp12c-teclas { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 6px 4px; }
+.hp12c-celula { display: flex; flex-direction: column; align-items: stretch; min-width: 0; }
+.hp12c-celula.larga { grid-row: span 2; }
+.hp12c-celula.larga .hp12c-tecla { flex: 1; }
+.hp12c-f, .hp12c-g { font-size: 8px; text-align: center; min-height: 10px; line-height: 10px; white-space: nowrap; overflow: hidden; font-weight: 700; }
+.hp12c-f { color: #e8b923; }
+.hp12c-g { color: #5fb0e6; }
+.hp12c-tecla { background: #2c2c2e; color: #fff; border: 1px solid #4a4a4c; border-bottom-width: 3px; border-radius: 4px; padding: 7px 0; font: inherit; font-size: 11.5px; font-weight: 700; cursor: pointer; min-width: 0; }
+.hp12c-tecla:hover:not(:disabled) { background: #3a3a3d; }
+.hp12c-tecla:active:not(:disabled) { transform: translateY(1px); border-bottom-width: 2px; }
+.hp12c-tecla:disabled { opacity: 0.35; cursor: default; }
+.hp12c-tecla:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.hp12c-tecla.f { background: #e8b923; color: #1c1c1e; border-color: #b8921a; }
+.hp12c-tecla.g { background: #5fb0e6; color: #0d2233; border-color: #3f8ab8; }
+.hp12c-tecla[aria-pressed='true'] { box-shadow: 0 0 0 2px #fff inset; }
+.hp12c-estado { font-variant-numeric: tabular-nums; max-width: 360px; }
+@media (max-width: 420px) { .hp12c-numero { font-size: 24px; } .hp12c-tecla { font-size: 10px; padding: 7px 0; } .hp12c-f, .hp12c-g { font-size: 7px; } }
