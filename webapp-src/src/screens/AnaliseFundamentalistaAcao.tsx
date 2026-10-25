@@ -284,6 +284,7 @@ function TabelaHistorica({ colunas, financeira }: { colunas: ColunaHistorica[]; 
 
 function ValorJustoModulo({ f }: { f: AnaliseFundamentalista }) {
   const vj = f.valorJusto
+  const pFcf = f.multiplos.find((m) => m.id === 'p-fcf')?.valor ?? null
   return (
     <Modulo titulo="Valor justo e margem de segurança" subtitulo={vj.aplicavel ? `confiança ${vj.confianca === 'alta' ? 'alta' : vj.confianca === 'media' ? 'média' : 'baixa'}` : 'dados insuficientes'} aberto>
       {!vj.aplicavel && <span className="small justify">{vj.motivo}</span>}
@@ -307,6 +308,7 @@ function ValorJustoModulo({ f }: { f: AnaliseFundamentalista }) {
           <div className="col" style={{ gap: 0 }}>
             <Linha rotulo="Margem de segurança (cenário base)" valor={vj.margemSegurancaPct === null ? '—' : percentual(vj.margemSegurancaPct, 0)} cor={corDoSinal(vj.margemSegurancaPct)} />
             <Linha rotulo="Potencial de valorização (cenário base)" valor={vj.potencialBasePct === null ? '—' : percentual(vj.potencialBasePct, 0, true)} cor={corDoSinal(vj.potencialBasePct)} />
+            {pFcf !== null && pFcf > 0 && <Linha rotulo="Rendimento do caixa livre hoje (FCF 12m ÷ valor de mercado)" valor={percentual(1 / pFcf, 1)} />}
             <Linha rotulo="Preço de entrada (margem de 25%)" valor={vj.precoEntrada === null ? '—' : reais(vj.precoEntrada)} />
           </div>
           {vj.confiancaMotivos.length > 0 && (
