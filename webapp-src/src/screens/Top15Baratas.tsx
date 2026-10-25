@@ -142,7 +142,7 @@ function ListaTop15({ snapshot, aoTrocarCodigo }: { snapshot: SnapshotAcoesBarat
       <div className="card-outline small muted justify" style={{ lineHeight: 1.5 }} role="note">
         <strong>Não é recomendação de investimento.</strong> Esta lista é uma triagem automática por fórmula, igual para todos, e não considera o seu
         perfil, seus objetivos nem o preço que faria sentido pagar. Números contábeis são do passado e podem conter ajustes e erros de divulgação; empresas
-        “baratas” incluem as que estão no pico do ciclo ou em declínio (as chamadas armadilhas de valor). Rentabilidade passada não garante rentabilidade
+        “baratas” incluem as que estão no pico do ciclo ou em declínio (as chamadas armadilhas de valor). “Barata” aqui quer dizer barata em relação às outras empresas da lista, não abaixo do valor justo: a análise fundamentalista de uma ação projeta o caixa e desconta pelos juros, e pode concluir que o preço está acima do valor justo mesmo para uma ação que aparece nesta lista. Rentabilidade passada não garante rentabilidade
         futura, e ações podem causar perda de parte ou de todo o dinheiro aplicado. Converse com um profissional certificado antes de investir.
       </div>
     </div>

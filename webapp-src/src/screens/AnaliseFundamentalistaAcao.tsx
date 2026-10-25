@@ -317,7 +317,7 @@ function ValorJustoModulo({ f }: { f: AnaliseFundamentalista }) {
         </>
       )}
       <span className="tiny muted justify">
-        Margem de segurança = 1 − preço ÷ valor justo; potencial = valor justo ÷ preço − 1: são conceitos diferentes. O custo do capital parte da Selic meta e o crescimento terminal, da inflação de longo prazo (Focus); o valor justo é muito sensível a essas premissas, por isso a faixa entre cenários importa mais que o número único. O modelo limita o crescimento explícito a 10% ao ano por 5 anos: empresas de crescimento muito alto tendem a aparecer caras nele, mesmo quando o mercado paga esse prêmio de propósito.
+        Margem de segurança = 1 − preço ÷ valor justo; potencial = valor justo ÷ preço − 1: são conceitos diferentes (um preço 100% acima do valor justo equivale a um valor justo 50% abaixo do preço). Com Selic alta, o desconto de cerca de 15% ao ano derruba o valor justo, e o mercado muitas vezes desconta o caixa de grandes empresas a uma taxa menor. Aparecer entre as mais baratas no Top 15 de ações baratas quer dizer barata em relação às outras empresas, não abaixo do valor justo: são perguntas diferentes e podem dar respostas opostas. O custo do capital parte da Selic meta e o crescimento terminal, da inflação de longo prazo (Focus); o valor justo é muito sensível a essas premissas, por isso a faixa entre cenários importa mais que o número único. O modelo limita o crescimento explícito a 10% ao ano por 5 anos: empresas de crescimento muito alto tendem a aparecer caras nele, mesmo quando o mercado paga esse prêmio de propósito.
       </span>
     </Modulo>
   )
