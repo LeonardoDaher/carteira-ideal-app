@@ -1,0 +1,9 @@
+import acoesDividendos from './acoesDividendos.json'
+import type { SnapshotAcoesDividendos } from '../domain/acoesDividendos'
+
+/**
+ * "Top 15 ações pagadoras de dividendos" gerado por scripts/atualizar-acoes-dividendos.mjs (D122). Ponto único de leitura do
+ * JSON (mesmo padrão de snapshotAcoesEndividadas.ts). Enquanto o responsável não aprovar a publicação em
+ * config/acoes-dividendos.json, o arquivo vem com `publicado: false` e sem lista. Acesso aberto: o arquivo traz tudo.
+ */
+export const SNAPSHOT_ACOES_DIVIDENDOS = acoesDividendos as unknown as SnapshotAcoesDividendos

@@ -1,0 +1,76 @@
+{
+  "esquema": 1,
+  "versaoMetodologia": "1.1.0",
+  "geradoEm": "2026-10-25T13:10:56.912Z",
+  "dataExecucao": "2026-10-25",
+  "dataPrecos": "2026-10-22",
+  "ambiente": {
+    "node": "v22.23.3",
+    "plataforma": "win32",
+    "commit": null,
+    "execucao": null
+  },
+  "codigo": {
+    "calculoSha256": "dd1a37174c8a1732931c7ae01b6ab4554b97eb31055a442b807ee410a7d8adf1"
+  },
+  "hashes": {
+    "config": "f484e5d2dfa904f32eb1a3d137e710ecb515a1e5f96a46c9c18ea953516979c4",
+    "insumos": "1af93c504432a3ea9729b6dcbb60ee95bb79f822988dd29079a893c19527c203",
+    "resultado": "fb68fc1daecbe0722cf9a9999888311d08470376b81a155f47d6b64e0b46aa28",
+    "memoria": "3d5f20ccae208c5e210207e281a22884e9f56a9c9fb20cc8b301f50d018528d9",
+    "arquivos": {
+      "insumos.json.gz": "8812731d42694b0eb4ed05272c1f2f8dcb59f8c91c8a77951f3b8d9128b4d195",
+      "config.json": "4508a4c468cd24a17e753b348b3bdc4f1028025d9dafac5a8dbbe64958c786fe",
+      "resultado.json": "4be0d860d7d6fde540d4bd147d82f760004055d031aa101d3a401997f614d0f1",
+      "memoria-de-calculo.json.gz": "8927b7cc15a89a67141f85513ae6380538d27efae7684a3c11a741a406d609e3",
+      "ranking.csv": "0a290dbd81f3825adb644ecdb6413ba5e8a697a48869538f027555a413546e6e",
+      "proventos.csv": "37795ab495994fd1e5d56653f9380871700d2c50be462d1c58a30fbbc4ce72bf",
+      "exclusoes.csv": "c4b2f534aef276b229b5997a5422fa3b53c3114b7f1f867dbdc736442568fbca"
+    }
+  },
+  "fontes": [
+    {
+      "papel": "Proventos em dinheiro por ação",
+      "url": "B3, sistemaswebb3-listados.b3.com.br (GetListedSupplementCompany e GetListedCashDividends)",
+      "empresasComProventos": 125
+    },
+    {
+      "papel": "Preço de fechamento (Boletim BVBG.086 da B3)",
+      "url": "historico/acoes.json (neste repositório)",
+      "ultimoPregao": "2026-10-22"
+    }
+  ],
+  "contagens": {
+    "universo": 226,
+    "avaliadas": 124,
+    "noRanking": 100,
+    "exclusoes": 102,
+    "etapas": [
+      {
+        "id": "preco",
+        "descricao": "Sem preço de fechamento recente na B3",
+        "entram": 226,
+        "saem": 29
+      },
+      {
+        "id": "liquidez",
+        "descricao": "Negocia menos de R$ 3.000.000 por dia (média de 21 pregões)",
+        "entram": 197,
+        "saem": 45
+      },
+      {
+        "id": "dados_b3",
+        "descricao": "A B3 não tem proventos publicados para a empresa",
+        "entram": 152,
+        "saem": 27
+      },
+      {
+        "id": "proventos",
+        "descricao": "Não pagou proventos em dinheiro nos últimos 365 dias (2025-10-22 a 2026-10-22)",
+        "entram": 125,
+        "saem": 1
+      }
+    ]
+  },
+  "publicadoNoApp": true
+}

@@ -56,6 +56,13 @@ O Meu Mês tem **duas abas**: "Contas do mês" (como sempre) e "Supermercado" (n
 - **Primeira rodada:** AGRO3 (35,3x), AMER3 (24,2x), HBOR3, ONCO3, LOGG3, BRKM5, AURE3, TTEN3, CAML3, ROMI3, ECOR3, EQTL3, TAEE11, TUPY3, ORVR3.
 - **Publicação:** aprovada pelo responsável em 17/10/2026 (v1.1.0, `aprovadoPeloResponsavel` true, aviso proposto mantido). O divulgador mensal (D91) passou a incluir esta lista no **post 4** (D95). **Pendente:** decidir se a lista "sem EBITDA positivo" fica à parte (como está).
 
+### D122 (25/10/2026) — Top 15 ações pagadoras de dividendos (dividend yield de 12 meses), com "Ver mais" até a 100ª posição, **publicado em 25/10/2026**
+- **Pedido:** ranking das 15 ações que mais pagam dividendos, conferido contra o Investidor10, com o botão "Ver mais" para as posições seguintes.
+- **Fonte:** B3 (duas listas públicas, unidas: histórico por nome de pregão e cadastro da empresa). A CVM só tem o dividendo pago no exercício, sem data com nem valor por ação.
+- **Conferência:** 97 ações em comum com o Investidor10, diferença média de 0,14 p.p.; a conferência achou e corrigiu quatro erros (parcelas repetidas, desdobramento da Sabesp, provento a pagar fora do histórico, séries A04OR do BBAS3).
+- **Código:** `config/acoes-dividendos.json`, `scripts/b3-proventos.mjs`, `acoes-dividendos-calculo.mjs`, `atualizar-acoes-dividendos.mjs`, `acoes-dividendos-verificar.mjs`, workflow `atualizar-acoes-dividendos.yml` (00h15 de Brasília), `webapp-src/src/screens/Top15Dividendos.tsx`, aba no `SimuleAcoes.tsx`. Detalhe em `docs/16` e `docs/07` D122.
+- **Publicação:** aprovada pelo responsável em 25/10/2026 (v1.1.0, `aprovadoPeloResponsavel` true, aviso proposto mantido). Pendente: conferir no ar e a primeira execução automática do workflow.
+
 ### Decisões anteriores recentes
 D67 Simule Imóvel com seleção de caminhos, D68 cartão "Simule Bens", D69 locação como quinto caminho no carro e na moto.
 

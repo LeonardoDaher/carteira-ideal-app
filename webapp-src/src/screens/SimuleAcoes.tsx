@@ -11,6 +11,7 @@ import { FaixaCotacoes, itensDeAcoes } from '../ui/FaixaCotacoes'
 import { Top15Baratas } from './Top15Baratas'
 import { Top15AcoesMaisNegociadas, Top15IbovMaioresPesos } from './Top15EtfsMaisNegociados'
 import { Top15Endividadas } from './Top15Endividadas'
+import { Top15Dividendos } from './Top15Dividendos'
 import { AnaliseTecnicaAcao } from './AnaliseTecnicaAcao'
 import { AnaliseFundamentalistaAcao } from './AnaliseFundamentalistaAcao'
 import { ConfluenciaAcao } from './ConfluenciaAcao'
@@ -31,7 +32,7 @@ function inteiro(valor: number) {
 /** O que está aberto no cartão: uma empresa do cadastro (dado completo) ou um código da busca (resumido). */
 type Selecao = { origem: 'lista'; acao: Acao; setor: string } | { origem: 'busca'; acao: AcaoBusca }
 
-type AbaAcoes = 'simulador' | 'top15' | 'negociadas' | 'ibov' | 'endividadas' | 'tecnica' | 'fundamentalista' | 'confluencia'
+type AbaAcoes = 'simulador' | 'top15' | 'negociadas' | 'ibov' | 'endividadas' | 'dividendos' | 'tecnica' | 'fundamentalista' | 'confluencia'
 const ABAS_DE_ANALISE: AbaAcoes[] = ['tecnica', 'fundamentalista', 'confluencia']
 const HORIZONTES: Horizonte[] = ['curto', 'medio', 'longo']
 
@@ -132,6 +133,7 @@ export function SimuleAcoes({
             { id: 'negociadas', emoji: '📊', titulo: 'Top 15 mais negociadas', descricao: 'Ranking por volume' },
             { id: 'ibov', emoji: '🏛️', titulo: 'Top 15 do Ibovespa', descricao: 'Maiores pesos do índice' },
             { id: 'endividadas', emoji: '💳', titulo: 'Top 15 mais endividadas', descricao: 'Dívida líquida ÷ EBITDA' },
+            { id: 'dividendos', emoji: '💰', titulo: 'Top 15 pagadoras de dividendos', descricao: 'Dividend yield de 12 meses' },
           ] as const
         ).map((c) => (
           <button
@@ -213,6 +215,8 @@ export function SimuleAcoes({
         <Top15AcoesMaisNegociadas />
       ) : aba === 'endividadas' ? (
         <Top15Endividadas />
+      ) : aba === 'dividendos' ? (
+        <Top15Dividendos />
       ) : !selecao ? (
         <div className="card col" style={{ gap: 6 }} role="status">
           <span style={{ fontWeight: 700 }}>Os dados das ações ainda não foram carregados.</span>
