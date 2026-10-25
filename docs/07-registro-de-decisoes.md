@@ -2163,3 +2163,15 @@ Pedido do responsável: o gráfico da análise técnica passou de linha para **c
 **Limites.** (a) Data com, não data de pagamento: um provento com data com depois do último pregão da base só entra no dia seguinte. (b) Provento extraordinário entra como qualquer outro e infla o yield (a tela avisa acima de 20% e mostra cada data). (c) Bonificação em ações e desdobramento de fator quebrado não entram nem são ajustados. (d) 27 empresas do cadastro (PRIO3, CSAN3, CSNA3, BRKM5, BHIA3, AMER3, DASA3 e outras) saem com `sem_dados_b3`; a B3 não publica proventos para elas. (e) Ambev, Klabin e Cury ficam com `historico_parcial`: só vale o cadastro da empresa, que cobre os últimos meses. (f) Depende de uma API pública da B3 sem contrato de estabilidade: se o formato mudar, o leitor erra e o job falha sem publicar. (g) Um código por empresa (a classe mais negociada do cadastro).
 
 **Testes.** `scripts/acoes-dividendos.test.mjs` (35): leitor e união das listas, URL, nova tentativa e JSON codificado duas vezes, conta feita à mão, parcelas, restituição de capital, desdobramento (Sabesp), cada exclusão, trava de sanidade, auditoria, modo diário, verificador pegando arquivo adulterado. Web: `Top15Dividendos.test.tsx` (13) + cinco testes existentes ajustados para seis abas.
+
+## D123 (25/10/2026): Top 15 confluência (positivas e negativas), ao lado da aba Confluência
+
+**Pedido do responsável (25/10/2026).** Um "Top 15 confluência" ao lado da aba Confluência, com escolha entre positivas e negativas e botão "Ver mais".
+
+**Desenho.** Diferente dos outros Top 15, **não há job, auditoria em pasta nem workflow**: o ranking é calculado no aparelho, com os mesmos arquivos que a aba Confluência já baixa (`dados/acoes-series.json` e `dados/fundamentos.json`) e as mesmas funções (`analisarTecnica`, `analisarFundamentos`, `analisarConfluencia`), então o número de cada ação é igual nas duas telas. Módulo puro `domain/confluenciaRanking.ts`; tela `screens/Top15Confluencia.tsx`; aba "Top 15 confluência" no grupo "Análise de uma ação" do `SimuleAcoes.tsx`.
+
+**Regras.** Positiva = situação `confluencia-positiva` (fundamentos favoráveis e gráfico a favor), da maior nota combinada para a menor. Negativa = `confluencia-negativa`, da menor nota para a maior. Empate: maior convicção, depois ordem alfabética. A nota usa os pesos do horizonte escolhido (curto 30/70, médio 50/50, longo 70/30). Ações de liquidez baixa saem (sinal técnico pouco confiável); ações sem as duas análises também. Mostra 15 cartões e "Ver mais" com o resto da lista.
+
+**Limites.** Sem aprovação do responsável nem código de acesso (a lista só reordena análises já publicadas); sem auditoria congelada, o resultado muda com os arquivos do dia. Confluência negativa não é sinal de venda. Cortes e ordem são escolhas do assistente, a rever pelo responsável. Primeira leitura (horizonte médio, 23/10/2026): 183 ações avaliadas, 25 positivas, 7 negativas, 10 fora por liquidez.
+
+**Testes.** `Top15Confluencia.test.tsx` (3: Ver mais, alternância, horizonte e lista vazia); teste das abas de análise ajustado para quatro abas.
