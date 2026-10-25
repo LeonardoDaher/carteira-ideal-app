@@ -1,6 +1,6 @@
 # Auditoria: Top 15 ações pagadoras de dividendos
 
-Execução com preços de **2026-10-22** · metodologia **v1.1.0**. Os proventos vêm da API pública da B3 (aba "Proventos em dinheiro" de cada empresa).
+Execução com preços de **2026-10-23** · metodologia **v1.1.0**. Os proventos vêm da API pública da B3 (aba "Proventos em dinheiro" de cada empresa).
 
 ## O que tem aqui
 

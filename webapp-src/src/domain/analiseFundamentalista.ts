@@ -624,6 +624,8 @@ export interface EntradaFundamentalista {
   dataCorte?: string | null
   dataPreco?: string | null
   premissas?: Partial<Premissas>
+  /** Dividend yield de 12 meses por ação (proventos com data com na janela ÷ cotação, B3), igual ao das listas de dividendos. Sem ele, usa a DFC. */
+  dyB3?: number | null
 }
 
 export function analisarFundamentos(entrada: EntradaFundamentalista): AnaliseFundamentalista | null {
@@ -751,11 +753,12 @@ export function analisarFundamentos(entrada: EntradaFundamentalista): AnaliseFun
   const pagos = anuais.map((c) => c.dividendosPagos)
   const anosComPagamento = pagos.filter((v): v is number => ok(v) && v > 0).length
   const cortes = pagos.slice(1).filter((v, i) => ok(v) && ok(pagos[i]) && (pagos[i] as number) > 0 && v < (pagos[i] as number) * 0.7).length
-  const dyValor = mult.dy
+  const dyDaB3 = ok(entrada.dyB3) ? entrada.dyB3 : null
+  const dyValor = dyDaB3 ?? mult.dy
   const dividendos = {
     aplicavel: pagos.some((v) => ok(v)),
     indicadores: [
-      ind({ id: 'dy', nome: 'Dividend yield (12 meses)', valor: dyValor, formato: 'pct', interpretacao: ok(dyValor) ? 'Proventos pagos nos últimos 12 meses (dividendos e JCP, do fluxo de caixa) ÷ valor de mercado.' : 'Sem pagamento identificado ou sem valor de mercado.', formula: 'Dividendos e JCP pagos (DFC 6.03) ÷ valor de mercado.' }),
+      ind({ id: 'dy', nome: 'Dividend yield (12 meses)', valor: dyValor, formato: 'pct', interpretacao: ok(dyValor) ? (dyDaB3 !== null ? 'Proventos por ação (dividendos e JCP brutos) com data com nos últimos 12 meses ÷ cotação.' : 'Proventos pagos nos últimos 12 meses (dividendos e JCP, do fluxo de caixa) ÷ valor de mercado.') : 'Sem pagamento identificado ou sem valor de mercado.', formula: dyDaB3 !== null ? 'Proventos por ação com data com nos últimos 12 meses (B3) ÷ cotação.' : 'Dividendos e JCP pagos (DFC 6.03) ÷ valor de mercado.' }),
       ind({ id: 'proventos', nome: 'Proventos pagos', valor: atual.dividendosPagos, formato: 'milhoes', historico: hist((c) => c.dividendosPagos), interpretacao: `Pagamentos em ${anosComPagamento} de ${pagos.length} exercícios${cortes ? `; ${cortes} queda${cortes > 1 ? 's' : ''} de mais de 30%` : ''}.`, formula: 'Soma das linhas de dividendos e juros sobre capital próprio pagos na DFC (financiamento).' }),
       ind({ id: 'payout', nome: 'Payout sobre o lucro', valor: payoutLucro, formato: 'pct', interpretacao: ok(payoutLucro) ? (payoutLucro > 1 ? 'Paga mais do que lucra: distribuição pode estar usando reservas ou caixa.' : payoutLucro > 0.8 ? 'Payout alto: pouco espaço para crescer sem dívida.' : 'Payout compatível com o lucro.') : 'Sem lucro positivo ou sem pagamento.', formula: 'Proventos pagos ÷ lucro dos controladores (reportado; o recorrente não consta na CVM).' }),
       ind({ id: 'cobertura-fcf', nome: 'Proventos ÷ FCF', valor: payoutFcf, formato: 'pct', interpretacao: ok(payoutFcf) ? (payoutFcf > 1 ? 'Os proventos superam o fluxo de caixa livre: dependem de caixa acumulado ou dívida.' : 'O fluxo de caixa livre cobre os proventos.') : 'Sem FCF positivo ou sem CAPEX identificado.', formula: 'Proventos pagos ÷ (FCO − CAPEX).' }),

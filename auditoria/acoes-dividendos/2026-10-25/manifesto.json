@@ -1,43 +1,43 @@
 {
   "esquema": 1,
   "versaoMetodologia": "1.1.0",
-  "geradoEm": "2026-10-25T13:10:56.912Z",
+  "geradoEm": "2026-10-25T19:38:27.090Z",
   "dataExecucao": "2026-10-25",
-  "dataPrecos": "2026-10-22",
+  "dataPrecos": "2026-10-23",
   "ambiente": {
-    "node": "v22.23.3",
+    "node": "v24.20.0",
     "plataforma": "win32",
     "commit": null,
     "execucao": null
   },
   "codigo": {
-    "calculoSha256": "dd1a37174c8a1732931c7ae01b6ab4554b97eb31055a442b807ee410a7d8adf1"
+    "calculoSha256": "c79d600cd659d9609ec3ef73f97cddb504786dfe70abb46c5ee7b4750a40eb6c"
   },
   "hashes": {
     "config": "f484e5d2dfa904f32eb1a3d137e710ecb515a1e5f96a46c9c18ea953516979c4",
-    "insumos": "1af93c504432a3ea9729b6dcbb60ee95bb79f822988dd29079a893c19527c203",
-    "resultado": "fb68fc1daecbe0722cf9a9999888311d08470376b81a155f47d6b64e0b46aa28",
-    "memoria": "3d5f20ccae208c5e210207e281a22884e9f56a9c9fb20cc8b301f50d018528d9",
+    "insumos": "3bf3a1c43d8a2be1799dc6078d26d6355ab5c95cdb998c8a86af6671170deb9f",
+    "resultado": "6249a852c5dd418d34f8336a095cedc2e6bc12ff1c7ec93d4671ed125dda0143",
+    "memoria": "a71fb2b97a5f971ea0a68ee1cef726dad93b78785e6a14feb005da03cb65f2bc",
     "arquivos": {
-      "insumos.json.gz": "8812731d42694b0eb4ed05272c1f2f8dcb59f8c91c8a77951f3b8d9128b4d195",
+      "insumos.json.gz": "8e5de9b4737a3b1de50a0a52ec80bc715954850c7746b12d51a19a557a7d826e",
       "config.json": "4508a4c468cd24a17e753b348b3bdc4f1028025d9dafac5a8dbbe64958c786fe",
-      "resultado.json": "4be0d860d7d6fde540d4bd147d82f760004055d031aa101d3a401997f614d0f1",
-      "memoria-de-calculo.json.gz": "8927b7cc15a89a67141f85513ae6380538d27efae7684a3c11a741a406d609e3",
-      "ranking.csv": "0a290dbd81f3825adb644ecdb6413ba5e8a697a48869538f027555a413546e6e",
-      "proventos.csv": "37795ab495994fd1e5d56653f9380871700d2c50be462d1c58a30fbbc4ce72bf",
-      "exclusoes.csv": "c4b2f534aef276b229b5997a5422fa3b53c3114b7f1f867dbdc736442568fbca"
+      "resultado.json": "8198740dc1b7715ceae609af1d217b6ad05f8a9ba6c203657957598e1ba739f7",
+      "memoria-de-calculo.json.gz": "2014919ba0ddba4f90768fb0121db78558538cbe5083f08851b970bf0aeb7436",
+      "ranking.csv": "7a6e469a56a9a60a73d3e71bad98420968329625c73da54cfe3fc8fcc258a157",
+      "proventos.csv": "6d1424470b3caadeb42e12f50232942437f00adab632985fe0e4b8bfbb44fce5",
+      "exclusoes.csv": "aafb32a5350c8aaa7bd27ca582202006f82157dbeb5f5bf247c1e43f02d5c505"
     }
   },
   "fontes": [
     {
       "papel": "Proventos em dinheiro por ação",
       "url": "B3, sistemaswebb3-listados.b3.com.br (GetListedSupplementCompany e GetListedCashDividends)",
-      "empresasComProventos": 125
+      "empresasComProventos": 151
     },
     {
       "papel": "Preço de fechamento (Boletim BVBG.086 da B3)",
       "url": "historico/acoes.json (neste repositório)",
-      "ultimoPregao": "2026-10-22"
+      "ultimoPregao": "2026-10-23"
     }
   ],
   "contagens": {
@@ -66,7 +66,7 @@
       },
       {
         "id": "proventos",
-        "descricao": "Não pagou proventos em dinheiro nos últimos 365 dias (2025-10-22 a 2026-10-22)",
+        "descricao": "Não pagou proventos em dinheiro nos últimos 365 dias (2025-10-23 a 2026-10-23)",
         "entram": 125,
         "saem": 1
       }

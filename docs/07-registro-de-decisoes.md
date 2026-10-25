@@ -2175,3 +2175,13 @@ Pedido do responsável: o gráfico da análise técnica passou de linha para **c
 **Limites.** Sem aprovação do responsável nem código de acesso (a lista só reordena análises já publicadas); sem auditoria congelada, o resultado muda com os arquivos do dia. Confluência negativa não é sinal de venda. Cortes e ordem são escolhas do assistente, a rever pelo responsável. Primeira leitura (horizonte médio, 23/10/2026): 183 ações avaliadas, 25 positivas, 7 negativas, 10 fora por liquidez.
 
 **Testes.** `Top15Confluencia.test.tsx` (3: Ver mais, alternância, horizonte e lista vazia); teste das abas de análise ajustado para quatro abas.
+
+## D124 (25/10/2026): Dividend yield da análise da ação passa a usar os proventos da B3
+
+**Problema (responsável).** O DY de 12 meses da tela de análise não batia com o Investidor10: FIQE3 mostrava 4,2% contra 11%. A tela dividia os dividendos **pagos na DFC** (6.03, por exercício) pelo valor de mercado; o ranking de dividendos (D122) e o Investidor10 somam os proventos **por ação com data com** nos últimos 12 meses ÷ cotação (FIQE3 no ranking: 11,06%).
+
+**Decisão.** A análise usa o DY da B3 (o mesmo do ranking). O job `atualizar-acoes-dividendos` agora baixa os proventos de **toda ação com preço** (o filtro de liquidez continua só no ranking) e grava `dyPorTicker` com o DY de cada uma (0 se não pagou na janela). A análise lê `dyPorTicker` (`dyB3` em `analisarFundamentos`); sem ele (sem preço ou sem proventos publicados na B3), cai no DY da DFC, e o texto do indicador diz de onde veio. Payout e proventos ÷ FCF seguem na DFC, que é a medida de caixa. Ranking e Top 15 não mudaram.
+
+**Cobertura.** 151 de 226 ações do cadastro com o DY da B3. Ficam na DFC as 29 sem preço recente, as 27 sem proventos publicados na B3 e as que não têm classe identificada.
+
+**Testes.** `acoes-dividendos.test.mjs` (35; o de `montarInsumos` agora espera baixar quem não tem liquidez). Web: suíte inteira verde.

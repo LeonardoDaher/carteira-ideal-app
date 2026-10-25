@@ -102,7 +102,7 @@ export function empresasDoCadastro({ cadastro, historico, cfg, lerAjustes = () =
 }
 
 /**
- * Baixa os proventos de cada empresa que passa no preço e na liquidez (as outras não precisam de rede). `baixar` é injetável
+ * Baixa os proventos de cada empresa com preço (a liquidez só filtra o ranking; o DY de todas alimenta a análise da ação). `baixar` é injetável
  * para os testes. Uma empresa que falha no download fica com `motivoSemDados` e o job segue; a trava de sanidade decide se o
  * conjunto ainda serve.
  */
@@ -111,7 +111,7 @@ export async function montarInsumos({ cadastro, historico, cfg, baixar = baixarP
   const inicio = somarDias(dataPrecos, -cfg.janelaDias - 30)
   const cache = new Map()
   let feitas = 0
-  const alvo = empresas.filter((e) => e.cotacao > 0 && e.liquidezDiaria >= cfg.liquidezMinimaDiariaReais)
+  const alvo = empresas.filter((e) => e.cotacao > 0)
   for (const emp of empresas) {
     emp.eventos = []
     if (!alvo.includes(emp)) continue
@@ -250,6 +250,7 @@ export function montarSnapshotApp({ resultado, cfg, manifesto, pasta, publicado,
     aviso: cfg.publicacao.aviso ?? cfg.publicacao.avisoProposto ?? null,
     parametros: { janelaDias: cfg.janelaDias, janelaInicio: resultado.janela.inicio, liquidezMinimaDiariaReais: cfg.liquidezMinimaDiariaReais, sessoesLiquidez: cfg.sessoesLiquidez, alertaDyAcimaDe: cfg.alertaDyAcimaDe },
     contagens: { ranking: resultado.ranking.length, exclusoes: resultado.exclusoes.length },
+    dyPorTicker: publicado ? (resultado.dyPorTicker ?? {}) : {},
     etapas: publicado ? resultado.etapas : [],
     ranking: publicado ? resultado.ranking : [],
     exclusoes: publicado ? resultado.exclusoes : [],

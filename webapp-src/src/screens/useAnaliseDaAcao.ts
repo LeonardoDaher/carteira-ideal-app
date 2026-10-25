@@ -12,6 +12,7 @@ import { analisarConfluencia } from '../domain/confluencia'
 import type { Confluencia } from '../domain/confluencia'
 import type { SnapshotAcoes } from '../domain/acoes'
 import { SNAPSHOT_MERCADO } from '../data/snapshotMercado'
+import { SNAPSHOT_ACOES_DIVIDENDOS } from '../data/snapshotAcoesDividendos'
 
 export const CAMINHO_SERIES = 'dados/acoes-series.json'
 export const CAMINHO_FUNDAMENTOS = 'dados/fundamentos.json'
@@ -89,8 +90,9 @@ export function useAnaliseDaAcao({
       dataCorte: fundamentos.dados.dataCorte,
       dataPreco: snapshot.dataPregao,
       premissas: premissasEfetivas,
+      dyB3: (ticker ? SNAPSHOT_ACOES_DIVIDENDOS.dyPorTicker?.[ticker] : undefined) ?? SNAPSHOT_ACOES_DIVIDENDOS.ranking?.find((r) => r.ticker === ticker)?.dy ?? null,
     })
-  }, [fundamentos, empresa, precoDe, snapshot.dataPregao, premissasEfetivas])
+  }, [fundamentos, empresa, ticker, precoDe, snapshot.dataPregao, premissasEfetivas])
 
   const confluencia = useMemo(
     () => (ticker && (tecnica || fundamentalista) ? analisarConfluencia({ ticker, tecnica, fundamentalista, horizonte }) : null),

@@ -70,6 +70,10 @@ Comparado o DY de 12 meses calculado aqui com o do ranking "Maiores Dividend Yie
 
 O ranking deles começa em empresas pequenas e ilíquidas (SCAR3, HBRE3, CATA3 com 119%), que ficam fora daqui pela liquidez mínima. A comparação é uma foto do dia: o Investidor10 não tem contrato de dados, e a fonte que vale é a B3.
 
+## 6.1 Uso fora do ranking (D124)
+
+O resultado também guarda `dyPorTicker`: o mesmo yield para **toda** ação com preço e proventos da B3, sem o filtro de liquidez. A análise fundamentalista de uma ação mostra esse número em "Dividend yield (12 meses)", para bater com o ranking e com o Investidor10; sem ele, usa os dividendos pagos da DFC.
+
 ## 7. Limitações conhecidas
 
 - **Data com, não data de pagamento.** O que entra é o que tinha direito no período, mesmo que pague depois. O Investidor10 e outras fontes podem usar outra convenção.

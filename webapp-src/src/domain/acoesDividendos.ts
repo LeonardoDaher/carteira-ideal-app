@@ -79,6 +79,8 @@ export interface SnapshotAcoesDividendos extends CampoAuditoriaDiaria {
   contagens: { ranking: number; exclusoes: number }
   etapas: EtapaDividendos[]
   ranking: ItemDividendos[]
+  /** DY de 12 meses de todas as ações avaliadas (o ranking guarda só as primeiras posições). */
+  dyPorTicker?: Record<string, number>
   exclusoes: ExclusaoDividendos[]
 }
 

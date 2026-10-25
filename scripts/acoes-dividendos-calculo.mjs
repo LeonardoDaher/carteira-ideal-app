@@ -120,6 +120,20 @@ export function calcularDividendos(insumos, cfg) {
     return null
   })
 
+  /** DY de toda empresa com preço e proventos da B3, sem o filtro de liquidez (ele só vale para o ranking); 0 se não pagou na janela. */
+  function dyDeTodas() {
+    const mapa = {}
+    for (const emp of insumos.empresas) {
+      const classe = classeDoTicker(emp.ticker)
+      if (!classe || !(emp.cotacao > 0) || !emp.dataCotacao || !emp.eventos?.length) continue
+      const total = ordenarEventos(emp.eventos.map((e) => ajustarPorDesdobramento(e, emp.ajustes)))
+        .filter((e) => e.classe === classe && e.dataCom > inicio && e.dataCom <= dataPrecos && tiposQueEntram.has(e.tipo))
+        .reduce((x, e) => x + e.valor, 0)
+      mapa[emp.ticker] = arred(total / emp.cotacao, 6)
+    }
+    return mapa
+  }
+
   itens.sort((a, b) => b.dy - a.dy || a.ticker.localeCompare(b.ticker))
   const ranking = itens.slice(0, cfg.rankingAteOnde).map((r, i) => ({ posicao: i + 1, ...r }))
   return {
@@ -128,6 +142,8 @@ export function calcularDividendos(insumos, cfg) {
       universo: insumos.empresas.length,
       avaliadas: itens.length,
       ranking,
+      /** DY de todas as ações avaliadas (não só as do ranking): a análise fundamentalista usa o mesmo yield das listas. */
+      dyPorTicker: dyDeTodas(),
       etapas,
       exclusoes,
     },

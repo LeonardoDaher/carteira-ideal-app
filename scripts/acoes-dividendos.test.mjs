@@ -299,7 +299,7 @@ test('empresasDoCadastro: preço do último negócio, liquidez média da janela;
   assert.equal(por.CCCC3.dataCotacao, null)
 })
 
-test('montarInsumos: só baixa quem tem preço e liquidez, uma vez por empresa; falha de uma empresa não derruba as outras', async () => {
+test('montarInsumos: baixa quem tem preço (liquidez só filtra o ranking), uma vez por empresa; falha de uma empresa não derruba as outras', async () => {
   const baixadas = []
   const baixar = async (raiz) => {
     baixadas.push(raiz)
@@ -307,13 +307,13 @@ test('montarInsumos: só baixa quem tem preço e liquidez, uma vez por empresa; 
     return { nomeDePregao: `NOME ${raiz}`, historicoDisponivel: true, sha256: 'h', eventos: [ev('2026-08-21', 1), ev('2020-01-01', 9)] }
   }
   const ins = await montarInsumos({ cadastro, historico, cfg: { ...cfg, pausaEntreChamadasMs: 0 }, baixar, log: () => {}, lerAjustes: (t) => (t === 'AAAA3' ? [{ data: '2026-04-29', fator: 5 }] : []) })
-  assert.deepEqual(baixadas, ['AAAA', 'DDDD'])
+  assert.deepEqual(baixadas, ['AAAA', 'BBBB', 'DDDD'])
   const por = Object.fromEntries(ins.empresas.map((e) => [e.ticker, e]))
   assert.deepEqual(por.AAAA3.eventos.map((e) => e.dataCom), ['2026-08-21'], 'evento de 2020 não entra nos insumos')
   assert.deepEqual(por.AAAA3.ajustes, [{ data: '2026-04-29', fator: 5 }])
   assert.equal(por.AAAA3.nomeDePregao, 'NOME AAAA')
   assert.match(por.DDDD3.motivoSemDados, /Falha ao baixar da B3: HTTP 503/)
-  assert.deepEqual(por.BBBB4.eventos, [])
+  assert.deepEqual(por.BBBB4.eventos.map((e) => e.dataCom), ['2026-08-21'], 'sem liquidez também baixa: o DY dela alimenta a análise')
   assert.deepEqual(por.CCCC3.eventos, [])
   assert.equal(ins.dataPrecos, '2026-10-22')
 })
