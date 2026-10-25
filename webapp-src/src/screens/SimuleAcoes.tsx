@@ -12,6 +12,7 @@ import { Top15Baratas } from './Top15Baratas'
 import { Top15AcoesMaisNegociadas, Top15IbovMaioresPesos } from './Top15EtfsMaisNegociados'
 import { Top15Endividadas } from './Top15Endividadas'
 import { Top15Dividendos } from './Top15Dividendos'
+import { Top15Confluencia } from './Top15Confluencia'
 import { AnaliseTecnicaAcao } from './AnaliseTecnicaAcao'
 import { AnaliseFundamentalistaAcao } from './AnaliseFundamentalistaAcao'
 import { ConfluenciaAcao } from './ConfluenciaAcao'
@@ -32,7 +33,7 @@ function inteiro(valor: number) {
 /** O que está aberto no cartão: uma empresa do cadastro (dado completo) ou um código da busca (resumido). */
 type Selecao = { origem: 'lista'; acao: Acao; setor: string } | { origem: 'busca'; acao: AcaoBusca }
 
-type AbaAcoes = 'simulador' | 'top15' | 'negociadas' | 'ibov' | 'endividadas' | 'dividendos' | 'tecnica' | 'fundamentalista' | 'confluencia'
+type AbaAcoes = 'simulador' | 'top15' | 'negociadas' | 'ibov' | 'endividadas' | 'dividendos' | 'tecnica' | 'fundamentalista' | 'confluencia' | 'top15confluencia'
 const ABAS_DE_ANALISE: AbaAcoes[] = ['tecnica', 'fundamentalista', 'confluencia']
 const HORIZONTES: Horizonte[] = ['curto', 'medio', 'longo']
 
@@ -80,6 +81,12 @@ export function SimuleAcoes({
     const m = new Map<string, number>()
     for (const b of snapshot.busca) m.set(b.ticker, b.cotacao)
     for (const st of snapshot.setores) for (const e of st.empresas) m.set(e.ticker, e.cotacao)
+    return (t: string) => m.get(t) ?? null
+  }, [snapshot])
+  const nomeDe = useMemo(() => {
+    const m = new Map<string, string>()
+    for (const b of snapshot.busca) m.set(b.ticker, b.nome ?? b.ticker)
+    for (const st of snapshot.setores) for (const e of st.empresas) m.set(e.ticker, e.nome)
     return (t: string) => m.get(t) ?? null
   }, [snapshot])
   const maisNegociadas = useMemo(() => snapshot.setores.flatMap((st) => st.empresas).sort((a, b) => b.volumeMedio - a.volumeMedio).slice(0, 10), [snapshot])
@@ -160,6 +167,7 @@ export function SimuleAcoes({
               { id: 'tecnica', emoji: '📈', titulo: 'Análise técnica', descricao: 'Tendência, níveis e risco' },
               { id: 'fundamentalista', emoji: '🧾', titulo: 'Análise fundamentalista', descricao: 'Balanços, valor justo e notas' },
               { id: 'confluencia', emoji: '🎯', titulo: 'Confluência', descricao: 'Fundamentos × gráfico' },
+              { id: 'top15confluencia', emoji: '🏆', titulo: 'Top 15 confluência', descricao: 'Positivas e negativas' },
             ] as const
           ).map((c) => (
             <button
@@ -217,6 +225,8 @@ export function SimuleAcoes({
         <Top15Endividadas />
       ) : aba === 'dividendos' ? (
         <Top15Dividendos />
+      ) : aba === 'top15confluencia' ? (
+        <Top15Confluencia precoDe={precoDe} nomeDe={nomeDe} dataPregao={snapshot.dataPregao ?? ''} horizonteInicial={horizonte} series={series} fundamentos={fundamentos} />
       ) : !selecao ? (
         <div className="card col" style={{ gap: 6 }} role="status">
           <span style={{ fontWeight: 700 }}>Os dados das ações ainda não foram carregados.</span>

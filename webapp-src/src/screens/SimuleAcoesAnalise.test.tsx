@@ -111,12 +111,12 @@ function abrir(aba: RegExp, historico: Record<string, HistoricoLongo> = {}) {
 }
 
 describe('Simule Ações: abas de análise', () => {
-  it('as três abas novas aparecem num grupo próprio, sem mexer nas seis originais', () => {
+  it('as abas de análise aparecem num grupo próprio, sem mexer nas seis originais', () => {
     render(<SimuleAcoes ctx={ctx} snapshot={snapshot} series={series} fundamentos={fundamentos} />)
     const originais = within(screen.getByRole('tablist', { name: 'O que você quer ver' })).getAllByRole('tab')
     expect(originais).toHaveLength(6)
     const novas = within(screen.getByRole('tablist', { name: 'Análise de uma ação' })).getAllByRole('tab')
-    expect(novas.map((a) => a.textContent)).toEqual([expect.stringContaining('Análise técnica'), expect.stringContaining('Análise fundamentalista'), expect.stringContaining('Confluência')])
+    expect(novas.map((a) => a.textContent)).toEqual([expect.stringContaining('Análise técnica'), expect.stringContaining('Análise fundamentalista'), expect.stringContaining('Confluência'), expect.stringContaining('Top 15 confluência')])
   })
 
   it('a análise técnica mostra resumo, gráfico, tendência por período, zonas, cenários, nota e fonte da ação escolhida', () => {
