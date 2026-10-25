@@ -134,6 +134,16 @@ describe('mercado e múltiplos', () => {
 describe('analisarFundamentos', () => {
   const analisar = (e: EmpresaFundamentos, preco = 10, todas?: EmpresaFundamentos[]) => analisarFundamentos({ empresa: e, precoDe: precoFixo(preco), todas: todas ?? [e, ...pares(e.setor)] })!
 
+  it('o DY da B3 (por ação) tem prioridade sobre o da DFC, e sem ele vale a DFC', () => {
+    const e = empresa()
+    const dy = (dyB3?: number | null) => analisarFundamentos({ empresa: e, precoDe: precoFixo(10), todas: [e, ...pares(e.setor)], dyB3 })!.dividendos.indicadores.find((i) => i.id === 'dy')!
+    const daDfc = dy(undefined).valor
+    expect(dy(0.1106).valor).toBe(0.1106)
+    expect(dy(0.1106).formula).toMatch(/B3/)
+    expect(dy(null).valor).toBe(daDfc)
+    expect(dy(0).valor).toBe(0)
+  })
+
   it('sem exercícios, não analisa', () => {
     const e = empresa()
     e.anual = []
