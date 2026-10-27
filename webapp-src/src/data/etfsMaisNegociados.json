@@ -3,16 +3,16 @@
   "acessoRestrito": false,
   "instagram": null,
   "versaoMetodologia": "1.1.0",
-  "geradoEm": "2026-10-24T06:28:19.057Z",
-  "dataExecucao": "2026-10-24",
-  "ultimoPregao": "2026-10-23",
+  "geradoEm": "2026-10-27T06:50:22.949Z",
+  "dataExecucao": "2026-10-27",
+  "ultimoPregao": "2026-10-26",
   "pastaAuditoria": "auditoria/top15-etfs/2026-10-17",
-  "hashResultado": "8f54aae43c449f90164d5e84d4a056aaab7e98b58a61eecc776bb980a38d3c69",
-  "hashInsumos": "82cfe97d9cd4ee8c7e2b36dc7e84a103832b224e88144bc4f82f82056d9e1f1b",
+  "hashResultado": "812441c1b8dbfc6459a7366e7d4a003bdce94a3dd976d7eb05d449928fcce8b8",
+  "hashInsumos": "07b651c4dad68bfaf61b00f413acbcee803685384a338dd889a209d5185767e0",
   "hashConfig": "98044bf1f49cd6fcf5e6bcfeef3e4ed62efc9c988f74fe7d828edf80a7d4e652",
   "tamanhoDaLista": 15,
   "universo": 239,
-  "elegiveis": 96,
+  "elegiveis": 99,
   "aviso": "Não é recomendação de investimento. “Mais negociado” significa apenas maior volume financeiro diário (mediana dos últimos 21 pregões): é liquidez, e não indica qualidade, custo baixo, bom momento de compra nem adequação ao seu perfil. Cada ETF tem taxa de administração, índice, risco e tributação próprios; leia o regulamento e a lâmina antes de investir. Os números vêm do Boletim de Preços da B3, são do passado e podem conter erros. Rentabilidade passada não garante rentabilidade futura. Converse com um profissional certificado antes de investir.",
   "parametros": {
     "tamanhoDaLista": 15,
@@ -26,99 +26,99 @@
   },
   "geral": [
     {
-      "ticker": "SMAL11",
-      "nome": "iShares BM&FBOVESPA Small Cap Index Fund",
-      "categoria": "Bolsa brasileira",
-      "volumeMediano": 1205449772,
-      "volumeMedio": 1233080908,
-      "diasNegociados": 21,
-      "cotacao": 137.5,
-      "dataCotacao": "2026-10-23",
-      "variacao3m": 30.9,
-      "posicaoGeral": 1
-    },
-    {
       "ticker": "BOVA11",
       "nome": "iShares Ibovespa",
       "categoria": "Bolsa brasileira",
-      "volumeMediano": 1112441790,
-      "volumeMedio": 1184709089,
+      "volumeMediano": 1253473443,
+      "volumeMedio": 1348406110,
       "diasNegociados": 21,
-      "cotacao": 201.69,
-      "dataCotacao": "2026-10-23",
-      "variacao3m": 18,
+      "cotacao": 172.42,
+      "dataCotacao": "2026-10-26",
+      "variacao3m": -0.2,
+      "posicaoGeral": 1
+    },
+    {
+      "ticker": "SMAL11",
+      "nome": "iShares BM&FBOVESPA Small Cap Index Fund",
+      "categoria": "Bolsa brasileira",
+      "volumeMediano": 1242158766,
+      "volumeMedio": 1372261106,
+      "diasNegociados": 21,
+      "cotacao": 98.81,
+      "dataCotacao": "2026-10-26",
+      "variacao3m": -7.4,
       "posicaoGeral": 2
     },
     {
       "ticker": "LFTB11",
       "nome": "Investo ETF Marketvector Brazil Treasury 760 Day Target Duration",
       "categoria": "Renda fixa",
-      "volumeMediano": 90191881,
-      "volumeMedio": 84233927,
+      "volumeMediano": 95880484,
+      "volumeMedio": 90971609,
       "diasNegociados": 21,
-      "cotacao": 129.72,
-      "dataCotacao": "2026-10-23",
-      "variacao3m": 4.5,
+      "cotacao": 127.92,
+      "dataCotacao": "2026-10-26",
+      "variacao3m": 3,
       "posicaoGeral": 3
     },
     {
       "ticker": "BOVV11",
       "nome": "IT Now Ibovespa",
       "categoria": "Bolsa brasileira",
-      "volumeMediano": 83855013,
-      "volumeMedio": 104087250,
+      "volumeMediano": 87062004,
+      "volumeMedio": 140005143,
       "diasNegociados": 21,
-      "cotacao": 211.86,
-      "dataCotacao": "2026-10-23",
-      "variacao3m": 18.2,
+      "cotacao": 182.3,
+      "dataCotacao": "2026-10-26",
+      "variacao3m": 0.8,
       "posicaoGeral": 4
     },
     {
       "ticker": "IVVB11",
       "nome": "iShares S&P 500",
       "categoria": "Bolsa exterior",
-      "volumeMediano": 70005291,
-      "volumeMedio": 78262079,
+      "volumeMediano": 71751309,
+      "volumeMedio": 96378420,
       "diasNegociados": 21,
-      "cotacao": 430,
-      "dataCotacao": "2026-10-23",
-      "variacao3m": 1.2,
+      "cotacao": 468.54,
+      "dataCotacao": "2026-10-26",
+      "variacao3m": 9.8,
       "posicaoGeral": 5
+    },
+    {
+      "ticker": "DIVO11",
+      "nome": "IT NOW IDIV",
+      "categoria": "Bolsa brasileira",
+      "volumeMediano": 42411856,
+      "volumeMedio": 53629692,
+      "diasNegociados": 21,
+      "cotacao": 126.57,
+      "dataCotacao": "2026-10-26",
+      "variacao3m": -0.7,
+      "posicaoGeral": 6
     },
     {
       "ticker": "BOVX11",
       "nome": "Trend ETF Ibovespa",
       "categoria": "Bolsa brasileira",
       "volumeMediano": 34747283,
-      "volumeMedio": 44795281,
+      "volumeMedio": 45451117,
       "diasNegociados": 21,
-      "cotacao": 21.1,
-      "dataCotacao": "2026-10-23",
-      "variacao3m": 18.3,
-      "posicaoGeral": 6
-    },
-    {
-      "ticker": "DIVO11",
-      "nome": "IT NOW IDIV",
-      "categoria": "Bolsa brasileira",
-      "volumeMediano": 33747145,
-      "volumeMedio": 47929325,
-      "diasNegociados": 21,
-      "cotacao": 146.12,
-      "dataCotacao": "2026-10-23",
-      "variacao3m": 15.3,
+      "cotacao": 18.13,
+      "dataCotacao": "2026-10-26",
+      "variacao3m": 0.6,
       "posicaoGeral": 7
     },
     {
       "ticker": "LFTS11",
       "nome": "Investo Teva Tesouro Selic ETF",
       "categoria": "Renda fixa",
-      "volumeMediano": 24825739,
-      "volumeMedio": 26407604,
+      "volumeMediano": 24922314,
+      "volumeMedio": 28966395,
       "diasNegociados": 21,
-      "cotacao": 161.86,
-      "dataCotacao": "2026-10-23",
-      "variacao3m": 3.2,
+      "cotacao": 161.5,
+      "dataCotacao": "2026-10-26",
+      "variacao3m": 2.9,
       "posicaoGeral": 8
     },
     {
@@ -126,11 +126,11 @@
       "nome": "BB ETF Ibovespa",
       "categoria": "Bolsa brasileira",
       "volumeMediano": 24028435,
-      "volumeMedio": 39854104,
+      "volumeMedio": 40280505,
       "diasNegociados": 21,
-      "cotacao": 108.05,
-      "dataCotacao": "2026-10-23",
-      "variacao3m": 18.1,
+      "cotacao": 93.11,
+      "dataCotacao": "2026-10-26",
+      "variacao3m": 1.1,
       "posicaoGeral": 9
     },
     {
@@ -138,99 +138,99 @@
       "nome": "It Now S&P 500 Futures Quanto BRL",
       "categoria": "Bolsa exterior",
       "volumeMediano": 23919420,
-      "volumeMedio": 27733544,
+      "volumeMedio": 26696346,
       "diasNegociados": 21,
-      "cotacao": 75.36,
-      "dataCotacao": "2026-10-23",
-      "variacao3m": 5,
+      "cotacao": 76.24,
+      "dataCotacao": "2026-10-26",
+      "variacao3m": 5.8,
       "posicaoGeral": 10
     },
     {
       "ticker": "GOLD11",
       "nome": "Gold - Trend ETF LBMA Ouro",
       "categoria": "Ouro, dólar e commodities",
-      "volumeMediano": 22811193,
-      "volumeMedio": 25395824,
+      "volumeMediano": 22957219,
+      "volumeMedio": 28815690,
       "diasNegociados": 21,
-      "cotacao": 20.74,
-      "dataCotacao": "2026-10-23",
-      "variacao3m": -2.9,
+      "cotacao": 22.48,
+      "dataCotacao": "2026-10-26",
+      "variacao3m": 3.5,
       "posicaoGeral": 11
     },
     {
       "ticker": "LTBX11",
       "nome": "Trend ETF Teva ITBR SELIC Target 760",
       "categoria": "Renda fixa",
-      "volumeMediano": 19538502,
-      "volumeMedio": 21273710,
+      "volumeMediano": 20041674,
+      "volumeMedio": 22320836,
       "diasNegociados": 21,
-      "cotacao": 27.24,
-      "dataCotacao": "2026-10-23",
-      "variacao3m": 4.5,
+      "cotacao": 26.82,
+      "dataCotacao": "2026-10-26",
+      "variacao3m": 2.8,
       "posicaoGeral": 12
     },
     {
       "ticker": "NASD11",
       "nome": "Trend ETF Nasdaq 100",
       "categoria": "Bolsa exterior",
-      "volumeMediano": 17494756,
-      "volumeMedio": 18511454,
+      "volumeMediano": 18290172,
+      "volumeMedio": 21165533,
       "diasNegociados": 21,
-      "cotacao": 20.15,
-      "dataCotacao": "2026-10-23",
-      "variacao3m": 1.2,
+      "cotacao": 22.01,
+      "dataCotacao": "2026-10-26",
+      "variacao3m": 10.4,
       "posicaoGeral": 13
     },
     {
       "ticker": "AUPO11",
       "nome": "BTG Pactual Teva AUVP ITBR Liquidez",
       "categoria": "Renda fixa",
-      "volumeMediano": 16893738,
-      "volumeMedio": 16357372,
+      "volumeMediano": 16935769,
+      "volumeMedio": 17449209,
       "diasNegociados": 21,
-      "cotacao": 112.84,
-      "dataCotacao": "2026-10-23",
-      "variacao3m": 4.4,
+      "cotacao": 111.28,
+      "dataCotacao": "2026-10-26",
+      "variacao3m": 3,
       "posicaoGeral": 14
     },
     {
-      "ticker": "IBOB11",
-      "nome": "BTG Pactual B3 Ibovespa",
-      "categoria": "Bolsa brasileira",
-      "volumeMediano": 16380555,
-      "volumeMedio": 18894122,
+      "ticker": "B5P211",
+      "nome": "IT Now IMA-B5 P2",
+      "categoria": "Renda fixa",
+      "volumeMediano": 14856828,
+      "volumeMedio": 25281029,
       "diasNegociados": 21,
-      "cotacao": 169.24,
-      "dataCotacao": "2026-10-23",
-      "variacao3m": 18.1,
+      "cotacao": 114.28,
+      "dataCotacao": "2026-10-26",
+      "variacao3m": 4.6,
       "posicaoGeral": 15
     }
   ],
   "porCategoria": {
     "Bolsa brasileira": [
       {
-        "ticker": "SMAL11",
-        "nome": "iShares BM&FBOVESPA Small Cap Index Fund",
+        "ticker": "BOVA11",
+        "nome": "iShares Ibovespa",
         "categoria": "Bolsa brasileira",
-        "volumeMediano": 1205449772,
-        "volumeMedio": 1233080908,
+        "volumeMediano": 1253473443,
+        "volumeMedio": 1348406110,
         "diasNegociados": 21,
-        "cotacao": 137.5,
-        "dataCotacao": "2026-10-23",
-        "variacao3m": 30.9,
+        "cotacao": 172.42,
+        "dataCotacao": "2026-10-26",
+        "variacao3m": -0.2,
         "posicaoGeral": 1,
         "posicaoNaCategoria": 1
       },
       {
-        "ticker": "BOVA11",
-        "nome": "iShares Ibovespa",
+        "ticker": "SMAL11",
+        "nome": "iShares BM&FBOVESPA Small Cap Index Fund",
         "categoria": "Bolsa brasileira",
-        "volumeMediano": 1112441790,
-        "volumeMedio": 1184709089,
+        "volumeMediano": 1242158766,
+        "volumeMedio": 1372261106,
         "diasNegociados": 21,
-        "cotacao": 201.69,
-        "dataCotacao": "2026-10-23",
-        "variacao3m": 18,
+        "cotacao": 98.81,
+        "dataCotacao": "2026-10-26",
+        "variacao3m": -7.4,
         "posicaoGeral": 2,
         "posicaoNaCategoria": 2
       },
@@ -238,38 +238,38 @@
         "ticker": "BOVV11",
         "nome": "IT Now Ibovespa",
         "categoria": "Bolsa brasileira",
-        "volumeMediano": 83855013,
-        "volumeMedio": 104087250,
+        "volumeMediano": 87062004,
+        "volumeMedio": 140005143,
         "diasNegociados": 21,
-        "cotacao": 211.86,
-        "dataCotacao": "2026-10-23",
-        "variacao3m": 18.2,
+        "cotacao": 182.3,
+        "dataCotacao": "2026-10-26",
+        "variacao3m": 0.8,
         "posicaoGeral": 4,
         "posicaoNaCategoria": 3
+      },
+      {
+        "ticker": "DIVO11",
+        "nome": "IT NOW IDIV",
+        "categoria": "Bolsa brasileira",
+        "volumeMediano": 42411856,
+        "volumeMedio": 53629692,
+        "diasNegociados": 21,
+        "cotacao": 126.57,
+        "dataCotacao": "2026-10-26",
+        "variacao3m": -0.7,
+        "posicaoGeral": 6,
+        "posicaoNaCategoria": 4
       },
       {
         "ticker": "BOVX11",
         "nome": "Trend ETF Ibovespa",
         "categoria": "Bolsa brasileira",
         "volumeMediano": 34747283,
-        "volumeMedio": 44795281,
+        "volumeMedio": 45451117,
         "diasNegociados": 21,
-        "cotacao": 21.1,
-        "dataCotacao": "2026-10-23",
-        "variacao3m": 18.3,
-        "posicaoGeral": 6,
-        "posicaoNaCategoria": 4
-      },
-      {
-        "ticker": "DIVO11",
-        "nome": "IT NOW IDIV",
-        "categoria": "Bolsa brasileira",
-        "volumeMediano": 33747145,
-        "volumeMedio": 47929325,
-        "diasNegociados": 21,
-        "cotacao": 146.12,
-        "dataCotacao": "2026-10-23",
-        "variacao3m": 15.3,
+        "cotacao": 18.13,
+        "dataCotacao": "2026-10-26",
+        "variacao3m": 0.6,
         "posicaoGeral": 7,
         "posicaoNaCategoria": 5
       }
@@ -279,12 +279,12 @@
         "ticker": "IVVB11",
         "nome": "iShares S&P 500",
         "categoria": "Bolsa exterior",
-        "volumeMediano": 70005291,
-        "volumeMedio": 78262079,
+        "volumeMediano": 71751309,
+        "volumeMedio": 96378420,
         "diasNegociados": 21,
-        "cotacao": 430,
-        "dataCotacao": "2026-10-23",
-        "variacao3m": 1.2,
+        "cotacao": 468.54,
+        "dataCotacao": "2026-10-26",
+        "variacao3m": 9.8,
         "posicaoGeral": 5,
         "posicaoNaCategoria": 1
       },
@@ -293,11 +293,11 @@
         "nome": "It Now S&P 500 Futures Quanto BRL",
         "categoria": "Bolsa exterior",
         "volumeMediano": 23919420,
-        "volumeMedio": 27733544,
+        "volumeMedio": 26696346,
         "diasNegociados": 21,
-        "cotacao": 75.36,
-        "dataCotacao": "2026-10-23",
-        "variacao3m": 5,
+        "cotacao": 76.24,
+        "dataCotacao": "2026-10-26",
+        "variacao3m": 5.8,
         "posicaoGeral": 10,
         "posicaoNaCategoria": 2
       },
@@ -305,12 +305,12 @@
         "ticker": "NASD11",
         "nome": "Trend ETF Nasdaq 100",
         "categoria": "Bolsa exterior",
-        "volumeMediano": 17494756,
-        "volumeMedio": 18511454,
+        "volumeMediano": 18290172,
+        "volumeMedio": 21165533,
         "diasNegociados": 21,
-        "cotacao": 20.15,
-        "dataCotacao": "2026-10-23",
-        "variacao3m": 1.2,
+        "cotacao": 22.01,
+        "dataCotacao": "2026-10-26",
+        "variacao3m": 10.4,
         "posicaoGeral": 13,
         "posicaoNaCategoria": 3
       },
@@ -318,12 +318,12 @@
         "ticker": "SPXI11",
         "nome": "It Now S&P500 TRN",
         "categoria": "Bolsa exterior",
-        "volumeMediano": 10953489,
-        "volumeMedio": 11628335,
+        "volumeMediano": 11986056,
+        "volumeMedio": 11678763,
         "diasNegociados": 21,
-        "cotacao": 52.2,
-        "dataCotacao": "2026-10-23",
-        "variacao3m": 1.8,
+        "cotacao": 57,
+        "dataCotacao": "2026-10-26",
+        "variacao3m": 9.3,
         "posicaoGeral": 19,
         "posicaoNaCategoria": 4
       },
@@ -331,13 +331,13 @@
         "ticker": "WRLD11",
         "nome": "Investo FTSE Global Equities ETF",
         "categoria": "Bolsa exterior",
-        "volumeMediano": 10525279,
-        "volumeMedio": 13168189,
+        "volumeMediano": 10556511,
+        "volumeMedio": 14459605,
         "diasNegociados": 21,
-        "cotacao": 140.74,
-        "dataCotacao": "2026-10-23",
-        "variacao3m": -0.6,
-        "posicaoGeral": 20,
+        "cotacao": 153.61,
+        "dataCotacao": "2026-10-26",
+        "variacao3m": 7.6,
+        "posicaoGeral": 21,
         "posicaoNaCategoria": 5
       }
     ],
@@ -346,12 +346,12 @@
         "ticker": "LFTB11",
         "nome": "Investo ETF Marketvector Brazil Treasury 760 Day Target Duration",
         "categoria": "Renda fixa",
-        "volumeMediano": 90191881,
-        "volumeMedio": 84233927,
+        "volumeMediano": 95880484,
+        "volumeMedio": 90971609,
         "diasNegociados": 21,
-        "cotacao": 129.72,
-        "dataCotacao": "2026-10-23",
-        "variacao3m": 4.5,
+        "cotacao": 127.92,
+        "dataCotacao": "2026-10-26",
+        "variacao3m": 3,
         "posicaoGeral": 3,
         "posicaoNaCategoria": 1
       },
@@ -359,12 +359,12 @@
         "ticker": "LFTS11",
         "nome": "Investo Teva Tesouro Selic ETF",
         "categoria": "Renda fixa",
-        "volumeMediano": 24825739,
-        "volumeMedio": 26407604,
+        "volumeMediano": 24922314,
+        "volumeMedio": 28966395,
         "diasNegociados": 21,
-        "cotacao": 161.86,
-        "dataCotacao": "2026-10-23",
-        "variacao3m": 3.2,
+        "cotacao": 161.5,
+        "dataCotacao": "2026-10-26",
+        "variacao3m": 2.9,
         "posicaoGeral": 8,
         "posicaoNaCategoria": 2
       },
@@ -372,12 +372,12 @@
         "ticker": "LTBX11",
         "nome": "Trend ETF Teva ITBR SELIC Target 760",
         "categoria": "Renda fixa",
-        "volumeMediano": 19538502,
-        "volumeMedio": 21273710,
+        "volumeMediano": 20041674,
+        "volumeMedio": 22320836,
         "diasNegociados": 21,
-        "cotacao": 27.24,
-        "dataCotacao": "2026-10-23",
-        "variacao3m": 4.5,
+        "cotacao": 26.82,
+        "dataCotacao": "2026-10-26",
+        "variacao3m": 2.8,
         "posicaoGeral": 12,
         "posicaoNaCategoria": 3
       },
@@ -385,12 +385,12 @@
         "ticker": "AUPO11",
         "nome": "BTG Pactual Teva AUVP ITBR Liquidez",
         "categoria": "Renda fixa",
-        "volumeMediano": 16893738,
-        "volumeMedio": 16357372,
+        "volumeMediano": 16935769,
+        "volumeMedio": 17449209,
         "diasNegociados": 21,
-        "cotacao": 112.84,
-        "dataCotacao": "2026-10-23",
-        "variacao3m": 4.4,
+        "cotacao": 111.28,
+        "dataCotacao": "2026-10-26",
+        "variacao3m": 3,
         "posicaoGeral": 14,
         "posicaoNaCategoria": 4
       },
@@ -398,13 +398,13 @@
         "ticker": "B5P211",
         "nome": "IT Now IMA-B5 P2",
         "categoria": "Renda fixa",
-        "volumeMediano": 14537385,
-        "volumeMedio": 23305690,
+        "volumeMediano": 14856828,
+        "volumeMedio": 25281029,
         "diasNegociados": 21,
-        "cotacao": 116.15,
-        "dataCotacao": "2026-10-23",
-        "variacao3m": 6.4,
-        "posicaoGeral": 16,
+        "cotacao": 114.28,
+        "dataCotacao": "2026-10-26",
+        "variacao3m": 4.6,
+        "posicaoGeral": 15,
         "posicaoNaCategoria": 5
       }
     ],
@@ -413,12 +413,12 @@
         "ticker": "GOLD11",
         "nome": "Gold - Trend ETF LBMA Ouro",
         "categoria": "Ouro, dólar e commodities",
-        "volumeMediano": 22811193,
-        "volumeMedio": 25395824,
+        "volumeMediano": 22957219,
+        "volumeMedio": 28815690,
         "diasNegociados": 21,
-        "cotacao": 20.74,
-        "dataCotacao": "2026-10-23",
-        "variacao3m": -2.9,
+        "cotacao": 22.48,
+        "dataCotacao": "2026-10-26",
+        "variacao3m": 3.5,
         "posicaoGeral": 11,
         "posicaoNaCategoria": 1
       },
@@ -427,11 +427,11 @@
         "nome": "BB ETF Indice Futuro De Dolar S&P/B3",
         "categoria": "Ouro, dólar e commodities",
         "volumeMediano": 6423905,
-        "volumeMedio": 7047957,
+        "volumeMedio": 8150584,
         "diasNegociados": 21,
-        "cotacao": 10.06,
-        "dataCotacao": "2026-10-23",
-        "variacao3m": 0.6,
+        "cotacao": 10.72,
+        "dataCotacao": "2026-10-26",
+        "variacao3m": 6.5,
         "posicaoGeral": 28,
         "posicaoNaCategoria": 2
       },
@@ -440,11 +440,11 @@
         "nome": "Trend ETF B3 Ouro",
         "categoria": "Ouro, dólar e commodities",
         "volumeMediano": 3857728,
-        "volumeMedio": 6495207,
+        "volumeMedio": 7181225,
         "diasNegociados": 21,
-        "cotacao": 47.9,
-        "dataCotacao": "2026-10-23",
-        "variacao3m": 0.1,
+        "cotacao": 48.19,
+        "dataCotacao": "2026-10-26",
+        "variacao3m": 0,
         "posicaoGeral": 39,
         "posicaoNaCategoria": 3
       },
@@ -452,13 +452,13 @@
         "ticker": "DOLX11",
         "nome": "Trend ETF S&P/B3 Dollar",
         "categoria": "Ouro, dólar e commodities",
-        "volumeMediano": 1167015,
-        "volumeMedio": 1657743,
+        "volumeMediano": 1261947,
+        "volumeMedio": 1772649,
         "diasNegociados": 21,
-        "cotacao": 46.62,
-        "dataCotacao": "2026-10-23",
-        "variacao3m": -1.2,
-        "posicaoGeral": 79,
+        "cotacao": 50.4,
+        "dataCotacao": "2026-10-26",
+        "variacao3m": 6.4,
+        "posicaoGeral": 76,
         "posicaoNaCategoria": 4
       },
       {
@@ -466,12 +466,12 @@
         "nome": "BTG Pactual Futuro de Ouro B3",
         "categoria": "Ouro, dólar e commodities",
         "volumeMediano": 1111396,
-        "volumeMedio": 1467176,
+        "volumeMedio": 1815932,
         "diasNegociados": 21,
-        "cotacao": 101.42,
-        "dataCotacao": "2026-10-23",
-        "variacao3m": 0.2,
-        "posicaoGeral": 81,
+        "cotacao": 102.52,
+        "dataCotacao": "2026-10-26",
+        "variacao3m": 0.3,
+        "posicaoGeral": 82,
         "posicaoNaCategoria": 5
       }
     ],
@@ -481,12 +481,12 @@
         "nome": "Hashdex Nasdaq Crypto Index",
         "categoria": "Cripto",
         "volumeMediano": 9651065,
-        "volumeMedio": 11108071,
+        "volumeMedio": 12429501,
         "diasNegociados": 21,
-        "cotacao": 52,
-        "dataCotacao": "2026-10-23",
-        "variacao3m": 24.6,
-        "posicaoGeral": 21,
+        "cotacao": 54.72,
+        "dataCotacao": "2026-10-26",
+        "variacao3m": 26.8,
+        "posicaoGeral": 23,
         "posicaoNaCategoria": 1
       },
       {
@@ -494,11 +494,11 @@
         "nome": "Hashdex Nasdaq Bitcoin Reference Rate",
         "categoria": "Cripto",
         "volumeMediano": 7597001,
-        "volumeMedio": 7110104,
+        "volumeMedio": 8092613,
         "diasNegociados": 21,
-        "cotacao": 91.75,
-        "dataCotacao": "2026-10-23",
-        "variacao3m": 24.5,
+        "cotacao": 95.03,
+        "dataCotacao": "2026-10-26",
+        "variacao3m": 27.5,
         "posicaoGeral": 26,
         "posicaoNaCategoria": 2
       },
@@ -507,11 +507,11 @@
         "nome": "HASHDEX NASDAQ ETHEREUM REFERENCE PRICE ETF",
         "categoria": "Cripto",
         "volumeMediano": 4291007,
-        "volumeMedio": 4562075,
+        "volumeMedio": 5004017,
         "diasNegociados": 21,
-        "cotacao": 34.4,
-        "dataCotacao": "2026-10-23",
-        "variacao3m": 25.1,
+        "cotacao": 35.69,
+        "dataCotacao": "2026-10-26",
+        "variacao3m": 23.6,
         "posicaoGeral": 36,
         "posicaoNaCategoria": 3
       },
@@ -519,26 +519,26 @@
         "ticker": "COIN11",
         "nome": "Buena Vista Neos Bitcoin High Income Etf",
         "categoria": "Cripto",
-        "volumeMediano": 2460642,
-        "volumeMedio": 2573137,
+        "volumeMediano": 2568475,
+        "volumeMedio": 2844562,
         "diasNegociados": 21,
-        "cotacao": 42.24,
-        "dataCotacao": "2026-10-23",
-        "variacao3m": 10.5,
-        "posicaoGeral": 44,
+        "cotacao": 43.8,
+        "dataCotacao": "2026-10-26",
+        "variacao3m": 12.7,
+        "posicaoGeral": 46,
         "posicaoNaCategoria": 4
       },
       {
         "ticker": "QBTC11",
         "nome": "QR CME CF Bitcoin Reference Rate",
         "categoria": "Cripto",
-        "volumeMediano": 2113626,
-        "volumeMedio": 2449223,
+        "volumeMediano": 2173586,
+        "volumeMedio": 2943440,
         "diasNegociados": 21,
-        "cotacao": 24.3,
-        "dataCotacao": "2026-10-23",
-        "variacao3m": 22.9,
-        "posicaoGeral": 53,
+        "cotacao": 25.7,
+        "dataCotacao": "2026-10-26",
+        "variacao3m": 28.5,
+        "posicaoGeral": 55,
         "posicaoNaCategoria": 5
       }
     ],
@@ -547,26 +547,26 @@
         "ticker": "FIND11",
         "nome": "IT Now IFNC",
         "categoria": "Outros",
-        "volumeMediano": 8066789,
-        "volumeMedio": 14645032,
+        "volumeMediano": 12476330,
+        "volumeMedio": 16620072,
         "diasNegociados": 21,
-        "cotacao": 225.5,
-        "dataCotacao": "2026-10-23",
-        "variacao3m": 25.8,
-        "posicaoGeral": 24,
+        "cotacao": 174.85,
+        "dataCotacao": "2026-10-26",
+        "variacao3m": -3.6,
+        "posicaoGeral": 18,
         "posicaoNaCategoria": 1
       },
       {
         "ticker": "SMAC11",
         "nome": "IT Now Small Cap",
         "categoria": "Outros",
-        "volumeMediano": 4984290,
-        "volumeMedio": 8809162,
+        "volumeMediano": 5545729,
+        "volumeMedio": 9772200,
         "diasNegociados": 21,
-        "cotacao": 71.71,
-        "dataCotacao": "2026-10-23",
-        "variacao3m": 31.7,
-        "posicaoGeral": 33,
+        "cotacao": 52.39,
+        "dataCotacao": "2026-10-26",
+        "variacao3m": -5.6,
+        "posicaoGeral": 32,
         "posicaoNaCategoria": 2
       },
       {
@@ -574,11 +574,11 @@
         "nome": "Itau Isento Setembro 29 FIC de Fundos Incentivados de Inv Financeiro em Infraestrutura Renda Fixa Resp Limitada",
         "categoria": "Outros",
         "volumeMediano": 4170037,
-        "volumeMedio": 8044214,
-        "diasNegociados": 18,
+        "volumeMedio": 7962093,
+        "diasNegociados": 17,
         "cotacao": 1160.92,
         "dataCotacao": "2026-10-20",
-        "variacao3m": 0.8,
+        "variacao3m": -3.8,
         "posicaoGeral": 37,
         "posicaoNaCategoria": 3
       },
@@ -587,12 +587,12 @@
         "nome": "IT Now IMA-B5+",
         "categoria": "Outros",
         "volumeMediano": 2833418,
-        "volumeMedio": 4035888,
+        "volumeMedio": 4097650,
         "diasNegociados": 21,
-        "cotacao": 139.32,
-        "dataCotacao": "2026-10-23",
-        "variacao3m": 14.5,
-        "posicaoGeral": 40,
+        "cotacao": 128.38,
+        "dataCotacao": "2026-10-26",
+        "variacao3m": 5.3,
+        "posicaoGeral": 41,
         "posicaoNaCategoria": 4
       },
       {
@@ -600,12 +600,12 @@
         "nome": "Ishares Bovespa BR+ Equal Weight",
         "categoria": "Outros",
         "volumeMediano": 2678142,
-        "volumeMedio": 2965728,
-        "diasNegociados": 21,
+        "volumeMedio": 2964810,
+        "diasNegociados": 20,
         "cotacao": 153.38,
         "dataCotacao": "2026-10-23",
-        "variacao3m": 23.1,
-        "posicaoGeral": 43,
+        "variacao3m": 21.6,
+        "posicaoGeral": 44,
         "posicaoNaCategoria": 5
       }
     ]
@@ -644,7 +644,7 @@
       "nome": "Trend ETF Bloomberg Aggregate US Bonds",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 19.884 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 20.624 por dia (mínimo 500.000)."
     },
     {
       "ticker": "AGRI11",
@@ -658,7 +658,7 @@
       "nome": "Investo MSCI US Real Estate ETF",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 211.755 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 227.254 por dia (mínimo 500.000)."
     },
     {
       "ticker": "AMAB11",
@@ -679,7 +679,7 @@
       "nome": "Investo Argentina",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 74.502 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 92.322 por dia (mínimo 500.000)."
     },
     {
       "ticker": "AURO11",
@@ -700,14 +700,14 @@
       "nome": "BB ETF Indice Futuro de Boi Gordo B3",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 77.698 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 95.561 por dia (mínimo 500.000)."
     },
     {
       "ticker": "BBSD11",
       "nome": "BB ETF S&P Dividendos Brasil",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 14.542 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 17.327 por dia (mínimo 500.000)."
     },
     {
       "ticker": "BDAP11",
@@ -728,7 +728,7 @@
       "nome": "Inter Infra",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 150.241 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 147.938 por dia (mínimo 500.000)."
     },
     {
       "ticker": "BITC11",
@@ -749,7 +749,7 @@
       "nome": "Investo Mvisrus Business Development Companies Index ETF",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 31.050 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 32.252 por dia (mínimo 500.000)."
     },
     {
       "ticker": "BMMT11",
@@ -770,14 +770,14 @@
       "nome": "Investo Brasil Bancos B3",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 29.872 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 31.805 por dia (mínimo 500.000)."
     },
     {
       "ticker": "BOL511",
       "nome": "B-Index ETF IMA-B 5 P2",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 232.940 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 230.161 por dia (mínimo 500.000)."
     },
     {
       "ticker": "BOVS11",
@@ -798,14 +798,14 @@
       "nome": "Bb Etf Indice Bovespa B3 Br",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 744 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 1.414 por dia (mínimo 500.000)."
     },
     {
       "ticker": "BRIA11",
       "nome": "Bindex ETF FTSE AI Global Leaders",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 19.503 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 18.385 por dia (mínimo 500.000)."
     },
     {
       "ticker": "BRXC11",
@@ -826,7 +826,7 @@
       "nome": "Fundo de Investimento Imobiliario BTG Pactual Terras Agricolas",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 141.331 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 123.724 por dia (mínimo 500.000)."
     },
     {
       "ticker": "BVBR11",
@@ -847,14 +847,14 @@
       "nome": "BTG Pactual Reference MSCI Brazil 25/50",
       "categoria": "Bolsa brasileira",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 41.001 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 45.517 por dia (mínimo 500.000)."
     },
     {
       "ticker": "CASA11",
       "nome": "Buena Vista Vi",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 145.534 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 149.418 por dia (mínimo 500.000)."
     },
     {
       "ticker": "CLOB11",
@@ -882,14 +882,14 @@
       "nome": "Empiricus Teva Criptomoedas TOP20",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 24.190 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 25.803 por dia (mínimo 500.000)."
     },
     {
       "ticker": "DEFI11",
       "nome": "Hashdex Defi Index",
       "categoria": "Cripto",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 182.844 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 172.251 por dia (mínimo 500.000)."
     },
     {
       "ticker": "DIGY11",
@@ -903,21 +903,21 @@
       "nome": "BTG PACTUAL TEVA INFRAESTRUTURA HIBRIDO ETF",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 4.296 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 4.769 por dia (mínimo 500.000)."
     },
     {
       "ticker": "DOLB11",
       "nome": "BTG Pactual Reference S&P/B3 Cambial",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 411.727 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 481.648 por dia (mínimo 500.000)."
     },
     {
       "ticker": "DVER11",
       "nome": "BB ETF Indice Diversidade B3 Investimento Sustentavel",
       "categoria": "Bolsa brasileira",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 131.948 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 135.480 por dia (mínimo 500.000)."
     },
     {
       "ticker": "EBIT11",
@@ -938,14 +938,14 @@
       "nome": "BTG Pactual Teva Ethereum",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 7.254 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 8.727 por dia (mínimo 500.000)."
     },
     {
       "ticker": "ELAS11",
       "nome": "Safra ETF Mulheres na Lideranca",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 20.045 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 17.824 por dia (mínimo 500.000)."
     },
     {
       "ticker": "ESGB11",
@@ -959,42 +959,42 @@
       "nome": "Galapagos Morningstar US Total Market Acoes",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 2.036 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 1.983 por dia (mínimo 500.000)."
     },
     {
       "ticker": "FDES11",
       "nome": "Fundo Desenvolvimento Espirito Santo- FUNDES Cotas",
       "categoria": "Outros",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 5 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "FIXA11",
       "nome": "BB ETF Renda Fixa Pre Indice Futuro de Taxas de Juros S&P/B3",
       "categoria": "Renda fixa",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 172.225 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 166.239 por dia (mínimo 500.000)."
     },
     {
       "ticker": "FIXX11",
       "nome": "Buena Vista NEOS Enhanced Income 1-3 Month T-Bill ETF",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 42.063 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 44.625 por dia (mínimo 500.000)."
     },
     {
       "ticker": "FOMO11",
       "nome": "Hashdex Momentum FI",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 17.176 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 17.411 por dia (mínimo 500.000)."
     },
     {
       "ticker": "FSPE11",
       "nome": "Fiset Pesca FISET FSPE Pfd",
       "categoria": "Outros",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 6 pregões (máximo 5)."
+      "motivo": "Último negócio há 7 pregões (máximo 5)."
     },
     {
       "ticker": "FSRF11",
@@ -1008,7 +1008,7 @@
       "nome": "Galapagos Bitcoin CME CF",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 419 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 251 por dia (mínimo 500.000)."
     },
     {
       "ticker": "GBTC11",
@@ -1022,7 +1022,7 @@
       "nome": "Buena Vista Dex Neos International High Income",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 56.031 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 59.136 por dia (mínimo 500.000)."
     },
     {
       "ticker": "GENB11",
@@ -1036,14 +1036,14 @@
       "nome": "Genial Teva Debentures DI Quality High Beta",
       "categoria": "Renda fixa",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 10.453 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 7.632 por dia (mínimo 500.000)."
     },
     {
       "ticker": "GLDI11",
       "nome": "IT Now Gold BRL",
       "categoria": "Ouro, dólar e commodities",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 251.565 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 195.032 por dia (mínimo 500.000)."
     },
     {
       "ticker": "GLDX11",
@@ -1057,7 +1057,7 @@
       "nome": "Galapagos Teva Acoes Energia Limpa IS ESG",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 1.289 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 1.124 por dia (mínimo 500.000)."
     },
     {
       "ticker": "GOAT11",
@@ -1071,7 +1071,7 @@
       "nome": "IT Now IGCT",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 7.629 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 8.678 por dia (mínimo 500.000)."
     },
     {
       "ticker": "GXUS11",
@@ -1085,14 +1085,14 @@
       "nome": "Hedge Brasil Equity Reits",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 24.096 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 28.172 por dia (mínimo 500.000)."
     },
     {
       "ticker": "HTEK11",
       "nome": "IT Now Morningstar XT US Healthcare",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 56.473 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 63.549 por dia (mínimo 500.000)."
     },
     {
       "ticker": "HYBR11",
@@ -1106,7 +1106,7 @@
       "nome": "Itau Isento Set28",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 170.148 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 166.939 por dia (mínimo 500.000)."
     },
     {
       "ticker": "ISNN11",
@@ -1141,7 +1141,7 @@
       "nome": "Buena Vista Neos Russell 2000 High Income Etf",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 211.772 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 229.021 por dia (mínimo 500.000)."
     },
     {
       "ticker": "JOGO11",
@@ -1149,20 +1149,6 @@
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
       "motivo": "Volume mediano de R$ 19.085 por dia (mínimo 500.000)."
-    },
-    {
-      "ticker": "LFTI11",
-      "nome": "IT Now Teva Tesouro SELIC",
-      "categoria": "Renda fixa",
-      "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 365.472 por dia (mínimo 500.000)."
-    },
-    {
-      "ticker": "LFTX11",
-      "nome": "Trend ETF B3 Tesouro SELIC",
-      "categoria": "Renda fixa",
-      "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 474.386 por dia (mínimo 500.000)."
     },
     {
       "ticker": "LTNB11",
@@ -1176,7 +1162,7 @@
       "nome": "BTG Pactual Margem Debentures Ultra Qualidade Di B3",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 151.914 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 171.793 por dia (mínimo 500.000)."
     },
     {
       "ticker": "META11",
@@ -1197,7 +1183,7 @@
       "nome": "IT Now Morningstar Us Digital Lifestyle",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 9.914 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 10.333 por dia (mínimo 500.000)."
     },
     {
       "ticker": "NBIT11",
@@ -1214,25 +1200,18 @@
       "motivo": "Volume mediano de R$ 178.959 por dia (mínimo 500.000)."
     },
     {
-      "ticker": "NTNF11",
-      "nome": "Investo V8 B3 Tesouro Prefixado Juros",
-      "categoria": "Outros",
-      "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 232.906 por dia (mínimo 500.000)."
-    },
-    {
       "ticker": "NUCL11",
       "nome": "Investo MVIS Global Uranium & Nuclear Energy ETF",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 147.230 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 147.966 por dia (mínimo 500.000)."
     },
     {
       "ticker": "OBRA11",
       "nome": "Trend ETF Infraestrutura ESG",
       "categoria": "Outros",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 3 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 4 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "OLEO11",
@@ -1253,7 +1232,7 @@
       "nome": "B-index ETF OURO BRL B3",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 199.072 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 218.107 por dia (mínimo 500.000)."
     },
     {
       "ticker": "PACC11",
@@ -1295,14 +1274,14 @@
       "nome": "Buena Vista DEX Vettafi Neos Energy Infrastructure High Income ETF",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 104.833 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 129.639 por dia (mínimo 500.000)."
     },
     {
       "ticker": "PKIN11",
       "nome": "Bindex ETF Connect China Universal CSI 300",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 84.138 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 91.117 por dia (mínimo 500.000)."
     },
     {
       "ticker": "PRAF11",
@@ -1316,28 +1295,28 @@
       "nome": "Sparta Infra Estrategico",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 55.154 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 54.850 por dia (mínimo 500.000)."
     },
     {
       "ticker": "PREX11",
       "nome": "Trend ETF IRF-M P2",
       "categoria": "Renda fixa",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 182.947 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 205.717 por dia (mínimo 500.000)."
     },
     {
       "ticker": "PSVM11",
       "nome": "Porto Sudeste VM SA",
       "categoria": "Outros",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "QDFI11",
       "nome": "QR Bloomberg Defi",
       "categoria": "Cripto",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 12.306 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 11.157 por dia (mínimo 500.000)."
     },
     {
       "ticker": "QETH11",
@@ -1351,7 +1330,7 @@
       "nome": "Buena Vista Nasdaq-100 High Beta Etf",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 79.698 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 81.891 por dia (mínimo 500.000)."
     },
     {
       "ticker": "QSOL11",
@@ -1365,21 +1344,21 @@
       "nome": "Investo MVIS Global Rare Earth/Strategic Metals",
       "categoria": "Bolsa exterior",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 434.291 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 441.525 por dia (mínimo 500.000)."
     },
     {
       "ticker": "RBIF11",
       "nome": "Rio Bravo ESG",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 151.023 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 137.294 por dia (mínimo 500.000)."
     },
     {
       "ticker": "REAL11",
       "nome": "Trend ETF B3 Real BRL",
       "categoria": "Outros",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 4 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 5 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "REVE11",
@@ -1400,21 +1379,21 @@
       "nome": "INVESTO B3 MARKET NEUTRAL",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 251 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 253 por dia (mínimo 500.000)."
     },
     {
       "ticker": "S1BK11",
       "nome": "BIG Pactual Reference Teva Acoes Bancos S1",
       "categoria": "Outros",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "SCVB11",
       "nome": "Investo Marketvector Brazil Small Cap Value ETF",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 114.687 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 179.554 por dia (mínimo 500.000)."
     },
     {
       "ticker": "SELI11",
@@ -1428,14 +1407,14 @@
       "nome": "It Now MSCI China A50",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 47.152 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 51.535 por dia (mínimo 500.000)."
     },
     {
       "ticker": "SMAB11",
       "nome": "BTG Pactual Smll B3",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 81.744 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 97.433 por dia (mínimo 500.000)."
     },
     {
       "ticker": "SPUB11",
@@ -1449,56 +1428,56 @@
       "nome": "Safra ETF Ibovespa Empresas Privadas",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 510 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 509 por dia (mínimo 500.000)."
     },
     {
       "ticker": "SPYR11",
       "nome": "B-INDEX ETF S&P 500 BRL",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 122.164 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 120.765 por dia (mínimo 500.000)."
     },
     {
       "ticker": "SVAL11",
       "nome": "Investo ETF S&P Smallcap 600 Value FDI",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 448.843 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 453.906 por dia (mínimo 500.000)."
     },
     {
       "ticker": "T10R11",
       "nome": "It Now SP Tesouro Americano 10 Anos BRL",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 293.941 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 325.756 por dia (mínimo 500.000)."
     },
     {
       "ticker": "TD3511",
       "nome": "IT Now NTNB 2035",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 217.356 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 371.681 por dia (mínimo 500.000)."
     },
     {
       "ticker": "TD5011",
       "nome": "IT Now NTNB 2050",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 106.722 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 110.965 por dia (mínimo 500.000)."
     },
     {
       "ticker": "TD6011",
       "nome": "IT Now NTNB 2060",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 196.064 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 279.448 por dia (mínimo 500.000)."
     },
     {
       "ticker": "TECX11",
       "nome": "Bindex ETF Connect China AMC Chinext",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 91.910 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 112.592 por dia (mínimo 500.000)."
     },
     {
       "ticker": "TOPY11",
@@ -1575,7 +1554,7 @@
       "nome": "Trend ETF Bloomberg Ethereum",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 49.249 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 63.665 por dia (mínimo 500.000)."
     },
     {
       "ticker": "XFIX11",
@@ -1603,14 +1582,14 @@
       "nome": "BUENA VISTA DEX VETTAFI NEOS BOOSTED S&P 500 HIGH INCOME",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 107.475 por dia (mínimo 500.000)."
+      "motivo": "Volume mediano de R$ 127.043 por dia (mínimo 500.000)."
     },
     {
       "ticker": "XVAL11",
       "nome": "Trend Giant Valor Brasil",
       "categoria": "Outros",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 13 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 14 dos últimos 21 pregões (mínimo 15)."
     }
   ],
   "modoAuditoria": "diaria",
