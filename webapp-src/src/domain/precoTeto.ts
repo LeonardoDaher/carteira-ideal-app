@@ -64,6 +64,11 @@ export interface PrecoTeto {
   status: StatusTeto
   /** Preço ÷ teto do gatilho − 1: negativo é folga abaixo do teto. */
   distanciaPct: number | null
+  /**
+   * Quanto o preço precisa cair para a análise fundamentalista (preço de entrada, com a margem de segurança) e o teto concordarem.
+   * Só existe quando o valor justo é confiável e nada mais impede a entrada; `limitadoPor` diz qual das duas travas está mais longe.
+   */
+  entrada: { alvo: number; faltaCairPct: number; limitadoPor: 'margem' | 'teto' } | null
   mensagem: string
 }
 
@@ -197,7 +202,17 @@ export function calcularPrecoTeto({
     mensagem += ' A análise fundamentalista vê margem de segurança, mas o preço está acima do teto de dividendos: o aviso só liga quando as duas concordam.'
   }
 
-  return { ticker: analise.ticker, nome: analise.nome, preco, bazin, graham, gatilho, tetoGatilho, grahamConfirma, valorJustoBase: ok(base) ? base : null, objecoes, ressalva, recomendacaoFund: rec, status, distanciaPct, mensagem }
+  // Distância até a entrada: só quando a fundamentalista considera o valor justo confiável, não há alerta crítico e a leitura dela
+  // depende do preço (aguardar, manter ou considerar entrada). Evitar/reduzir ou confiança baixa não têm "falta cair" que faça sentido.
+  let entrada: PrecoTeto['entrada'] = null
+  const semAlertaCritico = !analise.alertas.some((a) => a.gravidade === 'critico')
+  if (vj.aplicavel && vj.confianca !== 'baixa' && semAlertaCritico && (rec === 'aguardar-preco' || rec === 'manter-acompanhar' || rec === 'considerar-entrada') && ok(vj.precoEntrada) && vj.precoEntrada > 0) {
+    const porTeto = ok(tetoGatilho) && tetoGatilho > 0 && tetoGatilho < vj.precoEntrada
+    const alvo = porTeto ? (tetoGatilho as number) : vj.precoEntrada
+    if (preco > alvo) entrada = { alvo, faltaCairPct: (1 - alvo / preco) * 100, limitadoPor: porTeto ? 'teto' : 'margem' }
+  }
+
+  return { ticker: analise.ticker, nome: analise.nome, preco, bazin, graham, gatilho, tetoGatilho, grahamConfirma, valorJustoBase: ok(base) ? base : null, objecoes, ressalva, recomendacaoFund: rec, status, distanciaPct, entrada, mensagem }
 }
 
 /**

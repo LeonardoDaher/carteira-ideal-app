@@ -24,13 +24,13 @@ function empresa(p: { dividendos?: (number | null)[]; lucro?: number; pl?: numbe
   }
 }
 
-function analise(p: { valorJusto?: number | null; categoria?: AnaliseFundamentalista['categoria']; critico?: boolean; rec?: Recomendacao }): AnaliseFundamentalista {
+function analise(p: { valorJusto?: number | null; categoria?: AnaliseFundamentalista['categoria']; critico?: boolean; rec?: Recomendacao; precoEntrada?: number | null }): AnaliseFundamentalista {
   const vj = p.valorJusto === undefined ? 60 : p.valorJusto
   return {
     ticker: 'ALFA3', nome: 'Alfa',
     mercado: { preco: 40, valorMercado: null, ev: null, acoes: ACOES, aproximado: false },
     valorJusto: {
-      aplicavel: vj !== null, motivo: null, faixa: null, confianca: 'media', confiancaMotivos: [], margemSegurancaPct: null, potencialBasePct: null, precoEntrada: null,
+      aplicavel: vj !== null, motivo: null, faixa: null, confianca: 'media', confiancaMotivos: [], margemSegurancaPct: null, potencialBasePct: null, precoEntrada: p.precoEntrada ?? null,
       cenarios: vj === null ? [] : [{ cenario: 'base', valorJusto: vj, potencialPct: null, metodos: [], premissas: '', invalidacao: '' }],
     },
     categoria: p.categoria ?? 'neutra',
@@ -145,6 +145,26 @@ describe('regras de consistência com a análise fundamentalista', () => {
     expect(r.ressalva).toMatch(/70% da média/)
     expect(r.bazin.tetoRecente).toBeCloseTo(2 / 0.06 * 1, 6)
     expect(calcularPrecoTeto({ empresa: e, analise: analise({ valorJusto: 60 }), preco: 40, dyB3: 0.06 }).ressalva).toBeNull()
+  })
+
+  it('mostra quanto falta cair para entrar, pela margem de segurança da fundamentalista', () => {
+    const r = calcularPrecoTeto({ empresa: e, analise: analise({ valorJusto: 60, rec: 'manter-acompanhar', precoEntrada: 36 }), preco: 40 })
+    expect(r.entrada?.alvo).toBe(36)
+    expect(r.entrada?.faltaCairPct).toBeCloseTo(10, 6)
+    expect(r.entrada?.limitadoPor).toBe('margem')
+  })
+
+  it('quando o teto de dividendos é a trava mais baixa, o alvo é o teto', () => {
+    // teto de Bazin R$ 50; entrada pela margem em R$ 55; preço R$ 60
+    const r = calcularPrecoTeto({ empresa: e, analise: analise({ valorJusto: 80, rec: 'aguardar-preco', precoEntrada: 55 }), preco: 60 })
+    expect(r.entrada?.alvo).toBeCloseTo(50, 6)
+    expect(r.entrada?.limitadoPor).toBe('teto')
+  })
+
+  it('não há "falta cair" quando já está dentro, quando evitar/reduzir ou com alerta crítico', () => {
+    expect(calcularPrecoTeto({ empresa: e, analise: analise({ precoEntrada: 45 }), preco: 40 }).entrada).toBeNull()
+    expect(calcularPrecoTeto({ empresa: e, analise: analise({ rec: 'evitar-novos', precoEntrada: 20 }), preco: 40 }).entrada).toBeNull()
+    expect(calcularPrecoTeto({ empresa: e, analise: analise({ rec: 'manter-acompanhar', critico: true, precoEntrada: 20 }), preco: 40 }).entrada).toBeNull()
   })
 
   it('teto muito acima do preço vira ressalva de dado atípico, sem vetar', () => {

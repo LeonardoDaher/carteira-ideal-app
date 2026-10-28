@@ -282,6 +282,7 @@ export function PrecoTetoAcoes({
                   <span className="tiny muted">R$ {i.preco.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} · teto R$ {i.tetoGatilho?.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 </div>
                 <span className="tiny muted justify">{i.objecoes[0]}</span>
+                <FaltaCair item={i} />
                 {i.ressalva && <span className="tiny justify" style={{ color: 'var(--warning, #b7791f)' }}>⚠ Com ressalva: {i.ressalva}.</span>}
                 {!guardado.acompanhadas.includes(i.ticker) && (
                   <button className="chip" style={{ alignSelf: 'flex-start' }} onClick={() => adicionar(i.ticker)}>Acompanhar</button>
@@ -326,6 +327,7 @@ function CartaoTeto({ ticker, nome, item, aoRemover, aoAcompanhar }: { ticker: s
           </div>
           <span className="tiny muted" data-testid={`leitura-fund-${ticker}`}>Leitura final da análise fundamentalista: <strong>{ROTULO_RECOMENDACAO[item.recomendacaoFund]}</strong></span>
           <span className="small justify" style={{ lineHeight: 1.5 }}>{item.mensagem}</span>
+          <FaltaCair item={item} />
           {item.objecoes.length > 0 && (
             <ul className="small muted" style={{ margin: 0, paddingLeft: 18 }}>
               {item.objecoes.map((o) => <li key={o}>{o}</li>)}
@@ -369,6 +371,18 @@ function CartaoTeto({ ticker, nome, item, aoRemover, aoAcompanhar }: { ticker: s
         {aoRemover && <button className="btn btn-secondary" onClick={aoRemover} aria-label={`Parar de acompanhar ${ticker}`}>Remover</button>}
       </div>
     </div>
+  )
+}
+
+/** "Falta cair X% para entrar": distância até o preço em que a análise fundamentalista e o teto concordam. */
+function FaltaCair({ item }: { item: PrecoTeto }) {
+  if (!item.entrada) return null
+  const { alvo, faltaCairPct, limitadoPor } = item.entrada
+  return (
+    <span className="small" style={{ fontWeight: 700 }} data-testid={`falta-cair-${item.ticker}`}>
+      Falta cair {faltaCairPct.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}% (até {reais(alvo)}) para entrar
+      <span className="tiny muted" style={{ fontWeight: 400 }}> · {limitadoPor === 'teto' ? 'trava: o teto de dividendos' : 'trava: a margem de segurança de 25% da análise fundamentalista'}</span>
+    </span>
   )
 }
 

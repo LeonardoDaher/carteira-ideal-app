@@ -71,3 +71,11 @@ describe('coerência entre o preço teto e a análise fundamentalista, com todas
     expect(lista((x) => x.teto.recomendacaoFund === 'considerar-entrada' && x.teto.status !== 'abaixo-do-teto' && x.teto.status !== 'vetado' && !/duas concordam|sem teto|Nenhum dos dois/.test(x.teto.mensagem))).toEqual([])
   })
 })
+
+describe('"falta cair" nunca contradiz o estado do cartão', () => {
+  const todas = calcularTodas()
+  it('quem já está verde não tem "falta cair"; quem tem, está acima do alvo e a queda é positiva', () => {
+    expect(todas.filter((x) => x.teto.status === 'abaixo-do-teto' && x.teto.entrada !== null).map((x) => x.teto.ticker)).toEqual([])
+    expect(todas.filter((x) => x.teto.entrada && (x.teto.entrada.faltaCairPct <= 0 || x.teto.preco <= x.teto.entrada.alvo)).map((x) => x.teto.ticker)).toEqual([])
+  })
+})
