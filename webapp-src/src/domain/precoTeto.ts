@@ -28,6 +28,12 @@ export interface TetoBazin extends TetoDoMetodo {
   /** Exercícios usados na média (0 quando veio dos proventos de 12 meses da B3). */
   exercicios: number
   curto: boolean
+  /** Dividendo por ação de cada exercício usado na média (DFC ÷ ações atuais), do mais antigo para o mais recente. */
+  porExercicio: { ano: string; valor: number }[]
+  /** Dividend yield de 12 meses da B3 (0,09 = 9%); null quando a B3 não publicou. */
+  dy12m: number | null
+  /** Proventos dos últimos 12 meses (B3) abaixo de 70% da média: o teto pode estar inflado por anos melhores. */
+  recenteMenor: boolean
 }
 
 export type StatusTeto = 'abaixo-do-teto' | 'vetado' | 'perto' | 'aguardando' | 'sem-teto'
@@ -57,9 +63,12 @@ const reais = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', curr
 
 /** Bazin: dividendo médio por ação ÷ taxa mínima. Média dos últimos 5 exercícios da DFC; com menos de 3, cai para os proventos de 12 meses da B3. */
 export function tetoBazin(empresa: EmpresaFundamentos, acoes: number | null, preco: number, dyB3: number | null, taxa: number): TetoBazin {
-  const base = { taxa, dividendoMedio: null, exercicios: 0, curto: false }
+  const dy12m = ok(dyB3) && dyB3 >= 0 ? dyB3 : null
+  const base = { taxa, dividendoMedio: null, exercicios: 0, curto: false, porExercicio: [], dy12m, recenteMenor: false }
   if (!(taxa > 0)) return { ...base, aplicavel: false, teto: null, observacao: 'Taxa mínima inválida.', conta: null }
-  const pagos = empresa.anual.slice(-5).map((p) => p.dividendosPagos).filter(ok)
+  const usados = empresa.anual.slice(-5).filter((p) => ok(p.dividendosPagos))
+  const pagos = usados.map((p) => p.dividendosPagos as number)
+  const porAcao = (v: number) => (ok(acoes) && acoes > 0 ? (Math.abs(v) * 1000) / acoes : 0)
   let dividendo: number | null = null
   let exercicios = 0
   let curto = false
@@ -88,6 +97,10 @@ export function tetoBazin(empresa: EmpresaFundamentos, acoes: number | null, pre
     taxa,
     exercicios,
     curto,
+    porExercicio: ok(acoes) && acoes > 0 ? usados.map((p) => ({ ano: String(p.exercicio ?? '').slice(0, 4), valor: porAcao(p.dividendosPagos as number) })) : [],
+    dy12m,
+    // Só compara com a média da DFC; no histórico curto o dividendo já é o de 12 meses.
+    recenteMenor: !curto && ok(dy12m) && dy12m * preco < dividendo * 0.7,
     observacao: curto ? 'Histórico curto: menos de 3 exercícios de dividendos, a média é menos confiável.' : 'A DFC mistura dividendos ordinários e extraordinários; um ano atípico puxa a média.',
     conta: `${reais(dividendo)} (${origem}) ÷ ${(taxa * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}% = ${reais(teto)}`,
   }

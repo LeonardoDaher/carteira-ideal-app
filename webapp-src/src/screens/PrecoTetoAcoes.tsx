@@ -301,6 +301,21 @@ function CartaoTeto({ ticker, nome, item, aoRemover, aoAcompanhar }: { ticker: s
             <div className="tiny muted justify" style={{ lineHeight: 1.5, marginTop: 6 }}>
               <div><strong>Bazin:</strong> {item.bazin.conta ?? item.bazin.observacao}</div>
               {item.bazin.conta && item.bazin.observacao && <div>{item.bazin.observacao}</div>}
+              {item.bazin.porExercicio.length > 0 && (
+                <div data-testid={`dividendos-${ticker}`}>
+                  Dividendo por ação em cada exercício: {item.bazin.porExercicio.map((e) => `${e.ano}: ${reais(e.valor)}`).join(' · ')}.
+                </div>
+              )}
+              {item.bazin.dy12m !== null && (
+                <div>
+                  Dividend yield dos últimos 12 meses (B3): {(item.bazin.dy12m * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}% ({reais(item.bazin.dy12m * item.preco)} por ação).
+                </div>
+              )}
+              {item.bazin.recenteMenor && (
+                <div style={{ color: 'var(--warning)', fontWeight: 700 }} data-testid={`recente-menor-${ticker}`}>
+                  Dividendos recentes menores que a média: os últimos 12 meses pagaram menos de 70% da média dos exercícios, então o teto pode estar inflado por anos melhores.
+                </div>
+              )}
               <div style={{ marginTop: 4 }}><strong>Graham:</strong> {item.graham.conta ?? item.graham.observacao}</div>
               {item.graham.conta && item.graham.observacao && <div>{item.graham.observacao}</div>}
             </div>

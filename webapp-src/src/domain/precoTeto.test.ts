@@ -68,6 +68,29 @@ describe('Bazin', () => {
   })
 })
 
+describe('Bazin: dividendos por exercício e dividendos recentes', () => {
+  it('lista o dividendo por ação de cada exercício e o DY de 12 meses', () => {
+    const b = tetoBazin(empresa({}), ACOES, 40, 0.075, 0.06)
+    expect(b.porExercicio).toHaveLength(5)
+    expect(b.porExercicio[0]).toEqual({ ano: '2021', valor: 3 })
+    expect(b.dy12m).toBe(0.075)
+    expect(b.recenteMenor).toBe(false)
+  })
+
+  it('avisa quando os 12 meses pagaram menos de 70% da média', () => {
+    // média R$ 3,00; 12 meses: 5% de R$ 40 = R$ 2,00 (67%)
+    expect(tetoBazin(empresa({}), ACOES, 40, 0.05, 0.06).recenteMenor).toBe(true)
+    // 6% de R$ 40 = R$ 2,40 (80%)
+    expect(tetoBazin(empresa({}), ACOES, 40, 0.06, 0.06).recenteMenor).toBe(false)
+  })
+
+  it('sem DY da B3 não há aviso nem DY', () => {
+    const b = tetoBazin(empresa({}), ACOES, 40, null, 0.06)
+    expect(b.dy12m).toBeNull()
+    expect(b.recenteMenor).toBe(false)
+  })
+})
+
 describe('Graham', () => {
   it('calcula a raiz de 22,5 × LPA × VPA', () => {
     // LPA 10, VPA 20: raiz de 22,5 × 200 = 67,08
