@@ -4,7 +4,7 @@ import { useArquivoDados } from '../data/useArquivoDados'
 import { SNAPSHOT_ACOES_DIVIDENDOS } from '../data/snapshotAcoesDividendos'
 import { buscarAcoes } from '../domain/acoes'
 import type { AcaoBusca } from '../domain/acoes'
-import { analisarFundamentos } from '../domain/analiseFundamentalista'
+import { analisarFundamentos, ROTULO_RECOMENDACAO } from '../domain/analiseFundamentalista'
 import type { SnapshotFundamentos } from '../domain/analiseFundamentalista'
 import { calcularPrecoTeto, TAXA_BAZIN_PADRAO, tickersParaAvisar } from '../domain/precoTeto'
 import type { PrecoTeto, StatusTeto } from '../domain/precoTeto'
@@ -135,7 +135,7 @@ export function PrecoTetoAcoes({
       for (const t of r.avisar) {
         const i = itens.get(t)
         try {
-          new Notification(`${t} abaixo do preço teto`, { body: i ? i.mensagem : 'O preço entrou abaixo do teto.', tag: `preco-teto-${t}` })
+          new Notification(`${t} abaixo do preço teto`, { body: i ? `${i.mensagem}${i.ressalva ? ` Atenção: ${i.ressalva}.` : ''}` : 'O preço entrou abaixo do teto.', tag: `preco-teto-${t}` })
         } catch {
           // alguns navegadores móveis só aceitam notificação por service worker; o aviso na tela continua valendo
         }
@@ -282,6 +282,11 @@ function CartaoTeto({ ticker, nome, item, aoRemover, aoAcompanhar }: { ticker: s
           {verde ? '● ' : ''}{ROTULO_STATUS[status]}
         </span>
       </div>
+      {item?.ressalva && (
+        <div className="small" style={{ color: 'var(--warning)', fontWeight: 700 }} data-testid={`ressalva-${ticker}`}>
+          ⚠ Com ressalva: {item.ressalva}.
+        </div>
+      )}
       {item ? (
         <>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 8 }}>
@@ -290,6 +295,7 @@ function CartaoTeto({ ticker, nome, item, aoRemover, aoAcompanhar }: { ticker: s
             <Numero titulo={`Teto Graham${item.grahamConfirma ? ' ✓' : ''}`} valor={item.graham.teto !== null ? reais(item.graham.teto) : 'não se aplica'} />
             <Numero titulo="Valor justo (fundamentalista)" valor={item.valorJustoBase !== null ? reais(item.valorJustoBase) : 'sem cálculo'} />
           </div>
+          <span className="tiny muted" data-testid={`leitura-fund-${ticker}`}>Leitura final da análise fundamentalista: <strong>{ROTULO_RECOMENDACAO[item.recomendacaoFund]}</strong></span>
           <span className="small justify" style={{ lineHeight: 1.5 }}>{item.mensagem}</span>
           {item.objecoes.length > 0 && (
             <ul className="small muted" style={{ margin: 0, paddingLeft: 18 }}>
@@ -311,9 +317,14 @@ function CartaoTeto({ ticker, nome, item, aoRemover, aoAcompanhar }: { ticker: s
                   Dividend yield dos últimos 12 meses (B3): {(item.bazin.dy12m * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}% ({reais(item.bazin.dy12m * item.preco)} por ação).
                 </div>
               )}
+              {item.bazin.tetoRecente !== null && (
+                <div data-testid={`teto-recente-${ticker}`}>
+                  Teto de Bazin com o dividendo dos últimos 12 meses no lugar da média: {reais(item.bazin.tetoRecente)}. Só informação: não muda o aviso.
+                </div>
+              )}
               {item.bazin.recenteMenor && (
-                <div style={{ color: 'var(--warning)', fontWeight: 700 }} data-testid={`recente-menor-${ticker}`}>
-                  Dividendos recentes menores que a média: os últimos 12 meses pagaram menos de 70% da média dos exercícios, então o teto pode estar inflado por anos melhores.
+                <div style={{ color: 'var(--warning)', fontWeight: 700 }}>
+                  Os últimos 12 meses pagaram menos de 70% da média dos exercícios, então o teto pela média pode estar inflado por anos melhores.
                 </div>
               )}
               <div style={{ marginTop: 4 }}><strong>Graham:</strong> {item.graham.conta ?? item.graham.observacao}</div>

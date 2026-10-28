@@ -268,15 +268,20 @@ describe('Simule Ações: preço teto de compra', () => {
       })(),
     },
   })
-  // Lucro e caixa fortes: o valor justo fica acima de R$ 12 e a fundamentalista não objeta.
-  const forte = { fco: 720_000, ebit: 800_000, ebitda: 900_000, lucroLiquido: 480_000, lucroControladores: 480_000 }
+  // Lucro e caixa bons: o valor justo fica bem acima de R$ 12 e a fundamentalista diz "considerar entrada".
+  const forte = { fco: 300_000, ebit: 400_000, ebitda: 450_000, lucroLiquido: 250_000, lucroControladores: 250_000 }
   const comBeta = betaCom(forte)
-  // Lucro e caixa fracos para o que paga: o valor justo fica abaixo de R$ 12 e a fundamentalista veta o aviso.
+  // Lucro e caixa fracos para o que paga: a margem de segurança fica abaixo de 25% e a fundamentalista diz "aguardar preço".
   const comBetaFraca = betaCom({})
 
+  // Quatro pares do mesmo setor com preço, para o múltiplo setorial existir (como na análise real).
+  const snapshotTeto = {
+    ...snapshot,
+    setores: [{ ...snapshot.setores[0], empresas: [...snapshot.setores[0].empresas, ...['PAR1', 'PAR2', 'PAR3', 'PAR4'].map((t) => ({ ticker: t, nome: t, cotacao: 20, dataCotacao: pregoes[N - 1], variacao3m: 0, variacaoDia: 0, volumeMedio: 1_000_000, minima52: 18, maxima52: 22 }))] }],
+  } as unknown as SnapshotAcoes
   const abrirTeto = (f: SnapshotFundamentos = comBeta) => {
     try { localStorage.clear() } catch { /* sem armazenamento */ }
-    render(<SimuleAcoes ctx={ctx} snapshot={snapshot} series={series} fundamentos={f} />)
+    render(<SimuleAcoes ctx={ctx} snapshot={snapshotTeto} series={series} fundamentos={f} />)
     fireEvent.click(screen.getByRole('tab', { name: /Preço teto de compra/ }))
   }
 
@@ -295,7 +300,8 @@ describe('Simule Ações: preço teto de compra', () => {
     fireEvent.click(await screen.findByRole('button', { name: /BETA3/ }))
     const cartao = await screen.findByTestId('teto-BETA3')
     expect(cartao.getAttribute('data-status')).toBe('vetado')
-    expect(within(cartao).getByText(/acima do valor justo base/)).toBeTruthy()
+    expect(within(cartao).getByText(/A análise fundamentalista diz "Aguardar preço mais atrativo"/)).toBeTruthy()
+    expect(within(cartao).getByTestId('leitura-fund-BETA3').textContent).toContain('Aguardar preço mais atrativo')
     expect(screen.queryByTestId('aviso-preco-teto')).toBeNull()
   })
 

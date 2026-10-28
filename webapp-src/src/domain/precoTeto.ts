@@ -1,9 +1,10 @@
 // Preço teto de compra (D125). Módulo PURO. O preço teto é o máximo que a pessoa aceita pagar por uma ação para ter o retorno mínimo
 // que quer. Aqui há dois métodos: Bazin (gatilho) e Graham (confirmação). O modelo de Gordon ficou de fora porque explode quando
 // r − g é pequeno e g é chute. O teto NÃO é um segundo juiz: parte da mesma análise fundamentalista da aba ao lado (valor justo,
-// categoria e alertas), e o aviso de compra só liga quando as duas leituras não se contradizem. Não é recomendação (D19).
+// categoria e alertas), e o aviso de compra só liga quando as duas leituras não se contradizem e os dividendos recentes sustentam a média. Não é recomendação (D19).
 
-import type { AnaliseFundamentalista, EmpresaFundamentos } from './analiseFundamentalista'
+import { ROTULO_RECOMENDACAO } from './analiseFundamentalista'
+import type { AnaliseFundamentalista, EmpresaFundamentos, Recomendacao } from './analiseFundamentalista'
 
 /** Retorno mínimo em dividendos que Décio Bazin exigia (6% ao ano). */
 export const TAXA_BAZIN_PADRAO = 0.06
@@ -34,6 +35,8 @@ export interface TetoBazin extends TetoDoMetodo {
   dy12m: number | null
   /** Proventos dos últimos 12 meses (B3) abaixo de 70% da média: o teto pode estar inflado por anos melhores. */
   recenteMenor: boolean
+  /** Teto de Bazin com o dividendo dos últimos 12 meses (B3) no lugar da média; só informação, nunca gatilho. */
+  tetoRecente: number | null
 }
 
 export type StatusTeto = 'abaixo-do-teto' | 'vetado' | 'perto' | 'aguardando' | 'sem-teto'
@@ -52,6 +55,10 @@ export interface PrecoTeto {
   valorJustoBase: number | null
   /** Motivos pelos quais a análise fundamentalista não deixa o aviso ligar. Vazio quando não há objeção. */
   objecoes: string[]
+  /** Leitura final da análise fundamentalista (a mesma da aba ao lado). */
+  recomendacaoFund: Recomendacao
+  /** Ponto fraco do teto que NÃO bloqueia o verde (a fundamentalista segue como juiz), mas aparece no cartão e na notificação. */
+  ressalva: string | null
   status: StatusTeto
   /** Preço ÷ teto do gatilho − 1: negativo é folga abaixo do teto. */
   distanciaPct: number | null
@@ -64,7 +71,7 @@ const reais = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', curr
 /** Bazin: dividendo médio por ação ÷ taxa mínima. Média dos últimos 5 exercícios da DFC; com menos de 3, cai para os proventos de 12 meses da B3. */
 export function tetoBazin(empresa: EmpresaFundamentos, acoes: number | null, preco: number, dyB3: number | null, taxa: number): TetoBazin {
   const dy12m = ok(dyB3) && dyB3 >= 0 ? dyB3 : null
-  const base = { taxa, dividendoMedio: null, exercicios: 0, curto: false, porExercicio: [], dy12m, recenteMenor: false }
+  const base = { taxa, dividendoMedio: null, exercicios: 0, curto: false, porExercicio: [], dy12m, recenteMenor: false, tetoRecente: null }
   if (!(taxa > 0)) return { ...base, aplicavel: false, teto: null, observacao: 'Taxa mínima inválida.', conta: null }
   const usados = empresa.anual.slice(-5).filter((p) => ok(p.dividendosPagos))
   const pagos = usados.map((p) => p.dividendosPagos as number)
@@ -101,6 +108,7 @@ export function tetoBazin(empresa: EmpresaFundamentos, acoes: number | null, pre
     dy12m,
     // Só compara com a média da DFC; no histórico curto o dividendo já é o de 12 meses.
     recenteMenor: !curto && ok(dy12m) && dy12m * preco < dividendo * 0.7,
+    tetoRecente: ok(dy12m) && dy12m > 0 ? (dy12m * preco) / taxa : null,
     observacao: curto ? 'Histórico curto: menos de 3 exercícios de dividendos, a média é menos confiável.' : 'A DFC mistura dividendos ordinários e extraordinários; um ano atípico puxa a média.',
     conta: `${reais(dividendo)} (${origem}) ÷ ${(taxa * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}% = ${reais(teto)}`,
   }
@@ -145,11 +153,16 @@ export function calcularPrecoTeto({
   const vj = analise.valorJusto
   const base = vj.cenarios.find((c) => c.cenario === 'base')?.valorJusto ?? null
   const objecoes: string[] = []
+  // A leitura final da fundamentalista é o juiz: o verde só acende quando ela própria diz "considerar entrada". Qualquer outra leitura
+  // (aguardar preço, manter, reduzir, evitar) é objeção, para a aba de teto nunca dizer "vale" onde a outra diz "espere".
+  const rec = analise.recomendacao.categoria
+  if (rec !== 'considerar-entrada') objecoes.push(`A análise fundamentalista diz "${ROTULO_RECOMENDACAO[rec]}": ${analise.recomendacao.justificativa[0] ?? 'sem justificativa registrada'}`)
   if (!vj.aplicavel || !ok(base)) objecoes.push('A análise fundamentalista não calculou valor justo para esta ação, então não confirma o preço.')
   else if (preco > base) objecoes.push(`Na análise fundamentalista o preço (${reais(preco)}) está acima do valor justo base (${reais(base)}).`)
   if (analise.categoria === 'evitar') objecoes.push('A análise fundamentalista classifica a ação como "evitar ou reavaliar".')
   for (const a of analise.alertas) if (a.gravidade === 'critico') objecoes.push(`Alerta crítico na análise fundamentalista: ${a.titulo}.`)
 
+  const ressalva = gatilho === 'bazin' && bazin.recenteMenor ? 'dividendos dos últimos 12 meses abaixo de 70% da média' : null
   const distanciaPct = ok(tetoGatilho) && tetoGatilho > 0 ? (preco / tetoGatilho - 1) * 100 : null
   const nomeGatilho = gatilho === 'graham' ? 'Graham' : 'Bazin'
   let status: StatusTeto
@@ -160,20 +173,24 @@ export function calcularPrecoTeto({
   } else if (preco <= tetoGatilho) {
     if (objecoes.length) {
       status = 'vetado'
-      mensagem = `${nomeGatilho}: preço abaixo do teto de ${reais(tetoGatilho)}. Sem aviso de compra, porque a análise fundamentalista discorda.`
+      mensagem = `${nomeGatilho}: preço abaixo do teto de ${reais(tetoGatilho)}. Sem aviso de compra: há objeção, veja abaixo.`
     } else {
       status = 'abaixo-do-teto'
       mensagem = `Preço abaixo do teto de ${nomeGatilho} (${reais(tetoGatilho)}) e sem objeção da análise fundamentalista${grahamConfirma ? '; Graham também confirma' : ''}.`
     }
-  } else if (preco <= tetoGatilho * (1 + FAIXA_PERTO)) {
+  } else if (preco <= tetoGatilho * (1 + FAIXA_PERTO) && rec !== 'evitar-novos' && rec !== 'reduzir-exposicao') {
     status = 'perto'
     mensagem = `Preço a ${(distanciaPct as number).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}% acima do teto de ${nomeGatilho} (${reais(tetoGatilho)}).`
   } else {
     status = 'aguardando'
     mensagem = `Preço ${(distanciaPct as number).toLocaleString('pt-BR', { maximumFractionDigits: 0 })}% acima do teto de ${nomeGatilho} (${reais(tetoGatilho)}).`
   }
+  // Teto acima do preço pela fundamentalista, mas fora do teto: diz claramente que as duas leituras só avisam juntas.
+  if (rec === 'considerar-entrada' && (status === 'perto' || status === 'aguardando')) {
+    mensagem += ' A análise fundamentalista vê margem de segurança, mas o preço está acima do teto de dividendos: o aviso só liga quando as duas concordam.'
+  }
 
-  return { ticker: analise.ticker, nome: analise.nome, preco, bazin, graham, gatilho, tetoGatilho, grahamConfirma, valorJustoBase: ok(base) ? base : null, objecoes, status, distanciaPct, mensagem }
+  return { ticker: analise.ticker, nome: analise.nome, preco, bazin, graham, gatilho, tetoGatilho, grahamConfirma, valorJustoBase: ok(base) ? base : null, objecoes, ressalva, recomendacaoFund: rec, status, distanciaPct, mensagem }
 }
 
 /**

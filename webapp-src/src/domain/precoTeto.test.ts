@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { AnaliseFundamentalista, EmpresaFundamentos, PeriodoFundamental } from './analiseFundamentalista'
+import type { AnaliseFundamentalista, EmpresaFundamentos, PeriodoFundamental, Recomendacao } from './analiseFundamentalista'
 import { calcularPrecoTeto, tetoBazin, tetoGraham, tickersParaAvisar } from './precoTeto'
 
 function periodo(p: Partial<PeriodoFundamental>): PeriodoFundamental {
@@ -24,7 +24,7 @@ function empresa(p: { dividendos?: (number | null)[]; lucro?: number; pl?: numbe
   }
 }
 
-function analise(p: { valorJusto?: number | null; categoria?: AnaliseFundamentalista['categoria']; critico?: boolean }): AnaliseFundamentalista {
+function analise(p: { valorJusto?: number | null; categoria?: AnaliseFundamentalista['categoria']; critico?: boolean; rec?: Recomendacao }): AnaliseFundamentalista {
   const vj = p.valorJusto === undefined ? 60 : p.valorJusto
   return {
     ticker: 'ALFA3', nome: 'Alfa',
@@ -34,6 +34,7 @@ function analise(p: { valorJusto?: number | null; categoria?: AnaliseFundamental
       cenarios: vj === null ? [] : [{ cenario: 'base', valorJusto: vj, potencialPct: null, metodos: [], premissas: '', invalidacao: '' }],
     },
     categoria: p.categoria ?? 'neutra',
+    recomendacao: { categoria: p.rec ?? 'considerar-entrada', justificativa: ['Justificativa da fundamentalista.'], reavaliar: [] },
     alertas: p.critico ? [{ id: 'x', titulo: 'Lucro negativo', detalhe: '', gravidade: 'critico' }] : [],
   } as unknown as AnaliseFundamentalista
 }
@@ -135,6 +136,35 @@ describe('regras de consistência com a análise fundamentalista', () => {
     const longe = calcularPrecoTeto({ empresa: e, analise: analise({}), preco: 70 })
     expect(longe.status).toBe('aguardando')
     expect(longe.distanciaPct).toBeCloseTo(40, 6)
+  })
+
+  it('dividendo recente abaixo de 70% da média vira ressalva, mas não tira o verde (a fundamentalista é o juiz)', () => {
+    // média R$ 3,00 (teto R$ 50); 12 meses: 5% de R$ 40 = R$ 2,00
+    const r = calcularPrecoTeto({ empresa: e, analise: analise({ valorJusto: 60 }), preco: 40, dyB3: 0.05 })
+    expect(r.status).toBe('abaixo-do-teto')
+    expect(r.ressalva).toMatch(/70% da média/)
+    expect(r.bazin.tetoRecente).toBeCloseTo(2 / 0.06 * 1, 6)
+    expect(calcularPrecoTeto({ empresa: e, analise: analise({ valorJusto: 60 }), preco: 40, dyB3: 0.06 }).ressalva).toBeNull()
+  })
+
+  it('só acende o verde quando a leitura final da fundamentalista é "considerar entrada"', () => {
+    for (const rec of ['aguardar-preco', 'manter-acompanhar', 'reduzir-exposicao', 'evitar-novos'] as const) {
+      const r = calcularPrecoTeto({ empresa: e, analise: analise({ rec }), preco: 40 })
+      expect(r.status).toBe('vetado')
+      expect(r.objecoes[0]).toContain('A análise fundamentalista diz')
+    }
+    expect(calcularPrecoTeto({ empresa: e, analise: analise({ rec: 'considerar-entrada' }), preco: 40 }).status).toBe('abaixo-do-teto')
+  })
+
+  it('"perto do teto" (amarelo) não aparece quando a fundamentalista diz evitar ou reduzir', () => {
+    expect(calcularPrecoTeto({ empresa: e, analise: analise({ rec: 'evitar-novos' }), preco: 52 }).status).toBe('aguardando')
+    expect(calcularPrecoTeto({ empresa: e, analise: analise({ rec: 'reduzir-exposicao' }), preco: 52 }).status).toBe('aguardando')
+  })
+
+  it('quando a fundamentalista vê margem e o preço está acima do teto, a mensagem explica que só avisa quando as duas concordam', () => {
+    const r = calcularPrecoTeto({ empresa: e, analise: analise({ rec: 'considerar-entrada' }), preco: 70 })
+    expect(r.status).toBe('aguardando')
+    expect(r.mensagem).toMatch(/só liga quando as duas concordam/)
   })
 
   it('sem dividendos o gatilho passa a ser Graham', () => {
