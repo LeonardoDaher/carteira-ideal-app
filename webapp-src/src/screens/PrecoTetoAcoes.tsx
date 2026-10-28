@@ -411,7 +411,7 @@ function CartaoTeto({ ticker, nome, item, aoRemover, aoAcompanhar }: { ticker: s
                   Dividend yield dos últimos 12 meses (B3): {(item.bazin.dy12m * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}% ({reais(item.bazin.dy12m * item.preco)} por ação).
                 </div>
               )}
-              {item.bazin.tetoRecente !== null && (
+              {item.bazin.tetoRecente !== null && item.bazin.teto !== null && Math.abs(item.bazin.tetoRecente - item.bazin.teto) > 0.005 && (
                 <div data-testid={`teto-recente-${ticker}`}>
                   Teto de Bazin com o dividendo dos últimos 12 meses no lugar da média: {reais(item.bazin.tetoRecente)}. Só informação: não muda o aviso.
                 </div>

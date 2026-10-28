@@ -138,13 +138,34 @@ describe('regras de consistência com a análise fundamentalista', () => {
     expect(longe.distanciaPct).toBeCloseTo(40, 6)
   })
 
-  it('dividendo recente abaixo de 70% da média vira ressalva, mas não tira o verde (a fundamentalista é o juiz)', () => {
-    // média R$ 3,00 (teto R$ 50); 12 meses: 5% de R$ 40 = R$ 2,00
+  it('Bazin usa o MENOR entre a média de 5 exercícios e os 12 meses da B3 (não supõe mais do que foi pago no último ano)', () => {
+    // média R$ 3,00 (teto R$ 50 só pela média); 12 meses: 5% de R$ 40 = R$ 2,00, então o teto é R$ 33,33
     const r = calcularPrecoTeto({ empresa: e, analise: analise({ valorJusto: 60 }), preco: 40, dyB3: 0.05 })
+    expect(r.bazin.usouRecente).toBe(true)
+    expect(r.bazin.dividendoUsado).toBeCloseTo(2, 6)
+    expect(r.bazin.dividendoMedio).toBeCloseTo(3, 6)
+    expect(r.tetoGatilho).toBeCloseTo(2 / 0.06, 6)
+    expect(r.status).toBe('aguardando')
+    // 12 meses acima da média: vale a média
+    const maior = calcularPrecoTeto({ empresa: e, analise: analise({ valorJusto: 60 }), preco: 40, dyB3: 0.09 })
+    expect(maior.bazin.usouRecente).toBe(false)
+    expect(maior.tetoGatilho).toBeCloseTo(50, 6)
+  })
+
+  it('sem proventos nos últimos 12 meses (B3 = 0) o Bazin não se aplica e o gatilho passa a Graham', () => {
+    const r = calcularPrecoTeto({ empresa: e, analise: analise({ valorJusto: 80 }), preco: 40, dyB3: 0 })
+    expect(r.bazin.aplicavel).toBe(false)
+    expect(r.gatilho).toBe('graham')
+  })
+
+  it('dividendo recente abaixo de 70% da média vira ressalva, mas não tira o verde (a fundamentalista é o juiz)', () => {
+    // média R$ 3,00; 12 meses: 9% de R$ 20 = R$ 1,80 (60%); teto R$ 30, preço R$ 20 abaixo dele
+    const r = calcularPrecoTeto({ empresa: e, analise: analise({ valorJusto: 60 }), preco: 20, dyB3: 0.09 })
     expect(r.status).toBe('abaixo-do-teto')
     expect(r.ressalva).toMatch(/70% da média/)
-    expect(r.bazin.tetoRecente).toBeCloseTo(2 / 0.06 * 1, 6)
-    expect(calcularPrecoTeto({ empresa: e, analise: analise({ valorJusto: 60 }), preco: 40, dyB3: 0.06 }).ressalva).toBeNull()
+    expect(r.bazin.tetoRecente).toBeCloseTo(1.8 / 0.06, 6)
+    // 12 meses em 80% da média: sem ressalva
+    expect(calcularPrecoTeto({ empresa: e, analise: analise({ valorJusto: 60 }), preco: 20, dyB3: 0.12 }).ressalva).toBeNull()
   })
 
   it('mostra quanto falta cair para entrar, pela margem de segurança da fundamentalista', () => {

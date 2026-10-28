@@ -26,7 +26,12 @@ export interface TetoDoMetodo {
 }
 
 export interface TetoBazin extends TetoDoMetodo {
+  /** Média por ação dos exercícios da DFC (informação); o dividendo usado na conta é `dividendoUsado`. */
   dividendoMedio: number | null
+  /** Dividendo por ação efetivamente usado: o menor entre a média e os 12 meses da B3. */
+  dividendoUsado: number | null
+  /** A conta usou os 12 meses da B3 porque eram menores que a média. */
+  usouRecente: boolean
   taxa: number
   /** Exercícios usados na média (0 quando veio dos proventos de 12 meses da B3). */
   exercicios: number
@@ -75,10 +80,14 @@ export interface PrecoTeto {
 const ok = (v: number | null | undefined): v is number => typeof v === 'number' && Number.isFinite(v)
 const reais = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 
-/** Bazin: dividendo médio por ação ÷ taxa mínima. Média dos últimos 5 exercícios da DFC; com menos de 3, cai para os proventos de 12 meses da B3. */
+/**
+ * Bazin: dividendo por ação ÷ taxa mínima. O dividendo é o MENOR entre a média dos últimos 5 exercícios da DFC e os proventos dos últimos 12
+ * meses da B3 (D128): o teto nunca pode supor mais do que a empresa pagou de fato no último ano. Só a média inflava o teto de empresas cujo
+ * dividendo caiu (um ano extraordinário puxava a conta: PETR4, VALE3, GOAU4). Com menos de 3 exercícios, usa só os 12 meses da B3.
+ */
 export function tetoBazin(empresa: EmpresaFundamentos, acoes: number | null, preco: number, dyB3: number | null, taxa: number): TetoBazin {
   const dy12m = ok(dyB3) && dyB3 >= 0 ? dyB3 : null
-  const base = { taxa, dividendoMedio: null, exercicios: 0, curto: false, porExercicio: [], dy12m, recenteMenor: false, tetoRecente: null }
+  const base = { taxa, dividendoMedio: null, dividendoUsado: null, usouRecente: false, exercicios: 0, curto: false, porExercicio: [], dy12m, recenteMenor: false, tetoRecente: null }
   if (!(taxa > 0)) return { ...base, aplicavel: false, teto: null, observacao: 'Taxa mínima inválida.', conta: null }
   const usados = empresa.anual.slice(-5).filter((p) => ok(p.dividendosPagos))
   const pagos = usados.map((p) => p.dividendosPagos as number)
@@ -103,18 +112,28 @@ export function tetoBazin(empresa: EmpresaFundamentos, acoes: number | null, pre
     origem = `média de ${pagos.length} exercício${pagos.length > 1 ? 's' : ''} (DFC) ÷ ações atuais`
   }
   if (!ok(dividendo) || dividendo <= 0) return { ...base, aplicavel: false, teto: null, observacao: 'Sem pagamento de dividendos identificado: Bazin não se aplica.', conta: null }
+  const media = dividendo
+  const recente = ok(dy12m) ? dy12m * preco : null
+  const usouRecente = !curto && recente !== null && recente < media
+  if (usouRecente) {
+    dividendo = recente as number
+    origem = `proventos dos últimos 12 meses (B3), menores que a média de ${exercicios} exercícios (${reais(media)})`
+  }
+  if (dividendo <= 0) return { ...base, dividendoMedio: media, aplicavel: false, teto: null, observacao: 'A B3 não registra proventos nos últimos 12 meses: Bazin não se aplica.', conta: null }
   const teto = dividendo / taxa
   return {
     aplicavel: true,
     teto,
-    dividendoMedio: dividendo,
+    dividendoMedio: media,
+    dividendoUsado: dividendo,
+    usouRecente,
     taxa,
     exercicios,
     curto,
     porExercicio: ok(acoes) && acoes > 0 ? usados.map((p) => ({ ano: String(p.exercicio ?? '').slice(0, 4), valor: porAcao(p.dividendosPagos as number) })) : [],
     dy12m,
     // Só compara com a média da DFC; no histórico curto o dividendo já é o de 12 meses.
-    recenteMenor: !curto && ok(dy12m) && dy12m * preco < dividendo * 0.7,
+    recenteMenor: !curto && ok(dy12m) && dy12m * preco < media * 0.7,
     tetoRecente: ok(dy12m) && dy12m > 0 ? (dy12m * preco) / taxa : null,
     observacao: curto ? 'Histórico curto: menos de 3 exercícios de dividendos, a média é menos confiável.' : 'A DFC mistura dividendos ordinários e extraordinários; um ano atípico puxa a média.',
     conta: `${reais(dividendo)} (${origem}) ÷ ${(taxa * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}% = ${reais(teto)}`,
@@ -175,7 +194,7 @@ export function calcularPrecoTeto({
 
   // Ressalvas informam o dado usado; não vetam (quem decide é a fundamentalista).
   const avisos: string[] = []
-  if (gatilho === 'bazin' && bazin.recenteMenor) avisos.push('dividendos dos últimos 12 meses abaixo de 70% da média')
+  if (gatilho === 'bazin' && bazin.recenteMenor) avisos.push('dividendos dos últimos 12 meses abaixo de 70% da média (o teto já usa o valor mais baixo)')
   if (ok(tetoGatilho) && tetoGatilho > preco * TETO_ATIPICO) avisos.push(`teto mais de ${TETO_ATIPICO}× o preço: dividendo médio provavelmente atípico (pagamento extraordinário ou dado fora do padrão)`)
   if (vj.cenarios.find((c) => c.cenario === 'base')?.metodos.some((m) => m.nome === 'P/L do grupo B3')) avisos.push('o valor justo usa o P/L do grupo B3, porque o setor tem poucos pares')
   const ressalva = avisos.length ? avisos.join('; ') : null
