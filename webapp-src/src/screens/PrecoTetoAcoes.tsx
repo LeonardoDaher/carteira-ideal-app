@@ -16,6 +16,8 @@ import { CAMINHO_FUNDAMENTOS, premissasDoMercado } from './useAnaliseDaAcao'
 const CHAVE = 'carteira-ideal:preco-teto'
 const TAXAS = [0.06, 0.08, 0.1, 0.12]
 const MAX_RADAR = 15
+/** Aviso no celular com o app fechado (D127). Pausado por decisão do responsável: o código fica pronto, mas a opção não aparece. */
+const AVISO_NO_CELULAR = false
 const AVISO =
   'Não é recomendação de investimento. O preço teto é uma conta simples feita com dados do passado: dividendos que já foram pagos e lucro e patrimônio já publicados. Ele não prevê o futuro, e o aviso só indica que o preço entrou numa faixa que você mesmo definiu como aceitável. Converse com um profissional certificado antes de investir.'
 
@@ -247,11 +249,11 @@ export function PrecoTetoAcoes({
               {guardado.avisos ? 'Desativar notificações' : 'Ativar notificações'}
             </button>
             <span className="tiny muted justify">
-              Esta notificação chega quando você abre o app. Para receber com o app fechado, use o aviso no celular, logo abaixo.
+              Esta notificação chega quando você abre o app.
             </span>
           </>
         )}
-        {permissao !== 'unsupported' && (
+        {AVISO_NO_CELULAR && permissao !== 'unsupported' && (
           <div className="col" style={{ gap: 6, borderTop: '1px solid var(--border)', paddingTop: 8 }} data-testid="aviso-push">
             <span style={{ fontWeight: 700, fontSize: 13 }}>Aviso no celular, com o app fechado</span>
             <button className="btn btn-secondary" disabled={pushOcupado} onClick={() => void alternarPush()}>

@@ -13,10 +13,11 @@
 # de teste a todos os aparelhos inscritos (para conferir o caminho inteiro).
 name: Avisar Preço Teto
 
+# PAUSADO (decisão do responsável): sem o gatilho abaixo o job só roda manualmente. Para reativar, descomente o bloco workflow_run.
 on:
-  workflow_run:
-    workflows: ['Atualizar Ações']
-    types: [completed]
+  # workflow_run:
+  #   workflows: ['Atualizar Ações']
+  #   types: [completed]
   workflow_dispatch:
     inputs:
       modo:
