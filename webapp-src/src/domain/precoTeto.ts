@@ -12,6 +12,8 @@ export const TAXA_BAZIN_PADRAO = 0.06
 export const CONSTANTE_GRAHAM = 22.5
 /** Até esta distância acima do teto a ação aparece como "perto" do teto. */
 export const FAIXA_PERTO = 0.05
+/** Teto acima de tantas vezes o preço é sinal de dividendo médio atípico: vira ressalva. */
+export const TETO_ATIPICO = 5
 
 export interface TetoDoMetodo {
   aplicavel: boolean
@@ -162,7 +164,11 @@ export function calcularPrecoTeto({
   if (analise.categoria === 'evitar') objecoes.push('A análise fundamentalista classifica a ação como "evitar ou reavaliar".')
   for (const a of analise.alertas) if (a.gravidade === 'critico') objecoes.push(`Alerta crítico na análise fundamentalista: ${a.titulo}.`)
 
-  const ressalva = gatilho === 'bazin' && bazin.recenteMenor ? 'dividendos dos últimos 12 meses abaixo de 70% da média' : null
+  // Ressalvas informam o dado usado; não vetam (quem decide é a fundamentalista).
+  const avisos: string[] = []
+  if (gatilho === 'bazin' && bazin.recenteMenor) avisos.push('dividendos dos últimos 12 meses abaixo de 70% da média')
+  if (ok(tetoGatilho) && tetoGatilho > preco * TETO_ATIPICO) avisos.push(`teto mais de ${TETO_ATIPICO}× o preço: dividendo médio provavelmente atípico (pagamento extraordinário ou dado fora do padrão)`)
+  const ressalva = avisos.length ? avisos.join('; ') : null
   const distanciaPct = ok(tetoGatilho) && tetoGatilho > 0 ? (preco / tetoGatilho - 1) * 100 : null
   const nomeGatilho = gatilho === 'graham' ? 'Graham' : 'Bazin'
   let status: StatusTeto

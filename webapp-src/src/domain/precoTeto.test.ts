@@ -147,6 +147,14 @@ describe('regras de consistência com a análise fundamentalista', () => {
     expect(calcularPrecoTeto({ empresa: e, analise: analise({ valorJusto: 60 }), preco: 40, dyB3: 0.06 }).ressalva).toBeNull()
   })
 
+  it('teto muito acima do preço vira ressalva de dado atípico, sem vetar', () => {
+    // média R$ 3,00 → teto R$ 50; preço R$ 8 deixa o teto 6× acima
+    const r = calcularPrecoTeto({ empresa: e, analise: analise({ valorJusto: 60 }), preco: 8 })
+    expect(r.ressalva).toMatch(/atípico/)
+    expect(r.status).toBe('abaixo-do-teto')
+    expect(calcularPrecoTeto({ empresa: e, analise: analise({ valorJusto: 60 }), preco: 40 }).ressalva).toBeNull()
+  })
+
   it('só acende o verde quando a leitura final da fundamentalista é "considerar entrada"', () => {
     for (const rec of ['aguardar-preco', 'manter-acompanhar', 'reduzir-exposicao', 'evitar-novos'] as const) {
       const r = calcularPrecoTeto({ empresa: e, analise: analise({ rec }), preco: 40 })

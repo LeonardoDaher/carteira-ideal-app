@@ -2203,3 +2203,5 @@ Pedido do responsável: o gráfico da análise técnica passou de linha para **c
 **Arquivos.** `domain/precoTeto.ts` (puro), `screens/PrecoTetoAcoes.tsx`, aba "Preço teto de compra" no `SimuleAcoes.tsx`. Testes: `precoTeto.test.ts` (16) e quatro casos novos em `SimuleAcoesAnalise.test.tsx`.
 
 **Limites.** Bazin com média de 5 anos puxa dividendos extraordinários (PETR4 aparece com teto de R$ 132 contra preço de R$ 58); a taxa de 6% é permissiva com a Selic alta. Não é recomendação (D19).
+
+**Em observação e cobertura (28/10/2026).** Abaixo do teto mas sem "considerar entrada" a ação entra na lista recolhível "Em observação", com o motivo da própria fundamentalista; ela não fica verde nem gera aviso. Teto acima de 5× o preço vira ressalva de dividendo atípico (ex.: PTBL3 com teto de R$ 9.408 contra preço de R$ 1,76), sem vetar. Diagnóstico das 191 ações: 135 têm valor justo de confiança baixa (faixa entre cenários larga em 88, só um método aplicável em 68, nenhum método em 35), e só 10 chegam a "considerar entrada". O radar pequeno vem daí, não do teto: ampliar o radar exige melhorar a cobertura do valor justo, não afrouxar regras.

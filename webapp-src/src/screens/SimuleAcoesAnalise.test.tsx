@@ -305,6 +305,14 @@ describe('Simule Ações: preço teto de compra', () => {
     expect(screen.queryByTestId('aviso-preco-teto')).toBeNull()
   })
 
+  it('abaixo do teto sem "considerar entrada" fica na lista "Em observação", com o motivo, e fora do radar verde', async () => {
+    abrirTeto(comBetaFraca)
+    const lista = await screen.findByTestId('em-observacao')
+    const linha = within(lista).getByTestId('observacao-BETA3')
+    expect(within(linha).getByText(/A análise fundamentalista diz/)).toBeTruthy()
+    expect(screen.queryByTestId('teto-BETA3')).toBeNull()
+  })
+
   it('subir a taxa de Bazin tira a ação do radar', async () => {
     // R$ 1,00 por ação: teto de R$ 16,67 a 6%, mas de R$ 10,00 a 10%, abaixo do preço de R$ 12.
     abrirTeto(betaCom({ ...forte, dividendosPagos: 100_000 }))

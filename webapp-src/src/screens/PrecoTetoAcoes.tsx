@@ -123,6 +123,11 @@ export function PrecoTetoAcoes({
     () => (itens ? [...itens.values()].filter((i) => i.status === 'abaixo-do-teto').sort((a, b) => (a.distanciaPct ?? 0) - (b.distanciaPct ?? 0)) : []),
     [itens],
   )
+  // Abaixo do teto de dividendos, mas a análise fundamentalista não recomenda entrada: fica fora do verde e do aviso, com o motivo.
+  const observacao = useMemo(
+    () => (itens ? [...itens.values()].filter((i) => i.status === 'vetado').sort((a, b) => (a.distanciaPct ?? 0) - (b.distanciaPct ?? 0)) : []),
+    [itens],
+  )
 
   // Aviso: quem acabou de entrar abaixo do teto entre as acompanhadas.
   useEffect(() => {
@@ -262,6 +267,30 @@ export function PrecoTetoAcoes({
           ))
         )}
       </div>
+
+      {observacao.length > 0 && (
+        <details className="card" data-testid="em-observacao">
+          <summary style={{ cursor: 'pointer', fontWeight: 700 }}>Em observação: abaixo do teto, mas sem aviso ({observacao.length})</summary>
+          <div className="tiny muted justify" style={{ marginTop: 6, lineHeight: 1.5 }}>
+            O preço está abaixo do teto de dividendos, mas a análise fundamentalista não diz &ldquo;considerar entrada&rdquo;. Por isso não ficam verdes nem geram aviso. O motivo vem da própria análise.
+          </div>
+          <ul className="col" style={{ gap: 6, listStyle: 'none', padding: 0, margin: '8px 0 0' }}>
+            {observacao.map((i) => (
+              <li key={i.ticker} className="card-outline col" style={{ gap: 2 }} data-testid={`observacao-${i.ticker}`}>
+                <div className="row-between" style={{ gap: 8 }}>
+                  <span style={{ fontWeight: 700 }}>{i.ticker}</span>
+                  <span className="tiny muted">R$ {i.preco.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} · teto R$ {i.tetoGatilho?.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                </div>
+                <span className="tiny muted justify">{i.objecoes[0]}</span>
+                {i.ressalva && <span className="tiny justify" style={{ color: 'var(--warning, #b7791f)' }}>⚠ Com ressalva: {i.ressalva}.</span>}
+                {!guardado.acompanhadas.includes(i.ticker) && (
+                  <button className="chip" style={{ alignSelf: 'flex-start' }} onClick={() => adicionar(i.ticker)}>Acompanhar</button>
+                )}
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
 
       <div className="card-outline small muted justify" style={{ lineHeight: 1.5 }} role="note">{AVISO}</div>
     </div>
