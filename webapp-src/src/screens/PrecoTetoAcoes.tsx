@@ -329,6 +329,8 @@ export function PrecoTetoAcoes({
         )}
       </div>
 
+      <ListaTodas itens={itens} nomeDe={nomeDe} aoAcompanhar={(ticker) => adicionar(ticker)} acompanhadas={guardado.acompanhadas} />
+
       {observacao.length > 0 && (
         <details className="card" data-testid="em-observacao">
           <summary style={{ cursor: 'pointer', fontWeight: 700 }}>Em observação: abaixo do teto, mas sem aviso ({observacao.length})</summary>
@@ -435,6 +437,70 @@ function CartaoTeto({ ticker, nome, item, aoRemover, aoAcompanhar }: { ticker: s
   )
 }
 
+const PESO_STATUS: Record<StatusTeto, number> = { 'abaixo-do-teto': 0, vetado: 1, perto: 2, aguardando: 3, 'sem-teto': 4 }
+const pct = (v: number) => `${v > 0 ? '+' : v < 0 ? '−' : ''}${Math.abs(v).toLocaleString('pt-BR', { maximumFractionDigits: 0 })}%`
+
+/**
+ * Lista fininha de TODAS as ações do cadastro com o preço, o preço teto e a distância até ele. Só as que estão no verde (abaixo do teto
+ * e com a análise fundamentalista de acordo) ficam destacadas; as demais mostram o teto sem destaque. Tocar numa linha abre o cartão.
+ */
+function ListaTodas({ itens, nomeDe, aoAcompanhar, acompanhadas }: { itens: Map<string, PrecoTeto>; nomeDe: (t: string) => string | null; aoAcompanhar: (t: string) => void; acompanhadas: string[] }) {
+  const [filtro, setFiltro] = useState('')
+  const [aberta, setAberta] = useState<string | null>(null)
+  const linhas = useMemo(() => {
+    const q = filtro.trim().toLowerCase()
+    return [...itens.values()]
+      .filter((i) => !q || i.ticker.toLowerCase().includes(q) || (nomeDe(i.ticker) ?? i.nome ?? '').toLowerCase().includes(q))
+      .sort((a, b) => PESO_STATUS[a.status] - PESO_STATUS[b.status] || (a.distanciaPct ?? Infinity) - (b.distanciaPct ?? Infinity) || a.ticker.localeCompare(b.ticker))
+  }, [itens, filtro, nomeDe])
+  const verdes = useMemo(() => [...itens.values()].filter((i) => i.status === 'abaixo-do-teto').length, [itens])
+  return (
+    <div className="col" style={{ gap: 8 }} data-testid="lista-todas">
+      <span style={{ fontWeight: 700, fontSize: 14 }}>Todas as ações ({itens.size})</span>
+      <span className="tiny muted justify">
+        O preço teto de cada ação do app. Em verde, as {verdes} que estão abaixo do teto com a análise fundamentalista de acordo; nas demais, o teto aparece sem destaque. Ordem: verdes primeiro, depois as mais perto do teto.
+      </span>
+      <input type="search" className="busca-fii" placeholder="Filtrar: código ou nome" aria-label="Filtrar a lista de todas as ações" autoCapitalize="characters" autoCorrect="off" spellCheck={false} value={filtro} onChange={(e) => setFiltro(e.target.value.slice(0, 40))} />
+      <div className="row tiny muted" style={{ padding: '0 10px', gap: 8 }} aria-hidden="true">
+        <span style={{ flex: '1 1 0' }}>Ação</span>
+        <span style={{ width: 70, textAlign: 'right' }}>Preço</span>
+        <span style={{ width: 70, textAlign: 'right' }}>Teto</span>
+        <span style={{ width: 48, textAlign: 'right' }}>Dist.</span>
+      </div>
+      <ul className="col" style={{ gap: 2, listStyle: 'none', padding: 0, margin: 0 }} aria-label="Todas as ações com preço teto">
+        {linhas.map((i) => {
+          const verde = i.status === 'abaixo-do-teto'
+          const aberto = aberta === i.ticker
+          return (
+            <li key={i.ticker} data-testid={`linha-${i.ticker}`} data-status={i.status}>
+              <button
+                className="row"
+                aria-expanded={aberto}
+                onClick={() => setAberta(aberto ? null : i.ticker)}
+                style={{
+                  width: '100%', gap: 8, alignItems: 'center', textAlign: 'left', padding: '6px 10px', borderRadius: 8, border: 'none', cursor: 'pointer', color: 'inherit',
+                  borderLeft: `3px solid ${verde ? 'var(--success)' : 'transparent'}`,
+                  background: verde ? 'color-mix(in oklch, var(--success) 12%, var(--surface))' : 'var(--surface2)',
+                }}
+              >
+                <span className="col" style={{ flex: '1 1 0', minWidth: 0, gap: 0 }}>
+                  <span style={{ fontWeight: 700, fontSize: 13, color: verde ? 'var(--success)' : undefined }}>{i.ticker}</span>
+                  <span className="tiny muted" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{nomeDe(i.ticker) ?? i.nome}</span>
+                </span>
+                <span style={{ width: 70, textAlign: 'right', fontSize: 13 }}>{reais(i.preco)}</span>
+                <span style={{ width: 70, textAlign: 'right', fontSize: 13, fontWeight: verde ? 700 : 400 }}>{i.tetoGatilho !== null ? reais(i.tetoGatilho) : '—'}</span>
+                <span className="tiny" style={{ width: 48, textAlign: 'right', color: verde ? 'var(--success)' : i.status === 'vetado' ? 'var(--warning)' : 'var(--text-muted)' }}>{i.distanciaPct !== null ? pct(i.distanciaPct) : '—'}</span>
+              </button>
+              {aberto && <CartaoTeto ticker={i.ticker} nome={nomeDe(i.ticker)} item={i} aoAcompanhar={acompanhadas.includes(i.ticker) ? undefined : () => aoAcompanhar(i.ticker)} />}
+            </li>
+          )
+        })}
+      </ul>
+      {linhas.length === 0 && <div className="card small muted">Nenhuma ação encontrada.</div>}
+    </div>
+  )
+}
+
 /** "Falta cair X% para entrar": distância até o preço em que a análise fundamentalista e o teto concordam. */
 function FaltaCair({ item }: { item: PrecoTeto }) {
   if (!item.entrada) return null
@@ -442,7 +508,7 @@ function FaltaCair({ item }: { item: PrecoTeto }) {
   return (
     <span className="small" style={{ fontWeight: 700 }} data-testid={`falta-cair-${item.ticker}`}>
       Falta cair {faltaCairPct.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}% (até {reais(alvo)}) para entrar
-      <span className="tiny muted" style={{ fontWeight: 400 }}> · {limitadoPor === 'teto' ? 'trava: o teto de dividendos' : 'trava: a margem de segurança de 25% da análise fundamentalista'}</span>
+      <span className="tiny muted" style={{ fontWeight: 400 }}> · {limitadoPor === 'teto' ? 'trava: o teto de dividendos' : limitadoPor === 'graham' ? 'trava: o teto de Graham' : 'trava: a margem de segurança de 25% da análise fundamentalista'}</span>
     </span>
   )
 }

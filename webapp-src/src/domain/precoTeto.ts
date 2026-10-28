@@ -68,7 +68,7 @@ export interface PrecoTeto {
    * Quanto o preço precisa cair para a análise fundamentalista (preço de entrada, com a margem de segurança) e o teto concordarem.
    * Só existe quando o valor justo é confiável e nada mais impede a entrada; `limitadoPor` diz qual das duas travas está mais longe.
    */
-  entrada: { alvo: number; faltaCairPct: number; limitadoPor: 'margem' | 'teto' } | null
+  entrada: { alvo: number; faltaCairPct: number; limitadoPor: 'margem' | 'teto' | 'graham' } | null
   mensagem: string
 }
 
@@ -166,6 +166,10 @@ export function calcularPrecoTeto({
   if (rec !== 'considerar-entrada') objecoes.push(`A análise fundamentalista diz "${ROTULO_RECOMENDACAO[rec]}": ${analise.recomendacao.justificativa[0] ?? 'sem justificativa registrada'}`)
   if (!vj.aplicavel || !ok(base)) objecoes.push('A análise fundamentalista não calculou valor justo para esta ação, então não confirma o preço.')
   else if (preco > base) objecoes.push(`Na análise fundamentalista o preço (${reais(preco)}) está acima do valor justo base (${reais(base)}).`)
+  // Graham confirma: com Bazin como gatilho, se Graham se aplica e o preço está acima do teto dele, o aviso não liga (as duas contas precisam concordar).
+  if (gatilho === 'bazin' && graham.aplicavel && ok(graham.teto) && preco > graham.teto) {
+    objecoes.push(`O teto de Graham (${reais(graham.teto)}) está abaixo do preço (${reais(preco)}): Graham não confirma o teto de Bazin.`)
+  }
   if (analise.categoria === 'evitar') objecoes.push('A análise fundamentalista classifica a ação como "evitar ou reavaliar".')
   for (const a of analise.alertas) if (a.gravidade === 'critico') objecoes.push(`Alerta crítico na análise fundamentalista: ${a.titulo}.`)
 
@@ -207,9 +211,11 @@ export function calcularPrecoTeto({
   let entrada: PrecoTeto['entrada'] = null
   const semAlertaCritico = !analise.alertas.some((a) => a.gravidade === 'critico')
   if (vj.aplicavel && vj.confianca !== 'baixa' && semAlertaCritico && (rec === 'aguardar-preco' || rec === 'manter-acompanhar' || rec === 'considerar-entrada') && ok(vj.precoEntrada) && vj.precoEntrada > 0) {
-    const porTeto = ok(tetoGatilho) && tetoGatilho > 0 && tetoGatilho < vj.precoEntrada
-    const alvo = porTeto ? (tetoGatilho as number) : vj.precoEntrada
-    if (preco > alvo) entrada = { alvo, faltaCairPct: (1 - alvo / preco) * 100, limitadoPor: porTeto ? 'teto' : 'margem' }
+    const travas: { alvo: number; por: 'margem' | 'teto' | 'graham' }[] = [{ alvo: vj.precoEntrada, por: 'margem' }]
+    if (ok(tetoGatilho) && tetoGatilho > 0) travas.push({ alvo: tetoGatilho, por: 'teto' })
+    if (gatilho === 'bazin' && graham.aplicavel && ok(graham.teto) && graham.teto > 0) travas.push({ alvo: graham.teto, por: 'graham' })
+    const menor = travas.reduce((a, b) => (b.alvo < a.alvo ? b : a))
+    if (preco > menor.alvo) entrada = { alvo: menor.alvo, faltaCairPct: (1 - menor.alvo / preco) * 100, limitadoPor: menor.por }
   }
 
   return { ticker: analise.ticker, nome: analise.nome, preco, bazin, graham, gatilho, tetoGatilho, grahamConfirma, valorJustoBase: ok(base) ? base : null, objecoes, ressalva, recomendacaoFund: rec, status, distanciaPct, entrada, mensagem }

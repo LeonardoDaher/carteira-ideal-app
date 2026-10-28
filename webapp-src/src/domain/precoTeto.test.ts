@@ -175,6 +175,18 @@ describe('regras de consistência com a análise fundamentalista', () => {
     expect(calcularPrecoTeto({ empresa: e, analise: analise({ valorJusto: 60 }), preco: 40 }).ressalva).toBeNull()
   })
 
+  it('Graham confirma: abaixo do teto de Bazin, mas acima do teto de Graham, não liga o aviso e a trava aparece no "falta cair"', () => {
+    // LPA 4 e VPA 8: Graham = raiz de 22,5 × 32 ≈ R$ 26,83; Bazin R$ 50; preço R$ 40
+    const baixo = empresa({ lucro: 4000, pl: 8000 })
+    const r = calcularPrecoTeto({ empresa: baixo, analise: analise({ valorJusto: 80, rec: 'manter-acompanhar', precoEntrada: 60 }), preco: 40 })
+    expect(r.status).toBe('vetado')
+    expect(r.objecoes.some((o) => /Graham não confirma/.test(o))).toBe(true)
+    expect(r.entrada?.limitadoPor).toBe('graham')
+    expect(r.entrada?.alvo).toBeCloseTo(Math.sqrt(22.5 * 4 * 8), 6)
+    // preço dentro dos dois tetos: segue verde
+    expect(calcularPrecoTeto({ empresa: baixo, analise: analise({ valorJusto: 80 }), preco: 25 }).status).toBe('abaixo-do-teto')
+  })
+
   it('valor justo com P/L do grupo B3 vira ressalva visível, sem vetar', () => {
     const a = analise({ valorJusto: 60 })
     ;(a.valorJusto.cenarios[0] as { metodos: unknown[] }).metodos = [{ nome: 'P/L do grupo B3', valor: 60, premissas: '' }]

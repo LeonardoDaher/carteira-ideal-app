@@ -79,3 +79,10 @@ describe('"falta cair" nunca contradiz o estado do cartão', () => {
     expect(todas.filter((x) => x.teto.entrada && (x.teto.entrada.faltaCairPct <= 0 || x.teto.preco <= x.teto.entrada.alvo)).map((x) => x.teto.ticker)).toEqual([])
   })
 })
+
+describe('Graham confirma o verde', () => {
+  const todas = calcularTodas()
+  it('verde com Bazin como gatilho nunca tem o preço acima do teto de Graham (quando Graham se aplica)', () => {
+    expect(todas.filter((x) => x.teto.status === 'abaixo-do-teto' && x.teto.gatilho === 'bazin' && x.teto.graham.aplicavel && x.teto.graham.teto !== null && x.teto.preco > x.teto.graham.teto).map((x) => x.teto.ticker)).toEqual([])
+  })
+})

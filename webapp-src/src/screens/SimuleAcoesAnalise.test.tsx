@@ -297,7 +297,7 @@ describe('Simule Ações: preço teto de compra', () => {
   it('abaixo do teto de Bazin, mas acima do valor justo da fundamentalista, não acende o verde e explica por quê', async () => {
     abrirTeto(comBetaFraca)
     fireEvent.change(screen.getByLabelText(/Adicionar ação ao radar/), { target: { value: 'BETA3' } })
-    fireEvent.click(await screen.findByRole('button', { name: /BETA3/ }))
+    fireEvent.click(within(await screen.findByRole('list', { name: 'Ações encontradas' })).getByRole('button', { name: /BETA3/ }))
     const cartao = await screen.findByTestId('teto-BETA3')
     expect(cartao.getAttribute('data-status')).toBe('vetado')
     expect(within(cartao).getByText(/A análise fundamentalista diz "Aguardar preço mais atrativo"/)).toBeTruthy()
@@ -313,6 +313,21 @@ describe('Simule Ações: preço teto de compra', () => {
     expect(screen.queryByTestId('teto-BETA3')).toBeNull()
   })
 
+  it('a lista de todas as ações mostra o teto de cada uma e destaca só as verdes; tocar na linha abre o cartão', async () => {
+    abrirTeto()
+    const lista = await screen.findByTestId('lista-todas')
+    const verde = within(lista).getByTestId('linha-BETA3')
+    expect(verde.getAttribute('data-status')).toBe('abaixo-do-teto')
+    const outra = within(lista).getByTestId('linha-PAR1')
+    expect(outra.getAttribute('data-status')).not.toBe('abaixo-do-teto')
+    expect(outra.textContent).toMatch(/R\$\s\d/)
+    fireEvent.click(within(verde).getByRole('button'))
+    expect(await screen.findAllByTestId('teto-BETA3')).not.toHaveLength(0)
+    fireEvent.change(screen.getByLabelText(/Filtrar a lista de todas as ações/), { target: { value: 'par1' } })
+    expect(within(lista).queryByTestId('linha-BETA3')).toBeNull()
+    expect(within(lista).getByTestId('linha-PAR1')).toBeTruthy()
+  })
+
   it('subir a taxa de Bazin tira a ação do radar', async () => {
     // R$ 1,00 por ação: teto de R$ 16,67 a 6%, mas de R$ 10,00 a 10%, abaixo do preço de R$ 12.
     abrirTeto(betaCom({ ...forte, dividendosPagos: 100_000 }))
@@ -325,7 +340,7 @@ describe('Simule Ações: preço teto de compra', () => {
     abrirTeto()
     await screen.findByTestId('teto-BETA3')
     fireEvent.change(screen.getByLabelText(/Adicionar ação ao radar/), { target: { value: 'ALFA3' } })
-    fireEvent.click(await screen.findByRole('button', { name: /ALFA3/ }))
+    fireEvent.click(within(await screen.findByRole('list', { name: 'Ações encontradas' })).getByRole('button', { name: /ALFA3/ }))
     const cartao = await screen.findByTestId('teto-ALFA3')
     expect(cartao.getAttribute('data-status')).toBe('aguardando')
     expect(screen.queryByTestId('aviso-preco-teto')).toBeNull()
