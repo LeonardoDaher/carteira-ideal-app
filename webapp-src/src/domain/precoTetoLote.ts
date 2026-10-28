@@ -49,7 +49,7 @@ export function calcularItensPrecoTeto({
 export function textoDoAviso(item: PrecoTeto): { titulo: string; corpo: string } {
   return {
     titulo: `${item.ticker} abaixo do preço teto`,
-    corpo: `${item.mensagem}${item.ressalva ? ` Atenção: ${item.ressalva}.` : ''}`,
+    corpo: `${item.mensagem}${item.selo.tipo === 'alerta' ? ` ${item.selo.texto}` : ''}${item.ressalva ? ` Atenção: ${item.ressalva}.` : ''}`,
   }
 }
 
@@ -78,6 +78,6 @@ export function avisoDoAparelho(itens: Map<string, PrecoTeto>, ins: InscricaoPre
   const aviso: AvisoDoAparelho =
     novos.length === 1
       ? { ...textoDoAviso(novos[0]), tickers: [novos[0].ticker] }
-      : { titulo: `${novos.length} ações abaixo do preço teto`, corpo: `${novos.map((i) => i.ticker).join(', ')} entraram abaixo do teto e a análise fundamentalista não objeta. Abra o app para ver os detalhes.`, tickers: novos.map((i) => i.ticker) }
+      : { titulo: `${novos.length} ações abaixo do preço teto`, corpo: `${novos.map((i) => i.ticker).join(', ')} entraram abaixo do teto. Abra o app para ver os detalhes.`, tickers: novos.map((i) => i.ticker) }
   return { aviso, avisadosSeEnviado: r.avisados, avisadosSeFalhar: r.avisados.filter((t) => !r.avisar.includes(t)) }
 }

@@ -15,7 +15,6 @@ import { CAMINHO_FUNDAMENTOS, premissasDoMercado } from './useAnaliseDaAcao'
 
 const CHAVE = 'carteira-ideal:preco-teto'
 const TAXAS = [0.06, 0.08, 0.1, 0.12]
-const MAX_RADAR = 15
 /** Aviso no celular com o app fechado (D127). Pausado por decisão do responsável: o código fica pronto, mas a opção não aparece. */
 const AVISO_NO_CELULAR = false
 const AVISO =
@@ -25,7 +24,7 @@ const reais = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', curr
 
 const ROTULO_STATUS: Record<StatusTeto, string> = {
   'abaixo-do-teto': 'Abaixo do teto',
-  vetado: 'Abaixo, mas sem aviso',
+  vetado: 'Abaixo, Graham não confirma',
   perto: 'Perto do teto',
   aguardando: 'Acima do teto',
   'sem-teto': 'Sem teto',
@@ -166,16 +165,6 @@ export function PrecoTetoAcoes({
   }, [f, precoDe, guardado.taxa])
 
   const acompanhados = useMemo(() => (itens ? guardado.acompanhadas.map((t) => ({ ticker: t, item: itens.get(t) ?? null })) : []), [itens, guardado.acompanhadas])
-  const radar = useMemo(
-    () => (itens ? [...itens.values()].filter((i) => i.status === 'abaixo-do-teto').sort((a, b) => (a.distanciaPct ?? 0) - (b.distanciaPct ?? 0)) : []),
-    [itens],
-  )
-  // Abaixo do teto de dividendos, mas a análise fundamentalista não recomenda entrada: fica fora do verde e do aviso, com o motivo.
-  const observacao = useMemo(
-    () => (itens ? [...itens.values()].filter((i) => i.status === 'vetado').sort((a, b) => (a.distanciaPct ?? 0) - (b.distanciaPct ?? 0)) : []),
-    [itens],
-  )
-
   // Aviso: quem acabou de entrar abaixo do teto entre as acompanhadas.
   useEffect(() => {
     if (!itens || !lido) return
@@ -219,9 +208,10 @@ export function PrecoTetoAcoes({
       <div className="col" style={{ gap: 6 }}>
         <h2 style={{ fontSize: 17 }}>Preço teto de compra</h2>
         <div className="muted small justify" style={{ lineHeight: 1.5 }}>
-          O preço teto é o máximo que você aceita pagar por uma ação. Aqui o gatilho é o método de <strong>Bazin</strong> (dividendo médio ÷ retorno mínimo
-          exigido) e o de <strong>Graham</strong> (lucro e patrimônio) confirma. O verde só acende se a <strong>análise fundamentalista</strong> também não
-          objetar ao preço, para as duas abas não se contradizerem.
+          O preço teto é o máximo que você aceita pagar por uma ação. O gatilho é o método de <strong>Bazin</strong> (dividendo por ação ÷ retorno
+          mínimo exigido) e o de <strong>Graham</strong> (lucro e patrimônio) confirma. Fica <strong>verde</strong> a ação com o preço abaixo desses tetos.
+          A <strong>análise fundamentalista</strong> é outra pergunta (a empresa é boa? o valor justo é confiável?) e aparece ao lado, como um selo:
+          ela não muda o verde, mas vale olhar as duas leituras.
         </div>
       </div>
 
@@ -315,46 +305,7 @@ export function PrecoTetoAcoes({
         )}
       </div>
 
-      <div className="col" style={{ gap: 8 }}>
-        <span style={{ fontWeight: 700, fontSize: 14 }}>Radar: hoje abaixo do preço teto</span>
-        <span className="tiny muted justify">
-          Ações do cadastro com preço abaixo do teto e sem objeção da análise fundamentalista, das mais folgadas para as menos ({radar.length} no total).
-        </span>
-        {radar.length === 0 ? (
-          <div className="card small muted">Nenhuma ação passa nos dois testes com a taxa escolhida.</div>
-        ) : (
-          radar.slice(0, MAX_RADAR).map((i) => (
-            <CartaoTeto key={i.ticker} ticker={i.ticker} nome={nomeDe(i.ticker)} item={i} aoAcompanhar={guardado.acompanhadas.includes(i.ticker) ? undefined : () => adicionar(i.ticker)} />
-          ))
-        )}
-      </div>
-
       <ListaTodas itens={itens} nomeDe={nomeDe} aoAcompanhar={(ticker) => adicionar(ticker)} acompanhadas={guardado.acompanhadas} />
-
-      {observacao.length > 0 && (
-        <details className="card" data-testid="em-observacao">
-          <summary style={{ cursor: 'pointer', fontWeight: 700 }}>Em observação: abaixo do teto, mas sem aviso ({observacao.length})</summary>
-          <div className="tiny muted justify" style={{ marginTop: 6, lineHeight: 1.5 }}>
-            O preço está abaixo do teto de dividendos, mas a análise fundamentalista não diz &ldquo;considerar entrada&rdquo;. Por isso não ficam verdes nem geram aviso. O motivo vem da própria análise.
-          </div>
-          <ul className="col" style={{ gap: 6, listStyle: 'none', padding: 0, margin: '8px 0 0' }}>
-            {observacao.map((i) => (
-              <li key={i.ticker} className="card-outline col" style={{ gap: 2 }} data-testid={`observacao-${i.ticker}`}>
-                <div className="row-between" style={{ gap: 8 }}>
-                  <span style={{ fontWeight: 700 }}>{i.ticker}</span>
-                  <span className="tiny muted">R$ {i.preco.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} · teto R$ {i.tetoGatilho?.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                </div>
-                <span className="tiny muted justify">{i.objecoes[0]}</span>
-                <FaltaCair item={i} />
-                {i.ressalva && <span className="tiny justify" style={{ color: 'var(--warning, #b7791f)' }}>⚠ Com ressalva: {i.ressalva}.</span>}
-                {!guardado.acompanhadas.includes(i.ticker) && (
-                  <button className="chip" style={{ alignSelf: 'flex-start' }} onClick={() => adicionar(i.ticker)}>Acompanhar</button>
-                )}
-              </li>
-            ))}
-          </ul>
-        </details>
-      )}
 
       <div className="card-outline small muted justify" style={{ lineHeight: 1.5 }} role="note">{AVISO}</div>
     </div>
@@ -388,7 +339,7 @@ function CartaoTeto({ ticker, nome, item, aoRemover, aoAcompanhar }: { ticker: s
             <Numero titulo={`Teto Graham${item.grahamConfirma ? ' ✓' : ''}`} valor={item.graham.teto !== null ? reais(item.graham.teto) : 'não se aplica'} />
             <Numero titulo="Valor justo (fundamentalista)" valor={item.valorJustoBase !== null ? reais(item.valorJustoBase) : 'sem cálculo'} />
           </div>
-          <span className="tiny muted" data-testid={`leitura-fund-${ticker}`}>Leitura final da análise fundamentalista: <strong>{ROTULO_RECOMENDACAO[item.recomendacaoFund]}</strong></span>
+          <Selo item={item} detalhe />
           <span className="small justify" style={{ lineHeight: 1.5 }}>{item.mensagem}</span>
           <FaltaCair item={item} />
           {item.objecoes.length > 0 && (
@@ -437,12 +388,11 @@ function CartaoTeto({ ticker, nome, item, aoRemover, aoAcompanhar }: { ticker: s
   )
 }
 
-const PESO_STATUS: Record<StatusTeto, number> = { 'abaixo-do-teto': 0, vetado: 1, perto: 2, aguardando: 3, 'sem-teto': 4 }
 const pct = (v: number) => `${v > 0 ? '+' : v < 0 ? '−' : ''}${Math.abs(v).toLocaleString('pt-BR', { maximumFractionDigits: 0 })}%`
 
 /**
- * Lista fininha de TODAS as ações do cadastro com o preço, o preço teto e a distância até ele. Só as que estão no verde (abaixo do teto
- * e com a análise fundamentalista de acordo) ficam destacadas; as demais mostram o teto sem destaque. Tocar numa linha abre o cartão.
+ * Lista fininha de TODAS as ações do cadastro, em ordem alfabética, com o preço, o preço teto, a distância até ele e o selo da análise
+ * fundamentalista. Só as que estão abaixo dos tetos de Bazin e Graham ficam em verde; as demais mostram o teto sem destaque. Tocar numa linha abre o cartão.
  */
 function ListaTodas({ itens, nomeDe, aoAcompanhar, acompanhadas }: { itens: Map<string, PrecoTeto>; nomeDe: (t: string) => string | null; aoAcompanhar: (t: string) => void; acompanhadas: string[] }) {
   const [filtro, setFiltro] = useState('')
@@ -451,14 +401,14 @@ function ListaTodas({ itens, nomeDe, aoAcompanhar, acompanhadas }: { itens: Map<
     const q = filtro.trim().toLowerCase()
     return [...itens.values()]
       .filter((i) => !q || i.ticker.toLowerCase().includes(q) || (nomeDe(i.ticker) ?? i.nome ?? '').toLowerCase().includes(q))
-      .sort((a, b) => PESO_STATUS[a.status] - PESO_STATUS[b.status] || (a.distanciaPct ?? Infinity) - (b.distanciaPct ?? Infinity) || a.ticker.localeCompare(b.ticker))
+      .sort((a, b) => a.ticker.localeCompare(b.ticker))
   }, [itens, filtro, nomeDe])
   const verdes = useMemo(() => [...itens.values()].filter((i) => i.status === 'abaixo-do-teto').length, [itens])
   return (
     <div className="col" style={{ gap: 8 }} data-testid="lista-todas">
       <span style={{ fontWeight: 700, fontSize: 14 }}>Todas as ações ({itens.size})</span>
       <span className="tiny muted justify">
-        O preço teto de cada ação do app. Em verde, as {verdes} que estão abaixo do teto com a análise fundamentalista de acordo; nas demais, o teto aparece sem destaque. Ordem: verdes primeiro, depois as mais perto do teto.
+        O preço teto de cada ação do app, em ordem alfabética. Em verde, as {verdes} abaixo dos tetos de Bazin e Graham. O símbolo à direita é a leitura da análise fundamentalista: ✔ concorda, • neutra, ⚠ alerta.
       </span>
       <input type="search" className="busca-fii" placeholder="Filtrar: código ou nome" aria-label="Filtrar a lista de todas as ações" autoCapitalize="characters" autoCorrect="off" spellCheck={false} value={filtro} onChange={(e) => setFiltro(e.target.value.slice(0, 40))} />
       <div className="row tiny muted" style={{ padding: '0 10px', gap: 8 }} aria-hidden="true">
@@ -466,6 +416,7 @@ function ListaTodas({ itens, nomeDe, aoAcompanhar, acompanhadas }: { itens: Map<
         <span style={{ width: 70, textAlign: 'right' }}>Preço</span>
         <span style={{ width: 70, textAlign: 'right' }}>Teto</span>
         <span style={{ width: 48, textAlign: 'right' }}>Dist.</span>
+        <span style={{ width: 16 }} />
       </div>
       <ul className="col" style={{ gap: 2, listStyle: 'none', padding: 0, margin: 0 }} aria-label="Todas as ações com preço teto">
         {linhas.map((i) => {
@@ -490,6 +441,7 @@ function ListaTodas({ itens, nomeDe, aoAcompanhar, acompanhadas }: { itens: Map<
                 <span style={{ width: 70, textAlign: 'right', fontSize: 13 }}>{reais(i.preco)}</span>
                 <span style={{ width: 70, textAlign: 'right', fontSize: 13, fontWeight: verde ? 700 : 400 }}>{i.tetoGatilho !== null ? reais(i.tetoGatilho) : '—'}</span>
                 <span className="tiny" style={{ width: 48, textAlign: 'right', color: verde ? 'var(--success)' : i.status === 'vetado' ? 'var(--warning)' : 'var(--text-muted)' }}>{i.distanciaPct !== null ? pct(i.distanciaPct) : '—'}</span>
+                <Selo item={i} />
               </button>
               {aberto && <CartaoTeto ticker={i.ticker} nome={nomeDe(i.ticker)} item={i} aoAcompanhar={acompanhadas.includes(i.ticker) ? undefined : () => aoAcompanhar(i.ticker)} />}
             </li>
@@ -501,14 +453,31 @@ function ListaTodas({ itens, nomeDe, aoAcompanhar, acompanhadas }: { itens: Map<
   )
 }
 
-/** "Falta cair X% para entrar": distância até o preço em que a análise fundamentalista e o teto concordam. */
+/** "Falta cair X%": distância até o preço em que a ação fica abaixo dos tetos de Bazin e de Graham. */
 function FaltaCair({ item }: { item: PrecoTeto }) {
   if (!item.entrada) return null
   const { alvo, faltaCairPct, limitadoPor } = item.entrada
   return (
     <span className="small" style={{ fontWeight: 700 }} data-testid={`falta-cair-${item.ticker}`}>
-      Falta cair {faltaCairPct.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}% (até {reais(alvo)}) para entrar
-      <span className="tiny muted" style={{ fontWeight: 400 }}> · {limitadoPor === 'teto' ? 'trava: o teto de dividendos' : limitadoPor === 'graham' ? 'trava: o teto de Graham' : 'trava: a margem de segurança de 25% da análise fundamentalista'}</span>
+      Falta cair {faltaCairPct.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}% (até {reais(alvo)}) para ficar abaixo do teto
+      <span className="tiny muted" style={{ fontWeight: 400 }}> · {limitadoPor === 'graham' ? 'trava: o teto de Graham' : 'trava: o teto de Bazin'}</span>
+    </span>
+  )
+}
+
+const SIMBOLO_SELO = { concorda: '✔', neutro: '•', alerta: '⚠' } as const
+const COR_SELO = { concorda: 'var(--success)', neutro: 'var(--text-muted)', alerta: 'var(--warning)' } as const
+const ROTULO_SELO = { concorda: 'Fundamentalista concorda', neutro: 'Fundamentalista: neutra', alerta: 'Fundamentalista: alerta' } as const
+
+/** Selo da análise fundamentalista: só o símbolo na linha da lista; com `detalhe`, a leitura por extenso no cartão. */
+function Selo({ item, detalhe = false }: { item: PrecoTeto; detalhe?: boolean }) {
+  const { tipo, texto } = item.selo
+  if (!detalhe) {
+    return <span style={{ width: 16, textAlign: 'center', color: COR_SELO[tipo], fontSize: 12 }} title={texto} aria-label={`${ROTULO_SELO[tipo]}: ${ROTULO_RECOMENDACAO[item.recomendacaoFund]}`} data-testid={`selo-${item.ticker}`} data-selo={tipo}>{SIMBOLO_SELO[tipo]}</span>
+  }
+  return (
+    <span className="small justify" style={{ color: COR_SELO[tipo], fontWeight: tipo === 'alerta' ? 700 : 400, lineHeight: 1.5 }} data-testid={`leitura-fund-${item.ticker}`} data-selo={tipo}>
+      {SIMBOLO_SELO[tipo]} {texto}
     </span>
   )
 }

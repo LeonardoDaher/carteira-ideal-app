@@ -118,7 +118,7 @@ test('POST /api/push-inscrever recusa pedido inválido e método errado', async 
 // ---------- núcleo do job ----------
 
 function itemFalso(ticker, status, extra = {}) {
-  return { ticker, status, mensagem: `${ticker} abaixo do teto.`, ressalva: null, ...extra }
+  return { ticker, status, mensagem: `${ticker} abaixo do teto.`, ressalva: null, selo: { tipo: 'concorda', texto: '' }, ...extra }
 }
 const mapa = (...itens) => new Map(itens.map((i) => [i.ticker, i]))
 

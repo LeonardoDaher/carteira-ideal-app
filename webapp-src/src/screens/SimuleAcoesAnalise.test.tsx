@@ -285,35 +285,24 @@ describe('Simule Ações: preço teto de compra', () => {
     fireEvent.click(screen.getByRole('tab', { name: /Preço teto de compra/ }))
   }
 
-  it('o radar lista a ação abaixo do teto em verde, com os dois métodos e o valor justo da fundamentalista', async () => {
+  const abrirLinha = async (ticker: string) => {
+    const lista = await screen.findByTestId('lista-todas')
+    fireEvent.click(within(within(lista).getByTestId(`linha-${ticker}`)).getByRole('button'))
+    return screen.findByTestId(`teto-${ticker}`)
+  }
+
+  it('não há radar nem cartões verdes antes da lista: a lista de todas as ações em ordem alfabética é o conteúdo', async () => {
     abrirTeto()
-    const cartao = await screen.findByTestId('teto-BETA3')
-    expect(cartao.getAttribute('data-status')).toBe('abaixo-do-teto')
-    expect(within(cartao).getByText(/Teto Bazin/)).toBeTruthy()
-    expect(within(cartao).getByText(/Teto Graham/)).toBeTruthy()
-    expect(within(cartao).getByText(/Valor justo \(fundamentalista\)/)).toBeTruthy()
-  })
-
-  it('abaixo do teto de Bazin, mas acima do valor justo da fundamentalista, não acende o verde e explica por quê', async () => {
-    abrirTeto(comBetaFraca)
-    fireEvent.change(screen.getByLabelText(/Adicionar ação ao radar/), { target: { value: 'BETA3' } })
-    fireEvent.click(within(await screen.findByRole('list', { name: 'Ações encontradas' })).getByRole('button', { name: /BETA3/ }))
-    const cartao = await screen.findByTestId('teto-BETA3')
-    expect(cartao.getAttribute('data-status')).toBe('vetado')
-    expect(within(cartao).getByText(/A análise fundamentalista diz "Aguardar preço mais atrativo"/)).toBeTruthy()
-    expect(within(cartao).getByTestId('leitura-fund-BETA3').textContent).toContain('Aguardar preço mais atrativo')
-    expect(screen.queryByTestId('aviso-preco-teto')).toBeNull()
-  })
-
-  it('abaixo do teto sem "considerar entrada" fica na lista "Em observação", com o motivo, e fora do radar verde', async () => {
-    abrirTeto(comBetaFraca)
-    const lista = await screen.findByTestId('em-observacao')
-    const linha = within(lista).getByTestId('observacao-BETA3')
-    expect(within(linha).getByText(/A análise fundamentalista diz/)).toBeTruthy()
+    const lista = await screen.findByTestId('lista-todas')
+    expect(screen.queryByText(/Radar: hoje abaixo/)).toBeNull()
+    expect(screen.queryByTestId('em-observacao')).toBeNull()
     expect(screen.queryByTestId('teto-BETA3')).toBeNull()
+    const codigos = [...lista.querySelectorAll('li[data-testid^="linha-"]')].map((li) => (li.getAttribute('data-testid') as string).replace('linha-', ''))
+    expect(codigos.length).toBeGreaterThan(4)
+    expect(codigos).toEqual([...codigos].sort((a, b) => a.localeCompare(b)))
   })
 
-  it('a lista de todas as ações mostra o teto de cada uma e destaca só as verdes; tocar na linha abre o cartão', async () => {
+  it('só fica verde quem está abaixo dos tetos; as demais mostram o teto sem destaque', async () => {
     abrirTeto()
     const lista = await screen.findByTestId('lista-todas')
     const verde = within(lista).getByTestId('linha-BETA3')
@@ -321,24 +310,47 @@ describe('Simule Ações: preço teto de compra', () => {
     const outra = within(lista).getByTestId('linha-PAR1')
     expect(outra.getAttribute('data-status')).not.toBe('abaixo-do-teto')
     expect(outra.textContent).toMatch(/R\$\s\d/)
-    fireEvent.click(within(verde).getByRole('button'))
-    expect(await screen.findAllByTestId('teto-BETA3')).not.toHaveLength(0)
+  })
+
+  it('tocar na linha abre o cartão com os dois métodos, o valor justo e a leitura da fundamentalista', async () => {
+    abrirTeto()
+    const cartao = await abrirLinha('BETA3')
+    expect(cartao.getAttribute('data-status')).toBe('abaixo-do-teto')
+    expect(within(cartao).getByText(/Teto Bazin/)).toBeTruthy()
+    expect(within(cartao).getByText(/Teto Graham/)).toBeTruthy()
+    expect(within(cartao).getByText(/Valor justo \(fundamentalista\)/)).toBeTruthy()
+    expect(within(cartao).getByTestId('leitura-fund-BETA3').getAttribute('data-selo')).toBe('concorda')
+  })
+
+  it('a fundamentalista é um selo ao lado: com "aguardar preço" a linha continua verde e o selo é neutro', async () => {
+    abrirTeto(comBetaFraca)
+    const lista = await screen.findByTestId('lista-todas')
+    expect(within(lista).getByTestId('linha-BETA3').getAttribute('data-status')).toBe('abaixo-do-teto')
+    expect(within(lista).getByTestId('selo-BETA3').getAttribute('data-selo')).toBe('neutro')
+    const cartao = await abrirLinha('BETA3')
+    expect(within(cartao).getByTestId('leitura-fund-BETA3').textContent).toContain('Aguardar preço mais atrativo')
+  })
+
+  it('o filtro procura por código ou nome na lista', async () => {
+    abrirTeto()
+    const lista = await screen.findByTestId('lista-todas')
     fireEvent.change(screen.getByLabelText(/Filtrar a lista de todas as ações/), { target: { value: 'par1' } })
     expect(within(lista).queryByTestId('linha-BETA3')).toBeNull()
     expect(within(lista).getByTestId('linha-PAR1')).toBeTruthy()
   })
 
-  it('subir a taxa de Bazin tira a ação do radar', async () => {
+  it('subir a taxa de Bazin tira a ação do verde', async () => {
     // R$ 1,00 por ação: teto de R$ 16,67 a 6%, mas de R$ 10,00 a 10%, abaixo do preço de R$ 12.
     abrirTeto(betaCom({ ...forte, dividendosPagos: 100_000 }))
-    await screen.findByTestId('teto-BETA3')
+    const lista = await screen.findByTestId('lista-todas')
+    expect(within(lista).getByTestId('linha-BETA3').getAttribute('data-status')).toBe('abaixo-do-teto')
     fireEvent.click(screen.getByRole('button', { name: /^10%/ }))
-    expect(screen.queryByTestId('teto-BETA3')?.getAttribute('data-status') ?? 'aguardando').not.toBe('abaixo-do-teto')
+    expect(within(lista).getByTestId('linha-BETA3').getAttribute('data-status')).not.toBe('abaixo-do-teto')
   })
 
   it('acompanhar uma ação acima do teto mostra "Acima do teto" e sem aviso', async () => {
     abrirTeto()
-    await screen.findByTestId('teto-BETA3')
+    await screen.findByTestId('lista-todas')
     fireEvent.change(screen.getByLabelText(/Adicionar ação ao radar/), { target: { value: 'ALFA3' } })
     fireEvent.click(within(await screen.findByRole('list', { name: 'Ações encontradas' })).getByRole('button', { name: /ALFA3/ }))
     const cartao = await screen.findByTestId('teto-ALFA3')
@@ -348,7 +360,7 @@ describe('Simule Ações: preço teto de compra', () => {
 
   it('acompanhar a ação que já está abaixo do teto mostra o aviso na tela', async () => {
     abrirTeto()
-    await screen.findByTestId('teto-BETA3')
+    await abrirLinha('BETA3')
     fireEvent.click(screen.getByRole('button', { name: 'Acompanhar' }))
     expect((await screen.findByTestId('aviso-preco-teto')).textContent).toContain('BETA3')
   })

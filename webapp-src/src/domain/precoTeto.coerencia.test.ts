@@ -32,7 +32,7 @@ function calcularTodas() {
   return saida
 }
 
-describe('coerência entre o preço teto e a análise fundamentalista, com todas as ações do cadastro', () => {
+describe('preço teto com os dados reais: verde só por Bazin e Graham, fundamentalista como selo (D129)', () => {
   const todas = calcularTodas()
   const lista = (f: (x: (typeof todas)[number]) => boolean) => todas.filter(f).map((x) => x.teto.ticker)
 
@@ -40,49 +40,27 @@ describe('coerência entre o preço teto e a análise fundamentalista, com todas
     expect(todas.length).toBeGreaterThan(100)
   })
 
-  it('verde só onde a fundamentalista diz "considerar entrada"', () => {
-    expect(lista((x) => x.teto.status === 'abaixo-do-teto' && x.teto.recomendacaoFund !== 'considerar-entrada')).toEqual([])
-  })
-
-  it('verde nunca com preço acima do valor justo base, categoria "evitar" ou "pouco atrativa", ou alerta crítico', () => {
-    expect(lista((x) => x.teto.status === 'abaixo-do-teto' && (x.teto.valorJustoBase === null || x.teto.preco > x.teto.valorJustoBase))).toEqual([])
-    expect(lista((x) => x.teto.status === 'abaixo-do-teto' && (x.categoria === 'evitar' || x.categoria === 'pouco-atrativa'))).toEqual([])
-    expect(lista((x) => x.teto.status === 'abaixo-do-teto' && x.criticos > 0)).toEqual([])
-  })
-
-  it('verde sempre com o preço dentro do teto do gatilho e sem objeção', () => {
+  it('verde = preço dentro do teto do gatilho e, com Bazin como gatilho, dentro do teto de Graham quando ele se aplica', () => {
     expect(lista((x) => x.teto.status === 'abaixo-do-teto' && (x.teto.tetoGatilho === null || x.teto.preco > x.teto.tetoGatilho))).toEqual([])
     expect(lista((x) => x.teto.status === 'abaixo-do-teto' && x.teto.objecoes.length > 0)).toEqual([])
+    expect(lista((x) => x.teto.status === 'abaixo-do-teto' && x.teto.gatilho === 'bazin' && x.teto.graham.aplicavel && x.teto.graham.teto !== null && x.teto.preco > x.teto.graham.teto)).toEqual([])
   })
 
-  it('"abaixo, mas sem aviso" sempre explica o motivo', () => {
+  it('o que não é verde tem motivo: acima do teto, sem teto, ou Graham não confirma (com a objeção escrita)', () => {
     expect(lista((x) => x.teto.status === 'vetado' && x.teto.objecoes.length === 0)).toEqual([])
+    expect(lista((x) => x.teto.status === 'vetado' && !(x.teto.tetoGatilho !== null && x.teto.preco <= x.teto.tetoGatilho))).toEqual([])
+    expect(lista((x) => (x.teto.status === 'perto' || x.teto.status === 'aguardando') && (x.teto.tetoGatilho === null || x.teto.preco <= x.teto.tetoGatilho))).toEqual([])
   })
 
-  it('amarelo ("perto") nunca aparece onde a fundamentalista diz evitar ou reduzir exposição', () => {
-    expect(lista((x) => x.teto.status === 'perto' && (x.teto.recomendacaoFund === 'evitar-novos' || x.teto.recomendacaoFund === 'reduzir-exposicao'))).toEqual([])
+  it('todo item tem o selo da fundamentalista, coerente com a leitura dela: o selo "concorda" só com "considerar entrada" e sem alerta crítico', () => {
+    expect(lista((x) => !['concorda', 'neutro', 'alerta'].includes(x.teto.selo.tipo) || !x.teto.selo.texto)).toEqual([])
+    expect(lista((x) => x.teto.selo.tipo === 'concorda' && (x.teto.recomendacaoFund !== 'considerar-entrada' || x.criticos > 0))).toEqual([])
+    expect(lista((x) => (x.teto.recomendacaoFund === 'evitar-novos' || x.teto.recomendacaoFund === 'reduzir-exposicao' || x.criticos > 0) && x.teto.selo.tipo !== 'alerta')).toEqual([])
+    expect(lista((x) => x.teto.recomendacaoFund === 'considerar-entrada' && x.criticos === 0 && x.teto.selo.tipo !== 'concorda')).toEqual([])
   })
 
-  it('ação que a fundamentalista manda evitar ou reduzir nunca fica verde nem amarela', () => {
-    expect(lista((x) => (x.teto.recomendacaoFund === 'evitar-novos' || x.teto.recomendacaoFund === 'reduzir-exposicao') && (x.teto.status === 'abaixo-do-teto' || x.teto.status === 'perto'))).toEqual([])
-  })
-
-  it('se a fundamentalista diz "considerar entrada" e o teto não acende, a mensagem explica a diferença', () => {
-    expect(lista((x) => x.teto.recomendacaoFund === 'considerar-entrada' && x.teto.status !== 'abaixo-do-teto' && x.teto.status !== 'vetado' && !/duas concordam|sem teto|Nenhum dos dois/.test(x.teto.mensagem))).toEqual([])
-  })
-})
-
-describe('"falta cair" nunca contradiz o estado do cartão', () => {
-  const todas = calcularTodas()
-  it('quem já está verde não tem "falta cair"; quem tem, está acima do alvo e a queda é positiva', () => {
-    expect(todas.filter((x) => x.teto.status === 'abaixo-do-teto' && x.teto.entrada !== null).map((x) => x.teto.ticker)).toEqual([])
-    expect(todas.filter((x) => x.teto.entrada && (x.teto.entrada.faltaCairPct <= 0 || x.teto.preco <= x.teto.entrada.alvo)).map((x) => x.teto.ticker)).toEqual([])
-  })
-})
-
-describe('Graham confirma o verde', () => {
-  const todas = calcularTodas()
-  it('verde com Bazin como gatilho nunca tem o preço acima do teto de Graham (quando Graham se aplica)', () => {
-    expect(todas.filter((x) => x.teto.status === 'abaixo-do-teto' && x.teto.gatilho === 'bazin' && x.teto.graham.aplicavel && x.teto.graham.teto !== null && x.teto.preco > x.teto.graham.teto).map((x) => x.teto.ticker)).toEqual([])
+  it('"falta cair" só existe fora do verde, e a queda é positiva e vai até um teto menor que o preço', () => {
+    expect(lista((x) => x.teto.status === 'abaixo-do-teto' && x.teto.entrada !== null)).toEqual([])
+    expect(lista((x) => x.teto.entrada !== null && (x.teto.entrada.faltaCairPct <= 0 || x.teto.preco <= x.teto.entrada.alvo))).toEqual([])
   })
 })

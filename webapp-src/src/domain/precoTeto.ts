@@ -1,7 +1,8 @@
-// Preço teto de compra (D125). Módulo PURO. O preço teto é o máximo que a pessoa aceita pagar por uma ação para ter o retorno mínimo
-// que quer. Aqui há dois métodos: Bazin (gatilho) e Graham (confirmação). O modelo de Gordon ficou de fora porque explode quando
-// r − g é pequeno e g é chute. O teto NÃO é um segundo juiz: parte da mesma análise fundamentalista da aba ao lado (valor justo,
-// categoria e alertas), e o aviso de compra só liga quando as duas leituras não se contradizem e os dividendos recentes sustentam a média. Não é recomendação (D19).
+// Preço teto de compra (D125, revisto na D129). Módulo PURO. O preço teto é o máximo que a pessoa aceita pagar por uma ação para ter o retorno
+// mínimo que quer. Aqui há dois métodos: Bazin (gatilho) e Graham (confirmação). O modelo de Gordon ficou de fora porque explode quando
+// r − g é pequeno e g é chute. O verde depende SÓ de Bazin e Graham. A análise fundamentalista aparece ao lado como um SELO (concorda,
+// neutro ou alerta), sem vetar: são perguntas diferentes (preço barato para o dividendo e para o balanço × empresa boa e valor justo
+// confiável) e a pessoa vê as duas leituras. Não é recomendação (D19).
 
 import { ROTULO_RECOMENDACAO } from './analiseFundamentalista'
 import type { AnaliseFundamentalista, EmpresaFundamentos, Recomendacao } from './analiseFundamentalista'
@@ -60,20 +61,19 @@ export interface PrecoTeto {
   /** Graham também mostra o preço abaixo do teto dele. */
   grahamConfirma: boolean
   valorJustoBase: number | null
-  /** Motivos pelos quais a análise fundamentalista não deixa o aviso ligar. Vazio quando não há objeção. */
+  /** Motivos pelos quais o aviso não liga mesmo com o preço abaixo do teto de Bazin (hoje: Graham não confirma). Vazio quando não há. */
   objecoes: string[]
   /** Leitura final da análise fundamentalista (a mesma da aba ao lado). */
   recomendacaoFund: Recomendacao
-  /** Ponto fraco do teto que NÃO bloqueia o verde (a fundamentalista segue como juiz), mas aparece no cartão e na notificação. */
+  /** Selo da análise fundamentalista: aparece ao lado do teto, mas não bloqueia o verde. */
+  selo: { tipo: 'concorda' | 'neutro' | 'alerta'; texto: string }
+  /** Ponto fraco do dado do teto que NÃO bloqueia o verde, mas aparece no cartão e na notificação. */
   ressalva: string | null
   status: StatusTeto
   /** Preço ÷ teto do gatilho − 1: negativo é folga abaixo do teto. */
   distanciaPct: number | null
-  /**
-   * Quanto o preço precisa cair para a análise fundamentalista (preço de entrada, com a margem de segurança) e o teto concordarem.
-   * Só existe quando o valor justo é confiável e nada mais impede a entrada; `limitadoPor` diz qual das duas travas está mais longe.
-   */
-  entrada: { alvo: number; faltaCairPct: number; limitadoPor: 'margem' | 'teto' | 'graham' } | null
+  /** Quanto o preço precisa cair para ficar abaixo dos tetos (o menor entre Bazin e Graham); `limitadoPor` diz qual deles está mais baixo. Null quando já está abaixo. */
+  entrada: { alvo: number; faltaCairPct: number; limitadoPor: 'teto' | 'graham' } | null
   mensagem: string
 }
 
@@ -175,28 +175,30 @@ export function calcularPrecoTeto({
   const tetoGatilho = gatilho === 'bazin' ? bazin.teto : gatilho === 'graham' ? graham.teto : null
   const grahamConfirma = gatilho === 'bazin' && graham.aplicavel && ok(graham.teto) && preco <= graham.teto
 
-  // Objeções vindas da MESMA análise fundamentalista da aba ao lado.
   const vj = analise.valorJusto
   const base = vj.cenarios.find((c) => c.cenario === 'base')?.valorJusto ?? null
-  const objecoes: string[] = []
-  // A leitura final da fundamentalista é o juiz: o verde só acende quando ela própria diz "considerar entrada". Qualquer outra leitura
-  // (aguardar preço, manter, reduzir, evitar) é objeção, para a aba de teto nunca dizer "vale" onde a outra diz "espere".
+
+  // Selo da análise fundamentalista (a mesma leitura da aba ao lado). Informa, não veta.
   const rec = analise.recomendacao.categoria
-  if (rec !== 'considerar-entrada') objecoes.push(`A análise fundamentalista diz "${ROTULO_RECOMENDACAO[rec]}": ${analise.recomendacao.justificativa[0] ?? 'sem justificativa registrada'}`)
-  if (!vj.aplicavel || !ok(base)) objecoes.push('A análise fundamentalista não calculou valor justo para esta ação, então não confirma o preço.')
-  else if (preco > base) objecoes.push(`Na análise fundamentalista o preço (${reais(preco)}) está acima do valor justo base (${reais(base)}).`)
+  const criticos = analise.alertas.filter((a) => a.gravidade === 'critico')
+  const justificativa = analise.recomendacao.justificativa[0]
+  const selo: PrecoTeto['selo'] =
+    rec === 'evitar-novos' || rec === 'reduzir-exposicao' || criticos.length > 0
+      ? { tipo: 'alerta', texto: `A análise fundamentalista diz "${ROTULO_RECOMENDACAO[rec]}"${criticos.length ? ` e há alerta crítico (${criticos.map((a) => a.titulo).join(', ')})` : ''}${justificativa ? `: ${justificativa}` : '.'}` }
+      : rec === 'considerar-entrada'
+        ? { tipo: 'concorda', texto: 'A análise fundamentalista concorda: considerar entrada.' }
+        : { tipo: 'neutro', texto: `A análise fundamentalista diz "${ROTULO_RECOMENDACAO[rec]}"${justificativa ? `: ${justificativa}` : '.'}` }
+
   // Graham confirma: com Bazin como gatilho, se Graham se aplica e o preço está acima do teto dele, o aviso não liga (as duas contas precisam concordar).
+  const objecoes: string[] = []
   if (gatilho === 'bazin' && graham.aplicavel && ok(graham.teto) && preco > graham.teto) {
     objecoes.push(`O teto de Graham (${reais(graham.teto)}) está abaixo do preço (${reais(preco)}): Graham não confirma o teto de Bazin.`)
   }
-  if (analise.categoria === 'evitar') objecoes.push('A análise fundamentalista classifica a ação como "evitar ou reavaliar".')
-  for (const a of analise.alertas) if (a.gravidade === 'critico') objecoes.push(`Alerta crítico na análise fundamentalista: ${a.titulo}.`)
 
-  // Ressalvas informam o dado usado; não vetam (quem decide é a fundamentalista).
+  // Ressalvas informam o dado usado; não vetam.
   const avisos: string[] = []
   if (gatilho === 'bazin' && bazin.recenteMenor) avisos.push('dividendos dos últimos 12 meses abaixo de 70% da média (o teto já usa o valor mais baixo)')
   if (ok(tetoGatilho) && tetoGatilho > preco * TETO_ATIPICO) avisos.push(`teto mais de ${TETO_ATIPICO}× o preço: dividendo médio provavelmente atípico (pagamento extraordinário ou dado fora do padrão)`)
-  if (vj.cenarios.find((c) => c.cenario === 'base')?.metodos.some((m) => m.nome === 'P/L do grupo B3')) avisos.push('o valor justo usa o P/L do grupo B3, porque o setor tem poucos pares')
   const ressalva = avisos.length ? avisos.join('; ') : null
   const distanciaPct = ok(tetoGatilho) && tetoGatilho > 0 ? (preco / tetoGatilho - 1) * 100 : null
   const nomeGatilho = gatilho === 'graham' ? 'Graham' : 'Bazin'
@@ -208,36 +210,29 @@ export function calcularPrecoTeto({
   } else if (preco <= tetoGatilho) {
     if (objecoes.length) {
       status = 'vetado'
-      mensagem = `${nomeGatilho}: preço abaixo do teto de ${reais(tetoGatilho)}. Sem aviso de compra: há objeção, veja abaixo.`
+      mensagem = `${nomeGatilho}: preço abaixo do teto de ${reais(tetoGatilho)}, mas Graham não confirma. Sem aviso de compra.`
     } else {
       status = 'abaixo-do-teto'
-      mensagem = `Preço abaixo do teto de ${nomeGatilho} (${reais(tetoGatilho)}) e sem objeção da análise fundamentalista${grahamConfirma ? '; Graham também confirma' : ''}.`
+      mensagem = `Preço abaixo do teto de ${nomeGatilho} (${reais(tetoGatilho)})${grahamConfirma ? '; Graham também confirma' : ''}.`
     }
-  } else if (preco <= tetoGatilho * (1 + FAIXA_PERTO) && rec !== 'evitar-novos' && rec !== 'reduzir-exposicao') {
+  } else if (preco <= tetoGatilho * (1 + FAIXA_PERTO)) {
     status = 'perto'
     mensagem = `Preço a ${(distanciaPct as number).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}% acima do teto de ${nomeGatilho} (${reais(tetoGatilho)}).`
   } else {
     status = 'aguardando'
     mensagem = `Preço ${(distanciaPct as number).toLocaleString('pt-BR', { maximumFractionDigits: 0 })}% acima do teto de ${nomeGatilho} (${reais(tetoGatilho)}).`
   }
-  // Teto acima do preço pela fundamentalista, mas fora do teto: diz claramente que as duas leituras só avisam juntas.
-  if (rec === 'considerar-entrada' && (status === 'perto' || status === 'aguardando')) {
-    mensagem += ' A análise fundamentalista vê margem de segurança, mas o preço está acima do teto de dividendos: o aviso só liga quando as duas concordam.'
-  }
 
-  // Distância até a entrada: só quando a fundamentalista considera o valor justo confiável, não há alerta crítico e a leitura dela
-  // depende do preço (aguardar, manter ou considerar entrada). Evitar/reduzir ou confiança baixa não têm "falta cair" que faça sentido.
+  // Distância até ficar abaixo dos tetos: o menor entre Bazin (gatilho) e Graham (confirmação).
   let entrada: PrecoTeto['entrada'] = null
-  const semAlertaCritico = !analise.alertas.some((a) => a.gravidade === 'critico')
-  if (vj.aplicavel && vj.confianca !== 'baixa' && semAlertaCritico && (rec === 'aguardar-preco' || rec === 'manter-acompanhar' || rec === 'considerar-entrada') && ok(vj.precoEntrada) && vj.precoEntrada > 0) {
-    const travas: { alvo: number; por: 'margem' | 'teto' | 'graham' }[] = [{ alvo: vj.precoEntrada, por: 'margem' }]
-    if (ok(tetoGatilho) && tetoGatilho > 0) travas.push({ alvo: tetoGatilho, por: 'teto' })
+  if (ok(tetoGatilho) && tetoGatilho > 0 && status !== 'abaixo-do-teto') {
+    const travas: { alvo: number; por: 'teto' | 'graham' }[] = [{ alvo: tetoGatilho, por: 'teto' }]
     if (gatilho === 'bazin' && graham.aplicavel && ok(graham.teto) && graham.teto > 0) travas.push({ alvo: graham.teto, por: 'graham' })
     const menor = travas.reduce((a, b) => (b.alvo < a.alvo ? b : a))
     if (preco > menor.alvo) entrada = { alvo: menor.alvo, faltaCairPct: (1 - menor.alvo / preco) * 100, limitadoPor: menor.por }
   }
 
-  return { ticker: analise.ticker, nome: analise.nome, preco, bazin, graham, gatilho, tetoGatilho, grahamConfirma, valorJustoBase: ok(base) ? base : null, objecoes, ressalva, recomendacaoFund: rec, status, distanciaPct, entrada, mensagem }
+  return { ticker: analise.ticker, nome: analise.nome, preco, bazin, graham, gatilho, tetoGatilho, grahamConfirma, valorJustoBase: ok(base) ? base : null, objecoes, ressalva, recomendacaoFund: rec, selo, status, distanciaPct, entrada, mensagem }
 }
 
 /**

@@ -105,34 +105,39 @@ describe('Graham', () => {
   })
 })
 
-describe('regras de consistência com a análise fundamentalista', () => {
+describe('verde por Bazin e Graham, com a fundamentalista como selo (D129)', () => {
   const e = empresa({})
 
-  it('liga o aviso quando o preço está abaixo do teto e a fundamentalista não objeta', () => {
+  it('fica verde com o preço abaixo do teto de Bazin e Graham confirmando', () => {
     const r = calcularPrecoTeto({ empresa: e, analise: analise({ valorJusto: 60 }), preco: 40 })
     expect(r.status).toBe('abaixo-do-teto')
     expect(r.objecoes).toEqual([])
     expect(r.grahamConfirma).toBe(true)
+    expect(r.entrada).toBeNull()
   })
 
-  it('não liga o aviso quando o preço está acima do valor justo base, mesmo abaixo do teto de Bazin', () => {
-    const r = calcularPrecoTeto({ empresa: e, analise: analise({ valorJusto: 30 }), preco: 40 })
-    expect(r.status).toBe('vetado')
-    expect(r.objecoes[0]).toMatch(/acima do valor justo base/)
+  it('a fundamentalista NÃO veta: com "evitar" ou valor justo abaixo do preço o verde continua, com o selo de alerta', () => {
+    const evitar = calcularPrecoTeto({ empresa: e, analise: analise({ rec: 'evitar-novos', categoria: 'evitar', valorJusto: 30 }), preco: 40 })
+    expect(evitar.status).toBe('abaixo-do-teto')
+    expect(evitar.selo.tipo).toBe('alerta')
+    expect(evitar.selo.texto).toMatch(/Evitar novos investimentos/i)
+    const semValorJusto = calcularPrecoTeto({ empresa: e, analise: analise({ valorJusto: null, rec: 'manter-acompanhar' }), preco: 40 })
+    expect(semValorJusto.status).toBe('abaixo-do-teto')
   })
 
-  it('não liga o aviso sem valor justo calculado', () => {
-    const r = calcularPrecoTeto({ empresa: e, analise: analise({ valorJusto: null }), preco: 40 })
-    expect(r.status).toBe('vetado')
+  it('o selo reflete a leitura da fundamentalista: concorda, neutro ou alerta', () => {
+    const selo = (p: Parameters<typeof analise>[0]) => calcularPrecoTeto({ empresa: e, analise: analise(p), preco: 40 }).selo.tipo
+    expect(selo({ rec: 'considerar-entrada' })).toBe('concorda')
+    expect(selo({ rec: 'manter-acompanhar' })).toBe('neutro')
+    expect(selo({ rec: 'aguardar-preco' })).toBe('neutro')
+    expect(selo({ rec: 'evitar-novos' })).toBe('alerta')
+    expect(selo({ rec: 'reduzir-exposicao' })).toBe('alerta')
+    expect(selo({ rec: 'considerar-entrada', critico: true })).toBe('alerta')
   })
 
-  it('não liga o aviso com categoria "evitar" nem com alerta crítico', () => {
-    expect(calcularPrecoTeto({ empresa: e, analise: analise({ categoria: 'evitar' }), preco: 40 }).status).toBe('vetado')
-    expect(calcularPrecoTeto({ empresa: e, analise: analise({ critico: true }), preco: 40 }).status).toBe('vetado')
-  })
-
-  it('marca "perto" até 5% acima do teto e "aguardando" além disso', () => {
+  it('marca "perto" até 5% acima do teto e "aguardando" além disso, qualquer que seja a leitura da fundamentalista', () => {
     expect(calcularPrecoTeto({ empresa: e, analise: analise({}), preco: 52 }).status).toBe('perto')
+    expect(calcularPrecoTeto({ empresa: e, analise: analise({ rec: 'evitar-novos' }), preco: 52 }).status).toBe('perto')
     const longe = calcularPrecoTeto({ empresa: e, analise: analise({}), preco: 70 })
     expect(longe.status).toBe('aguardando')
     expect(longe.distanciaPct).toBeCloseTo(40, 6)
@@ -158,7 +163,7 @@ describe('regras de consistência com a análise fundamentalista', () => {
     expect(r.gatilho).toBe('graham')
   })
 
-  it('dividendo recente abaixo de 70% da média vira ressalva, mas não tira o verde (a fundamentalista é o juiz)', () => {
+  it('dividendo recente abaixo de 70% da média vira ressalva, mas não tira o verde', () => {
     // média R$ 3,00; 12 meses: 9% de R$ 20 = R$ 1,80 (60%); teto R$ 30, preço R$ 20 abaixo dele
     const r = calcularPrecoTeto({ empresa: e, analise: analise({ valorJusto: 60 }), preco: 20, dyB3: 0.09 })
     expect(r.status).toBe('abaixo-do-teto')
@@ -166,26 +171,6 @@ describe('regras de consistência com a análise fundamentalista', () => {
     expect(r.bazin.tetoRecente).toBeCloseTo(1.8 / 0.06, 6)
     // 12 meses em 80% da média: sem ressalva
     expect(calcularPrecoTeto({ empresa: e, analise: analise({ valorJusto: 60 }), preco: 20, dyB3: 0.12 }).ressalva).toBeNull()
-  })
-
-  it('mostra quanto falta cair para entrar, pela margem de segurança da fundamentalista', () => {
-    const r = calcularPrecoTeto({ empresa: e, analise: analise({ valorJusto: 60, rec: 'manter-acompanhar', precoEntrada: 36 }), preco: 40 })
-    expect(r.entrada?.alvo).toBe(36)
-    expect(r.entrada?.faltaCairPct).toBeCloseTo(10, 6)
-    expect(r.entrada?.limitadoPor).toBe('margem')
-  })
-
-  it('quando o teto de dividendos é a trava mais baixa, o alvo é o teto', () => {
-    // teto de Bazin R$ 50; entrada pela margem em R$ 55; preço R$ 60
-    const r = calcularPrecoTeto({ empresa: e, analise: analise({ valorJusto: 80, rec: 'aguardar-preco', precoEntrada: 55 }), preco: 60 })
-    expect(r.entrada?.alvo).toBeCloseTo(50, 6)
-    expect(r.entrada?.limitadoPor).toBe('teto')
-  })
-
-  it('não há "falta cair" quando já está dentro, quando evitar/reduzir ou com alerta crítico', () => {
-    expect(calcularPrecoTeto({ empresa: e, analise: analise({ precoEntrada: 45 }), preco: 40 }).entrada).toBeNull()
-    expect(calcularPrecoTeto({ empresa: e, analise: analise({ rec: 'evitar-novos', precoEntrada: 20 }), preco: 40 }).entrada).toBeNull()
-    expect(calcularPrecoTeto({ empresa: e, analise: analise({ rec: 'manter-acompanhar', critico: true, precoEntrada: 20 }), preco: 40 }).entrada).toBeNull()
   })
 
   it('teto muito acima do preço vira ressalva de dado atípico, sem vetar', () => {
@@ -196,10 +181,10 @@ describe('regras de consistência com a análise fundamentalista', () => {
     expect(calcularPrecoTeto({ empresa: e, analise: analise({ valorJusto: 60 }), preco: 40 }).ressalva).toBeNull()
   })
 
-  it('Graham confirma: abaixo do teto de Bazin, mas acima do teto de Graham, não liga o aviso e a trava aparece no "falta cair"', () => {
+  it('Graham confirma: abaixo do teto de Bazin, mas acima do teto de Graham, não fica verde e a trava aparece no "falta cair"', () => {
     // LPA 4 e VPA 8: Graham = raiz de 22,5 × 32 ≈ R$ 26,83; Bazin R$ 50; preço R$ 40
     const baixo = empresa({ lucro: 4000, pl: 8000 })
-    const r = calcularPrecoTeto({ empresa: baixo, analise: analise({ valorJusto: 80, rec: 'manter-acompanhar', precoEntrada: 60 }), preco: 40 })
+    const r = calcularPrecoTeto({ empresa: baixo, analise: analise({ valorJusto: 80 }), preco: 40 })
     expect(r.status).toBe('vetado')
     expect(r.objecoes.some((o) => /Graham não confirma/.test(o))).toBe(true)
     expect(r.entrada?.limitadoPor).toBe('graham')
@@ -208,32 +193,12 @@ describe('regras de consistência com a análise fundamentalista', () => {
     expect(calcularPrecoTeto({ empresa: baixo, analise: analise({ valorJusto: 80 }), preco: 25 }).status).toBe('abaixo-do-teto')
   })
 
-  it('valor justo com P/L do grupo B3 vira ressalva visível, sem vetar', () => {
-    const a = analise({ valorJusto: 60 })
-    ;(a.valorJusto.cenarios[0] as { metodos: unknown[] }).metodos = [{ nome: 'P/L do grupo B3', valor: 60, premissas: '' }]
-    const r = calcularPrecoTeto({ empresa: e, analise: a, preco: 40 })
-    expect(r.ressalva).toMatch(/grupo B3/)
-    expect(r.status).toBe('abaixo-do-teto')
-  })
-
-  it('só acende o verde quando a leitura final da fundamentalista é "considerar entrada"', () => {
-    for (const rec of ['aguardar-preco', 'manter-acompanhar', 'reduzir-exposicao', 'evitar-novos'] as const) {
-      const r = calcularPrecoTeto({ empresa: e, analise: analise({ rec }), preco: 40 })
-      expect(r.status).toBe('vetado')
-      expect(r.objecoes[0]).toContain('A análise fundamentalista diz')
-    }
-    expect(calcularPrecoTeto({ empresa: e, analise: analise({ rec: 'considerar-entrada' }), preco: 40 }).status).toBe('abaixo-do-teto')
-  })
-
-  it('"perto do teto" (amarelo) não aparece quando a fundamentalista diz evitar ou reduzir', () => {
-    expect(calcularPrecoTeto({ empresa: e, analise: analise({ rec: 'evitar-novos' }), preco: 52 }).status).toBe('aguardando')
-    expect(calcularPrecoTeto({ empresa: e, analise: analise({ rec: 'reduzir-exposicao' }), preco: 52 }).status).toBe('aguardando')
-  })
-
-  it('quando a fundamentalista vê margem e o preço está acima do teto, a mensagem explica que só avisa quando as duas concordam', () => {
-    const r = calcularPrecoTeto({ empresa: e, analise: analise({ rec: 'considerar-entrada' }), preco: 70 })
-    expect(r.status).toBe('aguardando')
-    expect(r.mensagem).toMatch(/só liga quando as duas concordam/)
+  it('"falta cair" mostra a distância até o teto e a trava; quem já está verde não tem', () => {
+    const r = calcularPrecoTeto({ empresa: e, analise: analise({}), preco: 70 })
+    expect(r.entrada?.alvo).toBeCloseTo(50, 6)
+    expect(r.entrada?.faltaCairPct).toBeCloseTo((1 - 50 / 70) * 100, 6)
+    expect(r.entrada?.limitadoPor).toBe('teto')
+    expect(calcularPrecoTeto({ empresa: e, analise: analise({}), preco: 40 }).entrada).toBeNull()
   })
 
   it('sem dividendos o gatilho passa a ser Graham', () => {
@@ -246,6 +211,13 @@ describe('regras de consistência com a análise fundamentalista', () => {
     const r = calcularPrecoTeto({ empresa: empresa({ dividendos: [0, 0, 0], lucro: -5 }), analise: analise({}), preco: 40 })
     expect(r.status).toBe('sem-teto')
     expect(r.tetoGatilho).toBeNull()
+  })
+
+  it('a notificação inclui o alerta da fundamentalista quando ela discorda', async () => {
+    const { textoDoAviso } = await import('./precoTetoLote')
+    const r = calcularPrecoTeto({ empresa: e, analise: analise({ rec: 'evitar-novos' }), preco: 40 })
+    expect(textoDoAviso(r).corpo).toMatch(/Evitar novos investimentos/i)
+    expect(textoDoAviso(calcularPrecoTeto({ empresa: e, analise: analise({}), preco: 40 })).corpo).not.toMatch(/fundamentalista/)
   })
 })
 
