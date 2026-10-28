@@ -36,7 +36,7 @@ export interface DadosDaAnalise {
 }
 
 /** Selic meta e IPCA de longo prazo (Focus) dos dados oficiais do app, para ancorar a taxa de desconto. */
-function premissasDoMercado(): Partial<Premissas> {
+export function premissasDoMercado(): Partial<Premissas> {
   const selic = SNAPSHOT_MERCADO.indicadores.selicMeta?.valor ?? null
   const ipca = SNAPSHOT_MERCADO.focus?.ipca ?? {}
   const anos = Object.keys(ipca).sort()

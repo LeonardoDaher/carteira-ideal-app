@@ -2185,3 +2185,17 @@ Pedido do responsável: o gráfico da análise técnica passou de linha para **c
 **Cobertura.** 151 de 226 ações do cadastro com o DY da B3. Ficam na DFC as 29 sem preço recente, as 27 sem proventos publicados na B3 e as que não têm classe identificada.
 
 **Testes.** `acoes-dividendos.test.mjs` (35; o de `montarInsumos` agora espera baixar quem não tem liquidez). Web: suíte inteira verde.
+
+## D125 (28/10/2026): aba "Preço teto de compra" no Simule Ações
+
+**Pedido (responsável).** Uma aba com o preço teto de compra, um radar que fica verde quando a ação cai abaixo do teto e uma notificação no celular. Preocupação: o teto não pode contradizer a análise fundamentalista.
+
+**Decisão.** Dois métodos, escolhidos entre Bazin, Graham e Gordon. **Bazin é o gatilho** (dividendo médio por ação ÷ retorno mínimo, 6% clássico, ajustável a 8, 10 ou 12%); **Graham confirma** (√(22,5 × LPA × VPA)) e vira o gatilho só para quem não paga dividendos. **Gordon ficou de fora**: explode quando r − g é pequeno e g é chute. O dividendo de Bazin é a média dos últimos 5 exercícios da DFC ÷ ações atuais; com menos de 3 exercícios cai para os proventos de 12 meses da B3 e a tela marca "histórico curto".
+
+**Consistência com a fundamentalista.** O teto lê a MESMA `analisarFundamentos` da aba ao lado. O verde só acende se o preço está abaixo do teto **e** a fundamentalista não objeta (valor justo calculado, preço não acima do valor justo base, categoria diferente de "evitar", sem alerta crítico). Se o teto aprova e a fundamentalista não, o cartão mostra "Abaixo, mas sem aviso" e a razão. Exige-se só o preço abaixo do valor justo base, não os 25% de margem do preço de entrada.
+
+**Aviso (fase 1).** Lista de ações acompanhadas e radar, guardados no aparelho (`localStorage`). O aviso é notificação do navegador, se permitida, mais faixa na tela, e só dispara quando a pessoa abre o app: quem entra abaixo do teto é avisado uma vez, e volta a ser avisado se sair e entrar de novo. **Fase 2, pendente:** push com o app fechado exige service worker, chaves Web Push, guardar o aparelho (o projeto já tem Redis) e um job depois do fechamento; no iPhone só com o app instalado.
+
+**Arquivos.** `domain/precoTeto.ts` (puro), `screens/PrecoTetoAcoes.tsx`, aba "Preço teto de compra" no `SimuleAcoes.tsx`. Testes: `precoTeto.test.ts` (16) e quatro casos novos em `SimuleAcoesAnalise.test.tsx`.
+
+**Limites.** Bazin com média de 5 anos puxa dividendos extraordinários (PETR4 aparece com teto de R$ 132 contra preço de R$ 58); a taxa de 6% é permissiva com a Selic alta. Não é recomendação (D19).

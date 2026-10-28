@@ -16,6 +16,7 @@ import { Top15Confluencia } from './Top15Confluencia'
 import { AnaliseTecnicaAcao } from './AnaliseTecnicaAcao'
 import { AnaliseFundamentalistaAcao } from './AnaliseFundamentalistaAcao'
 import { ConfluenciaAcao } from './ConfluenciaAcao'
+import { PrecoTetoAcoes } from './PrecoTetoAcoes'
 import { useAnaliseDaAcao } from './useAnaliseDaAcao'
 import { ROTULO_HORIZONTE } from '../domain/confluencia'
 import type { Horizonte, HistoricoLongo, SnapshotSeries } from '../domain/analiseTecnica'
@@ -33,7 +34,7 @@ function inteiro(valor: number) {
 /** O que está aberto no cartão: uma empresa do cadastro (dado completo) ou um código da busca (resumido). */
 type Selecao = { origem: 'lista'; acao: Acao; setor: string } | { origem: 'busca'; acao: AcaoBusca }
 
-type AbaAcoes = 'simulador' | 'top15' | 'negociadas' | 'ibov' | 'endividadas' | 'dividendos' | 'tecnica' | 'fundamentalista' | 'confluencia' | 'top15confluencia'
+type AbaAcoes = 'simulador' | 'top15' | 'negociadas' | 'ibov' | 'endividadas' | 'dividendos' | 'tecnica' | 'fundamentalista' | 'confluencia' | 'top15confluencia' | 'precoteto'
 const ABAS_DE_ANALISE: AbaAcoes[] = ['tecnica', 'fundamentalista', 'confluencia']
 const HORIZONTES: Horizonte[] = ['curto', 'medio', 'longo']
 
@@ -88,6 +89,12 @@ export function SimuleAcoes({
     for (const b of snapshot.busca) m.set(b.ticker, b.nome ?? b.ticker)
     for (const st of snapshot.setores) for (const e of st.empresas) m.set(e.ticker, e.nome)
     return (t: string) => m.get(t) ?? null
+  }, [snapshot])
+  // Busca com as empresas da lista por setor também, para o radar de preço teto achar qualquer código do cadastro.
+  const buscaCompleta = useMemo(() => {
+    const vistos = new Set(snapshot.busca.map((b) => b.ticker))
+    const extra = snapshot.setores.flatMap((st) => st.empresas.filter((e) => !vistos.has(e.ticker)).map((e) => ({ ticker: e.ticker, nome: e.nome, setor: st.setor, cotacao: e.cotacao, dataCotacao: e.dataCotacao, volumeDia: e.volumeMedio }) as AcaoBusca))
+    return [...snapshot.busca, ...extra]
   }, [snapshot])
   const maisNegociadas = useMemo(() => snapshot.setores.flatMap((st) => st.empresas).sort((a, b) => b.volumeMedio - a.volumeMedio).slice(0, 10), [snapshot])
 
@@ -168,6 +175,7 @@ export function SimuleAcoes({
               { id: 'fundamentalista', emoji: '🧾', titulo: 'Análise fundamentalista', descricao: 'Balanços, valor justo e notas' },
               { id: 'confluencia', emoji: '🎯', titulo: 'Confluência', descricao: 'Fundamentos × gráfico' },
               { id: 'top15confluencia', emoji: '🏆', titulo: 'Top 15 confluência', descricao: 'Positivas e negativas' },
+              { id: 'precoteto', emoji: '🎯', titulo: 'Preço teto de compra', descricao: 'Bazin, Graham e radar' },
             ] as const
           ).map((c) => (
             <button
@@ -225,6 +233,8 @@ export function SimuleAcoes({
         <Top15Endividadas />
       ) : aba === 'dividendos' ? (
         <Top15Dividendos />
+      ) : aba === 'precoteto' ? (
+        <PrecoTetoAcoes busca={buscaCompleta} precoDe={precoDe} nomeDe={(t) => nomeDe(t)} fundamentos={fundamentos} />
       ) : aba === 'top15confluencia' ? (
         <Top15Confluencia precoDe={precoDe} nomeDe={nomeDe} dataPregao={snapshot.dataPregao ?? ''} horizonteInicial={horizonte} series={series} fundamentos={fundamentos} />
       ) : !selecao ? (

@@ -87,6 +87,10 @@ Compara a postura de cada análise: fundamentalista (atrativa e com ressalvas = 
 - **O que acompanhar** e **riscos de interpretação** (liquidez baixa, salto de preço, valor justo frágil, balanço de data anterior ao preço, horizontes diferentes).
 - Sem uma das duas análises, a confluência é **"incompleta"** e não há pontuação.
 
+## Preço teto de compra (D125)
+
+Aba própria do Simule Ações, em cima da análise fundamentalista. **Bazin** (gatilho): média dos dividendos pagos nos últimos 5 exercícios (DFC) ÷ ações atuais ÷ retorno mínimo (6% por padrão, ajustável). **Graham** (confirmação): √(22,5 × LPA × VPA). O aviso verde exige preço abaixo do teto **e** nenhuma objeção da fundamentalista (valor justo calculado, preço não acima do valor justo base, categoria diferente de "evitar", sem alerta crítico). Detalhes e limites em `07-registro-de-decisoes.md` (D125).
+
 ## Operação e verificação
 
 - Para rodar à mão: `npm run atualizar-fundamentos` (baixa cerca de 110 MB da CVM; `--dados-locais=PASTA` guarda os zips e reutiliza). O job só grava o arquivo se houver pelo menos 100 empresas com fundamentos e falha **sem alterar nada** se a CVM mudar o layout.

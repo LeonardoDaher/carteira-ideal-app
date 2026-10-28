@@ -116,7 +116,7 @@ describe('Simule Ações: abas de análise', () => {
     const originais = within(screen.getByRole('tablist', { name: 'O que você quer ver' })).getAllByRole('tab')
     expect(originais).toHaveLength(6)
     const novas = within(screen.getByRole('tablist', { name: 'Análise de uma ação' })).getAllByRole('tab')
-    expect(novas.map((a) => a.textContent)).toEqual([expect.stringContaining('Análise técnica'), expect.stringContaining('Análise fundamentalista'), expect.stringContaining('Confluência'), expect.stringContaining('Top 15 confluência')])
+    expect(novas.map((a) => a.textContent)).toEqual([expect.stringContaining('Análise técnica'), expect.stringContaining('Análise fundamentalista'), expect.stringContaining('Confluência'), expect.stringContaining('Top 15 confluência'), expect.stringContaining('Preço teto de compra')])
   })
 
   it('a análise técnica mostra resumo, gráfico, tendência por período, zonas, cenários, nota e fonte da ação escolhida', () => {
@@ -252,5 +252,75 @@ describe('Simule Ações: abas de análise', () => {
     render(<SimuleAcoes ctx={ctx} snapshot={{ ...snapshot, setores: [], busca: [] } as never} series={series} fundamentos={fundamentos} />)
     fireEvent.click(screen.getByRole('tab', { name: /Análise técnica/ }))
     expect(screen.getByText(/ainda não foram carregados/)).toBeTruthy()
+  })
+})
+
+describe('Simule Ações: preço teto de compra', () => {
+  // BETA3 paga R$ 3,00 por ação (teto de Bazin de R$ 50 a 6%) e custa R$ 12; ALFA3 paga R$ 0,50 e custa mais de R$ 40.
+  const betaCom = (extra: Partial<PeriodoFundamental>): SnapshotFundamentos => ({
+    ...fundamentos,
+    empresas: {
+      ...fundamentos.empresas,
+      BETA3: (() => {
+        const e = empresa('BETA3')
+        const ajusta = (p: PeriodoFundamental) => ({ ...p, dividendosPagos: 300_000, ...extra })
+        return { ...e, anual: e.anual.map(ajusta), ttm: e.ttm ? ajusta(e.ttm) : null }
+      })(),
+    },
+  })
+  // Lucro e caixa fortes: o valor justo fica acima de R$ 12 e a fundamentalista não objeta.
+  const forte = { fco: 720_000, ebit: 800_000, ebitda: 900_000, lucroLiquido: 480_000, lucroControladores: 480_000 }
+  const comBeta = betaCom(forte)
+  // Lucro e caixa fracos para o que paga: o valor justo fica abaixo de R$ 12 e a fundamentalista veta o aviso.
+  const comBetaFraca = betaCom({})
+
+  const abrirTeto = (f: SnapshotFundamentos = comBeta) => {
+    try { localStorage.clear() } catch { /* sem armazenamento */ }
+    render(<SimuleAcoes ctx={ctx} snapshot={snapshot} series={series} fundamentos={f} />)
+    fireEvent.click(screen.getByRole('tab', { name: /Preço teto de compra/ }))
+  }
+
+  it('o radar lista a ação abaixo do teto em verde, com os dois métodos e o valor justo da fundamentalista', async () => {
+    abrirTeto()
+    const cartao = await screen.findByTestId('teto-BETA3')
+    expect(cartao.getAttribute('data-status')).toBe('abaixo-do-teto')
+    expect(within(cartao).getByText(/Teto Bazin/)).toBeTruthy()
+    expect(within(cartao).getByText(/Teto Graham/)).toBeTruthy()
+    expect(within(cartao).getByText(/Valor justo \(fundamentalista\)/)).toBeTruthy()
+  })
+
+  it('abaixo do teto de Bazin, mas acima do valor justo da fundamentalista, não acende o verde e explica por quê', async () => {
+    abrirTeto(comBetaFraca)
+    fireEvent.change(screen.getByLabelText(/Adicionar ação ao radar/), { target: { value: 'BETA3' } })
+    fireEvent.click(await screen.findByRole('button', { name: /BETA3/ }))
+    const cartao = await screen.findByTestId('teto-BETA3')
+    expect(cartao.getAttribute('data-status')).toBe('vetado')
+    expect(within(cartao).getByText(/acima do valor justo base/)).toBeTruthy()
+    expect(screen.queryByTestId('aviso-preco-teto')).toBeNull()
+  })
+
+  it('subir a taxa de Bazin tira a ação do radar', async () => {
+    // R$ 1,00 por ação: teto de R$ 16,67 a 6%, mas de R$ 10,00 a 10%, abaixo do preço de R$ 12.
+    abrirTeto(betaCom({ ...forte, dividendosPagos: 100_000 }))
+    await screen.findByTestId('teto-BETA3')
+    fireEvent.click(screen.getByRole('button', { name: /^10%/ }))
+    expect(screen.queryByTestId('teto-BETA3')?.getAttribute('data-status') ?? 'aguardando').not.toBe('abaixo-do-teto')
+  })
+
+  it('acompanhar uma ação acima do teto mostra "Acima do teto" e sem aviso', async () => {
+    abrirTeto()
+    await screen.findByTestId('teto-BETA3')
+    fireEvent.change(screen.getByLabelText(/Adicionar ação ao radar/), { target: { value: 'ALFA3' } })
+    fireEvent.click(await screen.findByRole('button', { name: /ALFA3/ }))
+    const cartao = await screen.findByTestId('teto-ALFA3')
+    expect(cartao.getAttribute('data-status')).toBe('aguardando')
+    expect(screen.queryByTestId('aviso-preco-teto')).toBeNull()
+  })
+
+  it('acompanhar a ação que já está abaixo do teto mostra o aviso na tela', async () => {
+    abrirTeto()
+    await screen.findByTestId('teto-BETA3')
+    fireEvent.click(screen.getByRole('button', { name: 'Acompanhar' }))
+    expect((await screen.findByTestId('aviso-preco-teto')).textContent).toContain('BETA3')
   })
 })
