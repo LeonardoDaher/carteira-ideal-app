@@ -1,11 +1,11 @@
 {
-  "geradoEm": "2026-10-28T06:54:21.926Z",
+  "geradoEm": "2026-10-28T18:25:31.688Z",
   "dataPregao": "2026-10-27",
   "fonte": "B3 - Boletim de Preços (BVBG.086)",
-  "cadastroId": "1730fa3a55",
+  "cadastroId": "a49b94790d",
   "pregoesNoHistorico": 260,
   "sessoesLiquidez": 21,
-  "totais": {"setores":37,"empresas":198},
+  "totais": {"setores":37,"empresas":201},
   "gruposOrdem": ["Petróleo, Gás e Biocombustíveis","Materiais Básicos","Bens Industriais","Utilidade Pública","Financeiro","Consumo Cíclico","Consumo não Cíclico","Saúde","Tecnologia da Informação","Comunicações"],
   "setores": [
     {"setor": "Petróleo e gás", "grupoB3": "Petróleo, Gás e Biocombustíveis", "empresas": [
@@ -72,6 +72,7 @@
       {"ticker":"MOTV3","nome":"Motiva (ex-CCR)","cotacao":14.9,"dataCotacao":"2026-10-27","variacao3m":1.4,"variacaoDia":0.95,"volumeMedio":398879931,"minima52":11.92,"maxima52":20.83},
       {"ticker":"RAIL3","nome":"Rumo","cotacao":15.36,"dataCotacao":"2026-10-27","variacao3m":9.1,"variacaoDia":-0.9,"volumeMedio":333223105,"minima52":12.16,"maxima52":19.54},
       {"ticker":"ECOR3","nome":"Ecorodovias","cotacao":5.82,"dataCotacao":"2026-10-27","variacao3m":null,"variacaoDia":12.14,"volumeMedio":235909757,"minima52":null,"maxima52":null},
+      {"ticker":"JSLG3","nome":"JSL","cotacao":6.12,"dataCotacao":"2026-10-27","variacao3m":null,"variacaoDia":-0.65,"volumeMedio":29405887,"minima52":null,"maxima52":null},
       {"ticker":"TGMA3","nome":"Tegma","cotacao":38.41,"dataCotacao":"2026-10-27","variacao3m":24.4,"variacaoDia":-3.01,"volumeMedio":26348011,"minima52":26.95,"maxima52":51.92},
       {"ticker":"HBSA3","nome":"Hidrovias do Brasil","cotacao":3.11,"dataCotacao":"2026-10-27","variacao3m":-3.7,"variacaoDia":0.32,"volumeMedio":8780826,"minima52":2.91,"maxima52":4.39},
       {"ticker":"LOGN3","nome":"Log-In","cotacao":28,"dataCotacao":"2026-10-27","variacao3m":1.3,"variacaoDia":9.8,"volumeMedio":682398,"minima52":24.99,"maxima52":40.15}
@@ -84,7 +85,6 @@
       {"ticker":"ARML3","nome":"Armac","cotacao":3.54,"dataCotacao":"2026-10-27","variacao3m":null,"variacaoDia":6.95,"volumeMedio":9949176,"minima52":null,"maxima52":null}
     ]},
     {"setor": "Serviços e locação de equipamentos", "grupoB3": "Bens Industriais", "empresas": [
-      {"ticker":"LOGG3","nome":"LOG Commercial Properties","cotacao":22.5,"dataCotacao":"2026-10-27","variacao3m":-13.6,"variacaoDia":1.72,"volumeMedio":26751654,"minima52":20.65,"maxima52":31.69},
       {"ticker":"PRNR3","nome":"Priner","cotacao":13.54,"dataCotacao":"2026-10-27","variacao3m":-29.4,"variacaoDia":-3.22,"volumeMedio":20653729,"minima52":13.22,"maxima52":22.96},
       {"ticker":"MILS3","nome":"Mills","cotacao":16,"dataCotacao":"2026-10-27","variacao3m":3.2,"variacaoDia":1.27,"volumeMedio":20134297,"minima52":11.87,"maxima52":16.31},
       {"ticker":"AMBP3","nome":"Ambipar","cotacao":0.13,"dataCotacao":"2026-10-27","variacao3m":null,"variacaoDia":0,"volumeMedio":960963,"minima52":null,"maxima52":null}
@@ -151,7 +151,9 @@
       {"ticker":"MULT3","nome":"Multiplan","cotacao":27.54,"dataCotacao":"2026-10-27","variacao3m":-4.3,"variacaoDia":-1.82,"volumeMedio":337427724,"minima52":22.51,"maxima52":39.38},
       {"ticker":"ALOS3","nome":"Allos","cotacao":25.85,"dataCotacao":"2026-10-27","variacao3m":-4.8,"variacaoDia":-1.3,"volumeMedio":324385671,"minima52":24.01,"maxima52":36.26},
       {"ticker":"IGTI11","nome":"Iguatemi","cotacao":23.86,"dataCotacao":"2026-10-27","variacao3m":-5.6,"variacaoDia":-2.65,"volumeMedio":170183709,"minima52":18.5,"maxima52":33.6},
-      {"ticker":"JHSF3","nome":"JHSF","cotacao":10.4,"dataCotacao":"2026-10-27","variacao3m":-5.9,"variacaoDia":-2.71,"volumeMedio":65226452,"minima52":6.03,"maxima52":14.73}
+      {"ticker":"JHSF3","nome":"JHSF","cotacao":10.4,"dataCotacao":"2026-10-27","variacao3m":-5.9,"variacaoDia":-2.71,"volumeMedio":65226452,"minima52":6.03,"maxima52":14.73},
+      {"ticker":"LOGG3","nome":"LOG Commercial Properties","cotacao":22.5,"dataCotacao":"2026-10-27","variacao3m":-13.6,"variacaoDia":1.72,"volumeMedio":26751654,"minima52":20.65,"maxima52":31.69},
+      {"ticker":"HBRE3","nome":"HBR Realty","cotacao":2.11,"dataCotacao":"2026-10-27","variacao3m":null,"variacaoDia":-9.83,"volumeMedio":3031202,"minima52":null,"maxima52":null}
     ]},
     {"setor": "Construção civil e incorporação", "grupoB3": "Consumo Cíclico", "empresas": [
       {"ticker":"CYRE3","nome":"Cyrela","cotacao":19.01,"dataCotacao":"2026-10-27","variacao3m":-10.8,"variacaoDia":-3.16,"volumeMedio":421902948,"minima52":17.79,"maxima52":39.06},
@@ -228,6 +230,7 @@
       {"ticker":"SLCE3","nome":"SLC Agrícola","cotacao":17.09,"dataCotacao":"2026-10-27","variacao3m":29.9,"variacaoDia":-2.06,"volumeMedio":55696035,"minima52":12.58,"maxima52":19.48},
       {"ticker":"SMTO3","nome":"São Martinho","cotacao":19.36,"dataCotacao":"2026-10-27","variacao3m":35.4,"variacaoDia":-3.54,"volumeMedio":43480091,"minima52":12.91,"maxima52":21.91},
       {"ticker":"TTEN3","nome":"3tentos","cotacao":10.7,"dataCotacao":"2026-10-27","variacao3m":-16.4,"variacaoDia":-1.83,"volumeMedio":36588881,"minima52":9.61,"maxima52":17.9},
+      {"ticker":"SOJA3","nome":"Boa Safra Sementes","cotacao":6.47,"dataCotacao":"2026-10-27","variacao3m":null,"variacaoDia":-6.23,"volumeMedio":7170454,"minima52":null,"maxima52":null},
       {"ticker":"AGRO3","nome":"BrasilAgro","cotacao":17.18,"dataCotacao":"2026-10-27","variacao3m":-9.5,"variacaoDia":-0.69,"volumeMedio":6492560,"minima52":16.92,"maxima52":22.75},
       {"ticker":"JALL3","nome":"Jalles Machado","cotacao":2.27,"dataCotacao":"2026-10-27","variacao3m":14.6,"variacaoDia":-8.1,"volumeMedio":3709220,"minima52":1.88,"maxima52":3.81},
       {"ticker":"AGXY3","nome":"AgroGalaxy","cotacao":0.54,"dataCotacao":"2026-10-27","variacao3m":-68.8,"variacaoDia":-5.26,"volumeMedio":18528,"minima52":0.54,"maxima52":6.07}
@@ -472,7 +475,7 @@
     {"ticker":"HAGA4","nome":null,"setor":"Outros","cotacao":1.91,"dataCotacao":"2026-10-27","volumeDia":30280},
     {"ticker":"HAPV3","nome":"Hapvida","setor":"Hospitais, planos e diagnósticos","cotacao":4.18,"dataCotacao":"2026-10-27","volumeDia":158516801},
     {"ticker":"HBOR3","nome":"Helbor","setor":"Construção civil e incorporação","cotacao":1.58,"dataCotacao":"2026-10-27","volumeDia":3755969},
-    {"ticker":"HBRE3","nome":null,"setor":"Outros","cotacao":2.11,"dataCotacao":"2026-10-27","volumeDia":5566595},
+    {"ticker":"HBRE3","nome":"HBR Realty","setor":"Shoppings e imóveis comerciais","cotacao":2.11,"dataCotacao":"2026-10-27","volumeDia":5566595},
     {"ticker":"HBSA3","nome":"Hidrovias do Brasil","setor":"Transporte e infraestrutura","cotacao":3.11,"dataCotacao":"2026-10-27","volumeDia":15267807},
     {"ticker":"HBTS5","nome":null,"setor":"Outros","cotacao":32.01,"dataCotacao":"2026-10-26","volumeDia":0},
     {"ticker":"HETA4","nome":null,"setor":"Outros","cotacao":6.01,"dataCotacao":"2026-10-05","volumeDia":0},
@@ -497,7 +500,7 @@
     {"ticker":"JHSF3","nome":"JHSF","setor":"Shoppings e imóveis comerciais","cotacao":10.4,"dataCotacao":"2026-10-27","volumeDia":109984245},
     {"ticker":"JOPA3","nome":null,"setor":"Outros","cotacao":19.95,"dataCotacao":"2026-10-09","volumeDia":0},
     {"ticker":"JOPA4","nome":null,"setor":"Outros","cotacao":18,"dataCotacao":"2026-10-23","volumeDia":0},
-    {"ticker":"JSLG3","nome":null,"setor":"Outros","cotacao":6.12,"dataCotacao":"2026-10-27","volumeDia":40457803},
+    {"ticker":"JSLG3","nome":"JSL","setor":"Transporte e infraestrutura","cotacao":6.12,"dataCotacao":"2026-10-27","volumeDia":40457803},
     {"ticker":"KEPL3","nome":"Kepler Weber","setor":"Máquinas, equipamentos e aeroespacial","cotacao":6.64,"dataCotacao":"2026-10-27","volumeDia":24836713},
     {"ticker":"KLBN11","nome":"Klabin","setor":"Papel, celulose e madeira","cotacao":18.68,"dataCotacao":"2026-10-27","volumeDia":268083863},
     {"ticker":"KLBN3","nome":null,"setor":"Outros","cotacao":3.81,"dataCotacao":"2026-10-27","volumeDia":4808494},
@@ -507,7 +510,7 @@
     {"ticker":"LEVE3","nome":"Mahle Metal Leve","setor":"Autopeças e veículos","cotacao":31.97,"dataCotacao":"2026-10-27","volumeDia":42557128},
     {"ticker":"LIGT3","nome":"Light","setor":"Energia elétrica: distribuição","cotacao":2.6,"dataCotacao":"2026-10-27","volumeDia":30011952},
     {"ticker":"LJQQ3","nome":"Lojas Quero-Quero","setor":"Varejo de eletro, móveis e e-commerce","cotacao":1.17,"dataCotacao":"2026-10-27","volumeDia":24217551},
-    {"ticker":"LOGG3","nome":"LOG Commercial Properties","setor":"Serviços e locação de equipamentos","cotacao":22.5,"dataCotacao":"2026-10-27","volumeDia":34247369},
+    {"ticker":"LOGG3","nome":"LOG Commercial Properties","setor":"Shoppings e imóveis comerciais","cotacao":22.5,"dataCotacao":"2026-10-27","volumeDia":34247369},
     {"ticker":"LOGN3","nome":"Log-In","setor":"Transporte e infraestrutura","cotacao":28,"dataCotacao":"2026-10-27","volumeDia":102614},
     {"ticker":"LPSB3","nome":null,"setor":"Outros","cotacao":1.2,"dataCotacao":"2026-10-27","volumeDia":554183},
     {"ticker":"LREN3","nome":"Lojas Renner","setor":"Moda e vestuário","cotacao":9.72,"dataCotacao":"2026-10-27","volumeDia":551809722},
@@ -621,7 +624,7 @@
     {"ticker":"SMTO3","nome":"São Martinho","setor":"Agronegócio, açúcar e etanol","cotacao":19.36,"dataCotacao":"2026-10-27","volumeDia":97863806},
     {"ticker":"SNSY3","nome":null,"setor":"Outros","cotacao":9.89,"dataCotacao":"2026-10-08","volumeDia":0},
     {"ticker":"SNSY5","nome":null,"setor":"Outros","cotacao":2.34,"dataCotacao":"2026-10-27","volumeDia":454},
-    {"ticker":"SOJA3","nome":null,"setor":"Outros","cotacao":6.47,"dataCotacao":"2026-10-27","volumeDia":11345430},
+    {"ticker":"SOJA3","nome":"Boa Safra Sementes","setor":"Agronegócio, açúcar e etanol","cotacao":6.47,"dataCotacao":"2026-10-27","volumeDia":11345430},
     {"ticker":"SOND5","nome":null,"setor":"Outros","cotacao":76,"dataCotacao":"2026-10-26","volumeDia":0},
     {"ticker":"SOND6","nome":null,"setor":"Outros","cotacao":90.1,"dataCotacao":"2026-10-26","volumeDia":0},
     {"ticker":"SUZB3","nome":"Suzano","setor":"Papel, celulose e madeira","cotacao":47.53,"dataCotacao":"2026-10-27","volumeDia":662129623},
