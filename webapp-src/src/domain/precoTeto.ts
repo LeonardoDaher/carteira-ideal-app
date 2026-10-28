@@ -168,6 +168,7 @@ export function calcularPrecoTeto({
   const avisos: string[] = []
   if (gatilho === 'bazin' && bazin.recenteMenor) avisos.push('dividendos dos últimos 12 meses abaixo de 70% da média')
   if (ok(tetoGatilho) && tetoGatilho > preco * TETO_ATIPICO) avisos.push(`teto mais de ${TETO_ATIPICO}× o preço: dividendo médio provavelmente atípico (pagamento extraordinário ou dado fora do padrão)`)
+  if (vj.cenarios.find((c) => c.cenario === 'base')?.metodos.some((m) => m.nome === 'P/L do grupo B3')) avisos.push('o valor justo usa o P/L do grupo B3, porque o setor tem poucos pares')
   const ressalva = avisos.length ? avisos.join('; ') : null
   const distanciaPct = ok(tetoGatilho) && tetoGatilho > 0 ? (preco / tetoGatilho - 1) * 100 : null
   const nomeGatilho = gatilho === 'graham' ? 'Graham' : 'Bazin'

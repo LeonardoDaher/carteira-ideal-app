@@ -402,15 +402,67 @@ export function multiplosDe(e: EmpresaFundamentos, precoDe: PrecoDe): MultiplosE
   }
 }
 
-/** Mediana de cada múltiplo entre as outras empresas do mesmo setor (precisa de ao menos 4 com o múltiplo). */
-export function medianaSetorial(alvo: EmpresaFundamentos, todas: EmpresaFundamentos[], precoDe: PrecoDe): { n: number; medianas: MultiplosEmpresa } {
-  const pares = todas.filter((x) => x.ticker !== alvo.ticker && x.setor === alvo.setor && x.financeira === alvo.financeira)
-  const mult = pares.map((x) => multiplosDe(x, precoDe))
-  const med = (k: keyof MultiplosEmpresa) => {
-    const v = mult.map((m) => m[k]).filter((x): x is number => ok(x))
-    return v.length >= 4 ? mediana(v) : null
+/**
+ * Grupos de comparação pela classificação setorial da B3 (D126). O cadastro tem setores pequenos (3 a 6 empresas); quando o setor sozinho
+ * não tem 4 pares com o múltiplo, a mediana vem do grupo B3 a que ele pertence. Setor fora desta tabela só se compara com ele mesmo.
+ */
+export const GRUPOS_B3: Record<string, string> = {
+  'Moda e vestuário': 'Tecidos, vestuário e calçados',
+  'Calçados e artigos esportivos': 'Tecidos, vestuário e calçados',
+  'Têxtil e eletrodomésticos': 'Tecidos, vestuário e calçados',
+  'Mineração': 'Materiais básicos',
+  'Siderurgia e metalurgia': 'Materiais básicos',
+  'Química e petroquímica': 'Materiais básicos',
+  'Papel, celulose e madeira': 'Materiais básicos',
+  'Energia elétrica: geração': 'Energia elétrica: geração e transmissão',
+  'Energia elétrica: transmissão': 'Energia elétrica: geração e transmissão',
+  'Petróleo e gás': 'Petróleo, gás e biocombustíveis',
+  'Distribuição de combustíveis e etanol': 'Petróleo, gás e biocombustíveis',
+  'Varejo alimentar': 'Comércio de alimentos e medicamentos',
+  'Farmácias, higiene e beleza': 'Comércio de alimentos e medicamentos',
+  'Carnes e proteínas': 'Alimentos processados',
+  'Alimentos e bebidas': 'Alimentos processados',
+  'Software e serviços de TI': 'Tecnologia da informação',
+  'Hardware e eletrônicos': 'Tecnologia da informação',
+  'Locação de veículos e frotas': 'Locação e serviços',
+  'Serviços e locação de equipamentos': 'Locação e serviços',
+  'Materiais de construção e acabamento': 'Construção',
+  'Construção civil e incorporação': 'Construção',
+  'Bolsa, holdings e serviços financeiros': 'Seguros, bolsa e serviços financeiros',
+  'Seguros e previdência': 'Seguros, bolsa e serviços financeiros',
+}
+
+export type OrigemMultiplo = 'setor' | 'grupo'
+
+/**
+ * Mediana de cada múltiplo entre as outras empresas do mesmo setor (precisa de ao menos 4 com o múltiplo). Se o setor não alcança 4 pares
+ * para um múltiplo, usa o grupo B3 (mesma regra de 4 pares). `origem` diz de onde veio cada mediana; `grupo` é o nome do grupo.
+ */
+export function medianaSetorial(alvo: EmpresaFundamentos, todas: EmpresaFundamentos[], precoDe: PrecoDe): { n: number; medianas: MultiplosEmpresa; origem: Partial<Record<keyof MultiplosEmpresa, OrigemMultiplo>>; grupo: string | null; nGrupo: number } {
+  const chaves: (keyof MultiplosEmpresa)[] = ['pl', 'pvp', 'evEbitda', 'evEbit', 'pVendas', 'pFcf', 'dy']
+  const paresDe = (filtro: (x: EmpresaFundamentos) => boolean) => todas.filter((x) => x.ticker !== alvo.ticker && x.financeira === alvo.financeira && filtro(x))
+  const medianasDe = (pares: EmpresaFundamentos[]) => {
+    const mult = pares.map((x) => multiplosDe(x, precoDe))
+    const saida = {} as Record<keyof MultiplosEmpresa, number | null>
+    for (const k of chaves) {
+      const v = mult.map((m) => m[k]).filter((x): x is number => ok(x))
+      saida[k] = v.length >= 4 ? mediana(v) : null
+    }
+    return saida
   }
-  return { n: pares.length, medianas: { pl: med('pl'), pvp: med('pvp'), evEbitda: med('evEbitda'), evEbit: med('evEbit'), pVendas: med('pVendas'), pFcf: med('pFcf'), dy: med('dy') } }
+  const doSetor = paresDe((x) => x.setor === alvo.setor)
+  const medianas = medianasDe(doSetor)
+  const origem: Partial<Record<keyof MultiplosEmpresa, OrigemMultiplo>> = {}
+  for (const k of chaves) if (medianas[k] !== null) origem[k] = 'setor'
+  const grupo = GRUPOS_B3[alvo.setor] ?? null
+  let nGrupo = 0
+  if (grupo && chaves.some((k) => medianas[k] === null)) {
+    const doGrupo = paresDe((x) => GRUPOS_B3[x.setor] === grupo)
+    nGrupo = doGrupo.length
+    const medGrupo = medianasDe(doGrupo)
+    for (const k of chaves) if (medianas[k] === null && medGrupo[k] !== null) { medianas[k] = medGrupo[k]; origem[k] = 'grupo' }
+  }
+  return { n: doSetor.length, medianas, origem, grupo, nGrupo }
 }
 
 // ---------------------------------------------------------------------------------------
@@ -434,7 +486,7 @@ export function descontarFluxo(fluxo0: number, g1: number, gt: number, r: number
   return vp + terminal / Math.pow(1 + r, 5)
 }
 
-function calcularValorJusto(e: EmpresaFundamentos, m: Mercado, cols: ColunaHistorica[], cagrReceita: number | null, setor: MultiplosEmpresa, pr: Premissas): ValorJusto {
+function calcularValorJusto(e: EmpresaFundamentos, m: Mercado, cols: ColunaHistorica[], cagrReceita: number | null, setor: MultiplosEmpresa, pr: Premissas, grupoPl: string | null = null): ValorJusto {
   const nada = (motivo: string): ValorJusto => ({ aplicavel: false, motivo, cenarios: [], faixa: null, confianca: 'baixa', confiancaMotivos: [], margemSegurancaPct: null, potencialBasePct: null, precoEntrada: null })
   if (!ok(m.preco) || !ok(m.acoes) || m.acoes <= 0) return nada('Dados insuficientes para conclusão: sem preço ou sem quantidade de ações confiável.')
   const acoes = m.acoes
@@ -475,7 +527,7 @@ function calcularValorJusto(e: EmpresaFundamentos, m: Mercado, cols: ColunaHisto
     const lpaNorm = media(lpas)
     if (ok(setor.pl) && ok(lpaNorm) && lpaNorm > 0 && lpas.length >= 2) {
       const fator = cenario === 'pessimista' ? 0.8 : cenario === 'otimista' ? 1.2 : 1
-      metodos.push({ nome: 'P/L do setor', valor: lpaNorm * setor.pl * fator, premissas: `LPA normalizado de ${reais(lpaNorm)} × P/L de ${vezes(setor.pl * fator)} (mediana do setor${fator !== 1 ? `, ${fator < 1 ? '−' : '+'}20%` : ''}).` })
+      metodos.push({ nome: grupoPl ? 'P/L do grupo B3' : 'P/L do setor', valor: lpaNorm * setor.pl * fator, premissas: `LPA normalizado de ${reais(lpaNorm)} × P/L de ${vezes(setor.pl * fator)} (mediana ${grupoPl ? `do grupo B3 "${grupoPl}", porque o setor tem poucos pares` : 'do setor'}${fator !== 1 ? `, ${fator < 1 ? '−' : '+'}20%` : ''}).` })
     }
     const validos = metodos.map((x) => x.valor).filter((x): x is number => ok(x))
     const valorJusto = validos.length ? (media(validos) as number) : null
@@ -730,7 +782,7 @@ export function analisarFundamentos(entrada: EntradaFundamentalista): AnaliseFun
   const mult = multiplosDe(e, precoDe)
   const set = medianaSetorial(e, entrada.todas, precoDe)
   const mi = (id: string, nome: string, valor: number | null, formato: FormatoIndicador, ref: number | null, formula: string, leitura: string): Indicador =>
-    ind({ id, nome, valor, formato, referenciaSetor: ref, interpretacao: ok(valor) ? (ok(ref) ? `${leitura} Frente à mediana do setor (${set.n} empresas comparadas), está ${valor <= ref * 0.85 ? 'abaixo' : valor >= ref * 1.15 ? 'acima' : 'em linha'}.` : `${leitura} Poucas empresas comparáveis no setor para fixar uma referência.`) : 'Dados insuficientes para conclusão (lucro, patrimônio ou caixa negativos ou ausentes).', formula })
+    ind({ id, nome, valor, formato, referenciaSetor: ref, interpretacao: ok(valor) ? (ok(ref) ? `${leitura} Frente à mediana ${set.origem[({ pl: 'pl', pvp: 'pvp', 'ev-ebitda': 'evEbitda', 'ev-ebit': 'evEbit', 'p-vendas': 'pVendas', 'p-fcf': 'pFcf' } as Record<string, keyof MultiplosEmpresa>)[id]] === 'grupo' ? `do grupo ${set.grupo} (${set.nGrupo} empresas comparadas; o setor tem poucos pares)` : `do setor (${set.n} empresas comparadas)`}, está ${valor <= ref * 0.85 ? 'abaixo' : valor >= ref * 1.15 ? 'acima' : 'em linha'}.` : `${leitura} Poucas empresas comparáveis no setor para fixar uma referência.`) : 'Dados insuficientes para conclusão (lucro, patrimônio ou caixa negativos ou ausentes).', formula })
   const multiplos: Indicador[] = [
     mi('pl', 'P/L', mult.pl, 'x', set.medianas.pl, 'Valor de mercado ÷ lucro dos controladores dos últimos 12 meses (só com lucro positivo).', 'Anos de lucro atual para pagar o preço.'),
     mi('pvp', 'P/VP', mult.pvp, 'x', set.medianas.pvp, 'Valor de mercado ÷ patrimônio líquido dos controladores.', 'Preço em relação ao patrimônio contábil.'),
@@ -742,7 +794,7 @@ export function analisarFundamentos(entrada: EntradaFundamentalista): AnaliseFun
     ...(e.financeira ? [] : [mi('p-fcf', 'P/FCF', mult.pFcf, 'x', set.medianas.pFcf, 'Valor de mercado ÷ fluxo de caixa livre dos últimos 12 meses (só com FCF positivo).', 'Preço em relação ao caixa livre.')]),
   ]
 
-  const vj = calcularValorJusto(e, mercado, cols, cg.receita, set.medianas, pr)
+  const vj = calcularValorJusto(e, mercado, cols, cg.receita, set.medianas, pr, set.origem.pl === 'grupo' ? set.grupo : null)
   const ev = ok(mercado.valorMercado) && ok(dlAtual) ? mercado.valorMercado + dlAtual + (atual.minoritarios ?? 0) : null
 
   // Relação múltiplos/setor (média das razões disponíveis).

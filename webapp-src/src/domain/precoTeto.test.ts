@@ -155,6 +155,14 @@ describe('regras de consistência com a análise fundamentalista', () => {
     expect(calcularPrecoTeto({ empresa: e, analise: analise({ valorJusto: 60 }), preco: 40 }).ressalva).toBeNull()
   })
 
+  it('valor justo com P/L do grupo B3 vira ressalva visível, sem vetar', () => {
+    const a = analise({ valorJusto: 60 })
+    ;(a.valorJusto.cenarios[0] as { metodos: unknown[] }).metodos = [{ nome: 'P/L do grupo B3', valor: 60, premissas: '' }]
+    const r = calcularPrecoTeto({ empresa: e, analise: a, preco: 40 })
+    expect(r.ressalva).toMatch(/grupo B3/)
+    expect(r.status).toBe('abaixo-do-teto')
+  })
+
   it('só acende o verde quando a leitura final da fundamentalista é "considerar entrada"', () => {
     for (const rec of ['aguardar-preco', 'manter-acompanhar', 'reduzir-exposicao', 'evitar-novos'] as const) {
       const r = calcularPrecoTeto({ empresa: e, analise: analise({ rec }), preco: 40 })

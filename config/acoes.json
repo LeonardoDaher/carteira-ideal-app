@@ -85,7 +85,8 @@
       {"ticker": "HBSA3", "nome": "Hidrovias do Brasil"},
       {"ticker": "LOGN3", "nome": "Log-In"},
       {"ticker": "TGMA3", "nome": "Tegma"},
-      {"ticker": "AZUL4", "nome": "Azul", "revisar": true}
+      {"ticker": "AZUL4", "nome": "Azul", "revisar": true},
+      {"ticker": "JSLG3", "nome": "JSL"}
     ]},
     {"setor": "Locação de veículos e frotas", "grupoB3": "Bens Industriais", "empresas": [
       {"ticker": "RENT3", "nome": "Localiza"},
@@ -97,7 +98,6 @@
     {"setor": "Serviços e locação de equipamentos", "grupoB3": "Bens Industriais", "empresas": [
       {"ticker": "MILS3", "nome": "Mills"},
       {"ticker": "PRNR3", "nome": "Priner"},
-      {"ticker": "LOGG3", "nome": "LOG Commercial Properties"},
       {"ticker": "AMBP3", "nome": "Ambipar"}
     ]},
     {"setor": "Energia elétrica: geração", "grupoB3": "Utilidade Pública", "empresas": [
@@ -169,7 +169,9 @@
       {"ticker": "MULT3", "nome": "Multiplan"},
       {"ticker": "ALOS3", "nome": "Allos"},
       {"ticker": "IGTI11", "nome": "Iguatemi"},
-      {"ticker": "JHSF3", "nome": "JHSF"}
+      {"ticker": "JHSF3", "nome": "JHSF"},
+      {"ticker": "LOGG3", "nome": "LOG Commercial Properties"},
+      {"ticker": "HBRE3", "nome": "HBR Realty"}
     ]},
     {"setor": "Construção civil e incorporação", "grupoB3": "Consumo Cíclico", "empresas": [
       {"ticker": "CYRE3", "nome": "Cyrela"},
@@ -258,7 +260,8 @@
       {"ticker": "JALL3", "nome": "Jalles Machado"},
       {"ticker": "TTEN3", "nome": "3tentos"},
       {"ticker": "AGRO3", "nome": "BrasilAgro"},
-      {"ticker": "AGXY3", "nome": "AgroGalaxy", "revisar": true}
+      {"ticker": "AGXY3", "nome": "AgroGalaxy", "revisar": true},
+      {"ticker": "SOJA3", "nome": "Boa Safra Sementes"}
     ]},
     {"setor": "Varejo alimentar", "grupoB3": "Consumo não Cíclico", "empresas": [
       {"ticker": "ASAI3", "nome": "Assaí"},

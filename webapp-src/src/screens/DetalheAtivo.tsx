@@ -2,7 +2,8 @@ import { useMemo, useState } from 'react'
 import { ATIVOS } from '../data/assets'
 import { ANALISES } from '../data/recomendacoes'
 import type { ItemRecomendado } from '../data/recomendacoes'
-import { AlertTriangleIcon, BarChartIcon, BrainIcon, ChevronDownIcon, PinIcon, TargetIcon } from '../ui/Icon'
+import { SUBSTITUTOS, ROTULO_SEGURANCA } from '../data/substitutos'
+import { AlertTriangleIcon, BarChartIcon, BrainIcon, ChevronDownIcon, LockIcon, PinIcon, TargetIcon } from '../ui/Icon'
 import { SectorPieChart } from '../ui/AllocBar'
 import type { AppCtx } from '../state/useAppState'
 import type { AtivoKey } from '../domain/types'
@@ -85,6 +86,8 @@ export function DetalheAtivo({ ctx }: { ctx: AppCtx }) {
   const pct = analise.composicaoPorTipo
     ? analise.composicaoPorTipo.tipos.reduce((soma, t) => soma + (resultado.carteira[t.chave] ?? 0), 0)
     : resultado.carteira[ativo] ?? 0
+
+  const substitutos = SUBSTITUTOS[tipoAtivo?.chave ?? ativo] ?? []
 
   const blocosRestantes = blocosAtuais.filter(
     (bloco) => !(bloco.itens.length > 0 && bloco.itens.every((item) => item.cor)),
@@ -299,6 +302,24 @@ export function DetalheAtivo({ ctx }: { ctx: AppCtx }) {
           </div>
         </div>
       ))}
+
+      {substitutos.length > 0 && (
+        <div className="col" style={{ gap: 8 }} data-testid="substitutos">
+          <div className="row" style={{ gap: 6, fontWeight: 700, fontSize: 13.5 }}><LockIcon size={15} /> Possíveis substitutos de {tipoAtivo?.label ?? info.label}</div>
+          <div className="muted tiny justify" style={{ lineHeight: 1.5 }}>
+            Outros produtos do mercado que cumprem um papel parecido na carteira, com o nível de segurança de cada um em comparação a este ativo. Exemplos ilustrativos, sem recomendação de compra.
+          </div>
+          {substitutos.map((s) => (
+            <div key={s.nome} className="card-outline col" style={{ gap: 4 }}>
+              <div className="row-between" style={{ alignItems: 'flex-start', gap: 8 }}>
+                <span style={{ fontWeight: 700, fontSize: 13.5 }}>{s.nome}</span>
+                <span className="tiny" style={{ fontWeight: 700, whiteSpace: 'nowrap', color: s.nivel === 'menor' ? 'var(--warning)' : 'var(--accent)' }}>{ROTULO_SEGURANCA[s.nivel]}</span>
+              </div>
+              <span className="muted tiny justify" style={{ lineHeight: 1.4, display: 'block' }}>{s.detalhe}</span>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Dados oficiais de mercado (D15): depois da carteira e dos exemplos, antes da análise */}
       {tesouroExibido && <TaxasTesouroHoje familia={tesouroExibido.familia} indexador={tesouroExibido.indexador} />}

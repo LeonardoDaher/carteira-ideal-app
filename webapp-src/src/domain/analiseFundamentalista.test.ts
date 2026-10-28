@@ -129,6 +129,33 @@ describe('mercado e múltiplos', () => {
     const outroSetor = medianaSetorial(alvo, [alvo, ...pares('Outro setor')], precoFixo(10))
     expect(outroSetor.n).toBe(0)
   })
+
+  it('setor com poucos pares usa o grupo B3, com a mesma regra de 4 pares, e diz de onde veio', () => {
+    const alvo = empresa({ ticker: 'ALVO3', setor: 'Calçados e artigos esportivos' })
+    const doGrupo = pares('Moda e vestuário') // mesmo grupo B3: Tecidos, vestuário e calçados
+    const r = medianaSetorial(alvo, [alvo, ...pares('Calçados e artigos esportivos').slice(0, 2), ...doGrupo], precoFixo(10))
+    expect(r.origem.pl).toBe('grupo')
+    expect(r.grupo).toBe('Tecidos, vestuário e calçados')
+    expect(r.medianas.pl).not.toBeNull()
+    // o próprio setor com 4 pares continua valendo, sem olhar o grupo
+    const proprio = medianaSetorial(alvo, [alvo, ...pares('Calçados e artigos esportivos').slice(0, 4), ...doGrupo], precoFixo(10))
+    expect(proprio.origem.pl).toBe('setor')
+  })
+
+  it('o grupo B3 também exige 4 pares e não mistura financeiras com não financeiras nem setores de grupos diferentes', () => {
+    const alvo = empresa({ ticker: 'ALVO3', setor: 'Calçados e artigos esportivos' })
+    expect(medianaSetorial(alvo, [alvo, ...pares('Moda e vestuário').slice(0, 3)], precoFixo(10)).medianas.pl).toBeNull()
+    expect(medianaSetorial(alvo, [alvo, ...pares('Mineração')], precoFixo(10)).medianas.pl).toBeNull()
+    const financeiros = ['F1', 'F2', 'F3', 'F4'].map((t) => empresa({ ticker: `${t}3`, setor: 'Moda e vestuário', financeira: true }))
+    expect(medianaSetorial(alvo, [alvo, ...financeiros], precoFixo(10)).medianas.pl).toBeNull()
+  })
+
+  it('o valor justo avisa quando o P/L vem do grupo B3', () => {
+    const alvo = empresa({ setor: 'Calçados e artigos esportivos' })
+    const a = analisarFundamentos({ empresa: alvo, precoDe: precoFixo(10), todas: [alvo, ...pares('Moda e vestuário')] })!
+    const metodo = a.valorJusto.cenarios.find((c) => c.cenario === 'base')!.metodos.find((m) => m.nome === 'P/L do grupo B3')
+    expect(metodo?.premissas).toMatch(/grupo B3 "Tecidos, vestuário e calçados"/)
+  })
 })
 
 describe('analisarFundamentos', () => {
