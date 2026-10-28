@@ -35,7 +35,7 @@
       <nav class="migalhas" aria-label="Você está aqui"><a href="/">Início</a><span aria-hidden="true"> › </span><a href="/privacidade/">Política de Privacidade</a></nav>
       <article>
         <h1>Política de Privacidade</h1>
-        <p class="byline">Última atualização: 7 de outubro de 2026</p>
+        <p class="byline">Última atualização: 28 de outubro de 2026</p>
         <p class="lead">Resumo em uma frase: não pedimos cadastro, não vendemos dados e só contamos o uso de forma anônima e agregada para saber se o projeto está ajudando as pessoas.</p>
 
         <section>
@@ -78,6 +78,12 @@
           <p>O &ldquo;Top 15 ações mais baratas&rdquo; e o &ldquo;Top 15 FIIs&rdquo; só abrem com um código do mês, e cada lista tem o seu código. Quando você digita o código, ele é enviado ao endereço <code>/api/top15</code> (ações) ou <code>/api/top15-fiis</code> (FIIs) apenas para ser conferido, e <strong>não é guardado em nosso servidor</strong>. O app salva cada código só no seu aparelho (localStorage), para você não precisar digitá-lo de novo; ele pode ser apagado por você a qualquer momento e deixa de valer quando o código do mês muda.</p>
           <p>Para impedir tentativas em massa de adivinhar o código, e chamadas em massa à API que calcula a carteira de referência (<code>/api/recomendacao</code>), contamos as tentativas por endereço IP. Guardamos <strong>apenas um hash irreversível do IP, e não o IP em si, e por no máximo 15 minutos</strong>. Nos Top 15 (ações e FIIs), a contagem vale só para códigos errados; em <code>/api/recomendacao</code>, para qualquer chamada (o limite é de 60 a cada 15 minutos, bem acima do uso normal). Acima do limite, o servidor recusa temporariamente novas chamadas daquele endereço.</p>
           <p>Também somamos, por mês, quantos acessos aos Top 15 foram aceitos, recusados por código errado ou bloqueados pelo limite. É só um número agregado, sem identificar ninguém.</p>
+        </section>
+
+        <section>
+          <h2>5B. Aviso de preço teto com o app fechado (opcional)</h2>
+          <p>Na aba &ldquo;Preço teto de compra&rdquo; do Simule Ações, você pode <strong>ligar</strong> o aviso no celular. É opcional e só funciona se você tocar em &ldquo;Ligar aviso no celular&rdquo; e permitir as notificações. Nesse caso, o nosso servidor passa a guardar, para o seu aparelho: o <strong>endereço de entrega do aviso</strong> que o seu navegador gera (com as duas chaves de criptografia dele), o <strong>código das ações que você acompanha</strong>, a <strong>taxa de dividendos</strong> escolhida, quais ações já foram avisadas e a data da última atualização. Não guardamos nome, e-mail, telefone nem IP, e nenhum dado da sua carteira.</p>
+          <p>Esse registro serve apenas para calcular e enviar o aviso, uma vez ao dia, depois do fechamento do mercado. Ele é apagado quando você <strong>desliga</strong> o aviso, quando o navegador recusa a entrega (por exemplo, se você bloquear as notificações) ou depois de <strong>90 dias sem você abrir o app</strong>. A entrega passa pelo serviço de notificações do seu navegador (Google, Apple, Mozilla ou Microsoft, conforme o aparelho), que recebe o aviso criptografado. Se você nunca ligar essa opção, nada disso é guardado.</p>
         </section>
 
         <section>

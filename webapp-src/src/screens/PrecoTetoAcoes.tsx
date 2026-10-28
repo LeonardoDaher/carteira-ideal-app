@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { storage } from '../data/storage'
+import { ativarPush, desativarPush, pushLigado, sincronizarPush } from '../data/pushPreco'
 import { useArquivoDados } from '../data/useArquivoDados'
 import { SNAPSHOT_ACOES_DIVIDENDOS } from '../data/snapshotAcoesDividendos'
 import { buscarAcoes } from '../domain/acoes'
 import type { AcaoBusca } from '../domain/acoes'
-import { analisarFundamentos, ROTULO_RECOMENDACAO } from '../domain/analiseFundamentalista'
+import { ROTULO_RECOMENDACAO } from '../domain/analiseFundamentalista'
 import type { SnapshotFundamentos } from '../domain/analiseFundamentalista'
-import { calcularPrecoTeto, TAXA_BAZIN_PADRAO, tickersParaAvisar } from '../domain/precoTeto'
+import { TAXA_BAZIN_PADRAO, tickersParaAvisar } from '../domain/precoTeto'
+import { calcularItensPrecoTeto, textoDoAviso } from '../domain/precoTetoLote'
 import type { PrecoTeto, StatusTeto } from '../domain/precoTeto'
 import { EstadoDoArquivo } from '../ui/BlocosDeAnalise'
 import { CAMINHO_FUNDAMENTOS, premissasDoMercado } from './useAnaliseDaAcao'
@@ -39,9 +41,11 @@ interface Guardado {
   taxa: number
   avisados: string[]
   avisos: boolean
+  /** Aviso com o app fechado (push) ligado neste aparelho. */
+  push: boolean
 }
 
-const PADRAO: Guardado = { acompanhadas: [], taxa: TAXA_BAZIN_PADRAO, avisados: [], avisos: false }
+const PADRAO: Guardado = { acompanhadas: [], taxa: TAXA_BAZIN_PADRAO, avisados: [], avisos: false, push: false }
 
 function lerGuardado(bruto: string | null): Guardado {
   if (!bruto) return PADRAO
@@ -52,6 +56,7 @@ function lerGuardado(bruto: string | null): Guardado {
       taxa: typeof o.taxa === 'number' && o.taxa > 0 && o.taxa <= 0.3 ? o.taxa : TAXA_BAZIN_PADRAO,
       avisados: Array.isArray(o.avisados) ? o.avisados.filter((t): t is string => typeof t === 'string') : [],
       avisos: o.avisos === true,
+      push: o.push === true,
     }
   } catch {
     return PADRAO
@@ -80,6 +85,9 @@ export function PrecoTetoAcoes({
   const [termo, setTermo] = useState('')
   const [permissao, setPermissao] = useState<string>(suportaNotificacao() ? Notification.permission : 'unsupported')
   const [avisosNaTela, setAvisosNaTela] = useState<string[]>([])
+  const [pushOn, setPushOn] = useState(false)
+  const [pushOcupado, setPushOcupado] = useState(false)
+  const [pushMsg, setPushMsg] = useState<string | null>(null)
   const guardadoRef = useRef(guardado)
   guardadoRef.current = guardado
 
@@ -95,6 +103,55 @@ export function PrecoTetoAcoes({
     }
   }, [])
 
+  // Confere se este aparelho ainda tem a inscrição de aviso (o navegador pode tê-la descartado).
+  useEffect(() => {
+    if (!lido || !guardado.push) return
+    let vivo = true
+    void pushLigado().then((ligado) => {
+      if (!vivo) return
+      setPushOn(ligado)
+      if (!ligado) atualizar({ push: false })
+    })
+    return () => {
+      vivo = false
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lido])
+
+  // Com o aviso ligado, a lista e a taxa acompanham o servidor (pequena espera para juntar vários cliques).
+  useEffect(() => {
+    if (!lido || !pushOn) return
+    const espera = setTimeout(() => void sincronizarPush({ tickers: guardado.acompanhadas, taxa: guardado.taxa, avisados: guardado.avisados }), 800)
+    return () => clearTimeout(espera)
+  }, [lido, pushOn, guardado.acompanhadas, guardado.taxa, guardado.avisados])
+
+  const alternarPush = async () => {
+    setPushMsg(null)
+    setPushOcupado(true)
+    try {
+      if (pushOn) {
+        await desativarPush()
+        setPushOn(false)
+        atualizar({ push: false })
+        return
+      }
+      const r = await ativarPush({ tickers: guardado.acompanhadas, taxa: guardado.taxa, avisados: guardado.avisados })
+      if (r === 'ligado') {
+        setPushOn(true)
+        atualizar({ push: true })
+        return
+      }
+      setPushMsg(
+        r === 'negado' ? 'As notificações estão bloqueadas neste navegador. Libere nas configurações do site e tente de novo.'
+        : r === 'precisa-instalar' ? 'No iPhone, instale o app primeiro: toque em Compartilhar, depois em Adicionar à Tela de Início, abra o app por lá e volte a esta aba.'
+        : r === 'indisponivel' ? 'O aviso com o app fechado ainda não está disponível neste navegador ou neste momento.'
+        : 'Não foi possível ligar agora. Tente de novo em alguns minutos.',
+      )
+    } finally {
+      setPushOcupado(false)
+    }
+  }
+
   const atualizar = (mudanca: Partial<Guardado>) => {
     const novo = { ...guardadoRef.current, ...mudanca }
     setGuardado(novo)
@@ -103,19 +160,7 @@ export function PrecoTetoAcoes({
 
   const itens = useMemo(() => {
     if (f.tipo !== 'pronto') return null
-    const premissas = premissasDoMercado()
-    const todas = Object.values(f.dados.empresas)
-    const mapa = new Map<string, PrecoTeto>()
-    for (const empresa of todas) {
-      const preco = precoDe(empresa.ticker)
-      if (preco === null) continue
-      const analise = analisarFundamentos({
-        empresa, precoDe, todas, premissas, dyB3: SNAPSHOT_ACOES_DIVIDENDOS.dyPorTicker?.[empresa.ticker] ?? null,
-      })
-      if (!analise) continue
-      mapa.set(empresa.ticker, calcularPrecoTeto({ empresa, analise, preco, dyB3: SNAPSHOT_ACOES_DIVIDENDOS.dyPorTicker?.[empresa.ticker] ?? null, taxaBazin: guardado.taxa }))
-    }
-    return mapa
+    return calcularItensPrecoTeto({ fundamentos: f.dados, precoDe, premissas: premissasDoMercado(), dyDe: (t) => SNAPSHOT_ACOES_DIVIDENDOS.dyPorTicker?.[t] ?? null, taxa: guardado.taxa })
   }, [f, precoDe, guardado.taxa])
 
   const acompanhados = useMemo(() => (itens ? guardado.acompanhadas.map((t) => ({ ticker: t, item: itens.get(t) ?? null })) : []), [itens, guardado.acompanhadas])
@@ -136,11 +181,11 @@ export function PrecoTetoAcoes({
     const r = tickersParaAvisar(atuais, guardadoRef.current.avisados)
     if (r.avisados.join() === guardadoRef.current.avisados.join() && r.avisar.length === 0) return
     setAvisosNaTela(r.avisar)
-    if (guardadoRef.current.avisos && suportaNotificacao() && Notification.permission === 'granted') {
+    if (guardadoRef.current.avisos && !guardadoRef.current.push && suportaNotificacao() && Notification.permission === 'granted') {
       for (const t of r.avisar) {
         const i = itens.get(t)
         try {
-          new Notification(`${t} abaixo do preço teto`, { body: i ? `${i.mensagem}${i.ressalva ? ` Atenção: ${i.ressalva}.` : ''}` : 'O preço entrou abaixo do teto.', tag: `preco-teto-${t}` })
+          new Notification(i ? textoDoAviso(i).titulo : `${t} abaixo do preço teto`, { body: i ? textoDoAviso(i).corpo : 'O preço entrou abaixo do teto.', tag: `preco-teto-${t}` })
         } catch {
           // alguns navegadores móveis só aceitam notificação por service worker; o aviso na tela continua valendo
         }
@@ -202,9 +247,23 @@ export function PrecoTetoAcoes({
               {guardado.avisos ? 'Desativar notificações' : 'Ativar notificações'}
             </button>
             <span className="tiny muted justify">
-              Por enquanto o aviso chega quando você abre o app. O aviso com o app fechado, direto no celular, é a próxima etapa.
+              Esta notificação chega quando você abre o app. Para receber com o app fechado, use o aviso no celular, logo abaixo.
             </span>
           </>
+        )}
+        {permissao !== 'unsupported' && (
+          <div className="col" style={{ gap: 6, borderTop: '1px solid var(--border)', paddingTop: 8 }} data-testid="aviso-push">
+            <span style={{ fontWeight: 700, fontSize: 13 }}>Aviso no celular, com o app fechado</span>
+            <button className="btn btn-secondary" disabled={pushOcupado} onClick={() => void alternarPush()}>
+              {pushOcupado ? 'Aguarde…' : pushOn ? 'Desligar aviso no celular' : 'Ligar aviso no celular'}
+            </button>
+            {pushMsg && <span className="tiny" style={{ color: 'var(--warning)' }} role="status">{pushMsg}</span>}
+            <span className="tiny muted justify">
+              {pushOn
+                ? 'Ligado. Quando uma ação que você acompanha entrar abaixo do teto, com a análise fundamentalista de acordo, o aviso chega no fim do dia, depois do fechamento. Para isso, o servidor guarda só o código das ações acompanhadas, a taxa escolhida e o endereço de entrega do aviso deste aparelho, e apaga tudo se você desligar ou ficar 90 dias sem abrir o app. No iPhone vale só com o app instalado na tela inicial.'
+                : 'Ao ligar, o servidor passa a guardar só o código das ações que você acompanha, a taxa escolhida e o endereço de entrega do aviso deste aparelho, sem nome nem e-mail. Você pode desligar quando quiser. No iPhone, instale o app na tela inicial antes.'}
+            </span>
+          </div>
         )}
       </div>
 

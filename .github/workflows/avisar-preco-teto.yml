@@ -1,0 +1,65 @@
+# Aviso de preço teto com o app fechado (D127): depois que o job de Ações grava o fechamento do dia, calcula o preço teto de cada
+# ação acompanhada pelos aparelhos inscritos na aba "Preço teto de compra" do Simule Ações e manda a notificação a quem acabou
+# de entrar abaixo do teto (com a análise fundamentalista de acordo). O cálculo é o MESMO código da tela do app.
+#
+# Precisa dos secrets do repositório (Settings > Secrets and variables > Actions):
+#   UPSTASH_REDIS_REST_URL e UPSTASH_REDIS_REST_TOKEN  mesmos valores do Redis da Vercel (onde os aparelhos se inscrevem)
+#   VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_SUBJECT  gerados por "npm run gerar-chaves-push" (a pública também vai na Vercel)
+# Sem eles o job termina sem erro e sem enviar nada.
+#
+# Rodar de novo no mesmo dia não repete avisos: cada aparelho guarda quem já foi avisado.
+#
+# Manual: Actions > Avisar Preço Teto > Run workflow. Modo "simular" mostra o que enviaria, sem enviar; "teste" manda uma notificação
+# de teste a todos os aparelhos inscritos (para conferir o caminho inteiro).
+name: Avisar Preço Teto
+
+on:
+  workflow_run:
+    workflows: ['Atualizar Ações']
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      modo:
+        description: 'normal, simular ou teste'
+        required: true
+        default: 'normal'
+        type: choice
+        options: [normal, simular, teste]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aviso-preco-teto # nunca duas execuções ao mesmo tempo (evita aviso em dobro)
+  cancel-in-progress: false
+
+jobs:
+  avisar:
+    # Só depois de uma execução bem-sucedida do job de Ações (ou manualmente).
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Calcular e enviar os avisos
+        env:
+          UPSTASH_REDIS_REST_URL: ${{ secrets.UPSTASH_REDIS_REST_URL }}
+          UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
+          VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+          VAPID_SUBJECT: ${{ secrets.VAPID_SUBJECT }}
+          MODO: ${{ github.event.inputs.modo || 'normal' }}
+        run: |
+          case "$MODO" in
+            simular) node scripts/avisar-preco-teto.mjs --simular ;;
+            teste) node scripts/avisar-preco-teto.mjs --teste ;;
+            *) node scripts/avisar-preco-teto.mjs ;;
+          esac

@@ -2,7 +2,8 @@ import { useMemo } from 'react'
 import { useArquivoDados } from '../data/useArquivoDados'
 import type { EstadoArquivo } from '../data/useArquivoDados'
 import type { AnaliseFundamentalista, Premissas, SnapshotFundamentos } from '../domain/analiseFundamentalista'
-import { analisarFundamentos, premissasDaSelic } from '../domain/analiseFundamentalista'
+import { premissasDoSnapshotMercado } from '../domain/precoTetoLote'
+import { analisarFundamentos } from '../domain/analiseFundamentalista'
 import type { AnaliseTecnica, Horizonte, SnapshotSeries } from '../domain/analiseTecnica'
 import { analisarTecnica, mesclarHistorico, montarBarras } from '../domain/analiseTecnica'
 import type { Barra, HistoricoLongo } from '../domain/analiseTecnica'
@@ -37,11 +38,7 @@ export interface DadosDaAnalise {
 
 /** Selic meta e IPCA de longo prazo (Focus) dos dados oficiais do app, para ancorar a taxa de desconto. */
 export function premissasDoMercado(): Partial<Premissas> {
-  const selic = SNAPSHOT_MERCADO.indicadores.selicMeta?.valor ?? null
-  const ipca = SNAPSHOT_MERCADO.focus?.ipca ?? {}
-  const anos = Object.keys(ipca).sort()
-  const longo = anos.length ? (ipca[anos[anos.length - 1]] ?? null) : null
-  return premissasDaSelic(selic, longo)
+  return premissasDoSnapshotMercado(SNAPSHOT_MERCADO)
 }
 
 /**

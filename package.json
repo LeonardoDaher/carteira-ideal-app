@@ -23,8 +23,9 @@
     "atualizar-fii-baratos": "node scripts/atualizar-fii-baratos.mjs",
     "atualizar-fiis-historico": "node scripts/atualizar-fiis-historico.mjs",
     "verificar-fii-baratos": "node scripts/fii-baratos-verificar.mjs ultima",
-    "codigo-top15":"node scripts/gerar-codigo-top15.mjs",
-    "gerar-divulgacao": "node scripts/gerar-divulgacao.mjs"
+    "codigo-top15": "node scripts/gerar-codigo-top15.mjs",
+    "gerar-divulgacao": "node scripts/gerar-divulgacao.mjs",
+    "gerar-chaves-push": "node scripts/gerar-chaves-push.mjs"
   },
   "dependencies": {
     "pdfjs-dist": "^6.3.289",
@@ -45,6 +46,7 @@
     "typescript": "~6.0.2",
     "vite": "^8.2.2",
     "vite-plugin-singlefile": "^2.3.3",
-    "vitest": "^4.1.11"
+    "vitest": "^4.1.11",
+    "web-push": "^3.6.7"
   }
 }
