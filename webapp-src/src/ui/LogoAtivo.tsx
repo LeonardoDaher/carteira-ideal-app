@@ -1,14 +1,16 @@
 /**
- * Logo da empresa na frente do código. As imagens ficam em src/assets/logos/<RAIZ>.(png|svg|webp|jpg), com a raiz de quatro
- * letras do código (PETR4 → PETR.png); o Vite só inclui as que existem e elas saem do próprio site (a política de segurança só
- * aceita imagens do site). Sem a imagem, aparece um selo com as iniciais (desenhadas por CSS, para não entrarem no texto da linha), para a linha não ficar torta.
+ * Logo da empresa na frente do código. As imagens ficam em public/logos/<RAIZ>.png, com a raiz de quatro letras do código
+ * (PETR4 → PETR.png), e saem do próprio site, em arquivos separados e carregados só quando a linha aparece (D133). Elas NÃO são
+ * importadas no código: o app é um arquivo único e importar embutiria todas em base64 dentro da página. A lista de nomes vem do
+ * vite.config.ts (__LOGOS__). Sem a imagem, aparece um selo com as iniciais (desenhadas por CSS, para não entrarem no texto da
+ * linha), para a linha não ficar torta.
  */
-const LOGOS = import.meta.glob('../assets/logos/*.{png,svg,webp,jpg}', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
+declare const __LOGOS__: string[]
 
 const POR_RAIZ: Record<string, string> = {}
-for (const [caminho, url] of Object.entries(LOGOS)) {
-  const raiz = /([A-Z0-9]+)\.[a-z]+$/.exec(caminho)?.[1]
-  if (raiz) POR_RAIZ[raiz] = url
+for (const arquivo of __LOGOS__) {
+  const raiz = /^([A-Z0-9]+)\.[a-z]+$/.exec(arquivo)?.[1]
+  if (raiz) POR_RAIZ[raiz] = `./logos/${arquivo}`
 }
 
 /** Cor do selo estável por empresa (mesma raiz, mesma cor). */
