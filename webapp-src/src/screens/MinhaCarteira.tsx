@@ -3,12 +3,14 @@ import { CATALOGO_ATIVOS } from '../data/catalogoAtivos'
 import { classificarPosicoes } from '../domain/classesDaCarteira'
 import { classificarAtivo } from '../domain/classificadorAtivo'
 import type { ClasseCarteira } from '../domain/classificadorAtivo'
+import { apurarImpostoRenda, categoriaIR } from '../domain/impostoRenda'
 import { capitalAplicadoPorMes, composicaoDasLinhas, montarPainel, proventosDoMes, proventosMensais, proximosProventos, resumoDeProventos } from '../domain/painelCarteira'
 import type { AppCtx } from '../state/useAppState'
 import { useCarteiraReal } from '../state/useCarteiraReal'
 import { AvisoEducacional } from '../ui/AvisoEducacional'
 import { CartaoComparacao } from '../ui/painel/CartaoComparacao'
 import { CartaoCarteira, CartaoComposicao, CartaoProventos, CartaoVazio } from '../ui/painel/CartoesPainel'
+import { CartaoImpostoRenda } from '../ui/painel/CartaoImpostoRenda'
 import { CartaoLancamentos } from '../ui/painel/CartaoLancamentos'
 import type { FiltroTipo } from '../ui/painel/CartaoLancamentos'
 import { CartaoPosicoes } from '../ui/painel/CartaoPosicoes'
@@ -99,6 +101,13 @@ export function MinhaCarteira({ ctx, hoje, valoresVisiveis = false }: { ctx: App
   const resumoProventos = useMemo(() => resumoDeProventos(c.lancamentos, hojeISO), [c.lancamentos, hojeISO])
   const fatias = useMemo(() => composicaoDasLinhas(painel.linhas), [painel.linhas])
   const proximos = useMemo(() => proximosProventos(c.eventosFuturos, hojeISO), [c.eventosFuturos, hojeISO])
+  const apuracaoIR = useMemo(
+    () =>
+      apurarImpostoRenda(c.lancamentos, (ativo) =>
+        categoriaIR(ativo, classesEfetivas[ativo] ?? classificarAtivo(ativo, CATALOGO_ATIVOS).classe, CATALOGO_ATIVOS),
+      ),
+    [c.lancamentos, classesEfetivas],
+  )
   const temDados = c.lancamentos.length > 0 || !!c.posicao || c.ativosManuais.length > 0
 
   /** "Lançamento direto": rola até a lista e abre o formulário de novo lançamento. */
@@ -187,6 +196,8 @@ export function MinhaCarteira({ ctx, hoje, valoresVisiveis = false }: { ctx: App
           onRestaurar={h.restaurarAtivo}
         />
       )}
+
+      {h.hidratado && temDados && <CartaoImpostoRenda apuracao={apuracaoIR} />}
 
       {h.hidratado && (
         <CartaoLancamentos abrirNovo={pedidoNovo} lancamentos={c.lancamentos} hoje={hojeISO} onAdicionar={h.adicionar} onCorrigir={h.corrigir} onExcluir={h.excluir} filtro={filtroAtivo} onFiltro={setFiltroAtivo} filtroTipo={filtroTipo} onFiltroTipo={setFiltroTipo} />
