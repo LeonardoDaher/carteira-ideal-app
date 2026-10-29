@@ -1,4 +1,8 @@
-import { useId, useState } from 'react'
+import { useId, useMemo, useState } from 'react'
+import { SNAPSHOT_BDRS_MAIS_NEGOCIADOS } from '../data/snapshotTop15Mercado'
+import { LegendaDosSelos, NosRadares, ResumoDoGrupo, Selos } from '../ui/DestaquesDoAtivo'
+import { indexarDestaques } from '../domain/destaquesRadares'
+import type { IndiceDeDestaques } from '../domain/destaquesRadares'
 import { SNAPSHOT_BDRS } from '../data/snapshotBdrs'
 import {
   VALORES_PADRAO,
@@ -19,6 +23,9 @@ import { Top15BdrsDesconto } from './Top15BdrsDesconto'
 import { Top15BdrsMaisNegociados } from './Top15EtfsMaisNegociados'
 import type { AppCtx } from '../state/useAppState'
 
+/** Radares que valem aqui: liquidez, no geral e na categoria. */
+const SELOS_BDR = ['maisNegociado', 'naCategoria'] as const
+
 function reais(valor: number) {
   return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 }
@@ -37,12 +44,16 @@ type Selecao = { origem: 'lista'; bdr: BdrLista; tipo: 'acao' | 'etf' } | { orig
  */
 export function SimuleBdr({
   snapshot = SNAPSHOT_BDRS,
+  destaques,
 }: {
   /** Recebido como as demais telas avulsas; esta tela só volta à landing. */
   ctx: AppCtx
   /** Permite injetar dados nos testes. No app, usa o arquivo gerado pelo job diário. */
   snapshot?: SnapshotBdrs
+  /** Só nos testes: destaques dos radares por código; no app, vêm do Top 15 mais negociados. */
+  destaques?: IndiceDeDestaques
 }) {
+  const indiceDestaques = useMemo(() => destaques ?? indexarDestaques({ maisNegociados: SNAPSHOT_BDRS_MAIS_NEGOCIADOS, hoje: '' }), [destaques])
   const grupos = agruparPorSetor(snapshot.acoes)
   const etfs = [...snapshot.etfs].sort((a, b) => b.volumeMedio - a.volumeMedio)
   const primeiro = grupos[0]?.bdrs[0]
@@ -73,6 +84,7 @@ export function SimuleBdr({
       onClick={() => abrir({ origem: 'lista', bdr: b, tipo })}
     >
       {b.ticker}
+      <Selos d={indiceDestaques.get(b.ticker)} usa={SELOS_BDR} />
     </button>
   )
 
@@ -129,6 +141,8 @@ export function SimuleBdr({
             </div>
           )}
 
+          <LegendaDosSelos usa={SELOS_BDR} />
+
           <div className="col" style={{ gap: 18 }}>
             {grupos.map((g) => (
               <div key={g.setor} className="col" style={{ gap: 8 }}>
@@ -136,6 +150,7 @@ export function SimuleBdr({
                 <div className="grade-tickers" role="group" aria-label={`BDRs do setor ${g.setor}`}>
                   {g.bdrs.map((b) => chip(b, 'acao'))}
                 </div>
+                <ResumoDoGrupo tickers={g.bdrs.map((b) => b.ticker)} indice={indiceDestaques} usa={SELOS_BDR} />
               </div>
             ))}
 
@@ -160,6 +175,7 @@ export function SimuleBdr({
             valorLivre={valorLivre}
             setValorLivre={setValorLivre}
           />
+          <NosRadares ticker={selecao.bdr.ticker} d={indiceDestaques.get(selecao.bdr.ticker)} usa={SELOS_BDR} nenhum={`${selecao.bdr.ticker} não está no Top 15 mais negociados nem entre os mais negociados do seu setor. A maioria dos BDRs não aparece nesses recortes.`} />
           </div>
         </div>
       )}

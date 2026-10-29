@@ -18,6 +18,13 @@ import { AnaliseFundamentalistaAcao } from './AnaliseFundamentalistaAcao'
 import { ConfluenciaAcao } from './ConfluenciaAcao'
 import { PrecoTetoAcoes } from './PrecoTetoAcoes'
 import { RadarDividendos } from './RadarDividendos'
+import { SNAPSHOT_ACOES_DIVIDENDOS } from '../data/snapshotAcoesDividendos'
+import { SNAPSHOT_ACOES_ENDIVIDADAS } from '../data/snapshotAcoesEndividadas'
+import { SNAPSHOT_ACOES_MAIS_NEGOCIADAS, SNAPSHOT_IBOV_MAIORES_PESOS } from '../data/snapshotTop15Mercado'
+import { LegendaDosSelos, NosRadares, ResumoDoGrupo, Selos } from '../ui/DestaquesDoAtivo'
+import { SNAPSHOT_RADAR_DIVIDENDOS } from '../data/snapshotRadarDividendos'
+import { indexarDestaques } from '../domain/destaquesRadares'
+import type { DestaquesDoAtivo, IndiceDeDestaques } from '../domain/destaquesRadares'
 import { useAnaliseDaAcao } from './useAnaliseDaAcao'
 import { ROTULO_HORIZONTE } from '../domain/confluencia'
 import type { Horizonte, HistoricoLongo, SnapshotSeries } from '../domain/analiseTecnica'
@@ -34,6 +41,9 @@ function inteiro(valor: number) {
 
 /** O que está aberto no cartão: uma empresa do cadastro (dado completo) ou um código da busca (resumido). */
 type Selecao = { origem: 'lista'; acao: Acao; setor: string } | { origem: 'busca'; acao: AcaoBusca }
+
+/** Radares que valem para ações. */
+const SELOS_ACOES = ['dividendos', 'radar', 'maisNegociado', 'indice', 'endividada'] as const satisfies readonly (keyof DestaquesDoAtivo)[]
 
 type AbaAcoes = 'simulador' | 'top15' | 'negociadas' | 'ibov' | 'endividadas' | 'dividendos' | 'tecnica' | 'fundamentalista' | 'confluencia' | 'top15confluencia' | 'precoteto' | 'radar'
 const ABAS_DE_ANALISE: AbaAcoes[] = ['tecnica', 'fundamentalista', 'confluencia']
@@ -55,6 +65,7 @@ export function SimuleAcoes({
   series,
   fundamentos,
   historico,
+  destaques,
 }: {
   /** Recebido como as demais telas avulsas; esta tela só volta ao Simule Ativos. */
   ctx: AppCtx
@@ -65,6 +76,8 @@ export function SimuleAcoes({
   fundamentos?: SnapshotFundamentos
   /** Só nos testes: histórico longo (COTAHIST) por ticker; no app, um arquivo por ação baixado ao abrir a análise técnica. */
   historico?: Record<string, HistoricoLongo>
+  /** Só nos testes: destaques dos radares por código; no app, vêm do Top 15 de dividendos, do de endividadas e do radar de dividendos. */
+  destaques?: IndiceDeDestaques
 }) {
   const grupos = agruparPorGrupo(snapshot.setores, snapshot.gruposOrdem)
   const totais = totaisDe(snapshot.setores)
@@ -98,6 +111,11 @@ export function SimuleAcoes({
     return [...snapshot.busca, ...extra]
   }, [snapshot])
   const maisNegociadas = useMemo(() => snapshot.setores.flatMap((st) => st.empresas).sort((a, b) => b.volumeMedio - a.volumeMedio).slice(0, 10), [snapshot])
+
+  const indiceDestaques = useMemo(
+    () => destaques ?? indexarDestaques({ dividendos: SNAPSHOT_ACOES_DIVIDENDOS, endividadas: SNAPSHOT_ACOES_ENDIVIDADAS, radar: SNAPSHOT_RADAR_DIVIDENDOS, maisNegociados: SNAPSHOT_ACOES_MAIS_NEGOCIADAS, indice: SNAPSHOT_IBOV_MAIORES_PESOS, hoje: snapshot.dataPregao ?? SNAPSHOT_RADAR_DIVIDENDOS.dataReferencia }),
+    [destaques, snapshot.dataPregao],
+  )
 
   const levarAoCartao = () => rolarParaResultado('cartao-acao')
 
@@ -150,7 +168,7 @@ export function SimuleAcoes({
             { id: 'endividadas', emoji: '💳', titulo: 'Top 15 mais endividadas', descricao: 'Dívida líquida ÷ EBITDA' },
             { id: 'dividendos', emoji: '💰', titulo: 'Top 15 pagadoras de dividendos', descricao: 'Dividend yield de 12 meses' },
             { id: 'precoteto', emoji: '🎯', titulo: 'Preço teto de compra', descricao: 'Bazin, Graham e radar' },
-            { id: 'radar', emoji: '📅', titulo: 'Radar de dividendos', descricao: 'O que já foi anunciado, mês a mês' },
+            { id: 'radar', emoji: '📅', titulo: 'Agenda de dividendos', descricao: 'O que já foi anunciado, mês a mês' },
           ] as const
         ).map((c) => (
           <button
@@ -271,6 +289,8 @@ export function SimuleAcoes({
               acima. Estar na lista não é uma indicação de compra.
             </div>
 
+            <LegendaDosSelos usa={SELOS_ACOES} />
+
             <div className="col" style={{ gap: 22 }}>
               {grupos.map((g) => (
                 <div key={g.grupo} className="col" style={{ gap: 14 }}>
@@ -294,9 +314,11 @@ export function SimuleAcoes({
                             onClick={() => abrir({ origem: 'lista', acao: e, setor: s.setor })}
                           >
                             {e.ticker}
+                            <Selos d={indiceDestaques.get(e.ticker)} usa={SELOS_ACOES} />
                           </button>
                         ))}
                       </div>
+                      <ResumoDoGrupo tickers={s.empresas.map((e) => e.ticker)} indice={indiceDestaques} usa={SELOS_ACOES} />
                     </div>
                   ))}
                 </div>
@@ -312,6 +334,7 @@ export function SimuleAcoes({
               setValorEscolhido={setValorEscolhido}
               valorLivre={valorLivre}
               setValorLivre={setValorLivre}
+              destaques={indiceDestaques.get(selecao.acao.ticker)}
             />
           </div>
         </div>
@@ -467,6 +490,7 @@ function CartaoAcao({
   setValorEscolhido,
   valorLivre,
   setValorLivre,
+  destaques,
 }: {
   selecao: Selecao
   dataPregao: string | null
@@ -474,6 +498,7 @@ function CartaoAcao({
   setValorEscolhido: (v: number) => void
   valorLivre: string
   setValorLivre: (v: string) => void
+  destaques?: DestaquesDoAtivo
 }) {
   const completo = selecao.origem === 'lista' ? selecao.acao : null
   const resumo = selecao.origem === 'busca' ? selecao.acao : null
@@ -551,6 +576,8 @@ function CartaoAcao({
           </div>
         )}
       </div>
+
+      <NosRadares ticker={acao.ticker} d={destaques} usa={SELOS_ACOES} nenhum={`${acao.ticker} não está nos Top 15 (dividendos, endividadas, mais negociadas, Ibovespa) nem tem provento anunciado no radar. A maioria das ações não aparece nesses recortes.`} />
 
       <div className="card col" style={{ gap: 12 }}>
         <span style={{ fontWeight: 700 }}>Quantas ações esse valor compra</span>

@@ -120,3 +120,30 @@ describe('SimuleAcoes', () => {
     expect(screen.queryByText(/P\/L|lucro por ação|melhores|maior alta|recomendamos/i)).toBeNull()
   })
 })
+
+describe('destaques dos radares (D131)', () => {
+  const destaques = new Map([
+    ['PETR4', { dividendos: { posicao: 3, dy: 0.1234 }, radar: { proximo: { ticker: 'PETR4', nome: 'Petrobras', setor: null, tipo: 'JRS CAP PROPRIO', valor: 0.5, dataCom: '2026-12-01', pagamentoEm: '2027-01-20', aprovadoEm: null, referencia: null, mes: '2027-01' }, total: 2, aindaTemDireito: true } }],
+    ['BBAS3', { endividada: { posicao: 9, dlEbitda: 4.2 } }],
+  ])
+
+  it('mostra selos nos códigos, o resumo do setor e o cartão nos nossos radares', () => {
+    render(<SimuleAcoes ctx={ctx} snapshot={snapshot} destaques={destaques} />)
+    expect(screen.getAllByTestId('selos')).toHaveLength(2)
+    expect(screen.getAllByTestId('resumo-setor').map((e) => e.textContent).join(' ')).toContain('PETR4')
+    fireEvent.click(screen.getByRole('button', { name: 'PETR4' }))
+    const cartao = screen.getByTestId('nos-radares')
+    expect(cartao.textContent).toContain('3º no Top 15 pagadoras de dividendos')
+    expect(cartao.textContent).toContain('12,3%')
+    expect(cartao.textContent).toContain('JCP (bruto)')
+    expect(cartao.textContent).toContain('+1 outro anunciado')
+    fireEvent.click(screen.getByRole('button', { name: 'BBAS3' }))
+    expect(screen.getByTestId('nos-radares').textContent).toContain('4,2x o EBITDA')
+  })
+
+  it('ação fora dos radares recebe a explicação, sem selo', () => {
+    render(<SimuleAcoes ctx={ctx} snapshot={snapshot} destaques={new Map()} />)
+    expect(screen.queryAllByTestId('selos')).toHaveLength(0)
+    expect(screen.getByTestId('nos-radares').textContent).toContain('não está nos Top 15')
+  })
+})

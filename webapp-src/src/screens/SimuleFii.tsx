@@ -1,4 +1,8 @@
-import { useId, useState } from 'react'
+import { useId, useMemo, useState } from 'react'
+import { SNAPSHOT_FIIS_MAIS_NEGOCIADOS, SNAPSHOT_IFIX_MAIORES_PESOS } from '../data/snapshotTop15Mercado'
+import { LegendaDosSelos, NosRadares, ResumoDoGrupo, Selos } from '../ui/DestaquesDoAtivo'
+import { indexarDestaques } from '../domain/destaquesRadares'
+import type { IndiceDeDestaques } from '../domain/destaquesRadares'
 import dadosRendimentos from '../data/rendimentosFii.json'
 import dadosPrecos from '../data/fiisPreco.json'
 import {
@@ -30,6 +34,9 @@ import type { AppCtx } from '../state/useAppState'
 
 const SNAPSHOT_PADRAO = aplicarPrecoDiario(dadosRendimentos as SnapshotRendimentosFii, dadosPrecos as unknown as PrecosDiariosFii)
 
+/** Radares que valem para FIIs: liquidez e peso no IFIX. */
+const SELOS_FII = ['maisNegociado', 'naCategoria', 'indice'] as const
+
 function reais(valor: number, casas: { min?: number; max?: number } = {}) {
   return valor.toLocaleString('pt-BR', {
     style: 'currency',
@@ -50,13 +57,17 @@ function inteiro(valor: number) {
 
 export function SimuleFii({
   snapshot = SNAPSHOT_PADRAO,
+  destaques,
 }: {
   /** Recebido como as demais telas. Desde que saiu da barra de abas, esta tela não navega
    * pelo app (só volta à landing), então não usa o contexto. */
   ctx: AppCtx
   /** Permite injetar dados nos testes. No app, usa o arquivo gerado pelo job mensal. */
   snapshot?: SnapshotRendimentosFii
+  /** Só nos testes: destaques dos radares por código; no app, vêm dos Top 15 mais negociados e do IFIX. */
+  destaques?: IndiceDeDestaques
 }) {
+  const indiceDestaques = useMemo(() => destaques ?? indexarDestaques({ maisNegociados: SNAPSHOT_FIIS_MAIS_NEGOCIADOS, indice: SNAPSHOT_IFIX_MAIORES_PESOS, hoje: '' }), [destaques])
   const grupos = agruparPorSetor(snapshot)
   const exibidos = grupos.flatMap((g) => g.fundos)
   const [tickerSelecionado, setTickerSelecionado] = useState<string | undefined>(exibidos[0]?.ticker)
@@ -147,6 +158,8 @@ export function SimuleFii({
             </div>
           )}
 
+          <LegendaDosSelos usa={SELOS_FII} />
+
           <div className="col" style={{ gap: 18 }}>
             {grupos.map((g) => (
               <div key={g.setor} className="col" style={{ gap: 8 }}>
@@ -160,9 +173,11 @@ export function SimuleFii({
                       onClick={() => selecionar(f.ticker)}
                     >
                       {f.ticker}
+                      <Selos d={indiceDestaques.get(f.ticker)} usa={SELOS_FII} />
                     </button>
                   ))}
                 </div>
+                <ResumoDoGrupo tickers={g.fundos.map((f) => f.ticker)} indice={indiceDestaques} usa={SELOS_FII} />
               </div>
             ))}
           </div>
@@ -175,6 +190,7 @@ export function SimuleFii({
             foraDaLista={!estaNaLista(snapshot, fundo)}
             volumeMinimo={snapshot.volumeMinimoDiario}
             quantidadeLivre={quantidadeLivre} setQuantidadeLivre={setQuantidadeLivre} />
+          <NosRadares ticker={fundo.ticker} d={indiceDestaques.get(fundo.ticker)} usa={SELOS_FII} nenhum={`${fundo.ticker} não está no Top 15 mais negociados nem entre os mais negociados da sua categoria, e não é um dos maiores pesos do IFIX. A maioria dos fundos não aparece nesses recortes.`} />
           </div>
         </div>
       )}

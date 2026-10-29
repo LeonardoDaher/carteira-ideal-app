@@ -1,4 +1,8 @@
-import { useId, useState } from 'react'
+import { useId, useMemo, useState } from 'react'
+import { SNAPSHOT_ETFS_MAIS_NEGOCIADOS } from '../data/snapshotTop15Mercado'
+import { LegendaDosSelos, NosRadares, ResumoDoGrupo, Selos } from '../ui/DestaquesDoAtivo'
+import { indexarDestaques } from '../domain/destaquesRadares'
+import type { IndiceDeDestaques } from '../domain/destaquesRadares'
 import { SNAPSHOT_ETFS } from '../data/snapshotEtfs'
 import { VALORES_PADRAO, formatarVariacao, simularCompra } from '../domain/bdrs'
 import { agruparPorCategoria, buscarEtfs, textoCambio, textoIrCurto } from '../domain/etfs'
@@ -11,6 +15,9 @@ import { AvisoEducacional } from '../ui/AvisoEducacional'
 import { AbasDaTela } from '../ui/AbasDaTela'
 import { Top15EtfsMaisNegociados } from './Top15EtfsMaisNegociados'
 import type { AppCtx } from '../state/useAppState'
+
+/** Radares que valem aqui: liquidez, no geral e na categoria. */
+const SELOS_ETF = ['maisNegociado', 'naCategoria'] as const
 
 function reais(valor: number) {
   return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -31,12 +38,16 @@ type Selecao = { origem: 'lista'; etf: EtfLista } | { origem: 'busca'; etf: EtfB
  */
 export function SimuleEtf({
   snapshot = SNAPSHOT_ETFS,
+  destaques,
 }: {
   /** Recebido como as demais telas avulsas; esta tela só volta à landing. */
   ctx: AppCtx
   /** Permite injetar dados nos testes. No app, usa o arquivo gerado pelo job diário. */
   snapshot?: SnapshotEtfs
+  /** Só nos testes: destaques dos radares por código; no app, vêm do Top 15 mais negociados. */
+  destaques?: IndiceDeDestaques
 }) {
+  const indiceDestaques = useMemo(() => destaques ?? indexarDestaques({ maisNegociados: SNAPSHOT_ETFS_MAIS_NEGOCIADOS, hoje: '' }), [destaques])
   const grupos = agruparPorCategoria(snapshot.etfs, snapshot.ordemCategorias)
   const primeiro = grupos[0]?.etfs[0]
   const [selecao, setSelecao] = useState<Selecao | undefined>(primeiro ? { origem: 'lista', etf: primeiro } : undefined)
@@ -109,6 +120,7 @@ export function SimuleEtf({
             )}
 
             <div className="col" style={{ gap: 18 }}>
+              <LegendaDosSelos usa={SELOS_ETF} />
               {grupos.map((g) => (
                 <div key={g.categoria} className="col" style={{ gap: 8 }}>
                   <h2 className="titulo-setor font-display">{g.categoria}</h2>
@@ -121,9 +133,11 @@ export function SimuleEtf({
                         onClick={() => abrir({ origem: 'lista', etf: e })}
                       >
                         {e.ticker}
+                        <Selos d={indiceDestaques.get(e.ticker)} usa={SELOS_ETF} />
                       </button>
                     ))}
                   </div>
+                  <ResumoDoGrupo tickers={g.etfs.map((e) => e.ticker)} indice={indiceDestaques} usa={SELOS_ETF} />
                 </div>
               ))}
             </div>
@@ -138,6 +152,7 @@ export function SimuleEtf({
               valorLivre={valorLivre}
               setValorLivre={setValorLivre}
             />
+            <NosRadares ticker={selecao.etf.ticker} d={indiceDestaques.get(selecao.etf.ticker)} usa={SELOS_ETF} nenhum={`${selecao.etf.ticker} não está no Top 15 mais negociados nem entre os mais negociados da sua categoria. A maioria dos ETFs não aparece nesses recortes.`} />
           </div>
         </div>
       )}
