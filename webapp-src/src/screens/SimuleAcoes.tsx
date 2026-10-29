@@ -149,6 +149,8 @@ export function SimuleAcoes({
             { id: 'ibov', emoji: '🏛️', titulo: 'Top 15 do Ibovespa', descricao: 'Maiores pesos do índice' },
             { id: 'endividadas', emoji: '💳', titulo: 'Top 15 mais endividadas', descricao: 'Dívida líquida ÷ EBITDA' },
             { id: 'dividendos', emoji: '💰', titulo: 'Top 15 pagadoras de dividendos', descricao: 'Dividend yield de 12 meses' },
+            { id: 'precoteto', emoji: '🎯', titulo: 'Preço teto de compra', descricao: 'Bazin, Graham e radar' },
+            { id: 'radar', emoji: '📅', titulo: 'Radar de dividendos', descricao: 'O que já foi anunciado, mês a mês' },
           ] as const
         ).map((c) => (
           <button
@@ -176,8 +178,6 @@ export function SimuleAcoes({
               { id: 'fundamentalista', emoji: '🧾', titulo: 'Análise fundamentalista', descricao: 'Balanços, valor justo e notas' },
               { id: 'confluencia', emoji: '🎯', titulo: 'Confluência', descricao: 'Fundamentos × gráfico' },
               { id: 'top15confluencia', emoji: '🏆', titulo: 'Top 15 confluência', descricao: 'Positivas e negativas' },
-              { id: 'precoteto', emoji: '🎯', titulo: 'Preço teto de compra', descricao: 'Bazin, Graham e radar' },
-              { id: 'radar', emoji: '📅', titulo: 'Radar de dividendos', descricao: 'O que já foi anunciado, mês a mês' },
             ] as const
           ).map((c) => (
             <button

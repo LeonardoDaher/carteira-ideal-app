@@ -169,7 +169,7 @@ describe('Simule Ações: aba "Top 15 mais endividadas"', () => {
   it('é a quinta aba, abre a lista (ou o "em validação") e dá para voltar ao simulador', () => {
     render(<SimuleAcoes ctx={ctx} snapshot={{ geradoEm: null, dataPregao: null, fonte: null, cadastroId: null, pregoesNoHistorico: 0, sessoesLiquidez: 21, totais: { setores: 0, empresas: 0 }, gruposOrdem: [], setores: [], busca: [] } as never} />)
     const abas = within(screen.getByRole('tablist', { name: 'O que você quer ver' })).getAllByRole('tab')
-    expect(abas).toHaveLength(6)
+    expect(abas).toHaveLength(8)
     expect(abas[4].textContent).toContain('Top 15 mais endividadas')
     expect(abas[4].textContent).toContain('Dívida líquida ÷ EBITDA')
     fireEvent.click(abas[4])

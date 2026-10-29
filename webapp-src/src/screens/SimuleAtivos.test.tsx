@@ -14,25 +14,25 @@ describe('SimuleAtivos (hub)', () => {
   it('mostra um cartão para cada simulador, com o endereço ?tela= que a landing usava', () => {
     render(<SimuleAtivos ctx={ctx} />)
     const esperado: Record<string, string> = {
-      'Simule Ações': './?tela=simuleAcoes',
-      'Simule FII': './?tela=simuleFii',
-      'Simule Tesouro Direto': './?tela=simuleTesouro',
-      'Simule BDR': './?tela=simuleBdr',
-      'Simule ETF': './?tela=simuleEtf',
-      'Simule Futuros': './?tela=simuleFuturos',
-      'Simule Opções': './?tela=simuleOpcoes',
+      'Ações': './?tela=simuleAcoes',
+      'Fundos imobiliários': './?tela=simuleFii',
+      'Tesouro Direto': './?tela=simuleTesouro',
+      'Brazilian Depositary Receipts (BDRs)': './?tela=simuleBdr',
+      'Exchange Traded Funds (ETFs)': './?tela=simuleEtf',
+      'Futuros': './?tela=simuleFuturos',
+      'Derivativos / Opções': './?tela=simuleOpcoes',
     }
     for (const [titulo, href] of Object.entries(esperado)) {
-      const link = screen.getByRole('link', { name: new RegExp(titulo) })
+      const link = screen.getByRole('link', { name: new RegExp(titulo.replace(/[()]/g, '\\$&')) })
       expect(link.getAttribute('href')).toBe(href)
     }
     expect(SIMULADORES).toHaveLength(7)
   })
 
-  it('o Simule Opções vem logo depois do Simule Ações', () => {
+  it('Derivativos / Opções vem logo depois de Ações', () => {
     const ordem = SIMULADORES.map((s) => s.titulo)
-    expect(ordem.indexOf('Simule Opções')).toBe(ordem.indexOf('Simule Ações') + 1)
-    expect(ordem.slice(0, 2)).toEqual(['Simule Ações', 'Simule Opções'])
+    expect(ordem.indexOf('Derivativos / Opções')).toBe(ordem.indexOf('Ações') + 1)
+    expect(ordem.slice(0, 2)).toEqual(['Ações', 'Derivativos / Opções'])
   })
 
   it('volta para a landing e não mostra a barra de abas do questionário', () => {
