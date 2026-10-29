@@ -1,4 +1,4 @@
-# Agenda de dividendos (D130): proventos já anunciados pela B3 que ainda vão ser pagos, por empresa do cadastro.
+# Agenda de dividendos (D130) e radar de dividendos inteligente (D132): proventos já anunciados pela B3 que ainda vão ser pagos, por empresa do cadastro.
 #
 # COM REDE: baixa o cadastro de cada empresa de config/acoes.json (uns 2 minutos) e grava webapp-src/src/data/radarDividendos.json.
 # Sem projeção, sem ranking: só o que a B3 publicou. Se muitas empresas falharem, o job termina com erro SEM publicar e o GitHub
@@ -21,7 +21,7 @@ concurrency:
 jobs:
   atualizar:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v5
 
@@ -30,11 +30,14 @@ jobs:
           node-version: 22
           cache: npm
 
-      - name: Testes do radar
-        run: node --test scripts/radar-dividendos.test.mjs
+      - name: Testes da agenda e do radar inteligente
+        run: node --test scripts/radar-dividendos.test.mjs scripts/radar-inteligente.test.mjs
 
-      - name: Baixar da B3 e gravar o radar
+      - name: Baixar da B3 e gravar a agenda
         run: node scripts/atualizar-radar-dividendos.mjs
+
+      - name: Baixar o histórico da B3 e gravar o radar inteligente (padrão de meses)
+        run: node scripts/atualizar-radar-inteligente.mjs
 
       - name: Conferir se o site compila com os dados novos
         run: |
@@ -43,7 +46,7 @@ jobs:
 
       - name: Publicar (commit) se houver mudança
         run: |
-          ALVO="webapp-src/src/data/radarDividendos.json"
+          ALVO="webapp-src/src/data/radarDividendos.json webapp-src/src/data/radarInteligente.json"
           if [ -z "$(git status --porcelain $ALVO)" ]; then
             echo "Sem mudanças."
             exit 0
@@ -51,6 +54,6 @@ jobs:
           git config user.name "${{ vars.COMMIT_AUTOR_NOME || 'github-actions[bot]' }}"
           git config user.email "${{ vars.COMMIT_AUTOR_EMAIL || '41898283+github-actions[bot]@users.noreply.github.com' }}"
           git add $ALVO
-          git commit -m "dados: Radar de dividendos ($(date -u +%Y-%m-%d))"
+          git commit -m "dados: Agenda e radar inteligente de dividendos ($(date -u +%Y-%m-%d))"
           git pull --rebase
           git push

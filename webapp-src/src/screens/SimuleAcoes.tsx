@@ -5,6 +5,7 @@ import type { Acao, AcaoBusca, SnapshotAcoes } from '../domain/acoes'
 import { VALORES_PADRAO, formatarVariacao } from '../domain/bdrs'
 import { formatarData, formatarVolume } from '../domain/rendaFii'
 import { VoltarInicio } from '../ui/VoltarInicio'
+import { LogoAtivo } from '../ui/LogoAtivo'
 import { rolarParaResultado } from '../ui/rolarParaResultado'
 import { AvisoEducacional } from '../ui/AvisoEducacional'
 import { FaixaCotacoes, itensDeAcoes } from '../ui/FaixaCotacoes'
@@ -17,7 +18,7 @@ import { AnaliseTecnicaAcao } from './AnaliseTecnicaAcao'
 import { AnaliseFundamentalistaAcao } from './AnaliseFundamentalistaAcao'
 import { ConfluenciaAcao } from './ConfluenciaAcao'
 import { PrecoTetoAcoes } from './PrecoTetoAcoes'
-import { RadarDividendos } from './RadarDividendos'
+import { AgendaDeDividendos } from './AgendaDeDividendos'
 import { SNAPSHOT_ACOES_DIVIDENDOS } from '../data/snapshotAcoesDividendos'
 import { SNAPSHOT_ACOES_ENDIVIDADAS } from '../data/snapshotAcoesEndividadas'
 import { SNAPSHOT_ACOES_MAIS_NEGOCIADAS, SNAPSHOT_IBOV_MAIORES_PESOS } from '../data/snapshotTop15Mercado'
@@ -254,7 +255,7 @@ export function SimuleAcoes({
       ) : aba === 'dividendos' ? (
         <Top15Dividendos />
       ) : aba === 'radar' ? (
-        <RadarDividendos />
+        <AgendaDeDividendos />
       ) : aba === 'precoteto' ? (
         <PrecoTetoAcoes busca={buscaCompleta} precoDe={precoDe} nomeDe={(t) => nomeDe(t)} fundamentos={fundamentos} />
       ) : aba === 'top15confluencia' ? (
@@ -518,7 +519,7 @@ function CartaoAcao({
       <div id="cartao-acao" className="card col" style={{ gap: 14, scrollMarginTop: 12 }}>
         <div className="row-between" style={{ alignItems: 'flex-start', gap: 12 }}>
           <div className="col" style={{ gap: 2, minWidth: 0 }}>
-            <span className="font-display" style={{ fontWeight: 700, fontSize: 24 }}>{acao.ticker}</span>
+            <span className="font-display" style={{ fontWeight: 700, fontSize: 24 }}><LogoAtivo ticker={acao.ticker} tamanho={36} inline />{acao.ticker}</span>
             {acao.nome && acao.nome !== acao.ticker && (
               <span className="tiny muted" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                 {acao.nome}

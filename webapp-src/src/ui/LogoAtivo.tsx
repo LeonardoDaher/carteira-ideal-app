@@ -1,7 +1,7 @@
 /**
  * Logo da empresa na frente do código. As imagens ficam em src/assets/logos/<RAIZ>.(png|svg|webp|jpg), com a raiz de quatro
  * letras do código (PETR4 → PETR.png); o Vite só inclui as que existem e elas saem do próprio site (a política de segurança só
- * aceita imagens do site). Sem a imagem, aparece um selo com as iniciais, para a linha não ficar torta.
+ * aceita imagens do site). Sem a imagem, aparece um selo com as iniciais (desenhadas por CSS, para não entrarem no texto da linha), para a linha não ficar torta.
  */
 const LOGOS = import.meta.glob('../assets/logos/*.{png,svg,webp,jpg}', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
 
@@ -29,9 +29,9 @@ export function LogoAtivo({ ticker, tamanho = 36, inline = false, semSelo = fals
     <span
       aria-hidden="true"
       data-testid="logo-ativo-selo"
-      style={{ ...caixa, display: inline ? 'inline-flex' : 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: tamanho * 0.36, fontWeight: 700, color: '#fff', background: `hsl(${matiz(raiz)} 45% 38%)` }}
-    >
-      {raiz.slice(0, 2)}
-    </span>
+      className="logo-selo"
+      data-iniciais={raiz.slice(0, 2)}
+      style={{ ...caixa, fontSize: tamanho * 0.36, background: `hsl(${matiz(raiz)} 45% 38%)` }}
+    />
   )
 }
