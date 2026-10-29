@@ -2237,6 +2237,3 @@ select option:disabled { color: #6b7280 !important; -webkit-text-fill-color: #6b
 }
 .faixa-strike input[type='range']:focus-visible::-webkit-slider-thumb { outline: 2px solid var(--accent); outline-offset: 2px; }
 .faixa-strike input[type='range']:focus-visible::-moz-range-thumb { outline: 2px solid var(--accent); outline-offset: 2px; }
-/* Selo de iniciais do LogoAtivo (empresa sem logo): as letras vêm do atributo, fora do texto da página. */
-.logo-selo { display: inline-flex; align-items: center; justify-content: center; font-weight: 700; color: #fff; }
-.logo-selo::before { content: attr(data-iniciais); }

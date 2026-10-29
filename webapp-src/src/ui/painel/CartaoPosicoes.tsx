@@ -26,7 +26,7 @@ function LinhaDoAtivo({ l, onEditar, onVerLancamentos }: { l: LinhaPosicao; onEd
           <PencilIcon size={16} />
         </button>
         <strong>
-          {/^[A-Z]{4}\d{1,2}$/.test(l.ativo) && <LogoAtivo ticker={l.ativo} tamanho={24} inline semSelo />}
+          {/^[A-Z]{4}\d{1,2}$/.test(l.ativo) && <LogoAtivo ticker={l.ativo} tamanho={24} inline />}
           {l.ativo}
         </strong>
         <span className="mc-nota">{quantidadeBR(l.quantidade)} un.</span>

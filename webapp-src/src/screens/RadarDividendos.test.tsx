@@ -75,10 +75,10 @@ describe('RadarDividendos (Agenda de dividendos)', () => {
     expect(screen.getByTestId('radar-linha').textContent).toContain('ainda dá tempo')
   })
 
-  it('pagamento sem data vai para o grupo à parte, e cada linha tem o logo ou o selo da empresa', () => {
+  it('pagamento sem data vai para o grupo à parte, e cada linha tem o logo ou o quadrado de candles', () => {
     render(<RadarDividendos snapshot={snap([pag('ARML3', null), pag('PETR4', '2026-10')])} hoje="2026-10-29" />)
     expect(within(screen.getByTestId('radar-sem-data')).getAllByText(/ARML3/).length).toBeGreaterThan(0)
-    expect(screen.queryAllByTestId('logo-ativo-selo').length + screen.queryAllByTestId('logo-ativo').length).toBe(2)
+    expect(screen.queryAllByTestId('logo-ativo-padrao').length + screen.queryAllByTestId('logo-ativo').length).toBe(2)
   })
 
   it('filtra por código e mostra aviso quando nada bate', () => {
