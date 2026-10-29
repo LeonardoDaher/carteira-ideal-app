@@ -116,7 +116,7 @@ describe('Simule Ações: abas de análise', () => {
     const originais = within(screen.getByRole('tablist', { name: 'O que você quer ver' })).getAllByRole('tab')
     expect(originais).toHaveLength(6)
     const novas = within(screen.getByRole('tablist', { name: 'Análise de uma ação' })).getAllByRole('tab')
-    expect(novas.map((a) => a.textContent)).toEqual([expect.stringContaining('Análise técnica'), expect.stringContaining('Análise fundamentalista'), expect.stringContaining('Confluência'), expect.stringContaining('Top 15 confluência'), expect.stringContaining('Preço teto de compra')])
+    expect(novas.map((a) => a.textContent)).toEqual([expect.stringContaining('Análise técnica'), expect.stringContaining('Análise fundamentalista'), expect.stringContaining('Confluência'), expect.stringContaining('Top 15 confluência'), expect.stringContaining('Preço teto de compra'), expect.stringContaining('Radar de dividendos')])
   })
 
   it('a análise técnica mostra resumo, gráfico, tendência por período, zonas, cenários, nota e fonte da ação escolhida', () => {

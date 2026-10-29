@@ -17,6 +17,7 @@ import { AnaliseTecnicaAcao } from './AnaliseTecnicaAcao'
 import { AnaliseFundamentalistaAcao } from './AnaliseFundamentalistaAcao'
 import { ConfluenciaAcao } from './ConfluenciaAcao'
 import { PrecoTetoAcoes } from './PrecoTetoAcoes'
+import { RadarDividendos } from './RadarDividendos'
 import { useAnaliseDaAcao } from './useAnaliseDaAcao'
 import { ROTULO_HORIZONTE } from '../domain/confluencia'
 import type { Horizonte, HistoricoLongo, SnapshotSeries } from '../domain/analiseTecnica'
@@ -34,7 +35,7 @@ function inteiro(valor: number) {
 /** O que está aberto no cartão: uma empresa do cadastro (dado completo) ou um código da busca (resumido). */
 type Selecao = { origem: 'lista'; acao: Acao; setor: string } | { origem: 'busca'; acao: AcaoBusca }
 
-type AbaAcoes = 'simulador' | 'top15' | 'negociadas' | 'ibov' | 'endividadas' | 'dividendos' | 'tecnica' | 'fundamentalista' | 'confluencia' | 'top15confluencia' | 'precoteto'
+type AbaAcoes = 'simulador' | 'top15' | 'negociadas' | 'ibov' | 'endividadas' | 'dividendos' | 'tecnica' | 'fundamentalista' | 'confluencia' | 'top15confluencia' | 'precoteto' | 'radar'
 const ABAS_DE_ANALISE: AbaAcoes[] = ['tecnica', 'fundamentalista', 'confluencia']
 const HORIZONTES: Horizonte[] = ['curto', 'medio', 'longo']
 
@@ -176,6 +177,7 @@ export function SimuleAcoes({
               { id: 'confluencia', emoji: '🎯', titulo: 'Confluência', descricao: 'Fundamentos × gráfico' },
               { id: 'top15confluencia', emoji: '🏆', titulo: 'Top 15 confluência', descricao: 'Positivas e negativas' },
               { id: 'precoteto', emoji: '🎯', titulo: 'Preço teto de compra', descricao: 'Bazin, Graham e radar' },
+              { id: 'radar', emoji: '📅', titulo: 'Radar de dividendos', descricao: 'O que já foi anunciado, mês a mês' },
             ] as const
           ).map((c) => (
             <button
@@ -233,6 +235,8 @@ export function SimuleAcoes({
         <Top15Endividadas />
       ) : aba === 'dividendos' ? (
         <Top15Dividendos />
+      ) : aba === 'radar' ? (
+        <RadarDividendos />
       ) : aba === 'precoteto' ? (
         <PrecoTetoAcoes busca={buscaCompleta} precoDe={precoDe} nomeDe={(t) => nomeDe(t)} fundamentos={fundamentos} />
       ) : aba === 'top15confluencia' ? (

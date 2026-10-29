@@ -1,0 +1,56 @@
+# Radar de dividendos (D130): proventos já anunciados pela B3 que ainda vão ser pagos, por empresa do cadastro.
+#
+# COM REDE: baixa o cadastro de cada empresa de config/acoes.json (uns 2 minutos) e grava webapp-src/src/data/radarDividendos.json.
+# Sem projeção, sem ranking: só o que a B3 publicou. Se muitas empresas falharem, o job termina com erro SEM publicar e o GitHub
+# envia e-mail.
+
+name: Atualizar Radar de Dividendos
+
+on:
+  schedule:
+    - cron: '30 3 * * 2-6' # terça a sábado, 03h30 UTC = terça a sábado, 00h30 de Brasília (depois do Top 15 de dividendos)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: radar-dividendos
+  cancel-in-progress: false
+
+jobs:
+  atualizar:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Testes do radar
+        run: node --test scripts/radar-dividendos.test.mjs
+
+      - name: Baixar da B3 e gravar o radar
+        run: node scripts/atualizar-radar-dividendos.mjs
+
+      - name: Conferir se o site compila com os dados novos
+        run: |
+          npm ci
+          npm run build
+
+      - name: Publicar (commit) se houver mudança
+        run: |
+          ALVO="webapp-src/src/data/radarDividendos.json"
+          if [ -z "$(git status --porcelain $ALVO)" ]; then
+            echo "Sem mudanças."
+            exit 0
+          fi
+          git config user.name "${{ vars.COMMIT_AUTOR_NOME || 'github-actions[bot]' }}"
+          git config user.email "${{ vars.COMMIT_AUTOR_EMAIL || '41898283+github-actions[bot]@users.noreply.github.com' }}"
+          git add $ALVO
+          git commit -m "dados: Radar de dividendos ($(date -u +%Y-%m-%d))"
+          git pull --rebase
+          git push
