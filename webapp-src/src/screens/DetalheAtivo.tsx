@@ -10,6 +10,8 @@ import type { AtivoKey } from '../domain/types'
 import { ATIVOS_COM_CENARIO, TESOURO_POR_ATIVO } from '../domain/mercadoOficial'
 import { TaxasTesouroHoje } from '../ui/TaxasTesouroHoje'
 import { CenarioJuros } from '../ui/CenarioJuros'
+import { RadaresDosExemplos } from '../ui/DestaquesDoAtivo'
+import { destaquesGerais } from '../data/destaquesGerais'
 
 /** Pluraliza a unidade contada em `setores[].fundos` (fundo/fundos, ação/ações ou BDR/BDRs). */
 function rotuloUnidade(unidade: 'fundo' | 'acao' | 'bdr' | 'cdb' | 'etf' | 'moeda' | 'titulo' | 'lci' | undefined, qtd: number): string {
@@ -266,6 +268,7 @@ export function DetalheAtivo({ ctx }: { ctx: AppCtx }) {
                         Exemplos
                       </span>
                       <span className="muted tiny justify" style={{ lineHeight: 1.5, display: 'block' }}>{exemplo.detalhe}</span>
+                      <RadaresDosExemplos texto={exemplo.detalhe} indice={destaquesGerais()} />
                     </div>
                   )}
                 </div>

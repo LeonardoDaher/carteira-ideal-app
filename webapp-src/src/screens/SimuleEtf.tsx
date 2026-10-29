@@ -1,6 +1,6 @@
 import { useId, useMemo, useState } from 'react'
 import { SNAPSHOT_ETFS_MAIS_NEGOCIADOS } from '../data/snapshotTop15Mercado'
-import { LegendaDosSelos, NosRadares, ResumoDoGrupo, Selos } from '../ui/DestaquesDoAtivo'
+import { NosRadares, ResumoDoGrupo } from '../ui/DestaquesDoAtivo'
 import { indexarDestaques } from '../domain/destaquesRadares'
 import type { IndiceDeDestaques } from '../domain/destaquesRadares'
 import { SNAPSHOT_ETFS } from '../data/snapshotEtfs'
@@ -120,7 +120,6 @@ export function SimuleEtf({
             )}
 
             <div className="col" style={{ gap: 18 }}>
-              <LegendaDosSelos usa={SELOS_ETF} />
               {grupos.map((g) => (
                 <div key={g.categoria} className="col" style={{ gap: 8 }}>
                   <h2 className="titulo-setor font-display">{g.categoria}</h2>
@@ -133,7 +132,6 @@ export function SimuleEtf({
                         onClick={() => abrir({ origem: 'lista', etf: e })}
                       >
                         {e.ticker}
-                        <Selos d={indiceDestaques.get(e.ticker)} usa={SELOS_ETF} />
                       </button>
                     ))}
                   </div>

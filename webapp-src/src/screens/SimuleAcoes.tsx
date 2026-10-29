@@ -22,7 +22,7 @@ import { AgendaDeDividendos } from './AgendaDeDividendos'
 import { SNAPSHOT_ACOES_DIVIDENDOS } from '../data/snapshotAcoesDividendos'
 import { SNAPSHOT_ACOES_ENDIVIDADAS } from '../data/snapshotAcoesEndividadas'
 import { SNAPSHOT_ACOES_MAIS_NEGOCIADAS, SNAPSHOT_IBOV_MAIORES_PESOS } from '../data/snapshotTop15Mercado'
-import { LegendaDosSelos, NosRadares, ResumoDoGrupo, Selos } from '../ui/DestaquesDoAtivo'
+import { NosRadares, ResumoDoGrupo } from '../ui/DestaquesDoAtivo'
 import { SNAPSHOT_RADAR_DIVIDENDOS } from '../data/snapshotRadarDividendos'
 import { indexarDestaques } from '../domain/destaquesRadares'
 import type { DestaquesDoAtivo, IndiceDeDestaques } from '../domain/destaquesRadares'
@@ -289,9 +289,6 @@ export function SimuleAcoes({
               {snapshot.sessoesLiquidez ?? 21} pregões). Ela é uma seleção, não a bolsa inteira: as demais ações estão na busca
               acima. Estar na lista não é uma indicação de compra.
             </div>
-
-            <LegendaDosSelos usa={SELOS_ACOES} />
-
             <div className="col" style={{ gap: 22 }}>
               {grupos.map((g) => (
                 <div key={g.grupo} className="col" style={{ gap: 14 }}>
@@ -315,7 +312,6 @@ export function SimuleAcoes({
                             onClick={() => abrir({ origem: 'lista', acao: e, setor: s.setor })}
                           >
                             {e.ticker}
-                            <Selos d={indiceDestaques.get(e.ticker)} usa={SELOS_ACOES} />
                           </button>
                         ))}
                       </div>

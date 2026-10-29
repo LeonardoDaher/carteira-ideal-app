@@ -18,29 +18,6 @@ const SELOS: Record<Selo, { emoji: string; legenda: string; resumo: string }> = 
 const pct = (v: number, casas = 1) => `${v.toLocaleString('pt-BR', { minimumFractionDigits: casas, maximumFractionDigits: casas })}%`
 const reaisPorCota = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2, maximumFractionDigits: 4 })
 
-/** Selos do código na lista por grupo. Decorativos para leitor de tela: o detalhe está no cartão do ativo. */
-export function Selos({ d, usa }: { d?: DestaquesDoAtivo; usa: readonly Selo[] }) {
-  const mostrar = usa.filter((s) => d?.[s])
-  if (mostrar.length === 0) return null
-  return (
-    <span aria-hidden="true" data-testid="selos" title="Este ativo aparece nos radares do app" style={{ marginLeft: 4, fontSize: 11 }}>
-      {mostrar.map((s) => SELOS[s].emoji).join('')}
-    </span>
-  )
-}
-
-export function LegendaDosSelos({ usa }: { usa: readonly Selo[] }) {
-  return (
-    <div className="tiny muted justify" style={{ lineHeight: 1.5 }} data-testid="legenda-selos">
-      Selos nos códigos:{' '}
-      {usa.map((s, i) => (
-        <span key={s}><strong>{SELOS[s].emoji}</strong> {SELOS[s].legenda}{i < usa.length - 1 ? '; ' : '. '}</span>
-      ))}
-      Toque no código para ver os detalhes.
-    </div>
-  )
-}
-
 /** Uma linha por grupo (setor, categoria): quais ativos dele estão nos radares, para achar os exemplos sem abrir um a um. */
 export function ResumoDoGrupo({ tickers, indice, usa }: { tickers: string[]; indice: IndiceDeDestaques; usa: readonly Selo[] }) {
   const partes = usa
@@ -95,6 +72,51 @@ export function NosRadares({ ticker, d, usa, nenhum }: { ticker: string; d?: Des
         </>
       )}
       <span className="tiny muted justify">Cruzamento de listas do app, só fato publicado: não é recomendação de compra.{radar || dividendos ? ' A data com é o último dia para ter direito ao provento.' : ''}</span>
+    </div>
+  )
+}
+
+const REGEX_CODIGO = /\b[A-Z]{4}\d{1,2}\b/g
+
+/** Códigos citados num texto de exemplo, sem repetir e na ordem em que aparecem. */
+export function codigosDoTexto(texto: string): string[] {
+  return [...new Set(texto.match(REGEX_CODIGO) ?? [])]
+}
+
+/** Frases curtas do que um ativo tem nos radares, uma por radar. */
+function frasesDoAtivo(d: DestaquesDoAtivo): string[] {
+  const f: string[] = []
+  if (d.dividendos) f.push(`💰 ${d.dividendos.posicao}º no Top 15 de dividendos (dividend yield de ${pct(d.dividendos.dy * 100)} em 12 meses)`)
+  if (d.radar) {
+    const p = d.radar.proximo
+    f.push(`📅 ${ROTULO_TIPO_RADAR[p.tipo] ?? p.tipo} de ${reaisPorCota(p.valor)} por ação${p.pagamentoEm ? `, pago em ${formatarData(p.pagamentoEm)}` : ''}${d.radar.aindaTemDireito ? `, data com ${formatarData(p.dataCom)}` : ''}`)
+  }
+  if (d.maisNegociado) f.push(`🔥 ${d.maisNegociado.posicao}º no Top 15 mais negociados`)
+  else if (d.naCategoria) f.push(`📊 ${d.naCategoria.posicao}º mais negociado de ${d.naCategoria.categoria}`)
+  if (d.indice) f.push(`🏛️ ${d.indice.posicao}º maior peso do ${d.indice.nome} (${pct(d.indice.peso, 2)})`)
+  if (d.endividada) f.push(`⚠️ ${d.endividada.posicao}ª no Top 15 mais endividadas`)
+  return f
+}
+
+/**
+ * Nos exemplos da carteira de referência: dos códigos citados no texto, mostra o que cada um tem hoje nos radares do app. Quem não
+ * aparece em nenhum radar não ganha linha. Só fato publicado, não é recomendação.
+ */
+export function RadaresDosExemplos({ texto, indice }: { texto: string; indice: IndiceDeDestaques }) {
+  const itens = codigosDoTexto(texto).flatMap((t) => {
+    const d = indice.get(t)
+    return temDestaque(d) ? [{ ticker: t, frases: frasesDoAtivo(d) }] : []
+  })
+  if (itens.length === 0) return null
+  return (
+    <div className="col" style={{ gap: 4, marginTop: 6 }} data-testid="radares-dos-exemplos">
+      <span className="tiny" style={{ fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: 0.4 }}>Nos nossos radares hoje</span>
+      {itens.map((i) => (
+        <span key={i.ticker} className="muted tiny justify" style={{ lineHeight: 1.5, display: 'block' }}>
+          <strong style={{ color: 'var(--text)' }}>{i.ticker}</strong>: {i.frases.join(' · ')}
+        </span>
+      ))}
+      <span className="tiny muted justify" style={{ lineHeight: 1.4 }}>Cruzamento de listas do app, só fato publicado: não é recomendação de compra.</span>
     </div>
   )
 }

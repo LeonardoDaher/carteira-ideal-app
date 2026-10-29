@@ -1,6 +1,6 @@
 import { useId, useMemo, useState } from 'react'
 import { SNAPSHOT_BDRS_MAIS_NEGOCIADOS } from '../data/snapshotTop15Mercado'
-import { LegendaDosSelos, NosRadares, ResumoDoGrupo, Selos } from '../ui/DestaquesDoAtivo'
+import { NosRadares, ResumoDoGrupo } from '../ui/DestaquesDoAtivo'
 import { indexarDestaques } from '../domain/destaquesRadares'
 import type { IndiceDeDestaques } from '../domain/destaquesRadares'
 import { SNAPSHOT_BDRS } from '../data/snapshotBdrs'
@@ -84,7 +84,6 @@ export function SimuleBdr({
       onClick={() => abrir({ origem: 'lista', bdr: b, tipo })}
     >
       {b.ticker}
-      <Selos d={indiceDestaques.get(b.ticker)} usa={SELOS_BDR} />
     </button>
   )
 
@@ -140,9 +139,6 @@ export function SimuleBdr({
               brasileira listadas no exterior ficam de fora. Os demais BDRs estão na busca acima.
             </div>
           )}
-
-          <LegendaDosSelos usa={SELOS_BDR} />
-
           <div className="col" style={{ gap: 18 }}>
             {grupos.map((g) => (
               <div key={g.setor} className="col" style={{ gap: 8 }}>

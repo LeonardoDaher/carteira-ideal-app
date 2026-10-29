@@ -1,6 +1,6 @@
 import { useId, useMemo, useState } from 'react'
 import { SNAPSHOT_FIIS_MAIS_NEGOCIADOS, SNAPSHOT_IFIX_MAIORES_PESOS } from '../data/snapshotTop15Mercado'
-import { LegendaDosSelos, NosRadares, ResumoDoGrupo, Selos } from '../ui/DestaquesDoAtivo'
+import { NosRadares, ResumoDoGrupo } from '../ui/DestaquesDoAtivo'
 import { indexarDestaques } from '../domain/destaquesRadares'
 import type { IndiceDeDestaques } from '../domain/destaquesRadares'
 import dadosRendimentos from '../data/rendimentosFii.json'
@@ -157,9 +157,6 @@ export function SimuleFii({
               de negociação inferiores a {formatarVolume(snapshot.volumeMinimoDiario)}, favor consultar na busca acima.
             </div>
           )}
-
-          <LegendaDosSelos usa={SELOS_FII} />
-
           <div className="col" style={{ gap: 18 }}>
             {grupos.map((g) => (
               <div key={g.setor} className="col" style={{ gap: 8 }}>
@@ -173,7 +170,6 @@ export function SimuleFii({
                       onClick={() => selecionar(f.ticker)}
                     >
                       {f.ticker}
-                      <Selos d={indiceDestaques.get(f.ticker)} usa={SELOS_FII} />
                     </button>
                   ))}
                 </div>
