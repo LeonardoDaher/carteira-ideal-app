@@ -130,6 +130,16 @@ function tributar(resultado: number, prejuizo: number, aliquota: number) {
   return { imposto: (resultado - compensado) * aliquota, prejuizo: prejuizo - compensado, compensado }
 }
 
+/** CSV do ano para abrir no Excel em português: separador ";", vírgula decimal e BOM no início. */
+export function apuracaoParaCsv(meses: MesIR[], ano: string): string {
+  const n = (v: number) => v.toFixed(2).replace('.', ',')
+  const cab = ['Mês', 'Vendas de ações', 'Isenção de R$ 20 mil', 'Lucro isento', 'Ações', 'FIIs', 'ETFs', 'BDRs', 'Day trade', 'Prejuízo compensado', 'Imposto', 'DARF', 'Vencimento']
+  const linhas = meses
+    .filter((m) => m.mes.startsWith(ano))
+    .map((m) => [m.mes, n(m.vendasAcoes), m.dentroDaIsencao ? 'sim' : 'não', n(m.lucroIsento), n(m.resultados.acoes), n(m.resultados.fiis), n(m.resultados.etfs), n(m.resultados.bdrs), n(m.resultados.daytrade), n(m.prejuizoCompensado), n(m.imposto), m.darf !== null ? n(m.darf) : '', m.vencimento ?? ''])
+  return `﻿${[cab, ...linhas].map((l) => l.join(';')).join('\r\n')}\r\n`
+}
+
 export function apurarImpostoRenda(lancamentos: Lancamento[], categoriaDe: (ativo: string) => CategoriaIR | null): ApuracaoIR {
   const categorias = new Map<string, CategoriaIR>()
   const semCategoria = new Set<string>()

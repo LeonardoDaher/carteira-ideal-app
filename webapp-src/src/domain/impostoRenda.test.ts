@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { apurarImpostoRenda, categoriaIR } from './impostoRenda'
+import { apuracaoParaCsv, apurarImpostoRenda, categoriaIR } from './impostoRenda'
 import type { CategoriaIR } from './impostoRenda'
 import { CATALOGO_VAZIO } from './classificadorAtivo'
 import type { Lancamento } from './lancamentos'
@@ -113,6 +113,19 @@ describe('apurarImpostoRenda', () => {
     )
     expect(r.historicoIncompleto).toEqual([{ ativo: 'PETR4', mes: '2026-01' }])
     expect(r.semCategoria).toEqual(['XPTO11'])
+  })
+})
+
+describe('apuracaoParaCsv', () => {
+  it('gera o CSV do ano com vírgula decimal', () => {
+    const r = apurarImpostoRenda(
+      [op('compra', '2026-01-10', 'VALE3', 1000, 50), op('venda', '2026-02-10', 'VALE3', 1000, 60)],
+      cat({ VALE3: 'acao' }),
+    )
+    const linhas = apuracaoParaCsv(r.meses, '2026').trim().split('\r\n')
+    expect(linhas).toHaveLength(2)
+    expect(linhas[1]).toBe('2026-02;60000,00;não;0,00;10000,00;0,00;0,00;0,00;0,00;0,00;1500,00;1500,00;2026-03-31')
+    expect(apuracaoParaCsv(r.meses, '2025').trim().split('\r\n')).toHaveLength(1)
   })
 })
 

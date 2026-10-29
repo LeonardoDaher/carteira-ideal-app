@@ -1,5 +1,5 @@
 import { useId, useMemo, useState } from 'react'
-import { DARF_MINIMO, LIMITE_ISENCAO_ACOES } from '../../domain/impostoRenda'
+import { DARF_MINIMO, apuracaoParaCsv, LIMITE_ISENCAO_ACOES } from '../../domain/impostoRenda'
 import type { ApuracaoIR, MesIR } from '../../domain/impostoRenda'
 import { dataCurta, mesPorExtensoDe } from './formatar'
 import { useValores } from './valoresOcultos'
@@ -11,6 +11,15 @@ const LINHAS_RESULTADO: { campo: keyof MesIR['resultados']; rotulo: string }[] =
   { campo: 'bdrs', rotulo: 'BDRs' },
   { campo: 'daytrade', rotulo: 'Day trade' },
 ]
+
+function baixarCsv(nome: string, texto: string) {
+  const a = document.createElement('a')
+  const blob = typeof URL.createObjectURL === 'function' ? new Blob([texto], { type: 'text/csv;charset=utf-8' }) : null
+  a.href = blob ? URL.createObjectURL(blob) : `data:text/csv;charset=utf-8,${encodeURIComponent(texto)}`
+  a.download = nome
+  a.click()
+  if (blob) setTimeout(() => URL.revokeObjectURL(a.href), 1000)
+}
 
 function Mes({ m }: { m: MesIR }) {
   const { reais } = useValores()
@@ -92,6 +101,11 @@ export function CartaoImpostoRenda({ apuracao }: { apuracao: ApuracaoIR }) {
               <Mes key={m.mes} m={m} />
             ))}
           </ul>
+          <div className="mc-acoes">
+            <button type="button" className="btn btn-secondary mc-btn" onClick={() => baixarCsv(`imposto-de-renda-${anoVisivel}.csv`, apuracaoParaCsv(apuracao.meses, anoVisivel ?? ''))}>
+              Baixar planilha de {anoVisivel}
+            </button>
+          </div>
           {temPrejuizo && (
             <div className="mc-nota">
               Prejuízo a compensar em meses futuros:{' '}
