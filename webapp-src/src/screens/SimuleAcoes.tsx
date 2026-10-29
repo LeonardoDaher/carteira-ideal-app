@@ -22,7 +22,7 @@ import { AgendaDeDividendos } from './AgendaDeDividendos'
 import { SNAPSHOT_ACOES_DIVIDENDOS } from '../data/snapshotAcoesDividendos'
 import { SNAPSHOT_ACOES_ENDIVIDADAS } from '../data/snapshotAcoesEndividadas'
 import { SNAPSHOT_ACOES_MAIS_NEGOCIADAS, SNAPSHOT_IBOV_MAIORES_PESOS } from '../data/snapshotTop15Mercado'
-import { NosRadares, ResumoDoGrupo } from '../ui/DestaquesDoAtivo'
+import { NosRadares } from '../ui/DestaquesDoAtivo'
 import { SNAPSHOT_RADAR_DIVIDENDOS } from '../data/snapshotRadarDividendos'
 import { indexarDestaques } from '../domain/destaquesRadares'
 import type { DestaquesDoAtivo, IndiceDeDestaques } from '../domain/destaquesRadares'
@@ -315,7 +315,6 @@ export function SimuleAcoes({
                           </button>
                         ))}
                       </div>
-                      <ResumoDoGrupo tickers={s.empresas.map((e) => e.ticker)} indice={indiceDestaques} usa={SELOS_ACOES} />
                     </div>
                   ))}
                 </div>

@@ -1,6 +1,6 @@
 import { useId, useMemo, useState } from 'react'
 import { SNAPSHOT_FIIS_MAIS_NEGOCIADOS, SNAPSHOT_IFIX_MAIORES_PESOS } from '../data/snapshotTop15Mercado'
-import { NosRadares, ResumoDoGrupo } from '../ui/DestaquesDoAtivo'
+import { NosRadares } from '../ui/DestaquesDoAtivo'
 import { indexarDestaques } from '../domain/destaquesRadares'
 import type { IndiceDeDestaques } from '../domain/destaquesRadares'
 import dadosRendimentos from '../data/rendimentosFii.json'
@@ -173,7 +173,6 @@ export function SimuleFii({
                     </button>
                   ))}
                 </div>
-                <ResumoDoGrupo tickers={g.fundos.map((f) => f.ticker)} indice={indiceDestaques} usa={SELOS_FII} />
               </div>
             ))}
           </div>

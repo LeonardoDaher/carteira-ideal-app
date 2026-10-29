@@ -5,28 +5,8 @@ import { formatarData } from '../domain/rendaFii'
 
 type Selo = keyof DestaquesDoAtivo
 
-/** Um selo por radar: o emoji do código na lista, o texto da legenda e o da linha-resumo do grupo. */
-const SELOS: Record<Selo, { emoji: string; legenda: string; resumo: string }> = {
-  dividendos: { emoji: '💰', legenda: 'está no Top 15 pagadoras de dividendos', resumo: 'no Top 15 de dividendos' },
-  radar: { emoji: '📅', legenda: 'tem provento já anunciado pela B3 a pagar (agenda de dividendos)', resumo: 'com provento anunciado' },
-  endividada: { emoji: '⚠️', legenda: 'está no Top 15 mais endividadas', resumo: 'no Top 15 mais endividadas' },
-  maisNegociado: { emoji: '🔥', legenda: 'está no Top 15 mais negociados', resumo: 'no Top 15 mais negociados' },
-  naCategoria: { emoji: '📊', legenda: 'está entre os mais negociados da sua categoria', resumo: 'entre os mais negociados da categoria' },
-  indice: { emoji: '🏛️', legenda: 'está entre os maiores pesos do índice', resumo: 'entre os maiores pesos do índice' },
-}
-
 const pct = (v: number, casas = 1) => `${v.toLocaleString('pt-BR', { minimumFractionDigits: casas, maximumFractionDigits: casas })}%`
 const reaisPorCota = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2, maximumFractionDigits: 4 })
-
-/** Uma linha por grupo (setor, categoria): quais ativos dele estão nos radares, para achar os exemplos sem abrir um a um. */
-export function ResumoDoGrupo({ tickers, indice, usa }: { tickers: string[]; indice: IndiceDeDestaques; usa: readonly Selo[] }) {
-  const partes = usa
-    .map((s) => ({ s, lista: tickers.filter((t) => indice.get(t)?.[s]) }))
-    .filter((x) => x.lista.length > 0)
-    .map((x) => `${SELOS[x.s].emoji} ${SELOS[x.s].resumo}: ${x.lista.join(', ')}`)
-  if (partes.length === 0) return null
-  return <div className="tiny muted" style={{ lineHeight: 1.5 }} data-testid="resumo-setor">{partes.join(' · ')}</div>
-}
 
 /** Cartão "nos nossos radares": o que os rankings abertos e a agenda de dividendos já dizem sobre o ativo aberto. */
 export function NosRadares({ ticker, d, usa, nenhum }: { ticker: string; d?: DestaquesDoAtivo; usa: readonly Selo[]; nenhum: string }) {

@@ -23,11 +23,9 @@ const todos = (d: DestaquesDoAtivo): IndiceDeDestaques => new ParaTodos(d)
 const liquidez = { maisNegociado: { posicao: 2 }, naCategoria: { posicao: 1, categoria: 'Categoria Teste' } }
 
 describe('destaques dos radares em FII, BDR e ETF (D131)', () => {
-  it('FII: resumo por grupo e o peso no IFIX no cartão', () => {
+  it('FII: o peso no IFIX aparece no cartão', () => {
     render(<SimuleFii ctx={ctx} destaques={todos({ ...liquidez, indice: { nome: 'IFIX', posicao: 4, peso: 3.21 } })} />)
     expect(screen.queryAllByTestId('selos')).toHaveLength(0)
-    expect(screen.getAllByTestId('resumo-setor')[0].textContent).toContain('🏛️')
-    expect(screen.getAllByTestId('resumo-setor').length).toBeGreaterThan(0)
     const cartao = screen.getByTestId('nos-radares').textContent ?? ''
     expect(cartao).toContain('2º no Top 15 mais negociados')
     expect(cartao).toContain('4º maior peso do IFIX')
@@ -36,14 +34,12 @@ describe('destaques dos radares em FII, BDR e ETF (D131)', () => {
 
   it('BDR: liquidez, sem selo de índice nem de dividendos', () => {
     render(<SimuleBdr ctx={ctx} destaques={todos({ ...liquidez, indice: { nome: 'IBOV', posicao: 1, peso: 9 } })} />)
-    expect(screen.getAllByTestId('resumo-setor')[0].textContent).toContain('🔥')
     expect(screen.getByTestId('nos-radares').textContent).toContain('1º entre os mais negociados de Categoria Teste')
     expect(screen.getByTestId('nos-radares').textContent).not.toContain('maior peso')
   })
 
   it('ETF: sem destaque, o cartão explica; com destaque, mostra a posição', () => {
     const { unmount } = render(<SimuleEtf ctx={ctx} destaques={new Map()} />)
-    expect(screen.queryAllByTestId('resumo-setor')).toHaveLength(0)
     expect(screen.getByTestId('nos-radares').textContent).toContain('não está no Top 15 mais negociados')
     unmount()
     render(<SimuleEtf ctx={ctx} destaques={todos(liquidez)} />)

@@ -1,6 +1,6 @@
 import { useId, useMemo, useState } from 'react'
 import { SNAPSHOT_ETFS_MAIS_NEGOCIADOS } from '../data/snapshotTop15Mercado'
-import { NosRadares, ResumoDoGrupo } from '../ui/DestaquesDoAtivo'
+import { NosRadares } from '../ui/DestaquesDoAtivo'
 import { indexarDestaques } from '../domain/destaquesRadares'
 import type { IndiceDeDestaques } from '../domain/destaquesRadares'
 import { SNAPSHOT_ETFS } from '../data/snapshotEtfs'
@@ -135,7 +135,6 @@ export function SimuleEtf({
                       </button>
                     ))}
                   </div>
-                  <ResumoDoGrupo tickers={g.etfs.map((e) => e.ticker)} indice={indiceDestaques} usa={SELOS_ETF} />
                 </div>
               ))}
             </div>

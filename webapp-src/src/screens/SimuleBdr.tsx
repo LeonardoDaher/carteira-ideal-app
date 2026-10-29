@@ -1,6 +1,6 @@
 import { useId, useMemo, useState } from 'react'
 import { SNAPSHOT_BDRS_MAIS_NEGOCIADOS } from '../data/snapshotTop15Mercado'
-import { NosRadares, ResumoDoGrupo } from '../ui/DestaquesDoAtivo'
+import { NosRadares } from '../ui/DestaquesDoAtivo'
 import { indexarDestaques } from '../domain/destaquesRadares'
 import type { IndiceDeDestaques } from '../domain/destaquesRadares'
 import { SNAPSHOT_BDRS } from '../data/snapshotBdrs'
@@ -146,7 +146,6 @@ export function SimuleBdr({
                 <div className="grade-tickers" role="group" aria-label={`BDRs do setor ${g.setor}`}>
                   {g.bdrs.map((b) => chip(b, 'acao'))}
                 </div>
-                <ResumoDoGrupo tickers={g.bdrs.map((b) => b.ticker)} indice={indiceDestaques} usa={SELOS_BDR} />
               </div>
             ))}
 

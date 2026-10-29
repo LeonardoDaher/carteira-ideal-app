@@ -127,11 +127,10 @@ describe('destaques dos radares (D131)', () => {
     ['BBAS3', { endividada: { posicao: 9, dlEbitda: 4.2 } }],
   ])
 
-  it('o código fica sem selo; mostra o resumo do setor e o cartão nos nossos radares', () => {
+  it('o código fica sem selo; mostra o cartão nos nossos radares', () => {
     render(<SimuleAcoes ctx={ctx} snapshot={snapshot} destaques={destaques} />)
     expect(screen.queryAllByTestId('selos')).toHaveLength(0)
     expect(screen.getByRole('button', { name: 'PETR4' }).textContent).toBe('PETR4')
-    expect(screen.getAllByTestId('resumo-setor').map((e) => e.textContent).join(' ')).toContain('PETR4')
     fireEvent.click(screen.getByRole('button', { name: 'PETR4' }))
     const cartao = screen.getByTestId('nos-radares')
     expect(cartao.textContent).toContain('3º no Top 15 pagadoras de dividendos')
@@ -144,7 +143,6 @@ describe('destaques dos radares (D131)', () => {
 
   it('ação fora dos radares recebe a explicação, sem selo', () => {
     render(<SimuleAcoes ctx={ctx} snapshot={snapshot} destaques={new Map()} />)
-    expect(screen.queryAllByTestId('resumo-setor')).toHaveLength(0)
     expect(screen.getByTestId('nos-radares').textContent).toContain('não está nos Top 15')
   })
 })
