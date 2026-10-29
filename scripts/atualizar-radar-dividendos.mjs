@@ -1,4 +1,4 @@
-// Radar de dividendos (D130): proventos já anunciados pela B3 que ainda vão ser pagos, por empresa do cadastro.
+// Agenda de dividendos (D130): proventos anunciados pela B3, já pagos e a pagar, por empresa do cadastro.
 //
 //   node scripts/atualizar-radar-dividendos.mjs
 //
@@ -43,7 +43,7 @@ async function baixarCadastro(raiz, { fetchImpl, tentativas = 3, pausaMs = 1500 
   throw ultimo
 }
 
-export async function gerarRadar({ raiz = RAIZ_PADRAO, fetchImpl = fetch, hoje = hojeEmBrasilia(), pausaEntreChamadasMs = 400, log = console.log } = {}) {
+export async function gerarRadar({ raiz = RAIZ_PADRAO, fetchImpl = fetch, hoje = hojeEmBrasilia(), pausaEntreChamadasMs = 400, log = console.log, anteriores = [] } = {}) {
   const config = JSON.parse(fs.readFileSync(path.join(raiz, 'config', 'acoes.json'), 'utf8'))
   const lidas = []
   const falhas = []
@@ -62,17 +62,19 @@ export async function gerarRadar({ raiz = RAIZ_PADRAO, fetchImpl = fetch, hoje =
     }
     if (pausaEntreChamadasMs) await pausa(pausaEntreChamadasMs)
   }
-  return montarRadar({ empresas: lidas, falhas, hoje })
+  return montarRadar({ empresas: lidas, falhas, hoje, anteriores })
 }
 
 async function principal() {
-  const radar = await gerarRadar()
+  const destino = path.join(RAIZ_PADRAO, ARQUIVO_APP)
+  let anteriores = []
+  try { anteriores = JSON.parse(fs.readFileSync(destino, 'utf8')).pagamentos ?? [] } catch { /* primeira execução */ }
+  const radar = await gerarRadar({ anteriores })
   const erros = verificarSanidadeRadar(radar)
   if (erros.length) {
     console.error('Radar NÃO publicado:\n- ' + erros.join('\n- '))
     process.exit(1)
   }
-  const destino = path.join(RAIZ_PADRAO, ARQUIVO_APP)
   fs.writeFileSync(destino, JSON.stringify({ geradoEm: new Date().toISOString(), ...radar }, null, 2) + '\n')
   console.log(`Radar gravado: ${radar.pagamentos.length} pagamentos de ${radar.comPagamento} empresas (${radar.falhas.length} falhas).`)
 }

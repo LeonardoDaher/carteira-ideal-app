@@ -6,6 +6,7 @@ import { formatarVolumeDiario } from '../domain/fiiBaratos'
 import { formatarData } from '../domain/rendaFii'
 import { ROTULO_EXCLUSAO_BDR, ROTULO_EXCLUSAO_ETF, buscarExclusaoMercado, contarExclusoesMercado } from '../domain/top15Mercado'
 import type { ItemEtfTop, SnapshotMaisNegociados } from '../domain/top15Mercado'
+import { LogoAtivo } from '../ui/LogoAtivo'
 
 function reais(valor: number) {
   return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -184,7 +185,7 @@ function Cartao({ t, item: e, ordem, janela, rotuloVariacao }: { t: Textos; item
     <li className="card col" style={{ gap: 8 }} data-testid={`${t.id}-${e.ticker}`}>
       <div className="row-between" style={{ alignItems: 'flex-start', gap: 10 }}>
         <div className="col" style={{ gap: 1, minWidth: 0 }}>
-          <span className="font-display" style={{ fontWeight: 700, fontSize: 18, color: 'var(--accent)' }}>{ordem}. {e.ticker}</span>
+          <span className="font-display" style={{ fontWeight: 700, fontSize: 18, color: 'var(--accent)' }}>{ordem}. <LogoAtivo ticker={e.ticker} tamanho={24} inline semSelo />{e.ticker}</span>
           <span className="tiny muted">{e.nome} · {e.categoria}</span>
         </div>
         <div className="col" style={{ gap: 1, alignItems: 'flex-end', flexShrink: 0 }}>

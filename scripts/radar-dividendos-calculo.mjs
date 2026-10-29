@@ -36,14 +36,14 @@ export function lerPagamentos(json) {
 }
 
 /**
- * Pagamentos anunciados que ainda não aconteceram em `hoje` (AAAA-MM-DD): data de pagamento de hoje em diante; sem data de
- * pagamento (a B3 ainda não a definiu), o provento continua na lista, em grupo à parte. Só a classe do código da empresa (as séries A04OR/A05OR do Banco do Brasil e
- * os BDRs viram "OUTRA" e saem) e só os tipos de TIPOS_DO_RADAR. Linhas iguais são parcelas e ficam todas.
+ * Pagamentos anunciados da empresa, já pagos ou a pagar: a tela navega mês a mês. Só a classe do código da empresa (as séries
+ * A04OR/A05OR do Banco do Brasil e os BDRs viram "OUTRA" e saem) e só os tipos de TIPOS_DO_RADAR. Linhas iguais são parcelas e
+ * ficam todas. Sem data de pagamento (a B3 ainda não a definiu), o provento fica com `pagamentoEm` null.
  */
-export function pagamentosAnunciados(eventos, ticker, hoje) {
+export function pagamentosAnunciados(eventos, ticker) {
   const classe = classeDoTicker(ticker)
   return eventos
-    .filter((e) => e.classe === classe && TIPOS_DO_RADAR.includes(e.tipo) && (e.pagamentoEm === null || e.pagamentoEm >= hoje))
+    .filter((e) => e.classe === classe && TIPOS_DO_RADAR.includes(e.tipo))
     .map((e) => ({ tipo: e.tipo, valor: e.valor, dataCom: e.dataCom, pagamentoEm: e.pagamentoEm, aprovadoEm: e.aprovadoEm, referencia: e.referencia }))
 }
 
@@ -51,17 +51,21 @@ const ordem = (a, b) =>
   (a.pagamentoEm ?? '9999-99-99').localeCompare(b.pagamentoEm ?? '9999-99-99') || a.ticker.localeCompare(b.ticker) || a.tipo.localeCompare(b.tipo) || a.dataCom.localeCompare(b.dataCom) || a.valor - b.valor
 
 /**
- * Monta o radar. `empresas`: [{ ticker, nome, setor, eventos }] (eventos de lerPagamentos). `falhas`: tickers que não puderam ser
- * lidos. Cada pagamento sai numa linha própria, em ordem de data de pagamento; o mês (`mes`, AAAA-MM) vem da data de pagamento
+ * Monta a agenda. `empresas`: [{ ticker, nome, setor, eventos }] (eventos de lerPagamentos). `falhas`: tickers que não puderam ser
+ * lidos. `anteriores`: pagamentos do arquivo anterior; os já pagos que saíram do cadastro da B3 continuam. Cada pagamento sai numa linha própria, em ordem de data de pagamento; o mês (`mes`, AAAA-MM) vem da data de pagamento
  * e fica null quando a B3 ainda não a informou.
  */
-export function montarRadar({ empresas, falhas = [], hoje }) {
+export function montarRadar({ empresas, falhas = [], hoje, anteriores = [] }) {
   const pagamentos = []
   for (const e of empresas) {
-    for (const p of pagamentosAnunciados(e.eventos, e.ticker, hoje)) {
+    for (const p of pagamentosAnunciados(e.eventos, e.ticker)) {
       pagamentos.push({ ticker: e.ticker, nome: e.nome ?? null, setor: e.setor ?? null, ...p, mes: p.pagamentoEm ? p.pagamentoEm.slice(0, 7) : null })
     }
   }
+  // O cadastro da B3 só guarda os proventos recentes: o que já foi pago e saiu dele fica guardado do arquivo anterior.
+  const base = (p) => `${p.ticker}|${p.tipo}|${p.dataCom}|${p.valor.toFixed(6)}`
+  const novos = new Set(pagamentos.map(base))
+  for (const p of anteriores) if (p.pagamentoEm && p.pagamentoEm < hoje && !novos.has(base(p))) pagamentos.push({ ...p })
   pagamentos.sort(ordem)
   return {
     publicado: true,

@@ -5,6 +5,7 @@ import type { ContaCalculo, ItemEndividada, SnapshotAcoesEndividadas } from '../
 import { formatarMultiplo, formatarReaisCompacto } from '../domain/acoesBaratas'
 import { introAuditoria, notaAuditoriaDiaria } from '../domain/auditoriaDiaria'
 import { formatarData } from '../domain/rendaFii'
+import { LogoAtivo } from '../ui/LogoAtivo'
 
 const AVISO_PADRAO =
   'Não é recomendação de investimento. Esta lista ordena as empresas pela razão entre a dívida líquida e o EBITDA dos últimos 12 meses, com dados das demonstrações publicadas na CVM. Dívida alta não quer dizer que a empresa está em risco, nem que a ação está barata ou cara. Converse com um profissional certificado antes de investir.'
@@ -163,7 +164,7 @@ function Cartao({ item: r }: { item: ItemEndividada }) {
     <li className="card col" style={{ gap: 8 }} data-testid={`top15-endividadas-${r.ticker}`}>
       <div className="row-between" style={{ alignItems: 'flex-start', gap: 10 }}>
         <div className="col" style={{ gap: 1, minWidth: 0 }}>
-          <span className="font-display" style={{ fontWeight: 700, fontSize: 18, color: 'var(--accent)' }}>{r.posicao}. {r.ticker}</span>
+          <span className="font-display" style={{ fontWeight: 700, fontSize: 18, color: 'var(--accent)' }}>{r.posicao}. <LogoAtivo ticker={r.ticker} tamanho={24} inline />{r.ticker}</span>
           <span className="tiny muted">{r.nome ?? '—'}{r.setor ? ` · ${r.setor}` : ''}</span>
         </div>
         <div className="col" style={{ gap: 1, alignItems: 'flex-end', flexShrink: 0 }}>

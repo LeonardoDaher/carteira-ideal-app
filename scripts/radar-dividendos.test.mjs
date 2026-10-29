@@ -27,30 +27,28 @@ test('lerPagamentos: erra em vez de adivinhar quando o formato muda', () => {
   assert.throws(() => lerPagamentos(cadastro([linha({ paymentDate: '31-12' })])), /pagamento ilegível/)
 })
 
-test('pagamentosAnunciados: só o que ainda será pago, da classe do código e dos tipos do radar', () => {
+test('pagamentosAnunciados: pagos e a pagar, da classe do código e dos tipos do radar', () => {
   const ev = lerPagamentos(cadastro([
     linha({ paymentDate: '21/12/2026' }),
     linha({ paymentDate: '23/11/2026', label: 'JRS CAP PROPRIO' }),
-    linha({ paymentDate: '15/10/2026' }), // já pago
-    linha({ paymentDate: '29/10/2026' }), // paga hoje: ainda conta
+    linha({ paymentDate: '15/10/2026' }), // já pago: continua, a tela navega por mês
     linha({ paymentDate: '21/12/2026', label: 'REST CAP DIN' }), // devolução de capital
     linha({ paymentDate: '21/12/2026', isinCode: 'BRBBASA04OR4' }), // série que repete o provento
     linha({ paymentDate: '21/12/2026', isinCode: 'BRPETRACNPR7' }), // PN, e o código é PETR3 (ON)
   ])).eventos
-  const r = pagamentosAnunciados(ev, 'PETR3', '2026-10-29')
-  assert.deepEqual(r.map((p) => [p.tipo, p.pagamentoEm]), [['DIVIDENDO', '2026-12-21'], ['JRS CAP PROPRIO', '2026-11-23'], ['DIVIDENDO', '2026-10-29']])
+  const r = pagamentosAnunciados(ev, 'PETR3')
+  assert.deepEqual(r.map((p) => [p.tipo, p.pagamentoEm]), [['DIVIDENDO', '2026-12-21'], ['JRS CAP PROPRIO', '2026-11-23'], ['DIVIDENDO', '2026-10-15']])
 })
 
-test('pagamentosAnunciados: sem data de pagamento (vazia ou 31/12/9999) fica no grupo à parte; parcelas iguais ficam todas', () => {
+test('pagamentosAnunciados: sem data de pagamento (vazia ou 31/12/9999) fica com pagamentoEm null; parcelas iguais ficam todas', () => {
   const ev = lerPagamentos(cadastro([
     linha({ paymentDate: '', lastDatePrior: '05/11/2026' }),
     linha({ paymentDate: '31/12/9999' }),
     linha({ paymentDate: '10/12/2026' }),
     linha({ paymentDate: '10/12/2026' }),
-    linha({ paymentDate: '10/01/2026' }), // já pago
   ])).eventos
   assert.equal(ev[1].pagamentoEm, null)
-  assert.equal(pagamentosAnunciados(ev, 'PETR3', '2026-10-29').length, 4)
+  assert.equal(pagamentosAnunciados(ev, 'PETR3').length, 4)
 })
 
 test('montarRadar: ordena por data de pagamento, depois ticker; mês vem do pagamento', () => {
@@ -68,6 +66,20 @@ test('montarRadar: ordena por data de pagamento, depois ticker; mês vem do paga
   assert.equal(radar.comPagamento, 2)
   assert.equal(radar.consultadas, 4)
   assert.deepEqual(radar.falhas, ['ZZZZ3'])
+})
+
+test('montarRadar: o já pago que saiu do cadastro continua; o que foi repetido, remarcado ou ainda não pago não duplica', () => {
+  const emp = [{ ticker: 'PETR3', nome: 'P', setor: 'X', eventos: lerPagamentos(cadastro([linha({ paymentDate: '21/12/2026' }), linha({ paymentDate: '10/12/2026', lastDatePrior: '01/09/2026' })])).eventos }]
+  const ant = (o) => ({ ticker: 'PETR3', nome: 'P', setor: 'X', tipo: 'DIVIDENDO', valor: 0.47156696, dataCom: '2026-08-21', pagamentoEm: '2026-12-21', aprovadoEm: null, referencia: null, mes: '2026-12', ...o })
+  const radar = montarRadar({
+    empresas: emp, hoje: '2026-10-29',
+    anteriores: [
+      ant({}), // igual a um que veio do cadastro: não duplica
+      ant({ dataCom: '2025-12-01', pagamentoEm: '2026-01-10', mes: '2026-01' }), // pago e fora do cadastro: continua
+      ant({ dataCom: '2026-10-01', pagamentoEm: '2026-11-10', mes: '2026-11' }), // ainda não pago e sumiu do cadastro: some
+    ],
+  })
+  assert.deepEqual(radar.pagamentos.map((p) => p.pagamentoEm), ['2026-01-10', '2026-12-10', '2026-12-21'])
 })
 
 test('verificarSanidadeRadar: poucas empresas ou muitas falhas travam a publicação', () => {

@@ -5,6 +5,7 @@ import type { ItemDividendos, SnapshotAcoesDividendos } from '../domain/acoesDiv
 import { formatarPercentual, formatarReaisCompacto } from '../domain/acoesBaratas'
 import { introAuditoria, notaAuditoriaDiaria } from '../domain/auditoriaDiaria'
 import { formatarData } from '../domain/rendaFii'
+import { LogoAtivo } from '../ui/LogoAtivo'
 
 const AVISO_PADRAO =
   'Não é recomendação de investimento. Esta lista ordena as ações pelo dividend yield dos últimos 12 meses: os proventos em dinheiro por ação (dividendos e juros sobre capital próprio, brutos) divididos pelo preço de fechamento mais recente, com dados da B3. Dividend yield alto não quer dizer que a ação é boa nem que o pagamento vai se repetir. Converse com um profissional certificado antes de investir.'
@@ -218,7 +219,7 @@ function Cartao({ item: r, alertaDy }: { item: ItemDividendos; alertaDy: number 
     <li className="card col" style={{ gap: 8 }} data-testid={`top15-dividendos-${r.ticker}`}>
       <div className="row-between" style={{ alignItems: 'flex-start', gap: 10 }}>
         <div className="col" style={{ gap: 1, minWidth: 0 }}>
-          <span className="font-display" style={{ fontWeight: 700, fontSize: 18, color: 'var(--accent)' }}>{r.posicao}. {r.ticker}</span>
+          <span className="font-display" style={{ fontWeight: 700, fontSize: 18, color: 'var(--accent)' }}>{r.posicao}. <LogoAtivo ticker={r.ticker} tamanho={24} inline />{r.ticker}</span>
           <span className="tiny muted">{r.nome ?? '—'}{r.setor ? ` · ${r.setor}` : ''}</span>
         </div>
         <div className="col" style={{ gap: 1, alignItems: 'flex-end', flexShrink: 0 }}>
@@ -262,7 +263,7 @@ function LinhaCompacta({ item: r }: { item: ItemDividendos }) {
         <summary style={{ cursor: 'pointer', listStyle: 'none' }}>
           <div className="row-between" style={{ alignItems: 'center', gap: 10 }}>
             <div className="col" style={{ gap: 0, minWidth: 0 }}>
-              <span style={{ fontWeight: 700, color: 'var(--accent)' }}>{r.posicao}. {r.ticker}</span>
+              <span style={{ fontWeight: 700, color: 'var(--accent)' }}>{r.posicao}. <LogoAtivo ticker={r.ticker} tamanho={24} inline />{r.ticker}</span>
               <span className="tiny muted">{r.nome ?? '—'}{r.setor ? ` · ${r.setor}` : ''}</span>
             </div>
             <div className="col" style={{ gap: 0, alignItems: 'flex-end', flexShrink: 0 }}>

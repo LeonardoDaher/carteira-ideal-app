@@ -1,10 +1,10 @@
-# Radar de dividendos (D130): proventos já anunciados pela B3 que ainda vão ser pagos, por empresa do cadastro.
+# Agenda de dividendos (D130): proventos já anunciados pela B3 que ainda vão ser pagos, por empresa do cadastro.
 #
 # COM REDE: baixa o cadastro de cada empresa de config/acoes.json (uns 2 minutos) e grava webapp-src/src/data/radarDividendos.json.
 # Sem projeção, sem ranking: só o que a B3 publicou. Se muitas empresas falharem, o job termina com erro SEM publicar e o GitHub
 # envia e-mail.
 
-name: Atualizar Radar de Dividendos
+name: Atualizar Agenda de Dividendos
 
 on:
   schedule:

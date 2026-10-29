@@ -8,6 +8,7 @@ import { ROTULO_HORIZONTE } from '../domain/confluencia'
 import { EstadoDoArquivo } from '../ui/BlocosDeAnalise'
 import { formatarData } from '../domain/rendaFii'
 import { CAMINHO_FUNDAMENTOS, CAMINHO_SERIES } from './useAnaliseDaAcao'
+import { LogoAtivo } from '../ui/LogoAtivo'
 
 const TAMANHO = 15
 const HORIZONTES: Horizonte[] = ['curto', 'medio', 'longo']
@@ -147,7 +148,7 @@ function Cartao({ item: r }: { item: ItemConfluencia }) {
     <li className="card col" style={{ gap: 8 }} data-testid={`top15-confluencia-${r.ticker}`}>
       <div className="row-between" style={{ alignItems: 'flex-start', gap: 10 }}>
         <div className="col" style={{ gap: 1, minWidth: 0 }}>
-          <span className="font-display" style={{ fontWeight: 700, fontSize: 18, color: 'var(--accent)' }}>{r.posicao}. {r.ticker}</span>
+          <span className="font-display" style={{ fontWeight: 700, fontSize: 18, color: 'var(--accent)' }}>{r.posicao}. <LogoAtivo ticker={r.ticker} tamanho={24} inline />{r.ticker}</span>
           <span className="tiny muted">{r.nome ?? '—'}</span>
         </div>
         <span style={{ fontWeight: 700, color: 'var(--accent)', flexShrink: 0 }}>{reais(r.preco)}</span>
@@ -190,7 +191,7 @@ function Linha({ item: r }: { item: ItemConfluencia }) {
     <li className="card-outline" data-testid={`top15-confluencia-${r.ticker}`}>
       <div className="row-between" style={{ alignItems: 'center', gap: 10 }}>
         <div className="col" style={{ gap: 0, minWidth: 0 }}>
-          <span style={{ fontWeight: 700, color: 'var(--accent)' }}>{r.posicao}. {r.ticker}</span>
+          <span style={{ fontWeight: 700, color: 'var(--accent)' }}>{r.posicao}. <LogoAtivo ticker={r.ticker} tamanho={24} inline />{r.ticker}</span>
           <span className="tiny muted">{r.nome ?? '—'}</span>
         </div>
         <div className="col" style={{ gap: 0, alignItems: 'flex-end', flexShrink: 0 }}>

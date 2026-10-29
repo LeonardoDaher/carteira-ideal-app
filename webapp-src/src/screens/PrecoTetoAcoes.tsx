@@ -12,6 +12,7 @@ import { calcularItensPrecoTeto, textoDoAviso } from '../domain/precoTetoLote'
 import type { PrecoTeto, StatusTeto } from '../domain/precoTeto'
 import { EstadoDoArquivo } from '../ui/BlocosDeAnalise'
 import { CAMINHO_FUNDAMENTOS, premissasDoMercado } from './useAnaliseDaAcao'
+import { LogoAtivo } from '../ui/LogoAtivo'
 
 const CHAVE = 'carteira-ideal:preco-teto'
 const TAXAS = [0.06, 0.08, 0.1, 0.12]
@@ -435,7 +436,7 @@ function ListaTodas({ itens, nomeDe, aoAcompanhar, acompanhadas }: { itens: Map<
                 }}
               >
                 <span className="col" style={{ flex: '1 1 0', minWidth: 0, gap: 0 }}>
-                  <span style={{ fontWeight: 700, fontSize: 13, color: verde ? 'var(--success)' : undefined }}>{i.ticker}</span>
+                  <span style={{ fontWeight: 700, fontSize: 13, color: verde ? 'var(--success)' : undefined }}><LogoAtivo ticker={i.ticker} tamanho={24} inline />{i.ticker}</span>
                   <span className="tiny muted" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{nomeDe(i.ticker) ?? i.nome}</span>
                 </span>
                 <span style={{ width: 70, textAlign: 'right', fontSize: 13 }}>{reais(i.preco)}</span>

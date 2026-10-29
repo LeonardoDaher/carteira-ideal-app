@@ -4,6 +4,7 @@ import { introAuditoria, notaAuditoriaDiaria } from '../domain/auditoriaDiaria'
 import { formatarVolumeDiario } from '../domain/fiiBaratos'
 import { formatarData } from '../domain/rendaFii'
 import type { ItemIndice, SnapshotIndice } from '../domain/top15Mercado'
+import { LogoAtivo } from '../ui/LogoAtivo'
 
 export type ClasseIndice = 'ifix' | 'ibov'
 
@@ -154,7 +155,7 @@ function Cartao({ t, item: r, maior }: { t: Textos; item: ItemIndice; maior: num
     <li className="card col" style={{ gap: 8 }} data-testid={`${t.id}-${r.ticker}`}>
       <div className="row-between" style={{ alignItems: 'flex-start', gap: 10 }}>
         <div className="col" style={{ gap: 1, minWidth: 0 }}>
-          <span className="font-display" style={{ fontWeight: 700, fontSize: 18, color: 'var(--accent)' }}>{r.posicao}. {r.ticker}</span>
+          <span className="font-display" style={{ fontWeight: 700, fontSize: 18, color: 'var(--accent)' }}>{r.posicao}. <LogoAtivo ticker={r.ticker} tamanho={24} inline semSelo />{r.ticker}</span>
           <span className="tiny muted">{r.nome}{r.setor ? ` · ${r.setor}` : ''}</span>
         </div>
         <div className="col" style={{ gap: 1, alignItems: 'flex-end', flexShrink: 0 }}>

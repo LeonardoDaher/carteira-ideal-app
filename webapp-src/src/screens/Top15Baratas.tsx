@@ -6,6 +6,7 @@ import type { RespostaTop15 } from '../domain/acessoTop15'
 import {
   CONTAGEM_POR_ETAPA, SEM_FILTROS, buscarExclusao, descreverComponente, formatarMultiplo, formatarPercentual, formatarReaisCompacto, selecionarTop,
 } from '../domain/acoesBaratas'
+import { LogoAtivo } from '../ui/LogoAtivo'
 import type { ComposicaoLtm, FiltrosQualidade, ItemRanking, SnapshotAcoesBaratas } from '../domain/acoesBaratas'
 import { introAuditoria, notaAuditoriaDiaria } from '../domain/auditoriaDiaria'
 import { formatarData } from '../domain/rendaFii'
@@ -170,7 +171,7 @@ function CartaoRanking({ item: r, ordem, comFiltro }: { item: ItemRanking; ordem
       <div className="row-between" style={{ alignItems: 'flex-start', gap: 10 }}>
         <div className="col" style={{ gap: 1, minWidth: 0 }}>
           <span className="font-display" style={{ fontWeight: 700, fontSize: 18, color: 'var(--accent)' }}>
-            {ordem}. {r.ticker}
+            {ordem}. <LogoAtivo ticker={r.ticker} tamanho={24} inline />{r.ticker}
             {comFiltro && r.posicao !== ordem && <span className="tiny muted" style={{ fontWeight: 400 }}> (#{r.posicao} no ranking geral)</span>}
           </span>
           <span className="tiny muted">{r.nome} · {r.setor}</span>
