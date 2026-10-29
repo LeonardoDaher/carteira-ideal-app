@@ -331,7 +331,7 @@ function paginaPerfil() {
 <li><strong>Um dos 9 perfis de carteira</strong>, que combina o que você diz que tolera com o que a sua situação permite.</li>
 <li><strong>Uma carteira de referência em percentuais</strong>, distribuída em 11 classes de ativos, do Tesouro Selic às criptomoedas, com a explicação do papel de cada uma.</li>
 <li><strong>Um simulador em reais</strong>, para ver quanto de cada fatia seria o seu dinheiro.</li>
-<li><strong>Atalhos para as ferramentas</strong> do site: simuladores de Tesouro Direto, FII, BDR, ETF, ações e opções e o Meu Mês, para organizar as contas do mês.</li>
+<li><strong>Atalhos para as ferramentas</strong> do site: simuladores de ações, opções, futuros, Tesouro Direto, FII, BDR e ETF, o Meus Ativos, para acompanhar o que você já tem, e o Meu Mês, para organizar as contas do mês.</li>
 </ul>`,
       ),
       secao(
@@ -933,7 +933,7 @@ function paginaSobre() {
         'Por que o projeto existe',
         `<p>Nascemos da necessidade de ajudar as pessoas menos familiarizadas com o mundo dos investimentos e que anseiam por aprender a investir. Temos espaços de aprendizagem e ferramentas de ajuda para quem deseja sair das dívidas. É um ambiente de ensino em constante evolução, com vídeos curtos e didáticos. Nossas ferramentas são simples, diretas e <strong>gratuitas</strong>, fáceis de entender e aplicar.</p>
 <p>O teste de perfil de investidor que as corretoras aplicam mede a intenção: quanto risco você diz aceitar. A vida real também conta: a reserva que você tem, as dívidas, os gastos previstos, a estabilidade da renda. O Carteira Ideal cruza as duas coisas e mostra uma carteira de referência.</p>
-<p>Junto com o teste, o projeto traz ferramentas para acompanhar a carteira que você tem (<a href="/minha-carteira/">Meus Ativos</a>) e organizar o mês (<a href="/meu-mes/">Meu Mês</a>), um caminho para <a href="/aprender/sair-das-dividas/">sair das dívidas</a> antes de investir, <a href="/aprender/">guias sobre cada classe de ativo</a>, simuladores com dados oficiais e o livro infantil <strong>Os Três Potes de Clara</strong>.</p>`,
+<p>Junto com o teste, o projeto traz ferramentas para acompanhar a carteira que você tem (<a href="/minha-carteira/">Meus Ativos</a>) e organizar o mês (<a href="/meu-mes/">Meu Mês</a>), um caminho para <a href="/aprender/sair-das-dividas/">sair das dívidas</a> antes de investir, <a href="/aprender/">guias sobre cada classe de ativo</a>, simuladores de ações, opções, futuros, FII, Tesouro Direto, BDR e ETF com dados oficiais, comparativos de imóvel, carro e moto e o livro infantil <strong>Os Três Potes de Clara</strong>.</p>`,
       ),
       secao(
         'Como o projeto se mantém',
@@ -991,7 +991,8 @@ function paginaMetodologia() {
         `<ul>
 <li><strong>Tesouro Direto:</strong> taxas e preços do Tesouro Transparente; Selic, CDI, IPCA, dólar e Boletim Focus do Banco Central. Atualizados uma vez por semana.</li>
 <li><strong>FIIs:</strong> Informe Mensal Estruturado da CVM, com cotação e volume de mercado. Atualizados uma vez por mês.</li>
-<li><strong>BDRs e ETFs:</strong> Boletim de Preços oficial da B3, nos dias úteis à noite. Nome, setor e proporção dos BDRs vêm de cadastros de mercado.</li>
+<li><strong>Ações, BDRs e ETFs:</strong> Boletim de Preços oficial da B3, nos dias úteis à noite. Nome, setor e proporção dos BDRs vêm de cadastros de mercado. As análises fundamentalistas e os Top 15 de ações usam também as demonstrações financeiras enviadas à CVM, e a agenda de dividendos mostra só o que já foi anunciado.</li>
+<li><strong>Opções e futuros:</strong> cadastro de instrumentos e Boletim de Preços oficiais da B3, nos dias úteis. A ferramenta descreve contratos e calcula o resultado de cada estratégia, sem indicar o que operar.</li>
 <li><strong>Opções:</strong> cadastro de instrumentos e Boletim de Preços (COTAHIST) oficiais da B3, nos dias úteis à noite, com as séries de ações e ETFs que negociaram nos últimos pregões e vencem em até seis meses. Gregas, volatilidade implícita e chances são estimativas do próprio simulador (modelo de Black-Scholes), a partir do último preço negociado de cada série.</li>
 <li><strong>Financiar, alugar ou consórcio:</strong> não usa cadastro de produtos. Parte das taxas que você informa e, como sugestão inicial, da projeção de longo prazo de Selic e IPCA do Boletim Focus, do Banco Central.</li>
 <li><strong>Imposto de Renda e custódia:</strong> regras vigentes na data da última revisão, que mudam com a legislação.</li>
@@ -1201,6 +1202,9 @@ function paginaAprender(dividasDisponivel) {
 <li><a href="/simulador-fii/">Simulador de FII</a></li>
 <li><a href="/simulador-bdr/">Simulador de BDR</a></li>
 <li><a href="/simulador-etf/">Simulador de ETF</a></li>
+<li><a href="/app/?tela=simuleAcoes">Simule Ações: análise, preço teto, dividendos e Top 15</a></li>
+<li><a href="/app/?tela=simuleOpcoes">Simule Opções</a></li>
+<li><a href="/app/?tela=simuleFuturos">Simule Futuros</a></li>
 <li><a href=\"/financiar-alugar-ou-consorcio/\">Comprar à vista, financiar, consórcio ou alugar</a></li>
 <li><a href="/carro-a-vista-financiar-consorcio-ou-sem-carro/">Carro: à vista, financiar, consórcio, alugar ou ficar sem carro</a></li>
 <li><a href="/moto-a-vista-financiar-consorcio-ou-sem-moto/">Moto: à vista, financiar, consórcio, alugar ou ficar sem moto</a></li>
