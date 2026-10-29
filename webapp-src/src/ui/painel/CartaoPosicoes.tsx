@@ -9,6 +9,7 @@ import { PainelEdicaoAtivo } from './PainelEdicaoAtivo'
 import type { AcoesPainel } from './PainelEdicaoAtivo'
 import { dataCurta, pct } from './formatar'
 import { useValores } from './valoresOcultos'
+import { LogoAtivo } from '../LogoAtivo'
 
 const ORIGEM: Record<OrigemPrecoMedio, string> = {
   calculado: 'Calculado pelos seus lançamentos',
@@ -24,7 +25,10 @@ function LinhaDoAtivo({ l, onEditar, onVerLancamentos }: { l: LinhaPosicao; onEd
         <button type="button" className="mc-lapis" aria-label={`Editar ${l.ativo}`} title="Editar" onClick={onEditar}>
           <PencilIcon size={16} />
         </button>
-        <strong>{l.ativo}</strong>
+        <strong>
+          {/^[A-Z]{4}\d{1,2}$/.test(l.ativo) && <LogoAtivo ticker={l.ativo} tamanho={24} inline semSelo />}
+          {l.ativo}
+        </strong>
         <span className="mc-nota">{quantidadeBR(l.quantidade)} un.</span>
         {l.status === 'faltaSaldoAnterior' && <span className="mc-selo faltaSaldoAnterior">Sem preço médio</span>}
         {l.aguardandoLiquidacao && <span className="mc-selo info">Aguardando liquidação</span>}

@@ -152,6 +152,17 @@ describe('MinhaCarteira: importar um arquivo', () => {
 })
 
 describe('MinhaCarteira: painel com dados', () => {
+  it('mostra o logo da empresa na frente das ações que têm logo, e nada nos demais ativos', async () => {
+    semear({ lancs: [L()], posicao: [pos('VALE3', 100, 1500), pos('HGBS11', 10, 500, 'fundos')], dataPosicao: '2026-09-30' })
+    render(<MinhaCarteira valoresVisiveis ctx={ctx} hoje={hoje} />)
+    await screen.findByRole('heading', { name: 'Carteira' })
+    const linhas = screen.getAllByRole('listitem').filter((li) => li.classList.contains('mc-posicao'))
+    const vale = linhas.find((li) => li.textContent?.includes('VALE3'))!
+    const fii = linhas.find((li) => li.textContent?.includes('HGBS11'))!
+    expect(vale.querySelector('[data-testid="logo-ativo"]')).not.toBeNull()
+    expect(fii.querySelector('[data-testid="logo-ativo"], [data-testid="logo-ativo-selo"]')).toBeNull()
+  })
+
   it('com Posição: patrimônio, resultado (só onde há preço médio) e composição', async () => {
     semear({ lancs: [L()], posicao: [pos('VALE3', 100, 1500), pos('HGBS11', 10, 500, 'fundos')], dataPosicao: '2026-09-30' })
     render(<MinhaCarteira valoresVisiveis ctx={ctx} hoje={hoje} />)
