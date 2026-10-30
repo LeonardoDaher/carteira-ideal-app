@@ -3,6 +3,7 @@ import { buscarAtivos } from '../domain/opcoes'
 import type { AtivoComOpcoes, SnapshotOpcoes } from '../domain/opcoes'
 import { reais } from '../domain/mercadoOficial'
 import { formatarData, formatarVolume } from '../domain/rendaFii'
+import { LogoAtivo } from '../ui/LogoAtivo'
 
 const MAIS_NEGOCIADOS = 12
 const num = (v: number, casas = 2) => v.toLocaleString('pt-BR', { minimumFractionDigits: casas, maximumFractionDigits: casas })
@@ -82,7 +83,7 @@ export function EscolhaDeAtivo({ snapshot, ativo, onEscolher }: { snapshot: Snap
       </div>
       <div className="card col" style={{ gap: 4 }} role="group" aria-label={`Preço de ${ativo.ticker} no mercado à vista`}>
         <div className="row" style={{ alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
-          <span className="font-display" style={{ fontWeight: 700, fontSize: 24 }}>{ativo.ticker}</span>
+          <span className="font-display" style={{ fontWeight: 700, fontSize: 24 }}><LogoAtivo ticker={ativo.ticker} tamanho={36} inline />{ativo.ticker}</span>
           <span className="font-display" style={{ fontWeight: 700, fontSize: 24 }} data-testid="preco-ativo">{reais(ativo.cotacao)}</span>
           {ativo.variacao != null && (
             <span style={{ fontWeight: 700, fontSize: 15, color: corVar(ativo.variacao) }} data-testid="variacao-ativo">

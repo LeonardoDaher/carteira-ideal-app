@@ -9,6 +9,7 @@ import { agruparPorCategoria, buscarEtfs, textoCambio, textoIrCurto } from '../d
 import type { EtfBusca, EtfLista, SnapshotEtfs } from '../domain/etfs'
 import { formatarData, formatarVolume } from '../domain/rendaFii'
 import { VoltarInicio } from '../ui/VoltarInicio'
+import { LogoAtivo } from '../ui/LogoAtivo'
 import { FaixaCotacoes, itensDeEtfs } from '../ui/FaixaCotacoes'
 import { rolarParaResultado } from '../ui/rolarParaResultado'
 import { AvisoEducacional } from '../ui/AvisoEducacional'
@@ -279,7 +280,7 @@ function CartaoEtf({
       <div id="cartao-etf" className="card col" style={{ gap: 14, scrollMarginTop: 12 }}>
         <div className="row-between" style={{ alignItems: 'flex-start', gap: 12 }}>
           <div className="col" style={{ gap: 2, minWidth: 0 }}>
-            <span className="font-display" style={{ fontWeight: 700, fontSize: 24 }}>{etf.ticker}</span>
+            <span className="font-display" style={{ fontWeight: 700, fontSize: 24 }}><LogoAtivo ticker={etf.ticker} tamanho={36} inline />{etf.ticker}</span>
             {etf.nome && etf.nome !== etf.ticker && (
               <span className="tiny muted" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                 {etf.nome}

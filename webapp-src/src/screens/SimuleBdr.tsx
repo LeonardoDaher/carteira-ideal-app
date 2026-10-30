@@ -15,6 +15,7 @@ import {
 import type { BdrBusca, BdrLista, SnapshotBdrs } from '../domain/bdrs'
 import { formatarData, formatarVolume } from '../domain/rendaFii'
 import { VoltarInicio } from '../ui/VoltarInicio'
+import { LogoAtivo } from '../ui/LogoAtivo'
 import { FaixaCotacoes, itensDeBdrs } from '../ui/FaixaCotacoes'
 import { rolarParaResultado } from '../ui/rolarParaResultado'
 import { AvisoEducacional } from '../ui/AvisoEducacional'
@@ -307,7 +308,7 @@ function CartaoBdr({
       <div id="cartao-bdr" className="card col" style={{ gap: 14, scrollMarginTop: 12 }}>
         <div className="row-between" style={{ alignItems: 'flex-start', gap: 12 }}>
           <div className="col" style={{ gap: 2, minWidth: 0 }}>
-            <span className="font-display" style={{ fontWeight: 700, fontSize: 24 }}>{bdr.ticker}</span>
+            <span className="font-display" style={{ fontWeight: 700, fontSize: 24 }}><LogoAtivo ticker={bdr.ticker} tamanho={36} inline />{bdr.ticker}</span>
             {bdr.nome && bdr.nome !== bdr.ticker && (
               <span className="tiny muted" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                 {bdr.nome}

@@ -25,6 +25,7 @@ import {
 import { aplicarPrecoDiario } from '../domain/rendaFii'
 import type { FundoFii, PrecosDiariosFii, SnapshotRendimentosFii } from '../domain/rendaFii'
 import { VoltarInicio } from '../ui/VoltarInicio'
+import { LogoAtivo } from '../ui/LogoAtivo'
 import { FaixaCotacoes, itensDeFiis } from '../ui/FaixaCotacoes'
 import { rolarParaResultado } from '../ui/rolarParaResultado'
 import { AvisoEducacional } from '../ui/AvisoEducacional'
@@ -318,7 +319,7 @@ function CartaoFundo({
       <div id="cartao-fundo-fii" className="card col" style={{ gap: 14, scrollMarginTop: 12 }}>
         <div className="row-between" style={{ alignItems: 'flex-start', gap: 12 }}>
           <div className="col" style={{ gap: 2, minWidth: 0 }}>
-            <span className="font-display" style={{ fontWeight: 700, fontSize: 24 }}>{fundo.ticker}</span>
+            <span className="font-display" style={{ fontWeight: 700, fontSize: 24 }}><LogoAtivo ticker={fundo.ticker} tamanho={36} inline />{fundo.ticker}</span>
             <span
               className="tiny muted"
               style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
