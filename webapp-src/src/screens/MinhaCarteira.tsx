@@ -102,13 +102,11 @@ export function MinhaCarteira({ ctx, hoje, valoresVisiveis = false }: { ctx: App
   const resumoProventos = useMemo(() => resumoDeProventos(c.lancamentos, hojeISO), [c.lancamentos, hojeISO])
   const fatias = useMemo(() => composicaoDasLinhas(painel.linhas), [painel.linhas])
   const proximos = useMemo(() => proximosProventos(c.eventosFuturos, hojeISO), [c.eventosFuturos, hojeISO])
-  const apuracaoIR = useMemo(
-    () =>
-      apurarImpostoRenda(c.lancamentos, (ativo) =>
-        categoriaIR(ativo, classesEfetivas[ativo] ?? classificarAtivo(ativo, CATALOGO_ATIVOS).classe, CATALOGO_ATIVOS),
-      ),
-    [c.lancamentos, classesEfetivas],
+  const categoriaDoAtivo = useMemo(
+    () => (ativo: string) => categoriaIR(ativo, classesEfetivas[ativo] ?? classificarAtivo(ativo, CATALOGO_ATIVOS).classe, CATALOGO_ATIVOS),
+    [classesEfetivas],
   )
+  const apuracaoIR = useMemo(() => apurarImpostoRenda(c.lancamentos, categoriaDoAtivo), [c.lancamentos, categoriaDoAtivo])
   const temDados = c.lancamentos.length > 0 || !!c.posicao || c.ativosManuais.length > 0
 
   /** "Lançamento direto": rola até a lista e abre o formulário de novo lançamento. */
@@ -200,7 +198,7 @@ export function MinhaCarteira({ ctx, hoje, valoresVisiveis = false }: { ctx: App
 
       {h.hidratado && temDados && <CartaoImpostoRenda apuracao={apuracaoIR} />}
 
-      {h.hidratado && temDados && <CartaoPosicaoDeclaracao lancamentos={c.lancamentos} hoje={hojeISO} />}
+      {h.hidratado && temDados && <CartaoPosicaoDeclaracao lancamentos={c.lancamentos} hoje={hojeISO} categoriaDe={categoriaDoAtivo} />}
 
       {h.hidratado && (
         <CartaoLancamentos abrirNovo={pedidoNovo} lancamentos={c.lancamentos} hoje={hojeISO} onAdicionar={h.adicionar} onCorrigir={h.corrigir} onExcluir={h.excluir} filtro={filtroAtivo} onFiltro={setFiltroAtivo} filtroTipo={filtroTipo} onFiltroTipo={setFiltroTipo} />

@@ -34,3 +34,10 @@ describe('posicaoEm31Dez', () => {
     expect(csv[2]).toBe('PETR4;200;35,0000;7000,00')
   })
 })
+
+describe('posicaoEm31Dez: categoria', () => {
+  it('marca cada ativo com a categoria dada', () => {
+    const { linhas } = posicaoEm31Dez(lancs, '2025', (a) => (a === 'PETR4' ? 'acao' : 'fii'))
+    expect(linhas.map((l) => [l.ativo, l.categoria])).toEqual([['MXRF11', 'fii'], ['PETR4', 'acao']])
+  })
+})

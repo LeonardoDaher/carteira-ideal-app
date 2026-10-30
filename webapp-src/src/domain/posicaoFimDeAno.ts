@@ -5,6 +5,7 @@
 // Módulo puro: sem rede, sem React, sem localStorage.
 import { derivarPosicoes } from './lancamentos'
 import type { Lancamento, PosicaoDerivada } from './lancamentos'
+import type { CategoriaIR } from './impostoRenda'
 
 export interface PosicaoFimDeAno {
   ativo: string
@@ -12,6 +13,8 @@ export interface PosicaoFimDeAno {
   precoMedio: number
   /** Quantidade x preço médio: o valor de aquisição que vai na declaração. */
   custoTotal: number
+  /** Ação, FII, ETF ou BDR; null = o resto (Tesouro, renda fixa, ativos sem classe definida). */
+  categoria: CategoriaIR | null
 }
 
 /** Anos em que há lançamentos, do mais recente ao mais antigo. */
@@ -19,12 +22,12 @@ export function anosDosLancamentos(lancamentos: Lancamento[]): string[] {
   return [...new Set(lancamentos.map((l) => l.data.slice(0, 4)))].sort().reverse()
 }
 
-export function posicaoEm31Dez(lancamentos: Lancamento[], ano: string): { linhas: PosicaoFimDeAno[]; incompleto: string[] } {
+export function posicaoEm31Dez(lancamentos: Lancamento[], ano: string, categoriaDe: (ativo: string) => CategoriaIR | null = () => null): { linhas: PosicaoFimDeAno[]; incompleto: string[] } {
   const ate = lancamentos.filter((l) => l.data <= `${ano}-12-31`)
   const { posicoes, avisos } = derivarPosicoes(ate)
   const linhas = posicoes
     .filter((p: PosicaoDerivada) => p.quantidade > 0)
-    .map((p) => ({ ativo: p.ativo, quantidade: p.quantidade, precoMedio: p.precoMedio, custoTotal: p.custoTotal }))
+    .map((p) => ({ ativo: p.ativo, quantidade: p.quantidade, precoMedio: p.precoMedio, custoTotal: p.custoTotal, categoria: categoriaDe(p.ativo) }))
   return { linhas, incompleto: [...new Set(avisos.filter((a) => a.tipo === 'vendaSemSaldo').map((a) => a.ativo))].sort() }
 }
 

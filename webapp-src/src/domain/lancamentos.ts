@@ -55,6 +55,15 @@ export function ehTickerDeBolsa(ativo: string): boolean {
   return RE_TICKER.test(ativo)
 }
 
+/**
+ * Contrato de opção como a Movimentação da B3 o nomeia ("OPCAO DE VENDA - BOVAT165 - BOVA"). É derivativo,
+ * fora do escopo da carteira: a liquidação do prêmio vira "posição" que nunca fecha, porque a opção vence
+ * ou é encerrada sem lançamento de saída.
+ */
+export function ehProdutoDeOpcao(ativo: string): boolean {
+  return /^OPCAO\b/.test(ativo)
+}
+
 /** Soma dias úteis (só fins de semana; feriados não entram). n pode ser negativo. */
 export function somarDiasUteis(iso: string, n: number): string {
   const d = new Date(`${iso}T00:00:00Z`)

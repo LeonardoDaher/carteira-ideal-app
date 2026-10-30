@@ -21,7 +21,7 @@
 // número da linha. Tipos de movimentação que ignoramos de propósito viram um aviso agregado.
 import { normalizarBusca } from '../rendaFii'
 import type { LancamentoNovo, OrigemLancamento, SubtipoProvento, TipoLancamento } from '../lancamentos'
-import { PADRAO_TICKER, desfazerProventosEmPares, ehTickerDeBolsa, validarLancamento } from '../lancamentos'
+import { PADRAO_TICKER, desfazerProventosEmPares, ehProdutoDeOpcao, ehTickerDeBolsa, validarLancamento } from '../lancamentos'
 import { lerData, lerNumero, lerTexto, linhaVazia, normalizarCabecalho, type Celula, type Matriz } from './celulas'
 
 export type PerfilArquivo =
@@ -305,6 +305,7 @@ function linhaB3Movimentacao(ctx: Contexto, linha: Celula[], mapa: Mapa, n: numb
     instituicao: instituicaoDe(celula(linha, mapa, 'instituicao')),
     origem: ctx.origem,
   }
+  if (ehProdutoDeOpcao(ativo)) return ignorar(ctx, 'Opção (derivativo: fora do escopo)')
   const q = lerNumero(celula(linha, mapa, 'quantidade'))
   const p = lerNumero(celula(linha, mapa, 'preco'))
   const v = lerNumero(celula(linha, mapa, 'valor'))

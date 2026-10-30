@@ -6,7 +6,7 @@ import { chaveDoAtivoManual, ehDataValida, TAXA_MAX, validarAtivoManual, type At
 import type { ClasseCarteira } from './classificadorAtivo'
 import { ativoDoTexto } from './importacao/planilha'
 import type { EventoFuturo, ItemPosicaoB3, ResultadoImportacao } from './importacao/planilha'
-import { desfazerProventosEmPares, mesclarLancamentos, somarDiasUteis, validarLancamento, type Lancamento, type OrigemLancamento, type SubtipoProvento, type TipoLancamento } from './lancamentos'
+import { desfazerProventosEmPares, ehProdutoDeOpcao, mesclarLancamentos, somarDiasUteis, validarLancamento, type Lancamento, type OrigemLancamento, type SubtipoProvento, type TipoLancamento } from './lancamentos'
 
 export const CHAVE_CARTEIRA = 'carteiraideal.carteira'
 export const VERSAO_CARTEIRA = 1
@@ -211,7 +211,8 @@ export function lerCarteiraSalva(bruto: string | null): CarteiraSalva | null {
     const c = o.carteira
     const posicao = Array.isArray(c.posicao) ? lista(c.posicao, itemPosicaoValido) : null
     return limparProventosEmPares(canonizarAtivos({
-      lancamentos: lista(c.lancamentos, lancamentoValido),
+      // Carteiras gravadas antes de a importação ignorar opções trazem contratos já vencidos como "posição".
+      lancamentos: lista(c.lancamentos, lancamentoValido).filter((l) => !ehProdutoDeOpcao(l.ativo)),
       excluidas: Array.isArray(c.excluidas) ? c.excluidas.filter(txt) : [],
       posicao: posicao && posicao.length ? posicao : null,
       dataPosicao: txt(c.dataPosicao) && ISO.test(c.dataPosicao) ? c.dataPosicao : null,

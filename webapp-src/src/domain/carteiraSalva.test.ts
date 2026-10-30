@@ -228,3 +228,12 @@ describe('migração: proventos repetidos em par, gravados por versões anterior
     expect(r.lancamentos).toHaveLength(1)
   })
 })
+
+describe('contratos de opção gravados como posição', () => {
+  it('saem da carteira ao ler, e os demais ficam', () => {
+    const c = { ...carteiraVazia(), lancamentos: [] as import('./lancamentos').Lancamento[] }
+    const nova = (ativo: string, id: string) => ({ ...L({ ativo }), id })
+    c.lancamentos = [nova('OPCAO DE VENDA - BOVAT165 - BOVA', 'a'), nova('PETR4', 'b')]
+    expect(lerCarteiraSalva(serializarCarteira(c))!.lancamentos.map((l) => l.ativo)).toEqual(['PETR4'])
+  })
+})
