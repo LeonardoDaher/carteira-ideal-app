@@ -56,7 +56,7 @@ export function NosRadares({ ticker, d, usa, nenhum }: { ticker: string; d?: Des
   )
 }
 
-const REGEX_CODIGO = /\b[A-Z]{4}\d{1,2}\b/g
+const REGEX_CODIGO = /\b[A-Z0-9]{4}\d{1,2}\b/g
 
 /** Códigos citados num texto de exemplo, sem repetir e na ordem em que aparecem. */
 export function codigosDoTexto(texto: string): string[] {

@@ -9,6 +9,7 @@ import { GRUPOS_FII, ROTULO_ALERTA, contarExclusoes, formatarPvp, formatarVolume
 import type { GrupoFii, ItemFii, SnapshotFiiBaratos } from '../domain/fiiBaratos'
 import { formatarData } from '../domain/rendaFii'
 import { PortaoPorCodigo } from '../ui/PortaoPorCodigo'
+import { LogoAtivo } from '../ui/LogoAtivo'
 
 function reais(valor: number) {
   return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -150,7 +151,7 @@ function CartaoFii({ item: f, ordem, snapshot }: { item: ItemFii; ordem: number;
       <div className="row-between" style={{ alignItems: 'flex-start', gap: 10 }}>
         <div className="col" style={{ gap: 1, minWidth: 0 }}>
           <span className="font-display" style={{ fontWeight: 700, fontSize: 18, color: 'var(--accent)' }}>
-            {ordem}. {f.ticker}
+            {ordem}. <LogoAtivo ticker={f.ticker} tamanho={24} inline />{f.ticker}
           </span>
           <span className="tiny muted">{f.nome ?? '—'}{f.setorDeclarado ? ` · ${f.setorDeclarado}` : ''}</span>
         </div>
