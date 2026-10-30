@@ -13,6 +13,7 @@ import { CartaoCarteira, CartaoComposicao, CartaoProventos, CartaoVazio } from '
 import { CartaoImpostoRenda } from '../ui/painel/CartaoImpostoRenda'
 import { CartaoLancamentos } from '../ui/painel/CartaoLancamentos'
 import type { FiltroTipo } from '../ui/painel/CartaoLancamentos'
+import { CartaoPosicaoDeclaracao } from '../ui/painel/CartaoPosicaoDeclaracao'
 import { CartaoPosicoes } from '../ui/painel/CartaoPosicoes'
 import { ImportarArquivos } from '../ui/painel/ImportarArquivos'
 import { EyeIcon, EyeOffIcon } from '../ui/Icon'
@@ -198,6 +199,8 @@ export function MinhaCarteira({ ctx, hoje, valoresVisiveis = false }: { ctx: App
       )}
 
       {h.hidratado && temDados && <CartaoImpostoRenda apuracao={apuracaoIR} />}
+
+      {h.hidratado && temDados && <CartaoPosicaoDeclaracao lancamentos={c.lancamentos} hoje={hojeISO} />}
 
       {h.hidratado && (
         <CartaoLancamentos abrirNovo={pedidoNovo} lancamentos={c.lancamentos} hoje={hojeISO} onAdicionar={h.adicionar} onCorrigir={h.corrigir} onExcluir={h.excluir} filtro={filtroAtivo} onFiltro={setFiltroAtivo} filtroTipo={filtroTipo} onFiltroTipo={setFiltroTipo} />
