@@ -195,10 +195,12 @@ describe('separarItensGrudados (ditado sem vírgulas)', () => {
     expect(separarItensGrudados('   ')).toEqual([])
   })
 
-  it('a edição do item usa o mesmo separador (áudio juntou tudo no nome)', () => {
-    const lista: ListaDeCompras = { itens: [{ id: 'a', nome: 'Arroz feijão leite', quantidade: '', categoria: 'outros', comprado: false }] }
-    const nova = editarItem(lista, 'a', { nome: 'arroz feijão leite', quantidade: '', categoria: 'outros' }, id)
-    expect(nova.itens.map((i) => i.nome)).toEqual(['Arroz', 'Feijão', 'Leite'])
+  it('a edição não separa por dicionário: acrescentar palavra ao nome mantém um item só', () => {
+    const lista: ListaDeCompras = { itens: [{ id: 'a', nome: 'Tomate', quantidade: '', categoria: 'outros', comprado: false }] }
+    const nova = editarItem(lista, 'a', { nome: 'molho tomate', quantidade: '', categoria: 'outros' }, id)
+    expect(nova.itens.map((i) => i.nome)).toEqual(['Molho tomate'])
+    const virgulas = editarItem(lista, 'a', { nome: 'arroz, feijão', quantidade: '', categoria: 'outros' }, id)
+    expect(virgulas.itens.map((i) => i.nome)).toEqual(['Arroz', 'Feijão'])
   })
 })
 

@@ -369,8 +369,13 @@ export function novoIdItem(): string {
 }
 
 /** Transforma o texto digitado em itens prontos (sem id repetido, sem verificar a lista atual). */
-export function interpretarTexto(texto: string, gerarId: () => string = novoIdItem): ItemDeCompra[] {
-  return quebrarEmItens(texto).flatMap(separarItensGrudados).map((pedaco) => {
+export function interpretarTexto(
+  texto: string,
+  gerarId: () => string = novoIdItem,
+  separarGrudados = true,
+): ItemDeCompra[] {
+  const pedacos = quebrarEmItens(texto)
+  return (separarGrudados ? pedacos.flatMap(separarItensGrudados) : pedacos).map((pedaco) => {
     const lido = separarQuantidade(descolarUnidade(pedaco))
     const final = lido.quantidade ? null : quantidadeNoFinal(lido.nome)
     const quantidade = final ? final.quantidade : lido.quantidade
@@ -446,7 +451,9 @@ export function editarItem(
 ): ListaDeCompras {
   const indice = lista.itens.findIndex((i) => i.id === id)
   if (indice < 0) return lista
-  const pedacos = interpretarTexto(dados.nome, gerarId)
+  // Na edição só vírgula, "e" e "+" criam item novo: o separador por dicionário (usado no ditado)
+  // quebrava "molho tomate" ou "leite integral" em dois itens ao acrescentar uma palavra.
+  const pedacos = interpretarTexto(dados.nome, gerarId, false)
   if (pedacos.length === 0) return lista
   const original = lista.itens[indice]
   const quantidadeEditada = dados.quantidade.trim().replace(/\s+/g, ' ')
