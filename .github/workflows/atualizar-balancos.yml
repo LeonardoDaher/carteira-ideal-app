@@ -1,0 +1,59 @@
+# Atualiza os balanços trimestrais das empresas do cadastro (config/acoes.json) para a aba "Balanços" do Simule Ações: o radar das
+# datas de divulgação (estimadas pelo histórico da própria empresa) e a análise do último balanço contra os anteriores. Os dados vêm
+# dos dados abertos da CVM (ITR e DFP, sem chave, sem cota) e vão para webapp-src/public/dados/balancos.json.
+#
+# Depois da CVM, o job consulta a página de cada empresa na B3 (resumo do balanço e aviso de entrega): o balanço aparece no mesmo dia da divulgação,
+# como "provisório", e a CVM completa EBIT, caixa e dívida quando publicar o arquivo aberto (a carga leva uns 8 minutos).
+#
+# Roda de terça a sábado, de madrugada: baixa cerca de 150 MB da CVM e, sem mudança nos dados (só quando alguma empresa divulga),
+# não gera commit nem deploy. Se algo estiver errado (layout da CVM mudou, poucas empresas), o job falha SEM alterar o arquivo.
+name: Atualizar Balanços
+
+on:
+  schedule:
+    - cron: '23 5 * * 2-6' # terça a sábado, 05h23 UTC = 02h23 de Brasília (depois do job de Fundamentos)
+    - cron: '41 14 * * 2-6' # repetição, se a primeira foi perdida (o GitHub atrasa disparos)
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: balancos
+  cancel-in-progress: false
+
+jobs:
+  atualizar:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Testes do cálculo de balanços
+        run: node --test scripts/balancos.test.mjs
+
+      - name: Baixar a CVM e gerar balancos.json
+        run: node scripts/atualizar-balancos.mjs
+
+      - name: Conferir se o site compila com os dados novos
+        run: |
+          npm ci
+          npm run build
+
+      - name: Publicar (commit) se houver mudança
+        run: |
+          if [ -z "$(git status --porcelain webapp-src/public/dados/balancos.json)" ]; then
+            echo "Sem mudanças nos dados."
+            exit 0
+          fi
+          git config user.name "${{ vars.COMMIT_AUTOR_NOME || 'github-actions[bot]' }}"
+          git config user.email "${{ vars.COMMIT_AUTOR_EMAIL || '41898283+github-actions[bot]@users.noreply.github.com' }}"
+          git add webapp-src/public/dados/balancos.json
+          git commit -m "dados: Balanços ($(date -u +%Y-%m-%d))"
+          git pull --rebase
+          git push

@@ -18,6 +18,7 @@ import { AnaliseTecnicaAcao } from './AnaliseTecnicaAcao'
 import { AnaliseFundamentalistaAcao } from './AnaliseFundamentalistaAcao'
 import { ConfluenciaAcao } from './ConfluenciaAcao'
 import { PrecoTetoAcoes } from './PrecoTetoAcoes'
+import { AgendaDeBalancos } from './AgendaDeBalancos'
 import { AgendaDeDividendos } from './AgendaDeDividendos'
 import { SNAPSHOT_ACOES_DIVIDENDOS } from '../data/snapshotAcoesDividendos'
 import { SNAPSHOT_ACOES_ENDIVIDADAS } from '../data/snapshotAcoesEndividadas'
@@ -46,7 +47,7 @@ type Selecao = { origem: 'lista'; acao: Acao; setor: string } | { origem: 'busca
 /** Radares que valem para ações. */
 const SELOS_ACOES = ['dividendos', 'radar', 'maisNegociado', 'indice', 'endividada'] as const satisfies readonly (keyof DestaquesDoAtivo)[]
 
-type AbaAcoes = 'simulador' | 'top15' | 'negociadas' | 'ibov' | 'endividadas' | 'dividendos' | 'tecnica' | 'fundamentalista' | 'confluencia' | 'top15confluencia' | 'precoteto' | 'radar'
+type AbaAcoes = 'simulador' | 'top15' | 'negociadas' | 'ibov' | 'endividadas' | 'dividendos' | 'tecnica' | 'fundamentalista' | 'confluencia' | 'top15confluencia' | 'precoteto' | 'radar' | 'balancos'
 const ABAS_DE_ANALISE: AbaAcoes[] = ['tecnica', 'fundamentalista', 'confluencia']
 const HORIZONTES: Horizonte[] = ['curto', 'medio', 'longo']
 
@@ -170,6 +171,7 @@ export function SimuleAcoes({
             { id: 'dividendos', emoji: '💰', titulo: 'Top 15 pagadoras de dividendos', descricao: 'Dividend yield de 12 meses' },
             { id: 'precoteto', emoji: '🎯', titulo: 'Preço teto de compra', descricao: 'Bazin, Graham e radar' },
             { id: 'radar', emoji: '📅', titulo: 'Agenda de dividendos', descricao: 'O que já foi anunciado, mês a mês' },
+            { id: 'balancos', emoji: '📑', titulo: 'Balanços', descricao: 'Datas de divulgação e análise' },
           ] as const
         ).map((c) => (
           <button
@@ -256,6 +258,8 @@ export function SimuleAcoes({
         <Top15Dividendos />
       ) : aba === 'radar' ? (
         <AgendaDeDividendos />
+      ) : aba === 'balancos' ? (
+        <AgendaDeBalancos />
       ) : aba === 'precoteto' ? (
         <PrecoTetoAcoes busca={buscaCompleta} precoDe={precoDe} nomeDe={(t) => nomeDe(t)} fundamentos={fundamentos} />
       ) : aba === 'top15confluencia' ? (
