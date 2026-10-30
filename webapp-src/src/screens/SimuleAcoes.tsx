@@ -48,6 +48,16 @@ type Selecao = { origem: 'lista'; acao: Acao; setor: string } | { origem: 'busca
 const SELOS_ACOES = ['dividendos', 'radar', 'maisNegociado', 'indice', 'endividada'] as const satisfies readonly (keyof DestaquesDoAtivo)[]
 
 type AbaAcoes = 'simulador' | 'top15' | 'negociadas' | 'ibov' | 'endividadas' | 'dividendos' | 'tecnica' | 'fundamentalista' | 'confluencia' | 'top15confluencia' | 'precoteto' | 'radar' | 'balancos'
+
+/** Os Top 15 de ações ficam todos dentro de um cartão só ("Top 15"), com um cartãozinho para cada lista. */
+const ABAS_TOP15 = [
+  { id: 'top15', emoji: '🏷️', titulo: 'Top 15 mais baratas', descricao: 'Triagem de valor, com auditoria' },
+  { id: 'negociadas', emoji: '📊', titulo: 'Top 15 mais negociadas', descricao: 'Ranking por volume' },
+  { id: 'ibov', emoji: '🏛️', titulo: 'Top 15 do Ibovespa', descricao: 'Maiores pesos do índice' },
+  { id: 'endividadas', emoji: '💳', titulo: 'Top 15 mais endividadas', descricao: 'Dívida líquida ÷ EBITDA' },
+  { id: 'dividendos', emoji: '💰', titulo: 'Top 15 pagadoras de dividendos', descricao: 'Dividend yield de 12 meses' },
+  { id: 'top15confluencia', emoji: '🏆', titulo: 'Top 15 confluência', descricao: 'Positivas e negativas' },
+] as const satisfies readonly { id: AbaAcoes; emoji: string; titulo: string; descricao: string }[]
 const ABAS_DE_ANALISE: AbaAcoes[] = ['tecnica', 'fundamentalista', 'confluencia']
 const HORIZONTES: Horizonte[] = ['curto', 'medio', 'longo']
 
@@ -92,6 +102,7 @@ export function SimuleAcoes({
   const [aba, setAba] = useState<AbaAcoes>('simulador')
   const [horizonte, setHorizonte] = useState<Horizonte>('medio')
   const emAnalise = ABAS_DE_ANALISE.includes(aba)
+  const noTop15 = ABAS_TOP15.some((c) => c.id === aba)
 
   // Preço de fechamento por código (lista por setor e busca), para o valor de mercado e os múltiplos da análise fundamentalista.
   const precoDe = useMemo(() => {
@@ -164,31 +175,54 @@ export function SimuleAcoes({
         {(
           [
             { id: 'simulador', emoji: '🧮', titulo: 'Simulador', descricao: 'Quantas ações o valor compra' },
-            { id: 'top15', emoji: '🏷️', titulo: 'Top 15 mais baratas', descricao: 'Triagem de valor, com auditoria' },
-            { id: 'negociadas', emoji: '📊', titulo: 'Top 15 mais negociadas', descricao: 'Ranking por volume' },
-            { id: 'ibov', emoji: '🏛️', titulo: 'Top 15 do Ibovespa', descricao: 'Maiores pesos do índice' },
-            { id: 'endividadas', emoji: '💳', titulo: 'Top 15 mais endividadas', descricao: 'Dívida líquida ÷ EBITDA' },
-            { id: 'dividendos', emoji: '💰', titulo: 'Top 15 pagadoras de dividendos', descricao: 'Dividend yield de 12 meses' },
+            { id: 'grupotop15', emoji: '🏆', titulo: 'Top 15', descricao: 'Rankings e triagens, em cartões' },
             { id: 'precoteto', emoji: '🎯', titulo: 'Preço teto de compra', descricao: 'Bazin, Graham e radar' },
             { id: 'radar', emoji: '📅', titulo: 'Agenda de dividendos', descricao: 'O que já foi anunciado, mês a mês' },
             { id: 'balancos', emoji: '📑', titulo: 'Balanços', descricao: 'Datas de divulgação e análise' },
           ] as const
-        ).map((c) => (
+        ).map((c) => {
+          const grupo = c.id === 'grupotop15'
+          const marcado = grupo ? noTop15 : aba === c.id
+          return (
           <button
             key={c.id}
             role="tab"
             id={`aba-acoes-${c.id}`}
-            aria-selected={aba === c.id}
+            aria-selected={marcado}
             aria-controls="painel-acoes"
-            className={`vehicle-card ${aba === c.id ? 'selected' : ''}`}
-            onClick={() => setAba(c.id)}
+            className={`vehicle-card ${marcado ? 'selected' : ''}`}
+            onClick={() => setAba(grupo ? (noTop15 ? aba : 'top15') : c.id)}
           >
             <span aria-hidden="true" style={{ fontSize: 24, lineHeight: 1 }}>{c.emoji}</span>
             <span style={{ fontSize: 14 }}>{c.titulo}</span>
             <span style={{ fontSize: 11.5, fontWeight: 400, opacity: 0.85 }}>{c.descricao}</span>
           </button>
-        ))}
+          )
+        })}
       </div>
+
+      {noTop15 && (
+        <div className="card col" style={{ gap: 8 }}>
+          <span style={{ fontWeight: 700 }}>🏆 Top 15</span>
+          <div role="tablist" aria-label="Qual Top 15" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 8 }}>
+            {ABAS_TOP15.map((c) => (
+              <button
+                key={c.id}
+                role="tab"
+                id={`aba-acoes-${c.id}`}
+                aria-selected={aba === c.id}
+                aria-controls="painel-acoes"
+                className={`vehicle-card ${aba === c.id ? 'selected' : ''}`}
+                onClick={() => setAba(c.id)}
+              >
+                <span aria-hidden="true" style={{ fontSize: 20, lineHeight: 1 }}>{c.emoji}</span>
+                <span style={{ fontSize: 13 }}>{c.titulo}</span>
+                <span style={{ fontSize: 11, fontWeight: 400, opacity: 0.85 }}>{c.descricao}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="col" style={{ gap: 6 }}>
         <span className="small muted" style={{ fontWeight: 700 }}>Análise de uma ação</span>
@@ -198,7 +232,6 @@ export function SimuleAcoes({
               { id: 'tecnica', emoji: '📈', titulo: 'Análise técnica', descricao: 'Tendência, níveis e risco' },
               { id: 'fundamentalista', emoji: '🧾', titulo: 'Análise fundamentalista', descricao: 'Balanços, valor justo e notas' },
               { id: 'confluencia', emoji: '🎯', titulo: 'Confluência', descricao: 'Fundamentos × gráfico' },
-              { id: 'top15confluencia', emoji: '🏆', titulo: 'Top 15 confluência', descricao: 'Positivas e negativas' },
             ] as const
           ).map((c) => (
             <button

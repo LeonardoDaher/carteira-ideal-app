@@ -20,6 +20,7 @@ describe('Simule Ações inteiro, com o arquivo de dados no estado que o job gra
   it('abre o Top 15 e PEDE O CÓDIGO, sem nenhuma ação na tela', async () => {
     const ctx = { screen: 'simuleAcoes', setScreen: vi.fn() } as unknown as AppCtx
     render(<SimuleAcoes ctx={ctx} snapshot={{ geradoEm: null, dataPregao: null, setores: [], busca: [] }} />)
+    fireEvent.click(screen.getByRole('tab', { name: /Rankings e triagens/ }))
     fireEvent.click(screen.getByRole('tab', { name: /Top 15 mais baratas/ }))
     expect(await screen.findByTestId('top15-codigo')).toBeTruthy()
     expect(screen.getByLabelText('Código do mês')).toBeTruthy()

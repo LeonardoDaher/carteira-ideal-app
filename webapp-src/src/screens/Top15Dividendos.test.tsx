@@ -162,14 +162,15 @@ describe('domínio de dividendos', () => {
 
 describe('Simule Ações: aba de dividendos', () => {
   const ctx = { screen: 'x', setScreen: vi.fn() } as unknown as AppCtx
-  it('é a sexta aba, abre a lista (ou o "em validação") e dá para voltar ao simulador', () => {
+  it('fica no cartão Top 15, abre a lista (ou o "em validação") e dá para voltar ao simulador', () => {
     render(<SimuleAcoes ctx={ctx} snapshot={{ geradoEm: null, dataPregao: null, fonte: null, cadastroId: null, pregoesNoHistorico: 0, sessoesLiquidez: 21, totais: { setores: 0, empresas: 0 }, gruposOrdem: [], setores: [], busca: [] } as never} />)
     const abas = within(screen.getByRole('tablist', { name: 'O que você quer ver' })).getAllByRole('tab')
-    expect(abas).toHaveLength(8)
-    expect(abas[5].textContent).toContain('Top 15 pagadoras de dividendos')
-    expect(abas[5].textContent).toContain('Dividend yield de 12 meses')
-    fireEvent.click(abas[5])
-    expect(abas[5].getAttribute('aria-selected')).toBe('true')
+    expect(abas).toHaveLength(5)
+    fireEvent.click(abas[1])
+    const cartao = screen.getByRole('tab', { name: /Top 15 pagadoras de dividendos/ })
+    expect(cartao.textContent).toContain('Dividend yield de 12 meses')
+    fireEvent.click(cartao)
+    expect(cartao.getAttribute('aria-selected')).toBe('true')
     expect(screen.queryByTestId('top15-dividendos-validacao') ?? screen.queryByTestId('top15-dividendos')).toBeTruthy()
     fireEvent.click(screen.getByRole('tab', { name: /Simulador/ }))
     expect(screen.queryByTestId('top15-dividendos-validacao') ?? screen.queryByTestId('top15-dividendos')).toBeNull()

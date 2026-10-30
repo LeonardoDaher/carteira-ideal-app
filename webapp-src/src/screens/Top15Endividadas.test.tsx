@@ -166,14 +166,15 @@ describe('domínio das endividadas', () => {
 
 describe('Simule Ações: aba "Top 15 mais endividadas"', () => {
   const ctx = { screen: 'x', setScreen: vi.fn() } as unknown as AppCtx
-  it('é a quinta aba, abre a lista (ou o "em validação") e dá para voltar ao simulador', () => {
+  it('fica no cartão Top 15, abre a lista (ou o "em validação") e dá para voltar ao simulador', () => {
     render(<SimuleAcoes ctx={ctx} snapshot={{ geradoEm: null, dataPregao: null, fonte: null, cadastroId: null, pregoesNoHistorico: 0, sessoesLiquidez: 21, totais: { setores: 0, empresas: 0 }, gruposOrdem: [], setores: [], busca: [] } as never} />)
     const abas = within(screen.getByRole('tablist', { name: 'O que você quer ver' })).getAllByRole('tab')
-    expect(abas).toHaveLength(8)
-    expect(abas[4].textContent).toContain('Top 15 mais endividadas')
-    expect(abas[4].textContent).toContain('Dívida líquida ÷ EBITDA')
-    fireEvent.click(abas[4])
-    expect(abas[4].getAttribute('aria-selected')).toBe('true')
+    expect(abas).toHaveLength(5)
+    fireEvent.click(abas[1])
+    const cartao = screen.getByRole('tab', { name: /Top 15 mais endividadas/ })
+    expect(cartao.textContent).toContain('Dívida líquida ÷ EBITDA')
+    fireEvent.click(cartao)
+    expect(cartao.getAttribute('aria-selected')).toBe('true')
     expect(screen.queryByTestId('top15-endividadas-validacao') ?? screen.queryByTestId('top15-endividadas')).toBeTruthy()
     expect(screen.queryByTestId('top15-acoes-negociadas-validacao')).toBeNull()
     fireEvent.click(screen.getByRole('tab', { name: /Simulador/ }))
