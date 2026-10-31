@@ -3,16 +3,16 @@
   "acessoRestrito": false,
   "instagram": null,
   "versaoMetodologia": "1.1.0",
-  "geradoEm": "2026-10-30T07:43:25.423Z",
-  "dataExecucao": "2026-10-30",
-  "ultimoPregao": "2026-10-29",
+  "geradoEm": "2026-10-31T07:30:02.935Z",
+  "dataExecucao": "2026-10-31",
+  "ultimoPregao": "2026-10-30",
   "pastaAuditoria": "auditoria/top15-acoes/2026-10-17",
-  "hashResultado": "ad2c11a6184a43c8de2ab216daa1cfcb97a5b9bc0cbf1b6e1dbbbdae3f29dedd",
-  "hashInsumos": "806118eac0fda311aa427a412666962831c4e6a9f417faf822de3d68574f27aa",
+  "hashResultado": "14b15ae2b88b10d73c547660fe2e9c1d24f56cd809193fa773bee01fe8141569",
+  "hashInsumos": "d37bf97a08615235a8163d3b6161a0c1ad098aeb916ee6bfbe59323b73427195",
   "hashConfig": "aacef27b68e500564375c495b0a99c2d658312026e876c5d96df38f635cc9ead",
   "tamanhoDaLista": 15,
   "universo": 398,
-  "elegiveis": 206,
+  "elegiveis": 207,
   "aviso": "Não é recomendação de investimento. “Mais negociada” significa apenas maior volume financeiro diário (mediana dos últimos 21 pregões): é liquidez, e não indica qualidade da empresa, preço baixo, bom momento de compra nem adequação ao seu perfil. Uma ação muito negociada pode estar cara, em queda ou em dificuldade. Os números vêm do Boletim de Preços da B3, são do passado e podem conter erros. Rentabilidade passada não garante rentabilidade futura e ações podem causar perda de parte ou de todo o dinheiro aplicado. Converse com um profissional certificado antes de investir.",
   "parametros": {
     "tamanhoDaLista": 15,
@@ -29,36 +29,36 @@
       "ticker": "PETR4",
       "nome": "Petrobras",
       "categoria": "Petróleo e gás",
-      "volumeMediano": 2793039893,
-      "volumeMedio": 3072405601,
+      "volumeMediano": 2811528507,
+      "volumeMedio": 3152844397,
       "diasNegociados": 21,
-      "cotacao": 52.2,
-      "dataCotacao": "2026-10-29",
-      "variacao3m": 21.8,
+      "cotacao": 52.71,
+      "dataCotacao": "2026-10-30",
+      "variacao3m": 21.4,
       "posicaoGeral": 1
+    },
+    {
+      "ticker": "VALE3",
+      "nome": "Vale",
+      "categoria": "Mineração",
+      "volumeMediano": 2085731348,
+      "volumeMedio": 2314351516,
+      "diasNegociados": 21,
+      "cotacao": 62.02,
+      "dataCotacao": "2026-10-30",
+      "variacao3m": -18.7,
+      "posicaoGeral": 2
     },
     {
       "ticker": "ITUB4",
       "nome": "Itaú Unibanco",
       "categoria": "Bancos",
       "volumeMediano": 1978529856,
-      "volumeMedio": 2209997003,
+      "volumeMedio": 2149951224,
       "diasNegociados": 21,
-      "cotacao": 39.54,
-      "dataCotacao": "2026-10-29",
-      "variacao3m": -7.5,
-      "posicaoGeral": 2
-    },
-    {
-      "ticker": "VALE3",
-      "nome": "Vale",
-      "categoria": "Mineração",
-      "volumeMediano": 1914325638,
-      "volumeMedio": 2291760290,
-      "diasNegociados": 21,
-      "cotacao": 60.05,
-      "dataCotacao": "2026-10-29",
-      "variacao3m": -21.1,
+      "cotacao": 38.69,
+      "dataCotacao": "2026-10-30",
+      "variacao3m": -9.8,
       "posicaoGeral": 3
     },
     {
@@ -66,47 +66,47 @@
       "nome": "Bradesco",
       "categoria": "Bancos",
       "volumeMediano": 1675471771,
-      "volumeMedio": 1732500079,
+      "volumeMedio": 1737459682,
       "diasNegociados": 21,
-      "cotacao": 14.16,
-      "dataCotacao": "2026-10-29",
-      "variacao3m": -23,
+      "cotacao": 13.86,
+      "dataCotacao": "2026-10-30",
+      "variacao3m": -24.8,
       "posicaoGeral": 4
+    },
+    {
+      "ticker": "BPAC11",
+      "nome": "BTG Pactual",
+      "categoria": "Bancos",
+      "volumeMediano": 1366514204,
+      "volumeMedio": 1740653547,
+      "diasNegociados": 21,
+      "cotacao": 51.52,
+      "dataCotacao": "2026-10-30",
+      "variacao3m": -9.3,
+      "posicaoGeral": 5
     },
     {
       "ticker": "B3SA3",
       "nome": "B3",
       "categoria": "Bolsa, holdings e serviços financeiros",
       "volumeMediano": 1364313702,
-      "volumeMedio": 1571926159,
+      "volumeMedio": 1596383947,
       "diasNegociados": 21,
-      "cotacao": 14.2,
-      "dataCotacao": "2026-10-29",
-      "variacao3m": -9.1,
-      "posicaoGeral": 5
+      "cotacao": 13.43,
+      "dataCotacao": "2026-10-30",
+      "variacao3m": -14.6,
+      "posicaoGeral": 6
     },
     {
       "ticker": "AXIA3",
       "nome": "Axia Energia (ex-Eletrobras)",
       "categoria": "Energia elétrica: geração",
-      "volumeMediano": 1229150416,
-      "volumeMedio": 1351274650,
+      "volumeMediano": 1163474951,
+      "volumeMedio": 1319634331,
       "diasNegociados": 21,
-      "cotacao": 47.68,
-      "dataCotacao": "2026-10-29",
-      "variacao3m": -10,
-      "posicaoGeral": 6
-    },
-    {
-      "ticker": "BPAC11",
-      "nome": "BTG Pactual",
-      "categoria": "Bancos",
-      "volumeMediano": 1218552093,
-      "volumeMedio": 1697681137,
-      "diasNegociados": 21,
-      "cotacao": 54.04,
-      "dataCotacao": "2026-10-29",
-      "variacao3m": -4.6,
+      "cotacao": 47.43,
+      "dataCotacao": "2026-10-30",
+      "variacao3m": -10.2,
       "posicaoGeral": 7
     },
     {
@@ -114,11 +114,11 @@
       "nome": "Banco do Brasil",
       "categoria": "Bancos",
       "volumeMediano": 1064499975,
-      "volumeMedio": 1466675754,
+      "volumeMedio": 1469514457,
       "diasNegociados": 21,
-      "cotacao": 16.46,
-      "dataCotacao": "2026-10-29",
-      "variacao3m": -22.3,
+      "cotacao": 16.47,
+      "dataCotacao": "2026-10-30",
+      "variacao3m": -22.9,
       "posicaoGeral": 8
     },
     {
@@ -126,11 +126,11 @@
       "nome": "Localiza",
       "categoria": "Locação de veículos e frotas",
       "volumeMediano": 922605453,
-      "volumeMedio": 959788785,
+      "volumeMedio": 941746872,
       "diasNegociados": 21,
-      "cotacao": 29.03,
-      "dataCotacao": "2026-10-29",
-      "variacao3m": -24.1,
+      "cotacao": 27.85,
+      "dataCotacao": "2026-10-30",
+      "variacao3m": -26,
       "posicaoGeral": 9
     },
     {
@@ -138,71 +138,71 @@
       "nome": "Equatorial",
       "categoria": "Energia elétrica: distribuição",
       "volumeMediano": 870565691,
-      "volumeMedio": 927309778,
+      "volumeMedio": 927829642,
       "diasNegociados": 21,
-      "cotacao": 32.9,
-      "dataCotacao": "2026-10-29",
-      "variacao3m": -14.9,
+      "cotacao": 32.6,
+      "dataCotacao": "2026-10-30",
+      "variacao3m": -15.7,
       "posicaoGeral": 10
+    },
+    {
+      "ticker": "PETR3",
+      "nome": "PETR3",
+      "categoria": "Outros",
+      "volumeMediano": 818306982,
+      "volumeMedio": 1048808707,
+      "diasNegociados": 21,
+      "cotacao": 60.01,
+      "dataCotacao": "2026-10-30",
+      "variacao3m": null,
+      "posicaoGeral": 11
     },
     {
       "ticker": "SBSP3",
       "nome": "Sabesp",
       "categoria": "Saneamento e resíduos",
       "volumeMediano": 797758897,
-      "volumeMedio": 964817457,
+      "volumeMedio": 969025910,
       "diasNegociados": 21,
-      "cotacao": 25.14,
-      "dataCotacao": "2026-10-29",
-      "variacao3m": -8.3,
-      "posicaoGeral": 11
-    },
-    {
-      "ticker": "PETR3",
-      "nome": "PETR3",
-      "categoria": "Outros",
-      "volumeMediano": 797053406,
-      "volumeMedio": 1011547889,
-      "diasNegociados": 21,
-      "cotacao": 59.06,
-      "dataCotacao": "2026-10-29",
-      "variacao3m": null,
+      "cotacao": 24.7,
+      "dataCotacao": "2026-10-30",
+      "variacao3m": -10.8,
       "posicaoGeral": 12
-    },
-    {
-      "ticker": "ITSA4",
-      "nome": "Itaúsa",
-      "categoria": "Bolsa, holdings e serviços financeiros",
-      "volumeMediano": 677784458,
-      "volumeMedio": 726998494,
-      "diasNegociados": 21,
-      "cotacao": 12.85,
-      "dataCotacao": "2026-10-29",
-      "variacao3m": -6.9,
-      "posicaoGeral": 13
     },
     {
       "ticker": "WEGE3",
       "nome": "WEG",
       "categoria": "Máquinas, equipamentos e aeroespacial",
-      "volumeMediano": 666214721,
-      "volumeMedio": 770818442,
+      "volumeMediano": 681066369,
+      "volumeMedio": 788831551,
       "diasNegociados": 21,
-      "cotacao": 49.28,
-      "dataCotacao": "2026-10-29",
-      "variacao3m": 5.3,
-      "posicaoGeral": 14
+      "cotacao": 48.36,
+      "dataCotacao": "2026-10-30",
+      "variacao3m": 2.5,
+      "posicaoGeral": 13
     },
     {
       "ticker": "ABEV3",
       "nome": "Ambev",
       "categoria": "Alimentos e bebidas",
       "volumeMediano": 660672222,
-      "volumeMedio": 747904505,
+      "volumeMedio": 760435473,
       "diasNegociados": 21,
-      "cotacao": 14.55,
-      "dataCotacao": "2026-10-29",
-      "variacao3m": -8.8,
+      "cotacao": 14.6,
+      "dataCotacao": "2026-10-30",
+      "variacao3m": -8.7,
+      "posicaoGeral": 14
+    },
+    {
+      "ticker": "ITSA4",
+      "nome": "Itaúsa",
+      "categoria": "Bolsa, holdings e serviços financeiros",
+      "volumeMediano": 641145566,
+      "volumeMedio": 725253785,
+      "diasNegociados": 21,
+      "cotacao": 12.45,
+      "dataCotacao": "2026-10-30",
+      "variacao3m": -9.9,
       "posicaoGeral": 15
     }
   ],
@@ -212,12 +212,12 @@
         "ticker": "PETR4",
         "nome": "Petrobras",
         "categoria": "Petróleo e gás",
-        "volumeMediano": 2793039893,
-        "volumeMedio": 3072405601,
+        "volumeMediano": 2811528507,
+        "volumeMedio": 3152844397,
         "diasNegociados": 21,
-        "cotacao": 52.2,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": 21.8,
+        "cotacao": 52.71,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": 21.4,
         "posicaoGeral": 1,
         "posicaoNaCategoria": 1
       },
@@ -225,11 +225,11 @@
         "ticker": "PRIO3",
         "nome": "PRIO",
         "categoria": "Petróleo e gás",
-        "volumeMediano": 623405924,
-        "volumeMedio": 685370264,
+        "volumeMediano": 638696277,
+        "volumeMedio": 693488483,
         "diasNegociados": 21,
-        "cotacao": 70.47,
-        "dataCotacao": "2026-10-29",
+        "cotacao": 71.49,
+        "dataCotacao": "2026-10-30",
         "variacao3m": 17.5,
         "posicaoGeral": 16,
         "posicaoNaCategoria": 2
@@ -239,12 +239,12 @@
         "nome": "Cosan",
         "categoria": "Petróleo e gás",
         "volumeMediano": 172622629,
-        "volumeMedio": 242234746,
+        "volumeMedio": 239983306,
         "diasNegociados": 21,
-        "cotacao": 2.25,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -43.6,
-        "posicaoGeral": 50,
+        "cotacao": 2.33,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -42.8,
+        "posicaoGeral": 51,
         "posicaoNaCategoria": 3
       },
       {
@@ -252,12 +252,12 @@
         "nome": "Brava Energia",
         "categoria": "Petróleo e gás",
         "volumeMediano": 91788044,
-        "volumeMedio": 90528584,
+        "volumeMedio": 92522650,
         "diasNegociados": 21,
-        "cotacao": 17.86,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -12.4,
-        "posicaoGeral": 78,
+        "cotacao": 18.42,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -7,
+        "posicaoGeral": 79,
         "posicaoNaCategoria": 4
       },
       {
@@ -265,12 +265,12 @@
         "nome": "PetroReconcavo",
         "categoria": "Petróleo e gás",
         "volumeMediano": 27568599,
-        "volumeMedio": 29108851,
+        "volumeMedio": 28790431,
         "diasNegociados": 21,
-        "cotacao": 10.75,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": 1.9,
-        "posicaoGeral": 111,
+        "cotacao": 11.03,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": 3.4,
+        "posicaoGeral": 110,
         "posicaoNaCategoria": 5
       }
     ],
@@ -280,11 +280,11 @@
         "nome": "Vibra Energia",
         "categoria": "Distribuição de combustíveis e etanol",
         "volumeMediano": 533196872,
-        "volumeMedio": 590256615,
+        "volumeMedio": 586512578,
         "diasNegociados": 21,
-        "cotacao": 30.46,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -14.5,
+        "cotacao": 29.6,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -17.9,
         "posicaoGeral": 19,
         "posicaoNaCategoria": 1
       },
@@ -292,12 +292,12 @@
         "ticker": "UGPA3",
         "nome": "Ultrapar",
         "categoria": "Distribuição de combustíveis e etanol",
-        "volumeMediano": 420961010,
-        "volumeMedio": 466318220,
+        "volumeMediano": 400575216,
+        "volumeMedio": 461232518,
         "diasNegociados": 21,
-        "cotacao": 32.01,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -2.8,
+        "cotacao": 31.76,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -3.9,
         "posicaoGeral": 22,
         "posicaoNaCategoria": 2
       },
@@ -305,13 +305,13 @@
         "ticker": "RAIZ4",
         "nome": "Raízen",
         "categoria": "Distribuição de combustíveis e etanol",
-        "volumeMediano": 7992043,
-        "volumeMedio": 9645573,
+        "volumeMediano": 8524443,
+        "volumeMedio": 9918575,
         "diasNegociados": 21,
-        "cotacao": 0.28,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": 7.7,
-        "posicaoGeral": 156,
+        "cotacao": 0.3,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": 15.4,
+        "posicaoGeral": 154,
         "posicaoNaCategoria": 3
       }
     ],
@@ -320,25 +320,25 @@
         "ticker": "VALE3",
         "nome": "Vale",
         "categoria": "Mineração",
-        "volumeMediano": 1914325638,
-        "volumeMedio": 2291760290,
+        "volumeMediano": 2085731348,
+        "volumeMedio": 2314351516,
         "diasNegociados": 21,
-        "cotacao": 60.05,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -21.1,
-        "posicaoGeral": 3,
+        "cotacao": 62.02,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -18.7,
+        "posicaoGeral": 2,
         "posicaoNaCategoria": 1
       },
       {
         "ticker": "BRAP4",
         "nome": "Bradespar",
         "categoria": "Mineração",
-        "volumeMediano": 84015689,
-        "volumeMedio": 104796466,
+        "volumeMediano": 86077774,
+        "volumeMedio": 107626549,
         "diasNegociados": 21,
-        "cotacao": 17.78,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -18.2,
+        "cotacao": 18.27,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -17,
         "posicaoGeral": 82,
         "posicaoNaCategoria": 2
       },
@@ -346,13 +346,13 @@
         "ticker": "CBAV3",
         "nome": "CBA (Companhia Brasileira de Alumínio)",
         "categoria": "Mineração",
-        "volumeMediano": 53016736,
-        "volumeMedio": 61999792,
+        "volumeMediano": 57100607,
+        "volumeMedio": 63375337,
         "diasNegociados": 21,
         "cotacao": 11.27,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": 2.3,
-        "posicaoGeral": 92,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": 1.7,
+        "posicaoGeral": 91,
         "posicaoNaCategoria": 3
       },
       {
@@ -360,11 +360,11 @@
         "nome": "CSN Mineração",
         "categoria": "Mineração",
         "volumeMediano": 40180769,
-        "volumeMedio": 45123835,
+        "volumeMedio": 45383745,
         "diasNegociados": 21,
-        "cotacao": 4.5,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -21.3,
+        "cotacao": 4.86,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -14.9,
         "posicaoGeral": 100,
         "posicaoNaCategoria": 4
       }
@@ -375,11 +375,11 @@
         "nome": "Gerdau",
         "categoria": "Siderurgia e metalurgia",
         "volumeMediano": 301803649,
-        "volumeMedio": 337745746,
+        "volumeMedio": 339507820,
         "diasNegociados": 21,
-        "cotacao": 25.46,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": 1.9,
+        "cotacao": 25.13,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": 0.6,
         "posicaoGeral": 33,
         "posicaoNaCategoria": 1
       },
@@ -387,13 +387,13 @@
         "ticker": "GOAU4",
         "nome": "Metalúrgica Gerdau",
         "categoria": "Siderurgia e metalurgia",
-        "volumeMediano": 143558777,
-        "volumeMedio": 175908041,
+        "volumeMediano": 150912326,
+        "volumeMedio": 184492275,
         "diasNegociados": 21,
-        "cotacao": 11.2,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": 2.2,
-        "posicaoGeral": 59,
+        "cotacao": 11.11,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": 1.7,
+        "posicaoGeral": 54,
         "posicaoNaCategoria": 2
       },
       {
@@ -401,25 +401,25 @@
         "nome": "CSN",
         "categoria": "Siderurgia e metalurgia",
         "volumeMediano": 130682140,
-        "volumeMedio": 138147008,
+        "volumeMedio": 136652070,
         "diasNegociados": 21,
-        "cotacao": 4.24,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -14.3,
-        "posicaoGeral": 62,
+        "cotacao": 3.88,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -19.8,
+        "posicaoGeral": 61,
         "posicaoNaCategoria": 3
       },
       {
         "ticker": "USIM5",
         "nome": "Usiminas",
         "categoria": "Siderurgia e metalurgia",
-        "volumeMediano": 87348308,
-        "volumeMedio": 98696670,
+        "volumeMediano": 96369312,
+        "volumeMedio": 102985802,
         "diasNegociados": 21,
-        "cotacao": 5.47,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -27.5,
-        "posicaoGeral": 80,
+        "cotacao": 5,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -32.1,
+        "posicaoGeral": 77,
         "posicaoNaCategoria": 4
       },
       {
@@ -427,11 +427,11 @@
         "nome": "Ferbasa",
         "categoria": "Siderurgia e metalurgia",
         "volumeMediano": 9853806,
-        "volumeMedio": 10360992,
+        "volumeMedio": 10316952,
         "diasNegociados": 21,
-        "cotacao": 5.15,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -14.3,
+        "cotacao": 5,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -16.5,
         "posicaoGeral": 151,
         "posicaoNaCategoria": 5
       }
@@ -441,39 +441,39 @@
         "ticker": "SUZB3",
         "nome": "Suzano",
         "categoria": "Papel, celulose e madeira",
-        "volumeMediano": 285729031,
-        "volumeMedio": 465448734,
+        "volumeMediano": 293970509,
+        "volumeMedio": 485778272,
         "diasNegociados": 21,
-        "cotacao": 49.72,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": 16.4,
-        "posicaoGeral": 35,
+        "cotacao": 50.14,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": 15.7,
+        "posicaoGeral": 34,
         "posicaoNaCategoria": 1
       },
       {
         "ticker": "KLBN11",
         "nome": "Klabin",
         "categoria": "Papel, celulose e madeira",
-        "volumeMediano": 115671850,
-        "volumeMedio": 149248419,
+        "volumeMediano": 126265451,
+        "volumeMedio": 151422119,
         "diasNegociados": 21,
-        "cotacao": 17.37,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -3.8,
-        "posicaoGeral": 65,
+        "cotacao": 17.2,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -5.8,
+        "posicaoGeral": 64,
         "posicaoNaCategoria": 2
       },
       {
         "ticker": "RANI3",
         "nome": "Irani",
         "categoria": "Papel, celulose e madeira",
-        "volumeMediano": 7446814,
-        "volumeMedio": 10215735,
+        "volumeMediano": 7992023,
+        "volumeMedio": 10905259,
         "diasNegociados": 21,
-        "cotacao": 6.93,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -13.7,
-        "posicaoGeral": 158,
+        "cotacao": 7.59,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -6.4,
+        "posicaoGeral": 157,
         "posicaoNaCategoria": 3
       },
       {
@@ -481,12 +481,12 @@
         "nome": "Eucatex",
         "categoria": "Papel, celulose e madeira",
         "volumeMediano": 1958490,
-        "volumeMedio": 2129800,
+        "volumeMedio": 2057382,
         "diasNegociados": 21,
-        "cotacao": 19.41,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -14.2,
-        "posicaoGeral": 196,
+        "cotacao": 18.65,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -18.9,
+        "posicaoGeral": 197,
         "posicaoNaCategoria": 4
       }
     ],
@@ -496,12 +496,12 @@
         "nome": "Braskem",
         "categoria": "Química e petroquímica",
         "volumeMediano": 26241754,
-        "volumeMedio": 25091340,
+        "volumeMedio": 24681422,
         "diasNegociados": 21,
-        "cotacao": 3.02,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -49.1,
-        "posicaoGeral": 113,
+        "cotacao": 2.99,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -49.9,
+        "posicaoGeral": 111,
         "posicaoNaCategoria": 1
       },
       {
@@ -509,12 +509,12 @@
         "nome": "Unipar",
         "categoria": "Química e petroquímica",
         "volumeMediano": 21993576,
-        "volumeMedio": 23726836,
+        "volumeMedio": 23677019,
         "diasNegociados": 21,
-        "cotacao": 50,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -20.3,
-        "posicaoGeral": 121,
+        "cotacao": 51,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -19.3,
+        "posicaoGeral": 120,
         "posicaoNaCategoria": 2
       },
       {
@@ -522,12 +522,12 @@
         "nome": "Vittia",
         "categoria": "Química e petroquímica",
         "volumeMediano": 1027887,
-        "volumeMedio": 1227611,
+        "volumeMedio": 1287927,
         "diasNegociados": 21,
         "cotacao": 2.6,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -16.1,
-        "posicaoGeral": 205,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -14.2,
+        "posicaoGeral": 206,
         "posicaoNaCategoria": 3
       }
     ],
@@ -536,13 +536,13 @@
         "ticker": "WEGE3",
         "nome": "WEG",
         "categoria": "Máquinas, equipamentos e aeroespacial",
-        "volumeMediano": 666214721,
-        "volumeMedio": 770818442,
+        "volumeMediano": 681066369,
+        "volumeMedio": 788831551,
         "diasNegociados": 21,
-        "cotacao": 49.28,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": 5.3,
-        "posicaoGeral": 14,
+        "cotacao": 48.36,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": 2.5,
+        "posicaoGeral": 13,
         "posicaoNaCategoria": 1
       },
       {
@@ -550,10 +550,10 @@
         "nome": "Embraer",
         "categoria": "Máquinas, equipamentos e aeroespacial",
         "volumeMediano": 597830402,
-        "volumeMedio": 732196930,
+        "volumeMedio": 731241889,
         "diasNegociados": 21,
-        "cotacao": 102.4,
-        "dataCotacao": "2026-10-29",
+        "cotacao": 99.62,
+        "dataCotacao": "2026-10-30",
         "variacao3m": null,
         "posicaoGeral": 17,
         "posicaoNaCategoria": 2
@@ -563,25 +563,25 @@
         "nome": "Tupy",
         "categoria": "Máquinas, equipamentos e aeroespacial",
         "volumeMediano": 20990415,
-        "volumeMedio": 24121472,
+        "volumeMedio": 24383481,
         "diasNegociados": 21,
-        "cotacao": 15.03,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -4.9,
-        "posicaoGeral": 123,
+        "cotacao": 14.46,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -8,
+        "posicaoGeral": 124,
         "posicaoNaCategoria": 3
       },
       {
         "ticker": "KEPL3",
         "nome": "Kepler Weber",
         "categoria": "Máquinas, equipamentos e aeroespacial",
-        "volumeMediano": 16732825,
-        "volumeMedio": 17709629,
+        "volumeMediano": 16811709,
+        "volumeMedio": 17956704,
         "diasNegociados": 21,
-        "cotacao": 6.4,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -1.4,
-        "posicaoGeral": 132,
+        "cotacao": 6.27,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -1.7,
+        "posicaoGeral": 133,
         "posicaoNaCategoria": 4
       },
       {
@@ -589,12 +589,12 @@
         "nome": "Iochpe-Maxion",
         "categoria": "Máquinas, equipamentos e aeroespacial",
         "volumeMediano": 13625317,
-        "volumeMedio": 14012972,
+        "volumeMedio": 14305492,
         "diasNegociados": 21,
-        "cotacao": 8.51,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -11,
-        "posicaoGeral": 138,
+        "cotacao": 8.12,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -16.4,
+        "posicaoGeral": 140,
         "posicaoNaCategoria": 5
       }
     ],
@@ -603,13 +603,13 @@
         "ticker": "POMO4",
         "nome": "Marcopolo",
         "categoria": "Autopeças e veículos",
-        "volumeMediano": 96909742,
-        "volumeMedio": 107658099,
+        "volumeMediano": 99576173,
+        "volumeMedio": 108682239,
         "diasNegociados": 21,
-        "cotacao": 3.8,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -28.8,
-        "posicaoGeral": 76,
+        "cotacao": 3.7,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -30.3,
+        "posicaoGeral": 75,
         "posicaoNaCategoria": 1
       },
       {
@@ -617,11 +617,11 @@
         "nome": "Randon",
         "categoria": "Autopeças e veículos",
         "volumeMediano": 38282669,
-        "volumeMedio": 45313322,
+        "volumeMedio": 45309714,
         "diasNegociados": 21,
-        "cotacao": 3.53,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -27.7,
+        "cotacao": 3.42,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -30.2,
         "posicaoGeral": 101,
         "posicaoNaCategoria": 2
       },
@@ -630,25 +630,25 @@
         "nome": "Mahle Metal Leve",
         "categoria": "Autopeças e veículos",
         "volumeMediano": 18301695,
-        "volumeMedio": 19223440,
+        "volumeMedio": 19595331,
         "diasNegociados": 21,
-        "cotacao": 30.35,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -4,
-        "posicaoGeral": 127,
+        "cotacao": 30.26,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -5.1,
+        "posicaoGeral": 129,
         "posicaoNaCategoria": 3
       },
       {
         "ticker": "FRAS3",
         "nome": "Fras-le",
         "categoria": "Autopeças e veículos",
-        "volumeMediano": 11060952,
-        "volumeMedio": 12398528,
+        "volumeMediano": 11644724,
+        "volumeMedio": 13163142,
         "diasNegociados": 21,
-        "cotacao": 20.14,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -3.3,
-        "posicaoGeral": 146,
+        "cotacao": 20.17,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -4.7,
+        "posicaoGeral": 145,
         "posicaoNaCategoria": 4
       }
     ],
@@ -657,12 +657,12 @@
         "ticker": "MOTV3",
         "nome": "Motiva (ex-CCR)",
         "categoria": "Transporte e infraestrutura",
-        "volumeMediano": 352095913,
-        "volumeMedio": 418141240,
+        "volumeMediano": 345745641,
+        "volumeMedio": 413227247,
         "diasNegociados": 21,
-        "cotacao": 14.22,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -4.5,
+        "cotacao": 14,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -5.1,
         "posicaoGeral": 28,
         "posicaoNaCategoria": 1
       },
@@ -671,12 +671,12 @@
         "nome": "Rumo",
         "categoria": "Transporte e infraestrutura",
         "volumeMediano": 334588508,
-        "volumeMedio": 351931853,
+        "volumeMedio": 355423435,
         "diasNegociados": 21,
-        "cotacao": 14.24,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -0.3,
-        "posicaoGeral": 29,
+        "cotacao": 13.78,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -4.6,
+        "posicaoGeral": 30,
         "posicaoNaCategoria": 2
       },
       {
@@ -684,12 +684,12 @@
         "nome": "Ecorodovias",
         "categoria": "Transporte e infraestrutura",
         "volumeMediano": 215793706,
-        "volumeMedio": 235754663,
+        "volumeMedio": 234461452,
         "diasNegociados": 21,
-        "cotacao": 5.2,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -26,
-        "posicaoGeral": 41,
+        "cotacao": 4.89,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -29.4,
+        "posicaoGeral": 42,
         "posicaoNaCategoria": 3
       },
       {
@@ -697,12 +697,12 @@
         "nome": "JSL",
         "categoria": "Transporte e infraestrutura",
         "volumeMediano": 24584479,
-        "volumeMedio": 29831671,
+        "volumeMedio": 29571523,
         "diasNegociados": 21,
-        "cotacao": 5.26,
-        "dataCotacao": "2026-10-29",
+        "cotacao": 5.44,
+        "dataCotacao": "2026-10-30",
         "variacao3m": null,
-        "posicaoGeral": 117,
+        "posicaoGeral": 116,
         "posicaoNaCategoria": 4
       },
       {
@@ -710,12 +710,12 @@
         "nome": "Tegma",
         "categoria": "Transporte e infraestrutura",
         "volumeMediano": 21068670,
-        "volumeMedio": 27112710,
+        "volumeMedio": 27173816,
         "diasNegociados": 21,
-        "cotacao": 36.07,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": 18.1,
-        "posicaoGeral": 122,
+        "cotacao": 36.02,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": 18.3,
+        "posicaoGeral": 123,
         "posicaoNaCategoria": 5
       }
     ],
@@ -725,11 +725,11 @@
         "nome": "Localiza",
         "categoria": "Locação de veículos e frotas",
         "volumeMediano": 922605453,
-        "volumeMedio": 959788785,
+        "volumeMedio": 941746872,
         "diasNegociados": 21,
-        "cotacao": 29.03,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -24.1,
+        "cotacao": 27.85,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -26,
         "posicaoGeral": 9,
         "posicaoNaCategoria": 1
       },
@@ -738,11 +738,11 @@
         "nome": "Movida",
         "categoria": "Locação de veículos e frotas",
         "volumeMediano": 256778680,
-        "volumeMedio": 297916643,
+        "volumeMedio": 298917874,
         "diasNegociados": 21,
-        "cotacao": 5.87,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -26.5,
+        "cotacao": 5.61,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -28.8,
         "posicaoGeral": 38,
         "posicaoNaCategoria": 2
       },
@@ -751,12 +751,12 @@
         "nome": "Vamos",
         "categoria": "Locação de veículos e frotas",
         "volumeMediano": 208875197,
-        "volumeMedio": 201654836,
+        "volumeMedio": 203337112,
         "diasNegociados": 21,
-        "cotacao": 2.46,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -28.1,
-        "posicaoGeral": 43,
+        "cotacao": 2.38,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -28.7,
+        "posicaoGeral": 44,
         "posicaoNaCategoria": 3
       },
       {
@@ -764,11 +764,11 @@
         "nome": "Simpar",
         "categoria": "Locação de veículos e frotas",
         "volumeMediano": 147111603,
-        "volumeMedio": 143122236,
+        "volumeMedio": 141673144,
         "diasNegociados": 21,
-        "cotacao": 4.83,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -37.5,
+        "cotacao": 4.84,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -37.2,
         "posicaoGeral": 58,
         "posicaoNaCategoria": 4
       },
@@ -777,40 +777,40 @@
         "nome": "Armac",
         "categoria": "Locação de veículos e frotas",
         "volumeMediano": 9875356,
-        "volumeMedio": 10550262,
+        "volumeMedio": 10699200,
         "diasNegociados": 21,
-        "cotacao": 2.98,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -12.4,
+        "cotacao": 2.97,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -16.6,
         "posicaoGeral": 150,
         "posicaoNaCategoria": 5
       }
     ],
     "Serviços e locação de equipamentos": [
       {
+        "ticker": "MILS3",
+        "nome": "Mills",
+        "categoria": "Serviços e locação de equipamentos",
+        "volumeMediano": 18314646,
+        "volumeMedio": 30232114,
+        "diasNegociados": 21,
+        "cotacao": 15.58,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -1.1,
+        "posicaoGeral": 128,
+        "posicaoNaCategoria": 1
+      },
+      {
         "ticker": "PRNR3",
         "nome": "Priner",
         "categoria": "Serviços e locação de equipamentos",
         "volumeMediano": 17788748,
-        "volumeMedio": 21728113,
+        "volumeMedio": 22003344,
         "diasNegociados": 21,
-        "cotacao": 12.32,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -36.6,
-        "posicaoGeral": 129,
-        "posicaoNaCategoria": 1
-      },
-      {
-        "ticker": "MILS3",
-        "nome": "Mills",
-        "categoria": "Serviços e locação de equipamentos",
-        "volumeMediano": 16098218,
-        "volumeMedio": 27950250,
-        "diasNegociados": 21,
-        "cotacao": 15.35,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -1.9,
-        "posicaoGeral": 133,
+        "cotacao": 12.12,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -38.6,
+        "posicaoGeral": 131,
         "posicaoNaCategoria": 2
       }
     ],
@@ -819,13 +819,13 @@
         "ticker": "AXIA3",
         "nome": "Axia Energia (ex-Eletrobras)",
         "categoria": "Energia elétrica: geração",
-        "volumeMediano": 1229150416,
-        "volumeMedio": 1351274650,
+        "volumeMediano": 1163474951,
+        "volumeMedio": 1319634331,
         "diasNegociados": 21,
-        "cotacao": 47.68,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -10,
-        "posicaoGeral": 6,
+        "cotacao": 47.43,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -10.2,
+        "posicaoGeral": 7,
         "posicaoNaCategoria": 1
       },
       {
@@ -833,11 +833,11 @@
         "nome": "Eneva",
         "categoria": "Energia elétrica: geração",
         "volumeMediano": 443296349,
-        "volumeMedio": 490859777,
+        "volumeMedio": 495117652,
         "diasNegociados": 21,
-        "cotacao": 25.83,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -1.2,
+        "cotacao": 25.7,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -2.3,
         "posicaoGeral": 20,
         "posicaoNaCategoria": 2
       },
@@ -846,12 +846,12 @@
         "nome": "Engie Brasil",
         "categoria": "Energia elétrica: geração",
         "volumeMediano": 114876620,
-        "volumeMedio": 128900404,
+        "volumeMedio": 130434020,
         "diasNegociados": 21,
-        "cotacao": 26.46,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -11.8,
-        "posicaoGeral": 66,
+        "cotacao": 26.26,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -11.9,
+        "posicaoGeral": 68,
         "posicaoNaCategoria": 3
       },
       {
@@ -859,12 +859,12 @@
         "nome": "Auren Energia",
         "categoria": "Energia elétrica: geração",
         "volumeMediano": 87679624,
-        "volumeMedio": 99607726,
+        "volumeMedio": 100600111,
         "diasNegociados": 21,
-        "cotacao": 10.97,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -2.1,
-        "posicaoGeral": 79,
+        "cotacao": 10.87,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -1,
+        "posicaoGeral": 80,
         "posicaoNaCategoria": 4
       }
     ],
@@ -873,26 +873,26 @@
         "ticker": "CMIG4",
         "nome": "Cemig",
         "categoria": "Energia elétrica: transmissão",
-        "volumeMediano": 205467803,
-        "volumeMedio": 254094577,
+        "volumeMediano": 235755247,
+        "volumeMedio": 257178358,
         "diasNegociados": 21,
         "cotacao": 10.07,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -10.3,
-        "posicaoGeral": 44,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -11.2,
+        "posicaoGeral": 40,
         "posicaoNaCategoria": 1
       },
       {
         "ticker": "TAEE11",
         "nome": "Taesa",
         "categoria": "Energia elétrica: transmissão",
-        "volumeMediano": 111707632,
-        "volumeMedio": 144183288,
+        "volumeMediano": 118264389,
+        "volumeMedio": 145213421,
         "diasNegociados": 21,
-        "cotacao": 39.2,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -1.7,
-        "posicaoGeral": 69,
+        "cotacao": 39.59,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -0.2,
+        "posicaoGeral": 67,
         "posicaoNaCategoria": 2
       },
       {
@@ -900,24 +900,24 @@
         "nome": "ISA Energia",
         "categoria": "Energia elétrica: transmissão",
         "volumeMediano": 104977631,
-        "volumeMedio": 180087576,
+        "volumeMedio": 144463057,
         "diasNegociados": 21,
-        "cotacao": 24.9,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -7,
-        "posicaoGeral": 70,
+        "cotacao": 24.76,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -7.9,
+        "posicaoGeral": 71,
         "posicaoNaCategoria": 3
       },
       {
         "ticker": "ALUP11",
         "nome": "Alupar",
         "categoria": "Energia elétrica: transmissão",
-        "volumeMediano": 60130724,
-        "volumeMedio": 71613268,
+        "volumeMediano": 61902243,
+        "volumeMedio": 73901470,
         "diasNegociados": 21,
-        "cotacao": 31.29,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -4.1,
+        "cotacao": 31.4,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -3.7,
         "posicaoGeral": 90,
         "posicaoNaCategoria": 4
       }
@@ -928,11 +928,11 @@
         "nome": "Equatorial",
         "categoria": "Energia elétrica: distribuição",
         "volumeMediano": 870565691,
-        "volumeMedio": 927309778,
+        "volumeMedio": 927829642,
         "diasNegociados": 21,
-        "cotacao": 32.9,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -14.9,
+        "cotacao": 32.6,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -15.7,
         "posicaoGeral": 10,
         "posicaoNaCategoria": 1
       },
@@ -940,12 +940,12 @@
         "ticker": "CPLE3",
         "nome": "Copel",
         "categoria": "Energia elétrica: distribuição",
-        "volumeMediano": 421695856,
-        "volumeMedio": 498202442,
+        "volumeMediano": 428617173,
+        "volumeMedio": 507442787,
         "diasNegociados": 21,
-        "cotacao": 14.5,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -2.6,
+        "cotacao": 14.32,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -3.4,
         "posicaoGeral": 21,
         "posicaoNaCategoria": 2
       },
@@ -954,11 +954,11 @@
         "nome": "Energisa",
         "categoria": "Energia elétrica: distribuição",
         "volumeMediano": 354446232,
-        "volumeMedio": 366248842,
+        "volumeMedio": 374866816,
         "diasNegociados": 21,
-        "cotacao": 44.5,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -10.3,
+        "cotacao": 44.29,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -11.1,
         "posicaoGeral": 27,
         "posicaoNaCategoria": 3
       },
@@ -966,12 +966,12 @@
         "ticker": "CPFE3",
         "nome": "CPFL Energia",
         "categoria": "Energia elétrica: distribuição",
-        "volumeMediano": 99567412,
-        "volumeMedio": 126635361,
+        "volumeMediano": 100986706,
+        "volumeMedio": 127195608,
         "diasNegociados": 21,
-        "cotacao": 42.51,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -7.8,
+        "cotacao": 41.9,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -9.2,
         "posicaoGeral": 74,
         "posicaoNaCategoria": 4
       },
@@ -979,13 +979,13 @@
         "ticker": "LIGT3",
         "nome": "Light",
         "categoria": "Energia elétrica: distribuição",
-        "volumeMediano": 17006062,
-        "volumeMedio": 20880583,
+        "volumeMediano": 16561879,
+        "volumeMedio": 20490661,
         "diasNegociados": 21,
-        "cotacao": 2.38,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -28.7,
-        "posicaoGeral": 131,
+        "cotacao": 2.49,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -23.6,
+        "posicaoGeral": 134,
         "posicaoNaCategoria": 5
       }
     ],
@@ -995,12 +995,12 @@
         "nome": "Sabesp",
         "categoria": "Saneamento e resíduos",
         "volumeMediano": 797758897,
-        "volumeMedio": 964817457,
+        "volumeMedio": 969025910,
         "diasNegociados": 21,
-        "cotacao": 25.14,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -8.3,
-        "posicaoGeral": 11,
+        "cotacao": 24.7,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -10.8,
+        "posicaoGeral": 12,
         "posicaoNaCategoria": 1
       },
       {
@@ -1008,11 +1008,11 @@
         "nome": "Copasa",
         "categoria": "Saneamento e resíduos",
         "volumeMediano": 384336266,
-        "volumeMedio": 425903572,
+        "volumeMedio": 430401368,
         "diasNegociados": 21,
-        "cotacao": 49.11,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -22.7,
+        "cotacao": 48.11,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -25,
         "posicaoGeral": 25,
         "posicaoNaCategoria": 2
       },
@@ -1021,11 +1021,11 @@
         "nome": "Sanepar",
         "categoria": "Saneamento e resíduos",
         "volumeMediano": 86977672,
-        "volumeMedio": 111899207,
+        "volumeMedio": 113146667,
         "diasNegociados": 21,
-        "cotacao": 31.85,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -12.4,
+        "cotacao": 30.85,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -14.8,
         "posicaoGeral": 81,
         "posicaoNaCategoria": 3
       },
@@ -1034,11 +1034,11 @@
         "nome": "Orizon",
         "categoria": "Saneamento e resíduos",
         "volumeMediano": 80154177,
-        "volumeMedio": 103790029,
+        "volumeMedio": 102618975,
         "diasNegociados": 21,
-        "cotacao": 15.88,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -77.1,
+        "cotacao": 15.96,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -77.4,
         "posicaoGeral": 83,
         "posicaoNaCategoria": 4
       }
@@ -1049,12 +1049,12 @@
         "nome": "Itaú Unibanco",
         "categoria": "Bancos",
         "volumeMediano": 1978529856,
-        "volumeMedio": 2209997003,
+        "volumeMedio": 2149951224,
         "diasNegociados": 21,
-        "cotacao": 39.54,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -7.5,
-        "posicaoGeral": 2,
+        "cotacao": 38.69,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -9.8,
+        "posicaoGeral": 3,
         "posicaoNaCategoria": 1
       },
       {
@@ -1062,11 +1062,11 @@
         "nome": "Bradesco",
         "categoria": "Bancos",
         "volumeMediano": 1675471771,
-        "volumeMedio": 1732500079,
+        "volumeMedio": 1737459682,
         "diasNegociados": 21,
-        "cotacao": 14.16,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -23,
+        "cotacao": 13.86,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -24.8,
         "posicaoGeral": 4,
         "posicaoNaCategoria": 2
       },
@@ -1074,13 +1074,13 @@
         "ticker": "BPAC11",
         "nome": "BTG Pactual",
         "categoria": "Bancos",
-        "volumeMediano": 1218552093,
-        "volumeMedio": 1697681137,
+        "volumeMediano": 1366514204,
+        "volumeMedio": 1740653547,
         "diasNegociados": 21,
-        "cotacao": 54.04,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -4.6,
-        "posicaoGeral": 7,
+        "cotacao": 51.52,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -9.3,
+        "posicaoGeral": 5,
         "posicaoNaCategoria": 3
       },
       {
@@ -1088,11 +1088,11 @@
         "nome": "Banco do Brasil",
         "categoria": "Bancos",
         "volumeMediano": 1064499975,
-        "volumeMedio": 1466675754,
+        "volumeMedio": 1469514457,
         "diasNegociados": 21,
-        "cotacao": 16.46,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -22.3,
+        "cotacao": 16.47,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -22.9,
         "posicaoGeral": 8,
         "posicaoNaCategoria": 4
       },
@@ -1101,11 +1101,11 @@
         "nome": "Santander Brasil",
         "categoria": "Bancos",
         "volumeMediano": 170025857,
-        "volumeMedio": 205106120,
+        "volumeMedio": 204466962,
         "diasNegociados": 21,
-        "cotacao": 24.64,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -2.4,
+        "cotacao": 23.94,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -16.4,
         "posicaoGeral": 52,
         "posicaoNaCategoria": 5
       }
@@ -1116,11 +1116,11 @@
         "nome": "BB Seguridade",
         "categoria": "Seguros e previdência",
         "volumeMediano": 310934021,
-        "volumeMedio": 359631443,
+        "volumeMedio": 359531937,
         "diasNegociados": 21,
-        "cotacao": 42.05,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": 2.9,
+        "cotacao": 41.32,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": 0.1,
         "posicaoGeral": 32,
         "posicaoNaCategoria": 1
       },
@@ -1129,37 +1129,37 @@
         "nome": "Caixa Seguridade",
         "categoria": "Seguros e previdência",
         "volumeMediano": 211077016,
-        "volumeMedio": 236835995,
+        "volumeMedio": 237613650,
         "diasNegociados": 21,
-        "cotacao": 21.5,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": 6.9,
-        "posicaoGeral": 42,
+        "cotacao": 21.38,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": 5.6,
+        "posicaoGeral": 43,
         "posicaoNaCategoria": 2
       },
       {
         "ticker": "PSSA3",
         "nome": "Porto Seguro",
         "categoria": "Seguros e previdência",
-        "volumeMediano": 113089073,
-        "volumeMedio": 141301243,
+        "volumeMediano": 110455325,
+        "volumeMedio": 136932916,
         "diasNegociados": 21,
-        "cotacao": 45.86,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -15.6,
-        "posicaoGeral": 67,
+        "cotacao": 44.75,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -18.2,
+        "posicaoGeral": 69,
         "posicaoNaCategoria": 3
       },
       {
         "ticker": "IRBR3",
         "nome": "IRB Brasil RE",
         "categoria": "Seguros e previdência",
-        "volumeMediano": 68056112,
-        "volumeMedio": 76742107,
+        "volumeMediano": 68305678,
+        "volumeMedio": 77806827,
         "diasNegociados": 21,
-        "cotacao": 55.5,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": 2.2,
+        "cotacao": 55.68,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -0.7,
         "posicaoGeral": 86,
         "posicaoNaCategoria": 4
       },
@@ -1168,11 +1168,11 @@
         "nome": "Wiz Soluções",
         "categoria": "Seguros e previdência",
         "volumeMediano": 6358072,
-        "volumeMedio": 10927402,
+        "volumeMedio": 11071800,
         "diasNegociados": 21,
-        "cotacao": 5.81,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -29.4,
+        "cotacao": 5.87,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -29.7,
         "posicaoGeral": 163,
         "posicaoNaCategoria": 5
       }
@@ -1183,25 +1183,25 @@
         "nome": "B3",
         "categoria": "Bolsa, holdings e serviços financeiros",
         "volumeMediano": 1364313702,
-        "volumeMedio": 1571926159,
+        "volumeMedio": 1596383947,
         "diasNegociados": 21,
-        "cotacao": 14.2,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -9.1,
-        "posicaoGeral": 5,
+        "cotacao": 13.43,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -14.6,
+        "posicaoGeral": 6,
         "posicaoNaCategoria": 1
       },
       {
         "ticker": "ITSA4",
         "nome": "Itaúsa",
         "categoria": "Bolsa, holdings e serviços financeiros",
-        "volumeMediano": 677784458,
-        "volumeMedio": 726998494,
+        "volumeMediano": 641145566,
+        "volumeMedio": 725253785,
         "diasNegociados": 21,
-        "cotacao": 12.85,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -6.9,
-        "posicaoGeral": 13,
+        "cotacao": 12.45,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -9.9,
+        "posicaoGeral": 15,
         "posicaoNaCategoria": 2
       },
       {
@@ -1209,11 +1209,11 @@
         "nome": "Méliuz",
         "categoria": "Bolsa, holdings e serviços financeiros",
         "volumeMediano": 6894340,
-        "volumeMedio": 9178023,
+        "volumeMedio": 9119097,
         "diasNegociados": 21,
-        "cotacao": 4.18,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -6.1,
+        "cotacao": 4.13,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -9.8,
         "posicaoGeral": 160,
         "posicaoNaCategoria": 3
       }
@@ -1223,52 +1223,52 @@
         "ticker": "ALOS3",
         "nome": "Allos",
         "categoria": "Shoppings e imóveis comerciais",
-        "volumeMediano": 328382431,
-        "volumeMedio": 355004806,
+        "volumeMediano": 344964601,
+        "volumeMedio": 356373731,
         "diasNegociados": 21,
-        "cotacao": 23.55,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -13.5,
-        "posicaoGeral": 30,
+        "cotacao": 23.5,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -13.3,
+        "posicaoGeral": 29,
         "posicaoNaCategoria": 1
       },
       {
         "ticker": "MULT3",
         "nome": "Multiplan",
         "categoria": "Shoppings e imóveis comerciais",
-        "volumeMediano": 237357350,
-        "volumeMedio": 359452692,
+        "volumeMediano": 285774763,
+        "volumeMedio": 364920767,
         "diasNegociados": 21,
-        "cotacao": 25.27,
-        "dataCotacao": "2026-10-29",
+        "cotacao": 25.19,
+        "dataCotacao": "2026-10-30",
         "variacao3m": -10.5,
-        "posicaoGeral": 39,
+        "posicaoGeral": 36,
         "posicaoNaCategoria": 2
       },
       {
         "ticker": "IGTI11",
         "nome": "Iguatemi",
         "categoria": "Shoppings e imóveis comerciais",
-        "volumeMediano": 170551684,
-        "volumeMedio": 188582648,
+        "volumeMediano": 183319049,
+        "volumeMedio": 194950404,
         "diasNegociados": 21,
-        "cotacao": 22.2,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -11.6,
-        "posicaoGeral": 51,
+        "cotacao": 21.79,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -12.2,
+        "posicaoGeral": 48,
         "posicaoNaCategoria": 3
       },
       {
         "ticker": "JHSF3",
         "nome": "JHSF",
         "categoria": "Shoppings e imóveis comerciais",
-        "volumeMediano": 65091451,
-        "volumeMedio": 71521600,
+        "volumeMediano": 66215366,
+        "volumeMedio": 73526464,
         "diasNegociados": 21,
-        "cotacao": 8.7,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -22.4,
-        "posicaoGeral": 89,
+        "cotacao": 8.97,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -18.9,
+        "posicaoGeral": 88,
         "posicaoNaCategoria": 4
       },
       {
@@ -1276,11 +1276,11 @@
         "nome": "LOG Commercial Properties",
         "categoria": "Shoppings e imóveis comerciais",
         "volumeMediano": 29424041,
-        "volumeMedio": 28603181,
+        "volumeMedio": 29222195,
         "diasNegociados": 21,
-        "cotacao": 19.83,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -22.6,
+        "cotacao": 20.23,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -20.4,
         "posicaoGeral": 108,
         "posicaoNaCategoria": 5
       }
@@ -1291,11 +1291,11 @@
         "nome": "Cyrela",
         "categoria": "Construção civil e incorporação",
         "volumeMediano": 393052576,
-        "volumeMedio": 452891856,
+        "volumeMedio": 454691881,
         "diasNegociados": 21,
-        "cotacao": 17.37,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -19.3,
+        "cotacao": 17.09,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -20,
         "posicaoGeral": 24,
         "posicaoNaCategoria": 1
       },
@@ -1304,51 +1304,51 @@
         "nome": "Cury",
         "categoria": "Construção civil e incorporação",
         "volumeMediano": 182507270,
-        "volumeMedio": 204130378,
+        "volumeMedio": 202953382,
         "diasNegociados": 21,
-        "cotacao": 26.16,
-        "dataCotacao": "2026-10-29",
+        "cotacao": 25.9,
+        "dataCotacao": "2026-10-30",
         "variacao3m": -13.9,
-        "posicaoGeral": 48,
+        "posicaoGeral": 49,
         "posicaoNaCategoria": 2
-      },
-      {
-        "ticker": "TEND3",
-        "nome": "Tenda",
-        "categoria": "Construção civil e incorporação",
-        "volumeMediano": 157541023,
-        "volumeMedio": 156069210,
-        "diasNegociados": 21,
-        "cotacao": 20.34,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -32.3,
-        "posicaoGeral": 54,
-        "posicaoNaCategoria": 3
       },
       {
         "ticker": "DIRR3",
         "nome": "Direcional",
         "categoria": "Construção civil e incorporação",
         "volumeMediano": 157514114,
-        "volumeMedio": 186952670,
+        "volumeMedio": 187931139,
         "diasNegociados": 21,
-        "cotacao": 8.23,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -28.2,
-        "posicaoGeral": 55,
-        "posicaoNaCategoria": 4
+        "cotacao": 8.06,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -29,
+        "posicaoGeral": 53,
+        "posicaoNaCategoria": 3
       },
       {
         "ticker": "MRVE3",
         "nome": "MRV",
         "categoria": "Construção civil e incorporação",
         "volumeMediano": 148438337,
-        "volumeMedio": 155893416,
+        "volumeMedio": 156224486,
         "diasNegociados": 21,
-        "cotacao": 4.04,
-        "dataCotacao": "2026-10-29",
+        "cotacao": 4.05,
+        "dataCotacao": "2026-10-30",
         "variacao3m": -14.6,
         "posicaoGeral": 57,
+        "posicaoNaCategoria": 4
+      },
+      {
+        "ticker": "TEND3",
+        "nome": "Tenda",
+        "categoria": "Construção civil e incorporação",
+        "volumeMediano": 126603057,
+        "volumeMedio": 149356724,
+        "diasNegociados": 21,
+        "cotacao": 20.01,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -34,
+        "posicaoGeral": 63,
         "posicaoNaCategoria": 5
       }
     ],
@@ -1358,11 +1358,11 @@
         "nome": "Dexco",
         "categoria": "Materiais de construção e acabamento",
         "volumeMediano": 44727224,
-        "volumeMedio": 49299419,
+        "volumeMedio": 49843769,
         "diasNegociados": 21,
-        "cotacao": 4.49,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -12,
+        "cotacao": 4.57,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -10.4,
         "posicaoGeral": 96,
         "posicaoNaCategoria": 1
       },
@@ -1371,12 +1371,12 @@
         "nome": "Portobello",
         "categoria": "Materiais de construção e acabamento",
         "volumeMediano": 2019650,
-        "volumeMedio": 2275078,
+        "volumeMedio": 2272066,
         "diasNegociados": 21,
-        "cotacao": 1.57,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -9.2,
-        "posicaoGeral": 193,
+        "cotacao": 1.56,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -7.1,
+        "posicaoGeral": 194,
         "posicaoNaCategoria": 2
       }
     ],
@@ -1386,11 +1386,11 @@
         "nome": "Lojas Renner",
         "categoria": "Moda e vestuário",
         "volumeMediano": 368868573,
-        "volumeMedio": 441424037,
+        "volumeMedio": 446149046,
         "diasNegociados": 21,
-        "cotacao": 9.38,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -30.6,
+        "cotacao": 8.98,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -34,
         "posicaoGeral": 26,
         "posicaoNaCategoria": 1
       },
@@ -1398,25 +1398,25 @@
         "ticker": "CEAB3",
         "nome": "C&A",
         "categoria": "Moda e vestuário",
-        "volumeMediano": 158245472,
-        "volumeMedio": 181291465,
+        "volumeMediano": 149578694,
+        "volumeMedio": 180081806,
         "diasNegociados": 21,
-        "cotacao": 6.64,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -29.6,
-        "posicaoGeral": 53,
+        "cotacao": 6.55,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -30.6,
+        "posicaoGeral": 56,
         "posicaoNaCategoria": 2
       },
       {
         "ticker": "AZZA3",
         "nome": "Azzas 2154",
         "categoria": "Moda e vestuário",
-        "volumeMediano": 136662074,
-        "volumeMedio": 131726790,
+        "volumeMediano": 133094655,
+        "volumeMedio": 128460098,
         "diasNegociados": 21,
-        "cotacao": 14.16,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -10.7,
+        "cotacao": 14.33,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -12.7,
         "posicaoGeral": 60,
         "posicaoNaCategoria": 3
       },
@@ -1424,25 +1424,25 @@
         "ticker": "VIVA3",
         "nome": "Vivara",
         "categoria": "Moda e vestuário",
-        "volumeMediano": 101232767,
-        "volumeMedio": 117288782,
+        "volumeMediano": 106519870,
+        "volumeMedio": 119107963,
         "diasNegociados": 21,
-        "cotacao": 17.35,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -21.7,
-        "posicaoGeral": 73,
+        "cotacao": 17.3,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -22,
+        "posicaoGeral": 70,
         "posicaoNaCategoria": 4
       },
       {
         "ticker": "TFCO4",
         "nome": "Track&Field",
         "categoria": "Moda e vestuário",
-        "volumeMediano": 22615376,
-        "volumeMedio": 27938886,
+        "volumeMediano": 22701187,
+        "volumeMedio": 28613058,
         "diasNegociados": 21,
-        "cotacao": 10,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -30.8,
+        "cotacao": 9.8,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -33.3,
         "posicaoGeral": 119,
         "posicaoNaCategoria": 5
       }
@@ -1453,11 +1453,11 @@
         "nome": "Alpargatas (Havaianas)",
         "categoria": "Calçados e artigos esportivos",
         "volumeMediano": 47678128,
-        "volumeMedio": 53935733,
+        "volumeMedio": 53987294,
         "diasNegociados": 21,
-        "cotacao": 12.95,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": 10.4,
+        "cotacao": 12.38,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": 0.9,
         "posicaoGeral": 93,
         "posicaoNaCategoria": 1
       },
@@ -1466,25 +1466,25 @@
         "nome": "Vulcabras",
         "categoria": "Calçados e artigos esportivos",
         "volumeMediano": 42992952,
-        "volumeMedio": 48215758,
+        "volumeMedio": 47993071,
         "diasNegociados": 21,
-        "cotacao": 11.59,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -17.6,
-        "posicaoGeral": 97,
+        "cotacao": 11.53,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -17.2,
+        "posicaoGeral": 98,
         "posicaoNaCategoria": 2
       },
       {
         "ticker": "GRND3",
         "nome": "Grendene",
         "categoria": "Calçados e artigos esportivos",
-        "volumeMediano": 12761845,
-        "volumeMedio": 17230580,
+        "volumeMediano": 14723053,
+        "volumeMedio": 17457833,
         "diasNegociados": 21,
         "cotacao": 3.56,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -4.3,
-        "posicaoGeral": 142,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -5.1,
+        "posicaoGeral": 138,
         "posicaoNaCategoria": 3
       }
     ],
@@ -1494,11 +1494,11 @@
         "nome": "Magazine Luiza",
         "categoria": "Varejo de eletro, móveis e e-commerce",
         "volumeMediano": 590288002,
-        "volumeMedio": 600383034,
+        "volumeMedio": 595941008,
         "diasNegociados": 21,
-        "cotacao": 5.13,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": 2.2,
+        "cotacao": 5.35,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": 6.4,
         "posicaoGeral": 18,
         "posicaoNaCategoria": 1
       },
@@ -1506,12 +1506,12 @@
         "ticker": "BHIA3",
         "nome": "Casas Bahia",
         "categoria": "Varejo de eletro, móveis e e-commerce",
-        "volumeMediano": 19753085,
-        "volumeMedio": 25365771,
+        "volumeMediano": 19440310,
+        "volumeMedio": 24226214,
         "diasNegociados": 21,
-        "cotacao": 0.64,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -19,
+        "cotacao": 0.69,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -11.5,
         "posicaoGeral": 126,
         "posicaoNaCategoria": 2
       },
@@ -1520,12 +1520,12 @@
         "nome": "Lojas Quero-Quero",
         "categoria": "Varejo de eletro, móveis e e-commerce",
         "volumeMediano": 17108948,
-        "volumeMedio": 16559044,
+        "volumeMedio": 16961132,
         "diasNegociados": 21,
-        "cotacao": 0.94,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -22.3,
-        "posicaoGeral": 130,
+        "cotacao": 0.95,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -24,
+        "posicaoGeral": 132,
         "posicaoNaCategoria": 3
       },
       {
@@ -1533,12 +1533,12 @@
         "nome": "Americanas",
         "categoria": "Varejo de eletro, móveis e e-commerce",
         "volumeMediano": 15406255,
-        "volumeMedio": 18589079,
+        "volumeMedio": 18202320,
         "diasNegociados": 21,
-        "cotacao": 4.02,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -11.3,
-        "posicaoGeral": 134,
+        "cotacao": 4,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -13.8,
+        "posicaoGeral": 137,
         "posicaoNaCategoria": 4
       },
       {
@@ -1546,11 +1546,11 @@
         "nome": "Enjoei",
         "categoria": "Varejo de eletro, móveis e e-commerce",
         "volumeMediano": 1466196,
-        "volumeMedio": 1395116,
+        "volumeMedio": 1391693,
         "diasNegociados": 21,
-        "cotacao": 6.27,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": 795.7,
+        "cotacao": 6.26,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": 794.3,
         "posicaoGeral": 200,
         "posicaoNaCategoria": 5
       }
@@ -1561,12 +1561,12 @@
         "nome": "Cogna",
         "categoria": "Educação",
         "volumeMediano": 174101135,
-        "volumeMedio": 182662249,
+        "volumeMedio": 184715213,
         "diasNegociados": 21,
-        "cotacao": 1.61,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -30.3,
-        "posicaoGeral": 49,
+        "cotacao": 1.58,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -30.7,
+        "posicaoGeral": 50,
         "posicaoNaCategoria": 1
       },
       {
@@ -1574,11 +1574,11 @@
         "nome": "Yduqs",
         "categoria": "Educação",
         "volumeMediano": 74876627,
-        "volumeMedio": 77623628,
+        "volumeMedio": 76811243,
         "diasNegociados": 21,
-        "cotacao": 8.96,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": 7.4,
+        "cotacao": 8.91,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": 7.9,
         "posicaoGeral": 85,
         "posicaoNaCategoria": 2
       },
@@ -1587,12 +1587,12 @@
         "nome": "Ânima",
         "categoria": "Educação",
         "volumeMediano": 55960714,
-        "volumeMedio": 61969471,
+        "volumeMedio": 62384838,
         "diasNegociados": 21,
-        "cotacao": 2.39,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": 8.6,
-        "posicaoGeral": 91,
+        "cotacao": 2.29,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": 5,
+        "posicaoGeral": 92,
         "posicaoNaCategoria": 3
       },
       {
@@ -1600,25 +1600,25 @@
         "nome": "Ser Educacional",
         "categoria": "Educação",
         "volumeMediano": 18179492,
-        "volumeMedio": 19471795,
+        "volumeMedio": 19439839,
         "diasNegociados": 21,
-        "cotacao": 10.92,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -9.5,
-        "posicaoGeral": 128,
+        "cotacao": 10.71,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -11.8,
+        "posicaoGeral": 130,
         "posicaoNaCategoria": 4
       },
       {
         "ticker": "CSED3",
         "nome": "Cruzeiro do Sul Educacional",
         "categoria": "Educação",
-        "volumeMediano": 2897606,
-        "volumeMedio": 3205064,
+        "volumeMediano": 3451978,
+        "volumeMedio": 3296945,
         "diasNegociados": 21,
-        "cotacao": 4.35,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -0.7,
-        "posicaoGeral": 185,
+        "cotacao": 4.44,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -1.3,
+        "posicaoGeral": 178,
         "posicaoNaCategoria": 5
       }
     ],
@@ -1628,11 +1628,11 @@
         "nome": "Smart Fit",
         "categoria": "Turismo, lazer e restaurantes",
         "volumeMediano": 316587083,
-        "volumeMedio": 350981952,
+        "volumeMedio": 352108566,
         "diasNegociados": 21,
-        "cotacao": 15.55,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -22.1,
+        "cotacao": 15.52,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -21.2,
         "posicaoGeral": 31,
         "posicaoNaCategoria": 1
       },
@@ -1641,11 +1641,11 @@
         "nome": "CVC",
         "categoria": "Turismo, lazer e restaurantes",
         "volumeMediano": 29212285,
-        "volumeMedio": 31368015,
+        "volumeMedio": 30967162,
         "diasNegociados": 21,
         "cotacao": 0.8,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -38.5,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -38.9,
         "posicaoGeral": 109,
         "posicaoNaCategoria": 2
       }
@@ -1655,13 +1655,13 @@
         "ticker": "MBRF3",
         "nome": "MBRF (BRF + Marfrig)",
         "categoria": "Carnes e proteínas",
-        "volumeMediano": 112620345,
-        "volumeMedio": 143674945,
+        "volumeMediano": 122647707,
+        "volumeMedio": 145551164,
         "diasNegociados": 21,
-        "cotacao": 16.44,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -8.5,
-        "posicaoGeral": 68,
+        "cotacao": 15.61,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -11,
+        "posicaoGeral": 65,
         "posicaoNaCategoria": 1
       },
       {
@@ -1669,12 +1669,12 @@
         "nome": "Minerva",
         "categoria": "Carnes e proteínas",
         "volumeMediano": 103290646,
-        "volumeMedio": 113224209,
+        "volumeMedio": 112924219,
         "diasNegociados": 21,
-        "cotacao": 2.69,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -25.1,
-        "posicaoGeral": 71,
+        "cotacao": 2.55,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -30.3,
+        "posicaoGeral": 72,
         "posicaoNaCategoria": 2
       }
     ],
@@ -1684,25 +1684,25 @@
         "nome": "Ambev",
         "categoria": "Alimentos e bebidas",
         "volumeMediano": 660672222,
-        "volumeMedio": 747904505,
+        "volumeMedio": 760435473,
         "diasNegociados": 21,
-        "cotacao": 14.55,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -8.8,
-        "posicaoGeral": 15,
+        "cotacao": 14.6,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -8.7,
+        "posicaoGeral": 14,
         "posicaoNaCategoria": 1
       },
       {
         "ticker": "MDIA3",
         "nome": "M. Dias Branco",
         "categoria": "Alimentos e bebidas",
-        "volumeMediano": 23354688,
-        "volumeMedio": 25214878,
+        "volumeMediano": 24070553,
+        "volumeMedio": 25636907,
         "diasNegociados": 21,
-        "cotacao": 15.66,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -8.6,
-        "posicaoGeral": 118,
+        "cotacao": 15.35,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -10.5,
+        "posicaoGeral": 117,
         "posicaoNaCategoria": 2
       },
       {
@@ -1710,11 +1710,11 @@
         "nome": "Camil",
         "categoria": "Alimentos e bebidas",
         "volumeMediano": 12039305,
-        "volumeMedio": 12247039,
+        "volumeMedio": 12563387,
         "diasNegociados": 21,
-        "cotacao": 4.03,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -14.1,
+        "cotacao": 3.98,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -15.1,
         "posicaoGeral": 144,
         "posicaoNaCategoria": 3
       }
@@ -1725,11 +1725,11 @@
         "nome": "SLC Agrícola",
         "categoria": "Agronegócio, açúcar e etanol",
         "volumeMediano": 47021904,
-        "volumeMedio": 59004873,
+        "volumeMedio": 59279295,
         "diasNegociados": 21,
-        "cotacao": 17.01,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": 28.3,
+        "cotacao": 17.02,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": 27.2,
         "posicaoGeral": 94,
         "posicaoNaCategoria": 1
       },
@@ -1737,13 +1737,13 @@
         "ticker": "SMTO3",
         "nome": "São Martinho",
         "categoria": "Agronegócio, açúcar e etanol",
-        "volumeMediano": 42648864,
-        "volumeMedio": 46239073,
+        "volumeMediano": 43454804,
+        "volumeMedio": 47951701,
         "diasNegociados": 21,
-        "cotacao": 19.55,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": 35.8,
-        "posicaoGeral": 98,
+        "cotacao": 21.09,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": 45.2,
+        "posicaoGeral": 97,
         "posicaoNaCategoria": 2
       },
       {
@@ -1751,11 +1751,11 @@
         "nome": "3tentos",
         "categoria": "Agronegócio, açúcar e etanol",
         "volumeMediano": 34647901,
-        "volumeMedio": 39446843,
+        "volumeMedio": 39280015,
         "diasNegociados": 21,
-        "cotacao": 10.27,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -14.9,
+        "cotacao": 10.28,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -12.9,
         "posicaoGeral": 105,
         "posicaoNaCategoria": 3
       },
@@ -1764,10 +1764,10 @@
         "nome": "Boa Safra Sementes",
         "categoria": "Agronegócio, açúcar e etanol",
         "volumeMediano": 6744635,
-        "volumeMedio": 7520260,
+        "volumeMedio": 7585728,
         "diasNegociados": 21,
-        "cotacao": 6.04,
-        "dataCotacao": "2026-10-29",
+        "cotacao": 5.9,
+        "dataCotacao": "2026-10-30",
         "variacao3m": null,
         "posicaoGeral": 161,
         "posicaoNaCategoria": 4
@@ -1777,11 +1777,11 @@
         "nome": "BrasilAgro",
         "categoria": "Agronegócio, açúcar e etanol",
         "volumeMediano": 5656456,
-        "volumeMedio": 6581202,
+        "volumeMedio": 6522760,
         "diasNegociados": 21,
-        "cotacao": 17.2,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -9.9,
+        "cotacao": 17.31,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -9.1,
         "posicaoGeral": 166,
         "posicaoNaCategoria": 5
       }
@@ -1792,12 +1792,12 @@
         "nome": "Assaí",
         "categoria": "Varejo alimentar",
         "volumeMediano": 228665174,
-        "volumeMedio": 306523446,
+        "volumeMedio": 309769033,
         "diasNegociados": 21,
-        "cotacao": 7.81,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -7.1,
-        "posicaoGeral": 40,
+        "cotacao": 7.88,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -7.3,
+        "posicaoGeral": 41,
         "posicaoNaCategoria": 1
       },
       {
@@ -1805,11 +1805,11 @@
         "nome": "Grupo Mateus",
         "categoria": "Varejo alimentar",
         "volumeMediano": 46980209,
-        "volumeMedio": 55945767,
+        "volumeMedio": 56619718,
         "diasNegociados": 21,
-        "cotacao": 3.55,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -10.8,
+        "cotacao": 3.5,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -13.2,
         "posicaoGeral": 95,
         "posicaoNaCategoria": 2
       },
@@ -1817,13 +1817,13 @@
         "ticker": "PCAR3",
         "nome": "Grupo Pão de Açúcar",
         "categoria": "Varejo alimentar",
-        "volumeMediano": 22332545,
-        "volumeMedio": 26860184,
+        "volumeMediano": 21212868,
+        "volumeMedio": 25565559,
         "diasNegociados": 21,
-        "cotacao": 2.03,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -25.9,
-        "posicaoGeral": 120,
+        "cotacao": 2.08,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -19.7,
+        "posicaoGeral": 122,
         "posicaoNaCategoria": 3
       }
     ],
@@ -1832,13 +1832,13 @@
         "ticker": "RADL3",
         "nome": "RaiaDrogasil",
         "categoria": "Farmácias, higiene e beleza",
-        "volumeMediano": 268292440,
-        "volumeMedio": 297250799,
+        "volumeMediano": 241884621,
+        "volumeMedio": 289865898,
         "diasNegociados": 21,
-        "cotacao": 15.5,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -15.1,
-        "posicaoGeral": 37,
+        "cotacao": 15.22,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -17.6,
+        "posicaoGeral": 39,
         "posicaoNaCategoria": 1
       },
       {
@@ -1846,12 +1846,12 @@
         "nome": "Natura",
         "categoria": "Farmácias, higiene e beleza",
         "volumeMediano": 97579346,
-        "volumeMedio": 103429797,
+        "volumeMedio": 103599313,
         "diasNegociados": 21,
-        "cotacao": 4.76,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -42.9,
-        "posicaoGeral": 75,
+        "cotacao": 4.86,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -42,
+        "posicaoGeral": 76,
         "posicaoNaCategoria": 2
       },
       {
@@ -1859,11 +1859,11 @@
         "nome": "Pague Menos",
         "categoria": "Farmácias, higiene e beleza",
         "volumeMediano": 75227747,
-        "volumeMedio": 70525660,
+        "volumeMedio": 71223590,
         "diasNegociados": 21,
-        "cotacao": 2.56,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -19.7,
+        "cotacao": 2.48,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -22,
         "posicaoGeral": 84,
         "posicaoNaCategoria": 3
       },
@@ -1871,12 +1871,12 @@
         "ticker": "PNVL3",
         "nome": "Panvel (Dimed)",
         "categoria": "Farmácias, higiene e beleza",
-        "volumeMediano": 15084159,
-        "volumeMedio": 19588387,
+        "volumeMediano": 16310832,
+        "volumeMedio": 20300343,
         "diasNegociados": 21,
-        "cotacao": 10.29,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -13.3,
+        "cotacao": 10.08,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -14.9,
         "posicaoGeral": 135,
         "posicaoNaCategoria": 4
       }
@@ -1887,11 +1887,11 @@
         "nome": "Rede D'Or",
         "categoria": "Hospitais, planos e diagnósticos",
         "volumeMediano": 394928532,
-        "volumeMedio": 499534676,
+        "volumeMedio": 499888244,
         "diasNegociados": 21,
-        "cotacao": 32.35,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -6,
+        "cotacao": 31.68,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -8.5,
         "posicaoGeral": 23,
         "posicaoNaCategoria": 1
       },
@@ -1900,11 +1900,11 @@
         "nome": "Fleury",
         "categoria": "Hospitais, planos e diagnósticos",
         "volumeMediano": 184334456,
-        "volumeMedio": 192306436,
+        "volumeMedio": 194817290,
         "diasNegociados": 21,
-        "cotacao": 20.74,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": 22.2,
+        "cotacao": 20.47,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": 19.4,
         "posicaoGeral": 47,
         "posicaoNaCategoria": 2
       },
@@ -1913,12 +1913,12 @@
         "nome": "Hapvida",
         "categoria": "Hospitais, planos e diagnósticos",
         "volumeMediano": 102342775,
-        "volumeMedio": 109926628,
+        "volumeMedio": 109659378,
         "diasNegociados": 21,
-        "cotacao": 4.23,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -61.6,
-        "posicaoGeral": 72,
+        "cotacao": 4.2,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -62.8,
+        "posicaoGeral": 73,
         "posicaoNaCategoria": 3
       },
       {
@@ -1926,12 +1926,12 @@
         "nome": "Qualicorp",
         "categoria": "Hospitais, planos e diagnósticos",
         "volumeMediano": 13154019,
-        "volumeMedio": 12909821,
+        "volumeMedio": 12992307,
         "diasNegociados": 21,
-        "cotacao": 1.3,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -15,
-        "posicaoGeral": 140,
+        "cotacao": 1.32,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -13.7,
+        "posicaoGeral": 141,
         "posicaoNaCategoria": 4
       },
       {
@@ -1939,11 +1939,11 @@
         "nome": "Dasa",
         "categoria": "Hospitais, planos e diagnósticos",
         "volumeMediano": 8914429,
-        "volumeMedio": 9327450,
+        "volumeMedio": 9254702,
         "diasNegociados": 21,
-        "cotacao": 2.95,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": 11.7,
+        "cotacao": 2.98,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": 14.2,
         "posicaoGeral": 153,
         "posicaoNaCategoria": 5
       }
@@ -1953,25 +1953,25 @@
         "ticker": "HYPE3",
         "nome": "Hypera Pharma",
         "categoria": "Medicamentos e saúde animal",
-        "volumeMediano": 133808651,
-        "volumeMedio": 152227012,
+        "volumeMediano": 138468350,
+        "volumeMedio": 153264113,
         "diasNegociados": 21,
-        "cotacao": 21.52,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -0.6,
-        "posicaoGeral": 61,
+        "cotacao": 21.27,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": 0,
+        "posicaoGeral": 59,
         "posicaoNaCategoria": 1
       },
       {
         "ticker": "BLAU3",
         "nome": "Blau Farmacêutica",
         "categoria": "Medicamentos e saúde animal",
-        "volumeMediano": 4282210,
-        "volumeMedio": 4756118,
+        "volumeMediano": 4412311,
+        "volumeMedio": 4852893,
         "diasNegociados": 21,
-        "cotacao": 9.35,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": 8.5,
+        "cotacao": 9.02,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": 4.9,
         "posicaoGeral": 169,
         "posicaoNaCategoria": 2
       },
@@ -1980,12 +1980,12 @@
         "nome": "Profarma",
         "categoria": "Medicamentos e saúde animal",
         "volumeMediano": 2467059,
-        "volumeMedio": 2442533,
+        "volumeMedio": 2460106,
         "diasNegociados": 21,
-        "cotacao": 6.6,
-        "dataCotacao": "2026-10-29",
+        "cotacao": 6.73,
+        "dataCotacao": "2026-10-30",
         "variacao3m": -2.7,
-        "posicaoGeral": 187,
+        "posicaoGeral": 188,
         "posicaoNaCategoria": 3
       }
     ],
@@ -1994,26 +1994,26 @@
         "ticker": "TOTS3",
         "nome": "Totvs",
         "categoria": "Software e serviços de TI",
-        "volumeMediano": 275099342,
-        "volumeMedio": 287511018,
+        "volumeMediano": 275007450,
+        "volumeMedio": 283507872,
         "diasNegociados": 21,
-        "cotacao": 33.23,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": 6.7,
-        "posicaoGeral": 36,
+        "cotacao": 32,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": 3,
+        "posicaoGeral": 37,
         "posicaoNaCategoria": 1
       },
       {
         "ticker": "BMOB3",
         "nome": "Bemobi",
         "categoria": "Software e serviços de TI",
-        "volumeMediano": 28712254,
-        "volumeMedio": 35110161,
+        "volumeMediano": 26153901,
+        "volumeMedio": 33673798,
         "diasNegociados": 21,
-        "cotacao": 24.27,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": 2.1,
-        "posicaoGeral": 110,
+        "cotacao": 23.51,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -1.2,
+        "posicaoGeral": 112,
         "posicaoNaCategoria": 2
       },
       {
@@ -2021,12 +2021,12 @@
         "nome": "Locaweb",
         "categoria": "Software e serviços de TI",
         "volumeMediano": 25905110,
-        "volumeMedio": 28332957,
+        "volumeMedio": 28769230,
         "diasNegociados": 21,
-        "cotacao": 3.24,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -14.1,
-        "posicaoGeral": 115,
+        "cotacao": 3.09,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -16.9,
+        "posicaoGeral": 113,
         "posicaoNaCategoria": 3
       }
     ],
@@ -2036,11 +2036,11 @@
         "nome": "Intelbras",
         "categoria": "Hardware e eletrônicos",
         "volumeMediano": 33741577,
-        "volumeMedio": 37773528,
+        "volumeMedio": 38068885,
         "diasNegociados": 21,
-        "cotacao": 14.75,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": 1.6,
+        "cotacao": 13.87,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -5.3,
         "posicaoGeral": 106,
         "posicaoNaCategoria": 1
       },
@@ -2049,12 +2049,12 @@
         "nome": "Positivo",
         "categoria": "Hardware e eletrônicos",
         "volumeMediano": 7514184,
-        "volumeMedio": 7568967,
+        "volumeMedio": 7674774,
         "diasNegociados": 21,
-        "cotacao": 3.11,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -11.6,
-        "posicaoGeral": 157,
+        "cotacao": 2.91,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -18,
+        "posicaoGeral": 158,
         "posicaoNaCategoria": 2
       },
       {
@@ -2062,11 +2062,11 @@
         "nome": "Multilaser",
         "categoria": "Hardware e eletrônicos",
         "volumeMediano": 6259384,
-        "volumeMedio": 6686733,
+        "volumeMedio": 6714266,
         "diasNegociados": 21,
-        "cotacao": 1.86,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": 4.5,
+        "cotacao": 1.8,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": 1.7,
         "posicaoGeral": 164,
         "posicaoNaCategoria": 3
       }
@@ -2077,11 +2077,11 @@
         "nome": "Vivo (Telefônica Brasil)",
         "categoria": "Telecomunicações",
         "volumeMediano": 204870002,
-        "volumeMedio": 240110364,
+        "volumeMedio": 240646760,
         "diasNegociados": 21,
-        "cotacao": 30.75,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -5.8,
+        "cotacao": 30.7,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -5.9,
         "posicaoGeral": 45,
         "posicaoNaCategoria": 1
       },
@@ -2090,11 +2090,11 @@
         "nome": "TIM",
         "categoria": "Telecomunicações",
         "volumeMediano": 192047543,
-        "volumeMedio": 208126880,
+        "volumeMedio": 210409127,
         "diasNegociados": 21,
-        "cotacao": 19.43,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": 0.7,
+        "cotacao": 19.17,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -1.3,
         "posicaoGeral": 46,
         "posicaoNaCategoria": 2
       },
@@ -2103,11 +2103,11 @@
         "nome": "Unifique",
         "categoria": "Telecomunicações",
         "volumeMediano": 12428272,
-        "volumeMedio": 15993870,
+        "volumeMedio": 16266155,
         "diasNegociados": 21,
-        "cotacao": 5.2,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": -3.3,
+        "cotacao": 5.28,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": -2.2,
         "posicaoGeral": 143,
         "posicaoNaCategoria": 3
       },
@@ -2115,12 +2115,12 @@
         "ticker": "DESK3",
         "nome": "Desktop",
         "categoria": "Telecomunicações",
-        "volumeMediano": 10876639,
-        "volumeMedio": 16810041,
+        "volumeMediano": 10662874,
+        "volumeMedio": 15260557,
         "diasNegociados": 21,
-        "cotacao": 19.37,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": 5.3,
+        "cotacao": 19.46,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": 4.6,
         "posicaoGeral": 147,
         "posicaoNaCategoria": 4
       }
@@ -2130,13 +2130,13 @@
         "ticker": "PETR3",
         "nome": "PETR3",
         "categoria": "Outros",
-        "volumeMediano": 797053406,
-        "volumeMedio": 1011547889,
+        "volumeMediano": 818306982,
+        "volumeMedio": 1048808707,
         "diasNegociados": 21,
-        "cotacao": 59.06,
-        "dataCotacao": "2026-10-29",
+        "cotacao": 60.01,
+        "dataCotacao": "2026-10-30",
         "variacao3m": null,
-        "posicaoGeral": 12,
+        "posicaoGeral": 11,
         "posicaoNaCategoria": 1
       },
       {
@@ -2144,12 +2144,12 @@
         "nome": "BBDC3",
         "categoria": "Outros",
         "volumeMediano": 292577637,
-        "volumeMedio": 400974533,
+        "volumeMedio": 405549964,
         "diasNegociados": 21,
-        "cotacao": 12.95,
-        "dataCotacao": "2026-10-29",
+        "cotacao": 12.71,
+        "dataCotacao": "2026-10-30",
         "variacao3m": null,
-        "posicaoGeral": 34,
+        "posicaoGeral": 35,
         "posicaoNaCategoria": 2
       },
       {
@@ -2157,38 +2157,38 @@
         "nome": "GGPS3",
         "categoria": "Outros",
         "volumeMediano": 150451685,
-        "volumeMedio": 163534976,
+        "volumeMedio": 163294510,
         "diasNegociados": 21,
-        "cotacao": 10.51,
-        "dataCotacao": "2026-10-29",
+        "cotacao": 10.5,
+        "dataCotacao": "2026-10-30",
         "variacao3m": null,
-        "posicaoGeral": 56,
+        "posicaoGeral": 55,
         "posicaoNaCategoria": 3
-      },
-      {
-        "ticker": "ITUB3",
-        "nome": "ITUB3",
-        "categoria": "Outros",
-        "volumeMediano": 124420979,
-        "volumeMedio": 154153670,
-        "diasNegociados": 21,
-        "cotacao": 44.05,
-        "dataCotacao": "2026-10-29",
-        "variacao3m": null,
-        "posicaoGeral": 63,
-        "posicaoNaCategoria": 4
       },
       {
         "ticker": "SAUD3",
         "nome": "SAUD3",
         "categoria": "Outros",
-        "volumeMediano": 119584537,
-        "volumeMedio": 133098241,
+        "volumeMediano": 126610503,
+        "volumeMedio": 138412002,
         "diasNegociados": 21,
-        "cotacao": 14.77,
-        "dataCotacao": "2026-10-29",
+        "cotacao": 14.1,
+        "dataCotacao": "2026-10-30",
         "variacao3m": null,
-        "posicaoGeral": 64,
+        "posicaoGeral": 62,
+        "posicaoNaCategoria": 4
+      },
+      {
+        "ticker": "ITUB3",
+        "nome": "ITUB3",
+        "categoria": "Outros",
+        "volumeMediano": 121863648,
+        "volumeMedio": 150609338,
+        "diasNegociados": 21,
+        "cotacao": 43.06,
+        "dataCotacao": "2026-10-30",
+        "variacao3m": null,
+        "posicaoGeral": 66,
         "posicaoNaCategoria": 5
       }
     ]
@@ -2199,14 +2199,14 @@
       "nome": "Alliar",
       "categoria": "Hospitais, planos e diagnósticos",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 222.672 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 220.121 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "AERI3",
       "nome": "Aeris Energy",
       "categoria": "Máquinas, equipamentos e aeroespacial",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 175.912 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 173.881 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "AFLT3",
@@ -2220,14 +2220,14 @@
       "nome": "AgroGalaxy",
       "categoria": "Agronegócio, açúcar e etanol",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 10.478 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 9.150 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "AHEB3",
       "nome": "AHEB3",
       "categoria": "Outros",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 13 pregões (máximo 5)."
+      "motivo": "Último negócio há 14 pregões (máximo 5)."
     },
     {
       "ticker": "ALPA3",
@@ -2237,25 +2237,18 @@
       "motivo": "Volume mediano de R$ 136.104 por dia (mínimo 1.000.000)."
     },
     {
-      "ticker": "ALPK3",
-      "nome": "ALPK3",
-      "categoria": "Outros",
-      "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 989.909 por dia (mínimo 1.000.000)."
-    },
-    {
       "ticker": "ALUP3",
       "nome": "ALUP3",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 81.709 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 85.795 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "ALUP4",
       "nome": "ALUP4",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 172.966 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 162.158 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "AMAR3",
@@ -2269,28 +2262,28 @@
       "nome": "Ambipar",
       "categoria": "Serviços e locação de equipamentos",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 299.504 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 247.110 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "ARND3",
       "nome": "ARND3",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 3.127 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 3.551 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "ATED3",
       "nome": "ATED3",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 4.218 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 3.823 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "AVLL3",
       "nome": "AVLL3",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 1.612 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 1.693 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "AZTE3",
@@ -2318,35 +2311,35 @@
       "nome": "BALM4",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 14.500 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 14.670 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "BAUH4",
       "nome": "BAUH4",
       "categoria": "Outros",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 17 pregões (máximo 5)."
+      "motivo": "Último negócio há 18 pregões (máximo 5)."
     },
     {
       "ticker": "BAZA3",
       "nome": "Banco da Amazônia",
       "categoria": "Bancos",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 315.137 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 331.614 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "BDLL3",
       "nome": "BDLL3",
       "categoria": "Outros",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "BDLL4",
       "nome": "BDLL4",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 1.610 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 1.324 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "BEES3",
@@ -2374,14 +2367,14 @@
       "nome": "BGIP4",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 18.563 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 20.436 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "BIED3",
       "nome": "BIED3",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 6.805 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 6.230 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "BIOM3",
@@ -2402,14 +2395,14 @@
       "nome": "BMIN3",
       "categoria": "Outros",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 17 pregões (máximo 5)."
+      "motivo": "Último negócio há 18 pregões (máximo 5)."
     },
     {
       "ticker": "BMIN4",
       "nome": "BMIN4",
       "categoria": "Outros",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 5 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 4 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "BMKS3",
@@ -2437,14 +2430,14 @@
       "nome": "BPAC3",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 758.152 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 790.317 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "BPAC5",
       "nome": "BPAC5",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 307.202 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 358.823 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "BPAN4",
@@ -2458,14 +2451,14 @@
       "nome": "BRKM3",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 209.965 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 191.146 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "BRKM6",
       "nome": "BRKM6",
       "categoria": "Outros",
-      "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 14 dos últimos 21 pregões (mínimo 15)."
+      "codigo": "liquidez_baixa",
+      "motivo": "Volume mediano de R$ 1.410 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "BRSR3",
@@ -2479,21 +2472,21 @@
       "nome": "BRSR5",
       "categoria": "Outros",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "BSLI3",
       "nome": "BSLI3",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 55.146 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 55.822 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "BSLI4",
       "nome": "BRB Banco de Brasília",
       "categoria": "Bancos",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 54.000 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 51.884 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "CALI3",
@@ -2507,7 +2500,7 @@
       "nome": "Cambuci",
       "categoria": "Calçados e artigos esportivos",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 343.735 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 386.662 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "CASN3",
@@ -2549,21 +2542,21 @@
       "nome": "CEBR5",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 147.970 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 151.932 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "CEBR6",
       "nome": "CEBR6",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 84.662 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 86.249 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "CEDO3",
       "nome": "CEDO3",
       "categoria": "Outros",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 12 pregões (máximo 5)."
+      "motivo": "Último negócio há 13 pregões (máximo 5)."
     },
     {
       "ticker": "CEDO4",
@@ -2577,7 +2570,7 @@
       "nome": "Coelba",
       "categoria": "Energia elétrica: distribuição",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 18.605 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 18.738 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "CEEB5",
@@ -2591,7 +2584,7 @@
       "nome": "CEED3",
       "categoria": "Outros",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 2 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 3 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "CGAS3",
@@ -2612,7 +2605,7 @@
       "nome": "CGRA3",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 30.536 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 30.714 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "CGRA4",
@@ -2626,7 +2619,7 @@
       "nome": "CLSC3",
       "categoria": "Outros",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "COCE3",
@@ -2640,14 +2633,14 @@
       "nome": "COCE5",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 192.953 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 149.461 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "CRPG5",
       "nome": "CRPG5",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 67.559 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 59.667 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "CRPG6",
@@ -2668,21 +2661,21 @@
       "nome": "CTKA3",
       "categoria": "Outros",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 9 pregões (máximo 5)."
+      "motivo": "Último negócio há 10 pregões (máximo 5)."
     },
     {
       "ticker": "CTKA4",
       "nome": "CTKA4",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 22.664 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 38.698 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "DEXP4",
       "nome": "DEXP4",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 20.767 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 23.401 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "DMVF3",
@@ -2710,21 +2703,21 @@
       "nome": "Dotz",
       "categoria": "Software e serviços de TI",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 327.505 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 313.978 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "DTCY3",
       "nome": "DTCY3",
       "categoria": "Outros",
-      "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
+      "codigo": "cotacao_defasada",
+      "motivo": "Último negócio há 6 pregões (máximo 5)."
     },
     {
       "ticker": "EALT3",
       "nome": "EALT3",
       "categoria": "Outros",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 11 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 12 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "EALT4",
@@ -2751,15 +2744,15 @@
       "ticker": "EMAE4",
       "nome": "EMAE4",
       "categoria": "Outros",
-      "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 98.448 por dia (mínimo 1.000.000)."
+      "codigo": "cotacao_defasada",
+      "motivo": "Último negócio há 6 pregões (máximo 5)."
     },
     {
       "ticker": "ENGI3",
       "nome": "ENGI3",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 134.979 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 149.085 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "ENGI4",
@@ -2773,14 +2766,14 @@
       "nome": "Energisa Mato Grosso",
       "categoria": "Energia elétrica: distribuição",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 18.170 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 14.406 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "ENMT4",
       "nome": "ENMT4",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 7.580 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 7.241 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "EPAR3",
@@ -2794,14 +2787,14 @@
       "nome": "EQPA3",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 159.126 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 161.047 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "EQPA5",
       "nome": "EQPA5",
       "categoria": "Outros",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 4 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 5 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "EQPA6",
@@ -2821,8 +2814,8 @@
       "ticker": "ESTR4",
       "nome": "ESTR4",
       "categoria": "Outros",
-      "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
+      "codigo": "cotacao_defasada",
+      "motivo": "Último negócio há 6 pregões (máximo 5)."
     },
     {
       "ticker": "ETER3",
@@ -2850,14 +2843,14 @@
       "nome": "FESA3",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 6.374 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 4.477 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "FHER3",
       "nome": "Fertilizantes Heringer",
       "categoria": "Química e petroquímica",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 27.245 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 23.998 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "FIEI3",
@@ -2871,7 +2864,7 @@
       "nome": "FIGE3",
       "categoria": "Outros",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 11 pregões (máximo 5)."
+      "motivo": "Último negócio há 12 pregões (máximo 5)."
     },
     {
       "ticker": "GEPA3",
@@ -2884,15 +2877,15 @@
       "ticker": "GEPA4",
       "nome": "Rio Paranapanema Energia",
       "categoria": "Energia elétrica: geração",
-      "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 14 dos últimos 21 pregões (mínimo 15)."
+      "codigo": "liquidez_baixa",
+      "motivo": "Volume mediano de R$ 7.200 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "GGBR3",
       "nome": "GGBR3",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 795.534 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 872.255 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "GOAU3",
@@ -2906,14 +2899,14 @@
       "nome": "GPAR3",
       "categoria": "Outros",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 13 pregões (máximo 5)."
+      "motivo": "Último negócio há 14 pregões (máximo 5)."
     },
     {
       "ticker": "GSHP3",
       "nome": "GSHP3",
       "categoria": "Outros",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 11 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "GUAR3",
@@ -2927,7 +2920,7 @@
       "nome": "HAGA3",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 6.130 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 5.958 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "HAGA4",
@@ -2941,14 +2934,14 @@
       "nome": "HBTS5",
       "categoria": "Outros",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 2 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 3 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "HETA4",
       "nome": "HETA4",
       "categoria": "Outros",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 17 pregões (máximo 5)."
+      "motivo": "Último negócio há 18 pregões (máximo 5)."
     },
     {
       "ticker": "HOOT4",
@@ -2962,14 +2955,14 @@
       "nome": "IFCM3",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 150.696 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 143.978 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "IGTI3",
       "nome": "IGTI3",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 122.005 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 135.112 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "IGTI4",
@@ -2983,35 +2976,35 @@
       "nome": "INEP3",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 46.012 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 45.480 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "INEP4",
       "nome": "INEP4",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 32.165 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 34.342 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "ISAE3",
       "nome": "ISAE3",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 70.567 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 77.822 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "JFEN3",
       "nome": "JFEN3",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 70.669 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 64.333 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "JOPA3",
       "nome": "JOPA3",
       "categoria": "Outros",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 13 pregões (máximo 5)."
+      "motivo": "Último negócio há 14 pregões (máximo 5)."
     },
     {
       "ticker": "JOPA4",
@@ -3032,28 +3025,28 @@
       "nome": "Log-In",
       "categoria": "Transporte e infraestrutura",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 483.475 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 619.613 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "LPSB3",
       "nome": "LPSB3",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 454.033 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 492.360 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "LUPA3",
       "nome": "Lupatech",
       "categoria": "Máquinas, equipamentos e aeroespacial",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 59.442 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 62.934 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "LUXM4",
       "nome": "LUXM4",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 14.356 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 13.765 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "MAPT3",
@@ -3074,7 +3067,7 @@
       "nome": "IMC Alimentação",
       "categoria": "Turismo, lazer e restaurantes",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 215.656 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 282.781 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "MERC4",
@@ -3088,21 +3081,21 @@
       "nome": "MGEL4",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 26.345 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 19.538 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "MNDL3",
       "nome": "MNDL3",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 10.106 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 9.245 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "MNPR3",
       "nome": "Minupar",
       "categoria": "Alimentos e bebidas",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 56.173 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 51.918 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "MSPA4",
@@ -3122,8 +3115,8 @@
       "ticker": "MWET4",
       "nome": "Wetzel",
       "categoria": "Autopeças e veículos",
-      "codigo": "sem_negocio",
-      "motivo": "Nenhum negócio nos últimos 21 pregões."
+      "codigo": "poucos_dias_negociados",
+      "motivo": "Negociou em 1 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "NEOE3",
@@ -3137,7 +3130,7 @@
       "nome": "NEXP3",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 974 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 724 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "NGRD3",
@@ -3151,7 +3144,7 @@
       "nome": "NORD3",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 1.651 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 1.616 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "NUTR3",
@@ -3172,28 +3165,28 @@
       "nome": "Ouro Fino Saúde Animal",
       "categoria": "Medicamentos e saúde animal",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 111.164 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 75.703 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "OSXB3",
       "nome": "OSXB3",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 2.816 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 3.212 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "PATI3",
       "nome": "PATI3",
       "categoria": "Outros",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 13 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 12 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "PATI4",
       "nome": "PATI4",
       "categoria": "Outros",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 6 pregões (máximo 5)."
+      "motivo": "Último negócio há 7 pregões (máximo 5)."
     },
     {
       "ticker": "PDGR3",
@@ -3214,7 +3207,7 @@
       "nome": "PEAB3",
       "categoria": "Outros",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 15 pregões (máximo 5)."
+      "motivo": "Último negócio há 16 pregões (máximo 5)."
     },
     {
       "ticker": "PETZ3",
@@ -3242,21 +3235,21 @@
       "nome": "RAPT3",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 333.833 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 365.562 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "RCSL3",
       "nome": "RCSL3",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 102.608 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 140.820 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "RCSL4",
       "nome": "RCSL4",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 950.628 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 847.605 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "RDNI3",
@@ -3291,7 +3284,7 @@
       "nome": "RPAD3",
       "categoria": "Outros",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 13 pregões (máximo 5)."
+      "motivo": "Último negócio há 14 pregões (máximo 5)."
     },
     {
       "ticker": "RPAD5",
@@ -3326,14 +3319,14 @@
       "nome": "RVEE3",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 265 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 132 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "SCAR3",
       "nome": "SCAR3",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 351.966 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 365.820 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "SEQL3",
@@ -3361,14 +3354,14 @@
       "nome": "SNSY3",
       "categoria": "Outros",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 14 pregões (máximo 5)."
+      "motivo": "Último negócio há 15 pregões (máximo 5)."
     },
     {
       "ticker": "SNSY5",
       "nome": "SNSY5",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 5.857 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 5.401 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "SOND5",
@@ -3431,14 +3424,14 @@
       "nome": "TOKY3",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 28.436 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 28.000 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "TPIS3",
       "nome": "TPIS3",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 413.407 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 456.247 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "TXRX4",
@@ -3466,14 +3459,14 @@
       "nome": "UNIP5",
       "categoria": "Outros",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 13 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 14 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "USIM6",
       "nome": "USIM6",
       "categoria": "Outros",
-      "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 3 dos últimos 21 pregões (mínimo 15)."
+      "codigo": "cotacao_defasada",
+      "motivo": "Último negócio há 6 pregões (máximo 5)."
     },
     {
       "ticker": "VIVR3",
@@ -3494,7 +3487,7 @@
       "nome": "WDCN3",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 49.956 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 55.271 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "WEST3",
@@ -3508,7 +3501,7 @@
       "nome": "WHRL3",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 19.954 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 23.584 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "WHRL4",
@@ -3522,14 +3515,14 @@
       "nome": "WLMM3",
       "categoria": "Outros",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "WLMM4",
       "nome": "WLMM4",
       "categoria": "Outros",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 61.269 por dia (mínimo 1.000.000)."
+      "motivo": "Volume mediano de R$ 66.439 por dia (mínimo 1.000.000)."
     },
     {
       "ticker": "ZAMP3",

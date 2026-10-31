@@ -3,12 +3,12 @@
   "acessoRestrito": false,
   "instagram": null,
   "versaoMetodologia": "1.1.1",
-  "geradoEm": "2026-10-30T07:43:26.833Z",
-  "dataExecucao": "2026-10-30",
-  "ultimoPregao": "2026-10-30",
+  "geradoEm": "2026-10-31T07:30:04.440Z",
+  "dataExecucao": "2026-10-31",
+  "ultimoPregao": "2026-11-03",
   "pastaAuditoria": "auditoria/top15-ibov/2026-10-17",
-  "hashResultado": "72a3fe8d35442fdabc0fdcdc37616649e7c1ed299599be0bb8c99df6c0406ae7",
-  "hashInsumos": "cc35f1b542ce41b50ea6b51bc93fdc32eab40153749605cbbf93ba19b669761c",
+  "hashResultado": "f68acd0228c5ead61953637ea40873030cdb19a7b15f27ce10217ee3196640c7",
+  "hashInsumos": "58658d42a55587222479f172cb5668cbb94eaeb19b7d7096bc22634b731d19e6",
   "hashConfig": "513fd602125efb5dcedb18e980d459f7c9ad71bb098ca01921925afa953246c1",
   "tamanhoDaLista": 15,
   "universo": 76,
@@ -20,9 +20,9 @@
     "idadeMaximaDias": 10
   },
   "indice": "IBOV",
-  "dataComposicao": "2026-10-30",
+  "dataComposicao": "2026-11-03",
   "somaPesos": 100,
-  "somaPesosDaLista": 67.341,
+  "somaPesosDaLista": 67.499,
   "ranking": [
     {
       "posicao": 1,
@@ -30,12 +30,12 @@
       "nome": "Petrobras",
       "tipo": "PN N2",
       "setor": "Petróleo e gás",
-      "peso": 9.721,
-      "pesoAcumulado": 9.721,
+      "peso": 9.891,
+      "pesoAcumulado": 9.891,
       "quantidadeTeorica": 4410957710,
-      "cotacao": 52.2,
-      "dataCotacao": "2026-10-29",
-      "volumeMediano": 2793039893
+      "cotacao": 52.71,
+      "dataCotacao": "2026-10-30",
+      "volumeMediano": 2811528507
     },
     {
       "posicao": 2,
@@ -43,24 +43,24 @@
       "nome": "Vale",
       "tipo": "ON NM",
       "setor": "Mineração",
-      "peso": 9.349,
-      "pesoAcumulado": 19.07,
+      "peso": 9.729,
+      "pesoAcumulado": 19.62,
       "quantidadeTeorica": 3687404862,
-      "cotacao": 60.05,
-      "dataCotacao": "2026-10-29",
-      "volumeMediano": 1914325638
+      "cotacao": 62.02,
+      "dataCotacao": "2026-10-30",
+      "volumeMediano": 2085731348
     },
     {
       "posicao": 3,
       "ticker": "ITUB4",
       "nome": "Itaú Unibanco",
-      "tipo": "PN N1",
+      "tipo": "PN EJ N1",
       "setor": "Bancos",
-      "peso": 8.911,
-      "pesoAcumulado": 27.981,
+      "peso": 8.782,
+      "pesoAcumulado": 28.402,
       "quantidadeTeorica": 5337898685,
-      "cotacao": 39.54,
-      "dataCotacao": "2026-10-29",
+      "cotacao": 38.69,
+      "dataCotacao": "2026-10-30",
       "volumeMediano": 1978529856
     },
     {
@@ -69,12 +69,12 @@
       "nome": "PETROBRAS",
       "tipo": "ON N2",
       "setor": "Outros",
-      "peso": 6.089,
-      "pesoAcumulado": 34.07,
+      "peso": 6.234,
+      "pesoAcumulado": 34.636,
       "quantidadeTeorica": 2441951100,
-      "cotacao": 59.06,
-      "dataCotacao": "2026-10-29",
-      "volumeMediano": 797053406
+      "cotacao": 60.01,
+      "dataCotacao": "2026-10-30",
+      "volumeMediano": 818306982
     },
     {
       "posicao": 5,
@@ -82,12 +82,12 @@
       "nome": "Axia Energia (ex-Eletrobras)",
       "tipo": "ON NM",
       "setor": "Energia elétrica: geração",
-      "peso": 4.587,
-      "pesoAcumulado": 38.657,
+      "peso": 4.598,
+      "pesoAcumulado": 39.234,
       "quantidadeTeorica": 2278697967,
-      "cotacao": 47.68,
-      "dataCotacao": "2026-10-29",
-      "volumeMediano": 1229150416
+      "cotacao": 47.43,
+      "dataCotacao": "2026-10-30",
+      "volumeMediano": 1163474951
     },
     {
       "posicao": 6,
@@ -95,11 +95,11 @@
       "nome": "Sabesp",
       "tipo": "ON NM",
       "setor": "Saneamento e resíduos",
-      "peso": 3.741,
-      "pesoAcumulado": 42.398,
+      "peso": 3.703,
+      "pesoAcumulado": 42.937,
       "quantidadeTeorica": 3524534025,
-      "cotacao": 25.14,
-      "dataCotacao": "2026-10-29",
+      "cotacao": 24.7,
+      "dataCotacao": "2026-10-30",
       "volumeMediano": 797758897
     },
     {
@@ -108,12 +108,12 @@
       "nome": "Itaúsa",
       "tipo": "PN N1",
       "setor": "Bolsa, holdings e serviços financeiros",
-      "peso": 3.244,
-      "pesoAcumulado": 45.642,
+      "peso": 3.167,
+      "pesoAcumulado": 46.104,
       "quantidadeTeorica": 5980171123,
-      "cotacao": 12.85,
-      "dataCotacao": "2026-10-29",
-      "volumeMediano": 677784458
+      "cotacao": 12.45,
+      "dataCotacao": "2026-10-30",
+      "volumeMediano": 641145566
     },
     {
       "posicao": 8,
@@ -121,11 +121,11 @@
       "nome": "Embraer",
       "tipo": "ON NM",
       "setor": "Máquinas, equipamentos e aeroespacial",
-      "peso": 3.078,
-      "pesoAcumulado": 48.72,
+      "peso": 3.017,
+      "pesoAcumulado": 49.121,
       "quantidadeTeorica": 711833141,
-      "cotacao": 102.4,
-      "dataCotacao": "2026-10-29",
+      "cotacao": 99.62,
+      "dataCotacao": "2026-10-30",
       "volumeMediano": 597830402
     },
     {
@@ -134,11 +134,11 @@
       "nome": "Bradesco",
       "tipo": "PN N1",
       "setor": "Bancos",
-      "peso": 3.05,
-      "pesoAcumulado": 51.77,
+      "peso": 3.008,
+      "pesoAcumulado": 52.129,
       "quantidadeTeorica": 5100907585,
-      "cotacao": 14.16,
-      "dataCotacao": "2026-10-29",
+      "cotacao": 13.86,
+      "dataCotacao": "2026-10-30",
       "volumeMediano": 1675471771
     },
     {
@@ -147,12 +147,12 @@
       "nome": "WEG",
       "tipo": "ON NM",
       "setor": "Máquinas, equipamentos e aeroespacial",
-      "peso": 3.039,
-      "pesoAcumulado": 54.809,
+      "peso": 3.005,
+      "pesoAcumulado": 55.134,
       "quantidadeTeorica": 1460506056,
-      "cotacao": 49.28,
-      "dataCotacao": "2026-10-29",
-      "volumeMediano": 666214721
+      "cotacao": 48.36,
+      "dataCotacao": "2026-10-30",
+      "volumeMediano": 681066369
     },
     {
       "posicao": 11,
@@ -160,11 +160,11 @@
       "nome": "B3",
       "tipo": "ON NM",
       "setor": "Bolsa, holdings e serviços financeiros",
-      "peso": 2.989,
-      "pesoAcumulado": 57.798,
+      "peso": 2.848,
+      "pesoAcumulado": 57.982,
       "quantidadeTeorica": 4985893391,
-      "cotacao": 14.2,
-      "dataCotacao": "2026-10-29",
+      "cotacao": 13.43,
+      "dataCotacao": "2026-10-30",
       "volumeMediano": 1364313702
     },
     {
@@ -173,12 +173,12 @@
       "nome": "BTG Pactual",
       "tipo": "UNT N2",
       "setor": "Bancos",
-      "peso": 2.726,
-      "pesoAcumulado": 60.524,
+      "peso": 2.619,
+      "pesoAcumulado": 60.601,
       "quantidadeTeorica": 1194770950,
-      "cotacao": 54.04,
-      "dataCotacao": "2026-10-29",
-      "volumeMediano": 1218552093
+      "cotacao": 51.52,
+      "dataCotacao": "2026-10-30",
+      "volumeMediano": 1366514204
     },
     {
       "posicao": 13,
@@ -186,11 +186,11 @@
       "nome": "Ambev",
       "tipo": "ON",
       "setor": "Alimentos e bebidas",
-      "peso": 2.484,
-      "pesoAcumulado": 63.008,
+      "peso": 2.511,
+      "pesoAcumulado": 63.112,
       "quantidadeTeorica": 4043349180,
-      "cotacao": 14.55,
-      "dataCotacao": "2026-10-29",
+      "cotacao": 14.6,
+      "dataCotacao": "2026-10-30",
       "volumeMediano": 660672222
     },
     {
@@ -199,12 +199,12 @@
       "nome": "PRIO",
       "tipo": "ON NM",
       "setor": "Petróleo e gás",
-      "peso": 2.243,
-      "pesoAcumulado": 65.251,
+      "peso": 2.292,
+      "pesoAcumulado": 65.404,
       "quantidadeTeorica": 753702456,
-      "cotacao": 70.47,
-      "dataCotacao": "2026-10-29",
-      "volumeMediano": 623405924
+      "cotacao": 71.49,
+      "dataCotacao": "2026-10-30",
+      "volumeMediano": 638696277
     },
     {
       "posicao": 15,
@@ -212,11 +212,11 @@
       "nome": "Eneva",
       "tipo": "ON NM",
       "setor": "Energia elétrica: geração",
-      "peso": 2.09,
-      "pesoAcumulado": 67.341,
+      "peso": 2.095,
+      "pesoAcumulado": 67.499,
       "quantidadeTeorica": 1916508073,
-      "cotacao": 25.83,
-      "dataCotacao": "2026-10-29",
+      "cotacao": 25.7,
+      "dataCotacao": "2026-10-30",
       "volumeMediano": 443296349
     }
   ],
