@@ -41,6 +41,9 @@ jobs:
         run: node --test scripts/balancos.test.mjs
 
       - name: Baixar a CVM e gerar balancos.json
+        # Seis anos de ITR e DFP deixam mais de 2 GB de linhas em memória: acima do limite padrão do Node (cerca de 2 GB neste runner); o runner de repositório privado tem 7 GB, então 5 GB de heap deixa folga para o sistema.
+        env:
+          NODE_OPTIONS: --max-old-space-size=5120
         run: node scripts/atualizar-balancos.mjs
 
       - name: Conferir se o site compila com os dados novos
