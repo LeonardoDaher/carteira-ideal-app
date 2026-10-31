@@ -4,7 +4,7 @@ import { ativarPush, desativarPush, pushLigado, sincronizarPush } from '../data/
 import { useArquivoDados } from '../data/useArquivoDados'
 import { SNAPSHOT_ACOES_DIVIDENDOS } from '../data/snapshotAcoesDividendos'
 import { buscarAcoes } from '../domain/acoes'
-import type { AcaoBusca } from '../domain/acoes'
+import type { AcaoBusca, GrupoAcoes } from '../domain/acoes'
 import { ROTULO_RECOMENDACAO } from '../domain/analiseFundamentalista'
 import type { SnapshotFundamentos } from '../domain/analiseFundamentalista'
 import { TAXA_BAZIN_PADRAO, tickersParaAvisar } from '../domain/precoTeto'
@@ -73,9 +73,11 @@ const suportaNotificacao = () => typeof Notification !== 'undefined'
  * para as duas abas nunca darem veredictos opostos. Fase 1: o aviso vale com o app aberto (notificação do navegador, se permitida).
  */
 export function PrecoTetoAcoes({
-  busca, precoDe, nomeDe, fundamentos,
+  busca, precoDe, nomeDe, fundamentos, grupos = [],
 }: {
   busca: AcaoBusca[]
+  /** Setores da B3 do cadastro, agrupados (os mesmos da aba Simulador), para o filtro por setor. */
+  grupos?: GrupoAcoes[]
   precoDe: (ticker: string) => number | null
   nomeDe: (ticker: string) => string | null
   /** Só nos testes. */
@@ -306,7 +308,7 @@ export function PrecoTetoAcoes({
         )}
       </div>
 
-      <ListaTodas itens={itens} nomeDe={nomeDe} aoAcompanhar={(ticker) => adicionar(ticker)} acompanhadas={guardado.acompanhadas} />
+      <ListaTodas itens={itens} grupos={grupos} nomeDe={nomeDe} aoAcompanhar={(ticker) => adicionar(ticker)} acompanhadas={guardado.acompanhadas} />
 
       <div className="card-outline small muted justify" style={{ lineHeight: 1.5 }} role="note">{AVISO}</div>
     </div>
@@ -395,22 +397,45 @@ const pct = (v: number) => `${v > 0 ? '+' : v < 0 ? '−' : ''}${Math.abs(v).toL
  * Lista fininha de TODAS as ações do cadastro, em ordem alfabética, com o preço, o preço teto, a distância até ele e o selo da análise
  * fundamentalista. Só as que estão abaixo dos tetos de Bazin e Graham ficam em verde; as demais mostram o teto sem destaque. Tocar numa linha abre o cartão.
  */
-function ListaTodas({ itens, nomeDe, aoAcompanhar, acompanhadas }: { itens: Map<string, PrecoTeto>; nomeDe: (t: string) => string | null; aoAcompanhar: (t: string) => void; acompanhadas: string[] }) {
+function ListaTodas({ itens, grupos, nomeDe, aoAcompanhar, acompanhadas }: { itens: Map<string, PrecoTeto>; grupos: GrupoAcoes[]; nomeDe: (t: string) => string | null; aoAcompanhar: (t: string) => void; acompanhadas: string[] }) {
   const [filtro, setFiltro] = useState('')
+  // Setor escolhido: 'g:Grupo' (todo o grande setor da B3) ou 's:Setor' (um setor dentro dele); vazio = todos.
+  const [setorEscolhido, setSetorEscolhido] = useState('')
   const [aberta, setAberta] = useState<string | null>(null)
+  const doSetor = useMemo(() => {
+    if (!setorEscolhido) return null
+    const [tipo, nome] = [setorEscolhido.slice(0, 1), setorEscolhido.slice(2)]
+    const conjunto = new Set<string>()
+    for (const g of grupos) for (const s of g.setores) if ((tipo === 'g' && g.grupo === nome) || (tipo === 's' && s.setor === nome)) for (const e of s.empresas) conjunto.add(e.ticker)
+    return conjunto
+  }, [setorEscolhido, grupos])
   const linhas = useMemo(() => {
     const q = filtro.trim().toLowerCase()
     return [...itens.values()]
+      .filter((i) => !doSetor || doSetor.has(i.ticker))
       .filter((i) => !q || i.ticker.toLowerCase().includes(q) || (nomeDe(i.ticker) ?? i.nome ?? '').toLowerCase().includes(q))
       .sort((a, b) => a.ticker.localeCompare(b.ticker))
-  }, [itens, filtro, nomeDe])
+  }, [itens, filtro, nomeDe, doSetor])
   const verdes = useMemo(() => [...itens.values()].filter((i) => i.status === 'abaixo-do-teto').length, [itens])
   return (
     <div className="col" style={{ gap: 8 }} data-testid="lista-todas">
-      <span style={{ fontWeight: 700, fontSize: 14 }}>Todas as ações ({itens.size})</span>
+      <span style={{ fontWeight: 700, fontSize: 14 }}>{doSetor ? 'Ações do setor' : 'Todas as ações'} ({doSetor || filtro.trim() ? linhas.length : itens.size})</span>
       <span className="tiny muted justify">
         O preço teto de cada ação do app, em ordem alfabética. Em verde, as {verdes} abaixo dos tetos de Bazin e Graham. O símbolo à direita é a leitura da análise fundamentalista: ✔ concorda, • neutra, ⚠ alerta.
       </span>
+      {grupos.length > 0 && (
+        <select className="busca-fii" aria-label="Filtrar por setor" value={setorEscolhido} onChange={(e) => { setSetorEscolhido(e.target.value); setAberta(null) }}>
+          <option value="">Todos os setores</option>
+          {grupos.map((g) => (
+            <optgroup key={g.grupo} label={g.grupo}>
+              <option value={`g:${g.grupo}`}>Todo o setor: {g.grupo} ({g.empresas})</option>
+              {g.setores.map((s) => (
+                <option key={s.setor} value={`s:${s.setor}`}>{s.setor} ({s.empresas.length})</option>
+              ))}
+            </optgroup>
+          ))}
+        </select>
+      )}
       <input type="search" className="busca-fii" placeholder="Filtrar: código ou nome" aria-label="Filtrar a lista de todas as ações" autoCapitalize="characters" autoCorrect="off" spellCheck={false} value={filtro} onChange={(e) => setFiltro(e.target.value.slice(0, 40))} />
       <div className="row tiny muted" style={{ padding: '0 10px', gap: 8 }} aria-hidden="true">
         <span style={{ flex: '1 1 0' }}>Ação</span>

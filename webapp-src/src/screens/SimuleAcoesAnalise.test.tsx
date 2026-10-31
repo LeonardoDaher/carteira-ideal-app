@@ -331,6 +331,37 @@ describe('Simule Ações: preço teto de compra', () => {
     expect(within(cartao).getByTestId('leitura-fund-BETA3').textContent).toContain('Aguardar preço mais atrativo')
   })
 
+  it('o filtro por setor lista os setores da B3 e mostra só as ações do setor escolhido', async () => {
+    try { localStorage.clear() } catch { /* sem armazenamento */ }
+    const base = snapshotTeto.setores[0]
+    const doisSetores = {
+      ...snapshotTeto,
+      setores: [
+        { ...base, empresas: base.empresas.filter((e) => !e.ticker.startsWith('PAR')) },
+        { ...base, setor: 'Pares', empresas: base.empresas.filter((e) => e.ticker.startsWith('PAR')) },
+      ],
+    } as unknown as SnapshotAcoes
+    render(<SimuleAcoes ctx={ctx} snapshot={doisSetores} series={series} fundamentos={comBeta} />)
+    fireEvent.click(screen.getByRole('tab', { name: /Preço teto de compra/ }))
+    const lista = await screen.findByTestId('lista-todas')
+    const seletor = screen.getByLabelText('Filtrar por setor') as HTMLSelectElement
+    expect([...seletor.options].map((o) => o.textContent)).toEqual(expect.arrayContaining(['Todos os setores', 'Pares (4)']))
+    expect(within(lista).getByTestId('linha-BETA3')).toBeTruthy()
+
+    fireEvent.change(seletor, { target: { value: 's:Pares' } })
+    expect(within(lista).getByTestId('linha-PAR1')).toBeTruthy()
+    expect(within(lista).queryByTestId('linha-BETA3')).toBeNull()
+    expect(within(lista).getByText(/Ações do setor \(4\)/)).toBeTruthy()
+
+    fireEvent.change(seletor, { target: { value: `g:${base.grupoB3}` } })
+    expect(within(lista).getByTestId('linha-BETA3')).toBeTruthy()
+    expect(within(lista).getByTestId('linha-PAR1')).toBeTruthy()
+
+    fireEvent.change(seletor, { target: { value: 's:Pares' } })
+    fireEvent.change(screen.getByLabelText(/Filtrar a lista de todas as ações/), { target: { value: 'par2' } })
+    expect(within(lista).getAllByTestId(/^linha-/)).toHaveLength(1)
+  })
+
   it('o filtro procura por código ou nome na lista', async () => {
     abrirTeto()
     const lista = await screen.findByTestId('lista-todas')

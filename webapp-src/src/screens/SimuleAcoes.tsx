@@ -294,7 +294,7 @@ export function SimuleAcoes({
       ) : aba === 'balancos' ? (
         <AgendaDeBalancos />
       ) : aba === 'precoteto' ? (
-        <PrecoTetoAcoes busca={buscaCompleta} precoDe={precoDe} nomeDe={(t) => nomeDe(t)} fundamentos={fundamentos} />
+        <PrecoTetoAcoes busca={buscaCompleta} precoDe={precoDe} nomeDe={(t) => nomeDe(t)} fundamentos={fundamentos} grupos={grupos} />
       ) : aba === 'top15confluencia' ? (
         <Top15Confluencia precoDe={precoDe} nomeDe={nomeDe} dataPregao={snapshot.dataPregao ?? ''} horizonteInicial={horizonte} series={series} fundamentos={fundamentos} />
       ) : !selecao ? (
