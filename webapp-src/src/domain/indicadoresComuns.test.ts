@@ -32,7 +32,7 @@ describe('indicadoresComuns', () => {
 
 describe('a análise dos balanços usa as mesmas contas', () => {
   const tri = (periodo: string, rotulo: string): Trimestre => ({
-    periodo, rotulo, tipo: 'ITR', dtReceb: null, link: null, consolidacao: 'consolidada', receita: 1000, ebit: 150, ebitda: 200, lucroLiquido: 100, lucroControladores: 90,
+    periodo, rotulo, tipo: 'ITR', dtReceb: null, link: null, consolidacao: 'consolidada', receita: 1000, ebit: 150, ebitda: 200, fco: null, capex: null, dividendosPagos: null, lucroLiquido: 100, lucroControladores: 90,
     ativoTotal: 5000, patrimonioLiquido: 2200, plControladores: 2000, caixa: 100, divida: 700,
   })
   const e: EmpresaBalanco = { ticker: 'T3', nome: 'T', setor: 'Mineração', financeira: false, cnpj: '1', proxima: null, trimestres: [['2025-03-31', '1T25'], ['2025-06-30', '2T25'], ['2025-09-30', '3T25'], ['2025-12-31', '4T25'], ['2026-03-31', '1T26']].map(([p, r]) => tri(p!, r!)) }
@@ -46,7 +46,7 @@ describe('a análise dos balanços usa as mesmas contas', () => {
 
 describe('alertas do balanço', () => {
   const tri = (periodo: string, rotulo: string, over: Partial<Trimestre> = {}): Trimestre => ({
-    periodo, rotulo, tipo: 'ITR', dtReceb: null, link: null, consolidacao: 'consolidada', receita: 1000, ebit: 200, ebitda: 250, lucroLiquido: 100, lucroControladores: 100,
+    periodo, rotulo, tipo: 'ITR', dtReceb: null, link: null, consolidacao: 'consolidada', receita: 1000, ebit: 200, ebitda: 250, fco: null, capex: null, dividendosPagos: null, lucroLiquido: 100, lucroControladores: 100,
     ativoTotal: 5000, patrimonioLiquido: 2000, plControladores: 2000, caixa: 100, divida: 600, ...over,
   })
   const datas: [string, string][] = [['2025-03-31', '1T25'], ['2025-06-30', '2T25'], ['2025-09-30', '3T25'], ['2025-12-31', '4T25'], ['2026-03-31', '1T26'], ['2026-06-30', '2T26']]
@@ -77,5 +77,39 @@ describe('alertas do balanço', () => {
   })
   it('patrimônio negativo é crítico', () => {
     expect(analisarBalanco(monta((i) => (i === 5 ? { patrimonioLiquido: -10 } : {})))!.alertas.map((x) => x.id)).toContain('pl-negativo')
+  })
+})
+
+describe('alertas de caixa', () => {
+  const datas: [string, string][] = [['2025-03-31', '1T25'], ['2025-06-30', '2T25'], ['2025-09-30', '3T25'], ['2025-12-31', '4T25'], ['2026-03-31', '1T26'], ['2026-06-30', '2T26']]
+  const monta = (over: Partial<Trimestre>): EmpresaBalanco => ({
+    ticker: 'T3', nome: 'T', setor: 'Mineração', financeira: false, cnpj: '1', proxima: null,
+    trimestres: datas.map(([periodo, rotulo]) => ({
+      periodo, rotulo, tipo: 'ITR' as const, dtReceb: null, link: null, consolidacao: 'consolidada' as const, receita: 1000, ebit: 200, ebitda: 250, lucroLiquido: 100, lucroControladores: 100,
+      ativoTotal: 5000, patrimonioLiquido: 2000, plControladores: 2000, caixa: 100, divida: 600, fco: 150, capex: 50, dividendosPagos: 20, ...over,
+    })),
+  })
+  const ids = (e: EmpresaBalanco) => analisarBalanco(e)!.alertas.map((a) => a.id)
+
+  it('caixa saudável não gera alerta e mostra as linhas de caixa', () => {
+    expect(ids(monta({}))).toEqual([])
+    expect(analisarBalanco(monta({}))!.linhas.map((l) => l.chave)).toEqual(expect.arrayContaining(['fco', 'fcl', 'conversao']))
+  })
+  it('caixa operacional negativo é crítico, mesmo com lucro', () => {
+    const a = analisarBalanco(monta({ fco: -50 }))!
+    const al = a.alertas.find((x) => x.id === 'fco-negativo')!
+    expect(al.gravidade).toBe('critico')
+    expect(al.detalhe).toContain('mesmo com lucro')
+  })
+  it('lucro que não vira caixa', () => {
+    expect(ids(monta({ fco: 30, capex: 5 }))).toContain('lucro-sem-caixa')
+  })
+  it('dividendos acima do caixa livre', () => {
+    expect(ids(monta({ fco: 120, capex: 50, dividendosPagos: 100 }))).toContain('dividendos-acima-fcl')
+  })
+  it('sem dado de caixa não há alerta nem linha', () => {
+    const e = monta({ fco: null, capex: null, dividendosPagos: null })
+    expect(ids(e)).toEqual([])
+    expect(analisarBalanco(e)!.linhas.map((l) => l.chave)).not.toContain('fco')
   })
 })

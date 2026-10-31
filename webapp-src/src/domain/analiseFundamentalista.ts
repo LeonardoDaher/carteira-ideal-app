@@ -5,7 +5,7 @@
 // Limite dos dados: a CVM traz demonstrações, não texto. Por isso vantagem competitiva, gestão, governança qualitativa, TAM e
 // projeções de mercado NÃO são inventados: aparecem como "dados insuficientes" ou como indício financeiro, rotulado como tal.
 
-import { dividaLiquida, dividir, lucroDosAcionistas, ok, setorAlavancado, tetoDividaEbitda } from './indicadoresComuns'
+import { conversaoLucroEmCaixa, dividaLiquida, dividir, fcoCoerente, fluxoDeCaixaLivre, lucroDosAcionistas, ok, setorAlavancado, tetoDividaEbitda } from './indicadoresComuns'
 
 // ---------------------------------------------------------------------------------------
 // Tipos dos dados (fundamentos.json)
@@ -292,16 +292,8 @@ export function cagr(inicio: number | null, fim: number | null, anos: number): n
 // Leitura dos períodos
 // ---------------------------------------------------------------------------------------
 
-/**
- * Caixa operacional acima de 2× o EBITDA (ou o EBIT) costuma ser financiamento classificado como operação (recebíveis, crédito a
- * clientes) ou evento pontual, não geração de caixa. Mesma trava do Top 15 mais baratas. Sem referência positiva, não se julga.
- */
-export function fcoCoerente(p: PeriodoFundamental): boolean {
-  if (!ok(p.fco)) return false
-  const ref = ok(p.ebitda) && p.ebitda > 0 ? p.ebitda : ok(p.ebit) && p.ebit > 0 ? p.ebit : null
-  return ref === null ? true : p.fco <= 2 * ref
-}
-const fcfDe = (p: PeriodoFundamental) => (ok(p.fco) && ok(p.capex) && fcoCoerente(p) ? p.fco - p.capex : null)
+export { fcoCoerente }
+const fcfDe = fluxoDeCaixaLivre
 const dividaLiquidaDe = dividaLiquida
 const lpaDe = (p: PeriodoFundamental) => {
   const l = lucroDosAcionistas(p)
@@ -738,7 +730,7 @@ export function analisarFundamentos(entrada: EntradaFundamentalista): AnaliseFun
   const cobertura = ok(atual.ebit) && ok(atual.despesaFinanceira) && atual.despesaFinanceira > 0 ? atual.ebit / atual.despesaFinanceira : null
   const liquidez = dividir(atual.ativoCirculante, atual.passivoCirculante)
   const fcoAtualOk = fcoCoerente(atual)
-  const conversao = ok(lucroAtual) && lucroAtual > 0 && fcoAtualOk && (!ok(atual.receita) || lucroAtual >= 0.01 * atual.receita) ? dividir(atual.fco, lucroAtual) : null
+  const conversao = conversaoLucroEmCaixa({ lucro: lucroAtual, fco: atual.fco, receita: atual.receita, coerente: fcoAtualOk })
   const acoesIni = anuais.find((c) => ok(c.acoes))?.acoes ?? null
   const acoesFim = mercado.acoes ?? atual.acoes ?? null
   const diluicao = ok(acoesIni) && ok(acoesFim) && acoesIni > 0 ? acoesFim / acoesIni - 1 : null

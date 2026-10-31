@@ -34,3 +34,21 @@ export const tetoDividaEbitda = (setor: string | null | undefined) => (setorAlav
 
 /** Leitura do ROE (mesmas faixas da Análise fundamentalista). */
 export const faixaDoRoe = (r: number): 'alto' | 'moderado' | 'baixo' => (r >= 0.15 ? 'alto' : r >= 0.08 ? 'moderado' : 'baixo')
+
+/**
+ * Caixa operacional acima de 2× o EBITDA (ou o EBIT) costuma ser financiamento classificado como operação (recebíveis, crédito a
+ * clientes) ou evento pontual, não geração de caixa. Sem referência positiva, não se julga.
+ */
+export function fcoCoerente(p: { fco: number | null; ebitda: number | null; ebit: number | null }): boolean {
+  if (!ok(p.fco)) return false
+  const ref = ok(p.ebitda) && p.ebitda > 0 ? p.ebitda : ok(p.ebit) && p.ebit > 0 ? p.ebit : null
+  return ref === null ? true : p.fco <= 2 * ref
+}
+
+/** Fluxo de caixa livre = caixa operacional − capex, só com caixa operacional coerente. */
+export const fluxoDeCaixaLivre = (p: { fco: number | null; capex: number | null; ebitda: number | null; ebit: number | null }) => (ok(p.fco) && ok(p.capex) && fcoCoerente(p) ? p.fco - p.capex : null)
+
+/** Quanto do lucro virou caixa operacional: só com lucro positivo e relevante (pelo menos 1% da receita) e caixa coerente. */
+export function conversaoLucroEmCaixa(p: { lucro: number | null; fco: number | null; receita: number | null; coerente: boolean }): number | null {
+  return ok(p.lucro) && p.lucro > 0 && p.coerente && (!ok(p.receita) || p.lucro >= 0.01 * p.receita) ? dividir(p.fco, p.lucro) : null
+}

@@ -2,7 +2,7 @@
 // Tudo em R$ MIL, como o arquivo. Só compara números que a empresa reportou à CVM: não há "consenso de mercado" aqui, então o
 // que é "abaixo do esperado" é medido contra o próprio histórico da empresa (trimestre anterior e mesmo trimestre do ano anterior).
 
-import { dividaLiquidaSobreEbitda, faixaDoRoe, lucroDosAcionistas, roe as calcularRoe, setorAlavancado, tetoDividaEbitda } from './indicadoresComuns'
+import { conversaoLucroEmCaixa, dividaLiquidaSobreEbitda, faixaDoRoe, fcoCoerente, fluxoDeCaixaLivre, lucroDosAcionistas, roe as calcularRoe, setorAlavancado, tetoDividaEbitda } from './indicadoresComuns'
 
 export interface Trimestre {
   periodo: string
@@ -15,6 +15,10 @@ export interface Trimestre {
   ebit: number | null
   /** EBIT + depreciação e amortização do trimestre (mesma definição da Análise fundamentalista). */
   ebitda: number | null
+  /** Caixa operacional, capex e dividendos pagos do trimestre (acumulado do exercício menos o trimestre anterior). */
+  fco: number | null
+  capex: number | null
+  dividendosPagos: number | null
   lucroLiquido: number | null
   lucroControladores: number | null
   ativoTotal: number | null
@@ -272,6 +276,11 @@ export function analisarBalanco(e: EmpresaBalanco): AnaliseBalanco | null {
   if (e.financeira) add('alavancagem', 'Ativo ÷ patrimônio líquido', 'x', (t) => razao(t.ativoTotal, t.patrimonioLiquido), false)
   else {
     add('dividaLiquida', 'Dívida líquida', 'reais', (t) => (t.divida == null || t.caixa == null ? null : t.divida - t.caixa), false)
+    if (tri.some((t) => t.fco != null)) {
+      add('fco', 'Caixa operacional', 'reais', (t) => t.fco)
+      add('fcl', 'Fluxo de caixa livre (caixa operacional − capex)', 'reais', (t) => fluxoDeCaixaLivre(t))
+      add('conversao', 'Lucro convertido em caixa (12 meses)', 'x', (_t, i) => { const l12 = soma12m(tri, i, lucroDoTri); const f12 = soma12m(tri, i, (x) => x.fco); return conversaoLucroEmCaixa({ lucro: l12, fco: f12, receita: soma12m(tri, i, (x) => x.receita), coerente: fcoCoerente({ fco: f12, ebitda: soma12m(tri, i, (x) => x.ebitda), ebit: soma12m(tri, i, (x) => x.ebit) }) }) })
+    }
     add('dividaEbitda', 'Dívida líquida ÷ EBITDA 12m', 'x', (t, i) => dividaLiquidaSobreEbitda(t.divida == null ? null : t.divida - (t.caixa ?? 0), soma12m(tri, i, (x) => x.ebitda)), false)
   }
 
@@ -358,6 +367,17 @@ export function analisarBalanco(e: EmpresaBalanco): AnaliseBalanco | null {
     const ebitda12 = soma12m(tri, idx, (t) => t.ebitda)
     if (dlEbitda != null && dlEbitda > tetoDividaEbitda(e.setor)) alerta('endividamento', 'critico', 'Endividamento elevado', `Dívida líquida de ${dlEbitda.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}× o EBITDA de 12 meses, acima do limite de atenção de ${tetoDividaEbitda(e.setor).toLocaleString('pt-BR')}× para o setor.`)
     else if (dlAtual != null && dlAtual > 0 && ebitda12 != null && ebitda12 <= 0) alerta('ebitda-negativo', 'critico', 'EBITDA de 12 meses negativo com dívida', `A dívida líquida é de ${reaisCompactos(dlAtual)} e o EBITDA dos 12 meses não é positivo: não há geração operacional para sustentá-la.`)
+    const fco12 = soma12m(tri, idx, (t) => t.fco)
+    const capex12 = soma12m(tri, idx, (t) => t.capex)
+    const divid12 = soma12m(tri, idx, (t) => t.dividendosPagos)
+    if (fco12 != null && fco12 < 0) {
+      alerta('fco-negativo', 'critico', 'Caixa operacional negativo', `A operação consumiu ${reaisCompactos(Math.abs(fco12))} de caixa nos últimos 12 meses${lucro12 != null && lucro12 > 0 ? `, mesmo com lucro de ${reaisCompactos(lucro12)}` : ''}.`)
+    } else if (fco12 != null) {
+      const conv = linha('conversao').valores[idx] ?? null
+      if (conv != null && conv < 0.5) alerta('lucro-sem-caixa', 'atencao', 'Lucro que não vira caixa', `Só ${pct1(conv)} do lucro dos últimos 12 meses virou caixa operacional (${reaisCompactos(fco12)} de caixa para ${reaisCompactos(lucro12)} de lucro).`)
+    }
+    const fcl12 = fluxoDeCaixaLivre({ fco: fco12, capex: capex12, ebitda: soma12m(tri, idx, (t) => t.ebitda), ebit: soma12m(tri, idx, (t) => t.ebit) })
+    if (fcl12 != null && divid12 != null && divid12 > 0 && divid12 > fcl12) alerta('dividendos-acima-fcl', 'atencao', 'Dividendos acima do caixa livre', `Foram pagos ${reaisCompactos(divid12)} de proventos nos 12 meses, mais do que o fluxo de caixa livre (${reaisCompactos(fcl12)}). A diferença saiu do caixa ou de dívida.`)
     const margem = linha('margemEbit')
     const mAtual = margem.valores[idx]
     const mAno = indiceAnoAnterior >= 0 ? margem.valores[indiceAnoAnterior] : null

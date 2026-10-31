@@ -66,8 +66,8 @@ export function guardaLinha(dem, cd) {
 }
 
 // Identificação das linhas variáveis do fluxo de caixa, pela descrição (sem acento, minúscula).
-const ehCapex = (l) => l.dem === 'DFC' && /^6\.02\.\d{2}$/.test(l.cd) && l.valor < 0 && /imobilizad|intangiv|propriedades? para invest|ativo biologic/.test(semAcento(l.ds)) && !/aplicac|participac|coligad|controlad|empresa|fundo/.test(semAcento(l.ds))
-const ehDividendo = (l) => l.dem === 'DFC' && /^6\.03\.\d{2}$/.test(l.cd) && l.valor < 0 && /dividend|juros sobre (o )?capital|jcp|proventos/.test(semAcento(l.ds))
+export const ehCapex = (l) => l.dem === 'DFC' && /^6\.02\.\d{2}$/.test(l.cd) && l.valor < 0 && /imobilizad|intangiv|propriedades? para invest|ativo biologic/.test(semAcento(l.ds)) && !/aplicac|participac|coligad|controlad|empresa|fundo/.test(semAcento(l.ds))
+export const ehDividendo = (l) => l.dem === 'DFC' && /^6\.03\.\d{2}$/.test(l.cd) && l.valor < 0 && /dividend|juros sobre (o )?capital|jcp|proventos/.test(semAcento(l.ds))
 const ehDepreciacaoDfc = (l) => l.dem === 'DFC' && /^6\.01\.01\.\d{2}$/.test(l.cd) && /deprecia|amortiza|exaust/.test(semAcento(l.ds)) && !/direito.*uso.*arrend/.test(semAcento(l.ds))
 
 // ---------------------------------------------------------------------------------------

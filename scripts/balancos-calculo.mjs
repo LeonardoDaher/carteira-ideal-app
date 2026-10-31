@@ -7,6 +7,7 @@
 // DFP) vai junto como teto. Valor ausente é null, nunca zero.
 
 import { diasEntre, semAcento } from './acoes-baratas-calculo.mjs'
+import { ehCapex, ehDividendo } from './fundamentos-calculo.mjs'
 
 const mil = (v) => (v == null || !Number.isFinite(v) ? null : Math.round(v / 1000))
 const somaDias = (data, dias) => new Date(Date.parse(`${data}T00:00:00Z`) + dias * 86400000).toISOString().slice(0, 10)
@@ -60,6 +61,19 @@ const ehDepreciacaoDfc = (l) => l.dem === 'DFC' && /^6.01.01.d{2}$/.test(l.cd) &
 /** Janela de duração (dias) do acumulado do exercício até a data-base: 3, 6, 9 ou 12 meses. */
 const janelaAcumulada = (dtRefer) => ({ '03': [80, 100], '06': [170, 195], '09': [265, 280], '12': [355, 372] })[dtRefer.slice(5, 7)] ?? null
 
+/** Fluxo de caixa ACUMULADO no exercício: caixa operacional (6.01), capex e dividendos pagos (valores positivos). null onde a demonstração não traz. */
+function fluxoDeCaixaAcumulado(linhas, doc, dtRefer, cons) {
+  const janela = janelaAcumulada(dtRefer)
+  if (!janela) return { fco: null, capex: null, dividendos: null }
+  const dfc = linhas.filter((l) => l.doc === doc && l.dtRefer === dtRefer && l.cons === cons && l.ordem === 'ULTIMO' && l.dem === 'DFC' && duracao(l) >= janela[0] && duracao(l) <= janela[1])
+  const soma = (filtro) => {
+    const achadas = dfc.filter(filtro)
+    return achadas.length ? Math.abs(achadas.reduce((t, l) => t + l.valor, 0)) : null
+  }
+  const fco = dfc.find((l) => l.cd === '6.01')
+  return { fco: fco ? fco.valor : null, capex: soma(ehCapex), dividendos: soma(ehDividendo) }
+}
+
 /** Depreciação e amortização ACUMULADAS no exercício (DVA 7.04.01; sem ela, soma das linhas do fluxo de caixa), em valor positivo. null se não há. */
 function depreciacaoAcumulada(linhas, doc, dtRefer, cons) {
   const janela = janelaAcumulada(dtRefer)
@@ -97,7 +111,7 @@ function lerDocumento(linhas, d, cons, financeira, janela) {
     ativoTotal: r.saldo(porCodigo('1')),
     patrimonioLiquido: pl,
     plControladores: pl == null ? null : pl - (minoritarios ?? 0),
-    depreciacaoAcumulada: financeira ? null : depreciacaoAcumulada(linhas, d.doc, d.dtRefer, cons),
+    acumulados: financeira ? {} : { depreciacao: depreciacaoAcumulada(linhas, d.doc, d.dtRefer, cons), ...(() => { const c = fluxoDeCaixaAcumulado(linhas, d.doc, d.dtRefer, cons); return { fco: c.fco, capex: c.capex, dividendos: c.dividendos } })() },
     caixa: financeira ? null : caixa == null && aplic == null ? null : (caixa ?? 0) + (aplic ?? 0),
     divida: financeira ? null : dc == null && dl == null ? null : (dc ?? 0) + (dl ?? 0),
     dtIni: r.dtIniDe('3.01'),
@@ -143,7 +157,7 @@ export function trimestresDaEmpresa({ c, financeira = false, dataCorte, maximo =
       ativoTotal: ano.ativoTotal,
       patrimonioLiquido: ano.patrimonioLiquido,
       plControladores: ano.plControladores,
-      depreciacaoAcumulada: ano.depreciacaoAcumulada,
+      acumulados: ano.acumulados,
       caixa: ano.caixa,
       divida: ano.divida,
     }
@@ -153,21 +167,22 @@ export function trimestresDaEmpresa({ c, financeira = false, dataCorte, maximo =
 
   const ordenados = saida.sort((a, b) => (a.periodo < b.periodo ? -1 : 1))
   const porPeriodo = new Map(ordenados.map((e) => [e.periodo, e]))
-  // Depreciação isolada: acumulado do exercício menos o acumulado do trimestre anterior do mesmo exercício (o 1º trimestre é o próprio acumulado).
-  const depreciacaoIsolada = (e) => {
-    const acum = e.v.depreciacaoAcumulada
+  // Contas de fluxo que a CVM informa ACUMULADAS no exercício (depreciação, caixa operacional, capex, dividendos): o trimestre isolado é o
+  // acumulado menos o acumulado do trimestre anterior do mesmo exercício (o 1º trimestre é o próprio acumulado).
+  const isolado = (e, campo) => {
+    const acum = e.v.acumulados?.[campo]
     if (acum == null) return null
     if (e.periodo.slice(5, 7) === '03') return acum
     const [ano, mes] = e.periodo.split('-').map(Number)
     const anterior = porPeriodo.get(new Date(Date.UTC(ano, mes - 3, 0)).toISOString().slice(0, 10))
-    return anterior?.v.depreciacaoAcumulada == null ? null : acum - anterior.v.depreciacaoAcumulada
+    return anterior?.v.acumulados?.[campo] == null ? null : acum - anterior.v.acumulados[campo]
   }
 
   return ordenados
     .slice(-maximo)
     .map((e) => {
       const { periodo, tipo, dtReceb, link, cons, v } = e
-      const depreciacao = depreciacaoIsolada(e)
+      const depreciacao = isolado(e, 'depreciacao')
       return {
         periodo,
         rotulo: rotuloDoTrimestre(periodo),
@@ -179,6 +194,9 @@ export function trimestresDaEmpresa({ c, financeira = false, dataCorte, maximo =
         ebit: mil(v.ebit),
         // EBIT + depreciação e amortização (mesma definição da Análise fundamentalista); sem uma das duas, não há EBITDA.
         ebitda: v.ebit == null || depreciacao == null ? null : mil(v.ebit + depreciacao),
+        fco: mil(isolado(e, 'fco')),
+        capex: mil(isolado(e, 'capex')),
+        dividendosPagos: mil(isolado(e, 'dividendos')),
         lucroLiquido: mil(v.lucroLiquido),
         // A CVM às vezes traz 3.11.01 zerado com lucro diferente de zero (linha sem preenchimento): é dado ausente, não lucro zero.
         lucroControladores: v.lucroControladores === 0 && v.lucroLiquido !== 0 ? null : mil(v.lucroControladores),
@@ -302,6 +320,9 @@ export function trimestreProvisorio({ trimestres, b3, entrega, dataCorte }) {
     receita: tira(b3.receita, 'receita'),
     ebit: null,
     ebitda: null,
+    fco: null,
+    capex: null,
+    dividendosPagos: null,
     lucroLiquido: tira(b3.lucroLiquido, 'lucroLiquido'),
     lucroControladores: tira(b3.lucroControladores, 'lucroControladores'),
     ativoTotal: b3.ativoTotal,
