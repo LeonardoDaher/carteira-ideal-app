@@ -232,3 +232,41 @@ test('SES: só baixa a base quando falta o trimestre já fechado há 50 dias, e 
   const r = incorporarSeguros({ empresa: emp({}), porPeriodo: { '2026-06-30': { premioGanho: 9, sinistralidade: 0.6, comissionamento: 0.2 } } })
   assert.equal(r.trimestres[1].sinistralidade, 0.6)
 })
+
+test('receita zero com lucro vira sem dado; consolidada em branco cai na individual; em branco nas duas, o trimestre sai', () => {
+  const docs = [{ doc: 'ITR', dtRefer: '2025-03-31', dtReceb: '2025-05-05' }, { doc: 'ITR', dtRefer: '2025-06-30', dtReceb: '2025-08-05' }, { doc: 'ITR', dtRefer: '2025-09-30', dtReceb: '2025-11-05' }]
+  const ind = (l) => ({ ...l, cons: 'ind' })
+  const linhas = [
+    // 1T25: holding — 3.01 zerado mas com lucro → receita null, lucro mantido.
+    ...dre('ITR', '2025-03-31', '2025-01-01', 0, 5e6), ...bal('ITR', '2025-03-31'),
+    // 2T25: consolidada toda em branco, individual com números → usa a individual.
+    ...dre('ITR', '2025-06-30', '2025-04-01', 0, 0), ...dre('ITR', '2025-06-30', '2025-04-01', 7e6, 7e5).map(ind), ...bal('ITR', '2025-06-30'),
+    // 3T25: em branco nas duas → fora.
+    ...dre('ITR', '2025-09-30', '2025-07-01', 0, 0), ...dre('ITR', '2025-09-30', '2025-07-01', 0, 0).map(ind), ...bal('ITR', '2025-09-30'),
+  ]
+  const t = trimestresDaEmpresa({ c: { docs, linhas }, dataCorte: '2026-10-30' })
+  assert.deepEqual(t.map((x) => x.rotulo), ['1T25', '2T25'])
+  assert.equal(t[0].receita, null)
+  assert.equal(t[0].lucroLiquido, 5000)
+  assert.equal(t[1].consolidacao, 'individual')
+  assert.equal(t[1].receita, 7000)
+})
+
+test('holding com 3.01 zerado: receita = comissões + outras receitas operacionais + equivalência patrimonial, e o 4º trimestre continua ano menos 9 meses', () => {
+  const docs = [{ doc: 'ITR', dtRefer: '2025-09-30', dtReceb: '2025-11-05' }, { doc: 'DFP', dtRefer: '2025-12-31', dtReceb: '2026-03-10' }]
+  const partes = (doc, dtRefer, ini, com, outras, eqv) => [
+    linha(doc, dtRefer, 'DRE', '3.01', 0, ini), linha(doc, dtRefer, 'DRE', '3.11', 1e6, ini),
+    linha(doc, dtRefer, 'DRE', '3.05.01', com, ini, dtRefer, 'Receitas de Comissões'),
+    linha(doc, dtRefer, 'DRE', '3.04.04', outras, ini, dtRefer, 'Outras Receitas Operacionais'),
+    linha(doc, dtRefer, 'DRE', '3.06', eqv, ini, dtRefer, 'Resultado de Equivalência Patrimonial'),
+  ]
+  const linhas = [
+    ...partes('ITR', '2025-09-30', '2025-07-01', 1e6, 2e6, 3e6), ...partes('ITR', '2025-09-30', '2025-01-01', 3e6, 6e6, 9e6), ...bal('ITR', '2025-09-30'),
+    ...partes('DFP', '2025-12-31', '2025-01-01', 5e6, 9e6, 14e6), ...bal('DFP', '2025-12-31'),
+  ]
+  const [t3, t4] = trimestresDaEmpresa({ c: { docs, linhas }, dataCorte: '2026-10-30' })
+  assert.equal(t3.receita, 6000)
+  assert.equal(t3.receitaTipo, 'comissoes-equivalencia')
+  assert.equal(t4.receita, 10000) // (5+9+14) − (3+6+9) = 10 milhões
+  assert.equal(t4.receitaTipo, 'comissoes-equivalencia')
+})

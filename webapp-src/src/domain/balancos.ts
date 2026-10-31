@@ -32,6 +32,8 @@ export interface Trimestre {
   provisorio?: boolean
   /** Sem o aviso da B3: `dtReceb` é o dia da coleta (o balanço saiu até esse dia). */
   dataAproximada?: boolean
+  /** Holdings e corretoras de seguro: a CVM traz receita zero e o resultado vem de comissões e equivalência patrimonial; a receita aqui é a soma delas. */
+  receitaTipo?: 'comissoes-equivalencia'
   /** Só em bancos, do IF.data do Banco Central (conglomerado prudencial), em fração (0,148 = 14,8%). Ausente até o BC publicar o trimestre. */
   /** Só fora de bancos e seguradoras: lucro bruto e custo (positivo) só existem quando a empresa reporta custo; estoque é saldo do balanço. */
   lucroBruto?: number | null
@@ -306,7 +308,8 @@ export function analisarBalanco(e: EmpresaBalanco): AnaliseBalanco | null {
     })
   }
 
-  add('receita', e.financeira ? 'Receitas da intermediação financeira' : 'Receita líquida', 'reais', (t) => t.receita)
+  const receitaDeHolding = tri.some((t) => t.receitaTipo != null)
+  add('receita', receitaDeHolding ? 'Receita (comissões + equivalência patrimonial)' : e.financeira ? 'Receitas da intermediação financeira' : 'Receita líquida', 'reais', (t) => t.receita)
   if (!e.financeira) add('ebit', 'EBIT (resultado operacional)', 'reais', (t) => t.ebit)
   add('lucro', 'Lucro líquido (dos controladores)', 'reais', lucroDoTri)
   add('margemLiquida', 'Margem líquida', 'pct', (t) => razao(lucroDoTri(t), t.receita))

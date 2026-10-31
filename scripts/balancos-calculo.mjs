@@ -88,11 +88,25 @@ function depreciacaoAcumulada(linhas, doc, dtRefer, cons) {
   return dfc.length ? Math.abs(dfc.reduce((t, l) => t + l.valor, 0)) : null
 }
 
-/** Escolhe 'con' se houver DRE consolidada com 3.01 ou 3.05, senão 'ind'. */
-function consolidacaoDoDocumento(linhas, d) {
+/** Demonstrações do documento com DRE (3.01 ou 3.05), na ordem de preferência: consolidada, depois individual. */
+function consolidacoesDoDocumento(linhas, d) {
   const tem = (cons) => linhas.some((l) => l.doc === d.doc && l.dtRefer === d.dtRefer && l.cons === cons && l.dem === 'DRE' && (l.cd === '3.05' || l.cd === '3.01'))
-  return tem('con') ? 'con' : tem('ind') ? 'ind' : null
+  return ['con', 'ind'].filter(tem)
 }
+
+/**
+ * Holdings e corretoras de seguro (BB Seguridade, Caixa Seguridade, Bradespar) não vendem produto: a CVM traz 3.01 = 0 e o resultado vem de
+ * comissões, outras receitas operacionais e equivalência patrimonial. Quando 3.01 é zero, a receita passa a ser a soma dessas linhas
+ * (pelo início do nome, porque o código e o texto mudam entre empresas e entre ITR e DFP: "Comissões" × "Comissões Líquidas"); sem nenhuma delas, continua sem receita.
+ */
+const RECEITAS_DE_HOLDING = ['receitas de comissoes', 'outras receitas operacionais', 'resultado de equivalencia patrimonial']
+function receitaDeHolding(r, janela) {
+  const partes = RECEITAS_DE_HOLDING.map((ds) => r.fluxo((l) => semAcento(l.ds).startsWith(ds), janela)).filter((v) => v != null)
+  return partes.length ? partes.reduce((t, v) => t + v, 0) : null
+}
+
+/** Receita e lucro ambos exatamente zero: demonstração entregue em branco (a CVM tem ITR da TIM e da Rio Paranapanema de 2024 assim), não uma empresa sem resultado. */
+const dreEmBranco = (v) => v.receita === 0 && v.lucroLiquido === 0
 
 /** Lê o que importa de um documento: fluxos em uma janela de duração e saldos. Fluxos em R$ unidades (o arredondamento a mil é no fim). */
 function lerDocumento(linhas, d, cons, financeira, janela) {
@@ -106,8 +120,11 @@ function lerDocumento(linhas, d, cons, financeira, janela) {
   const minoritarios = financeira ? r.saldo(ehMinoritarioFinanceira) : r.saldo(porCodigo('2.03.09'))
   const dc = r.saldo(porCodigo('2.01.04'))
   const dl = r.saldo(porCodigo('2.02.01'))
+  const receitaCvm = r.fluxo(porCodigo('3.01'), janela)
+  const alternativa = receitaCvm ? null : receitaDeHolding(r, janela)
   return {
-    receita: r.fluxo(porCodigo('3.01'), janela),
+    receita: alternativa || receitaCvm,
+    receitaAlt: Boolean(alternativa),
     ebit: financeira ? null : r.fluxo(porCodigo('3.05'), janela),
     lucroBruto: financeira ? null : r.fluxo(porCodigo('3.03'), janela),
     cmv: financeira ? null : r.fluxo(porCodigo('3.02'), janela),
@@ -139,39 +156,42 @@ export function trimestresDaEmpresa({ c, financeira = false, dataCorte, maximo =
   const saida = []
 
   for (const d of itr) {
-    const cons = consolidacaoDoDocumento(c.linhas, d)
-    if (!cons) continue
-    const v = lerDocumento(c.linhas, d, cons, financeira, JANELA_TRIMESTRE)
-    if (v.lucroLiquido == null) continue
-    saida.push({ periodo: d.dtRefer, tipo: 'ITR', dtReceb: d.dtReceb ?? null, link: d.linkDoc ?? null, cons, v })
+    // Consolidada em branco: tenta a individual; em branco nas duas, o trimestre fica de fora.
+    for (const cons of consolidacoesDoDocumento(c.linhas, d)) {
+      const v = lerDocumento(c.linhas, d, cons, financeira, JANELA_TRIMESTRE)
+      if (v.lucroLiquido == null || dreEmBranco(v)) continue
+      saida.push({ periodo: d.dtRefer, tipo: 'ITR', dtReceb: d.dtReceb ?? null, link: d.linkDoc ?? null, cons, v })
+      break
+    }
   }
   for (const d of dfp) {
-    const cons = consolidacaoDoDocumento(c.linhas, d)
-    if (!cons) continue
     const t3 = itr.find((x) => diasEntre(x.dtRefer, d.dtRefer) >= 85 && diasEntre(x.dtRefer, d.dtRefer) <= 100)
     if (!t3) continue
-    const consT3 = c.linhas.some((l) => l.doc === 'ITR' && l.dtRefer === t3.dtRefer && l.cons === cons) ? cons : null
-    if (!consT3) continue
-    const ano = lerDocumento(c.linhas, d, cons, financeira, JANELA_ANO)
-    const nove = lerDocumento(c.linhas, t3, cons, financeira, JANELA_ACUMULADO_9M)
-    const dif = (a, b) => (a == null || b == null ? null : a - b)
-    const v = {
-      receita: dif(ano.receita, nove.receita),
-      ebit: financeira ? null : dif(ano.ebit, nove.ebit),
-      lucroBruto: financeira ? null : dif(ano.lucroBruto, nove.lucroBruto),
-      cmv: financeira ? null : dif(ano.cmv, nove.cmv),
-      estoques: ano.estoques,
-      lucroLiquido: dif(ano.lucroLiquido, nove.lucroLiquido),
-      lucroControladores: dif(ano.lucroControladores, nove.lucroControladores),
-      ativoTotal: ano.ativoTotal,
-      patrimonioLiquido: ano.patrimonioLiquido,
-      plControladores: ano.plControladores,
-      acumulados: ano.acumulados,
-      caixa: ano.caixa,
-      divida: ano.divida,
+    for (const cons of consolidacoesDoDocumento(c.linhas, d)) {
+      if (!c.linhas.some((l) => l.doc === 'ITR' && l.dtRefer === t3.dtRefer && l.cons === cons)) continue
+      const ano = lerDocumento(c.linhas, d, cons, financeira, JANELA_ANO)
+      const nove = lerDocumento(c.linhas, t3, cons, financeira, JANELA_ACUMULADO_9M)
+      const dif = (a, b) => (a == null || b == null ? null : a - b)
+      const v = {
+        receita: ano.receitaAlt === nove.receitaAlt ? dif(ano.receita, nove.receita) : null,
+      receitaAlt: ano.receitaAlt && nove.receitaAlt,
+        ebit: financeira ? null : dif(ano.ebit, nove.ebit),
+        lucroBruto: financeira ? null : dif(ano.lucroBruto, nove.lucroBruto),
+        cmv: financeira ? null : dif(ano.cmv, nove.cmv),
+        estoques: ano.estoques,
+        lucroLiquido: dif(ano.lucroLiquido, nove.lucroLiquido),
+        lucroControladores: dif(ano.lucroControladores, nove.lucroControladores),
+        ativoTotal: ano.ativoTotal,
+        patrimonioLiquido: ano.patrimonioLiquido,
+        plControladores: ano.plControladores,
+        acumulados: ano.acumulados,
+        caixa: ano.caixa,
+        divida: ano.divida,
+      }
+      if (v.lucroLiquido == null || dreEmBranco(v)) continue
+      saida.push({ periodo: d.dtRefer, tipo: 'DFP', dtReceb: d.dtReceb ?? null, link: d.linkDoc ?? null, cons, v })
+      break
     }
-    if (v.lucroLiquido == null) continue
-    saida.push({ periodo: d.dtRefer, tipo: 'DFP', dtReceb: d.dtReceb ?? null, link: d.linkDoc ?? null, cons, v })
   }
 
   const ordenados = saida.sort((a, b) => (a.periodo < b.periodo ? -1 : 1))
@@ -199,7 +219,9 @@ export function trimestresDaEmpresa({ c, financeira = false, dataCorte, maximo =
         dtReceb,
         link,
         consolidacao: cons === 'con' ? 'consolidada' : 'individual',
-        receita: mil(v.receita),
+        // Receita zero é "sem receita nesta linha" (holdings e corretoras de seguro ganham por equivalência e comissão, e a CVM traz 3.01 = 0): dado ausente, não receita nula.
+        receita: v.receita ? mil(v.receita) : null,
+        ...(v.receitaAlt ? { receitaTipo: 'comissoes-equivalencia' } : {}),
         ebit: mil(v.ebit),
         // Lucro bruto e custo só valem quando a empresa reporta custo (3.02 ≠ 0): utilities e serviços sem custo ficam null, não margem de 100%.
         lucroBruto: v.cmv ? mil(v.lucroBruto) : null,
@@ -350,7 +372,8 @@ export function trimestreProvisorio({ trimestres, b3, entrega, dataCorte }) {
     ...(entrega ? {} : { dataAproximada: true }),
     link: entrega?.link ?? null,
     consolidacao: b3.consolidacao,
-    receita: tira(b3.receita, 'receita'),
+    // Holdings: a receita do histórico é comissões + equivalência, e a da B3 não; misturar daria um trimestre sem sentido.
+    receita: ultimo.receitaTipo ? null : tira(b3.receita, 'receita'),
     ebit: null,
     ebitda: null,
     fco: null,
