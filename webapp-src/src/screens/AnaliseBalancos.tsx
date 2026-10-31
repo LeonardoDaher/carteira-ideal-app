@@ -155,6 +155,23 @@ export function AnaliseBalancos({ snapshot, itens, ticker, hoje, aoEscolher }: {
             ))}
           </section>
 
+          <section className="card col" style={{ gap: 10 }} aria-label="Sinais de alerta" data-testid="balanco-alertas">
+            <h3 style={{ fontSize: 15 }}>Sinais de alerta</h3>
+            {analise.alertas.length === 0 ? (
+              <span className="small muted justify" role="status">Nenhum sinal de alerta nos dados do balanço (lucro, margem, patrimônio e endividamento). O fluxo de caixa ainda não entra nesta leitura.</span>
+            ) : (
+              analise.alertas.map((al) => (
+                <div key={al.id} className="col" style={{ gap: 2 }} data-testid="balanco-alerta">
+                  <span style={{ fontWeight: 700, fontSize: 13.5 }}>
+                    {al.titulo} <Selo tom={al.gravidade === 'critico' ? 'negativo' : 'neutro'}>{al.gravidade === 'critico' ? 'crítico' : 'atenção'}</Selo>
+                  </span>
+                  <span className="small muted justify" style={{ lineHeight: 1.5 }}>{al.detalhe}</span>
+                </div>
+              ))
+            )}
+            <span className="tiny muted justify">Os alertas olham só o que o balanço mostra e não consideram o contexto: uma empresa investindo pesado ou com baixa contábil pontual pode disparar um alerta sem que o negócio tenha piorado.</span>
+          </section>
+
           <section className="card col" style={{ gap: 10 }} aria-label="Comparação dos últimos trimestres">
             <h3 style={{ fontSize: 15 }}>Últimos {analise.trimestres.length} trimestres</h3>
             <Tabela rotulos={analise.trimestres.map((t) => t.rotulo)} linhas={analise.linhas} />

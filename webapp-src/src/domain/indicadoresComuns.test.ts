@@ -43,3 +43,39 @@ describe('a análise dos balanços usa as mesmas contas', () => {
     expect(a.linhas.find((l) => l.chave === 'dividaEbitda')!.valores[ult]).toBeCloseTo(dividaLiquidaSobreEbitda(600, 800)!)
   })
 })
+
+describe('alertas do balanço', () => {
+  const tri = (periodo: string, rotulo: string, over: Partial<Trimestre> = {}): Trimestre => ({
+    periodo, rotulo, tipo: 'ITR', dtReceb: null, link: null, consolidacao: 'consolidada', receita: 1000, ebit: 200, ebitda: 250, lucroLiquido: 100, lucroControladores: 100,
+    ativoTotal: 5000, patrimonioLiquido: 2000, plControladores: 2000, caixa: 100, divida: 600, ...over,
+  })
+  const datas: [string, string][] = [['2025-03-31', '1T25'], ['2025-06-30', '2T25'], ['2025-09-30', '3T25'], ['2025-12-31', '4T25'], ['2026-03-31', '1T26'], ['2026-06-30', '2T26']]
+  const monta = (f: (i: number) => Partial<Trimestre>, setor = 'Mineração'): EmpresaBalanco => ({ ticker: 'T3', nome: 'T', setor, financeira: false, cnpj: '1', proxima: null, trimestres: datas.map(([p, r], i) => tri(p, r, f(i))) })
+
+  it('empresa saudável não gera alerta', () => {
+    expect(analisarBalanco(monta(() => ({})))!.alertas).toEqual([])
+  })
+  it('dívida acima do teto do setor é alerta crítico e impede selo forte', () => {
+    const a = analisarBalanco(monta(() => ({ divida: 5000, ebitda: 250 })))!
+    expect(a.alertas.map((x) => x.id)).toContain('endividamento')
+    expect(a.veredito).not.toBe('forte')
+  })
+  it('teto maior para energia: 4× o EBITDA não alerta', () => {
+    // dívida líquida 4.000 ÷ EBITDA 1.000 = 4×
+    expect(analisarBalanco(monta(() => ({ divida: 4100 }), 'Energia Elétrica'))!.alertas.map((x) => x.id)).not.toContain('endividamento')
+    expect(analisarBalanco(monta(() => ({ divida: 4100 }), 'Mineração'))!.alertas.map((x) => x.id)).toContain('endividamento')
+  })
+  it('prejuízo de um trimestre com 12 meses positivos é só atenção; 12 meses negativos é crítico', () => {
+    const pontual = analisarBalanco(monta((i) => (i === 5 ? { lucroLiquido: -50, lucroControladores: -50 } : {})))!
+    expect(pontual.alertas.find((x) => x.id === 'prejuizo-trimestre')?.gravidade).toBe('atencao')
+    const geral = analisarBalanco(monta(() => ({ lucroLiquido: -50, lucroControladores: -50 })))!
+    expect(geral.alertas.find((x) => x.id === 'prejuizo-12m')?.gravidade).toBe('critico')
+  })
+  it('receita crescendo com margem caindo', () => {
+    const a = analisarBalanco(monta((i) => (i === 5 ? { receita: 1200, ebit: 120 } : {})))!
+    expect(a.alertas.map((x) => x.id)).toContain('margem-cai')
+  })
+  it('patrimônio negativo é crítico', () => {
+    expect(analisarBalanco(monta((i) => (i === 5 ? { patrimonioLiquido: -10 } : {})))!.alertas.map((x) => x.id)).toContain('pl-negativo')
+  })
+})

@@ -195,6 +195,13 @@ export interface Destaque {
 
 export type Veredito = 'forte' | 'misto' | 'fraco'
 
+export interface Alerta {
+  id: string
+  gravidade: 'critico' | 'atencao'
+  titulo: string
+  detalhe: string
+}
+
 export interface AnaliseBalanco {
   ticker: string
   nome: string | null
@@ -205,6 +212,7 @@ export interface AnaliseBalanco {
   anoAnterior: Trimestre | null
   linhas: LinhaComparativa[]
   destaques: Destaque[]
+  alertas: Alerta[]
   veredito: Veredito
   /** Resumo em uma frase para o topo do cartão. */
   resumo: string
@@ -336,10 +344,46 @@ export function analisarBalanco(e: EmpresaBalanco): AnaliseBalanco | null {
     push('neutro', 'Atenção ao 4º trimestre', 'O resultado do 4º trimestre é calculado como exercício menos os 9 meses já informados e costuma concentrar baixas contábeis (impairment) e ajustes de fim de ano, que não se repetem todo trimestre.')
   }
 
+  // Sinais de alerta: só com dado suficiente (sem dado não há alerta) e com contexto: investimento pesado ou baixa contábil pontual não é tratado como deterioração.
+  const alertas: Alerta[] = []
+  const alerta = (id: string, gravidade: Alerta['gravidade'], titulo: string, detalhe: string) => alertas.push({ id, gravidade, titulo, detalhe })
+  const pct1 = (v: number) => `${(v * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%`
+  const lucro12 = soma12m(tri, idx, lucroDoTri)
+  if (ultimo.patrimonioLiquido != null && ultimo.patrimonioLiquido < 0) alerta('pl-negativo', 'critico', 'Patrimônio líquido negativo', `O patrimônio líquido está em ${reaisCompactos(ultimo.patrimonioLiquido)}: as dívidas e obrigações superam o que a empresa possui.`)
+  if (lucro12 != null && lucro12 < 0) alerta('prejuizo-12m', 'critico', 'Prejuízo nos últimos 12 meses', `A soma dos 4 últimos trimestres é um prejuízo de ${reaisCompactos(Math.abs(lucro12))}.`)
+  else if (lucroAtual != null && lucroAtual < 0) alerta('prejuizo-trimestre', 'atencao', 'Prejuízo no trimestre', `${rot}: prejuízo de ${reaisCompactos(Math.abs(lucroAtual))}${lucro12 != null ? `, mas os 12 meses somam lucro de ${reaisCompactos(lucro12)}` : ''}. Confira se há baixa contábil pontual (impairment) ou efeito cambial.`)
+  if (!e.financeira) {
+    const dlEbitda = linha('dividaEbitda').valores[idx]
+    const dlAtual = ultimo.divida == null ? null : ultimo.divida - (ultimo.caixa ?? 0)
+    const ebitda12 = soma12m(tri, idx, (t) => t.ebitda)
+    if (dlEbitda != null && dlEbitda > tetoDividaEbitda(e.setor)) alerta('endividamento', 'critico', 'Endividamento elevado', `Dívida líquida de ${dlEbitda.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}× o EBITDA de 12 meses, acima do limite de atenção de ${tetoDividaEbitda(e.setor).toLocaleString('pt-BR')}× para o setor.`)
+    else if (dlAtual != null && dlAtual > 0 && ebitda12 != null && ebitda12 <= 0) alerta('ebitda-negativo', 'critico', 'EBITDA de 12 meses negativo com dívida', `A dívida líquida é de ${reaisCompactos(dlAtual)} e o EBITDA dos 12 meses não é positivo: não há geração operacional para sustentá-la.`)
+    const margem = linha('margemEbit')
+    const mAtual = margem.valores[idx]
+    const mAno = indiceAnoAnterior >= 0 ? margem.valores[indiceAnoAnterior] : null
+    if (mAtual != null && mAno != null && receita.contraAnoAnterior.pct != null && receita.contraAnoAnterior.pct > 0.02 && mAno - mAtual >= 0.02) {
+      alerta('margem-cai', 'atencao', 'Receita crescendo, margem caindo', `Receita ${receita.contraAnoAnterior.texto} contra o ${vsAno}, mas a margem EBIT caiu de ${pct1(mAno)} para ${pct1(mAtual)}.`)
+    }
+    if (indiceAnoAnterior >= 3) {
+      const dlAno = tri[indiceAnoAnterior]!.divida == null ? null : tri[indiceAnoAnterior]!.divida! - (tri[indiceAnoAnterior]!.caixa ?? 0)
+      const ebitda12Ano = soma12m(tri, indiceAnoAnterior, (t) => t.ebitda)
+      if (dlAtual != null && dlAno != null && dlAno > 0 && dlAtual / dlAno - 1 >= 0.1 && ebitda12 != null && ebitda12Ano != null && ebitda12 < ebitda12Ano) {
+        alerta('divida-sobe-ebitda-cai', 'atencao', 'Dívida subindo e EBITDA caindo', `Dívida líquida ${percentual(dlAtual / dlAno - 1)} e EBITDA de 12 meses ${percentual(ebitda12 / ebitda12Ano - 1)} em 12 meses.`)
+      }
+    }
+  } else {
+    const r = linha('roe').valores[idx]
+    if (r != null && faixaDoRoe(r) === 'baixo' && lucro.contraAnoAnterior.tom === 'ruim') alerta('roe-baixo', 'atencao', 'Rentabilidade baixa e em queda', `ROE de ${pct1(r)} nos 12 meses, com lucro ${lucro.contraAnoAnterior.texto} contra o ${vsAno}.`)
+    const al = linha('alavancagem')
+    if (al.contraAnoAnterior.pct != null && al.contraAnoAnterior.pct >= 0.1 && lucro.contraAnoAnterior.tom === 'ruim') alerta('alavancagem-sobe', 'atencao', 'Alavancagem subindo com lucro em queda', `O ativo passou a ${(al.valores[idx] ?? 0).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}× o patrimônio líquido (${al.contraAnoAnterior.texto}) enquanto o lucro caiu.`)
+  }
+
   // Veredito: pesa lucro (ano e trimestre), receita e margem.
   const pontos = (v: Variacao) => (v.tom === 'bom' ? 1 : v.tom === 'ruim' ? -1 : 0)
   const total = pontos(lucro.contraAnoAnterior) * 2 + pontos(lucro.contraAnterior) + pontos(receita.contraAnoAnterior) + (ml != null && mlAno != null ? Math.sign(ml - mlAno) * (Math.abs(ml - mlAno) >= 0.01 ? 1 : 0) : 0)
-  const veredito: Veredito = lucroAtual != null && lucroAtual < 0 ? 'fraco' : total >= 2 ? 'forte' : total <= -2 ? 'fraco' : 'misto'
+  const base: Veredito = lucroAtual != null && lucroAtual < 0 ? 'fraco' : total >= 2 ? 'forte' : total <= -2 ? 'fraco' : 'misto'
+  // Nota alta não esconde problema crítico: com alerta crítico o balanço nunca é "forte".
+  const veredito: Veredito = base === 'forte' && alertas.some((a) => a.gravidade === 'critico') ? 'misto' : base
 
   const a = lucro.contraAnoAnterior
   const resumo = lucroAtual == null
@@ -348,5 +392,5 @@ export function analisarBalanco(e: EmpresaBalanco): AnaliseBalanco | null {
       ? `${rot}: lucro de ${reaisCompactos(lucroAtual)}, ${a.texto} contra o ${vsAno}.`
       : `${rot}: lucro de ${reaisCompactos(lucroAtual)}.`
 
-  return { ticker: e.ticker, nome: e.nome, financeira: e.financeira, trimestres: tri, ultimo, anterior, anoAnterior, linhas, destaques, veredito, resumo }
+  return { ticker: e.ticker, nome: e.nome, financeira: e.financeira, trimestres: tri, ultimo, anterior, anoAnterior, linhas, destaques, alertas, veredito, resumo }
 }
