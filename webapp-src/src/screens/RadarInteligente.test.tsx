@@ -57,20 +57,30 @@ describe('montarGrade', () => {
 
 describe('RadarInteligente', () => {
   it('mostra a grade com logo/selo, meses e a legenda; avisa que é projeção sem valor', () => {
-    render(<RadarInteligente radar={radar([emp('PETR4', [11]), emp('VALE3', [12])])} agenda={[pag('PETR4', '2026-11-05', '2026-12-10')]} hoje={HOJE} />)
+    render(<RadarInteligente radar={radar([emp('PETR4', [11]), emp('VALE3', [10])])} agenda={[pag('PETR4', '2026-11-05', '2026-12-10')]} hoje={HOJE} />)
     expect(screen.getByTestId('radar-inteligente-ano').textContent).toBe('2026')
     const petr = screen.getByTestId('radar-linha-PETR4')
     expect(within(petr).getAllByTestId('celula-confirmado')).toHaveLength(1)
     expect(within(screen.getByTestId('radar-linha-VALE3')).getAllByTestId('celula-provavel')).toHaveLength(1)
     expect(screen.getByText(/não estima o valor/)).toBeTruthy()
-    expect(within(petr).getByTitle('Anunciado pela empresa em Nov')).toBeTruthy()
+    expect(within(petr).getByTitle('Anunciado pela empresa em Dez')).toBeTruthy() // abre em Data pagamento
   })
 
-  it('trocar para Data pagamento move o anunciado para o mês do pagamento', () => {
+  it('abre em Data pagamento; trocar para Data com move o anunciado para o mês da data com', () => {
     render(<RadarInteligente radar={radar([emp('PETR4', [])])} agenda={[pag('PETR4', '2026-11-05', '2026-12-10')]} hoje={HOJE} />)
-    expect(within(screen.getByTestId('radar-linha-PETR4')).getByTitle('Anunciado pela empresa em Nov')).toBeTruthy()
-    fireEvent.click(screen.getByRole('button', { name: 'Data pagamento' }))
     expect(within(screen.getByTestId('radar-linha-PETR4')).getByTitle('Anunciado pela empresa em Dez')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Data com' }))
+    expect(within(screen.getByTestId('radar-linha-PETR4')).getByTitle('Anunciado pela empresa em Nov')).toBeTruthy()
+  })
+
+  it('data com já passada com pagamento ainda por vir é anunciado (não "já pago"), nas duas visões', () => {
+    const agenda = [pag('ITUB4', '2026-10-01', '2026-11-03')]
+    for (const base of ['com', 'pagamento'] as const) {
+      const [l] = montarGrade({ radar: radar([emp('ITUB4', [])]), agenda, ano: 2026, base, hoje: HOJE })
+      expect(l.celulas[base === 'com' ? 9 : 10]).toEqual({ status: 'confirmado' })
+    }
+    const [paga] = montarGrade({ radar: radar([emp('ITUB4', [])]), agenda: [pag('ITUB4', '2026-09-01', '2026-10-03')], ano: 2026, base: 'com', hoje: HOJE })
+    expect(paga.celulas[8]).toEqual({ status: 'pago' })
   })
 
   it('setas de ano ficam entre o ano atual e o seguinte; filtro sem resultado avisa', () => {

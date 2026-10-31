@@ -41,7 +41,7 @@ export function RadarInteligente({ radar, agenda, hoje }: { radar?: SnapshotRada
   const r = radar ?? SNAPSHOT_RADAR_INTELIGENTE
   const pagamentos = agenda ?? SNAPSHOT_RADAR_DIVIDENDOS.pagamentos
   const dia = hoje ?? r.dataReferencia
-  const [base, setBase] = useState<BaseDaData>('com')
+  const [base, setBase] = useState<BaseDaData>('pagamento')
   const [ano, setAno] = useState(Number(dia.slice(0, 4)))
   const [busca, setBusca] = useState('')
   const [setor, setSetor] = useState('')

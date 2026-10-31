@@ -108,8 +108,9 @@ export function montarGrade(opts: {
       const chave = `${ano}-${String(m).padStart(2, '0')}`
       const anunciados = (porTicker.get(e.ticker) ?? []).filter((p) => (base === 'com' ? p.dataCom.slice(0, 7) : p.pagamentoEm?.slice(0, 7)) === chave)
       if (anunciados.length) {
-        const datas = anunciados.map((p) => (base === 'com' ? p.dataCom : (p.pagamentoEm as string)))
-        celulas.push({ status: datas.every((d) => d < hoje) ? 'pago' : 'confirmado' })
+        // "Pago" é só o que já caiu na conta (data de pagamento passada), em qualquer das duas visões: data com passada com
+        // pagamento ainda por vir continua "anunciado". Sem data de pagamento, também é anunciado.
+        celulas.push({ status: anunciados.every((p) => p.pagamentoEm !== null && p.pagamentoEm < hoje) ? 'pago' : 'confirmado' })
         continue
       }
       const passou = ano < anoDeHoje || (ano === anoDeHoje && m < mesDeHoje)
