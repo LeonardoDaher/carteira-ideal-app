@@ -3,8 +3,8 @@ import { analisarBalanco, divulgadosRecentes, itensDoRadar, pendentes, variar } 
 import type { EmpresaBalanco, SnapshotBalancos, Trimestre } from './balancos'
 
 const tri = (periodo: string, rotulo: string, lucro: number, receita = 1000, dtReceb: string | null = null): Trimestre => ({
-  periodo, rotulo, tipo: 'ITR', dtReceb, link: null, consolidacao: 'consolidada', receita, ebit: lucro, lucroLiquido: lucro, lucroControladores: lucro,
-  ativoTotal: 5000, patrimonioLiquido: 2000, caixa: 100, divida: 400,
+  periodo, rotulo, tipo: 'ITR', dtReceb, link: null, consolidacao: 'consolidada', receita, ebit: lucro, ebitda: lucro, lucroLiquido: lucro, lucroControladores: lucro,
+  ativoTotal: 5000, patrimonioLiquido: 2000, plControladores: 2000, caixa: 100, divida: 400,
 })
 
 const empresa = (trimestres: Trimestre[], proxima: EmpresaBalanco['proxima'] = null): EmpresaBalanco => ({ ticker: 'TESTE3', nome: 'Teste', setor: 'Setor', financeira: false, cnpj: '1', trimestres, proxima })

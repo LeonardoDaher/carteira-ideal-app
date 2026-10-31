@@ -54,6 +54,22 @@ function leitorDoDocumento(linhas, doc, dtRefer, cons) {
 }
 
 const porCodigo = (cd) => (l) => l.cd === cd
+const ehMinoritarioFinanceira = (l) => /^2.d{2}.d{2}$/.test(l.cd) && /nao controlador|minorit/.test(semAcento(l.ds))
+const ehDepreciacaoDfc = (l) => l.dem === 'DFC' && /^6.01.01.d{2}$/.test(l.cd) && /deprecia|amortiza|exaust/.test(semAcento(l.ds)) && !/direito.*uso.*arrend/.test(semAcento(l.ds))
+
+/** Janela de duração (dias) do acumulado do exercício até a data-base: 3, 6, 9 ou 12 meses. */
+const janelaAcumulada = (dtRefer) => ({ '03': [80, 100], '06': [170, 195], '09': [265, 280], '12': [355, 372] })[dtRefer.slice(5, 7)] ?? null
+
+/** Depreciação e amortização ACUMULADAS no exercício (DVA 7.04.01; sem ela, soma das linhas do fluxo de caixa), em valor positivo. null se não há. */
+function depreciacaoAcumulada(linhas, doc, dtRefer, cons) {
+  const janela = janelaAcumulada(dtRefer)
+  if (!janela) return null
+  const doDoc = linhas.filter((l) => l.doc === doc && l.dtRefer === dtRefer && l.cons === cons && l.ordem === 'ULTIMO' && duracao(l) >= janela[0] && duracao(l) <= janela[1])
+  const dva = doDoc.find((l) => l.dem === 'DVA' && l.cd === '7.04.01')
+  if (dva) return Math.abs(dva.valor)
+  const dfc = doDoc.filter(ehDepreciacaoDfc)
+  return dfc.length ? Math.abs(dfc.reduce((t, l) => t + l.valor, 0)) : null
+}
 
 /** Escolhe 'con' se houver DRE consolidada com 3.01 ou 3.05, senão 'ind'. */
 function consolidacaoDoDocumento(linhas, d) {
@@ -69,6 +85,8 @@ function lerDocumento(linhas, d, cons, financeira, janela) {
   const controladoresCd = lucroCd ? r.doDoc.filter((l) => l.dem === 'DRE' && l.cd.startsWith(`${lucroCd}.`) && (financeira ? /controlador|socios da empresa/.test(semAcento(l.ds)) && !/nao controlador/.test(semAcento(l.ds)) : l.cd === '3.11.01')).map((l) => l.cd)[0] : null
   const caixa = r.saldo(porCodigo('1.01.01'))
   const aplic = r.saldo(porCodigo('1.01.02'))
+  const pl = financeira ? r.saldo(ehPlFinanceira) : r.saldo(porCodigo('2.03'))
+  const minoritarios = financeira ? r.saldo(ehMinoritarioFinanceira) : r.saldo(porCodigo('2.03.09'))
   const dc = r.saldo(porCodigo('2.01.04'))
   const dl = r.saldo(porCodigo('2.02.01'))
   return {
@@ -77,7 +95,9 @@ function lerDocumento(linhas, d, cons, financeira, janela) {
     lucroLiquido: lucroCd ? lucroLinha(lucroCd) : null,
     lucroControladores: controladoresCd ? lucroLinha(controladoresCd) : null,
     ativoTotal: r.saldo(porCodigo('1')),
-    patrimonioLiquido: financeira ? r.saldo(ehPlFinanceira) : r.saldo(porCodigo('2.03')),
+    patrimonioLiquido: pl,
+    plControladores: pl == null ? null : pl - (minoritarios ?? 0),
+    depreciacaoAcumulada: financeira ? null : depreciacaoAcumulada(linhas, d.doc, d.dtRefer, cons),
     caixa: financeira ? null : caixa == null && aplic == null ? null : (caixa ?? 0) + (aplic ?? 0),
     divida: financeira ? null : dc == null && dl == null ? null : (dc ?? 0) + (dl ?? 0),
     dtIni: r.dtIniDe('3.01'),
@@ -122,6 +142,8 @@ export function trimestresDaEmpresa({ c, financeira = false, dataCorte, maximo =
       lucroControladores: dif(ano.lucroControladores, nove.lucroControladores),
       ativoTotal: ano.ativoTotal,
       patrimonioLiquido: ano.patrimonioLiquido,
+      plControladores: ano.plControladores,
+      depreciacaoAcumulada: ano.depreciacaoAcumulada,
       caixa: ano.caixa,
       divida: ano.divida,
     }
@@ -129,26 +151,44 @@ export function trimestresDaEmpresa({ c, financeira = false, dataCorte, maximo =
     saida.push({ periodo: d.dtRefer, tipo: 'DFP', dtReceb: d.dtReceb ?? null, link: d.linkDoc ?? null, cons, v })
   }
 
-  return saida
-    .sort((a, b) => (a.periodo < b.periodo ? -1 : 1))
+  const ordenados = saida.sort((a, b) => (a.periodo < b.periodo ? -1 : 1))
+  const porPeriodo = new Map(ordenados.map((e) => [e.periodo, e]))
+  // Depreciação isolada: acumulado do exercício menos o acumulado do trimestre anterior do mesmo exercício (o 1º trimestre é o próprio acumulado).
+  const depreciacaoIsolada = (e) => {
+    const acum = e.v.depreciacaoAcumulada
+    if (acum == null) return null
+    if (e.periodo.slice(5, 7) === '03') return acum
+    const [ano, mes] = e.periodo.split('-').map(Number)
+    const anterior = porPeriodo.get(new Date(Date.UTC(ano, mes - 3, 0)).toISOString().slice(0, 10))
+    return anterior?.v.depreciacaoAcumulada == null ? null : acum - anterior.v.depreciacaoAcumulada
+  }
+
+  return ordenados
     .slice(-maximo)
-    .map(({ periodo, tipo, dtReceb, link, cons, v }) => ({
-      periodo,
-      rotulo: rotuloDoTrimestre(periodo),
-      tipo,
-      dtReceb,
-      link,
-      consolidacao: cons === 'con' ? 'consolidada' : 'individual',
-      receita: mil(v.receita),
-      ebit: mil(v.ebit),
-      lucroLiquido: mil(v.lucroLiquido),
-      // A CVM às vezes traz 3.11.01 zerado com lucro diferente de zero (linha sem preenchimento): é dado ausente, não lucro zero.
-      lucroControladores: v.lucroControladores === 0 && v.lucroLiquido !== 0 ? null : mil(v.lucroControladores),
-      ativoTotal: mil(v.ativoTotal),
-      patrimonioLiquido: mil(v.patrimonioLiquido),
-      caixa: mil(v.caixa),
-      divida: mil(v.divida),
-    }))
+    .map((e) => {
+      const { periodo, tipo, dtReceb, link, cons, v } = e
+      const depreciacao = depreciacaoIsolada(e)
+      return {
+        periodo,
+        rotulo: rotuloDoTrimestre(periodo),
+        tipo,
+        dtReceb,
+        link,
+        consolidacao: cons === 'con' ? 'consolidada' : 'individual',
+        receita: mil(v.receita),
+        ebit: mil(v.ebit),
+        // EBIT + depreciação e amortização (mesma definição da Análise fundamentalista); sem uma das duas, não há EBITDA.
+        ebitda: v.ebit == null || depreciacao == null ? null : mil(v.ebit + depreciacao),
+        lucroLiquido: mil(v.lucroLiquido),
+        // A CVM às vezes traz 3.11.01 zerado com lucro diferente de zero (linha sem preenchimento): é dado ausente, não lucro zero.
+        lucroControladores: v.lucroControladores === 0 && v.lucroLiquido !== 0 ? null : mil(v.lucroControladores),
+        ativoTotal: mil(v.ativoTotal),
+        patrimonioLiquido: mil(v.patrimonioLiquido),
+        plControladores: mil(v.plControladores),
+        caixa: mil(v.caixa),
+        divida: mil(v.divida),
+      }
+    })
 }
 
 /**
@@ -261,10 +301,12 @@ export function trimestreProvisorio({ trimestres, b3, entrega, dataCorte }) {
     consolidacao: b3.consolidacao,
     receita: tira(b3.receita, 'receita'),
     ebit: null,
+    ebitda: null,
     lucroLiquido: tira(b3.lucroLiquido, 'lucroLiquido'),
     lucroControladores: tira(b3.lucroControladores, 'lucroControladores'),
     ativoTotal: b3.ativoTotal,
     patrimonioLiquido: b3.patrimonioLiquido,
+    plControladores: b3.plControladores ?? null,
     caixa: null,
     divida: null,
     provisorio: true,

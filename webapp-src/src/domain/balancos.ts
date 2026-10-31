@@ -2,6 +2,8 @@
 // Tudo em R$ MIL, como o arquivo. Só compara números que a empresa reportou à CVM: não há "consenso de mercado" aqui, então o
 // que é "abaixo do esperado" é medido contra o próprio histórico da empresa (trimestre anterior e mesmo trimestre do ano anterior).
 
+import { dividaLiquidaSobreEbitda, faixaDoRoe, lucroDosAcionistas, roe as calcularRoe, setorAlavancado, tetoDividaEbitda } from './indicadoresComuns'
+
 export interface Trimestre {
   periodo: string
   rotulo: string
@@ -11,10 +13,13 @@ export interface Trimestre {
   consolidacao: 'consolidada' | 'individual'
   receita: number | null
   ebit: number | null
+  /** EBIT + depreciação e amortização do trimestre (mesma definição da Análise fundamentalista). */
+  ebitda: number | null
   lucroLiquido: number | null
   lucroControladores: number | null
   ativoTotal: number | null
   patrimonioLiquido: number | null
+  plControladores: number | null
   caixa: number | null
   divida: number | null
   /** Vem do resumo da B3 (a CVM ainda não publicou o arquivo aberto): sem EBIT, caixa e dívida até lá. */
@@ -169,7 +174,7 @@ export function reaisCompactos(milReais: number | null): string {
 }
 
 const razao = (a: number | null, b: number | null) => (a == null || b == null || b === 0 ? null : a / b)
-const lucroDoTri = (t: Trimestre) => t.lucroControladores ?? t.lucroLiquido
+const lucroDoTri = (t: Trimestre) => lucroDosAcionistas(t)
 
 export interface LinhaComparativa {
   chave: string
@@ -254,14 +259,12 @@ export function analisarBalanco(e: EmpresaBalanco): AnaliseBalanco | null {
   add('margemLiquida', 'Margem líquida', 'pct', (t) => razao(lucroDoTri(t), t.receita))
   if (!e.financeira) add('margemEbit', 'Margem EBIT', 'pct', (t) => razao(t.ebit, t.receita))
   add('pl', 'Patrimônio líquido', 'reais', (t) => t.patrimonioLiquido)
-  add('roe', 'ROE do trimestre (anualizado)', 'pct', (t) => { const r = razao(lucroDoTri(t), t.patrimonioLiquido); return r == null ? null : r * 4 })
+  // Mesma conta da Análise fundamentalista: lucro dos controladores dos últimos 12 meses ÷ patrimônio líquido médio dos controladores.
+  add('roe', 'ROE (12 meses)', 'pct', (t, i) => calcularRoe(soma12m(tri, i, lucroDoTri), t.plControladores, tri[i - 4]?.plControladores ?? null))
   if (e.financeira) add('alavancagem', 'Ativo ÷ patrimônio líquido', 'x', (t) => razao(t.ativoTotal, t.patrimonioLiquido), false)
   else {
     add('dividaLiquida', 'Dívida líquida', 'reais', (t) => (t.divida == null || t.caixa == null ? null : t.divida - t.caixa), false)
-    add('dividaEbit', 'Dívida líquida ÷ EBIT 12m', 'x', (t, i) => {
-      const e12 = soma12m(tri, i, (x) => x.ebit)
-      return t.divida == null || t.caixa == null || e12 == null || e12 <= 0 ? null : (t.divida - t.caixa) / e12
-    }, false)
+    add('dividaEbitda', 'Dívida líquida ÷ EBITDA 12m', 'x', (t, i) => dividaLiquidaSobreEbitda(t.divida == null ? null : t.divida - (t.caixa ?? 0), soma12m(tri, i, (x) => x.ebitda)), false)
   }
 
   const linha = (c: string) => linhas.find((l) => l.chave === c)!
@@ -298,7 +301,10 @@ export function analisarBalanco(e: EmpresaBalanco): AnaliseBalanco | null {
     push(Math.abs(dp) < 1 ? 'neutro' : dp > 0 ? 'bom' : 'ruim', 'Margem líquida', `${(ml * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}% no trimestre, ${Math.abs(dp) < 1 ? 'estável' : dp > 0 ? `${dp.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} p.p. acima` : `${Math.abs(dp).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} p.p. abaixo`} do ${vsAno}.`)
   }
   const roe = linha('roe').valores[idx]
-  if (roe != null) push(roe >= 0.15 ? 'bom' : roe >= 0.08 ? 'neutro' : 'ruim', 'Retorno sobre o patrimônio', `ROE anualizado de ${(roe * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}% (lucro do trimestre × 4 ÷ patrimônio líquido).`)
+  if (roe != null) {
+    const faixa = faixaDoRoe(roe)
+    push(faixa === 'alto' ? 'bom' : faixa === 'moderado' ? 'neutro' : 'ruim', 'Retorno sobre o patrimônio', `ROE de ${(roe * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}% nos últimos 12 meses (lucro dos controladores ÷ patrimônio líquido médio dos controladores).`)
+  }
 
   // Endividamento
   if (e.financeira) {
@@ -307,14 +313,14 @@ export function analisarBalanco(e: EmpresaBalanco): AnaliseBalanco | null {
     if (v != null) push(al.contraAnoAnterior.tom === 'ruim' ? 'ruim' : 'neutro', 'Alavancagem', `O ativo equivale a ${v.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}× o patrimônio líquido${al.contraAnoAnterior.pct != null ? ` (${al.contraAnoAnterior.texto} contra o ${vsAno})` : ''}. Em bancos, isso mede o quanto o balanço é financiado por terceiros; o índice de Basileia, que não está na base aberta, é o que a regulação acompanha.`)
   } else {
     const dl = linha('dividaLiquida')
-    const dEbit = linha('dividaEbit').valores[idx]
+    const dEbit = linha('dividaEbitda').valores[idx]
     const v = dl.valores[idx]
     if (v != null) {
       const caixaLiquido = v < 0
       const texto = caixaLiquido
         ? `Caixa maior que a dívida: sobra ${reaisCompactos(-v)} (posição de caixa líquido).`
-        : `Dívida líquida de ${reaisCompactos(v)}${dEbit != null ? `, ${dEbit.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}× o EBIT dos últimos 12 meses` : ''}${dl.contraAnoAnterior.pct != null ? `; ${dl.contraAnoAnterior.texto} contra o ${vsAno}` : ''}.`
-      const tom: Tom = caixaLiquido ? 'bom' : dEbit == null ? dl.contraAnoAnterior.tom : dEbit > 4 ? 'ruim' : dEbit < 2 ? 'bom' : 'neutro'
+        : `Dívida líquida de ${reaisCompactos(v)}${dEbit != null ? `, ${dEbit.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}× o EBITDA dos últimos 12 meses` : ''}${dl.contraAnoAnterior.pct != null ? `; ${dl.contraAnoAnterior.texto} contra o ${vsAno}` : ''}.`
+      const tom: Tom = caixaLiquido ? 'bom' : dEbit == null ? dl.contraAnoAnterior.tom : dEbit > tetoDividaEbitda(e.setor) ? 'ruim' : dEbit <= (setorAlavancado(e.setor) ? 3.5 : 2) ? 'bom' : 'neutro'
       push(tom, 'Endividamento', texto)
     }
   }

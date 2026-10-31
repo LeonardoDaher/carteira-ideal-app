@@ -65,6 +65,7 @@ export function lerFinanceiro(json) {
       lucroControladores: pega(resultado, /atribu[ií]do [àa] controladora/i),
       ativoTotal,
       patrimonioLiquido,
+      plControladores: pega(balanco, /^patrim[oô]nio l[ií]quido atribu[ií]do [àa] controladora$/i),
     }
   }
   return null

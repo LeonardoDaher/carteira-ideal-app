@@ -5,6 +5,8 @@
 // Limite dos dados: a CVM traz demonstrações, não texto. Por isso vantagem competitiva, gestão, governança qualitativa, TAM e
 // projeções de mercado NÃO são inventados: aparecem como "dados insuficientes" ou como indício financeiro, rotulado como tal.
 
+import { dividaLiquida, dividir, lucroDosAcionistas, ok, setorAlavancado, tetoDividaEbitda } from './indicadoresComuns'
+
 // ---------------------------------------------------------------------------------------
 // Tipos dos dados (fundamentos.json)
 // ---------------------------------------------------------------------------------------
@@ -249,7 +251,6 @@ export const FONTE_CVM = 'CVM, dados abertos (DFP e ITR); preço de fechamento d
 // ---------------------------------------------------------------------------------------
 
 const limitar = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v))
-const ok = (v: number | null | undefined): v is number => v !== null && v !== undefined && Number.isFinite(v)
 const media = (v: number[]) => (v.length ? v.reduce((s, x) => s + x, 0) / v.length : null)
 const mediana = (v: number[]) => {
   if (!v.length) return null
@@ -261,7 +262,6 @@ const desvio = (v: number[]) => {
   const m = media(v)
   return m === null || v.length < 2 ? null : Math.sqrt(v.reduce((s, x) => s + (x - m) ** 2, 0) / (v.length - 1))
 }
-const dividir = (a: number | null, b: number | null) => (ok(a) && ok(b) && b !== 0 ? a / b : null)
 const pct = (v: number, casas = 1) => `${(v * 100).toLocaleString('pt-BR', { minimumFractionDigits: casas, maximumFractionDigits: casas })}%`
 const vezes = (v: number, casas = 1) => `${v.toLocaleString('pt-BR', { minimumFractionDigits: casas, maximumFractionDigits: casas })}×`
 const reais = (v: number) => `R$ ${v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
@@ -287,14 +287,11 @@ export function cagr(inicio: number | null, fim: number | null, anos: number): n
   return Math.pow(fim / inicio, 1 / anos) - 1
 }
 
-// Setores com dívida estruturalmente mais alta (receita regulada ou contratada de longo prazo): a régua de endividamento sobe.
-const SETORES_ALAVANCAGEM_ALTA = /energia|el[eé]trica|saneamento|telecom|rodovia|concess|transporte|log[ií]stica|ferrovia|aeroporto|g[aá]s|utilidade|infraestrutura|geradora|transmiss/i
 
 // ---------------------------------------------------------------------------------------
 // Leitura dos períodos
 // ---------------------------------------------------------------------------------------
 
-const lucroDosAcionistas = (p: PeriodoFundamental) => (ok(p.lucroControladores) && p.lucroControladores !== 0 ? p.lucroControladores : p.lucroLiquido)
 /**
  * Caixa operacional acima de 2× o EBITDA (ou o EBIT) costuma ser financiamento classificado como operação (recebíveis, crédito a
  * clientes) ou evento pontual, não geração de caixa. Mesma trava do Top 15 mais baratas. Sem referência positiva, não se julga.
@@ -305,7 +302,7 @@ export function fcoCoerente(p: PeriodoFundamental): boolean {
   return ref === null ? true : p.fco <= 2 * ref
 }
 const fcfDe = (p: PeriodoFundamental) => (ok(p.fco) && ok(p.capex) && fcoCoerente(p) ? p.fco - p.capex : null)
-const dividaLiquidaDe = (p: PeriodoFundamental) => (ok(p.divida) ? p.divida - (p.caixa ?? 0) : null)
+const dividaLiquidaDe = dividaLiquida
 const lpaDe = (p: PeriodoFundamental) => {
   const l = lucroDosAcionistas(p)
   return ok(l) && ok(p.acoes) && p.acoes > 0 ? (l * 1000) / p.acoes : null
@@ -750,7 +747,7 @@ export function analisarFundamentos(entrada: EntradaFundamentalista): AnaliseFun
 
   const rotulosHist = cols.map((c) => c.rotulo)
   const hist = (f: (c: ColunaHistorica) => number | null) => cols.map(f)
-  const setorAlavancado = SETORES_ALAVANCAGEM_ALTA.test(e.setor)
+  const setorAlavancadoDaEmpresa = setorAlavancado(e.setor)
   const ind = (i: Omit<Indicador, 'fonte' | 'dataReferencia' | 'rotulosHistorico'> & Partial<Pick<Indicador, 'rotulosHistorico'>>): Indicador => ({ fonte, dataReferencia: dataRef, rotulosHistorico: i.historico ? rotulosHist : undefined, ...i })
 
   const rentabilidade: Indicador[] = [
@@ -770,7 +767,7 @@ export function analisarFundamentos(entrada: EntradaFundamentalista): AnaliseFun
     ? [ind({ id: 'pl-ativo', nome: 'PL ÷ ativo total', valor: dividir(atual.plControladores, atual.ativoTotal), formato: 'pct', interpretacao: 'Aproximação da alavancagem de uma instituição financeira; não substitui o índice de Basileia.', formula: 'Patrimônio líquido dos controladores ÷ ativo total.' })]
     : [
         ind({ id: 'divida-liquida', nome: 'Dívida líquida', valor: dlAtual, formato: 'milhoes', historico: hist((c) => c.dividaLiquida), interpretacao: ok(dlAtual) ? (dlAtual <= 0 ? 'Caixa maior que a dívida.' : 'Dívida maior que o caixa.') : 'Dados insuficientes para conclusão.', formula: 'Empréstimos e financiamentos (curto + longo prazo) − caixa e aplicações financeiras. Arrendamentos podem estar fora.' }),
-        ind({ id: 'dl-ebitda', nome: 'Dívida líquida ÷ EBITDA', valor: dlEbitda, formato: 'x', interpretacao: semDividaLiquida ? 'Caixa líquido: sem dívida líquida.' : ok(dlEbitda) ? (dlEbitda <= (setorAlavancado ? 3.5 : 2) ? 'Endividamento confortável para o setor.' : dlEbitda <= (setorAlavancado ? 5 : 3.5) ? 'Endividamento adequado, mas exige atenção ao custo da dívida.' : 'Endividamento elevado para o setor.') : 'Sem EBITDA positivo para a razão.', formula: 'Dívida líquida ÷ EBITDA dos últimos 12 meses.' }),
+        ind({ id: 'dl-ebitda', nome: 'Dívida líquida ÷ EBITDA', valor: dlEbitda, formato: 'x', interpretacao: semDividaLiquida ? 'Caixa líquido: sem dívida líquida.' : ok(dlEbitda) ? (dlEbitda <= (setorAlavancadoDaEmpresa ? 3.5 : 2) ? 'Endividamento confortável para o setor.' : dlEbitda <= tetoDividaEbitda(e.setor) ? 'Endividamento adequado, mas exige atenção ao custo da dívida.' : 'Endividamento elevado para o setor.') : 'Sem EBITDA positivo para a razão.', formula: 'Dívida líquida ÷ EBITDA dos últimos 12 meses.' }),
         ind({ id: 'cobertura', nome: 'Cobertura de juros', valor: cobertura, formato: 'x', interpretacao: ok(cobertura) ? (cobertura >= 5 ? 'Folga ampla para pagar juros.' : cobertura >= 2.5 ? 'Cobertura adequada.' : 'Cobertura apertada.') : 'Despesa financeira não informada ou nula.', formula: 'EBIT ÷ despesas financeiras (DRE 3.06.02) dos últimos 12 meses.' }),
         ind({ id: 'liquidez', nome: 'Liquidez corrente', valor: liquidez, formato: 'x', interpretacao: ok(liquidez) ? (liquidez >= 1.5 ? 'Folga de curto prazo.' : liquidez >= 1 ? 'Liquidez adequada.' : 'Passivo de curto prazo maior que o ativo de curto prazo.') : 'Dados insuficientes para conclusão.', formula: 'Ativo circulante ÷ passivo circulante.' }),
         ind({ id: 'fco', nome: 'Caixa operacional (FCO)', valor: atual.fco, formato: 'milhoes', historico: hist((c) => c.fco), interpretacao: ok(atual.fco) && !fcoAtualOk ? 'Mais de 2× o EBITDA: provável financiamento (recebíveis, crédito a clientes) classificado como operação, ou efeito pontual. O fluxo de caixa livre não é usado na avaliação.' : 'Caixa gerado pela operação; deve acompanhar o lucro ao longo dos anos.', formula: 'Fluxo de caixa das atividades operacionais (DFC 6.01).' }),
@@ -870,10 +867,10 @@ export function analisarFundamentos(entrada: EntradaFundamentalista): AnaliseFun
   if (!e.financeira && fcfs.length >= 3 && fcfs.filter((x) => x < 0).length >= Math.ceil(fcfs.length * 0.6) && (!ok(fcfAtual) || fcfAtual < 0)) {
     // Investimento pesado financiado por dívida (energia, saneamento, concessões) deixa o FCF negativo sem ser problema por si só:
     // só é crítico quando o prejuízo, o endividamento ou a cobertura de juros também são ruins.
-    const fragil = (ok(lucroAtual) && lucroAtual < 0) || (ok(dlEbitda) && dlEbitda > (setorAlavancado ? 5 : 3.5)) || (ok(cobertura) && cobertura < 1.5)
+    const fragil = (ok(lucroAtual) && lucroAtual < 0) || (ok(dlEbitda) && dlEbitda > tetoDividaEbitda(e.setor)) || (ok(cobertura) && cobertura < 1.5)
     alertas.push({ id: 'fcf-negativo', titulo: 'Fluxo de caixa livre estruturalmente negativo', detalhe: `FCF negativo em ${fcfs.filter((x) => x < 0).length} de ${fcfs.length} exercícios${fragil ? ', com lucro, endividamento ou cobertura de juros também frágeis' : ' (típico de quem investe pesado; confira se o retorno compensa)'}.`, gravidade: fragil ? 'critico' : 'atencao' })
   }
-  const tetoDl = setorAlavancado ? 5 : 3.5
+  const tetoDl = tetoDividaEbitda(e.setor)
   const coberturaInsuficiente = ok(cobertura) && cobertura < 1
   if (!e.financeira && ((ok(dlEbitda) && dlEbitda > tetoDl) || (ok(dlAtual) && dlAtual > 0 && ok(atual.ebitda) && atual.ebitda <= 0) || coberturaInsuficiente)) {
     alertas.push({
@@ -921,7 +918,7 @@ export function analisarFundamentos(entrada: EntradaFundamentalista): AnaliseFun
   const qualidade = notaQualidade(e, cols, { roic, roe, cagrLpa: cg.lpa, cagrReceita: cg.receita }, pr.pesos.qualidade)
   const valuation = notaValuation(vj, relativo, pr.pesos.valuation)
   const plAtivo = dividir(atual.plControladores, atual.ativoTotal)
-  const risco = notaRisco(e, cols, { dlEbitda, cobertura, liquidez, diluicao, payoutFcf, plAtivo, semDividaLiquida, setorAlavancado }, pr.pesos.risco)
+  const risco = notaRisco(e, cols, { dlEbitda, cobertura, liquidez, diluicao, payoutFcf, plAtivo, semDividaLiquida, setorAlavancado: setorAlavancadoDaEmpresa }, pr.pesos.risco)
   const dims = [qualidade, valuation, risco].filter((d) => ok(d.nota))
   const somaPesos = dims.reduce((s, d) => s + d.peso, 0)
   const total = somaPesos > 0 ? Math.round(dims.reduce((s, d) => s + (d.nota as number) * d.peso, 0) / somaPesos) : null
