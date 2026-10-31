@@ -161,3 +161,74 @@ test('capital entra só nos trimestres que o BC já publicou', () => {
   assert.equal('basileia' in r.trimestres[1], false)
   assert.equal(incorporarCapital({ empresa, capitais: {} }), empresa)
 })
+
+test('lucro bruto, custo e estoque: só entram quando a empresa reporta custo; o 4º trimestre é o ano menos 9 meses', () => {
+  const docs = [
+    { doc: 'ITR', dtRefer: '2025-09-30', dtReceb: '2025-11-05' },
+    { doc: 'DFP', dtRefer: '2025-12-31', dtReceb: '2026-03-10' },
+  ]
+  const extra = (doc, dtRefer, ini, custo, bruto) => [linha(doc, dtRefer, 'DRE', '3.02', custo, ini), linha(doc, dtRefer, 'DRE', '3.03', bruto, ini)]
+  const estoque = (doc, dtRefer, v) => [linha(doc, dtRefer, 'BPA', '1.01.04', v)]
+  const linhas = [
+    ...dre('ITR', '2025-09-30', '2025-07-01', 3e6, 3e5), ...extra('ITR', '2025-09-30', '2025-07-01', -2e6, 1e6),
+    ...dre('ITR', '2025-09-30', '2025-01-01', 9e6, 9e5), ...extra('ITR', '2025-09-30', '2025-01-01', -6e6, 3e6), ...bal('ITR', '2025-09-30'), ...estoque('ITR', '2025-09-30', 5e5),
+    ...dre('DFP', '2025-12-31', '2025-01-01', 13e6, 1e6), ...extra('DFP', '2025-12-31', '2025-01-01', -8.5e6, 4.5e6), ...bal('DFP', '2025-12-31'), ...estoque('DFP', '2025-12-31', 7e5),
+  ]
+  const [t3, t4] = trimestresDaEmpresa({ c: { docs, linhas }, dataCorte: '2026-10-30' })
+  assert.equal(t3.lucroBruto, 1000)
+  assert.equal(t3.cmv, 2000)
+  assert.equal(t3.estoques, 500)
+  assert.equal(t4.lucroBruto, 1500)
+  assert.equal(t4.cmv, 2500)
+  assert.equal(t4.estoques, 700)
+  // Sem custo informado (3.02 ausente), não há margem bruta: fica null.
+  const semCusto = trimestresDaEmpresa({ c: { docs: [docs[0]], linhas: [...dre('ITR', '2025-09-30', '2025-07-01', 3e6, 3e5), ...bal('ITR', '2025-09-30')] }, dataCorte: '2026-10-30' })[0]
+  assert.equal(semCusto.lucroBruto, null)
+  assert.equal(semCusto.cmv, null)
+})
+
+import { herdarSeguros, precisaDoSes } from './atualizar-balancos.mjs'
+import { incorporarSeguros } from './balancos-calculo.mjs'
+import { lerSeguros, mesesDoTrimestre, trimestreDeSeguros } from './susep-ses.mjs'
+
+async function* linhasSes(linhas) {
+  yield 'damesano;coenti;cogrupo;coramo;premio_direto;premio_de_seguros;premio_retido;premio_ganho;sinistro_direto;sinistro_retido;desp_com;premio_emitido2;premio_emitido_cap;despesa_resseguros;sinistro_ocorrido'
+  for (const l of linhas) yield l
+}
+
+test('SES: soma os 3 meses e calcula sinistralidade e comissionamento; mês faltando ou prêmio zero não vira número', async () => {
+  assert.deepEqual(mesesDoTrimestre('2026-06-30'), [202604, 202605, 202606])
+  const linhas = [
+    '202604;05886;00051;0531;0;0;0;1000000,50;0;0;100000;0;0;0;500000',
+    '202604;05886;00051;0532;0;0;0;1000000;0;0;100000;0;0;0;400000',
+    '202605;05886;00051;0531;0;0;0;2000000;0;0;200000;0;0;0;1000000',
+    '202606;05886;00051;0531;0;0;0;2000000;0;0;200000;0;0;0;1100000',
+    '202606;99999;00051;0531;0;0;0;9999999;0;0;1;0;0;0;1',
+    '202601;05886;00051;0531;0;0;0;1;0;0;1;0;0;0;1',
+  ]
+  const por = await lerSeguros('x.zip', ['05886'], { desdeAnoMes: 202603, linhas: linhasSes(linhas) })
+  assert.deepEqual(Object.keys(por), ['05886'])
+  assert.deepEqual(Object.keys(por['05886']).map(Number), [202604, 202605, 202606])
+  const q = trimestreDeSeguros(por, ['05886'], '2026-06-30')
+  assert.equal(q.premioGanho, 6000)
+  assert.ok(Math.abs(q.sinistralidade - 3000000 / 6000000.5) < 1e-9)
+  assert.ok(Math.abs(q.comissionamento - 600000 / 6000000.5) < 1e-9)
+  assert.equal(trimestreDeSeguros(por, ['05886'], '2026-09-30'), null)
+  assert.equal(trimestreDeSeguros({ A: { 202604: { premioGanho: 1, sinistroOcorrido: 5, comissoes: 0 }, 202605: { premioGanho: 1, sinistroOcorrido: 5, comissoes: 0 }, 202606: { premioGanho: 1, sinistroOcorrido: 5, comissoes: 0 } } }, ['A'], '2026-06-30'), null)
+})
+
+test('SES: só baixa a base quando falta o trimestre já fechado há 50 dias, e herda o que já foi publicado', () => {
+  const emp = (extra) => ({ trimestres: [{ periodo: '2026-03-31', ...extra }, { periodo: '2026-06-30' }] })
+  const entidades = { PSSA3: { entidades: ['05886'] } }
+  assert.equal(precisaDoSes({ saida: { PSSA3: emp({}) }, entidades, dataCorte: '2026-10-31' }), true)
+  // O 2T26 fechou há 123 dias e ainda não tem dado: precisa.
+  assert.equal(precisaDoSes({ saida: { PSSA3: { trimestres: [{ periodo: '2026-06-30', sinistralidade: 0.5 }] } }, entidades, dataCorte: '2026-10-31' }), false)
+  // Trimestre recente demais (menos de 50 dias): ainda não vale baixar.
+  assert.equal(precisaDoSes({ saida: { PSSA3: { trimestres: [{ periodo: '2026-06-30' }] } }, entidades, dataCorte: '2026-08-01' }), false)
+  const saida = { PSSA3: emp({}) }
+  herdarSeguros({ saida, anterior: { empresas: { PSSA3: emp({ premioGanho: 5, sinistralidade: 0.5, comissionamento: 0.1 }) } } })
+  assert.equal(saida.PSSA3.trimestres[0].sinistralidade, 0.5)
+  assert.equal('sinistralidade' in saida.PSSA3.trimestres[1], false)
+  const r = incorporarSeguros({ empresa: emp({}), porPeriodo: { '2026-06-30': { premioGanho: 9, sinistralidade: 0.6, comissionamento: 0.2 } } })
+  assert.equal(r.trimestres[1].sinistralidade, 0.6)
+})

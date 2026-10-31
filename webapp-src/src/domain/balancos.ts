@@ -2,6 +2,8 @@
 // Tudo em R$ MIL, como o arquivo. Só compara números que a empresa reportou à CVM: não há "consenso de mercado" aqui, então o
 // que é "abaixo do esperado" é medido contra o próprio histórico da empresa (trimestre anterior e mesmo trimestre do ano anterior).
 
+import { perfilDoSetor } from './setoresBalanco'
+import type { IndicadorSetorial, PerfilSetorial } from './setoresBalanco'
 import { conversaoLucroEmCaixa, dividaLiquidaSobreEbitda, faixaDoRoe, fcoCoerente, fluxoDeCaixaLivre, lucroDosAcionistas, roe as calcularRoe, setorAlavancado, tetoDividaEbitda } from './indicadoresComuns'
 
 export interface Trimestre {
@@ -31,6 +33,14 @@ export interface Trimestre {
   /** Sem o aviso da B3: `dtReceb` é o dia da coleta (o balanço saiu até esse dia). */
   dataAproximada?: boolean
   /** Só em bancos, do IF.data do Banco Central (conglomerado prudencial), em fração (0,148 = 14,8%). Ausente até o BC publicar o trimestre. */
+  /** Só fora de bancos e seguradoras: lucro bruto e custo (positivo) só existem quando a empresa reporta custo; estoque é saldo do balanço. */
+  lucroBruto?: number | null
+  cmv?: number | null
+  estoques?: number | null
+  /** Só em seguradoras, da base SES da SUSEP (seguradora operacional, soma dos 3 meses): prêmio ganho em R$ mil e razões sobre o prêmio ganho. */
+  premioGanho?: number | null
+  sinistralidade?: number | null
+  comissionamento?: number | null
   basileia?: number | null
   capitalPrincipal?: number | null
   nivel1?: number | null
@@ -196,7 +206,7 @@ export interface LinhaComparativa {
   rotulo: string
   /** Valor por trimestre, do mais antigo ao mais recente (mesma ordem de `trimestres`). */
   valores: (number | null)[]
-  formato: 'reais' | 'pct' | 'x' | 'var'
+  formato: 'reais' | 'pct' | 'x' | 'var' | 'dias'
   /** Comparação do último trimestre com o trimestre anterior e com o mesmo trimestre do ano anterior. */
   contraAnterior: Variacao
   contraAnoAnterior: Variacao
@@ -224,6 +234,8 @@ export interface AnaliseBalanco {
   ticker: string
   nome: string | null
   financeira: boolean
+  /** Grupo do setor e o que a análise acrescenta para ele. */
+  perfil: PerfilSetorial
   trimestres: Trimestre[]
   ultimo: Trimestre
   anterior: Trimestre | null
@@ -258,6 +270,17 @@ function soma12m(trimestres: Trimestre[], i: number, campo: (t: Trimestre) => nu
     total += v
   }
   return total
+}
+
+/** ROIC aproximado: EBIT dos 12 meses após 34% de imposto ÷ capital investido médio (patrimônio líquido + dívida − caixa, agora e 4 trimestres antes). */
+function roicAproximado(tri: Trimestre[], i: number): number | null {
+  const ebit12 = soma12m(tri, i, (t) => t.ebit)
+  const capital = (t: Trimestre | undefined) => (t == null || t.patrimonioLiquido == null || t.divida == null || t.caixa == null ? null : t.patrimonioLiquido + t.divida - t.caixa)
+  const c1 = capital(tri[i])
+  const c0 = capital(tri[i - 4])
+  if (ebit12 == null || c1 == null || c0 == null) return null
+  const medio = (c1 + c0) / 2
+  return medio <= 0 ? null : (ebit12 * 0.66) / medio
 }
 
 export function analisarBalanco(e: EmpresaBalanco): AnaliseBalanco | null {
@@ -302,6 +325,11 @@ export function analisarBalanco(e: EmpresaBalanco): AnaliseBalanco | null {
     // Capital regulatório (Banco Central): só aparece quando o BC já publicou algum trimestre do banco.
     if (tri.some((t) => t.basileia != null)) add('basileia', 'Índice de Basileia', 'pct', (t) => t.basileia ?? null)
     if (tri.some((t) => t.capitalPrincipal != null)) add('capitalPrincipal', 'Capital principal (CET1)', 'pct', (t) => t.capitalPrincipal ?? null)
+    // Seguradoras (SUSEP): sinistralidade e comissões sobre o prêmio ganho. O índice combinado completo exigiria as despesas administrativas, que a base não traz.
+    if (tri.some((t) => t.sinistralidade != null)) {
+      add('sinistralidade', 'Sinistralidade (sinistros ÷ prêmio ganho)', 'pct', (t) => t.sinistralidade ?? null, false)
+      add('comissionamento', 'Comissões ÷ prêmio ganho', 'pct', (t) => t.comissionamento ?? null, false)
+    }
   } else {
     add('dividaLiquida', 'Dívida líquida', 'reais', (t) => (t.divida == null || t.caixa == null ? null : t.divida - t.caixa), false)
     if (tri.some((t) => t.fco != null)) {
@@ -312,7 +340,19 @@ export function analisarBalanco(e: EmpresaBalanco): AnaliseBalanco | null {
     add('dividaEbitda', 'Dívida líquida ÷ EBITDA 12m', 'x', (t, i) => dividaLiquidaSobreEbitda(t.divida == null ? null : t.divida - (t.caixa ?? 0), soma12m(tri, i, (x) => x.ebitda)), false)
   }
 
+  // Indicadores do setor (só os que dá para calcular com as demonstrações): o perfil do grupo decide quais entram.
+  const perfil = perfilDoSetor(e.setor, e.financeira)
+  const quer = (i: IndicadorSetorial) => perfil.indicadores.includes(i)
+  if (!e.financeira) {
+    if (quer('margemBruta') && tri.some((t) => t.lucroBruto != null)) add('margemBruta', 'Margem bruta', 'pct', (t) => razao(t.lucroBruto ?? null, t.receita))
+    if (quer('margemEbitda') && tri.some((t) => t.ebitda != null)) add('margemEbitda', 'Margem EBITDA', 'pct', (t) => razao(t.ebitda, t.receita))
+    if (quer('capexReceita') && tri.some((t) => t.capex != null)) add('capexReceita', 'Capex ÷ receita (12 meses)', 'pct', (_t, i) => razao(soma12m(tri, i, (x) => x.capex), soma12m(tri, i, (x) => x.receita)), false)
+    if (quer('estoque') && tri.some((t) => t.estoques != null && t.cmv != null)) add('estoqueDias', 'Estoque (dias de custo)', 'dias', (t, i) => { const c = soma12m(tri, i, (x) => x.cmv ?? null); return t.estoques == null || c == null || c <= 0 ? null : (t.estoques / c) * 365 }, false)
+    if (quer('roic')) add('roic', 'ROIC (12 meses, aproximado)', 'pct', (_t, i) => roicAproximado(tri, i))
+  }
+
   const linha = (c: string) => linhas.find((l) => l.chave === c)!
+  const tem = (c: string) => linhas.some((l) => l.chave === c)
   const lucro = linha('lucro')
   const receita = linha('receita')
   const destaques: Destaque[] = []
@@ -383,6 +423,40 @@ export function analisarBalanco(e: EmpresaBalanco): AnaliseBalanco | null {
     }
   }
 
+  // Indicadores do setor (margem bruta, EBITDA, ROIC, estoque, capex).
+  if (!e.financeira) {
+    const lado = (c: string, rotulo: string, formatar: (v: number) => string, emPontos = true) => {
+      const v = tem(c) ? linha(c).valores[idx] ?? null : null
+      if (v == null) return null
+      const a = tem(c) && indiceAnoAnterior >= 0 ? linha(c).valores[indiceAnoAnterior] ?? null : null
+      const d = a == null ? null : emPontos ? (v - a) * 100 : v - a
+      const sufixo = d == null || Math.abs(d) < (emPontos ? 0.1 : 1) ? '' : ` (${d > 0 ? '+' : '−'}${Math.abs(d).toLocaleString('pt-BR', { maximumFractionDigits: emPontos ? 1 : 0 })}${emPontos ? ' p.p.' : ' dias'} contra o ${vsAno})`
+      return { texto: `${rotulo} ${formatar(v)}${sufixo}`, d, emPontos }
+    }
+    const pctTxt = (v: number) => `${(v * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%`
+    const itens = [
+      lado('margemBruta', 'margem bruta', pctTxt),
+      lado('margemEbitda', 'margem EBITDA', pctTxt),
+      lado('roic', 'ROIC', pctTxt),
+      lado('estoqueDias', 'estoque de', (v) => `${Math.round(v)} dias de custo`, false),
+      lado('capexReceita', 'capex de', (v) => `${pctTxt(v)} da receita`),
+    ].filter((x): x is NonNullable<typeof x> => x != null)
+    if (itens.length) {
+      // O tom segue a primeira margem/retorno comparável (estoque e capex mais altos não são "bons").
+      const principal = itens.find((x) => x.d != null && x.emPontos && !x.texto.startsWith('capex'))
+      push(principal == null || Math.abs(principal.d!) < 1 ? 'neutro' : principal.d! > 0 ? 'bom' : 'ruim', `Setor: ${perfil.rotulo.toLowerCase()}`, `${itens.map((x) => x.texto).join('; ')}.`)
+    }
+  }
+
+  if (e.financeira && tri.some((t) => t.sinistralidade != null)) {
+    const iSin = tri.findLastIndex((t) => t.sinistralidade != null)
+    const ts = tri[iSin]!
+    const antes = tri[iSin - 4]?.sinistralidade ?? null
+    const dp = antes == null ? null : (ts.sinistralidade! - antes) * 100
+    const variacao = dp != null && Math.abs(dp) >= 0.1 ? `, ${dp > 0 ? 'alta' : 'queda'} de ${Math.abs(dp).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} p.p. em 12 meses` : ''
+    push(dp == null || Math.abs(dp) < 1 ? 'neutro' : dp > 0 ? 'ruim' : 'bom', 'Sinistralidade', `${(ts.sinistralidade! * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}% em ${ts.rotulo}${variacao} (dado da SUSEP, da seguradora operacional). É a parte do prêmio que virou sinistro; o índice combinado completo também inclui comissões e despesas administrativas.`)
+  }
+
   // Patrimônio
   const pl = linha('pl')
   if (pl.contraAnoAnterior.pct != null && Math.abs(pl.contraAnoAnterior.pct) >= 0.1) {
@@ -432,9 +506,33 @@ export function analisarBalanco(e: EmpresaBalanco): AnaliseBalanco | null {
         alerta('divida-sobe-ebitda-cai', 'atencao', 'Dívida subindo e EBITDA caindo', `Dívida líquida ${percentual(dlAtual / dlAno - 1)} e EBITDA de 12 meses ${percentual(ebitda12 / ebitda12Ano - 1)} em 12 meses.`)
       }
     }
+    // Alertas do setor: só com os dois pontos de comparação (agora e um ano antes).
+    const agora = (c: string) => (tem(c) ? linha(c).valores[idx] ?? null : null)
+    const ano = (c: string) => (tem(c) && indiceAnoAnterior >= 0 ? linha(c).valores[indiceAnoAnterior] ?? null : null)
+    const pp = (c: string) => { const a = agora(c); const b = ano(c); return a == null || b == null ? null : a - b }
+    const doGrupo = (...grupos: string[]) => grupos.includes(perfil.grupo)
+    const dMargemBruta = pp('margemBruta')
+    if (dMargemBruta != null && dMargemBruta <= -0.03 && doGrupo('varejo', 'construcao', 'industria')) alerta('margem-bruta-cai', 'atencao', 'Margem bruta em queda', `A margem bruta caiu de ${pct1(ano('margemBruta')!)} para ${pct1(agora('margemBruta')!)} contra o ${vsAno}: a empresa está repassando menos do custo ou perdendo preço.`)
+    const dMargemEbitda = pp('margemEbitda')
+    if (dMargemEbitda != null && dMargemEbitda <= -0.05 && doGrupo('commodities')) alerta('margem-ebitda-cai', 'atencao', 'Margem EBITDA caiu forte', `A margem EBITDA foi de ${pct1(ano('margemEbitda')!)} para ${pct1(agora('margemEbitda')!)} contra o ${vsAno}. Em setores de commodities isso costuma refletir preço ou custo do ciclo.`)
+    const estoqueAgora = agora('estoqueDias')
+    const estoqueAno = ano('estoqueDias')
+    if (estoqueAgora != null && estoqueAno != null && estoqueAno > 0 && estoqueAgora / estoqueAno - 1 >= 0.25 && doGrupo('varejo', 'construcao', 'industria')) alerta('estoque-sobe', 'atencao', 'Estoque acumulando', `O estoque passou de ${Math.round(estoqueAno)} para ${Math.round(estoqueAgora)} dias de custo contra o ${vsAno}: mais capital parado e risco de remarcação.`)
+    const roicAgora = agora('roic')
+    if (roicAgora != null && roicAgora < 0.08 && doGrupo('varejo', 'construcao', 'industria', 'servicos', 'commodities')) alerta('roic-baixo', 'atencao', 'Retorno sobre o capital baixo', `ROIC aproximado de ${pct1(roicAgora)} nos 12 meses, abaixo de 8%: o negócio rende pouco sobre o capital que usa.`)
+    const capexReceita = agora('capexReceita')
+    const dlEbitdaSetor = linha('dividaEbitda').valores[idx]
+    if (doGrupo('infraestrutura') && capexReceita != null && capexReceita > 0.4 && dlEbitdaSetor != null && dlEbitdaSetor > 3) alerta('capex-pesado-divida', 'atencao', 'Investimento pesado com dívida alta', `O capex dos 12 meses equivale a ${pct1(capexReceita)} da receita, com dívida líquida de ${dlEbitdaSetor.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}× o EBITDA.`)
   } else {
     const r = linha('roe').valores[idx]
     if (r != null && faixaDoRoe(r) === 'baixo' && lucro.contraAnoAnterior.tom === 'ruim') alerta('roe-baixo', 'atencao', 'Rentabilidade baixa e em queda', `ROE de ${pct1(r)} nos 12 meses, com lucro ${lucro.contraAnoAnterior.texto} contra o ${vsAno}.`)
+    // Seguradoras: sinistralidade subindo 5 p.p. ou mais em 12 meses (pressão sobre a margem técnica).
+    const iSin = tri.findLastIndex((t) => t.sinistralidade != null)
+    if (iSin >= 0) {
+      const sAgora = tri[iSin]!.sinistralidade!
+      const sAntes = tri[iSin - 4]?.sinistralidade ?? null
+      if (sAntes != null && sAgora - sAntes >= 0.05) alerta('sinistralidade-sobe', 'atencao', 'Sinistralidade subindo', `${tri[iSin]!.rotulo}: sinistros equivalem a ${pct1(sAgora)} do prêmio ganho, contra ${pct1(sAntes)} um ano antes.`)
+    }
     // Capital regulatório (Banco Central), no último trimestre que o BC já publicou.
     const iCap = tri.findLastIndex((t) => t.basileia != null)
     if (iCap >= 0) {
@@ -497,5 +595,5 @@ export function analisarBalanco(e: EmpresaBalanco): AnaliseBalanco | null {
   const vertCompleto = vertical.filter((l) => l.valores.some((v) => v != null))
   const horizCompleto = horizontal.filter((l) => l.valores.some((v) => v != null))
 
-  return { ticker: e.ticker, nome: e.nome, financeira: e.financeira, trimestres: tri, ultimo, anterior, anoAnterior, linhas, horizontal: horizCompleto, vertical: vertCompleto, destaques, alertas, veredito, resumo }
+  return { ticker: e.ticker, nome: e.nome, financeira: e.financeira, perfil, trimestres: tri, ultimo, anterior, anoAnterior, linhas, horizontal: horizCompleto, vertical: vertCompleto, destaques, alertas, veredito, resumo }
 }

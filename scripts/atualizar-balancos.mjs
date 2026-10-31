@@ -15,8 +15,9 @@ import { agruparPorCnpj, empresasDoCadastro } from './atualizar-acoes-baratas.mj
 import { baixar, cnpjDigitos, mapaTickerCnpj, resolverCnpjs, urlDemonstracoes, urlFca } from './acoes-baratas-cvm.mjs'
 import { extrairParaFundamentos } from './atualizar-fundamentos.mjs'
 import { acharEntrega, baixarFinanceiro, codigoCvmDaRaiz } from './b3-balancos.mjs'
+import { lerSeguros, trimestreDeSeguros, URL_SES } from './susep-ses.mjs'
 import { anoMesDoPeriodo, baixarCadastro, baixarCapital, raizDoCnpj } from './bcb-ifdata.mjs'
-import { incorporarB3, incorporarCapital, montarBalancoDaEmpresa, verificarSanidadeBalancos } from './balancos-calculo.mjs'
+import { incorporarB3, incorporarCapital, incorporarSeguros, montarBalancoDaEmpresa, verificarSanidadeBalancos } from './balancos-calculo.mjs'
 
 const RAIZ_PADRAO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 export const VERSAO = '1.0.0'
@@ -127,7 +128,60 @@ export async function completarComCapital({ saida, fetchImpl = fetch, log = cons
   }
 }
 
-export async function executar({ raiz = RAIZ_PADRAO, dadosLocais = null, agora = new Date(), log = console.log, fetchImpl = fetch } = {}) {
+const CAMPOS_SEGUROS = ['premioGanho', 'sinistralidade', 'comissionamento']
+
+/** Mantém a sinistralidade já publicada: o SES é uma base de ~600 MB, então só se baixa de novo quando falta o trimestre mais recente. */
+export function herdarSeguros({ saida, anterior }) {
+  for (const [ticker, e] of Object.entries(saida)) {
+    const antigos = new Map((anterior?.empresas?.[ticker]?.trimestres ?? []).filter((t) => t.sinistralidade != null).map((t) => [t.periodo, t]))
+    if (!antigos.size) continue
+    saida[ticker] = { ...e, trimestres: e.trimestres.map((t) => (antigos.has(t.periodo) ? { ...t, ...Object.fromEntries(CAMPOS_SEGUROS.map((c) => [c, antigos.get(t.periodo)[c]])) } : t)) }
+  }
+}
+
+/** Seguradora com trimestre já encerrado há pelo menos 50 dias (prazo do SES) sem sinistralidade: vale baixar a base da SUSEP. */
+export function precisaDoSes({ saida, entidades, dataCorte }) {
+  const limite = new Date(Date.parse(`${dataCorte}T00:00:00Z`) - 50 * 86400000).toISOString().slice(0, 10)
+  return Object.keys(entidades).some((ticker) => {
+    const alvo = saida[ticker]?.trimestres.filter((t) => t.periodo <= limite).at(-1)
+    return alvo != null && alvo.sinistralidade == null
+  })
+}
+
+/**
+ * Sinistralidade das seguradoras pela base da SUSEP (SES). Falha na fonte não derruba o job: a seguradora fica só com o dado da CVM.
+ * `forcar` baixa mesmo sem necessidade (uso manual). A base é atualizada às segundas; o job só tenta aos sábados para não repetir o download.
+ */
+export async function completarComSeguros({ saida, entidades, dataCorte, pastaTemp, forcar = false, sabado = false, fetchImpl = fetch, log = console.log, zipLocal = null }) {
+  const tickers = Object.keys(entidades).filter((t) => saida[t])
+  if (!tickers.length) return
+  if (!forcar && !(precisaDoSes({ saida, entidades, dataCorte }) && sabado)) return
+  try {
+    let zip = zipLocal
+    if (!zip) {
+      log('  baixando a base do SES da SUSEP (~600 MB)…')
+      const r = await baixar(URL_SES, path.join(pastaTemp, 'ses_base_completa.zip'), { fetchImpl })
+      if (!r) throw new Error('base do SES indisponível')
+      zip = r.caminho
+    }
+    const codigos = [...new Set(tickers.flatMap((t) => entidades[t].entidades))]
+    const desde = Math.min(...tickers.flatMap((t) => saida[t].trimestres.map((x) => Number(x.periodo.slice(0, 4) + x.periodo.slice(5, 7))))) - 2
+    const porEntidade = await lerSeguros(zip, codigos, { desdeAnoMes: desde })
+    for (const t of tickers) {
+      const porPeriodo = {}
+      for (const tri of saida[t].trimestres) {
+        const q = trimestreDeSeguros(porEntidade, entidades[t].entidades, tri.periodo)
+        if (q) porPeriodo[tri.periodo] = q
+      }
+      saida[t] = incorporarSeguros({ empresa: saida[t], porPeriodo })
+      log(`  SUSEP: ${t} com sinistralidade em ${Object.keys(porPeriodo).length} trimestres`)
+    }
+  } catch (e) {
+    log(`  [SUSEP] sinistralidade indisponível: ${e.message}`)
+  }
+}
+
+export async function executar({ raiz = RAIZ_PADRAO, dadosLocais = null, forcarSes = false, agora = new Date(), log = console.log, fetchImpl = fetch } = {}) {
   const cfg = lerJson(path.join(raiz, 'config', 'acoes-baratas.json'))
   const configAcoes = lerJson(path.join(raiz, 'config', 'acoes.json'))
   const manualCnpj = lerJson(path.join(raiz, 'config', 'acoes-baratas-cnpj.json'), {})
@@ -193,6 +247,11 @@ export async function executar({ raiz = RAIZ_PADRAO, dadosLocais = null, agora =
 
     await completarComB3({ saida, docsPorTicker, dataCorte, fetchImpl, log })
     await completarComCapital({ saida, fetchImpl, log })
+    const arquivoAtual = path.join(raiz, 'webapp-src', 'public', 'dados', 'balancos.json')
+    herdarSeguros({ saida, anterior: lerJson(arquivoAtual, null) })
+    const entidades = lerJson(path.join(raiz, 'config', 'susep-entidades.json'), {})
+    delete entidades._leia
+    await completarComSeguros({ saida, entidades, dataCorte, pastaTemp, forcar: forcarSes, sabado: agora.getUTCDay() === 6, fetchImpl, log })
     log(`  ${Object.keys(saida).length} empresas com balanço; ${excluidas.length} sem dado suficiente`)
 
     const resultado = {
@@ -230,7 +289,7 @@ function argumento(nome) {
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  executar({ dadosLocais: argumento('dados-locais') ? path.resolve(argumento('dados-locais')) : null }).catch((e) => {
+  executar({ dadosLocais: argumento('dados-locais') ? path.resolve(argumento('dados-locais')) : null, forcarSes: process.argv.includes('--forcar-ses') }).catch((e) => {
     console.error(`[erro] ${e.message}`)
     process.exit(1)
   })

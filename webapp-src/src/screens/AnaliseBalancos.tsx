@@ -20,6 +20,7 @@ const formatarValor = (v: number | null, formato: LinhaDeAnalise['formato']) => 
     return arred === 0 ? '0%' : `${arred > 0 ? '+' : '−'}${Math.abs(arred).toLocaleString('pt-BR')}%`
   }
   if (formato === 'reais') return reaisCompactos(v)
+  if (formato === 'dias') return `${Math.round(v).toLocaleString('pt-BR')} dias`
   if (formato === 'pct') return `${(v * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%`
   return `${v.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}×`
 }
@@ -202,12 +203,15 @@ export function AnaliseBalancos({ snapshot, itens, ticker, hoje, aoEscolher }: {
                 <span className="small muted justify" style={{ lineHeight: 1.5 }}>{d.texto}</span>
               </div>
             ))}
+            <span className="tiny muted justify" data-testid="balanco-perfil">
+              Leitura de setor ({analise.perfil.rotulo.toLowerCase()}): pesa mais {analise.perfil.foco}. Não entram aqui, por não estarem nos balanços abertos: {analise.perfil.foraDaBase}.
+            </span>
           </section>
 
           <section className="card col" style={{ gap: 10 }} aria-label="Sinais de alerta" data-testid="balanco-alertas">
             <h3 style={{ fontSize: 15 }}>Sinais de alerta</h3>
             {analise.alertas.length === 0 ? (
-              <span className="small muted justify" role="status">Nenhum sinal de alerta nos dados do balanço (lucro, margem, patrimônio e endividamento). O fluxo de caixa ainda não entra nesta leitura.</span>
+              <span className="small muted justify" role="status">Nenhum sinal de alerta nos dados do balanço (lucro, margem, patrimônio, endividamento e caixa).</span>
             ) : (
               analise.alertas.map((al) => (
                 <div key={al.id} className="col" style={{ gap: 2 }} data-testid="balanco-alerta">

@@ -119,3 +119,88 @@ describe('banco: capital regulatório do Banco Central', () => {
     expect(roa.valores[5]).toBeCloseTo(400 / 5000)
   })
 })
+
+describe('indicadores por setor', () => {
+  const periodos = [['2025-03-31', '1T25'], ['2025-06-30', '2T25'], ['2025-09-30', '3T25'], ['2025-12-31', '4T25'], ['2026-03-31', '1T26'], ['2026-06-30', '2T26']] as const
+  const comSetor = (setor: string, ajusta: (t: Trimestre, i: number) => Partial<Trimestre> = () => ({})): EmpresaBalanco => ({
+    ...empresa(periodos.map(([p, r], i) => ({ ...tri(p, r, 100), lucroBruto: 400, cmv: 600, estoques: 200, capex: 100, ebitda: 150, ...ajusta(tri(p, r, 100), i) }))),
+    setor,
+  })
+  const ids = (e: EmpresaBalanco) => analisarBalanco(e)!.alertas.map((x) => x.id)
+
+  it('cada setor recebe o perfil do seu grupo e só as linhas desse grupo', () => {
+    const varejo = analisarBalanco(comSetor('Varejo alimentar'))!
+    expect(varejo.perfil.grupo).toBe('varejo')
+    expect(varejo.linhas.map((l) => l.chave)).toEqual(expect.arrayContaining(['margemBruta', 'margemEbitda', 'estoqueDias', 'roic']))
+    expect(varejo.linhas.some((l) => l.chave === 'capexReceita')).toBe(false)
+    const energia = analisarBalanco(comSetor('Energia elétrica: geração'))!
+    expect(energia.perfil.grupo).toBe('infraestrutura')
+    expect(energia.linhas.map((l) => l.chave)).toEqual(expect.arrayContaining(['margemEbitda', 'capexReceita']))
+    expect(energia.linhas.some((l) => l.chave === 'margemBruta')).toBe(false)
+    expect(analisarBalanco(comSetor('Setor desconhecido'))!.perfil.grupo).toBe('padrao')
+  })
+  it('margem bruta, estoque em dias e capex sobre receita saem das contas do balanço', () => {
+    const a = analisarBalanco(comSetor('Varejo alimentar'))!
+    expect(a.linhas.find((l) => l.chave === 'margemBruta')!.valores[5]).toBeCloseTo(0.4)
+    // 200 de estoque ÷ 4 × 600 de custo × 365 dias
+    expect(a.linhas.find((l) => l.chave === 'estoqueDias')!.valores[5]).toBeCloseTo((200 / 2400) * 365)
+    expect(a.linhas.find((l) => l.chave === 'estoqueDias')!.valores[2]).toBeNull()
+    expect(analisarBalanco(comSetor('Saneamento e resíduos'))!.linhas.find((l) => l.chave === 'capexReceita')!.valores[5]).toBeCloseTo(0.1)
+  })
+  it('sem custo informado não inventa margem bruta nem estoque', () => {
+    const a = analisarBalanco(comSetor('Varejo alimentar', () => ({ lucroBruto: null, cmv: null })))!
+    expect(a.linhas.some((l) => l.chave === 'margemBruta' || l.chave === 'estoqueDias')).toBe(false)
+  })
+  it('alerta de margem bruta em queda no varejo, mas não na infraestrutura', () => {
+    const cai = (_t: Trimestre, i: number) => ({ lucroBruto: i === 5 ? 300 : 400, cmv: i === 5 ? 700 : 600 })
+    expect(ids(comSetor('Varejo alimentar', cai))).toContain('margem-bruta-cai')
+    expect(ids(comSetor('Energia elétrica: geração', cai))).not.toContain('margem-bruta-cai')
+  })
+  it('alerta de estoque acumulando, de margem EBITDA nas commodities e de capex com dívida na infraestrutura', () => {
+    // O estoque em dias precisa de 4 trimestres de custo antes de cada ponto: aqui são 8 trimestres, com o estoque dobrando no último.
+    const oito = [['2024-09-30', '3T24'], ['2024-12-31', '4T24'], ...periodos].map(([p, r], i) => ({ ...tri(p!, r!, 100), lucroBruto: 400, cmv: 600, estoques: i === 7 ? 400 : 200 }))
+    expect(ids({ ...empresa(oito), setor: 'Varejo alimentar' })).toContain('estoque-sobe')
+    expect(ids(comSetor('Mineração', (_t, i) => ({ ebitda: i === 5 ? 50 : 300, ebit: 50 })))).toContain('margem-ebitda-cai')
+    const infra = comSetor('Energia elétrica: geração', () => ({ capex: 500, ebitda: 100, divida: 3000, caixa: 100 }))
+    expect(ids(infra)).toContain('capex-pesado-divida')
+  })
+  it('ROIC baixo avisa fora da infraestrutura', () => {
+    const fraco = (grupo: string) => comSetor(grupo, () => ({ ebit: 10, patrimonioLiquido: 2000, divida: 400, caixa: 100 }))
+    expect(ids(fraco('Moda e vestuário'))).toContain('roic-baixo')
+    expect(ids(fraco('Energia elétrica: geração'))).not.toContain('roic-baixo')
+  })
+  it('o destaque do setor lista os indicadores e o perfil traz o que mais pesa', () => {
+    const d = analisarBalanco(comSetor('Moda e vestuário'))!.destaques.find((x) => x.titulo.startsWith('Setor:'))!
+    expect(d.texto).toContain('margem bruta 40%')
+    expect(analisarBalanco(comSetor('Moda e vestuário'))!.perfil.foco).toContain('margem bruta')
+  })
+})
+
+describe('seguradora: sinistralidade da SUSEP', () => {
+  const periodos = [['2025-03-31', '1T25'], ['2025-06-30', '2T25'], ['2025-09-30', '3T25'], ['2025-12-31', '4T25'], ['2026-03-31', '1T26'], ['2026-06-30', '2T26']] as const
+  const seguradora = (sin: (number | null)[]): EmpresaBalanco => ({
+    ...empresa(periodos.map(([p, r], i) => ({ ...tri(p, r, 100), sinistralidade: sin[i] ?? null, comissionamento: sin[i] == null ? null : 0.2, premioGanho: 5000 }))),
+    financeira: true,
+    setor: 'Seguros e previdência',
+  })
+  const ids = (e: EmpresaBalanco) => analisarBalanco(e)!.alertas.map((x) => x.id)
+
+  it('mostra sinistralidade e comissões e comenta a variação em 12 meses', () => {
+    const a = analisarBalanco(seguradora([0.5, 0.5, 0.5, 0.5, 0.5, 0.6]))!
+    expect(a.linhas.find((l) => l.chave === 'sinistralidade')!.valores[5]).toBeCloseTo(0.6)
+    expect(a.linhas.find((l) => l.chave === 'comissionamento')).toBeDefined()
+    const d = a.destaques.find((x) => x.titulo === 'Sinistralidade')!
+    expect(d.tom).toBe('ruim')
+    expect(d.texto).toContain('alta de 10 p.p.')
+  })
+  it('alerta quando a sinistralidade sobe 5 p.p. ou mais, e não quando sobe pouco', () => {
+    expect(ids(seguradora([0.5, 0.5, 0.5, 0.5, 0.5, 0.56]))).toContain('sinistralidade-sobe')
+    expect(ids(seguradora([0.5, 0.5, 0.5, 0.5, 0.5, 0.52]))).not.toContain('sinistralidade-sobe')
+  })
+  it('sem dado da SUSEP não aparece linha, destaque nem alerta', () => {
+    const a = analisarBalanco(seguradora([]))!
+    expect(a.linhas.some((l) => l.chave === 'sinistralidade')).toBe(false)
+    expect(a.destaques.some((x) => x.titulo === 'Sinistralidade')).toBe(false)
+    expect(a.perfil.grupo).toBe('financeiro')
+  })
+})

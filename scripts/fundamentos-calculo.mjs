@@ -56,8 +56,11 @@ export const FORMATOS = [
   { dem: 'DRE', formato: /^3\.\d{2}(\.\d{2})?$/ },
 ]
 
+/** Contas que o extrator guarda só para a aba Balanços (a análise fundamentalista não lê): estoques. */
+export const CONTAS_EXTRAS = [{ dem: 'BPA', cd: '1.01.04' }]
+
 export function contasDoExtrator() {
-  return [...Object.values(CONTAS_FLUXO), ...Object.values(CONTAS_SALDO)].map((c) => ({ dem: c.dem, cd: c.cd }))
+  return [...Object.values(CONTAS_FLUXO), ...Object.values(CONTAS_SALDO), ...CONTAS_EXTRAS].map((c) => ({ dem: c.dem, cd: c.cd }))
 }
 
 export function guardaLinha(dem, cd) {

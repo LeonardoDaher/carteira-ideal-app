@@ -1,0 +1,4 @@
+{
+  "_leia": "Ligação entre o código de negociação e as entidades do SES da SUSEP (campo coenti de Ses_seguros.csv e LISTAEMPRESAS.csv) cujos prêmios e sinistros medem a sinistralidade da empresa. Só entra quem tem a seguradora operacional identificada com segurança: holdings que só recebem equivalência patrimonial (BB Seguridade, Caixa Seguridade) e a resseguradora IRB (sem linhas em Ses_seguros) ficam de fora. Mudar com cuidado: a conta usa 100% da entidade.",
+  "PSSA3": { "entidades": ["05886"], "descricao": "Porto Seguro Companhia de Seguros Gerais" }
+}

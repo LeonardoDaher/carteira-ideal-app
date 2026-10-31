@@ -109,6 +109,9 @@ function lerDocumento(linhas, d, cons, financeira, janela) {
   return {
     receita: r.fluxo(porCodigo('3.01'), janela),
     ebit: financeira ? null : r.fluxo(porCodigo('3.05'), janela),
+    lucroBruto: financeira ? null : r.fluxo(porCodigo('3.03'), janela),
+    cmv: financeira ? null : r.fluxo(porCodigo('3.02'), janela),
+    estoques: financeira ? null : r.saldo(porCodigo('1.01.04')),
     lucroLiquido: lucroCd ? lucroLinha(lucroCd) : null,
     lucroControladores: controladoresCd ? lucroLinha(controladoresCd) : null,
     ativoTotal: r.saldo(porCodigo('1')),
@@ -155,6 +158,9 @@ export function trimestresDaEmpresa({ c, financeira = false, dataCorte, maximo =
     const v = {
       receita: dif(ano.receita, nove.receita),
       ebit: financeira ? null : dif(ano.ebit, nove.ebit),
+      lucroBruto: financeira ? null : dif(ano.lucroBruto, nove.lucroBruto),
+      cmv: financeira ? null : dif(ano.cmv, nove.cmv),
+      estoques: ano.estoques,
       lucroLiquido: dif(ano.lucroLiquido, nove.lucroLiquido),
       lucroControladores: dif(ano.lucroControladores, nove.lucroControladores),
       ativoTotal: ano.ativoTotal,
@@ -195,6 +201,10 @@ export function trimestresDaEmpresa({ c, financeira = false, dataCorte, maximo =
         consolidacao: cons === 'con' ? 'consolidada' : 'individual',
         receita: mil(v.receita),
         ebit: mil(v.ebit),
+        // Lucro bruto e custo só valem quando a empresa reporta custo (3.02 ≠ 0): utilities e serviços sem custo ficam null, não margem de 100%.
+        lucroBruto: v.cmv ? mil(v.lucroBruto) : null,
+        cmv: v.cmv ? mil(Math.abs(v.cmv)) : null,
+        estoques: mil(v.estoques),
         // EBIT + depreciação e amortização (mesma definição da Análise fundamentalista); sem uma das duas, não há EBITDA.
         ebitda: v.ebit == null || depreciacao == null ? null : mil(v.ebit + depreciacao),
         fco: mil(isolado(e, 'fco')),
@@ -363,4 +373,19 @@ export function incorporarB3({ empresa, docs, b3, entrega, dataCorte }) {
   const q = trimestreProvisorio({ trimestres: empresa.trimestres, b3, entrega, dataCorte })
   if (!q) return empresa
   return { ...empresa, trimestres: [...empresa.trimestres, q].slice(-MAXIMO_TRIMESTRES), proxima: proximaDivulgacao([...docs, { doc: q.tipo, dtRefer: q.periodo, dtReceb: q.dtReceb }], dataCorte) }
+}
+
+/**
+ * Junta a sinistralidade (SUSEP) aos trimestres de uma seguradora. `porPeriodo` = { 'AAAA-MM-DD': { premioGanho, sinistralidade,
+ * comissionamento } }. Trimestre sem dado fica sem os campos (a tela mostra "—").
+ */
+export function incorporarSeguros({ empresa, porPeriodo }) {
+  let mudou = false
+  const trimestres = empresa.trimestres.map((t) => {
+    const s = porPeriodo[t.periodo]
+    if (!s) return t
+    mudou = true
+    return { ...t, premioGanho: s.premioGanho, sinistralidade: s.sinistralidade, comissionamento: s.comissionamento }
+  })
+  return mudou ? { ...empresa, trimestres } : empresa
 }

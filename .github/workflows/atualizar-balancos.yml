@@ -5,6 +5,9 @@
 # Depois da CVM, o job consulta a página de cada empresa na B3 (resumo do balanço e aviso de entrega): o balanço aparece no mesmo dia da divulgação,
 # como "provisório", e a CVM completa EBIT, caixa e dívida quando publicar o arquivo aberto (a carga leva uns 12 minutos).
 #
+# Dois complementos que não dependem da CVM: os índices de capital dos bancos (IF.data do Banco Central, uma consulta por trimestre) e a
+# sinistralidade da Porto (base do SES da SUSEP, ~600 MB). A base da SUSEP só é baixada aos sábados e só quando falta o trimestre mais recente.
+#
 # Roda de terça a sábado, de madrugada: baixa cerca de 150 MB da CVM e, sem mudança nos dados (só quando alguma empresa divulga),
 # não gera commit nem deploy. Se algo estiver errado (layout da CVM mudou, poucas empresas), o job falha SEM alterar o arquivo.
 name: Atualizar Balanços
