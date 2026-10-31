@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 import {
-  agruparPorTicker, ajustarCandles, combinarEventos, detectarEventos, formatarHistoricoTicker, lerLinhaCotahist, linhaDoCandle, saltosRestantes,
+  agruparPorTicker, ajustarCandles, buscarEventosB3, combinarEventos, confirmarEventosB3, detectarEventos, emitenteDoTicker, eventosDaB3,
+  formatarHistoricoTicker, lerLinhaCotahist, linhaDoCandle, saltosRestantes, URL_EVENTOS_B3,
 } from './historico-cotahist.mjs'
 
 /** Monta uma linha de 245 colunas do COTAHIST. Preços em reais (2 casas implícitas), volume em reais. */
@@ -91,13 +92,9 @@ describe('detectarEventos', () => {
 })
 
 describe('combinarEventos e ajustarCandles', () => {
-  it('o evento do config prevalece sobre o detectado do mesmo dia (até 3 dias de diferença)', () => {
+  it('o evento do config prevalece sobre o da B3 do mesmo dia (até 3 dias de diferença)', () => {
     const r = combinarEventos([{ data: '2025-04-02', fator: 3 }], [{ data: '2025-04-01', fator: 3 }, { data: '2025-08-01', fator: 2 }])
-    assert.deepEqual(r, [{ data: '2025-04-02', fator: 3, origem: 'config' }, { data: '2025-08-01', fator: 2, origem: 'detectado' }])
-  })
-
-  it('descarta o evento detectado cuja data está em "ignorarEventos"', () => {
-    assert.deepEqual(combinarEventos([], [{ data: '2023-01-12', fator: 4 }], ['2023-01-12']), [])
+    assert.deepEqual(r, [{ data: '2025-04-02', fator: 3, origem: 'config' }, { data: '2025-08-01', fator: 2, origem: 'b3' }])
   })
 
   it('divide só os preços anteriores à data do evento e acumula vários eventos', () => {
@@ -139,5 +136,87 @@ describe('saltosRestantes e formato do arquivo', () => {
     assert.equal(j.barras.length, 2)
     assert.equal(j.barras[0].length, 6)
     assert.equal(texto.split('\n').filter((l) => l.startsWith('    ["2025')).length, 2)
+  })
+})
+
+describe('eventos oficiais da B3', () => {
+  const resposta = (stockDividends) => [{ code: 'ANIM', stockDividends }]
+  const ev = (label, factor, lastDatePrior, isinCode = 'BRANIMACNOR6') => ({ assetIssued: isinCode, isinCode, label, factor, lastDatePrior, approvedOn: lastDatePrior, remarks: '' })
+  const dias = (n, preco) => Array.from({ length: n }, (_, i) => candle(`2025-03-${String(i + 1).padStart(2, '0')}`, preco))
+
+  it('converte desdobramento e bonificação (em %) e grupamento (razão) no fator de ações novas por antiga', () => {
+    const r = eventosDaB3(resposta([
+      ev('DESDOBRAMENTO', '200,00000000000', '18/02/2021'),
+      ev('BONIFICACAO', '5,00000000000', '29/12/2025'),
+      ev('GRUPAMENTO', '0,10000000000', '24/05/2024'),
+      ev('DESDOBRAMENTO', '7.900,00000000000', '14/04/2025'),
+      ev('CISAO', '10,0', '14/04/2025'),
+    ]), 'BRANIMACNOR6')
+    assert.deepEqual(r.map((e) => [e.ultimaDataCom, Number(e.fator.toFixed(6))]), [['2021-02-18', 3], ['2025-12-29', 1.05], ['2024-05-24', 0.1], ['2025-04-14', 80]])
+  })
+
+  it('usa só os eventos do ISIN do papel, e os do emissor inteiro se nenhum tem o ISIN', () => {
+    const lista = resposta([ev('DESDOBRAMENTO', '100,0', '01/03/2024', 'BRXXXXACNOR1'), ev('DESDOBRAMENTO', '200,0', '01/04/2024', 'BRXXXXACNPR1')])
+    assert.deepEqual(eventosDaB3(lista, 'BRXXXXACNPR1').map((e) => e.fator), [3])
+    assert.equal(eventosDaB3(lista, 'BRXXXXCDAM00').length, 2)
+  })
+
+  it('resposta que não é a esperada devolve null; sem eventos devolve lista vazia', () => {
+    assert.equal(eventosDaB3(null, 'X'), null)
+    assert.equal(eventosDaB3([], 'X'), null)
+    assert.equal(eventosDaB3('<html>', 'X'), null)
+    assert.deepEqual(eventosDaB3(resposta([]), 'X'), [])
+  })
+
+  it('aplica o evento da B3 no primeiro pregão depois da data com, se o preço confirma', () => {
+    const cs = [...dias(10, 30), candle('2025-03-13', 10, { abertura: 10 })]
+    const { eventos, divergentes } = confirmarEventosB3(cs, [{ ultimaDataCom: '2025-03-10', fator: 3, rotulo: 'DESDOBRAMENTO' }])
+    assert.deepEqual(eventos, [{ data: '2025-03-13', fator: 3 }])
+    assert.deepEqual(divergentes, [])
+  })
+
+  it('o que a B3 não lista não é ajustado: queda de 44% com volume normal (ANIM3 em 26/10/2026) segue como queda', () => {
+    const cs = [...dias(10, 5), candle('2025-03-13', 2.8, { abertura: 2.5 })]
+    assert.deepEqual(confirmarEventosB3(cs, []).eventos, [])
+    assert.equal(ajustarCandles(cs, [])[0].ultimo, 5)
+  })
+
+  it('evento da B3 que o preço não confirma vai para divergentes e não é aplicado', () => {
+    const cs = [...dias(10, 30), candle('2025-03-13', 30)]
+    const { eventos, divergentes } = confirmarEventosB3(cs, [{ ultimaDataCom: '2025-03-10', fator: 3, rotulo: 'DESDOBRAMENTO' }])
+    assert.deepEqual(eventos, [])
+    assert.equal(divergentes.length, 1)
+  })
+
+  it('desdobramento e grupamento na mesma data com valem pelo produto (VIVT3: 80 x 0,025 = 2; TIMS3: 100 x 0,01 = nada)', () => {
+    const vivt = [...dias(10, 51), candle('2025-03-13', 25.5, { abertura: 25.4 })]
+    const par = [{ ultimaDataCom: '2025-03-10', fator: 80, rotulo: 'DESDOBRAMENTO' }, { ultimaDataCom: '2025-03-10', fator: 0.025, rotulo: 'GRUPAMENTO' }]
+    assert.deepEqual(confirmarEventosB3(vivt, par).eventos, [{ data: '2025-03-13', fator: 2 }])
+    const tims = [...dias(10, 22), candle('2025-03-13', 22.6)]
+    const nulo = [{ ultimaDataCom: '2025-03-10', fator: 100, rotulo: 'DESDOBRAMENTO' }, { ultimaDataCom: '2025-03-10', fator: 0.01, rotulo: 'GRUPAMENTO' }]
+    const r = confirmarEventosB3(tims, nulo)
+    assert.deepEqual(r.eventos, [])
+    assert.deepEqual(r.divergentes, [])
+  })
+
+  it('bonificação pequena é aplicada sem conferência de preço; evento fora do período ou futuro é ignorado', () => {
+    const cs = dias(10, 30)
+    assert.deepEqual(confirmarEventosB3(cs, [{ ultimaDataCom: '2025-03-05', fator: 1.05, rotulo: 'BONIFICACAO' }]).eventos, [{ data: '2025-03-06', fator: 1.05 }])
+    assert.deepEqual(confirmarEventosB3(cs, [{ ultimaDataCom: '2020-01-01', fator: 3, rotulo: 'DESDOBRAMENTO' }]).eventos, [])
+    assert.deepEqual(confirmarEventosB3(cs, [{ ultimaDataCom: '2025-03-10', fator: 3, rotulo: 'DESDOBRAMENTO' }]).eventos, [])
+  })
+
+  it('busca: monta a URL com o emissor em base64 e devolve null em erro, corpo vazio ou JSON inválido', async () => {
+    assert.equal(emitenteDoTicker('ANIM3'), 'ANIM')
+    assert.equal(emitenteDoTicker('BPAC11'), 'BPAC')
+    const url = URL_EVENTOS_B3('ANIM')
+    assert.match(url, /GetListedSupplementCompany\//)
+    assert.deepEqual(JSON.parse(Buffer.from(url.split('/').pop(), 'base64').toString()), { issuingCompany: 'ANIM', language: 'pt-br' })
+    const resp = (ok, texto) => async () => ({ ok, text: async () => texto })
+    assert.deepEqual(await buscarEventosB3('ANIM', resp(true, '[{"a":1}]')), [{ a: 1 }])
+    assert.equal(await buscarEventosB3('ANIM', resp(true, '')), null)
+    assert.equal(await buscarEventosB3('ANIM', resp(true, '<html>')), null)
+    assert.equal(await buscarEventosB3('ANIM', resp(false, '[]')), null)
+    assert.equal(await buscarEventosB3('ANIM', async () => { throw new Error('rede') }), null)
   })
 })

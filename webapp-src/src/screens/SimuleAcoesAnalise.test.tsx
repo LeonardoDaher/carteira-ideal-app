@@ -172,10 +172,10 @@ describe('Simule Ações: abas de análise', () => {
   })
 
   it('com o histórico longo, mostra abertura real, os eventos ajustados e períodos de anos', () => {
-    abrir(/Análise técnica/, historicoLongoDeAlfa([{ data: '2025-03-03', fator: 3, origem: 'detectado' }]))
+    abrir(/Análise técnica/, historicoLongoDeAlfa([{ data: '2025-03-03', fator: 3, origem: 'b3' }]))
     const nota = screen.getByTestId('nota-historico-longo').textContent ?? ''
     expect(nota).toContain('abertura real do COTAHIST')
-    expect(nota).toContain('03/03/2025 (3:1 desdobramento, detectado pelo preço e pelo volume)')
+    expect(nota).toContain('03/03/2025 (3:1 desdobramento, registrado na B3)')
     fireEvent.click(screen.getByRole('button', { name: '2 anos' }))
     expect(screen.getByRole('img', { name: /candles diários de ALFA3, 520 pregões/ })).toBeTruthy()
     expect(screen.getByRole('button', { name: 'Tudo' })).toBeTruthy()

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta id="csp-scripts" http-equiv="Content-Security-Policy" content="script-src 'self' 'sha256-+3Wd2+isEAlkVNzB58FSZCiXlNxoRV8r8RvN/fskDPI=' 'sha256-QxzWjnMAMdTcujJbRSvQmzuo8/3HVmTRVfjQ/3CZ5lg='; script-src-attr 'none'">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Painel de métricas | Carteira Ideal</title>
+    <meta name="theme-color" content="#0a0d13" />
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+    <style>
+      @font-face { font-family: "Sora"; font-weight: 700; font-style: normal; font-display: swap; src: url("/assets/fonts/sora-latin-700-normal.woff2") format("woff2"); }
+      @font-face { font-family: "IBM Plex Sans"; font-weight: 400; font-style: normal; font-display: swap; src: url("/assets/fonts/ibm-plex-sans-latin-400-normal.woff2") format("woff2"); }
+      @font-face { font-family: "IBM Plex Sans"; font-weight: 600; font-style: normal; font-display: swap; src: url("/assets/fonts/ibm-plex-sans-latin-600-normal.woff2") format("woff2"); }
+
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      :root {
+        --bg: #0a0d13; --surface: #131822; --stroke: rgba(255,255,255,.14);
+        --text: #f0f2f6; --muted: rgba(240,242,246,.68);
+        --accent: #e8cb00; --accent-text: #0d121b; --alerta: #ff8a5c; --ok: #5ad19a;
+        --barra: rgba(255,255,255,.08);
+      }
+      :root.light {
+        --bg: #f6f7fb; --surface: #ffffff; --stroke: rgba(0,0,0,.14);
+        --text: #11161f; --muted: rgba(17,22,31,.68);
+        --accent: #b89b00; --accent-text: #11161f; --alerta: #c4501f; --ok: #1f8f5f;
+        --barra: rgba(0,0,0,.07);
+      }
+      body { font-family: "IBM Plex Sans", system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; min-height: 100vh; }
+      h1, h2, .num { font-family: "Sora", "IBM Plex Sans", system-ui, sans-serif; font-weight: 700; }
+      a { color: var(--accent); }
+      .wrap { max-width: 1040px; margin: 0 auto; padding: 20px 18px 60px; }
+      header.topo { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+      header.topo .marca { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); font-family: "Sora", sans-serif; font-weight: 700; }
+      h1 { font-size: 26px; margin: 18px 0 4px; text-wrap: balance; }
+      .sub { color: var(--muted); font-size: 15px; margin-bottom: 18px; }
+
+      .barra { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 20px; }
+      input[type=password] { flex: 1 1 240px; min-width: 200px; padding: 11px 14px; border-radius: 10px; border: 1px solid var(--stroke); background: var(--surface); color: var(--text); font: inherit; }
+      select { padding: 11px 12px; border-radius: 10px; border: 1px solid var(--stroke); background: var(--surface); color: var(--text); font: inherit; }
+      button { padding: 11px 16px; border-radius: 10px; border: 1px solid var(--stroke); background: var(--surface); color: var(--text); font: inherit; font-weight: 600; cursor: pointer; }
+      button.primario { background: var(--accent); color: var(--accent-text); border-color: transparent; }
+      button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+      .erro { color: var(--alerta); margin: 4px 0 14px; font-size: 15px; }
+      .aviso { margin-top: 26px; padding: 14px 16px; font-size: 14px; color: var(--muted); border: 1px dashed var(--stroke); border-radius: 10px; }
+
+      .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin-bottom: 18px; }
+      .card { background: var(--surface); border: 1px solid var(--stroke); border-radius: 14px; padding: 16px 18px; }
+      .kpi .rot { font-size: 13px; color: var(--muted); }
+      .kpi .num { font-size: 34px; line-height: 1.15; margin-top: 4px; }
+      .kpi .nota { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+      .grade { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 12px; margin-bottom: 12px; }
+      .card h2 { font-size: 17px; margin-bottom: 4px; }
+      .card .desc { font-size: 13.5px; color: var(--muted); margin-bottom: 12px; }
+      .linha { margin: 9px 0; }
+      .linha .topo-l { display: flex; justify-content: space-between; gap: 10px; font-size: 14px; }
+      .linha .topo-l span:first-child { overflow-wrap: anywhere; }
+      .linha .valor { color: var(--muted); white-space: nowrap; }
+      .trilho { height: 12px; border-radius: 6px; background: var(--barra); margin-top: 4px; overflow: hidden; }
+      .trilho > i { display: block; height: 100%; border-radius: 6px; background: var(--accent); min-width: 2px; }
+      .trilho > i.alerta { background: var(--alerta); }
+      .queda { font-size: 12.5px; color: var(--muted); }
+      .insight { margin-top: 12px; padding: 11px 13px; border-radius: 10px; background: rgba(255,138,92,.12); font-size: 14px; }
+      .vazio { color: var(--muted); font-size: 14px; }
+      svg.grafico { width: 100%; height: auto; display: block; }
+      .leg { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--muted); margin-top: 4px; }
+      .acoes { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
+      [hidden] { display: none !important; }
+
+      @media print {
+        :root, :root.light { --bg: #fff; --surface: #fff; --stroke: #ccc; --text: #111; --muted: #444; --accent: #a88900; --barra: #e6e6e6; }
+        .barra, .acoes, header.topo a.sair { display: none !important; }
+        .card { break-inside: avoid; }
+      }
+    </style>
+    <script>
+      (function () { try { if (localStorage.getItem("theme") === "light") document.documentElement.classList.add("light"); } catch (e) {} })();
+    </script>
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="topo">
+        <a class="marca" href="/"><img src="/assets/logo-mark.svg" alt="" width="30" height="30" /><span>Carteira Ideal</span></a>
+      </header>
+      <h1>Painel de métricas de uso</h1>
+      <p class="sub">Números agregados e anônimos. Não há dados pessoais neste painel.</p>
+
+      <form class="barra" id="form-acesso" autocomplete="off">
+        <input type="password" id="senha" placeholder="Senha do painel (METRICAS_TOKEN)" aria-label="Senha do painel" autocomplete="off" />
+        <select id="dias" aria-label="Período">
+          <option value="7">Últimos 7 dias</option>
+          <option value="30" selected>Últimos 30 dias</option>
+          <option value="90">Últimos 90 dias</option>
+        </select>
+        <button type="submit" class="primario" id="btn-entrar">Ver números</button>
+      </form>
+      <p class="erro" id="erro" role="alert" hidden></p>
+
+      <div id="conteudo" hidden>
+        <p class="sub" id="periodo"></p>
+        <section class="kpis" id="kpis" aria-label="Indicadores principais"></section>
+        <section class="grade">
+          <div class="card" id="c-funil"></div>
+          <div class="card" id="c-dias"></div>
+        </section>
+        <section class="grade">
+          <div class="card" id="c-perfis"></div>
+          <div class="card" id="c-outros"></div>
+        </section>
+        <div class="acoes">
+          <button type="button" id="btn-imprimir">Imprimir ou salvar em PDF</button>
+          <button type="button" id="btn-csv">Baixar dados por dia (CSV)</button>
+        </div>
+        <p class="aviso">Como ler: &ldquo;visitantes&rdquo; são navegadores distintos, contados por um código aleatório, sem identificar pessoas. Testes feitos pela própria equipe entram na contagem. Bloqueadores de anúncio e o sinal &ldquo;Não rastrear&rdquo; podem esconder uma pequena parte dos acessos, então os números são um piso confiável. Política completa em <a href="/privacidade/">/privacidade/</a>.</p>
+      </div>
+    </div>
+
+    <script>
+      "use strict";
+      var $ = function (s) { return document.querySelector(s); };
+      var token = ""; // fica só na memória desta aba: some ao fechar ou recarregar a página
+      var ultimo = null;
+
+      var ETAPAS = {
+        visita: "Abriram o app",
+        questionario_iniciado: "Começaram o questionário",
+        suitability_concluido: "Terminaram o suitability (7 perguntas)",
+        arquitetura_concluida: "Terminaram a arquitetura patrimonial (14 no total)",
+        recomendacao_gerada: "Receberam a carteira de referência"
+      };
+      var TELAS = { aprender: "Aprender", trilha: "Trilhas", aprenderVideo: "Videoaulas", simuleFii: "Simule FII", simuleTesouro: "Simule Tesouro", simuleBdr: "Simule BDR", simuleEtf: "Simule ETF", simuleOpcoes: "Simule Opções", minhaCarteira: "Meus Ativos", meuMes: "Meu Mês", carteira: "Carteira", simulador: "Simulador" };
+      var CAP = { baixa: "Baixa", media: "Média", alta: "Alta" };
+      var PRAZO = { curto: "Curto prazo", medio: "Médio prazo", longo: "Longo prazo" };
+
+      function esc(t) {
+        return String(t).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; });
+      }
+      function fmt(n) { return Number(n || 0).toLocaleString("pt-BR"); }
+      function pct(a, b) { return b > 0 ? Math.round((a / b) * 1000) / 10 : 0; }
+      function pctTxt(v) { return String(v).replace(".", ",") + "%"; }
+      function dataCurta(iso) { var p = iso.split("-"); return p[2] + "/" + p[1]; }
+
+      function linhaBarra(rotulo, valor, total, opcoes) {
+        opcoes = opcoes || {};
+        var p = pct(valor, total);
+        return '<div class="linha"><div class="topo-l"><span>' + esc(rotulo) + '</span><span class="valor">' + fmt(valor) + " · " + pctTxt(p) + "</span></div>" +
+          '<div class="trilho" aria-hidden="true"><i class="' + (opcoes.alerta ? "alerta" : "") + '" style="width:' + Math.max(p, 0) + '%"></i></div>' +
+          (opcoes.extra ? '<div class="queda">' + esc(opcoes.extra) + "</div>" : "") + "</div>";
+      }
+
+      function somarDim(mensal, campo) {
+        var s = {};
+        mensal.forEach(function (m) {
+          var d = (m.distribuicao && m.distribuicao[campo]) || {};
+          // o rótulo do perfil 7 mudou (D78): une as contagens antigas e novas na mesma barra
+          Object.keys(d).forEach(function (k) { var nome = campo === "perfil" ? String(k).replace("(Falso Arrojado)", "(Quase Arrojado)") : k; s[nome] = (s[nome] || 0) + Number(d[k]); });
+        });
+        return s;
+      }
+      function ordenar(obj) {
+        return Object.keys(obj).map(function (k) { return [k, obj[k]]; }).sort(function (a, b) { return b[1] - a[1]; });
+      }
+
+      function render(d) {
+        ultimo = d;
+        var dias = d.porDia || [];
+        $("#periodo").textContent = "Período: " + dias[0].dia.split("-").reverse().join("/") + " a " + dias[dias.length - 1].dia.split("-").reverse().join("/") + " (" + d.periodoDias + " dias, horário de Brasília)";
+
+        var mensal = d.mensal || [];
+        var mesAtual = mensal.length ? mensal[mensal.length - 1] : null;
+        $("#kpis").innerHTML =
+          kpi("Visitantes únicos", fmt(d.visitantesUnicosNoPeriodo), "navegadores distintos no período") +
+          kpi("Carteiras geradas", fmt(d.recomendacoesGeradas), "recomendações entregues") +
+          kpi("Conclusão do funil", pctTxt(d.taxaConclusaoFunilPercentual), "de quem abriu o app chegou ao resultado") +
+          kpi("Usuários ativos no mês", fmt(mesAtual ? mesAtual.usuariosAtivosMes : 0), mesAtual ? "MAU de " + mesAtual.mes : "sem dados");
+
+        // Funil
+        var funil = d.funil || [];
+        var base = funil.length ? funil[0].pessoas : 0;
+        var html = '<h2>Funil de uso</h2><p class="desc">Quantas pessoas chegam a cada etapa e onde desistem.</p>';
+        funil.forEach(function (f, i) {
+          var anterior = i > 0 ? funil[i - 1].pessoas : null;
+          var extra = anterior !== null && anterior > 0 ? "Perda nesta etapa: " + pctTxt(pct(Math.max(anterior - f.pessoas, 0), anterior)) + " de quem chegou na anterior" : "";
+          html += linhaBarra(ETAPAS[f.etapa] || f.etapa, f.pessoas, base, { extra: extra });
+        });
+        if (!base) html += '<p class="vazio">Ainda sem dados no período.</p>';
+        $("#c-funil").innerHTML = html;
+
+        // Visitantes por dia
+        $("#c-dias").innerHTML = '<h2>Visitantes por dia</h2><p class="desc">Pessoas distintas em cada dia.</p>' + graficoDias(dias);
+
+        // Perfis
+        var perfis = ordenar(somarDim(mensal, "perfil"));
+        var totalPerfis = perfis.reduce(function (s, p) { return s + p[1]; }, 0);
+        var h = '<h2>Perfis-Mãe de Carteira</h2><p class="desc">Distribuição dos resultados entregues no período.</p>';
+        var arrojados = 0, travados = 0;
+        perfis.forEach(function (p) {
+          var m = /^(\d)\./.exec(p[0]);
+          var n = m ? Number(m[1]) : 0;
+          if (n >= 7) arrojados += p[1];
+          if (n === 7) travados += p[1];
+          h += linhaBarra(p[0], p[1], totalPerfis, { alerta: n === 7 });
+        });
+        if (!totalPerfis) h += '<p class="vazio">Ainda sem carteiras geradas no período.</p>';
+        if (arrojados > 0) {
+          h += '<p class="insight"><strong>' + pctTxt(pct(travados, arrojados)) + "</strong> dos perfis Arrojados são &ldquo;Quase Arrojado&rdquo; (" + fmt(travados) + " de " + fmt(arrojados) + "): a pessoa aceitou risco no suitability, mas a vida financeira real não sustenta esse apetite.</p>";
+        }
+        $("#c-perfis").innerHTML = h;
+
+        // Outros
+        var o = '<h2>Outras leituras</h2><p class="desc">Capacidade real, prazo, restrições e telas mais abertas.</p>';
+        o += bloco("Capacidade real de risco", somarDim(mensal, "capacidade"), CAP);
+        o += bloco("Prazo do investidor", somarDim(mensal, "prazo"), PRAZO);
+        var veto = somarDim(mensal, "veto");
+        var totalVeto = (veto.sim || 0) + (veto.nao || 0);
+        if (totalVeto) o += '<p class="desc" style="margin-top:14px"><strong>Restrição dura (veto):</strong> ' + pctTxt(pct(veto.sim || 0, totalVeto)) + " das pessoas tiveram o perfil patrimonial travado em Defensivo (dívida cara, reserva curta ou gasto grande em até 24 meses).</p>";
+        o += bloco("Telas mais abertas", somarDim(mensal, "tela"), TELAS);
+        $("#c-outros").innerHTML = o;
+
+        $("#conteudo").hidden = false;
+      }
+
+      function kpi(rot, num, nota) {
+        return '<div class="card kpi"><div class="rot">' + esc(rot) + '</div><div class="num">' + esc(num) + '</div><div class="nota">' + esc(nota) + "</div></div>";
+      }
+      function bloco(titulo, obj, nomes) {
+        var itens = ordenar(obj);
+        var total = itens.reduce(function (s, p) { return s + p[1]; }, 0);
+        if (!total) return "";
+        var h = '<p style="font-weight:600;margin-top:14px">' + esc(titulo) + "</p>";
+        itens.forEach(function (p) { h += linhaBarra(nomes[p[0]] || p[0], p[1], total); });
+        return h;
+      }
+
+      function graficoDias(dias) {
+        var max = Math.max.apply(null, dias.map(function (x) { return x.visitantes; }).concat([1]));
+        var W = 600, H = 150, pad = 4, n = dias.length;
+        var largura = (W - pad * 2) / n;
+        var barras = dias.map(function (x, i) {
+          var alt = Math.round((x.visitantes / max) * (H - 20));
+          var bw = Math.max(largura - (n > 45 ? 0.5 : 2), 1);
+          return '<rect x="' + (pad + i * largura).toFixed(2) + '" y="' + (H - alt) + '" width="' + bw.toFixed(2) + '" height="' + Math.max(alt, x.visitantes > 0 ? 2 : 0) + '" rx="2" fill="var(--accent)"><title>' + esc(dataCurta(x.dia)) + ": " + x.visitantes + "</title></rect>";
+        }).join("");
+        return '<svg class="grafico" viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Visitantes por dia. Máximo de ' + max + ' em um dia.">' +
+          '<line x1="0" y1="' + H + '" x2="' + W + '" y2="' + H + '" stroke="var(--stroke)"/>' + barras + "</svg>" +
+          '<div class="leg"><span>' + esc(dataCurta(dias[0].dia)) + "</span><span>Pico: " + max + " por dia</span><span>" + esc(dataCurta(dias[n - 1].dia)) + "</span></div>";
+      }
+
+      function mostrarErro(msg) { var e = $("#erro"); e.textContent = msg; e.hidden = !msg; }
+
+      async function carregar() {
+        mostrarErro("");
+        var dias = $("#dias").value;
+        if (!token) { mostrarErro("Digite a senha do painel."); return; }
+        $("#btn-entrar").disabled = true;
+        try {
+          var r = await fetch("/api/metricas?dias=" + encodeURIComponent(dias), { headers: { Authorization: "Bearer " + token } });
+          if (r.status === 401) { $("#conteudo").hidden = true; mostrarErro("Senha incorreta."); return; }
+          if (r.status === 503) { mostrarErro("O banco de métricas não está configurado neste ambiente."); return; }
+          if (!r.ok) { mostrarErro("Não foi possível ler as métricas agora (erro " + r.status + ")."); return; }
+          render(await r.json());
+        } catch (e) {
+          mostrarErro("Falha de conexão. Verifique a internet e tente de novo.");
+        } finally {
+          $("#btn-entrar").disabled = false;
+        }
+      }
+
+      $("#form-acesso").addEventListener("submit", function (ev) {
+        ev.preventDefault();
+        token = $("#senha").value.trim();
+        carregar();
+      });
+      $("#dias").addEventListener("change", function () { if (token) carregar(); });
+      $("#btn-imprimir").addEventListener("click", function () { window.print(); });
+      $("#btn-csv").addEventListener("click", function () {
+        if (!ultimo) return;
+        var nomes = ["visita", "questionario_iniciado", "suitability_concluido", "arquitetura_concluida", "recomendacao_gerada", "recomendacao_erro", "tela_vista"];
+        var linhas = [["dia", "visitantes_unicos"].concat(nomes).join(";")];
+        ultimo.porDia.forEach(function (x) {
+          linhas.push([x.dia, x.visitantes].concat(nomes.map(function (n) { return (x.eventos && x.eventos[n]) || 0; })).join(";"));
+        });
+        var blob = new Blob(["\ufeff" + linhas.join("\r\n")], { type: "text/csv;charset=utf-8" });
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "carteira-ideal-metricas.csv";
+        document.body.appendChild(a); a.click(); a.remove();
+      });
+    </script>
+  </body>
+</html>

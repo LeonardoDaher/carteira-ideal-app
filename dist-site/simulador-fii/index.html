@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta id="csp-scripts" http-equiv="Content-Security-Policy" content="script-src 'self' 'sha256-b3e1QDleV2TjNDuHoqH3tNWSoJwS5aEjH+lNuReeFvo='; script-src-attr 'none'">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Simulador de FII: quanto rendem as cotas | Carteira Ideal</title>
+    <meta name="description" content="Veja o rendimento estimado dos fundos imobiliários mais negociados, por setor, e simule a renda mensal de uma quantidade de cotas. Grátis, sem cadastro." />
+    <link rel="canonical" href="https://carteiraideal.app.br/simulador-fii/" />
+    <meta name="theme-color" content="#0a0d13" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Carteira Ideal" />
+    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:title" content="Simulador de FII: quanto rendem as cotas" />
+    <meta property="og:description" content="Veja o rendimento estimado dos fundos imobiliários mais negociados, por setor, e simule a renda mensal de uma quantidade de cotas. Grátis, sem cadastro." />
+    <meta property="og:image" content="https://carteiraideal.app.br/assets/og-image.png?v=2" />
+    <meta property="og:url" content="https://carteiraideal.app.br/simulador-fii/" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
+    <link rel="preload" href="/assets/fonts/ibm-plex-sans-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/assets/fonts/sora-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="/paginas.css" />
+    <script>
+      (function () {
+        try {
+          if (localStorage.getItem("theme") === "light") document.documentElement.classList.add("light");
+        } catch (e) {}
+      })();
+    </script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Início",
+          "item": "https://carteiraideal.app.br/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Simulador de FII (fundos imobiliários)",
+          "item": "https://carteiraideal.app.br/simulador-fii/"
+        }
+      ]
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://carteiraideal.app.br/simulador-fii/#pagina",
+      "url": "https://carteiraideal.app.br/simulador-fii/",
+      "name": "Simulador de FII (fundos imobiliários)",
+      "description": "Veja o rendimento estimado dos fundos imobiliários mais negociados, por setor, e simule a renda mensal de uma quantidade de cotas. Grátis, sem cadastro.",
+      "inLanguage": "pt-BR",
+      "dateModified": "2026-09-28",
+      "isPartOf": {
+        "@id": "https://carteiraideal.app.br/#site"
+      },
+      "author": {
+        "@id": "https://carteiraideal.app.br/sobre/#autor"
+      },
+      "publisher": {
+        "@id": "https://carteiraideal.app.br/#org"
+      }
+    },
+    {
+      "@type": "Person",
+      "@id": "https://carteiraideal.app.br/sobre/#autor",
+      "name": "Leonardo Daher",
+      "url": "https://carteiraideal.app.br/sobre/",
+      "description": "Criador do Carteira Ideal. Formado em Administração de Empresas e Direito.",
+      "sameAs": [
+        "https://www.instagram.com/acarteiraideal/",
+        "https://www.youtube.com/@acarteiraideal"
+      ]
+    },
+    {
+      "@type": "Organization",
+      "@id": "https://carteiraideal.app.br/#org",
+      "name": "Carteira Ideal",
+      "url": "https://carteiraideal.app.br/",
+      "logo": "https://carteiraideal.app.br/assets/apple-touch-icon.png",
+      "founder": {
+        "@id": "https://carteiraideal.app.br/sobre/#autor"
+      }
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "O simulador de FII é gratuito?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Sim, é gratuito e não pede cadastro."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "O rendimento mostrado é garantido?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Não. É uma estimativa baseada nos informes da CVM e no histórico, e os FIIs podem pagar mais ou menos no mês seguinte."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Por que alguns fundos aparecem só na busca?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "A lista principal traz os fundos com mais de R$ 1 milhão de negociação por dia. Nos demais, comprar ou vender pode levar tempo ou exigir aceitar um preço pior, então a tela avisa."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "A ferramenta indica qual FII comprar?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Não. Ela mostra dados por setor, na ordem de liquidez, e não faz ranking nem recomendação."
+          }
+        }
+      ]
+    }
+  ]
+}
+    </script>
+  </head>
+  <body>
+    <header class="topo">
+      <a class="marca" href="/"><img src="/assets/logo-mark.svg" alt="" width="32" height="32" /><span>Carteira Ideal</span></a>
+      <a class="topo-link" href="/app/">Abrir o app</a>
+    </header>
+    <main class="conteudo">
+      <nav class="migalhas" aria-label="Você está aqui"><a href="/">Início</a></nav>
+      <article>
+        <h1>Simulador de FII (fundos imobiliários)</h1>
+        <p class="byline">Por <a href="/sobre/">Leonardo Daher</a> · Revisado em 28/09/2026</p>
+        <p class="lead">Veja o rendimento estimado dos FIIs mais negociados da bolsa, separados por setor, e simule quanto uma quantidade de cotas poderia render por mês.</p>
+        <div class="botoes">
+        <a class="btn btn-app" href="/app/?tela=simuleFii">Abrir o simulador</a>
+      </div>
+        <section>
+<h2>O que você encontra na ferramenta</h2>
+<ul>
+<li>Uma <strong>lista por setor</strong> dos fundos que negociam mais de R$ 1 milhão por dia, ou seja, com liquidez.</li>
+<li>Uma <strong>busca</strong> para os demais fundos, com aviso de liquidez quando o volume é baixo.</li>
+<li>O <strong>rendimento por cota</strong> e o rendimento estimado em percentual ao mês.</li>
+<li>Uma <strong>simulação em quantidade de cotas</strong> (de 10 a 5.000, ou o valor que você digitar) e o quanto isso renderia por mês.</li>
+</ul>
+<p>A tela é descritiva: mostra dados, na ordem de liquidez e por setor, e não faz ranking nem indica qual fundo comprar.</p>
+</section>
+<section>
+<h2>De onde vem o rendimento estimado</h2>
+<p>O cálculo parte do Informe Mensal Estruturado que cada fundo entrega à CVM (o dividend yield do mês sobre o valor patrimonial da cota). Os dados são atualizados uma vez por mês, depois da divulgação dos informes. Quando o valor calculado destoa do histórico do fundo, a estimativa recebe uma trava e um aviso de <strong>confiança baixa</strong>, e você deve conferir o rendimento anunciado pelo próprio fundo.</p>
+<p>A cotação e o volume negociado vêm de dados de mercado. Como os informes têm defasagem, o rendimento do mês mais recente pode ainda não ter entrado.</p>
+</section>
+<section>
+<h2>Para que serve um FII na carteira</h2>
+<p>Fundos imobiliários investem em imóveis (galpões, shoppings, lajes corporativas) ou em recebíveis imobiliários e distribuem renda mensal. Os rendimentos costumam ser isentos de Imposto de Renda para pessoa física, dentro das regras vigentes, mas as condições variam por fundo e por período, então confira antes. O risco é moderado: as cotas oscilam na bolsa e os rendimentos podem cair.</p>
+</section>
+        <section class="faq" aria-labelledby="faq-titulo">
+        <h2 id="faq-titulo">Perguntas frequentes</h2>
+        <details><summary>O simulador de FII é gratuito?</summary><p>Sim, é gratuito e não pede cadastro.</p></details>
+        <details><summary>O rendimento mostrado é garantido?</summary><p>Não. É uma estimativa baseada nos informes da CVM e no histórico, e os FIIs podem pagar mais ou menos no mês seguinte.</p></details>
+        <details><summary>Por que alguns fundos aparecem só na busca?</summary><p>A lista principal traz os fundos com mais de R$ 1 milhão de negociação por dia. Nos demais, comprar ou vender pode levar tempo ou exigir aceitar um preço pior, então a tela avisa.</p></details>
+        <details><summary>A ferramenta indica qual FII comprar?</summary><p>Não. Ela mostra dados por setor, na ordem de liquidez, e não faz ranking nem recomendação.</p></details>
+      </section>
+        <section class="relacionados" aria-labelledby="rel-titulo">
+        <h2 id="rel-titulo">Continue por aqui</h2>
+        <ul><li><a href="/aprender/ativos/fundos-imobiliarios-fiis/">Fundos imobiliários (FIIs): como funcionam e o que olhar</a></li><li><a href="/simulador-etf/">Simulador de ETF</a></li><li><a href="/teste-perfil-de-investidor/">Descubra o seu perfil de investidor</a></li></ul>
+      </section>
+        <p class="aviso" role="note">Conteúdo educacional. Não é recomendação de investimento. Antes de investir, confira as condições de cada produto com a sua corretora ou com um profissional certificado.</p>
+      </article>
+    </main>
+    <footer class="rodape">
+      <ul><li><a href="/teste-perfil-de-investidor/">Teste de perfil de investidor</a></li><li><a href="/simulador-tesouro-direto/">Simulador de Tesouro Direto</a></li><li><a href="/simulador-fii/">Simulador de FII</a></li><li><a href="/simulador-bdr/">Simulador de BDR</a></li><li><a href="/simulador-etf/">Simulador de ETF</a></li><li><a href="/financiar-alugar-ou-consorcio/">Comprar à vista, financiar, consórcio ou alugar</a></li><li><a href="/carro-a-vista-financiar-consorcio-ou-sem-carro/">Carro: à vista, financiar, consórcio, alugar ou sem carro</a></li><li><a href="/moto-a-vista-financiar-consorcio-ou-sem-moto/">Moto: à vista, financiar, consórcio, alugar ou sem moto</a></li><li><a href="/minha-carteira/">Meus Ativos</a></li><li><a href="/meu-mes/">Meu Mês</a></li><li><a href="/aprender/">Aprender</a></li><li><a href="/sobre/">Sobre</a></li><li><a href="/privacidade/">Privacidade</a></li><li><a href="/metodologia-e-fontes/">Metodologia e fontes</a></li></ul>
+      <p>Carteira Ideal · <a href="https://www.instagram.com/acarteiraideal/" rel="noopener">Instagram</a> · <a href="https://www.youtube.com/@acarteiraideal" rel="noopener">YouTube</a> · <a href="mailto:acarteiraideal@gmail.com">E-mail</a></p>
+    </footer>
+  </body>
+</html>

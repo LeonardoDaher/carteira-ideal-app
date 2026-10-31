@@ -284,7 +284,7 @@ export interface HistoricoLongo {
   ticker: string
   de: string
   ate: string
-  ajustes: { data: string; fator: number; origem: 'config' | 'detectado' }[]
+  ajustes: { data: string; fator: number; origem: 'config' | 'b3' }[]
   saltosRestantes: { data: string; de: number; para: number }[]
   barras: [string, number, number, number, number, number][]
 }

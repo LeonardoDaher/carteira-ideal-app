@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta id="csp-scripts" http-equiv="Content-Security-Policy" content="script-src 'self' 'sha256-b3e1QDleV2TjNDuHoqH3tNWSoJwS5aEjH+lNuReeFvo='; script-src-attr 'none'">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Política de Privacidade | Carteira Ideal</title>
+    <meta name="description" content="Como o Carteira Ideal trata seus dados: o que fica no seu aparelho, o que é enviado ao servidor, as métricas anônimas de uso e os seus direitos pela LGPD." />
+    <link rel="canonical" href="https://carteiraideal.app.br/privacidade/" />
+    <meta name="theme-color" content="#0a0d13" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Carteira Ideal" />
+    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:title" content="Política de Privacidade | Carteira Ideal" />
+    <meta property="og:url" content="https://carteiraideal.app.br/privacidade/" />
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
+    <link rel="preload" href="/assets/fonts/ibm-plex-sans-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/assets/fonts/sora-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="/paginas.css" />
+    <script>
+      (function () {
+        try {
+          if (localStorage.getItem("theme") === "light") document.documentElement.classList.add("light");
+        } catch (e) {}
+      })();
+    </script>
+    <script defer src="/_vercel/insights/script.js"></script>
+  </head>
+  <body>
+    <header class="topo">
+      <a class="marca" href="/"><img src="/assets/logo-mark.svg" alt="" width="32" height="32" /><span>Carteira Ideal</span></a>
+      <a class="topo-link" href="/app/">Abrir o app</a>
+    </header>
+    <main class="conteudo">
+      <nav class="migalhas" aria-label="Você está aqui"><a href="/">Início</a><span aria-hidden="true"> › </span><a href="/privacidade/">Política de Privacidade</a></nav>
+      <article>
+        <h1>Política de Privacidade</h1>
+        <p class="byline">Última atualização: 7 de outubro de 2026</p>
+        <p class="lead">Resumo em uma frase: não pedimos cadastro, não vendemos dados e só contamos o uso de forma anônima e agregada para saber se o projeto está ajudando as pessoas.</p>
+
+        <section>
+          <h2>1. Quem é o responsável</h2>
+          <p>O Carteira Ideal (carteiraideal.app.br) é um projeto educacional de <a href="/sobre/">Leonardo Daher</a>. Ele é o controlador dos dados tratados aqui, nos termos da Lei Geral de Proteção de Dados (Lei nº 13.709/2018, a LGPD). Contato para qualquer assunto de privacidade: <a href="mailto:acarteiraideal@gmail.com">acarteiraideal@gmail.com</a>.</p>
+        </section>
+
+        <section>
+          <h2>2. O que <em>não</em> fazemos</h2>
+          <p>Não exigimos cadastro, login, e-mail, telefone, CPF ou qualquer documento para usar o app. Não pedimos nem guardamos o seu nome. Não vendemos nem compartilhamos dados para publicidade, e o site não exibe anúncios.</p>
+        </section>
+
+        <section>
+          <h2>3. O que fica só no seu aparelho</h2>
+          <p>Para você não perder o progresso, o app guarda no armazenamento do seu próprio navegador (localStorage) informações como: suas respostas do questionário, a idade informada, o tema claro ou escuro, dados do Meu Mês (orçamento e lista de compras do supermercado), dados de Meus Ativos (os lançamentos, as posições e os proventos que você importar dos extratos da B3, e os ativos que você cadastrar à mão, com a classe que escolher) e preferências de uso. Esses dados <strong>não são enviados a nós</strong> por essa via e podem ser apagados por você a qualquer momento, usando a opção de limpar dados do app ou o botão de limpar dados do site no seu navegador.</p>
+          <p>Em Meus Ativos, os arquivos que você escolhe (Excel ou CSV dos extratos da B3) são <strong>lidos dentro do seu próprio navegador</strong>: eles não são enviados a nós nem a nenhum servidor. O app guarda só o que precisa para os cálculos (ativo, data, quantidade, preço, valores e o nome da instituição). Colunas como número da conta ou CPF, se vierem no arquivo, não são lidas nem guardadas. O backup que o app oferece é um arquivo seu, gravado no seu aparelho.</p>
+          <p>Na lista de supermercado do Meu Mês, o botão &ldquo;Enviar o que falta pelo WhatsApp&rdquo; abre o WhatsApp com o texto dos itens que ainda faltam comprar. O texto só sai do seu aparelho quando você toca no botão e escolhe o contato; ele não passa por nenhum servidor nosso, e a partir daí é tratado pelo WhatsApp, conforme as regras dele.</p>
+        </section>
+
+        <section>
+          <h2>4. O que é enviado ao servidor para calcular a carteira</h2>
+          <p>O cálculo da carteira de referência é feito em nosso servidor. Por isso, quando você conclui o questionário, as suas respostas (as 14 perguntas) e a idade são enviadas ao endereço <code>/api/recomendacao</code> apenas para gerar o resultado e devolvê-lo a você. <strong>Não guardamos essas respostas nem o resultado ligados a você.</strong> Os provedores de infraestrutura descritos abaixo podem registrar dados técnicos de conexão (como o endereço IP) nos registros normais de funcionamento de qualquer site. Os dados de Meus Ativos (seus ativos, lançamentos e posições) nunca fazem parte desse envio.</p>
+        </section>
+
+        <section>
+          <h2>5. Métricas anônimas de uso</h2>
+          <p>Para saber quantas pessoas usam o app e em que etapa desistem, registramos eventos como: visita, questionário iniciado, suitability concluído, arquitetura concluída e recomendação gerada. Junto com o evento, guardamos apenas:</p>
+          <ul>
+            <li>um código aleatório do seu navegador (não é o seu nome nem o seu IP), usado só para contar pessoas distintas sem saber quem são;</li>
+            <li>a origem do acesso, quando o link traz um parâmetro como <code>?ref=</code>;</li>
+            <li>rótulos agregados do resultado (o nome do perfil, o prazo, a faixa de capacidade real e se houve restrição), <strong>sem as respostas individuais, sem idade e sem valores em reais</strong>;</li>
+            <li>contagens de telas abertas (por exemplo, Aprender ou Simule FII).</li>
+          </ul>
+          <p>Esses números são somados em contadores diários e mensais. Usamos essas informações para melhorar o app e para elaborar estatísticas agregadas, que podem ser apresentadas a parceiros e a instituições de pesquisa <strong>sempre de forma agregada, sem identificar ninguém</strong>. Se o seu navegador enviar o sinal &ldquo;Não rastrear&rdquo; (Do Not Track) ou o Global Privacy Control, as métricas próprias não são registradas.</p>
+          <p>Também usamos o Vercel Web Analytics, um serviço de audiência que mede visitas e páginas vistas sem cookies e sem acompanhar você entre sites.</p>
+        </section>
+
+        <section>
+          <h2>5A. Acesso ao Top 15 e limites de uso</h2>
+          <p>O &ldquo;Top 15 ações mais baratas&rdquo; e o &ldquo;Top 15 FIIs&rdquo; só abrem com um código do mês, e cada lista tem o seu código. Quando você digita o código, ele é enviado ao endereço <code>/api/top15</code> (ações) ou <code>/api/top15-fiis</code> (FIIs) apenas para ser conferido, e <strong>não é guardado em nosso servidor</strong>. O app salva cada código só no seu aparelho (localStorage), para você não precisar digitá-lo de novo; ele pode ser apagado por você a qualquer momento e deixa de valer quando o código do mês muda.</p>
+          <p>Para impedir tentativas em massa de adivinhar o código, e chamadas em massa à API que calcula a carteira de referência (<code>/api/recomendacao</code>), contamos as tentativas por endereço IP. Guardamos <strong>apenas um hash irreversível do IP, e não o IP em si, e por no máximo 15 minutos</strong>. Nos Top 15 (ações e FIIs), a contagem vale só para códigos errados; em <code>/api/recomendacao</code>, para qualquer chamada (o limite é de 60 a cada 15 minutos, bem acima do uso normal). Acima do limite, o servidor recusa temporariamente novas chamadas daquele endereço.</p>
+          <p>Também somamos, por mês, quantos acessos aos Top 15 foram aceitos, recusados por código errado ou bloqueados pelo limite. É só um número agregado, sem identificar ninguém.</p>
+        </section>
+
+        <section>
+          <h2>6. Cookies e serviços de terceiros</h2>
+          <p>O Carteira Ideal não usa cookies de publicidade nem de rastreamento próprio. Alguns serviços de terceiros participam do funcionamento do site:</p>
+          <ul>
+            <li><strong>Vercel</strong>: hospedagem do site e das funções do servidor, além do Web Analytics.</li>
+            <li><strong>Upstash</strong>: banco de dados onde ficam os contadores das métricas anônimas e os contadores temporários de limite de uso descritos na seção 5A (região de São Paulo, Brasil).</li>
+            <li><strong>YouTube</strong>: as videoaulas são exibidas por meio de vídeos incorporados do YouTube. Ao reproduzi-las, o YouTube pode tratar dados e usar cookies conforme a política de privacidade do Google. Os links para as nossas páginas no Instagram e no YouTube também levam a serviços de terceiros.</li>
+            <li><strong>Fontes públicas de dados de mercado</strong> (como B3 e Banco Central): usadas para atualizar informações do app, sem envio de dados seus.</li>
+          </ul>
+          <p>Alguns desses provedores podem tratar dados fora do Brasil. Nesses casos, a transferência internacional ocorre com base nos mecanismos previstos no art. 33 da LGPD.</p>
+        </section>
+
+        <section>
+          <h2>7. Base legal e finalidades</h2>
+          <p>Tratamos os dados descritos acima para: (a) executar o serviço que você pediu, que é calcular a sua carteira de referência (execução do serviço solicitado por você); e (b) medir o uso do app de forma anônima e agregada, para melhorá-lo e para fins de estudo (legítimo interesse, art. 7º, IX, com o mínimo de dados necessário). Não tratamos dados sensíveis, e o app não é voltado a crianças e adolescentes.</p>
+        </section>
+
+        <section>
+          <h2>8. Por quanto tempo guardamos</h2>
+          <p>As respostas do questionário e os dados do Meu Mês e de Meus Ativos ficam no seu aparelho até você apagá-los. Os contadores anônimos são mantidos enquanto forem úteis para as estatísticas do projeto e podem ser apagados a qualquer momento. Os contadores de limite de uso (seção 5A) somem sozinhos em 15 minutos. Como não ficam ligados a uma pessoa identificada, em geral não é possível localizar &ldquo;os dados de uma pessoa&rdquo; nesses contadores.</p>
+        </section>
+
+        <section>
+          <h2>9. Seus direitos</h2>
+          <p>A LGPD garante, entre outros, os direitos de confirmar se há tratamento de dados, acessar, corrigir, pedir a anonimização, a eliminação ou a portabilidade, obter informação sobre compartilhamento e revogar consentimento, quando for o caso. Para exercê-los, escreva para <a href="mailto:acarteiraideal@gmail.com">acarteiraideal@gmail.com</a>. Você também pode reclamar à Autoridade Nacional de Proteção de Dados (ANPD).</p>
+        </section>
+
+        <section>
+          <h2>10. Segurança</h2>
+          <p>Adotamos medidas técnicas razoáveis: conexão criptografada (HTTPS), coleta reduzida ao mínimo, contadores sem identificação pessoal e acesso restrito ao painel de métricas. Nenhum sistema é 100% imune a falhas, e por isso evitamos coletar o que não precisamos.</p>
+        </section>
+
+        <section>
+          <h2>11. Mudanças nesta política</h2>
+          <p>Se o funcionamento do app mudar de forma relevante (por exemplo, se um dia houver cadastro ou login), atualizaremos esta página e a data acima antes de passar a tratar dados novos.</p>
+        </section>
+
+        <p class="aviso" role="note">Conteúdo educacional. Não é recomendação de investimento. Esta política descreve o funcionamento atual do app e não substitui orientação jurídica.</p>
+      </article>
+    </main>
+    <footer class="rodape">
+      <ul><li><a href="/sobre/">Sobre</a></li><li><a href="/metodologia-e-fontes/">Metodologia e fontes</a></li><li><a href="/privacidade/">Privacidade</a></li></ul>
+      <p>Carteira Ideal · <a href="https://www.instagram.com/acarteiraideal/" rel="noopener">Instagram</a> · <a href="https://www.youtube.com/@acarteiraideal" rel="noopener">YouTube</a> · <a href="mailto:acarteiraideal@gmail.com">E-mail</a></p>
+    </footer>
+  </body>
+</html>

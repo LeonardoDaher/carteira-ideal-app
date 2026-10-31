@@ -1,0 +1,125 @@
+/* Estilo das páginas estáticas geradas por scripts/gerar-paginas.mjs (D26, Etapa 3).
+   Mesma identidade da landing (style.css): fontes, amarelo e tema escuro por padrão. Arquivo
+   separado porque o style.css da landing estiliza "ul li a" como botão. */
+
+@font-face { font-family: "Sora"; font-weight: 700; font-style: normal; font-display: swap;
+  src: url("/assets/fonts/sora-latin-700-normal.woff2") format("woff2"); }
+@font-face { font-family: "IBM Plex Sans"; font-weight: 400; font-style: normal; font-display: swap;
+  src: url("/assets/fonts/ibm-plex-sans-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "IBM Plex Sans"; font-weight: 500; font-style: normal; font-display: swap;
+  src: url("/assets/fonts/ibm-plex-sans-latin-500-normal.woff2") format("woff2"); }
+@font-face { font-family: "IBM Plex Sans"; font-weight: 600; font-style: normal; font-display: swap;
+  src: url("/assets/fonts/ibm-plex-sans-latin-600-normal.woff2") format("woff2"); }
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --text: #f0f2f6;
+  --muted: rgba(240, 242, 246, 0.72);
+  --bg: #0a0d13;
+  --surface: rgba(255, 255, 255, 0.05);
+  --stroke: rgba(255, 255, 255, 0.28);
+  --link: #e8cb00;
+  --accent: #e8cb00;
+  --accent-text: #0d121b;
+  --note-bg: rgba(232, 203, 0, 0.1);
+}
+:root.light {
+  --text: #11161f;
+  --muted: rgba(17, 22, 31, 0.72);
+  --bg: #f6f7fb;
+  --surface: #ffffff;
+  --stroke: rgba(0, 0, 0, 0.22);
+  --link: #6a5a00;
+  --note-bg: rgba(232, 203, 0, 0.22);
+}
+@supports (color: oklch(0% 0 0)) {
+  :root { --text: oklch(96% 0.006 262); --bg: oklch(16% 0.014 262); --accent: oklch(84% 0.19 100); --link: oklch(84% 0.19 100); --accent-text: oklch(18% 0.02 262); }
+  :root.light { --text: oklch(20% 0.02 262); --bg: oklch(97% 0.006 262); --link: oklch(42% 0.09 95); }
+}
+
+html { scroll-padding-top: 16px; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 17px;
+  line-height: 1.65;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+}
+
+a { color: var(--link); text-underline-offset: 3px; }
+a:focus-visible, summary:focus-visible { outline: 2px solid var(--text); outline-offset: 3px; border-radius: 4px; }
+
+/* ----- Topo ----- */
+.topo {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  width: 100%; max-width: 760px; margin: 0 auto; padding: 16px 20px;
+}
+.marca { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text);
+  font-family: "Sora", "IBM Plex Sans", system-ui, sans-serif; font-weight: 700; }
+.marca img { border-radius: 50%; }
+.topo-link { font-weight: 600; font-size: 15px; text-decoration: none; padding: 8px 14px; border: 1px solid var(--stroke); border-radius: 8px; color: var(--text); }
+.topo-link:hover { border-color: var(--text); }
+
+/* ----- Conteúdo ----- */
+.conteudo { width: 100%; max-width: 760px; margin: 0 auto; padding: 8px 20px 40px; flex: 1; }
+.migalhas { font-size: 14px; color: var(--muted); margin-bottom: 20px; }
+.migalhas a { color: var(--muted); }
+
+h1, h2, h3 { font-family: "Sora", "IBM Plex Sans", system-ui, sans-serif; font-weight: 700; line-height: 1.25; text-wrap: balance; }
+h1 { font-size: clamp(26px, 5.5vw, 36px); margin-bottom: 14px; }
+h2 { font-size: 21px; margin: 34px 0 12px; }
+.byline { font-size: 14px; color: var(--muted); margin: -4px 0 16px; }
+.byline a { color: var(--muted); }
+.lead { font-size: 19px; color: var(--muted); margin-bottom: 22px; }
+.eyebrow { font-size: 14px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px; }
+
+article p, article li { margin-bottom: 14px; }
+article ul, article ol { padding-left: 22px; margin-bottom: 14px; }
+article li > span { color: var(--muted); }
+.lista-aulas { list-style: none; padding-left: 0; }
+.lista-aulas li { padding: 14px 16px; margin-bottom: 10px; background: var(--surface); border: 1px solid var(--stroke); border-radius: 8px; }
+.lista-aulas a { font-weight: 600; }
+
+/* ----- Botões ----- */
+.botoes { display: flex; flex-wrap: wrap; gap: 12px; margin: 0 0 28px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; text-align: center; min-height: 48px; padding: 12px 22px;
+  border-radius: 8px; font-weight: 600; text-decoration: none; border: 1px solid var(--stroke); color: var(--text); background: var(--surface); }
+.btn:hover { border-color: var(--text); }
+.btn-app { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+.btn-app:hover { filter: brightness(1.05); border-color: var(--accent); }
+
+/* ----- FAQ ----- */
+.faq details { padding: 14px 16px; margin-bottom: 10px; background: var(--surface); border: 1px solid var(--stroke); border-radius: 8px; }
+.faq summary { cursor: pointer; font-weight: 600; line-height: 1.4; }
+.faq details p { margin: 10px 0 0; color: var(--muted); }
+
+/* ----- Relacionados ----- */
+.relacionados ul { list-style: none; padding-left: 0; }
+.relacionados li { margin-bottom: 8px; }
+
+/* ----- Aviso ----- */
+.aviso { margin-top: 34px; padding: 14px 16px; font-size: 15px; background: var(--note-bg); border-radius: 8px; }
+
+/* ----- Tabelas (taxas do Tesouro) ----- */
+.tabela-scroll { overflow-x: auto; margin-bottom: 14px; border: 1px solid var(--stroke); border-radius: 8px; }
+table { width: 100%; border-collapse: collapse; font-size: 15px; min-width: 520px; }
+th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--stroke); font-variant-numeric: tabular-nums; }
+thead th { font-weight: 600; background: var(--surface); }
+tbody th { font-weight: 500; }
+tbody tr:last-child th, tbody tr:last-child td { border-bottom: 0; }
+
+/* ----- Rodapé ----- */
+.rodape { width: 100%; max-width: 760px; margin: 0 auto; padding: 24px 20px 40px; border-top: 1px solid var(--stroke); font-size: 14px; color: var(--muted); }
+.rodape ul { list-style: none; display: flex; flex-wrap: wrap; gap: 8px 18px; margin-bottom: 14px; }
+.rodape a { color: var(--muted); }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+/* Tema claro: contorno preto fino por fora do anel amarelo da logo (D90). */
+:root.light .marca img {
+  filter: drop-shadow(0 0 0.6px #111) drop-shadow(0 0 0.6px #111);
+}

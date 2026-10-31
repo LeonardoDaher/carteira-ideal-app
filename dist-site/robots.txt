@@ -1,0 +1,6 @@
+# D26 (SEO): tudo liberado para buscadores. A API (/api/) não tem páginas, só responde ao app.
+User-agent: *
+Allow: /
+Disallow: /api/
+
+Sitemap: https://carteiraideal.app.br/sitemap.xml

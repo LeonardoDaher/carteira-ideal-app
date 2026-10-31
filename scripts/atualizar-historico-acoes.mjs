@@ -14,13 +14,16 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 import { dataEmBrasilia } from './b3-boletim.mjs'
 import { montarCadastro } from './atualizar-acoes.mjs'
 import {
-  URL_COTAHIST, agruparPorTicker, ajustarCandles, combinarEventos, detectarEventos, formatarHistoricoTicker, lerZipCotahist, saltosRestantes,
+  URL_COTAHIST, agruparPorTicker, ajustarCandles, buscarEventosB3, combinarEventos, confirmarEventosB3, detectarEventos, emitenteDoTicker,
+  eventosDaB3, formatarHistoricoTicker, lerZipCotahist, saltosRestantes,
 } from './historico-cotahist.mjs'
 
 const RAIZ_PADRAO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 export const FONTE_HISTORICO = 'B3 - Séries Históricas de Cotações (COTAHIST)'
 const MINIMO_PREGOES = 60
 const MINIMO_ACOES_PARA_PUBLICAR = 150
+// Falhar se a B3 não responder o cadastro de eventos de mais de 10% das ações: sem ele o histórico sairia sem ajuste.
+const MAXIMO_SEM_EVENTOS_B3 = 0.1
 
 async function baixarZip(ano, destino) {
   let ultimoErro = null
@@ -50,6 +53,8 @@ export async function executar({
   argv = process.argv,
   baixar = baixarZip,
   lerZip = lerZipCotahist,
+  buscarB3 = buscarEventosB3,
+  esperar = (ms) => new Promise((r) => setTimeout(r, ms)),
   log = { info: console.log, warn: console.warn },
 } = {}) {
   const config = JSON.parse(fs.readFileSync(path.join(raiz, 'config', 'acoes.json'), 'utf8'))
@@ -90,9 +95,37 @@ export async function executar({
   const escritos = []
   const resumoEventos = []
   const comSalto = []
+  const divergentesB3 = []
+  const naoConfirmados = []
   const novos = new Map()
+
+  // Eventos oficiais (desdobramento, grupamento, bonificação) do cadastro de empresas listadas da B3, um pedido por emissor.
+  const respostasB3 = new Map()
+  for (const ticker of porTicker.keys()) {
+    const emitente = emitenteDoTicker(ticker)
+    if (respostasB3.has(emitente)) continue
+    respostasB3.set(emitente, await buscarB3(emitente))
+    await esperar(150)
+  }
+  const semEventosB3 = [...porTicker.keys()].filter((t) => !respostasB3.get(emitenteDoTicker(t)))
+  if (semEventosB3.length > porTicker.size * MAXIMO_SEM_EVENTOS_B3) {
+    throw new Error(`A B3 não devolveu os eventos de ${semEventosB3.length} de ${porTicker.size} ações (${semEventosB3.slice(0, 8).join(', ')}...). Sem eles o histórico sairia sem ajuste a desdobramentos. Nada foi gravado.`)
+  }
+  const dia = (d) => Date.parse(`${d}T12:00:00Z`) / 86_400_000
+
   for (const [ticker, candles] of porTicker) {
-    const eventos = combinarEventos(config.desdobramentos?.[ticker], detectarEventos(candles), config.historicoLongo?.ignorarEventos?.[ticker])
+    const resposta = respostasB3.get(emitenteDoTicker(ticker))
+    const doB3 = resposta ? eventosDaB3(resposta, candles[candles.length - 1].isin) : null
+    if (doB3 === null) {
+      log.warn(`[aviso] ${ticker}: sem eventos da B3; só valem os de config/acoes.json ("desdobramentos").`)
+    }
+    const { eventos: confirmados, divergentes } = confirmarEventosB3(candles, doB3 ?? [])
+    for (const d of divergentes) divergentesB3.push(`${ticker} ${d.data}: ${d.motivo}`)
+    const eventos = combinarEventos(config.desdobramentos?.[ticker], confirmados)
+    // Conferência: salto de preço que parece desdobramento e a B3 não confirma (queda forte por notícia, em geral). Não ajusta nada.
+    for (const d of detectarEventos(candles)) {
+      if (d.data >= inicio && !eventos.some((e) => Math.abs(dia(e.data) - dia(d.data)) <= 3)) naoConfirmados.push(`${ticker} ${d.data} (fator ${d.fator})`)
+    }
     const ajustados = ajustarCandles(candles, eventos).filter((c) => c.data >= inicio)
     if (ajustados.length < MINIMO_PREGOES) continue
     const uteis = eventos.filter((e) => e.data > ajustados[0].data)
@@ -121,10 +154,12 @@ export async function executar({
 
   log.info(`[info] ${escritos.length} ações gravadas em ${path.relative(raiz, saida)} (até ${ate}).`)
   log.info(`[info] ${resumoEventos.length} desdobramento(s)/grupamento(s) aplicados:${resumoEventos.length ? `\n  ${resumoEventos.join('\n  ')}` : ' nenhum'}`)
+  if (divergentesB3.length) log.warn(`[aviso] evento da B3 que o preço não confirma (NÃO aplicado):\n  ${divergentesB3.join('\n  ')}`)
+  if (naoConfirmados.length) log.info(`[info] salto que parece desdobramento mas a B3 não lista (tratado como queda ou alta de preço, sem ajuste):\n  ${naoConfirmados.join('\n  ')}`)
   if (comSalto.length) log.warn(`[aviso] salto de preço que continua na série ajustada (possível bonificação ou evento não detectado):\n  ${comSalto.join('\n  ')}`)
   const semHistorico = [...alvos].filter((t) => !novos.has(t))
   if (semHistorico.length) log.info(`[info] sem histórico suficiente (${semHistorico.length}): ${semHistorico.join(', ')}`)
-  return { escritos, resumoEventos, comSalto }
+  return { escritos, resumoEventos, comSalto, divergentesB3, naoConfirmados }
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

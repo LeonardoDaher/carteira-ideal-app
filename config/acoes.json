@@ -10,7 +10,6 @@
   "pregoesBusca": 63,
   "controle": {"tickers": ["PETR4", "VALE3", "ITUB4", "BBDC4", "BBAS3", "WEGE3"], "minimo": 5},
   "desdobramentos": {},
-  "historicoLongo": {"_leia": "Histórico de até 5 anos do COTAHIST (D120). O job detecta desdobramentos e grupamentos pelo preço, pela quantidade e pelo volume; 'desdobramentos' acima prevalece sobre o detectado. 'ignorarEventos': { TICKER: [datas] } descarta um evento detectado que na verdade foi queda de preço por notícia.", "ignorarEventos": {"AMER3": ["2023-01-12"]}},
   "grupoB3Ordem": ["Petróleo, Gás e Biocombustíveis", "Materiais Básicos", "Bens Industriais", "Utilidade Pública", "Financeiro", "Consumo Cíclico", "Consumo não Cíclico", "Saúde", "Tecnologia da Informação", "Comunicações"],
   "setores": [
     {"setor": "Petróleo e gás", "grupoB3": "Petróleo, Gás e Biocombustíveis", "empresas": [

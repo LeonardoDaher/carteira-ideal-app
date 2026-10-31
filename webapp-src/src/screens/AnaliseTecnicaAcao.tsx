@@ -22,7 +22,7 @@ const JANELAS: Record<Periodicidade, { n: number; rotulo: string }[]> = {
 export const tomDoVies = (v: Viés): Tom => (v === 'altista' || v === 'moderadamente-altista' ? 'positivo' : v === 'baixista' || v === 'moderadamente-baixista' ? 'negativo' : 'neutro')
 const tomDaLeitura = (l: Leitura): Tom => (l === 'alta' ? 'positivo' : l === 'baixa' ? 'negativo' : 'neutro')
 
-const textoDoFator = (f: number) => (f >= 1 ? `${f}:1 desdobramento` : `1:${Math.round(1 / f)} grupamento`)
+const textoDoFator = (f: number) => (f >= 1.5 ? `${numero(f, Number.isInteger(f) ? 0 : 2)}:1 desdobramento` : f > 1 ? `bonificação de ${numero((f - 1) * 100, 1)}%` : `1:${Math.round(1 / f)} grupamento`)
 
 /** Diz de onde vêm os candles e o que foi ajustado: abertura real do COTAHIST ou aproximada, desdobramentos e grupamentos aplicados. */
 function NotaDoHistorico({ barras, estado }: { barras: Barra[]; estado: EstadoHistoricoLongo }) {
@@ -42,10 +42,10 @@ function NotaDoHistorico({ barras, estado }: { barras: Barra[]; estado: EstadoHi
       Candles com abertura real do COTAHIST da B3, de {dataLonga(comAbertura[0].data)} a {dataLonga(ultimaReal)}
       {barras[barras.length - 1].data > ultimaReal ? '; depois disso a abertura é aproximada pelo fechamento anterior' : ''}.{' '}
       {ajustes.length
-        ? `Preços ajustados a ${ajustes.length === 1 ? 'um evento' : `${ajustes.length} eventos`}: ${ajustes.map((a) => `${dataLonga(a.data)} (${textoDoFator(a.fator)}${a.origem === 'detectado' ? ', detectado pelo preço e pelo volume' : ''})`).join('; ')}.`
+        ? `Preços ajustados a ${ajustes.length === 1 ? 'um evento' : `${ajustes.length} eventos`}: ${ajustes.map((a) => `${dataLonga(a.data)} (${textoDoFator(a.fator)}${a.origem === 'b3' ? ', registrado na B3' : ', confirmado pelo responsável'})`).join('; ')}.`
         : 'Nenhum desdobramento ou grupamento no período.'}
       {estado.tipo === 'pronto' && estado.dados.saltosRestantes.length
-        ? ` Atenção: há saltos de preço que não foram reconhecidos como desdobramento (${estado.dados.saltosRestantes.map((s) => dataLonga(s.data)).join(', ')}), então o gráfico pode estar distorcido nessas datas.`
+        ? ` Variação de mais de 40% em um só pregão sem desdobramento, grupamento ou bonificação registrado na B3 (${estado.dados.saltosRestantes.map((s) => dataLonga(s.data)).join(', ')}): é movimento real de preço, ou um evento que a B3 não lista.`
         : ''}
     </span>
   )

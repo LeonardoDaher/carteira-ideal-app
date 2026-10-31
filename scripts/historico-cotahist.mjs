@@ -4,12 +4,16 @@
 // TXT de largura fixa de 245 colunas, codificação ISO-8859-1). Cada linha de tipo 01 é um papel num pregão, com abertura, máxima,
 // mínima, último preço, quantidade e volume financeiro. Só há linha nos dias com negócio.
 //
-// O COTAHIST NÃO ajusta desdobramentos nem grupamentos: sem tratamento, o gráfico mostraria uma queda de 66% (ou um salto)
-// no dia do evento. Este módulo faz duas coisas: aplica os eventos confirmados em config/acoes.json ("desdobramentos") e
-// DETECTA os demais. Um evento só é detectado quando três coisas coincidem no mesmo pregão (ver `detectarEventos`): o preço
-// muda por um fator inteiro (2, 3, 4, 5, 10...), a quantidade negociada em ações muda na mesma proporção e o volume em reais
-// NÃO muda. Queda por notícia ruim tem o volume em reais disparando, então não passa. Bonificação com fator quebrado (por exemplo
-// 10%) não é detectável por preço e fica sem ajuste. Dividendos e juros sobre capital próprio também não ajustam a série.
+// O COTAHIST NÃO ajusta desdobramentos, grupamentos nem bonificações: sem tratamento, o gráfico mostraria uma queda de 66% (ou um
+// salto) no dia do evento. Os eventos vêm da própria B3, do cadastro de empresas listadas (stockDividends: DESDOBRAMENTO,
+// GRUPAMENTO e BONIFICACAO, com fator e "data com"), e o config/acoes.json ("desdobramentos") prevalece. Cada evento da B3 é
+// conferido contra o preço: se o preço não andou como o fator manda, o evento não é aplicado e vira aviso.
+//
+// Por que não detectar pelo preço: tentamos (preço em fator inteiro + quantidade + volume em reais) e deu falso positivo. Em
+// 26/10/2026 a ANIM3 caiu 44% de um dia para o outro com volume normal e a regra a tomou por desdobramento 1:2, apagando a
+// máxima real de R$ 5,83 do gráfico. Queda forte por notícia e desdobramento 1:2 são indistinguíveis só pelo preço. A detecção
+// ficou apenas como conferência (`detectarEventos`): o que ela acha e a B3 não confirma vai para o log, sem ajustar nada.
+// Dividendos e juros sobre capital próprio não ajustam a série.
 //
 // Este módulo só tem funções puras e a leitura em fluxo; o job que grava os arquivos é scripts/atualizar-historico-acoes.mjs.
 
@@ -42,6 +46,7 @@ export function lerLinhaCotahist(linha) {
     data: `${d.slice(0, 4)}-${d.slice(4, 6)}-${d.slice(6, 8)}`,
     bdi,
     codigo: linha.slice(12, 24).trim(),
+    isin: linha.slice(230, 242).trim(),
     abertura, maxima, minima, ultimo,
     quantidade: numero(152, 170),
     volume: numero(170, 188) / 100,
@@ -82,7 +87,7 @@ export function agruparPorTicker(papeis, alvos) {
     }
     if (!alvos.has(p.codigo)) continue
     const lista = porTicker.get(p.codigo) ?? []
-    lista.push({ data: p.data, abertura: p.abertura, maxima: p.maxima, minima: p.minima, ultimo: p.ultimo, quantidade: p.quantidade, volume: p.volume })
+    lista.push({ isin: p.isin, data: p.data, abertura: p.abertura, maxima: p.maxima, minima: p.minima, ultimo: p.ultimo, quantidade: p.quantidade, volume: p.volume })
     porTicker.set(p.codigo, lista)
   }
   for (const [ticker, lista] of porTicker) {
@@ -102,7 +107,7 @@ function mediana(valores) {
 }
 
 /**
- * Desdobramentos e grupamentos prováveis numa série de candles (sem ajuste). Devolve [{ data, fator }] com fator = ações novas por
+ * Desdobramentos e grupamentos PROVÁVEIS numa série de candles, só para conferência (ver o cabeçalho: não ajusta nada) (sem ajuste). Devolve [{ data, fator }] com fator = ações novas por
  * ação antiga (desdobramento 1:3 = 3; grupamento 10:1 = 0.1), no mesmo formato de config/acoes.json.
  *
  * Regra (as três juntas): (1) a abertura do dia fica a um fator inteiro do último fechamento, com o fechamento também na mesma
@@ -142,16 +147,105 @@ export function detectarEventos(candles) {
 }
 
 /**
- * Junta os eventos de config (confirmados pelo responsável, prevalecem) com os detectados: um detectado a até 3 dias de um evento
- * de config é o mesmo evento, e as datas em `ignorados` (config "historicoLongo.ignorarEventos") são descartadas: queda por notícia
- * ruim que o detector confundiu com desdobramento (ex.: Americanas em 12/01/2023). Devolve [{ data, fator, origem: 'config' | 'detectado' }] em ordem de data.
+ * Junta os eventos de config (confirmados pelo responsável, prevalecem) com os da B3: um evento da B3 a até 3 dias de um de config é
+ * o mesmo. Devolve [{ data, fator, origem: 'config' | 'b3' }] em ordem de data.
  */
-export function combinarEventos(deConfig = [], detectados = [], ignorados = []) {
+export function combinarEventos(deConfig = [], oficiais = []) {
   const validos = deConfig.filter((e) => e && typeof e.data === 'string' && e.fator > 0)
   const dia = (d) => Date.parse(`${d}T12:00:00Z`) / 86_400_000
-  const extras = detectados.filter((d) => !ignorados.includes(d.data) && !validos.some((e) => Math.abs(dia(e.data) - dia(d.data)) <= 3))
-  return [...validos.map((e) => ({ data: e.data, fator: e.fator, origem: 'config' })), ...extras.map((e) => ({ data: e.data, fator: e.fator, origem: 'detectado' }))]
+  const extras = oficiais.filter((d) => !validos.some((e) => Math.abs(dia(e.data) - dia(d.data)) <= 3))
+  return [...validos.map((e) => ({ data: e.data, fator: e.fator, origem: 'config' })), ...extras.map((e) => ({ data: e.data, fator: e.fator, origem: 'b3' }))]
     .sort((a, b) => (a.data < b.data ? -1 : 1))
+}
+
+// ---------------------------------------------------------------------------------------
+// Eventos oficiais da B3 (desdobramento, grupamento, bonificação)
+// ---------------------------------------------------------------------------------------
+
+export const URL_EVENTOS_B3 = (emitente) =>
+  `https://sistemaswebb3-listados.b3.com.br/listedCompaniesProxy/CompanyCall/GetListedSupplementCompany/${Buffer.from(JSON.stringify({ issuingCompany: emitente, language: 'pt-br' })).toString('base64')}`
+
+/** Código do emissor na B3: os 4 primeiros caracteres do ticker (ANIM3 -> ANIM, BPAC11 -> BPAC). */
+export const emitenteDoTicker = (ticker) => ticker.replace(/\d+$/, '')
+
+const numeroB3 = (texto) => {
+  const t = String(texto ?? '').trim()
+  return Number(t.includes(',') ? t.replace(/\./g, '').replace(',', '.') : t)
+}
+const dataB3 = (texto) => {
+  const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(String(texto ?? '').trim())
+  return m ? `${m[3]}-${m[2]}-${m[1]}` : null
+}
+
+/**
+ * Resposta do cadastro da B3 (`GetListedSupplementCompany`) -> eventos de quantidade de ações do papel de ISIN `isin`.
+ * Cada item: { ultimaDataCom, fator, rotulo }, com fator = ações novas por ação antiga, como em config/acoes.json:
+ *  - DESDOBRAMENTO: a B3 informa o aumento em % (200 = 3 ações por 1) -> 1 + n/100;
+ *  - BONIFICACAO: também em % (5 = 5 ações novas para cada 100) -> 1 + n/100;
+ *  - GRUPAMENTO: já vem como razão (0,1 = 10 ações viram 1) -> n.
+ * Se nenhum evento tem o ISIN do papel (units, por exemplo), devolve os de todo o emissor: a conferência com o preço decide.
+ * Devolve null se a resposta não é o que se espera (fora do ar, formato mudou).
+ */
+export function eventosDaB3(resposta, isin) {
+  if (!Array.isArray(resposta) || !resposta.length || typeof resposta[0] !== 'object' || resposta[0] === null) return null
+  const lista = Array.isArray(resposta[0].stockDividends) ? resposta[0].stockDividends : []
+  const doPapel = lista.filter((e) => e.isinCode === isin || e.assetIssued === isin)
+  const base = doPapel.length ? doPapel : lista
+  const eventos = []
+  for (const e of base) {
+    const n = numeroB3(e.factor)
+    const rotulo = String(e.label ?? '').toUpperCase()
+    const ultimaDataCom = dataB3(e.lastDatePrior)
+    if (!ultimaDataCom || !(n > 0)) continue
+    if (rotulo.startsWith('DESDOBRAMENTO') || rotulo.startsWith('BONIFICACAO')) eventos.push({ ultimaDataCom, fator: 1 + n / 100, rotulo })
+    else if (rotulo.startsWith('GRUPAMENTO') && n < 1) eventos.push({ ultimaDataCom, fator: n, rotulo })
+  }
+  return eventos
+}
+
+/** Busca o cadastro do emissor na B3. Devolve o JSON ou null (rede, HTTP, corpo vazio ou inválido). */
+export async function buscarEventosB3(emitente, buscar = fetch) {
+  try {
+    const r = await buscar(URL_EVENTOS_B3(emitente))
+    if (!r.ok) return null
+    const texto = await r.text()
+    return texto.trim() ? JSON.parse(texto) : null
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Eventos da B3 -> eventos aplicáveis à série de candles, conferidos contra o preço.
+ * A data do evento é o primeiro pregão depois da "data com". Fica de fora, sem erro: o que ocorreu antes do primeiro candle ou ainda
+ * não ocorreu (sem pregão depois da data com). Para fator que muda muito o preço (abaixo de 0,77 ou acima de 1,3), o fechamento
+ * ou a abertura do dia do evento precisam ter andado perto de 1/fator contra o fechamento anterior (tolerância de 35%); se não, o
+ * evento vai para `divergentes` e NÃO é aplicado. Bonificação pequena não tem como ser conferida pelo preço e é aplicada.
+ */
+export function confirmarEventosB3(candles, eventosB3) {
+  const eventos = []
+  const divergentes = []
+  // Na mesma "data com" a B3 às vezes lista um desdobramento e um grupamento que se compensam em parte (VIVT3: 7.900% e 1:40 = 2:1
+  // no fim; TIMS3: 100 e 0,01 = nada). O efeito no preço é o produto dos fatores.
+  const porData = new Map()
+  for (const e of eventosB3) porData.set(e.ultimaDataCom, (porData.get(e.ultimaDataCom) ?? 1) * e.fator)
+  for (const [ultimaDataCom, fator] of [...porData].map(([d, f]) => [d, Number(f.toFixed(8))]).sort()) {
+    if (Math.abs(fator - 1) < 1e-6) continue
+    const e = { ultimaDataCom, fator }
+    const i = candles.findIndex((c) => c.data > e.ultimaDataCom)
+    if (i < 1) continue
+    const c = candles[i]
+    const anterior = candles[i - 1]
+    if (e.fator < 0.77 || e.fator > 1.3) {
+      const perto = (razao) => Math.abs(razao * e.fator - 1) <= 0.35
+      if (!perto(c.ultimo / anterior.ultimo) && !perto(c.abertura / anterior.ultimo)) {
+        divergentes.push({ data: c.data, fator: e.fator, motivo: `o preço foi de ${anterior.ultimo} para ${c.ultimo}, não compatível com o fator ${e.fator}` })
+        continue
+      }
+    }
+    eventos.push({ data: c.data, fator: Number(e.fator.toFixed(6)) })
+  }
+  return { eventos, divergentes }
 }
 
 /** Divide os preços anteriores à data de cada evento pelo fator acumulado. Quantidade e volume em reais não mudam. */
