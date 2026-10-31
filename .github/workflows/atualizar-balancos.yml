@@ -3,7 +3,7 @@
 # dos dados abertos da CVM (ITR e DFP, sem chave, sem cota) e vão para webapp-src/public/dados/balancos.json.
 #
 # Depois da CVM, o job consulta a página de cada empresa na B3 (resumo do balanço e aviso de entrega): o balanço aparece no mesmo dia da divulgação,
-# como "provisório", e a CVM completa EBIT, caixa e dívida quando publicar o arquivo aberto (a carga leva uns 8 minutos).
+# como "provisório", e a CVM completa EBIT, caixa e dívida quando publicar o arquivo aberto (a carga leva uns 12 minutos).
 #
 # Roda de terça a sábado, de madrugada: baixa cerca de 150 MB da CVM e, sem mudança nos dados (só quando alguma empresa divulga),
 # não gera commit nem deploy. Se algo estiver errado (layout da CVM mudou, poucas empresas), o job falha SEM alterar o arquivo.

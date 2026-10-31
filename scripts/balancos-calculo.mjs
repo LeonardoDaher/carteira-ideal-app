@@ -9,6 +9,9 @@
 import { diasEntre, semAcento } from './acoes-baratas-calculo.mjs'
 import { ehCapex, ehDividendo } from './fundamentos-calculo.mjs'
 
+/** Quantos trimestres isolados cada empresa guarda (5 anos). */
+export const MAXIMO_TRIMESTRES = 20
+
 const mil = (v) => (v == null || !Number.isFinite(v) ? null : Math.round(v / 1000))
 const somaDias = (data, dias) => new Date(Date.parse(`${data}T00:00:00Z`) + dias * 86400000).toISOString().slice(0, 10)
 const somaMeses = (data, meses) => {
@@ -126,7 +129,7 @@ const JANELA_ANO = [355, 372]
  * Trimestres isolados de uma empresa, do mais antigo ao mais recente. `c` = { docs, linhas } da CVM só desta empresa.
  * Q1–Q3 vêm do ITR (coluna do trimestre); Q4 = DFP (ano) − ITR do 3º trimestre (9 meses). Trimestre sem os dados necessários é omitido.
  */
-export function trimestresDaEmpresa({ c, financeira = false, dataCorte, maximo = 8 }) {
+export function trimestresDaEmpresa({ c, financeira = false, dataCorte, maximo = MAXIMO_TRIMESTRES }) {
   const docs = c.docs.filter((d) => d.dtRefer <= dataCorte && (!d.dtReceb || d.dtReceb <= dataCorte))
   const itr = docs.filter((d) => d.doc === 'ITR')
   const dfp = docs.filter((d) => d.doc === 'DFP')
@@ -339,5 +342,5 @@ export function trimestreProvisorio({ trimestres, b3, entrega, dataCorte }) {
 export function incorporarB3({ empresa, docs, b3, entrega, dataCorte }) {
   const q = trimestreProvisorio({ trimestres: empresa.trimestres, b3, entrega, dataCorte })
   if (!q) return empresa
-  return { ...empresa, trimestres: [...empresa.trimestres, q].slice(-8), proxima: proximaDivulgacao([...docs, { doc: q.tipo, dtRefer: q.periodo, dtReceb: q.dtReceb }], dataCorte) }
+  return { ...empresa, trimestres: [...empresa.trimestres, q].slice(-MAXIMO_TRIMESTRES), proxima: proximaDivulgacao([...docs, { doc: q.tipo, dtRefer: q.periodo, dtReceb: q.dtReceb }], dataCorte) }
 }

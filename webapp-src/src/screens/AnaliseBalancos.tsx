@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { analisarBalanco, divulgadosRecentes, reaisCompactos } from '../domain/balancos'
-import type { ItemRadar, LinhaComparativa, SnapshotBalancos, Tom as TomBalanco, Veredito } from '../domain/balancos'
+import type { AnaliseBalanco, ItemRadar, LinhaDeAnalise, SnapshotBalancos, Tom as TomBalanco, Veredito } from '../domain/balancos'
 import { formatarData } from '../domain/rendaFii'
 import { LogoAtivo } from '../ui/LogoAtivo'
 import { Selo } from '../ui/BlocosDeAnalise'
@@ -13,8 +13,12 @@ const VEREDITO: Record<Veredito, { tom: Tom; texto: string }> = {
   fraco: { tom: 'negativo', texto: 'Balanço fraco' },
 }
 
-const formatarValor = (v: number | null, formato: LinhaComparativa['formato']) => {
+const formatarValor = (v: number | null, formato: LinhaDeAnalise['formato']) => {
   if (v == null) return '—'
+  if (formato === 'var') {
+    const arred = Math.round(v * 100)
+    return arred === 0 ? '0%' : `${arred > 0 ? '+' : '−'}${Math.abs(arred).toLocaleString('pt-BR')}%`
+  }
   if (formato === 'reais') return reaisCompactos(v)
   if (formato === 'pct') return `${(v * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%`
   return `${v.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}×`
@@ -22,7 +26,7 @@ const formatarValor = (v: number | null, formato: LinhaComparativa['formato']) =
 
 const corDoTom = (t: TomBalanco) => (t === 'bom' ? 'var(--success)' : t === 'ruim' ? 'var(--danger)' : undefined)
 
-function Tabela({ rotulos, linhas }: { rotulos: string[]; linhas: LinhaComparativa[] }) {
+function Tabela({ rotulos, linhas }: { rotulos: string[]; linhas: LinhaDeAnalise[] }) {
   return (
     <div style={{ overflowX: 'auto' }}>
       <table className="small" style={{ borderCollapse: 'collapse', width: '100%', minWidth: 120 + rotulos.length * 92 }} data-testid="balanco-tabela">
@@ -41,6 +45,51 @@ function Tabela({ rotulos, linhas }: { rotulos: string[]; linhas: LinhaComparati
           ))}
         </tbody>
       </table>
+    </div>
+  )
+}
+
+type Modo = 'valores' | 'horizontal' | 'vertical'
+const MODOS: { id: Modo; rotulo: string; ajuda: string }[] = [
+  { id: 'valores', rotulo: 'Valores', ajuda: 'Os números de cada trimestre.' },
+  { id: 'horizontal', rotulo: 'Variação anual', ajuda: 'Análise horizontal: quanto cada conta cresceu ou caiu contra o mesmo trimestre do ano anterior.' },
+  { id: 'vertical', rotulo: '% da base', ajuda: 'Análise vertical: cada conta como parte da receita (resultado) ou do ativo total (balanço).' },
+]
+
+/** Tabela do histórico, com o período (8, 12 ou 20 trimestres) e o modo (valores, variação anual, % da base). */
+function Historico({ analise }: { analise: AnaliseBalanco }) {
+  const total = analise.trimestres.length
+  const opcoes = [8, 12, 20].filter((n) => n < total).concat(total)
+  const [periodo, setPeriodo] = useState(Math.min(8, total))
+  const [modo, setModo] = useState<Modo>('valores')
+  const n = Math.min(periodo, total)
+  const corta = (l: LinhaDeAnalise): LinhaDeAnalise => ({ ...l, valores: l.valores.slice(-n) })
+  const linhas = (modo === 'valores' ? analise.linhas : modo === 'horizontal' ? analise.horizontal : analise.vertical).map(corta)
+  return (
+    <div className="col" style={{ gap: 10 }}>
+      <h3 style={{ fontSize: 15 }}>Histórico de {n} trimestres</h3>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+        <div role="group" aria-label="Período" style={{ display: 'flex', gap: 6 }}>
+          {[...new Set(opcoes)].map((o) => (
+            <button key={o} type="button" className={`chip ${n === o ? 'selected' : ''}`} aria-pressed={n === o} onClick={() => setPeriodo(o)}>{o} trim.</button>
+          ))}
+        </div>
+        <div role="group" aria-label="Modo da tabela" style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          {MODOS.map((m) => (
+            <button key={m.id} type="button" className={`chip ${modo === m.id ? 'selected' : ''}`} aria-pressed={modo === m.id} onClick={() => setModo(m.id)}>{m.rotulo}</button>
+          ))}
+        </div>
+      </div>
+      <span className="tiny muted">{MODOS.find((m) => m.id === modo)!.ajuda}{modo === 'horizontal' ? ' Troca de sinal (lucro para prejuízo) aparece como “—”: o percentual não faz sentido.' : ''}</span>
+      <Tabela rotulos={analise.trimestres.slice(-n).map((t) => t.rotulo)} linhas={linhas} />
+      <div className="col" style={{ gap: 4 }}>
+        {analise.linhas.filter((l) => ['receita', 'lucro'].includes(l.chave)).map((l) => (
+          <span key={l.chave} className="tiny muted">
+            {l.rotulo}: <strong style={{ color: corDoTom(l.contraAnterior.tom) }}>{l.contraAnterior.texto}</strong> contra o trimestre anterior,{' '}
+            <strong style={{ color: corDoTom(l.contraAnoAnterior.tom) }}>{l.contraAnoAnterior.texto}</strong> contra o mesmo trimestre do ano anterior.
+          </span>
+        ))}
+      </div>
     </div>
   )
 }
@@ -64,7 +113,7 @@ export function AnaliseBalancos({ snapshot, itens, ticker, hoje, aoEscolher }: {
       <div className="col" style={{ gap: 6 }}>
         <h2 style={{ fontSize: 17 }}>Análise dos balanços</h2>
         <div className="muted small justify">
-          Escolha uma empresa para ver o que ela reportou no último balanço, comparado ao trimestre anterior e ao mesmo trimestre do ano passado, mais os últimos 8 trimestres.
+          Escolha uma empresa para ver o que ela reportou no último balanço, comparado ao trimestre anterior e ao mesmo trimestre do ano passado, mais o histórico de até 20 trimestres.
         </div>
       </div>
 
@@ -173,16 +222,7 @@ export function AnaliseBalancos({ snapshot, itens, ticker, hoje, aoEscolher }: {
           </section>
 
           <section className="card col" style={{ gap: 10 }} aria-label="Comparação dos últimos trimestres">
-            <h3 style={{ fontSize: 15 }}>Últimos {analise.trimestres.length} trimestres</h3>
-            <Tabela rotulos={analise.trimestres.map((t) => t.rotulo)} linhas={analise.linhas} />
-            <div className="col" style={{ gap: 4 }}>
-              {analise.linhas.filter((l) => ['receita', 'lucro'].includes(l.chave)).map((l) => (
-                <span key={l.chave} className="tiny muted">
-                  {l.rotulo}: <strong style={{ color: corDoTom(l.contraAnterior.tom) }}>{l.contraAnterior.texto}</strong> contra o trimestre anterior,{' '}
-                  <strong style={{ color: corDoTom(l.contraAnoAnterior.tom) }}>{l.contraAnoAnterior.texto}</strong> contra o mesmo trimestre do ano anterior.
-                </span>
-              ))}
-            </div>
+            <Historico analise={analise} />
           </section>
 
           <div className="tiny muted justify" role="note">

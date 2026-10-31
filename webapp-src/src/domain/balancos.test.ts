@@ -57,3 +57,19 @@ describe('radar', () => {
     expect(divulgadosRecentes(itens, '2026-10-30')).toHaveLength(1)
   })
 })
+
+describe('análises horizontal e vertical', () => {
+  const periodos = [['2025-03-31', '1T25'], ['2025-06-30', '2T25'], ['2025-09-30', '3T25'], ['2025-12-31', '4T25'], ['2026-03-31', '1T26'], ['2026-06-30', '2T26']] as const
+  const a = analisarBalanco(empresa(periodos.map(([p, r], i) => ({ ...tri(p, r, i === 5 ? 50 : 100), receita: i === 5 ? 1500 : 1000 }))))!
+
+  it('horizontal compara com o mesmo trimestre do ano anterior e deixa vazio o que não tem base', () => {
+    const receita = a.horizontal.find((l) => l.chave === 'h-receita')!
+    expect(receita.valores.slice(0, 4)).toEqual([null, null, null, null])
+    expect(receita.valores[5]).toBeCloseTo(0.5)
+    expect(a.horizontal.find((l) => l.chave === 'h-lucro')!.valores[5]).toBeCloseTo(-0.5)
+  })
+  it('vertical mostra cada conta como parte da receita e do ativo', () => {
+    expect(a.vertical.find((l) => l.chave === 'v-lucro')!.valores[0]).toBeCloseTo(0.1)
+    expect(a.vertical.find((l) => l.chave === 'v-pl-ativo')!.valores[0]).toBeCloseTo(0.4)
+  })
+})

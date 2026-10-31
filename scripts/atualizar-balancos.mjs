@@ -3,8 +3,8 @@
 //   node scripts/atualizar-balancos.mjs                       baixa as demonstrações da CVM e grava o arquivo do app
 //   node scripts/atualizar-balancos.mjs --dados-locais=PASTA  usa zips já baixados (offline; também guarda os baixados)
 //
-// Baixa ITR e DFP (3 anos) da CVM, liga código de negociação a CNPJ pelo FCA (mesmas regras do Top 15) e grava
-// webapp-src/public/dados/balancos.json: para cada empresa, os últimos 8 trimestres isolados (R$ mil), a data em que cada um foi
+// Baixa ITR e DFP (6 anos) da CVM, liga código de negociação a CNPJ pelo FCA (mesmas regras do Top 15) e grava
+// webapp-src/public/dados/balancos.json: para cada empresa, os últimos 20 trimestres isolados (R$ mil), a data em que cada um foi
 // recebido pela CVM e a estimativa da próxima divulgação. Se algo estiver errado, o job termina com erro SEM alterar o arquivo.
 
 import fs from 'node:fs'
@@ -117,7 +117,7 @@ export async function executar({ raiz = RAIZ_PADRAO, dadosLocais = null, agora =
 
     const extracoes = []
     for (const tipo of ['DFP', 'ITR']) {
-      for (const a of [ano - 3, ano - 2, ano - 1, ano]) {
+      for (const a of [ano - 5, ano - 4, ano - 3, ano - 2, ano - 1, ano]) {
         const zip = await obter(urlDemonstracoes(tipo, a), `${tipo.toLowerCase()}_cia_aberta_${a}.zip`)
         if (!zip) {
           log(`  ${tipo} ${a}: não publicado, seguindo sem ele`)

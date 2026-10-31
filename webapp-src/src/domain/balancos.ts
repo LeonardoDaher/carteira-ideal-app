@@ -185,11 +185,14 @@ export interface LinhaComparativa {
   rotulo: string
   /** Valor por trimestre, do mais antigo ao mais recente (mesma ordem de `trimestres`). */
   valores: (number | null)[]
-  formato: 'reais' | 'pct' | 'x'
+  formato: 'reais' | 'pct' | 'x' | 'var'
   /** Comparação do último trimestre com o trimestre anterior e com o mesmo trimestre do ano anterior. */
   contraAnterior: Variacao
   contraAnoAnterior: Variacao
 }
+
+/** Linha de tabela sem comparação própria (análises horizontal e vertical). */
+export type LinhaDeAnalise = Pick<LinhaComparativa, 'chave' | 'rotulo' | 'valores' | 'formato'>
 
 export interface Destaque {
   tom: Tom
@@ -215,6 +218,10 @@ export interface AnaliseBalanco {
   anterior: Trimestre | null
   anoAnterior: Trimestre | null
   linhas: LinhaComparativa[]
+  /** Análise horizontal: variação de cada conta contra o mesmo trimestre do ano anterior. */
+  horizontal: LinhaDeAnalise[]
+  /** Análise vertical: cada conta como fração de uma base (receita no resultado; ativo no balanço). */
+  vertical: LinhaDeAnalise[]
   destaques: Destaque[]
   alertas: Alerta[]
   veredito: Veredito
@@ -412,5 +419,32 @@ export function analisarBalanco(e: EmpresaBalanco): AnaliseBalanco | null {
       ? `${rot}: lucro de ${reaisCompactos(lucroAtual)}, ${a.texto} contra o ${vsAno}.`
       : `${rot}: lucro de ${reaisCompactos(lucroAtual)}.`
 
-  return { ticker: e.ticker, nome: e.nome, financeira: e.financeira, trimestres: tri, ultimo, anterior, anoAnterior, linhas, destaques, alertas, veredito, resumo }
+  // Horizontal: variação anual (contra 4 trimestres antes) das contas em reais.
+  const horizontal: LinhaDeAnalise[] = linhas
+    .filter((l) => l.formato === 'reais')
+    .map((l) => ({ chave: `h-${l.chave}`, rotulo: `${l.rotulo} (variação anual)`, formato: 'var' as const, valores: l.valores.map((v, i) => (i < 4 ? null : variar(v, l.valores[i - 4] ?? null).pct)) }))
+
+  // Vertical: resultado sobre a receita; balanço sobre o ativo total.
+  const sobre = (nome: string, chave: string, valor: (t: Trimestre) => number | null, base: (t: Trimestre) => number | null): LinhaDeAnalise => ({ chave, rotulo: nome, formato: 'pct', valores: tri.map((t) => razao(valor(t), base(t))) })
+  const dl = (t: Trimestre) => (t.divida == null ? null : t.divida - (t.caixa ?? 0))
+  const vertical: LinhaDeAnalise[] = e.financeira
+    ? [
+        sobre('Lucro ÷ receita', 'v-lucro', lucroDoTri, (t) => t.receita),
+        sobre('Patrimônio líquido ÷ ativo', 'v-pl-ativo', (t) => t.patrimonioLiquido, (t) => t.ativoTotal),
+      ]
+    : [
+        sobre('EBITDA ÷ receita', 'v-ebitda', (t) => t.ebitda, (t) => t.receita),
+        sobre('EBIT ÷ receita', 'v-ebit', (t) => t.ebit, (t) => t.receita),
+        sobre('Lucro ÷ receita', 'v-lucro', lucroDoTri, (t) => t.receita),
+        sobre('Caixa operacional ÷ receita', 'v-fco', (t) => t.fco, (t) => t.receita),
+        sobre('Capex ÷ receita', 'v-capex', (t) => t.capex, (t) => t.receita),
+        sobre('Caixa ÷ ativo', 'v-caixa', (t) => t.caixa, (t) => t.ativoTotal),
+        sobre('Dívida ÷ ativo', 'v-divida', (t) => t.divida, (t) => t.ativoTotal),
+        sobre('Patrimônio líquido ÷ ativo', 'v-pl-ativo', (t) => t.patrimonioLiquido, (t) => t.ativoTotal),
+        sobre('Dívida líquida ÷ patrimônio líquido', 'v-dl-pl', dl, (t) => t.patrimonioLiquido),
+      ]
+  const vertCompleto = vertical.filter((l) => l.valores.some((v) => v != null))
+  const horizCompleto = horizontal.filter((l) => l.valores.some((v) => v != null))
+
+  return { ticker: e.ticker, nome: e.nome, financeira: e.financeira, trimestres: tri, ultimo, anterior, anoAnterior, linhas, horizontal: horizCompleto, vertical: vertCompleto, destaques, alertas, veredito, resumo }
 }
