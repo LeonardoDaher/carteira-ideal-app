@@ -15,7 +15,8 @@ import { agruparPorCnpj, empresasDoCadastro } from './atualizar-acoes-baratas.mj
 import { baixar, cnpjDigitos, mapaTickerCnpj, resolverCnpjs, urlDemonstracoes, urlFca } from './acoes-baratas-cvm.mjs'
 import { extrairParaFundamentos } from './atualizar-fundamentos.mjs'
 import { acharEntrega, baixarFinanceiro, codigoCvmDaRaiz } from './b3-balancos.mjs'
-import { incorporarB3, montarBalancoDaEmpresa, verificarSanidadeBalancos } from './balancos-calculo.mjs'
+import { anoMesDoPeriodo, baixarCadastro, baixarCapital, raizDoCnpj } from './bcb-ifdata.mjs'
+import { incorporarB3, incorporarCapital, montarBalancoDaEmpresa, verificarSanidadeBalancos } from './balancos-calculo.mjs'
 
 const RAIZ_PADRAO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 export const VERSAO = '1.0.0'
@@ -78,6 +79,52 @@ export async function completarComB3({ saida, docsPorTicker, dataCorte, fetchImp
     if (pausaMs) await new Promise((r) => setTimeout(r, pausaMs))
   }
   log(`  B3: ${novos} empresas com balanço mais novo que a CVM (${falhas} falhas)`)
+}
+
+/**
+ * Índices de capital (Basileia, capital principal, nível I, alavancagem) dos bancos, pelo IF.data do Banco Central, ligados à empresa pela
+ * raiz do CNPJ da líder do conglomerado. Falha na fonte não derruba o job: o banco fica só com o dado da CVM.
+ */
+export async function completarComCapital({ saida, fetchImpl = fetch, log = console.log, pausaMs = 300 }) {
+  const bancos = Object.values(saida).filter((e) => e.financeira && raizDoCnpj(e.cnpj))
+  if (!bancos.length) return
+  const raizes = [...new Set(bancos.map((e) => raizDoCnpj(e.cnpj)))]
+  const periodos = [...new Set(bancos.flatMap((e) => e.trimestres.map((t) => t.periodo)))].sort().reverse()
+  try {
+    // Conglomerado prudencial de cada banco: cadastro do trimestre mais recente publicado (volta até 3 trimestres se faltar).
+    const codigoPorRaiz = {}
+    for (const periodo of periodos.slice(0, 4)) {
+      const achados = (await baixarCadastro(anoMesDoPeriodo(periodo), raizes.filter((r) => !codigoPorRaiz[r]), { fetchImpl })) ?? {}
+      Object.assign(codigoPorRaiz, achados)
+      if (raizes.every((r) => codigoPorRaiz[r])) break
+    }
+    const codigos = [...new Set(Object.values(codigoPorRaiz))]
+    if (!codigos.length) {
+      log('  [BC] nenhum conglomerado prudencial encontrado: bancos ficam sem índices de capital')
+      return
+    }
+    const capitalPorPeriodo = {}
+    for (const periodo of periodos) {
+      const dados = await baixarCapital(anoMesDoPeriodo(periodo), codigos, { fetchImpl })
+      if (Object.keys(dados).length) capitalPorPeriodo[periodo] = dados
+      if (pausaMs) await new Promise((r) => setTimeout(r, pausaMs))
+    }
+    let comCapital = 0
+    for (const e of bancos) {
+      const codigo = codigoPorRaiz[raizDoCnpj(e.cnpj)]
+      if (!codigo) continue
+      const capitais = {}
+      for (const [periodo, dados] of Object.entries(capitalPorPeriodo)) if (dados[codigo]) capitais[periodo] = dados[codigo]
+      const atualizada = incorporarCapital({ empresa: e, capitais })
+      if (atualizada !== e) {
+        saida[e.ticker] = atualizada
+        comCapital++
+      }
+    }
+    log(`  BC: ${comCapital} de ${bancos.length} bancos com índices de capital (${Object.keys(capitalPorPeriodo).length} trimestres)`)
+  } catch (e) {
+    log(`  [BC] índices de capital indisponíveis: ${e.message}`)
+  }
 }
 
 export async function executar({ raiz = RAIZ_PADRAO, dadosLocais = null, agora = new Date(), log = console.log, fetchImpl = fetch } = {}) {
@@ -145,6 +192,7 @@ export async function executar({ raiz = RAIZ_PADRAO, dadosLocais = null, agora =
     }
 
     await completarComB3({ saida, docsPorTicker, dataCorte, fetchImpl, log })
+    await completarComCapital({ saida, fetchImpl, log })
     log(`  ${Object.keys(saida).length} empresas com balanço; ${excluidas.length} sem dado suficiente`)
 
     const resultado = {

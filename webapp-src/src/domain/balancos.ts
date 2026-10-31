@@ -30,7 +30,18 @@ export interface Trimestre {
   provisorio?: boolean
   /** Sem o aviso da B3: `dtReceb` é o dia da coleta (o balanço saiu até esse dia). */
   dataAproximada?: boolean
+  /** Só em bancos, do IF.data do Banco Central (conglomerado prudencial), em fração (0,148 = 14,8%). Ausente até o BC publicar o trimestre. */
+  basileia?: number | null
+  capitalPrincipal?: number | null
+  nivel1?: number | null
+  razaoAlavancagem?: number | null
 }
+
+/** Mínimos regulatórios do índice de Basileia (8% + 2,5% de conservação) e do capital principal (4,5% + 2,5%). */
+export const MINIMO_BASILEIA = 0.105
+export const MINIMO_CAPITAL_PRINCIPAL = 0.07
+/** Abaixo disso o banco tem pouca folga sobre o mínimo. */
+export const FOLGA_BASILEIA = 0.12
 
 export interface ProximaDivulgacao {
   periodo: string
@@ -280,8 +291,18 @@ export function analisarBalanco(e: EmpresaBalanco): AnaliseBalanco | null {
   add('pl', 'Patrimônio líquido', 'reais', (t) => t.patrimonioLiquido)
   // Mesma conta da Análise fundamentalista: lucro dos controladores dos últimos 12 meses ÷ patrimônio líquido médio dos controladores.
   add('roe', 'ROE (12 meses)', 'pct', (t, i) => calcularRoe(soma12m(tri, i, lucroDoTri), t.plControladores, tri[i - 4]?.plControladores ?? null))
-  if (e.financeira) add('alavancagem', 'Ativo ÷ patrimônio líquido', 'x', (t) => razao(t.ativoTotal, t.patrimonioLiquido), false)
-  else {
+  if (e.financeira) {
+    // ROA: lucro dos controladores dos últimos 12 meses ÷ ativo total médio (agora e 4 trimestres antes).
+    add('roa', 'ROA (12 meses)', 'pct', (t, i) => {
+      const l12 = soma12m(tri, i, lucroDoTri)
+      const a0 = tri[i - 4]?.ativoTotal ?? null
+      return l12 == null || a0 == null || t.ativoTotal == null ? null : razao(l12, (t.ativoTotal + a0) / 2)
+    })
+    add('alavancagem', 'Ativo ÷ patrimônio líquido', 'x', (t) => razao(t.ativoTotal, t.patrimonioLiquido), false)
+    // Capital regulatório (Banco Central): só aparece quando o BC já publicou algum trimestre do banco.
+    if (tri.some((t) => t.basileia != null)) add('basileia', 'Índice de Basileia', 'pct', (t) => t.basileia ?? null)
+    if (tri.some((t) => t.capitalPrincipal != null)) add('capitalPrincipal', 'Capital principal (CET1)', 'pct', (t) => t.capitalPrincipal ?? null)
+  } else {
     add('dividaLiquida', 'Dívida líquida', 'reais', (t) => (t.divida == null || t.caixa == null ? null : t.divida - t.caixa), false)
     if (tri.some((t) => t.fco != null)) {
       add('fco', 'Caixa operacional', 'reais', (t) => t.fco)
@@ -334,7 +355,20 @@ export function analisarBalanco(e: EmpresaBalanco): AnaliseBalanco | null {
   if (e.financeira) {
     const al = linha('alavancagem')
     const v = al.valores[idx]
-    if (v != null) push(al.contraAnoAnterior.tom === 'ruim' ? 'ruim' : 'neutro', 'Alavancagem', `O ativo equivale a ${v.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}× o patrimônio líquido${al.contraAnoAnterior.pct != null ? ` (${al.contraAnoAnterior.texto} contra o ${vsAno})` : ''}. Em bancos, isso mede o quanto o balanço é financiado por terceiros; o índice de Basileia, que não está na base aberta, é o que a regulação acompanha.`)
+    const temCapital = tri.some((t) => t.basileia != null)
+    if (v != null) push(al.contraAnoAnterior.tom === 'ruim' ? 'ruim' : 'neutro', 'Alavancagem', `O ativo equivale a ${v.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}× o patrimônio líquido${al.contraAnoAnterior.pct != null ? ` (${al.contraAnoAnterior.texto} contra o ${vsAno})` : ''}. Em bancos, isso mede o quanto o balanço é financiado por terceiros${temCapital ? '.' : '; o índice de Basileia, que a regulação acompanha, ainda não está disponível para este banco.'}`)
+    // Capital regulatório: o dado do BC chega depois do balanço, então usa o último trimestre que ele já publicou.
+    const iCap = tri.findLastIndex((t) => t.basileia != null)
+    if (iCap >= 0) {
+      const tc = tri[iCap]!
+      const b = tc.basileia!
+      const anoAnt = tri[iCap - 4]?.basileia ?? null
+      const dp = anoAnt != null ? (b - anoAnt) * 100 : null
+      const folga = b >= FOLGA_BASILEIA ? 'folga confortável sobre o mínimo regulatório' : b >= MINIMO_BASILEIA ? 'pouca folga sobre o mínimo regulatório' : 'abaixo do mínimo regulatório'
+      const principal = tc.capitalPrincipal != null ? `, capital principal de ${(tc.capitalPrincipal * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%` : ''
+      const variacao = dp != null && Math.abs(dp) >= 0.1 ? `, ${dp > 0 ? 'alta' : 'queda'} de ${Math.abs(dp).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} p.p. em 12 meses` : ''
+      push(b < MINIMO_BASILEIA ? 'ruim' : b < FOLGA_BASILEIA || (dp != null && dp <= -1) ? 'neutro' : 'bom', 'Capital regulatório', `Índice de Basileia de ${(b * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}% em ${tc.rotulo}${principal}${variacao}: ${folga} (dado do Banco Central).`)
+    }
   } else {
     const dl = linha('dividaLiquida')
     const dEbit = linha('dividaEbitda').valores[idx]
@@ -401,6 +435,23 @@ export function analisarBalanco(e: EmpresaBalanco): AnaliseBalanco | null {
   } else {
     const r = linha('roe').valores[idx]
     if (r != null && faixaDoRoe(r) === 'baixo' && lucro.contraAnoAnterior.tom === 'ruim') alerta('roe-baixo', 'atencao', 'Rentabilidade baixa e em queda', `ROE de ${pct1(r)} nos 12 meses, com lucro ${lucro.contraAnoAnterior.texto} contra o ${vsAno}.`)
+    // Capital regulatório (Banco Central), no último trimestre que o BC já publicou.
+    const iCap = tri.findLastIndex((t) => t.basileia != null)
+    if (iCap >= 0) {
+      const tc = tri[iCap]!
+      const b = tc.basileia!
+      if (b < MINIMO_BASILEIA) alerta('basileia-minimo', 'critico', 'Índice de Basileia abaixo do mínimo', `${tc.rotulo}: Basileia de ${pct1(b)}, abaixo do mínimo regulatório de ${pct1(MINIMO_BASILEIA)} (8% mais 2,5% de colchão de conservação).`)
+      else if (b < FOLGA_BASILEIA) alerta('basileia-folga', 'atencao', 'Pouca folga de capital', `${tc.rotulo}: Basileia de ${pct1(b)}, perto do mínimo regulatório de ${pct1(MINIMO_BASILEIA)}.`)
+      if (tc.capitalPrincipal != null && tc.capitalPrincipal < MINIMO_CAPITAL_PRINCIPAL) alerta('capital-principal-minimo', 'critico', 'Capital principal abaixo do mínimo', `${tc.rotulo}: capital principal de ${pct1(tc.capitalPrincipal)}, abaixo do mínimo de ${pct1(MINIMO_CAPITAL_PRINCIPAL)} (4,5% mais 2,5% de colchão).`)
+      // Queda persistente: três quedas seguidas somando pelo menos 1 p.p. (só com trimestres consecutivos).
+      const serie = iCap >= 3 ? [3, 2, 1, 0].map((k) => tri[iCap - k]!.basileia ?? null) : null
+      if (serie && serie.every((v): v is number => v != null) && serie[1]! < serie[0]! && serie[2]! < serie[1]! && serie[3]! < serie[2]! && serie[0]! - serie[3]! >= 0.01) {
+        alerta('basileia-cai', 'atencao', 'Basileia em queda há três trimestres', `O índice caiu de ${pct1(serie[0]!)} para ${pct1(serie[3]!)} em três trimestres seguidos.`)
+      }
+    }
+    // ROE alto sustentado por encolhimento do patrimônio, e não por mais lucro.
+    const plVar = pl.contraAnoAnterior.pct
+    if (r != null && faixaDoRoe(r) === 'alto' && plVar != null && plVar <= -0.1) alerta('roe-por-pl', 'atencao', 'ROE alto com patrimônio encolhendo', `ROE de ${pct1(r)}, mas o patrimônio líquido caiu ${pct1(-plVar)} em 12 meses: parte do retorno vem de um patrimônio menor.`)
     const al = linha('alavancagem')
     if (al.contraAnoAnterior.pct != null && al.contraAnoAnterior.pct >= 0.1 && lucro.contraAnoAnterior.tom === 'ruim') alerta('alavancagem-sobe', 'atencao', 'Alavancagem subindo com lucro em queda', `O ativo passou a ${(al.valores[idx] ?? 0).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}× o patrimônio líquido (${al.contraAnoAnterior.texto}) enquanto o lucro caiu.`)
   }

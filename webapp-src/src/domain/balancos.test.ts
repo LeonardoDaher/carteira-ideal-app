@@ -73,3 +73,49 @@ describe('análises horizontal e vertical', () => {
     expect(a.vertical.find((l) => l.chave === 'v-pl-ativo')!.valores[0]).toBeCloseTo(0.4)
   })
 })
+
+describe('banco: capital regulatório do Banco Central', () => {
+  const periodos = [['2025-03-31', '1T25'], ['2025-06-30', '2T25'], ['2025-09-30', '3T25'], ['2025-12-31', '4T25'], ['2026-03-31', '1T26'], ['2026-06-30', '2T26']] as const
+  const banco = (basileia: (number | null)[], capitalPrincipal: number | null = 0.12, patrimonio = 2000) =>
+    ({ ...empresa(periodos.map(([p, r], i) => ({ ...tri(p, r, 100), basileia: basileia[i] ?? null, capitalPrincipal: basileia[i] == null ? null : capitalPrincipal, patrimonioLiquido: i === 5 ? patrimonio : 2000, plControladores: i === 5 ? patrimonio : 2000 }))), financeira: true })
+  const ids = (e: EmpresaBalanco) => analisarBalanco(e)!.alertas.map((x) => x.id)
+
+  it('mostra Basileia e capital principal e comenta a folga sobre o mínimo', () => {
+    const a = analisarBalanco(banco([0.15, 0.15, 0.15, 0.15, 0.15, 0.155]))!
+    expect(a.linhas.find((l) => l.chave === 'basileia')!.valores[5]).toBeCloseTo(0.155)
+    expect(a.linhas.find((l) => l.chave === 'capitalPrincipal')).toBeDefined()
+    expect(a.destaques.find((d) => d.titulo === 'Capital regulatório')!.texto).toContain('folga confortável')
+    expect(a.alertas).toEqual([])
+  })
+  it('sem dado do Banco Central não inventa linha nem alerta de capital', () => {
+    const a = analisarBalanco(banco([]))!
+    expect(a.linhas.some((l) => l.chave === 'basileia')).toBe(false)
+    expect(a.destaques.find((d) => d.titulo === 'Capital regulatório')).toBeUndefined()
+    expect(a.destaques.find((d) => d.titulo === 'Alavancagem')!.texto).toContain('ainda não está disponível')
+  })
+  it('usa o último trimestre que o BC já publicou', () => {
+    const a = analisarBalanco(banco([0.15, 0.15, 0.15, 0.15, 0.14, null]))!
+    expect(a.destaques.find((d) => d.titulo === 'Capital regulatório')!.texto).toContain('1T26')
+  })
+  it('alerta crítico abaixo do mínimo e de atenção com pouca folga', () => {
+    expect(ids(banco([0.15, 0.15, 0.15, 0.15, 0.15, 0.1]))).toContain('basileia-minimo')
+    const folga = ids(banco([0.15, 0.15, 0.15, 0.15, 0.15, 0.115]))
+    expect(folga).toContain('basileia-folga')
+    expect(folga).not.toContain('basileia-minimo')
+    expect(ids(banco([0.15, 0.15, 0.15, 0.15, 0.15, 0.15], 0.06))).toContain('capital-principal-minimo')
+  })
+  it('alerta de queda só com três quedas seguidas somando 1 p.p. ou mais', () => {
+    expect(ids(banco([0.15, 0.15, 0.15, 0.15, 0.145, 0.14]))).not.toContain('basileia-cai')
+    expect(ids(banco([0.16, 0.155, 0.15, 0.145, 0.14, 0.135]))).toContain('basileia-cai')
+    expect(ids(banco([0.16, 0.155, 0.15, 0.1505, 0.14, 0.135]))).not.toContain('basileia-cai')
+  })
+  it('ROE alto com patrimônio encolhendo vira alerta; a nota "forte" não esconde alerta crítico', () => {
+    expect(ids(banco([0.15, 0.15, 0.15, 0.15, 0.15, 0.15], 0.12, 1700))).toContain('roe-por-pl')
+    expect(analisarBalanco(banco([0.15, 0.15, 0.15, 0.15, 0.15, 0.1]))!.veredito).not.toBe('forte')
+  })
+  it('calcula o ROA dos últimos 12 meses sobre o ativo médio', () => {
+    const roa = analisarBalanco(banco([]))!.linhas.find((l) => l.chave === 'roa')!
+    expect(roa.valores[3]).toBeNull()
+    expect(roa.valores[5]).toBeCloseTo(400 / 5000)
+  })
+})

@@ -274,6 +274,21 @@ export function montarBalancoDaEmpresa({ ticker, nome, setor, financeira, cnpj, 
   }
 }
 
+/**
+ * Junta o capital regulatório do Banco Central (índices em fração, por fim de trimestre) aos trimestres de um banco. Trimestre sem
+ * dado do BC (ainda não publicado, ou provisório da B3) fica sem os campos: a tela mostra "—", nunca zero.
+ */
+export function incorporarCapital({ empresa, capitais }) {
+  let mudou = false
+  const trimestres = empresa.trimestres.map((t) => {
+    const c = capitais[t.periodo]
+    if (!c) return t
+    mudou = true
+    return { ...t, basileia: c.basileia, capitalPrincipal: c.capitalPrincipal, nivel1: c.nivel1, razaoAlavancagem: c.razaoAlavancagem }
+  })
+  return mudou ? { ...empresa, trimestres } : empresa
+}
+
 /** Confere o arquivo antes de publicar: devolve a lista de problemas (vazia = ok). */
 export function verificarSanidadeBalancos(saida, { minimoEmpresas = 100 } = {}) {
   const erros = []
@@ -283,6 +298,11 @@ export function verificarSanidadeBalancos(saida, { minimoEmpresas = 100 } = {}) 
   if (lista.length && comOito / lista.length < 0.6) erros.push(`Só ${comOito} de ${lista.length} empresas têm 4 trimestres ou mais: layout da CVM mudou?`)
   const comData = lista.filter((e) => e.trimestres.at(-1)?.dtReceb).length
   if (lista.length && comData / lista.length < 0.9) erros.push('Menos de 90% das empresas com data de recebimento do último balanço.')
+  for (const e of lista) {
+    for (const t of e.trimestres) {
+      if (t.basileia != null && (t.basileia < 0.05 || t.basileia > 0.6)) erros.push(`${e.ticker} ${t.rotulo}: índice de Basileia de ${(t.basileia * 100).toFixed(1)}% fora do plausível.`)
+    }
+  }
   return erros
 }
 

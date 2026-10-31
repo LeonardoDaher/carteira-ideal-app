@@ -113,3 +113,51 @@ test('trimestre provisório = acumulado da B3 menos os trimestres anteriores do 
   // falta um trimestre do ano: não dá para isolar
   assert.equal(trimestreProvisorio({ trimestres: trimestres.slice(0, 3), b3: lerFinanceiro(RESUMO_VALE), dataCorte: '2026-10-30' }), null)
 })
+
+import { anoMesDoPeriodo, lerCadastro, lerCapital, raizDoCnpj, urlCapital } from './bcb-ifdata.mjs'
+import { incorporarCapital } from './balancos-calculo.mjs'
+
+test('IF.data: período, raiz do CNPJ e endereço usam os nomes exatos dos parâmetros', () => {
+  assert.equal(anoMesDoPeriodo('2026-03-31'), 202603)
+  assert.equal(raizDoCnpj('60.872.504/0001-23'), '60872504')
+  assert.equal(raizDoCnpj('123'), null)
+  const url = urlCapital(202603, ['C0080099', 'C0080075'])
+  assert.ok(url.includes('IfDataValores(AnoMes=@AnoMes,TipoInstituicao=@TipoInstituicao,Relatorio=@Relatorio)'))
+  assert.ok(url.includes("@Relatorio='5'"))
+  assert.ok(decodeURIComponent(url).includes("CodInst eq 'C0080099' or CodInst eq 'C0080075'"))
+})
+
+test('IF.data: cadastro liga a raiz do CNPJ ao conglomerado prudencial mais frequente', () => {
+  const json = {
+    value: [
+      { CnpjInstituicaoLider: '60872504', CodConglomeradoPrudencial: 'C0080099' },
+      { CnpjInstituicaoLider: '60872504', CodConglomeradoPrudencial: 'C0080099' },
+      { CnpjInstituicaoLider: '60872504', CodConglomeradoPrudencial: 'C0000001' },
+      { CnpjInstituicaoLider: '00000000', CodConglomeradoPrudencial: null },
+    ],
+  }
+  assert.deepEqual(lerCadastro(json), { 60872504: 'C0080099' })
+  assert.equal(lerCadastro({}), null)
+})
+
+test('IF.data: lê os índices de capital e descarta valor fora do plausível', () => {
+  const json = {
+    value: [
+      { CodInst: 'C1', NomeColuna: 'Índice de Basileia \n(n) = (e) / (j)', Saldo: 0.1477 },
+      { CodInst: 'C1', NomeColuna: 'Índice de Capital Principal \n(l) = (a) / (j)', Saldo: 0.121 },
+      { CodInst: 'C1', NomeColuna: 'Índice de Capital Nível I \n(m) = (c) / (j)', Saldo: 0.13 },
+      { CodInst: 'C1', NomeColuna: 'Razão de Alavancagem \n(o) = (c) / (k)', Saldo: 7.5 },
+      { CodInst: 'C1', NomeColuna: 'Índice de Imobilização \n(p)', Saldo: 0.2 },
+    ],
+  }
+  assert.deepEqual(lerCapital(json), { C1: { basileia: 0.1477, capitalPrincipal: 0.121, nivel1: 0.13, razaoAlavancagem: null } })
+  assert.equal(lerCapital({ erro: 1 }), null)
+})
+
+test('capital entra só nos trimestres que o BC já publicou', () => {
+  const empresa = { ticker: 'ITUB4', trimestres: [{ periodo: '2025-12-31', rotulo: '4T25' }, { periodo: '2026-03-31', rotulo: '1T26' }] }
+  const r = incorporarCapital({ empresa, capitais: { '2025-12-31': { basileia: 0.15, capitalPrincipal: 0.12, nivel1: 0.13, razaoAlavancagem: null } } })
+  assert.equal(r.trimestres[0].basileia, 0.15)
+  assert.equal('basileia' in r.trimestres[1], false)
+  assert.equal(incorporarCapital({ empresa, capitais: {} }), empresa)
+})

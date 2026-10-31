@@ -227,7 +227,7 @@ export function AnaliseBalancos({ snapshot, itens, ticker, hoje, aoEscolher }: {
 
           <div className="tiny muted justify" role="note">
             Fonte: ITR e DFP entregues à CVM{analise.ultimo.link ? <> (<a href={analise.ultimo.link} target="_blank" rel="noopener noreferrer">documento do último balanço</a>)</> : ''}. Valores em reais, do
-            trimestre isolado. O 4º trimestre é o exercício menos os 9 meses informados antes e pode incluir ajustes contábeis pontuais. “Abaixo do esperado” aqui significa abaixo do
+            trimestre isolado.{analise.trimestres.some((t) => t.basileia != null) ? ' Índices de capital (Basileia, capital principal): IF.data do Banco Central, do conglomerado prudencial; saem depois do balanço.' : ''} O 4º trimestre é o exercício menos os 9 meses informados antes e pode incluir ajustes contábeis pontuais. “Abaixo do esperado” aqui significa abaixo do
             próprio histórico da empresa: a base aberta não traz a projeção dos analistas. Não é recomendação de investimento.
           </div>
         </>
