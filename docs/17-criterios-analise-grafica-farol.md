@@ -22,7 +22,7 @@ Documento de **estudo**, não é decisão nem recomendação. Registra o método
 | 01/07/2026 | parte das ações | índice tentando formar fundo, ações com compras por pullback |
 | 29/10/2026 | parte das ações | dia seguinte ao pior dia da queda pós-eleição, volatilidade alta |
 
-Doze vídeos dele (mais o de outro analista), de junho a outubro de 2026. Os de junho, julho e a segunda leitura de outubro confirmaram o método sem trazer um setup novo; trouxeram só os pontos do bloco 3.9. **O método parece estável**: ler mais vídeos do mesmo programa tem retorno decrescente. O que falta para fixar números é calibrar com os preços (seção 6). Não li os 100 vídeos da playlist. Leitura de vídeo no navegador do app é lenta e instável: em vários vídeos a transcrição não carregou e eles ficaram de fora.
+**Cobertura final (31/10 a 01/11/2026): 94 transmissões da playlist, de 12/06 a 30/10/2026**, lidas com um resumo automático das falas sobre stop, gatilho, gap, bandas, volume e padrões (a metade final de cada vídeo, onde ele analisa as ações pedidas). Ficaram de fora, sem transcrição: 07/08, 17/06, 24/09 e 17/09. Quatro transmissões (28/08, 31/08, 23/07 e 24/07) parecem ter outro apresentador ou formato curto e entram só como vocabulário. A playlist tem vídeos anteriores a 12/06 que não foram lidos. **O método é o mesmo do primeiro ao último vídeo**: os blocos 3.9, 3.10 e 3.11 só refinam números e gestão. O que falta para fixar limiares é calibrar com os preços (seção 6), não ler mais vídeos. Não li os 100 vídeos da playlist. Leitura de vídeo no navegador do app é lenta e instável: em vários vídeos a transcrição não carregou e eles ficaram de fora.
 
 **O que a transcrição não mostra.** O desenho dele (linhas, caixas, canais) só aparece no vídeo. Tirei uma imagem do vídeo de 10/09 para conferir os indicadores da plataforma dele (seção 2). Os níveis e as linhas de tendência eu leio pelo que ele diz ("aqui nos 17,80", "essa faixa").
 
@@ -115,6 +115,30 @@ Ele compra quase sempre **na superação da máxima de um candle de sinal**, dep
 40. **Stop curto com reentrada**: "o stop certo era mais embaixo, mas eu iria de stop curto; se fosse stopado, tentaria uma reentrada".
 41. **O retorno/risco considera obstáculos no caminho**: uma barra elefante baixista (abre na máxima e fecha na mínima, queda de 6,5%) sugere venda, mas "para chegar no um para um eu teria de vencer a média de 200 e o fundo importante: não abraço".
 42. **Barra de ignição não acionada** que volta a corrigir não é compra: "nada garante que ela não caia até a abertura dessa barra"; a abertura da barra de ignição é o nível de invalidação.
+
+### 3.10 Acréscimos da leitura de outubro a agosto (cerca de 40 vídeos)
+Padrão estável: estes pontos refinam números e gestão, não mudam os setups.
+43. **Condução do stop.** Três formas, nesta ordem de uso: (a) abaixo da mínima do candle de sinal; (b) depois da parcial de 1:1, **stop por mínimas** (abaixo da mínima do dia ou da véspera); (c) com o movimento "parabólico", **stop pela média exponencial de 9** (fechou abaixo, sai). Quem entra "pelo intradiário" e conduz para swing já tem o stop de entrada como referência.
+44. **Parcial e entrada escalonada.** Realiza **parcial em 1:1** e carrega o resto; ou entra com **meia posição** na superação da máxima e completa no pullback; "tenta não demorar para fazer parcial".
+45. **Tamanho do stop (em % do preço), como régua de aceitação.** Cerca de 3 a 5%: bom. Até uns 10%: aceitável só se a barra for curta. **12% é "caro"** e normalmente reprova (aceita só se o alvo entrega o mesmo). **17%, 26%, 30%: não faz swing**, procura entrada pelo intradiário para encurtar o stop.
+46. **Risco de evento e de fim de semana.** Antes de eleição ou balanço não atravessa o fim de semana posicionado e reduz posição. Em **circuit breaker** não coloca stop nos preços do limite ("os stops foram cancelados pela bolsa"); espera algumas horas para reposicionar.
+47. **Sinais de exaustão.** Sequência de **11 a 12 candles de alta seguidos** ("o limite"), movimento parabólico, **volume enorme** ao fim de uma alta longa, "última pernada". Depois disso não entra; protege o lucro.
+48. **Assimetria de volume.** Dias de queda com volume **menor** que os de alta = cenário altista; queda com volume baixo é correção. Número de **negócios** abaixo da média enfraquece o sinal; volume formado no **leilão** pesa menos.
+49. **Gap.** "Gap de fuga" (em tendência, não é preenchido); o gap comum tende a ser **fechado parcialmente**; "gap que afasta o preço de si mesmo"; a **primeira e a segunda fronteira** do gap são níveis; a **regra dos 50%** (ponto médio de corpo a corpo) é a que ele diz trabalhar.
+50. **Trap de banda.** O preço fura a banda de Bollinger e fecha de volta dentro: gatilho de compra acima da máxima do candle (e de venda abaixo da mínima). Também compra quando o preço "estressa a banda inferior sem romper" com volume.
+51. **Bollinger como regime.** Bandas estreitas = espera; barra forte que abre as bandas define a direção; bandas abrindo **para baixo** = continuidade de queda; vale também no semanal e no 60 minutos.
+52. **Preferências de estilo.** "Seguir, não liderar"; "na dúvida entre comprar e vender, prefiro comprar"; **retorno à média é "sempre mais difícil"**, então evita; "três barras de respiro" antes do rompimento de uma bandeira é o usual.
+53. **1-2-3 de compra** (fundo, topo, segundo fundo mais alto), aparece com frequência apoiado na **média de 21**; é do método da casa (citado "em homenagem ao Stormer"), não só do outro analista.
+
+### 3.11 Acréscimos da leitura completa (junho a julho) e parâmetros que ele diz em voz alta
+54. **Liquidez.** Três faixas: abaixo de **R$ 500 mil por dia** "quebra as pernas" (não opera swing); em torno de **R$ 1 milhão** "esquece"; de **R$ 7 a 8 milhões** opera com ressalva. Usa o volume do dia contra o **regime dos últimos 2 meses** da própria ação e confere o **número de negócios**.
+55. **Barra elefante e ignição são a mesma ideia.** "Hoje eu chamo tudo de barra de ignição, a diferença é a amplitude." Uma definição prática dele: **elefante = a maior barra dos últimos 61 candles**. A **barra ignorada** só vale com **barra forte no dia anterior** (contexto).
+56. **Múltiplos de risco.** Alvo comum de **1,6 a 2 vezes o risco**; com inside bar de stop mínimo ele reconhece que "pode ganhar 10 vezes o risco", mas é exceção. **Parcial em 1:1** é regra.
+57. **Estocástico** aparece pouco: "estocástico lento cruzando abaixo de 20" como apoio de sobrevenda e "estocástico em 72" como leitura de força. Bollinger, médias de 9, 21 e 200, volume e candles carregam a decisão.
+58. **Squeeze extremo** é "bandas se beijando": o movimento seguinte tende a ser forte, mas ele espera a **barra que abre as bandas** para dizer o lado.
+59. **Disciplina com o stop.** Não ficar "alterando toda hora o stop no calor do momento"; dar espaço, de preferência **abaixo do gap**, para o papel respirar; só subir o stop por regra (mínimas, média de 9).
+60. **1-2-3 de venda** também existe (espelho do de compra), com stop acima das máximas; "retorno à média" é o único trade que ele reconhece como "sempre mais difícil".
+61. **Gap de exaustão**: gap depois de movimento longo, que costuma ser preenchido; é o contrário do **gap de fuga** da tendência.
 
 ## 4. Vocabulário dele → regra que o app consegue medir
 
