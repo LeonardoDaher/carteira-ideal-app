@@ -9,6 +9,7 @@ import type { OpcoesDoGrafico } from '../ui/GraficoPrecoAcao'
 import { AvisoDaAnalise, BarraDeNota, EstadoDoArquivo, Linha, Modulo, Selo } from '../ui/BlocosDeAnalise'
 import type { Tom } from '../ui/BlocosDeAnalise'
 import { dataLonga, numero, percentual, reais } from '../ui/formatoAnalise'
+import { aberturaDaSemana, caixaDaBase, gapsAbertos, mediaDe200Semanas } from '../domain/niveisDoGrafico'
 
 type Periodicidade = 'diario' | 'semanal' | 'mensal'
 const PERIODICIDADES: { chave: Periodicidade; rotulo: string }[] = [{ chave: 'diario', rotulo: 'Diário' }, { chave: 'semanal', rotulo: 'Semanal' }, { chave: 'mensal', rotulo: 'Mensal' }]
@@ -51,11 +52,32 @@ function NotaDoHistorico({ barras, estado }: { barras: Barra[]; estado: EstadoHi
   )
 }
 
+/** Explica em texto cada nível desenhado no gráfico (origem e valor), para quem não enxerga as cores ou quer a conta. */
+function NotaDosNiveis({ n }: { n: { abertura: ReturnType<typeof aberturaDaSemana>; media200: ReturnType<typeof mediaDe200Semanas>; gaps: ReturnType<typeof gapsAbertos>; caixa: ReturnType<typeof caixaDaBase> } }) {
+  const itens: string[] = []
+  if (n.abertura) itens.push(`${n.abertura.rotulo}: ${reais(n.abertura.preco)}${n.abertura.real ? '' : ' (aproximada pelo fechamento anterior)'}`)
+  if (n.media200) itens.push(`média de 200 semanas: ${reais(n.media200.preco)}`)
+  for (const g of n.gaps) {
+    itens.push(`gap de ${g.tipo} de ${dataLonga(g.data)} ainda aberto entre ${reais(g.inferior)} e ${reais(g.superior)} (${numero(g.preenchido * 100, 0)}% preenchido; meio do gap em ${reais(g.meio)})`)
+  }
+  if (n.caixa) {
+    itens.push(`base de ${n.caixa.candles} candles, de ${dataLonga(n.caixa.inicio)} a ${dataLonga(n.caixa.fim)}, entre ${reais(n.caixa.fundo)} e ${reais(n.caixa.topo)}${n.caixa.rompeu ? `; o último candle fechou ${n.caixa.rompeu === 'acima' ? 'acima' : 'abaixo'} dela` : ''}`)
+  }
+  if (!itens.length) return <span className="tiny muted">Sem níveis extras no momento: nenhum gap aberto, nenhuma base lateral e histórico curto para a média de 200 semanas.</span>
+  return (
+    <ul className="tiny muted" style={{ margin: 0, paddingLeft: 16 }} data-testid="niveis-do-grafico">
+      {itens.map((x) => (
+        <li key={x}>{x}</li>
+      ))}
+    </ul>
+  )
+}
+
 /** Aba "Análise técnica": leitura gráfica calculada por regra (tendência, médias, IFR, MACD, volume, zonas, padrões, risco, cenários e nota). */
 export function AnaliseTecnicaAcao({ dados, ticker, nome, horizonte }: { dados: DadosDaAnalise; ticker: string; nome: string | null; horizonte: Horizonte }) {
   const [periodicidade, setPeriodicidade] = useState<Periodicidade>('diario')
   const [janela, setJanela] = useState(120)
-  const [opcoes, setOpcoes] = useState<OpcoesDoGrafico>({ mm21: true, mm80: true, mm200: false, zonas: true, volume: true, ifr: true, macd: true, estocastico: true })
+  const [opcoes, setOpcoes] = useState<OpcoesDoGrafico>({ mm21: true, mm80: true, mm200: false, zonas: true, volume: true, ifr: true, macd: true, estocastico: true, bollinger: true, ema9: true, niveis: true })
   const barrasDoGrafico = useMemo(() => {
     const b = dados.barrasDoGrafico ?? []
     return periodicidade === 'diario' ? b : agregar(b, periodicidade === 'semanal' ? 'semana' : 'mes')
@@ -66,6 +88,18 @@ export function AnaliseTecnicaAcao({ dados, ticker, nome, horizonte }: { dados: 
     () => (dados.tecnica && dados.barrasDoGrafico && dados.barrasDoGrafico !== dados.barras ? zonasDePreco(dados.barrasDoGrafico, dados.tecnica.volatilidade.atrPct) : (dados.tecnica?.zonas ?? [])),
     [dados.tecnica, dados.barrasDoGrafico, dados.barras],
   )
+  // Níveis do gráfico: abertura da semana, média de 200 semanas, gaps ainda abertos e a caixa da base atual. Sempre sobre o diário.
+  const niveisDoGrafico = useMemo(() => {
+    const b = dados.barrasDoGrafico ?? []
+    if (b.length < 30) return { niveis: [], gaps: [], caixa: null, abertura: null, media200: null }
+    const abertura = aberturaDaSemana(b)
+    const media200 = mediaDe200Semanas(b)
+    const niveis = [
+      ...(abertura ? [{ chave: abertura.chave, preco: abertura.preco, rotulo: abertura.rotulo }] : []),
+      ...(media200 ? [{ chave: 'media-200-semanas', preco: media200.preco, rotulo: 'média de 200 semanas', cor: 'oklch(62% 0.27 328)' }] : []),
+    ]
+    return { niveis, gaps: gapsAbertos(b), caixa: caixaDaBase(b), abertura, media200 }
+  }, [dados.barrasDoGrafico])
   // Só oferece janelas que cabem no histórico disponível; "Tudo" some quando a última janela já o cobre.
   const caben = JANELAS[periodicidade].filter((j) => j.n !== 0 && j.n < barrasDoGrafico.length * 1.1)
   const janelas = caben.length && caben[caben.length - 1].n >= barrasDoGrafico.length * 0.95 ? caben : [...caben, { n: 0, rotulo: 'Tudo' }]
@@ -108,14 +142,15 @@ export function AnaliseTecnicaAcao({ dados, ticker, nome, horizonte }: { dados: 
           ))}
         </div>
         <div className="row" style={{ gap: 6, flexWrap: 'wrap' }} role="group" aria-label="Indicadores do gráfico">
-          {([['mm21', 'Média 21'], ['mm80', 'Média 80'], ['mm200', 'Média 200'], ['zonas', 'Suportes e resistências'], ['volume', 'Volume'], ['ifr', 'IFR'], ['macd', 'MACD'], ['estocastico', 'Estocástico']] as const).map(([chave, rotulo]) => (
+          {([['mm21', 'Média 21'], ['mm80', 'Média 80'], ['mm200', 'Média 200'], ['zonas', 'Suportes e resistências'], ['volume', 'Volume'], ['ifr', 'IFR'], ['macd', 'MACD'], ['estocastico', 'Estocástico'], ['bollinger', 'Bollinger'], ['ema9', 'Média 9'], ['niveis', 'Níveis e gaps']] as const).map(([chave, rotulo]) => (
             <button key={chave} className={`chip ${opcoes[chave] ? 'selected' : ''}`} aria-pressed={opcoes[chave]} onClick={() => setOpcoes({ ...opcoes, [chave]: !opcoes[chave] })}>
               {rotulo}
             </button>
           ))}
         </div>
-        <GraficoPrecoAcao key={`${ticker}-${periodicidade}-${janelaAtiva}`} barras={barrasDoGrafico} zonas={zonasDoGrafico} nome={ticker} periodicidade={periodicidade} janela={janelaAtiva === 0 ? barrasDoGrafico.length : Math.min(janelaAtiva, barrasDoGrafico.length)} opcoes={opcoes} />
+        <GraficoPrecoAcao key={`${ticker}-${periodicidade}-${janelaAtiva}`} barras={barrasDoGrafico} zonas={zonasDoGrafico} niveis={niveisDoGrafico.niveis} gaps={niveisDoGrafico.gaps} caixa={niveisDoGrafico.caixa} nome={ticker} periodicidade={periodicidade} janela={janelaAtiva === 0 ? barrasDoGrafico.length : Math.min(janelaAtiva, barrasDoGrafico.length)} opcoes={opcoes} />
         <NotaDoHistorico barras={barrasDoGrafico} estado={dados.historicoLongo} />
+        {opcoes.niveis && <NotaDosNiveis n={niveisDoGrafico} />}
         <span className="tiny muted justify">Todo o histórico de preços vem de arquivos da B3. O volume é financeiro (R$), não quantidade de ações. Dividendos não ajustam o preço.</span>
       </Modulo>
 

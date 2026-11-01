@@ -183,6 +183,23 @@ describe('Simule Ações: abas de análise', () => {
     expect(screen.getByRole('img', { name: /candles diários de ALFA3, 800 pregões/ })).toBeTruthy()
   })
 
+  it('o gráfico tem Bollinger, média 9 e níveis; os níveis ficam escritos e podem ser desligados', () => {
+    abrir(/Análise técnica/)
+    for (const nome of ['Bollinger', 'Média 9', 'Níveis e gaps']) expect(screen.getByRole('button', { name: nome }).getAttribute('aria-pressed')).toBe('true')
+    const niveis = screen.getByTestId('niveis-do-grafico').textContent ?? ''
+    expect(niveis).toMatch(/abertura da semana de \d\d\/\d\d: R\$/)
+    expect(niveis).toContain('aproximada pelo fechamento anterior')
+    fireEvent.click(screen.getByRole('button', { name: 'Níveis e gaps' }))
+    expect(screen.queryByTestId('niveis-do-grafico')).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Bollinger' }))
+    expect(screen.getByRole('button', { name: 'Bollinger' }).getAttribute('aria-pressed')).toBe('false')
+  })
+
+  it('com o histórico longo a abertura da semana é a real', () => {
+    abrir(/Análise técnica/, historicoLongoDeAlfa())
+    expect(screen.getByTestId('niveis-do-grafico').textContent).not.toContain('aproximada pelo fechamento anterior')
+  })
+
   it('o gráfico responde ao teclado e mostra a data lida', () => {
     abrir(/Análise técnica/)
     const g = screen.getByRole('img', { name: /Gráfico de candles diários de ALFA3/ })

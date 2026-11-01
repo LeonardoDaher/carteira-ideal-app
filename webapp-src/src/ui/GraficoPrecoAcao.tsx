@@ -3,6 +3,9 @@ import type { KeyboardEvent, PointerEvent } from 'react'
 import type { Barra, ZonaPreco } from '../domain/analiseTecnica'
 import { estocasticoSerie, macdSerie, rsiSerie } from '../domain/analiseTecnica'
 import { mediaMovel } from '../domain/futuros'
+import type { CaixaDaBase, GapAberto, NivelDePreco } from '../domain/niveisDoGrafico'
+import { bollinger } from '../domain/niveisDoGrafico'
+import { ema } from '../domain/analiseTecnica'
 import { dataCurta, dataLonga, numero, reais } from './formatoAnalise'
 
 const W = 340
@@ -26,6 +29,11 @@ const COR_SUPORTE = 'oklch(66% 0.19 250)'
 const COR_RESISTENCIA = 'oklch(60% 0.24 25)'
 const COR_MACD = 'oklch(72% 0.13 235)'
 const COR_SINAL = 'oklch(75% 0.16 60)'
+const COR_BANDA = 'oklch(68% 0.08 250)'
+const COR_EMA9 = 'oklch(80% 0.13 200)'
+const COR_ABERTURA = 'oklch(82% 0.15 85)'
+const COR_GAP = 'oklch(70% 0.12 300)'
+const COR_BASE = 'oklch(72% 0.2 350)'
 
 export interface OpcoesDoGrafico {
   mm21: boolean
@@ -36,6 +44,10 @@ export interface OpcoesDoGrafico {
   ifr: boolean
   macd: boolean
   estocastico: boolean
+  bollinger: boolean
+  ema9: boolean
+  /** Abertura da semana, média de 200 semanas, gaps abertos e caixa da base. */
+  niveis: boolean
 }
 
 /** Trecho visível: `qtd` candles, terminando `desloc` candles antes do último. */
@@ -76,7 +88,7 @@ function passoRedondo(amplitude: number, linhas = 4) {
  * Com o histórico longo do COTAHIST (`abe`) o corpo vai da abertura real ao fechamento; sem ele (Boletim de Preços, que não traz a
  * abertura) vai do fechamento do pregão anterior ao do dia, e o gap de abertura não aparece. O pavio vai da mínima à máxima. Toque, arraste ou use as setas para ler cada dia.
  */
-export function GraficoPrecoAcao({ barras, zonas, nome, janela = 120, opcoes, periodicidade = 'diario' }: { barras: Barra[]; zonas: ZonaPreco[]; nome: string; janela?: number; opcoes: OpcoesDoGrafico; periodicidade?: 'diario' | 'semanal' | 'mensal' }) {
+export function GraficoPrecoAcao({ barras, zonas, nome, janela = 120, opcoes, periodicidade = 'diario', niveis = [], gaps = [], caixa = null }: { barras: Barra[]; zonas: ZonaPreco[]; nome: string; janela?: number; opcoes: OpcoesDoGrafico; periodicidade?: 'diario' | 'semanal' | 'mensal'; niveis?: (NivelDePreco & { cor?: string })[]; gaps?: GapAberto[]; caixa?: CaixaDaBase | null }) {
   const [indice, setIndice] = useState<number | null>(null)
   const [vista, setVista] = useState<VistaDoGrafico>({ qtd: janela, desloc: 0 })
   const svgRef = useRef<SVGSVGElement>(null)
@@ -88,7 +100,7 @@ export function GraficoPrecoAcao({ barras, zonas, nome, janela = 120, opcoes, pe
   // Os indicadores são calculados uma vez sobre todo o histórico: ampliar e arrastar só recortam as séries prontas.
   const ind = useMemo(() => {
     const fech = barras.map((b) => b.fech)
-    return { m21: mediaMovel(fech, 21), m80: mediaMovel(fech, 80), m200: mediaMovel(fech, 200), ifr: rsiSerie(fech), macd: macdSerie(fech), est: estocasticoSerie(barras) }
+    return { m21: mediaMovel(fech, 21), m80: mediaMovel(fech, 80), m200: mediaMovel(fech, 200), e9: ema(fech, 9), bandas: bollinger(fech, 21, 2), ifr: rsiSerie(fech), macd: macdSerie(fech), est: estocasticoSerie(barras) }
   }, [barras])
 
   // A roda do mouse amplia e reduz em torno do candle sob o ponteiro. Precisa de ouvinte não passivo para segurar a rolagem da página.
@@ -114,11 +126,16 @@ export function GraficoPrecoAcao({ barras, zonas, nome, janela = 120, opcoes, pe
     const v21 = ind.m21.slice(inicio, fim)
     const v80 = ind.m80.slice(inicio, fim)
     const v200 = ind.m200.slice(inicio, fim)
+    const ve9 = ind.e9.slice(inicio, fim)
+    const bSup = ind.bandas.superior.slice(inicio, fim)
+    const bInf = ind.bandas.inferior.slice(inicio, fim)
     const relevantes = [
       ...vis.flatMap((b, k) => [b.max, b.min, b.abe ?? (k > 0 ? vis[k - 1].fech : b.fech)]),
       ...(opcoes.mm21 ? v21 : []),
       ...(opcoes.mm80 ? v80 : []),
       ...(opcoes.mm200 ? v200 : []),
+      ...(opcoes.ema9 ? ve9 : []),
+      ...(opcoes.bollinger ? [...bSup, ...bInf] : []),
     ].filter((v): v is number => v !== null)
     let minimo = Math.min(...relevantes)
     let maximo = Math.max(...relevantes)
@@ -130,6 +147,25 @@ export function GraficoPrecoAcao({ barras, zonas, nome, janela = 120, opcoes, pe
     for (const z of zonasVisiveis) {
       minimo = Math.min(minimo, z.inferior)
       maximo = Math.max(maximo, z.superior)
+    }
+    // Níveis, gaps abertos e caixa da base entram na escala só se estiverem perto do preço, como as zonas.
+    const perto = (a: number, b: number) => b >= minimo - folgaZona && a <= maximo + folgaZona
+    const niveisVisiveis = opcoes.niveis ? niveis.filter((nv) => perto(nv.preco, nv.preco)) : []
+    const gapsVisiveis = opcoes.niveis ? gaps.filter((g) => perto(g.inferior, g.superior)) : []
+    const kCaixaIni = caixa ? vis.findIndex((b) => b.data >= caixa.inicio) : -1
+    const kCaixaFim = caixa ? vis.reduce((m, b, k) => (b.data <= caixa.fim ? k : m), -1) : -1
+    const caixaVisivel = opcoes.niveis && caixa && kCaixaIni >= 0 && kCaixaFim >= kCaixaIni && perto(caixa.fundo, caixa.topo) ? caixa : null
+    for (const nv of niveisVisiveis) {
+      minimo = Math.min(minimo, nv.preco)
+      maximo = Math.max(maximo, nv.preco)
+    }
+    for (const g of gapsVisiveis) {
+      minimo = Math.min(minimo, g.inferior)
+      maximo = Math.max(maximo, g.superior)
+    }
+    if (caixaVisivel) {
+      minimo = Math.min(minimo, caixaVisivel.fundo)
+      maximo = Math.max(maximo, caixaVisivel.topo)
     }
     const passo = passoRedondo(maximo - minimo || 1)
     const yMin = Math.floor(minimo / passo) * passo
@@ -177,19 +213,25 @@ export function GraficoPrecoAcao({ barras, zonas, nome, janela = 120, opcoes, pe
         ? viradas.filter((_, j) => j % passoAno === 0)
         : [0, 1, 2, 3, 4].map((j) => Math.round(((n - 1) * j) / 4)).filter((v, i, a) => a.indexOf(v) === i).map((k) => ({ k, texto: dataCurta(vis[k].data), ano: false }))
     // Preço escrito na ponta de cada zona (azul/vermelho); afasta os rótulos que ficariam um sobre o outro e some com os da grade que colidem.
-    const rotulosZona = zonasVisiveis
-      .map((z) => ({ tipo: z.tipo, valor: z.tipo === 'suporte' ? z.superior : z.inferior, y: y(z.tipo === 'suporte' ? z.superior : z.inferior) }))
-      .sort((a, b) => a.y - b.y)
+    const rotulosZona = [
+      ...zonasVisiveis.map((z) => ({ cor: z.tipo === 'suporte' ? COR_SUPORTE : COR_RESISTENCIA, valor: z.tipo === 'suporte' ? z.superior : z.inferior, y: y(z.tipo === 'suporte' ? z.superior : z.inferior) })),
+      ...niveisVisiveis.map((nv) => ({ cor: nv.cor ?? COR_ABERTURA, valor: nv.preco, y: y(nv.preco) })),
+    ].sort((a, b) => a.y - b.y)
     for (let k = 1; k < rotulosZona.length; k++) rotulosZona[k].y = Math.max(rotulosZona[k].y, rotulosZona[k - 1].y + 9)
     const gradeSemColisao = grade.filter((v) => rotulosZona.every((r) => Math.abs(r.y - y(v)) > 9))
     return {
-      vis, n, largura, x, y, yVol, grade: gradeSemColisao, marcas, zonasVisiveis, minimo, maximo, H, fundoPaineis, rotulosZona,
+      vis, n, largura, x, y, yVol, grade: gradeSemColisao, marcas, zonasVisiveis, niveisVisiveis, gapsVisiveis, caixaVisivel, kCaixaIni, kCaixaFim, minimo, maximo, H, fundoPaineis, rotulosZona,
       pVolume, pIfr, pMacd, pEst, yIfr, yMacd, yEst, ifr, mLinha, mSinal, mHist, eK, eD,
       cK: linha(eK, yEst), cD: linha(eD, yEst),
-      c21: linha(v21), c80: linha(v80), c200: linha(v200),
+      c21: linha(v21), c80: linha(v80), c200: linha(v200), cE9: linha(ve9), cSup: linha(bSup), cInf: linha(bInf),
+      areaBandas: (() => {
+        const idx = bSup.map((v, k) => (v !== null && bInf[k] !== null ? k : -1)).filter((k) => k >= 0)
+        if (idx.length < 2) return ''
+        return `M${idx.map((k) => `${x(k).toFixed(1)} ${y(bSup[k] as number).toFixed(1)}`).join('L')}L${[...idx].reverse().map((k) => `${x(k).toFixed(1)} ${y(bInf[k] as number).toFixed(1)}`).join('L')}Z`
+      })(),
       cIfr: linha(ifr, yIfr), cMacd: linha(mLinha, yMacd), cSinal: linha(mSinal, yMacd),
     }
-  }, [barras, ind, total, qtd, desloc, zonas, opcoes.mm21, opcoes.mm80, opcoes.mm200, opcoes.zonas, opcoes.volume, opcoes.ifr, opcoes.macd, opcoes.estocastico])
+  }, [barras, ind, total, qtd, desloc, zonas, opcoes.mm21, opcoes.mm80, opcoes.mm200, opcoes.zonas, opcoes.volume, opcoes.ifr, opcoes.macd, opcoes.estocastico, opcoes.bollinger, opcoes.ema9, opcoes.niveis, niveis, gaps, caixa])
 
   const { vis, n, x, y, yVol, largura, H, pVolume, pIfr, pMacd, pEst } = dados
   if (n < 2) return <div className="small muted" role="status">Histórico insuficiente para o gráfico.</div>
@@ -294,7 +336,36 @@ export function GraficoPrecoAcao({ barras, zonas, nome, janela = 120, opcoes, pe
           )
         })}
         {dados.rotulosZona.map((r, k) => (
-          <text key={`${r.tipo}-${k}`} x={W - R + 4} y={r.y + 3} style={{ ...estiloEixo, fill: r.tipo === 'suporte' ? COR_SUPORTE : COR_RESISTENCIA, fontWeight: 700 }}>{numero(r.valor, 2)}</text>
+          <text key={k} x={W - R + 4} y={r.y + 3} style={{ ...estiloEixo, fill: r.cor, fontWeight: 700 }}>{numero(r.valor, 2)}</text>
+        ))}
+
+        {opcoes.bollinger && dados.areaBandas && <path d={dados.areaBandas} fill={COR_BANDA} opacity={0.07} />}
+
+        {dados.caixaVisivel && (
+          <g>
+            <rect
+              x={x(dados.kCaixaIni) - largura / 2}
+              y={y(dados.caixaVisivel.topo)}
+              width={Math.max(2, (dados.kCaixaFim - dados.kCaixaIni + 1) * largura)}
+              height={Math.max(2, y(dados.caixaVisivel.fundo) - y(dados.caixaVisivel.topo))}
+              fill={COR_BASE}
+              opacity={0.1}
+              stroke={COR_BASE}
+              strokeWidth={0.8}
+            />
+            {!dados.caixaVisivel.rompeu && <line x1={x(dados.kCaixaFim) + largura / 2} x2={W - R} y1={y(dados.caixaVisivel.topo)} y2={y(dados.caixaVisivel.topo)} stroke={COR_BASE} strokeWidth={0.6} strokeDasharray="3 3" />}
+          </g>
+        )}
+
+        {dados.gapsVisiveis.map((g) => (
+          <g key={`gap-${g.data}`}>
+            <rect x={L} y={y(g.superior)} width={W - R - L} height={Math.max(1.5, y(g.inferior) - y(g.superior))} fill={COR_GAP} opacity={0.16} />
+            <line x1={L} x2={W - R} y1={y(g.meio)} y2={y(g.meio)} stroke={COR_GAP} strokeWidth={0.6} strokeDasharray="2 3" />
+          </g>
+        ))}
+
+        {dados.niveisVisiveis.map((nv) => (
+          <line key={nv.chave} x1={L} x2={W - R} y1={y(nv.preco)} y2={y(nv.preco)} stroke={nv.cor ?? COR_ABERTURA} strokeWidth={0.9} strokeDasharray={nv.chave === 'media-200-semanas' ? '6 3' : '3 3'} />
         ))}
 
         {vis.map((b, k) => {
@@ -316,6 +387,9 @@ export function GraficoPrecoAcao({ barras, zonas, nome, janela = 120, opcoes, pe
         {opcoes.mm200 && <path d={dados.c200} fill="none" stroke={COR_MM200} strokeWidth={2.2} strokeDasharray="6 3" strokeLinejoin="round" />}
         {opcoes.mm80 && <path d={dados.c80} fill="none" stroke={COR_MM80} strokeWidth={0.9} strokeLinejoin="round" />}
         {opcoes.mm21 && <path d={dados.c21} fill="none" stroke={COR_MM21} strokeWidth={0.9} strokeLinejoin="round" />}
+        {opcoes.bollinger && <path d={dados.cSup} fill="none" stroke={COR_BANDA} strokeWidth={0.8} strokeLinejoin="round" />}
+        {opcoes.bollinger && <path d={dados.cInf} fill="none" stroke={COR_BANDA} strokeWidth={0.8} strokeLinejoin="round" />}
+        {opcoes.ema9 && <path d={dados.cE9} fill="none" stroke={COR_EMA9} strokeWidth={0.9} strokeLinejoin="round" />}
 
         {pVolume && <text x={L + 2} y={pVolume.topo + 8} style={estiloEixo}>Volume</text>}
 
@@ -385,6 +459,11 @@ export function GraficoPrecoAcao({ barras, zonas, nome, janela = 120, opcoes, pe
         {opcoes.mm21 && <span><svg width="18" height="8" aria-hidden="true"><line x1="1" x2="17" y1="4" y2="4" stroke={COR_MM21} strokeWidth="1" /></svg> Média 21</span>}
         {opcoes.mm80 && <span><svg width="18" height="8" aria-hidden="true"><line x1="1" x2="17" y1="4" y2="4" stroke={COR_MM80} strokeWidth="1" /></svg> Média 80</span>}
         {opcoes.mm200 && <span><svg width="18" height="8" aria-hidden="true"><line x1="1" x2="17" y1="4" y2="4" stroke={COR_MM200} strokeWidth="2.5" strokeDasharray="5 2" /></svg> Média 200</span>}
+        {opcoes.ema9 && <span><svg width="18" height="8" aria-hidden="true"><line x1="1" x2="17" y1="4" y2="4" stroke={COR_EMA9} strokeWidth="1" /></svg> Média 9 (exp.)</span>}
+        {opcoes.bollinger && <span><svg width="18" height="8" aria-hidden="true"><line x1="1" x2="17" y1="4" y2="4" stroke={COR_BANDA} strokeWidth="1" /></svg> Bandas de Bollinger (21, 2)</span>}
+        {opcoes.niveis && dados.niveisVisiveis.some((nv) => nv.chave === 'abertura-semana') && <span><svg width="18" height="8" aria-hidden="true"><line x1="1" x2="17" y1="4" y2="4" stroke={COR_ABERTURA} strokeWidth="1.2" strokeDasharray="3 2" /></svg> Abertura da semana</span>}
+        {opcoes.niveis && dados.gapsVisiveis.length > 0 && <span><svg width="14" height="8" aria-hidden="true"><rect width="14" height="8" fill={COR_GAP} opacity="0.5" /></svg> Gap aberto</span>}
+        {opcoes.niveis && dados.caixaVisivel && <span><svg width="14" height="8" aria-hidden="true"><rect width="14" height="8" fill="none" stroke={COR_BASE} strokeWidth="1.2" /></svg> Base</span>}
         {opcoes.zonas && <span><svg width="18" height="8" aria-hidden="true"><line x1="1" x2="17" y1="4" y2="4" stroke={COR_SUPORTE} strokeWidth="1" /></svg> Suporte <svg width="18" height="8" aria-hidden="true"><line x1="1" x2="17" y1="4" y2="4" stroke={COR_RESISTENCIA} strokeWidth="1" /></svg> Resistência</span>}
         {(opcoes.macd || opcoes.estocastico) && <span><svg width="18" height="8" aria-hidden="true"><line x1="1" x2="17" y1="4" y2="4" stroke={COR_MACD} strokeWidth="2" /></svg> {opcoes.macd && opcoes.estocastico ? 'MACD / %K' : opcoes.macd ? 'MACD' : '%K'} <svg width="18" height="8" aria-hidden="true"><line x1="1" x2="17" y1="4" y2="4" stroke={COR_SINAL} strokeWidth="2" /></svg> {opcoes.macd && opcoes.estocastico ? 'Sinal / %D' : opcoes.macd ? 'Sinal' : '%D'}</span>}
       </div>
