@@ -1,98 +1,177 @@
-# Critérios de análise gráfica observados no Farol (estudo para a análise técnica)
+# Estudo: como o Farol lê o gráfico, e como replicar isso nos gráficos do app
 
-Documento de estudo, **não é decisão**. Registra como o analista Thiago Bisi lê gráficos no programa diário **Farol** (playlist "Farol – Análise diária de oportunidades de investimentos", YouTube), para decidir o que a análise técnica do app pode adotar como padrão. Nada aqui está implementado por causa deste documento.
+Documento de **estudo**, não é decisão nem recomendação. Registra o método de análise gráfica do analista Thiago Bisi no programa diário **Farol** (playlist "Farol – Análise diária de oportunidades de investimentos", YouTube), organiza esse método em regras que o app consegue medir e propõe como entrar nos gráficos e na análise técnica de cada ação. **Nada aqui foi implementado.** Os números marcados como "provisório" são chute de partida e devem ser calibrados com o histórico de 5 anos (D120) antes de valerem.
 
-## Fontes e limites
+## 1. Fontes e limites
 
-- **Transcrições lidas (automáticas, sem revisão):** Farol de 30/10/2026 (inteira), 23/10, 15/10 e 09/10/2026 (metade final de cada: ações). **Quatro vídeos: amostra ainda pequena.** O de 30/10 foi depois de uma semana de queda histórica (eleição) e o de 09/10 foi um dia de máxima histórica do índice, duas situações extremas e opostas. Outras transcrições (16/10, 17/09, 21/10 e mais) não carregaram no navegador do app e ficaram de fora.
-- A transcrição não mostra o que ele desenha. Linhas, canais e zonas são lidos pelo que ele diz ("aqui nos 17,80", "essa faixa"), sem ver o traço.
-- É análise **discricionária**: parte do que ele faz é julgamento visual do dia. O que não vira regra clara fica marcado como "discricionário".
-- Os critérios abaixo são conceitos gerais de análise gráfica clássica. Não copiar texto, imagens nem nomes de métodos próprios dele no app. Os vídeos também divulgam cursos pagos; isso não é aproveitado.
+**Vídeos lidos (transcrição automática do YouTube, sem revisão):**
 
-## Vocabulário dele
+| Data | O que foi lido | Contexto de mercado |
+|---|---|---|
+| 30/10/2026 | inteiro | semana de queda histórica (resultado da eleição), índice −18% |
+| 23/10/2026 | parte das ações | véspera do segundo turno, mercado lateral |
+| 15/10/2026 | parte das ações | correção curta em tendência de alta |
+| 14/10/2026 | parte das ações | lateral com viés de alta |
+| 09/10/2026 | parte das ações | índice em máxima histórica |
+| 06/10/2026 | parte das ações | alta forte depois do primeiro turno |
+| 02/10/2026 | parte das ações | rompimento do índice, bandas estreitas |
+| 10/09/2026 | parte das ações | índices americanos em queda e vários rompimentos pontuais em ações |
+| 28/08/2026 | parte das ações | **apresentado por outro analista**; só usado para vocabulário (padrão "1-2-3") |
 
-LTA e LTB (linhas de tendência de alta e de baixa), **linha de retorno** (a paralela do canal), canal, congestão, retângulo, **perna** (de alta ou de baixa), **zigue-zague ascendente ou descendente** (sequência de topos e fundos), pivô, **fundo duplo**, **barra de ignição** (barra forte que inicia movimento), **barra de decisão**, **barra elefante** (barra grande, "dinossauro" quando exagerada), **barra ignorada** (candle que não foi superado no dia seguinte, usado como gatilho), inside bar, **trap** (rompe o nível e volta), **pullback** (teste do nível rompido), **abertura da segunda-feira**, **fronteira de gap**, "sobrevendido", "esticado".
+Sete vídeos dele, nove dias de mercado diferentes. Não li os 100 vídeos da playlist. Leitura de vídeo no navegador do app é lenta e instável: em vários vídeos a transcrição não carregou e eles ficaram de fora.
 
-## Critérios, por tema
+**O que a transcrição não mostra.** O desenho dele (linhas, caixas, canais) só aparece no vídeo. Tirei uma imagem do vídeo de 10/09 para conferir os indicadores da plataforma dele (seção 2). Os níveis e as linhas de tendência eu leio pelo que ele diz ("aqui nos 17,80", "essa faixa").
 
-### Suporte e resistência (níveis)
-1. São **zonas** ("faixa", "região", "patamar"), nunca um preço exato.
-2. Vêm de: fundos e topos anteriores relevantes (ele nomeia o mês: "fundo de agosto", "topo de abril", "fundo do começo de 2025"); a **abertura da segunda-feira** (abertura da semana); **bordas de gap** ("suporte do gap", "fronteira de gap"); **médias móveis** (21 e 200 diárias, 200 semanal); LTA, LTB e linha de retorno de canais; bordas de retângulo e de congestão; números redondos.
-3. Nível já rompido vira o contrário e é testado no pullback ("o teste desse patamar rompido").
-4. O nível mais importante é o de **timeframe maior** (semanal pesa mais que diário).
+**É análise discricionária.** Há regras que ele repete e que dá para medir; há julgamentos de "gráfico bonito" que não dá. O que não for mensurável fica fora do cálculo e marcado como **discricionário**.
 
-### Tendência e estrutura
-5. Tendência = sequência de topos e fundos (zigue-zague), mais o preço contra a média de 21 e a LTA ou LTB. Reversão exige **romper o canal e formar zigue-zague contrário**, não um candle isolado.
-6. Correção dentro de tendência de alta tem **volume baixo** e dura poucos candles ("três candles de queda, ideia de pullback"); isso favorece a continuação.
-7. Movimento "em linha reta" sem pausa é desconfiado; espera-se repique ou correção.
+**Atribuição.** Os critérios abaixo são conceitos gerais de análise gráfica clássica e de operação de swing trade. Não copiar texto, imagens nem nomes de cursos dele no app. Os vídeos também vendem cursos; isso não é aproveitado.
 
-### Médias
-8. Média de **21** é a referência de swing: não comprar longe dela ("gostaria de uma aproximação com a média de 21"); a de **9** perdida indica correção; a de **200** (diária e semanal) é suporte ou resistência forte.
-9. **Bandas** (provavelmente Bollinger): "abrindo bandas" é expansão de volatilidade e dá sinal de entrada; "bandas estreitas" é compressão antes do movimento.
+## 2. O gráfico que ele usa (padrão visual)
 
-### Candles
-10. Candle só vale **contra o contexto**: martelo precisa de amplitude relevante frente à volatilidade e volume que se destaque; martelo pequeno "não é candle de reversão".
-11. Padrões que ele usa: engolfo de alta (com volume), martelo, barra de ignição, barra elefante, barra ignorada, inside bar, trap.
-12. **Não opera contra barra grande** que sugere início de movimento, inclusive no semanal.
-13. Candle verde com volume fraco no meio de queda **não é reversão**.
+Na imagem do vídeo de 10/09 (SUZB3, diário), a plataforma mostra:
 
-### Entrada, rompimento e pullback
-14. Duas entradas típicas: **rompimento da resistência** ou **teste do suporte** (inclusive suporte de gap) com reação.
-15. Gatilho de compra: **superar a máxima do candle de sinal** (martelo, barra ignorada, trap), com volume.
-16. **Trap em suporte** (tenta romper e volta) vira compra se superar a máxima seguinte.
-17. Rompimento precisa de confirmação; "pullback de um candle só nunca é legal"; rompimento que falha vira sinal contrário.
-18. Reversão de queda: fundo duplo só depois de **romper o topo intermediário**.
+- **Candles** diários.
+- **Bandas de Bollinger A [21]**: média aritmética de 21 períodos no centro e duas bandas (provavelmente desvio 2). A "média de 21" que ele cita o tempo todo é o **centro da banda**.
+- **Média móvel exponencial de 9** (a "média de 9") e **média aritmética de 50**.
+- **Volume** com uma média móvel aritmética de 21 sobre ele.
+- Uma **caixa** (retângulo) desenhada à mão sobre a base de consolidação, com linhas horizontais nos extremos.
+- Ele também cita a **média de 200** (diária e semanal), linhas de tendência (**LTA** e **LTB**), canais e a **linha de retorno** (a paralela do canal).
 
-### Stop, alvo e risco
-19. Stop **abaixo da consolidação** ou da mínima do candle de sinal; quando o stop fica "caro", não entra e espera um gatilho menor (no gráfico de 60 minutos).
-20. Alvo é a próxima resistência ou o topo anterior; ele avalia se há "amplitude para um para um" (retorno pelo menos igual ao risco).
-21. Risco de **gap de abertura** (stop não executa); em evento de risco (eleição, balanço) o swing é evitado.
-22. Posição aberta que perde o sinal sai e reentra se vier novo sinal.
+Como ele analisa **três períodos**: diário e semanal para contexto, **60 minutos** para o gatilho e o stop curto ("um gráfico de 60 minutos pode ser usado para swing trade").
 
-### Ação em tendência forte (acrescentado pelo vídeo de 09/10)
-28. **Não persegue o movimento**: "difícil se posicionar no meio de um movimento forte"; se a ação já correu da barra de sinal, "pagar ainda mais caro não dá, tem que esperar uma correção" (de preferência até a média de 21 ou até dentro do gap).
-29. Entrada possível: **superação da máxima do dia anterior** logo no começo do pregão, com stop abaixo da mínima do sinal.
-30. **Stop por mínimas** (stop móvel) enquanto o papel sobe: abaixo da mínima do dia ou da véspera. Quem opera assim "não é stopado há bastante tempo".
-31. Aceita **stop largo (12%) só se o alvo entregar pelo menos o mesmo** (relação retorno/risco de 1 ou mais). Alvo: "a resistência mais forte" (por exemplo 8,65); a média de 200 aparece como teto em que o papel "trava".
-32. **Rompimento de máxima histórica** é lido pelo comportamento: sombra e retomada no dia seguinte indicam rompimento verdadeiro, e não falso. Fundo duplo, rompimento do gap, "respiro" e depois rompimento da cabeça do pullback é uma sequência de compra que ele aprecia.
+## 3. O método, em camadas
 
-### Volume e qualidade
-23. Volume confirma reversão e rompimento; alta com volume pequeno não muda nada; movimento feito no **leilão** é suspeito.
+### 3.1 Contexto de mercado (antes da ação)
+1. Olha o **índice** e os mercados externos antes das ações. Sem sinal de reversão no índice, evita compra de repique em ação. Num mercado em queda, a conclusão frequente é "nada a fazer".
+2. **Risco de evento**: antes de eleição, balanço ou decisão de juros, evita swing, porque o preço pode abrir em **gap** e o stop não executa ("o mercado pode abrir com gap de 10% e eu não consigo stopar"). Ele cita a "temporada de balanços".
+3. Considera horário de pregão e leilão: movimento feito no **leilão** é suspeito.
 
-### Contexto e disciplina
-24. Olha o **índice** e o mercado externo antes da ação; sem sinal de reversão no índice, evita compra de repique em ação.
-25. "**Não vejo sinal, então não faço nada**" é uma conclusão normal e frequente; não vende depois de queda esticada nem compra sem sinal.
-26. Em temporada de balanço, considera a data do resultado.
+### 3.2 Tendência e estrutura (por período)
+4. Tendência = **zigue-zague** (sequência de topos e fundos) mais o preço contra a média de 21 e a **LTA** ou **LTB**. **Pivô de alta** = rompe o topo anterior depois de um fundo; **pivô de baixa** = o oposto. Fundo duplo só "vale" depois de **romper o topo intermediário**.
+5. **Reversão exige mais que um candle**: romper o canal de baixa e formar zigue-zague ascendente. Um candle verde pequeno, com volume fraco, no meio de uma queda "não é reversão".
+6. Correção dentro de tendência de alta tem **volume baixo** e dura poucos candles; isso favorece a continuação ("três candles de queda, ideia de pullback").
+7. Movimento em "linha reta", sem pausa, é desconfiado: espera repique ou correção.
+8. **Retângulo** (base) e **congestão**: dentro de uma base, o viés é de rompimento no sentido da tendência anterior; compra na base mira a resistência da base, e rompimento é o sinal de entrada.
 
-### Vários gráficos
-27. **Diário e semanal** dão o contexto; **60 minutos** dão o gatilho e o stop curto, e "pode ser usado para swing trade". O app **não tem** gráfico de 60 minutos (D120).
+### 3.3 Níveis (suporte e resistência)
+9. São **zonas** ("faixa", "região", "patamar"), nunca preço exato.
+10. Origem dos níveis: fundos e topos anteriores nomeados pelo mês ("fundo de agosto", "topo de fevereiro"); **abertura da semana** (a abertura da segunda-feira); **bordas de gap** ("fronteira 1 e fronteira 2 do gap"); médias de 9, 21, 50, 200 (a de 200 semanal é suporte forte); LTA, LTB e linha de retorno; bordas de retângulo; números redondos; máxima histórica.
+11. Nível rompido vira o contrário e é testado no pullback.
+12. O nível do período maior pesa mais (semanal sobre diário).
 
-## O que o app já tem e o que falta
+### 3.4 Gatilhos e setups de compra (o coração do método)
+Ele compra quase sempre **na superação da máxima de um candle de sinal**, depois que um setup se formou. Setups observados:
+
+- **A. Rompimento de base com volatilidade comprimida.** A ação anda de lado por semanas, as **bandas de Bollinger estreitam** e a volatilidade cai; um dia rompe a base com **volume alto**, candle firme (ignição) e as **bandas começam a abrir**. Bom quando não está "caro" (perto do limite da base) e o stop é curto. Exemplos: "volume alto, bandas super estreitas, rompendo resistência, sem ficar muito caro"; "Suzano: 12 candles laterais, rompendo na 13ª, tem base mínima".
+- **B. Pullback em tendência de alta.** A ação volta à **média de 9**, à **média de 21**, à **linha de retorno** do canal de alta, à LTA ou a **50% do gap**, e dá um candle de reversão (martelo, engolfo, trap, barra ignorada). Entrada na superação da máxima desse candle. Quer correção "profunda o bastante": "a gente tá muito distante da média de 21; eu faria nada".
+- **C. Trap em suporte.** O preço tenta romper um fundo, não consegue e volta; compra na superação da máxima do candle do trap, com volume. Vale também o trap na mínima da barra de ignição, idealmente perto da média de 9.
+- **D. Regra do gap.** Depois de um gap de alta, espera a correção até **50% da amplitude do gap, de corpo a corpo**; ou o preço "fecha o gap" e reage. Entrar "através de um gap" é aceito quando é rompimento de base. Gap aberto não preenchido é um alvo de correção.
+- **E. Reversão de fundo.** Fundo duplo ou fundo mais alto, **pivô de alta** (romper o topo intermediário), rompimento da LTB, **zigue-zague ascendente**. Sequência que ele aprecia: fundo duplo, rompe o gap, respiro, pullback da cabeça e superação da máxima.
+- **F. Barra ignorada / inside bar.** Candle (muitas vezes vermelho) que não foi superado no dia seguinte; compra na superação da máxima, com **stop curto** na mínima da barra pequena.
+- **G. Barra de ignição / barra elefante.** Candle grande e firme que inicia movimento; ele evita operar **contra** barra grande, inclusive no semanal, e usa a ignição que rompe consolidação como gatilho.
+- **H. "1-2-3 de compra"** (citado por outro analista no vídeo de 28/08): fundo, topo e um segundo fundo mais alto, comprado na superação da máxima do segundo fundo. Secundário, não é dele.
+- **Venda (rara no swing):** retorno à média de ação muito esticada, rompimento de suporte com estrela cadente e volume. Ele diz com frequência que "ainda não é momento de venda" e evita vender depois de queda esticada.
+
+### 3.5 Candles: só valem com contexto
+13. **Martelo**: precisa de amplitude relevante frente à volatilidade e de volume que se destaque; martelo pequeno "não é candle de reversão". **Engolfo de alta**: com volume, sobre o suporte. **Estrela cadente**: reversão de topo com bom volume, mas "fechou em alta, não é bom sinal". Candle que **perde a mínima e engolfa** costuma continuar a alta.
+14. Sombra inferior em candle de alta é positiva; candle de **indecisão** (inside, corpo pequeno) não muda o viés.
+
+### 3.6 Volume e liquidez
+15. Volume confirma rompimento e reversão. Ele cita "volume decente: média de 26 milhões, hoje 50 milhões" (cerca de **2 vezes a média**); a ignição pode valer mesmo com volume só "se destacando um pouco".
+16. **Liquidez mínima**: ação que negocia menos de **R$ 1 milhão por dia** é descartada ("esquece").
+17. Alta com volume fraco não muda nada; queda com volume baixo é correção, não reversão.
+
+### 3.7 Filtros: quando não faz nada
+18. **"Não vejo sinal, então não faço nada"** é uma conclusão normal e frequente. Ele diz o que precisaria ver para mudar de ideia (um nível, um candle).
+19. **Esticado ou sobrecomprado**: longe da média de 9 ou de 21, ou depois de muitos dias de alta, não compra ("difícil se posicionar no meio de movimento forte"); espera correção. Ação já correu da barra de sinal: "pagar ainda mais caro não dá".
+20. **Sobrevendido** depois de queda enorme não é compra sem sinal de reversão; também não vende ali.
+21. **Rompimento que falha** vira sinal contrário; "pullback de um candle só nunca é legal"; rompimento precisa de confirmação (fechamento, volume).
+22. **Stop caro**: se o stop fica longe demais, não entra e espera gatilho menor (no 60 minutos) ou trata como posição (position), não swing.
+23. Contra as médias (preço abaixo da média de 21 e da de 200) a compra exige mais.
+
+### 3.8 Stop, alvo e gestão
+24. **Stop** abaixo da **mínima do candle de sinal**, ou da mínima de ontem, ou abaixo da base, ou do "fundo válido" da estrutura. Stop "frágil" (mínima de hoje) ou "longo" (mínima de ontem) é avaliado contra a distância da média de 21.
+25. **Relação retorno/risco de pelo menos 1:1**: aceita stop de 12% só se o alvo entregar 12%; aceita 3,5% quando a barra é curta.
+26. **Alvo**: próxima resistência, topo anterior, média de 200, fechamento do gap, ou **a altura da base projetada** a partir do rompimento ("uma boa medida de movimento lateral").
+27. **Parcial** na resistência e **stop móvel por mínimas** (abaixo da mínima do dia ou da véspera) enquanto o papel sobe; "quem trabalha stop por mínimas não é stopado há bastante tempo". Ajusta o tamanho da parcial ao novo tamanho do stop.
+28. Posição vendida ou comprada que perde o sinal sai e **reentra** se houver novo sinal.
+
+## 4. Vocabulário dele → regra que o app consegue medir
+
+Todos os números são **provisórios**, para calibrar.
+
+| Termo dele | Regra mensurável proposta |
+|---|---|
+| Média de 21 | Média aritmética de 21 (centro das bandas de Bollinger) |
+| Média de 9 | Exponencial de 9 |
+| Bandas estreitas / abrindo | Largura das bandas (superior − inferior)/centro em percentil dos últimos 120 pregões: estreita se abaixo do percentil 20; "abrindo" se a largura sobe pelo menos 15% em 3 pregões |
+| Base / consolidação | Mínimo de 12 candles com amplitude total (máxima − mínima) até 1,5 × ATR(14) × raiz do número de candles ou até 12% do preço; sem tendência (inclinação da média de 21 próxima de zero) |
+| Barra de ignição | Corpo ≥ 1,5 × ATR(14), fecha no terço superior, sai de base, volume ≥ média de 21 do volume |
+| Barra elefante | Amplitude ≥ 2 × ATR(14) |
+| Barra ignorada | Candle cuja máxima e mínima não foram superadas pelo candle seguinte (inside bar) e cuja amplitude é menor que 0,8 × ATR(14) |
+| Martelo | Sombra inferior ≥ 2 × corpo, fecha no terço superior, amplitude ≥ 0,8 × ATR(14), volume ≥ média de 21 |
+| Engolfo de alta | Corpo de alta que engloba o corpo de baixa anterior, perto de suporte ou da média de 21, volume maior que o do dia anterior |
+| Trap | Preço fura o nível (mínima abaixo do fundo, ou máxima acima do topo) e fecha de volta dentro nos 1 a 3 candles seguintes |
+| Pivô de alta | Fechamento acima do topo intermediário depois de um fundo (pivô de 3 a 5 candles) |
+| Pullback | Primeiro retorno ao nível rompido ou à média (9 ou 21) depois do rompimento, até 10 candles |
+| Gap | Abertura acima da máxima (ou abaixo da mínima) do dia anterior; **fronteira 1** = máxima do dia anterior, **fronteira 2** = abertura do dia do gap; "regra dos 50%" = ponto médio de corpo a corpo |
+| Esticado | Distância do fechamento à média de 21 acima de 2,5 × ATR(14) ou fechamento acima da banda superior |
+| Fundo válido | Último fundo que, se perdido, quebra a sequência de fundos mais altos |
+| Liquidez | Volume financeiro médio de 21 dias ≥ R$ 1 milhão |
+
+## 5. O que o app já tem e o que falta
 
 | Critério | No app hoje | Dá para automatizar? |
 |---|---|---|
-| Zonas por fundos e topos (1, 2) | Sim: pivôs agrupados em zonas (largura limitada a 0,8%–3%), com toques e idade | Já feito; histórico longo ajuda a achar níveis de anos |
-| Abertura da semana e bordas de gap como nível (2, 14) | Não | Sim, direto dos candles (a abertura real existe no histórico de 5 anos) |
-| Média de 200 semanal como nível (2, 8) | Média de 200 diária só com histórico longo | Sim |
-| LTA, LTB, canal e linha de retorno (2, 5) | Não (só canal por regressão em padrões) | Parcial: por dois pivôs, mas é a parte mais discricionária |
-| Zigue-zague (sequência de topos e fundos) (5) | Sim, na estrutura da tendência | Já feito |
-| Média de 9, 21 e distância à 21 (8) | Médias 9, 21, 50, 200; sem leitura de "distância" | Sim |
-| Bandas de Bollinger (9) | Não (ATR sim) | Sim |
-| Martelo, engolfo, barra elefante, ignição, ignorada, inside bar (10–13) | Não (sem abertura até hoje; agora há no histórico longo) | Sim, medidos contra ATR e volume |
-| Gatilho: superar a máxima do candle de sinal (15, 16) | Hipótese de entrada no suporte; sem gatilho de candle | Sim |
-| Rompimento, pullback, falso (17) | Sim, rompimento "confirmado, tentativa ou falso" | Já feito; falta pullback e a regra de 1 candle |
-| Fundo duplo após romper topo intermediário (18) | Fundo duplo sim, sem a regra do topo intermediário | Sim |
-| Stop abaixo do sinal, relação retorno/risco (19, 20, 31) | Sim, stop = suporte menos meio ATR, retorno/risco ≥ 1 | Já feito; falta stop pelo candle de sinal e stop móvel por mínimas (30) |
-| Não perseguir movimento esticado (28) | Parcial: nota de risco e distância às médias | Sim: distância à média de 21 em ATR |
-| Risco de gap e evento (21, 26) | Não | Parcial (data de balanço não está nos dados) |
-| Volume em correção e leilão (6, 23) | Volume contra média de 20 e nas altas contra as quedas; sem leilão | Leilão não (sem dado); resto sim |
-| Contexto do índice (24) | Referência de mercado (BOVA11) na nota | Já feito em parte |
-| "Sem sinal, nada" (25) | Sim: conclusão "sem sinal técnico consistente" | Já feito |
-| 60 minutos (27) | Não | **Não**: falta fonte de dados |
+| Zonas por fundos e topos (3.3) | Sim: pivôs agrupados em zonas de largura limitada, com toques e idade | Já feito |
+| Abertura da semana e bordas de gap como nível | Não | Sim, direto dos candles (abertura real no histórico de 5 anos) |
+| Média de 200 semanal como nível | Média de 200 diária | Sim |
+| Média de 9 exponencial, centro e bandas de Bollinger | Não (médias simples de 21, 80 e 200 no gráfico) | Sim |
+| LTA, LTB, canal e linha de retorno | Não | Parcial: dois pivôs definem a reta; é a parte mais discricionária |
+| Zigue-zague e pivô | Sim (estrutura da tendência) | Já feito; falta "pivô de alta" como evento |
+| Base e rompimento com volume e bandas | Não | Sim |
+| Candles medidos contra ATR e volume (martelo, engolfo, ignição, elefante, ignorada, trap) | Não | Sim |
+| Gatilho pela máxima do candle de sinal, stop pela mínima do sinal | Hipótese de entrada no suporte; stop = suporte menos meio ATR | Sim |
+| Regra dos 50% do gap, fechamento de gap | Não | Sim |
+| Relação retorno/risco, alvo por altura da base, stop móvel por mínimas | Retorno/risco ≥ 1 com alvo nas resistências | Sim |
+| Filtros (esticado, liquidez, stop caro, evento) | Liquidez e risco na nota; sem "esticado" nem "evento" | Esticado e liquidez sim; evento só com calendário de balanços (não temos) |
+| "Sem sinal, nada" | Sim: conclusão "sem sinal técnico consistente" | Já feito |
+| Gráfico de 60 minutos | Não | **Não**: falta fonte de dados (brapi gratuita não libera) |
 
-## Decisões em aberto (do responsável)
+## 6. Como replicar nos gráficos do app
 
-1. Quais itens da coluna "dá para automatizar" entram, e em que ordem. Sugestão de primeira leva, a mais objetiva: abertura da semana e bordas de gap como níveis, média de 200 semanal, candles medidos contra ATR e volume (martelo, engolfo, barra elefante, barra ignorada, inside bar) e gatilho pela máxima do candle de sinal.
-2. LTA e LTB: entram, sabendo que é a parte menos objetiva?
-3. O app cita a inspiração ou escreve só "critérios de análise gráfica clássica"?
-4. Ampliar a amostra de vídeos (dias calmos e de tendência) antes de fixar pesos e limiares, que hoje seriam chute.
+Proposta em quatro camadas, da mais objetiva para a mais discricionária.
+
+**Camada 1: indicadores no gráfico.** Bandas de Bollinger (21, 2) e média exponencial de 9 como opções ligáveis (junto das médias que já existem); volume com média de 21. Resultado visual igual ao que o analista usa.
+
+**Camada 2: níveis.** Somar às zonas atuais: abertura da semana, bordas dos gaps abertos, média de 200 semanal, caixa da base atual (extremos da consolidação), máxima histórica. Cada nível com a origem escrita ("fundo de 12/08", "abertura da semana de 26/10"), como ele fala. LTA e LTB só depois, com ajuste manual possível.
+
+**Camada 3: marcadores de sinal nos candles.** Pequenos símbolos nos candles em que um padrão medido ocorreu (ignição, elefante, ignorada, martelo, engolfo, trap, rompimento de base). O toque no candle explica por que foi marcado e com que números.
+
+**Camada 4: leitura personalizada ("Leitura Farol")** no resumo da análise técnica, por ação:
+- **Tendência** (diário e semanal) e **viés**;
+- **Setup ativo** (A a G acima) ou "nenhum setup";
+- **Gatilho** (preço da máxima do candle de sinal) e se já foi acionado;
+- **Stop** (mínima do sinal ou base) e **distância em %**;
+- **Alvo** (resistência, gap, altura da base) e **retorno/risco**;
+- **Filtros reprovados** (esticada, liquidez baixa, stop longo, mercado em queda), cada um com o motivo;
+- conclusão em texto: "Setup de rompimento de base com volume, gatilho 17,80, stop 16,90 (5,1%), alvo 19,40, retorno/risco 1,8" **ou** "Sem sinal: ação esticada, a 3,1 ATR da média de 21".
+Tudo calculado por regra, descritivo, sem prometer retorno (exceção D19 como a da D119), com o mesmo aviso de "leitura educacional, não é recomendação".
+
+**Calibragem com o histórico de 5 anos.** Antes de fixar os números da seção 4, rodar cada setup nos 5 anos de candles com abertura de 220 ações e medir: quantas vezes aparece, quanto o preço andou nos 5, 10 e 20 pregões seguintes, quantas vezes bateu no stop antes do alvo. Isso troca "chute provisório" por limiar escolhido com dado e mostra se um setup dele funciona no nosso universo. **Cuidado com sobreajuste**: escolher só limiares simples e testar em período que não foi usado para escolher.
+
+## 7. Fases sugeridas
+
+1. **Indicadores e níveis** (camadas 1 e 2): Bollinger, EMA 9, abertura da semana, gaps, média de 200 semanal, caixa da base. Baixo risco.
+2. **Candles e setups medidos** (camada 3 e parte da 4): ignição, elefante, ignorada, martelo, engolfo, trap, rompimento de base, regra dos 50% do gap, com testes unitários por padrão.
+3. **Leitura Farol e filtros** (camada 4): gatilho, stop, alvo, retorno/risco, motivos de "sem sinal".
+4. **Calibragem e backtest** com o histórico de 5 anos, e só então fixar limiares e eventual pontuação.
+5. **Linhas de tendência** e eventual **60 minutos** se houver fonte de dados.
+
+## 8. Decisões em aberto (do responsável)
+
+1. Quais camadas e fases entram, e em que ordem. Sugestão: fase 1, depois 2.
+2. O app cita a inspiração ou escreve só "critérios de análise gráfica clássica"?
+3. A "Leitura Farol" vira uma seção nova na análise técnica ou substitui a hipótese operacional atual?
+4. Aceita o backtest como regra de calibragem (e a limitação de que 5 anos incluem um mercado muito atípico, a eleição de 2026)?
+5. Ampliar a amostra de vídeos (outros meses) antes de fixar os limiares, ou calibrar só com o histórico de preços?
