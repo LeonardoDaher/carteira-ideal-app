@@ -19,8 +19,10 @@ Documento de **estudo**, não é decisão nem recomendação. Registra o método
 | 28/08/2026 | parte das ações | **apresentado por outro analista**; só usado para vocabulário (padrão "1-2-3") |
 | 28/07/2026 | parte das ações | mercado lateral com bandas estreitas, rompimentos pontuais em ações |
 | 18/06/2026 | parte das ações | mercado em correção, com vendas por rompimento de suporte |
+| 01/07/2026 | parte das ações | índice tentando formar fundo, ações com compras por pullback |
+| 29/10/2026 | parte das ações | dia seguinte ao pior dia da queda pós-eleição, volatilidade alta |
 
-Nove vídeos dele, onze dias de mercado diferentes, de junho a outubro de 2026. Os de junho e julho confirmaram o método sem trazer um setup novo; trouxeram só os pontos do bloco 3.9. Não li os 100 vídeos da playlist. Leitura de vídeo no navegador do app é lenta e instável: em vários vídeos a transcrição não carregou e eles ficaram de fora.
+Doze vídeos dele (mais o de outro analista), de junho a outubro de 2026. Os de junho, julho e a segunda leitura de outubro confirmaram o método sem trazer um setup novo; trouxeram só os pontos do bloco 3.9. **O método parece estável**: ler mais vídeos do mesmo programa tem retorno decrescente. O que falta para fixar números é calibrar com os preços (seção 6). Não li os 100 vídeos da playlist. Leitura de vídeo no navegador do app é lenta e instável: em vários vídeos a transcrição não carregou e eles ficaram de fora.
 
 **O que a transcrição não mostra.** O desenho dele (linhas, caixas, canais) só aparece no vídeo. Tirei uma imagem do vídeo de 10/09 para conferir os indicadores da plataforma dele (seção 2). Os níveis e as linhas de tendência eu leio pelo que ele diz ("aqui nos 17,80", "essa faixa").
 
@@ -108,6 +110,11 @@ Ele compra quase sempre **na superação da máxima de um candle de sinal**, dep
 35. **Acrescentar posição no pullback** depois de comprar o rompimento, sem fugir do risco definido.
 36. **Evento após balanço**: ação que abre em gap de alta depois do balanço e "rasga para baixo" (amplitude de 13%) fica sem trade: "até a venda fica ruim, é difícil posicionar stop". Mudança de composição de índice por fundos também é risco de curto prazo.
 37. **Liquidez**: "faz 8 milhões por dia" aparece como ressalva, não como veto (o veto citado é abaixo de R$ 1 milhão).
+38. **Regime do índice manda**: com o índice em queda forte e sem sinal de fundo, "enquanto o índice não der uma sinalização firme, não vou às compras", mesmo com a ação dando setup. Depois de um choque, a **volatilidade geral sobe** e o tamanho de barra se mede contra ela: "2,23% parece um candle pequenininho porque a volatilidade geral aumentou muito".
+39. **Ele próprio não opera vendido** ("eu não opero short"), mas reconhece e comenta sinais de venda. Para o app, venda é leitura descritiva, nunca ordem.
+40. **Stop curto com reentrada**: "o stop certo era mais embaixo, mas eu iria de stop curto; se fosse stopado, tentaria uma reentrada".
+41. **O retorno/risco considera obstáculos no caminho**: uma barra elefante baixista (abre na máxima e fecha na mínima, queda de 6,5%) sugere venda, mas "para chegar no um para um eu teria de vencer a média de 200 e o fundo importante: não abraço".
+42. **Barra de ignição não acionada** que volta a corrigir não é compra: "nada garante que ela não caia até a abertura dessa barra"; a abertura da barra de ignição é o nível de invalidação.
 
 ## 4. Vocabulário dele → regra que o app consegue medir
 
