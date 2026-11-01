@@ -109,3 +109,18 @@ Os dois sinais que faltavam da Fase 2 entraram em `sinaisDeCandle` e foram medid
 | 50% do gap de baixa | -0,41 ± 0,21 | -0,56 ± 0,16 | 59 / 53 |
 
 **Leitura:** nenhum dos dois mostrou vantagem robusta. O rompimento de alta fica perto de zero (o -0,72 do treino vem de poucas perdas enormes, com erro-padrão de 0,76), e as bandas estreitas melhoram o resultado nos dois períodos, mas dentro do erro. O gap de 50% tem poucos casos (cerca de 50 por período), inverte de sinal entre treino e teste na alta e é negativo na baixa. **Ficam no app como leitura descritiva, sem peso na nota e sem mudar filtros**, com a mesma ressalva por lado da seção 3.
+
+## 6. Linhas de tendência: o sinal perto da reta (D134)
+
+Para cada sinal, com só os candles até o dia do sinal (os últimos 300), calculou-se a LTA (sinais de compra) ou a LTB (sinais de venda) vigente e não rompida. "Perto" é o extremo do candle de sinal (mínima na compra, máxima na venda) a até 1,5% da reta; "longe" é o resto; "sem" é quando não havia linha válida.
+
+| Grupo (média em R, treino / teste) | Treino | Teste | n (treino / teste) |
+|---|---|---|---|
+| Compra perto da LTA | +0,01 ± 0,08 | +0,26 ± 0,10 | 580 / 588 |
+| Compra longe da LTA | -0,31 ± 0,22 | +0,11 ± 0,05 | 2.588 / 2.821 |
+| Compra sem LTA | -0,05 ± 0,04 | +0,10 ± 0,04 | 3.938 / 3.044 |
+| Venda perto da LTB | -0,19 ± 0,06 | -0,20 ± 0,06 | 604 / 638 |
+| Venda longe da LTB | -0,10 ± 0,03 | -0,17 ± 0,08 | 2.381 / 2.296 |
+| Venda sem LTB | -0,05 ± 0,02 | -0,13 ± 0,03 | 4.439 / 4.262 |
+
+**Leitura:** compra perto da LTA fica à frente dos outros dois grupos nos dois períodos (cerca de 0,15 R no teste), mas a diferença está dentro de uns 1,5 erros-padrão e o grupo é pequeno: **sugestivo, não comprovado**. Venda perto da LTB é um pouco pior que as demais. Por isso a linha **não vira filtro nem entra na leitura do setup**: fica como desenho e nota descritiva no gráfico.

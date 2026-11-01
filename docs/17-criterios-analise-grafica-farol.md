@@ -210,7 +210,7 @@ Tudo calculado por regra, descritivo, sem prometer retorno (exceção D19 como a
 2. **Candles e setups medidos** (camada 3 e parte da 4): ignição, elefante, ignorada, martelo, engolfo, trap, rompimento de base, regra dos 50% do gap, com testes unitários por padrão. **Feita em 01/11/2026 (D130 e D133)**, com rompimento de base e regra dos 50% do gap.
 3. **Leitura Farol e filtros** (camada 4): gatilho, stop, alvo, retorno/risco, motivos de "sem sinal". **Feita em 01/11/2026 (D131)**, sem o regime do índice e o risco de evento.
 4. **Calibragem e backtest** com o histórico de 5 anos, e só então fixar limiares e eventual pontuação. **Feita em 01/11/2026 (D132, `docs/18`)**; sem vantagem comprovada, limiares mantidos, filtros sem evidência rebaixados.
-5. **Linhas de tendência** e eventual **60 minutos** se houver fonte de dados.
+5. **Linhas de tendência** e eventual **60 minutos** se houver fonte de dados. **Linhas feitas em 01/11/2026 (D134)**; os 60 minutos continuam sem fonte gratuita.
 
 ## 8. Decisões em aberto (do responsável)
 

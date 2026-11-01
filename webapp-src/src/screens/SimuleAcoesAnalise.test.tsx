@@ -228,6 +228,16 @@ describe('Simule Ações: abas de análise', () => {
     expect(leitura.textContent).toContain('não é recomendação')
   })
 
+  it('linhas de tendência: botão ligado por padrão, nota explicando a reta ou dizendo que não há, e desliga', () => {
+    abrir(/Análise técnica/, historicoLongoDeAlfa())
+    const botao = screen.getByRole('button', { name: 'Linhas de tendência' })
+    expect(botao.getAttribute('aria-pressed')).toBe('true')
+    const nota = screen.getByTestId('linhas-de-tendencia')
+    expect(nota.textContent).toMatch(/LTA|LTB|Sem linha de tendência/)
+    fireEvent.click(botao)
+    expect(screen.queryByTestId('linhas-de-tendencia')).toBeNull()
+  })
+
   it('com o histórico longo a abertura da semana é a real', () => {
     abrir(/Análise técnica/, historicoLongoDeAlfa())
     expect(screen.getByTestId('niveis-do-grafico').textContent).not.toContain('aproximada pelo fechamento anterior')

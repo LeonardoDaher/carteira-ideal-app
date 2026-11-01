@@ -12,6 +12,8 @@ import { dataLonga, numero, percentual, reais } from '../ui/formatoAnalise'
 import { sinaisDeCandle, sinalAtivo } from '../domain/sinaisDeCandle'
 import type { SinalDeCandle } from '../domain/sinaisDeCandle'
 import { leituraFarol } from '../domain/leituraFarol'
+import { linhasDeTendencia } from '../domain/linhasDeTendencia'
+import type { LinhaDeTendencia } from '../domain/linhasDeTendencia'
 import type { LeituraFarol, StatusDoFiltro } from '../domain/leituraFarol'
 import { aberturaDaSemana, caixaDaBase, gapsAbertos, mediaDe200Semanas } from '../domain/niveisDoGrafico'
 
@@ -125,6 +127,18 @@ function LeituraDoSetup({ l }: { l: LeituraFarol }) {
   )
 }
 
+/** Explica em texto as linhas de tendência desenhadas: quais pivôs ligam, quantos toques e onde o preço está em relação a elas. */
+function NotaDasLinhas({ linhas }: { linhas: LinhaDeTendencia[] }) {
+  if (!linhas.length) return <span className="tiny muted" data-testid="linhas-de-tendencia">Sem linha de tendência definida: não há dois fundos ascendentes ou dois topos descendentes que formem uma reta sem ser furada.</span>
+  return (
+    <ul className="tiny muted" style={{ margin: 0, paddingLeft: 16 }} data-testid="linhas-de-tendencia">
+      {linhas.map((l) => (
+        <li key={l.tipo}>{l.explicacao}. A reta depende da escolha dos pivôs: é uma leitura geométrica, não uma previsão.</li>
+      ))}
+    </ul>
+  )
+}
+
 /** Explica em texto cada nível desenhado no gráfico (origem e valor), para quem não enxerga as cores ou quer a conta. */
 function NotaDosNiveis({ n }: { n: { abertura: ReturnType<typeof aberturaDaSemana>; media200: ReturnType<typeof mediaDe200Semanas>; gaps: ReturnType<typeof gapsAbertos>; caixa: ReturnType<typeof caixaDaBase> } }) {
   const itens: string[] = []
@@ -150,7 +164,7 @@ function NotaDosNiveis({ n }: { n: { abertura: ReturnType<typeof aberturaDaSeman
 export function AnaliseTecnicaAcao({ dados, ticker, nome, horizonte }: { dados: DadosDaAnalise; ticker: string; nome: string | null; horizonte: Horizonte }) {
   const [periodicidade, setPeriodicidade] = useState<Periodicidade>('diario')
   const [janela, setJanela] = useState(120)
-  const [opcoes, setOpcoes] = useState<OpcoesDoGrafico>({ mm21: true, mm80: true, mm200: false, zonas: true, volume: true, ifr: true, macd: true, estocastico: true, bollinger: true, ema9: true, niveis: true, sinais: true })
+  const [opcoes, setOpcoes] = useState<OpcoesDoGrafico>({ mm21: true, mm80: true, mm200: false, zonas: true, volume: true, ifr: true, macd: true, estocastico: true, bollinger: true, ema9: true, niveis: true, sinais: true, linhas: true })
   const barrasDoGrafico = useMemo(() => {
     const b = dados.barrasDoGrafico ?? []
     return periodicidade === 'diario' ? b : agregar(b, periodicidade === 'semanal' ? 'semana' : 'mes')
@@ -174,6 +188,8 @@ export function AnaliseTecnicaAcao({ dados, ticker, nome, horizonte }: { dados: 
     return { niveis, gaps: gapsAbertos(b), caixa: caixaDaBase(b), abertura, media200 }
   }, [dados.barrasDoGrafico])
   // Sinais de candle sobre os candles que estão na tela (diário, semanal ou mensal), com o gatilho e o stop do mais recente que ainda vale.
+  // LTA e LTB sobre os candles que estão na tela (diário, semanal ou mensal).
+  const linhas = useMemo(() => linhasDeTendencia(barrasDoGrafico), [barrasDoGrafico])
   const sinaisDiarios = useMemo(() => sinaisDeCandle(dados.barrasDoGrafico ?? []), [dados.barrasDoGrafico])
   const sinais = useMemo(() => (periodicidade === 'diario' ? sinaisDiarios : sinaisDeCandle(barrasDoGrafico)), [periodicidade, sinaisDiarios, barrasDoGrafico])
   const ativo = useMemo(() => sinalAtivo(sinais, barrasDoGrafico.length), [sinais, barrasDoGrafico.length])
@@ -227,15 +243,16 @@ export function AnaliseTecnicaAcao({ dados, ticker, nome, horizonte }: { dados: 
           ))}
         </div>
         <div className="row" style={{ gap: 6, flexWrap: 'wrap' }} role="group" aria-label="Indicadores do gráfico">
-          {([['mm21', 'Média 21'], ['mm80', 'Média 80'], ['mm200', 'Média 200'], ['zonas', 'Suportes e resistências'], ['volume', 'Volume'], ['ifr', 'IFR'], ['macd', 'MACD'], ['estocastico', 'Estocástico'], ['bollinger', 'Bollinger'], ['ema9', 'Média 9'], ['niveis', 'Níveis e gaps'], ['sinais', 'Sinais de candle']] as const).map(([chave, rotulo]) => (
+          {([['mm21', 'Média 21'], ['mm80', 'Média 80'], ['mm200', 'Média 200'], ['zonas', 'Suportes e resistências'], ['volume', 'Volume'], ['ifr', 'IFR'], ['macd', 'MACD'], ['estocastico', 'Estocástico'], ['bollinger', 'Bollinger'], ['ema9', 'Média 9'], ['niveis', 'Níveis e gaps'], ['sinais', 'Sinais de candle'], ['linhas', 'Linhas de tendência']] as const).map(([chave, rotulo]) => (
             <button key={chave} className={`chip ${opcoes[chave] ? 'selected' : ''}`} aria-pressed={opcoes[chave]} onClick={() => setOpcoes({ ...opcoes, [chave]: !opcoes[chave] })}>
               {rotulo}
             </button>
           ))}
         </div>
-        <GraficoPrecoAcao key={`${ticker}-${periodicidade}-${janelaAtiva}`} barras={barrasDoGrafico} zonas={zonasDoGrafico} niveis={niveisDoGrafico.niveis} gaps={niveisDoGrafico.gaps} caixa={niveisDoGrafico.caixa} sinais={sinais} sinalAtivo={ativo} alvo={periodicidade === 'diario' ? (leitura?.alvo?.preco ?? null) : null} nome={ticker} periodicidade={periodicidade} janela={janelaAtiva === 0 ? barrasDoGrafico.length : Math.min(janelaAtiva, barrasDoGrafico.length)} opcoes={opcoes} />
+        <GraficoPrecoAcao key={`${ticker}-${periodicidade}-${janelaAtiva}`} barras={barrasDoGrafico} zonas={zonasDoGrafico} niveis={niveisDoGrafico.niveis} gaps={niveisDoGrafico.gaps} caixa={niveisDoGrafico.caixa} sinais={sinais} sinalAtivo={ativo} linhas={linhas} alvo={periodicidade === 'diario' ? (leitura?.alvo?.preco ?? null) : null} nome={ticker} periodicidade={periodicidade} janela={janelaAtiva === 0 ? barrasDoGrafico.length : Math.min(janelaAtiva, barrasDoGrafico.length)} opcoes={opcoes} />
         <NotaDoHistorico barras={barrasDoGrafico} estado={dados.historicoLongo} />
         {opcoes.niveis && <NotaDosNiveis n={niveisDoGrafico} />}
+        {opcoes.linhas && <NotaDasLinhas linhas={linhas} />}
         <span className="tiny muted justify">Todo o histórico de preços vem de arquivos da B3. O volume é financeiro (R$), não quantidade de ações. Dividendos não ajustam o preço.</span>
       </Modulo>
 

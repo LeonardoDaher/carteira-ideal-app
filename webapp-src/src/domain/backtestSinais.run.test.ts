@@ -10,6 +10,7 @@ import type { Operacao, Resumo } from './backtestSinais'
 import { agrupar, resumir, simular } from './backtestSinais'
 import { filtroDeContexto } from './leituraFarol'
 import type { EntradaDaLeitura } from './leituraFarol'
+import { linhasDeTendencia, valorDaLinha } from './linhasDeTendencia'
 import { LIMITES_PADRAO, sinaisDeCandle } from './sinaisDeCandle'
 import type { LimitesDeSinal } from './sinaisDeCandle'
 
@@ -36,7 +37,17 @@ function carregar(): { ticker: string; barras: Barra[] }[] {
 function contexto(barras: Barra[], i: number, lado: 'compra' | 'venda'): Record<string, string> {
   const e = { barras: barras.slice(0, i + 1), sinais: [], zonas: [], gaps: [], caixa: null, media200Semanas: null, tendenciaDiaria: 'consolidacao', tendenciaSemanal: 'consolidacao' } as EntradaDaLeitura
   const f = filtroDeContexto(e, lado)
-  return Object.fromEntries(f.filter((x) => x.chave !== 'tendencia').map((x) => [x.chave, x.status]))
+  const resultado = Object.fromEntries(f.filter((x) => x.chave !== 'tendencia').map((x) => [x.chave, x.status])) as Record<string, string>
+  // Linha de tendência a favor do trade (LTA na compra, LTB na venda), só com candles até o sinal: perto = o extremo do candle está a até 1,5% da reta.
+  const recorte = barras.slice(Math.max(0, i - 300), i + 1)
+  const l = linhasDeTendencia(recorte).find((x) => x.tipo === (lado === 'compra' ? 'LTA' : 'LTB') && !x.rompida)
+  if (!l) resultado.linha = 'sem'
+  else {
+    const ref = valorDaLinha(l, recorte.length - 1)
+    const b = recorte[recorte.length - 1]
+    resultado.linha = Math.abs((lado === 'compra' ? b.min : b.max) - ref) / ref <= 0.015 ? 'perto' : 'longe'
+  }
+  return resultado
 }
 
 function operacoesDosSinais(dados: { ticker: string; barras: Barra[] }[], limites: LimitesDeSinal, comContexto: boolean): Op[] {
@@ -80,7 +91,7 @@ describe.skipIf(!process.env.BACKTEST)('backtest dos sinais de candle', () => {
     relatorio.porTipoEPeriodo = por(base, (o) => `${o.tipo}/${periodo(o)}`)
     relatorio.porLadoEPeriodo = por(base, (o) => `${o.lado}/${periodo(o)}`)
     relatorio.porFaixaDeStop = por(base, (o) => `${o.lado}/${o.riscoPct <= 3 ? '1: até 3%' : o.riscoPct <= 5 ? '2: 3-5%' : o.riscoPct <= 10 ? '3: 5-10%' : '4: acima de 10%'}`)
-    for (const chave of ['liquidez', 'esticada', 'exaustao']) relatorio[`filtro_${chave}`] = por(base, (o) => `${o.lado}/${chave}=${o.filtros[chave]}/${periodo(o)}`)
+    for (const chave of ['liquidez', 'esticada', 'exaustao', 'linha']) relatorio[`filtro_${chave}`] = por(base, (o) => `${o.lado}/${chave}=${o.filtros[chave]}/${periodo(o)}`)
     const sem = (nome: string, chave: keyof LimitesDeSinal, valores: number[], tipos: string[]) => {
       const saida: Record<string, Resumo> = {}
       for (const v of valores) {
