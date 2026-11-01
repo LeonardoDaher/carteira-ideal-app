@@ -17,8 +17,10 @@ Documento de **estudo**, não é decisão nem recomendação. Registra o método
 | 02/10/2026 | parte das ações | rompimento do índice, bandas estreitas |
 | 10/09/2026 | parte das ações | índices americanos em queda e vários rompimentos pontuais em ações |
 | 28/08/2026 | parte das ações | **apresentado por outro analista**; só usado para vocabulário (padrão "1-2-3") |
+| 28/07/2026 | parte das ações | mercado lateral com bandas estreitas, rompimentos pontuais em ações |
+| 18/06/2026 | parte das ações | mercado em correção, com vendas por rompimento de suporte |
 
-Sete vídeos dele, nove dias de mercado diferentes. Não li os 100 vídeos da playlist. Leitura de vídeo no navegador do app é lenta e instável: em vários vídeos a transcrição não carregou e eles ficaram de fora.
+Nove vídeos dele, onze dias de mercado diferentes, de junho a outubro de 2026. Os de junho e julho confirmaram o método sem trazer um setup novo; trouxeram só os pontos do bloco 3.9. Não li os 100 vídeos da playlist. Leitura de vídeo no navegador do app é lenta e instável: em vários vídeos a transcrição não carregou e eles ficaram de fora.
 
 **O que a transcrição não mostra.** O desenho dele (linhas, caixas, canais) só aparece no vídeo. Tirei uma imagem do vídeo de 10/09 para conferir os indicadores da plataforma dele (seção 2). Os níveis e as linhas de tendência eu leio pelo que ele diz ("aqui nos 17,80", "essa faixa").
 
@@ -95,6 +97,17 @@ Ele compra quase sempre **na superação da máxima de um candle de sinal**, dep
 26. **Alvo**: próxima resistência, topo anterior, média de 200, fechamento do gap, ou **a altura da base projetada** a partir do rompimento ("uma boa medida de movimento lateral").
 27. **Parcial** na resistência e **stop móvel por mínimas** (abaixo da mínima do dia ou da véspera) enquanto o papel sobe; "quem trabalha stop por mínimas não é stopado há bastante tempo". Ajusta o tamanho da parcial ao novo tamanho do stop.
 28. Posição vendida ou comprada que perde o sinal sai e **reentra** se houver novo sinal.
+
+### 3.9 Acréscimos dos vídeos de junho e julho
+29. **Venda quando o setup é claro**: perda de suporte com **volume forte e barra grande** (ex.: queda de 9% com muito volume) dá venda, com gatilho na **perda da mínima** do candle. Como o preço já está esticado e o stop sai caro, usa **posição pequena** e, em vez de vender a mercado, uma **"pescaria"**: ordem em um repique provável para ter stop mais curto. Stop de venda acima das últimas máximas.
+30. **Preço não ajustado por dividendos é a versão preferida** dele; ele compara com a ajustada porque a média de 200 pode ser obstáculo numa e suporte na outra ("no saldo das duas visões, dá para operar"). O app também não ajusta por dividendos (D120).
+31. **Tamanho da barra é relativo à ação**: "2,5% já é uma barra significativa para ela"; o volume é comparado ao **"regime dos últimos dois meses"** da própria ação, não a um número fixo. Número de negócios também confirma volume.
+32. **Pico de volume costuma marcar inflexão** do movimento.
+33. **Resistência que vem de um gap** (origem do gap) atrapalha o rompimento, mesmo com bandas abrindo.
+34. **Medida do mastro da bandeira**: o alvo de uma bandeira ou flâmula é o tamanho do impulso anterior projetado; "cumpriu o alvo da bandeira e começou a perder força".
+35. **Acrescentar posição no pullback** depois de comprar o rompimento, sem fugir do risco definido.
+36. **Evento após balanço**: ação que abre em gap de alta depois do balanço e "rasga para baixo" (amplitude de 13%) fica sem trade: "até a venda fica ruim, é difícil posicionar stop". Mudança de composição de índice por fundos também é risco de curto prazo.
+37. **Liquidez**: "faz 8 milhões por dia" aparece como ressalva, não como veto (o veto citado é abaixo de R$ 1 milhão).
 
 ## 4. Vocabulário dele → regra que o app consegue medir
 
