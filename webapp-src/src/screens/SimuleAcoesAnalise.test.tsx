@@ -195,6 +195,24 @@ describe('Simule Ações: abas de análise', () => {
     expect(screen.getByRole('button', { name: 'Bollinger' }).getAttribute('aria-pressed')).toBe('false')
   })
 
+  it('sinais de candle: a lista aparece, o botão liga e desliga os marcadores, e um candle forte vira sinal com gatilho e stop', () => {
+    const h = historicoLongoDeAlfa()
+    const ultima = h.ALFA3.barras[h.ALFA3.barras.length - 1]
+    ultima[1] = ultima[4] * 0.96 // abre 4% abaixo e fecha na máxima, com volume muito acima da média
+    ultima[3] = ultima[1] * 0.995
+    ultima[2] = ultima[4] * 1.001
+    ultima[5] = 90_000
+    abrir(/Análise técnica/, h)
+    const lista = screen.getByTestId('sinais-de-candle')
+    expect(lista.textContent).toMatch(/Barra (de ignição|elefante) de alta/)
+    expect(lista.textContent).toMatch(/gatilho R\$ .* · stop R\$ /)
+    expect(lista.textContent).toContain('não ordem de compra ou venda')
+    const botao = screen.getByRole('button', { name: 'Sinais de candle' })
+    expect(botao.getAttribute('aria-pressed')).toBe('true')
+    fireEvent.click(botao)
+    expect(botao.getAttribute('aria-pressed')).toBe('false')
+  })
+
   it('com o histórico longo a abertura da semana é a real', () => {
     abrir(/Análise técnica/, historicoLongoDeAlfa())
     expect(screen.getByTestId('niveis-do-grafico').textContent).not.toContain('aproximada pelo fechamento anterior')

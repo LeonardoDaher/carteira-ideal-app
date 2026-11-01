@@ -9,6 +9,8 @@ import type { OpcoesDoGrafico } from '../ui/GraficoPrecoAcao'
 import { AvisoDaAnalise, BarraDeNota, EstadoDoArquivo, Linha, Modulo, Selo } from '../ui/BlocosDeAnalise'
 import type { Tom } from '../ui/BlocosDeAnalise'
 import { dataLonga, numero, percentual, reais } from '../ui/formatoAnalise'
+import { sinaisDeCandle, sinalAtivo } from '../domain/sinaisDeCandle'
+import type { SinalDeCandle } from '../domain/sinaisDeCandle'
 import { aberturaDaSemana, caixaDaBase, gapsAbertos, mediaDe200Semanas } from '../domain/niveisDoGrafico'
 
 type Periodicidade = 'diario' | 'semanal' | 'mensal'
@@ -52,6 +54,38 @@ function NotaDoHistorico({ barras, estado }: { barras: Barra[]; estado: EstadoHi
   )
 }
 
+const SITUACAO: Record<SinalDeCandle['situacao'], string> = { aguardando: 'aguardando o gatilho', acionado: 'gatilho acionado', invalidado: 'stop perdido antes do gatilho', expirado: 'sem gatilho em 5 candles' }
+const FAIXA_STOP: Record<SinalDeCandle['faixaDoStop'], string> = { curto: 'stop curto', medio: 'stop médio', caro: 'stop caro', inviavel: 'stop inviável para swing' }
+
+/** Lista os sinais de candle mais recentes com gatilho, stop (e a distância em %) e a situação, mais a explicação de como cada um foi medido. */
+function SinaisDeCandle({ sinais, barras, periodicidade }: { sinais: SinalDeCandle[]; barras: Barra[]; periodicidade: Periodicidade }) {
+  const unidade = periodicidade === 'mensal' ? 'mês' : periodicidade === 'semanal' ? 'semana' : 'dia'
+  const recentes = [...sinais].reverse().slice(0, 6)
+  return (
+    <div className="col" style={{ gap: 8 }} data-testid="sinais-de-candle">
+      <span className="small muted justify">
+        Cada candle é medido contra a volatilidade (ATR de 14) e o volume médio de 21 {unidade === 'dia' ? 'dias' : unidade === 'semana' ? 'semanas' : 'meses'} da própria ação. O gatilho é a superação da máxima (compra) ou a perda da mínima (venda) do candle de sinal, e o stop é o extremo oposto. É leitura do que o preço fez, não ordem de compra ou venda.
+      </span>
+      {recentes.length === 0 ? (
+        <span className="small muted">Nenhum candle de sinal nos {barras.length} candles carregados.</span>
+      ) : (
+        recentes.map((s) => (
+          <div key={`${s.indice}-${s.tipo}`} className="card-outline col" style={{ gap: 2 }}>
+            <div className="row-between" style={{ gap: 8 }}>
+              <strong>{s.rotulo}</strong>
+              <Selo tom={s.lado === 'compra' ? 'positivo' : 'negativo'}>{s.lado === 'compra' ? 'Compra' : 'Venda'}</Selo>
+            </div>
+            <span className="small">
+              {dataLonga(s.data)} · gatilho {reais(s.gatilho)} · stop {reais(s.stop)} ({numero(s.stopPct, 1)}%, {FAIXA_STOP[s.faixaDoStop]}) · {SITUACAO[s.situacao]}
+            </span>
+            <span className="tiny muted">{s.explicacao}</span>
+          </div>
+        ))
+      )}
+    </div>
+  )
+}
+
 /** Explica em texto cada nível desenhado no gráfico (origem e valor), para quem não enxerga as cores ou quer a conta. */
 function NotaDosNiveis({ n }: { n: { abertura: ReturnType<typeof aberturaDaSemana>; media200: ReturnType<typeof mediaDe200Semanas>; gaps: ReturnType<typeof gapsAbertos>; caixa: ReturnType<typeof caixaDaBase> } }) {
   const itens: string[] = []
@@ -77,7 +111,7 @@ function NotaDosNiveis({ n }: { n: { abertura: ReturnType<typeof aberturaDaSeman
 export function AnaliseTecnicaAcao({ dados, ticker, nome, horizonte }: { dados: DadosDaAnalise; ticker: string; nome: string | null; horizonte: Horizonte }) {
   const [periodicidade, setPeriodicidade] = useState<Periodicidade>('diario')
   const [janela, setJanela] = useState(120)
-  const [opcoes, setOpcoes] = useState<OpcoesDoGrafico>({ mm21: true, mm80: true, mm200: false, zonas: true, volume: true, ifr: true, macd: true, estocastico: true, bollinger: true, ema9: true, niveis: true })
+  const [opcoes, setOpcoes] = useState<OpcoesDoGrafico>({ mm21: true, mm80: true, mm200: false, zonas: true, volume: true, ifr: true, macd: true, estocastico: true, bollinger: true, ema9: true, niveis: true, sinais: true })
   const barrasDoGrafico = useMemo(() => {
     const b = dados.barrasDoGrafico ?? []
     return periodicidade === 'diario' ? b : agregar(b, periodicidade === 'semanal' ? 'semana' : 'mes')
@@ -100,6 +134,9 @@ export function AnaliseTecnicaAcao({ dados, ticker, nome, horizonte }: { dados: 
     ]
     return { niveis, gaps: gapsAbertos(b), caixa: caixaDaBase(b), abertura, media200 }
   }, [dados.barrasDoGrafico])
+  // Sinais de candle sobre os candles que estão na tela (diário, semanal ou mensal), com o gatilho e o stop do mais recente que ainda vale.
+  const sinais = useMemo(() => sinaisDeCandle(barrasDoGrafico), [barrasDoGrafico])
+  const ativo = useMemo(() => sinalAtivo(sinais, barrasDoGrafico.length), [sinais, barrasDoGrafico.length])
   // Só oferece janelas que cabem no histórico disponível; "Tudo" some quando a última janela já o cobre.
   const caben = JANELAS[periodicidade].filter((j) => j.n !== 0 && j.n < barrasDoGrafico.length * 1.1)
   const janelas = caben.length && caben[caben.length - 1].n >= barrasDoGrafico.length * 0.95 ? caben : [...caben, { n: 0, rotulo: 'Tudo' }]
@@ -142,16 +179,20 @@ export function AnaliseTecnicaAcao({ dados, ticker, nome, horizonte }: { dados: 
           ))}
         </div>
         <div className="row" style={{ gap: 6, flexWrap: 'wrap' }} role="group" aria-label="Indicadores do gráfico">
-          {([['mm21', 'Média 21'], ['mm80', 'Média 80'], ['mm200', 'Média 200'], ['zonas', 'Suportes e resistências'], ['volume', 'Volume'], ['ifr', 'IFR'], ['macd', 'MACD'], ['estocastico', 'Estocástico'], ['bollinger', 'Bollinger'], ['ema9', 'Média 9'], ['niveis', 'Níveis e gaps']] as const).map(([chave, rotulo]) => (
+          {([['mm21', 'Média 21'], ['mm80', 'Média 80'], ['mm200', 'Média 200'], ['zonas', 'Suportes e resistências'], ['volume', 'Volume'], ['ifr', 'IFR'], ['macd', 'MACD'], ['estocastico', 'Estocástico'], ['bollinger', 'Bollinger'], ['ema9', 'Média 9'], ['niveis', 'Níveis e gaps'], ['sinais', 'Sinais de candle']] as const).map(([chave, rotulo]) => (
             <button key={chave} className={`chip ${opcoes[chave] ? 'selected' : ''}`} aria-pressed={opcoes[chave]} onClick={() => setOpcoes({ ...opcoes, [chave]: !opcoes[chave] })}>
               {rotulo}
             </button>
           ))}
         </div>
-        <GraficoPrecoAcao key={`${ticker}-${periodicidade}-${janelaAtiva}`} barras={barrasDoGrafico} zonas={zonasDoGrafico} niveis={niveisDoGrafico.niveis} gaps={niveisDoGrafico.gaps} caixa={niveisDoGrafico.caixa} nome={ticker} periodicidade={periodicidade} janela={janelaAtiva === 0 ? barrasDoGrafico.length : Math.min(janelaAtiva, barrasDoGrafico.length)} opcoes={opcoes} />
+        <GraficoPrecoAcao key={`${ticker}-${periodicidade}-${janelaAtiva}`} barras={barrasDoGrafico} zonas={zonasDoGrafico} niveis={niveisDoGrafico.niveis} gaps={niveisDoGrafico.gaps} caixa={niveisDoGrafico.caixa} sinais={sinais} sinalAtivo={ativo} nome={ticker} periodicidade={periodicidade} janela={janelaAtiva === 0 ? barrasDoGrafico.length : Math.min(janelaAtiva, barrasDoGrafico.length)} opcoes={opcoes} />
         <NotaDoHistorico barras={barrasDoGrafico} estado={dados.historicoLongo} />
         {opcoes.niveis && <NotaDosNiveis n={niveisDoGrafico} />}
         <span className="tiny muted justify">Todo o histórico de preços vem de arquivos da B3. O volume é financeiro (R$), não quantidade de ações. Dividendos não ajustam o preço.</span>
+      </Modulo>
+
+      <Modulo titulo="Sinais de candle" subtitulo="ignição, elefante, ignorada, martelo, engolfo e trap">
+        <SinaisDeCandle sinais={sinais} barras={barrasDoGrafico} periodicidade={periodicidade} />
       </Modulo>
 
       <Modulo titulo="Tendência por período" subtitulo={`horizonte de ${ROTULO_HORIZONTE[horizonte].toLowerCase()}`} aberto>
