@@ -1,6 +1,6 @@
 // "Leitura Farol" (D131): junta o sinal de candle ativo (D130), as zonas e os níveis do gráfico (D121) num resumo por regra: setup,
 // gatilho, stop, alvo, retorno/risco e os filtros que aprovam ou reprovam. Funções puras. Os limiares são provisórios e serão
-// calibrados com o histórico de 5 anos (docs/17). Descreve o que o preço fez; não é ordem nem recomendação.
+// calibrados com o histórico de 5 anos (docs/18, D132). Descreve o que o preço fez; não é ordem nem recomendação.
 
 import type { Barra, Leitura, ZonaPreco } from './analiseTecnica'
 import { atrSerie } from './analiseTecnica'
@@ -36,6 +36,8 @@ export interface LeituraFarol {
   conclusao: string
   /** O que a leitura não consegue avaliar (calendário de balanços, regime do índice). */
   naoAvaliado: string[]
+  /** O que o histórico de 5 anos mostrou sobre este tipo de sinal (docs/18); vazio sem setup. */
+  ressalva: string
 }
 
 export interface EntradaDaLeitura {
@@ -88,7 +90,7 @@ function candidatos(e: EntradaDaLeitura, s: SinalDeCandle): AlvoFarol[] {
   return lista.sort((p, q) => (compra ? p.preco - q.preco : q.preco - p.preco))
 }
 
-function filtroDeContexto(e: EntradaDaLeitura, lado: 'compra' | 'venda'): FiltroFarol[] {
+export function filtroDeContexto(e: EntradaDaLeitura, lado: 'compra' | 'venda'): FiltroFarol[] {
   const { barras } = e
   const n = barras.length
   const filtros: FiltroFarol[] = []
@@ -114,7 +116,7 @@ function filtroDeContexto(e: EntradaDaLeitura, lado: 'compra' | 'venda'): Filtro
     const contra = lado === 'compra' ? dist > LIMITES_FAROL.esticadaAtr : -dist > LIMITES_FAROL.esticadaAtr
     filtros.push(
       contra
-        ? { chave: 'esticada', rotulo: 'Ação esticada', status: 'reprova', motivo: `${x(Math.abs(dist), 1)} ATR ${dist > 0 ? 'acima' : 'abaixo'} da média de 21: retorno à média é o trade mais difícil` }
+        ? { chave: 'esticada', rotulo: 'Ação esticada', status: 'alerta', motivo: `${x(Math.abs(dist), 1)} ATR ${dist > 0 ? 'acima' : 'abaixo'} da média de 21 (no histórico de 5 anos não pior que as demais): retorno à média é o trade mais difícil` }
         : { chave: 'esticada', rotulo: 'Ação esticada', status: 'ok', motivo: `${x(Math.abs(dist), 1)} ATR ${dist >= 0 ? 'acima' : 'abaixo'} da média de 21` },
     )
   }
@@ -125,7 +127,7 @@ function filtroDeContexto(e: EntradaDaLeitura, lado: 'compra' | 'venda'): Filtro
   for (let i = n - 1; i >= 1 && (barras[i].fech - barras[i - 1].fech) * sentido > 0; i--) seq++
   filtros.push(
     seq >= LIMITES_FAROL.candlesDeExaustao
-      ? { chave: 'exaustao', rotulo: 'Exaustão', status: 'reprova', motivo: `${seq} fechamentos seguidos ${lado === 'compra' ? 'de alta' : 'de baixa'}: perto do limite da sequência` }
+      ? { chave: 'exaustao', rotulo: 'Exaustão', status: 'alerta', motivo: `${seq} fechamentos seguidos ${lado === 'compra' ? 'de alta' : 'de baixa'}: perto do limite da sequência (quase não ocorre com sinal ativo)` }
       : { chave: 'exaustao', rotulo: 'Exaustão', status: 'ok', motivo: `${seq} fechamentos seguidos na direção do trade` },
   )
 
@@ -141,19 +143,23 @@ function filtroDeContexto(e: EntradaDaLeitura, lado: 'compra' | 'venda'): Filtro
 }
 
 export function leituraFarol(e: EntradaDaLeitura): LeituraFarol {
+  const ressalva = (lado: 'compra' | 'venda') =>
+    lado === 'compra'
+      ? 'Nos 5 anos de histórico (218 ações), os sinais de compra ficaram perto de zero em múltiplos de risco: melhores que entrar em qualquer candle, mas sem vantagem comprovada.'
+      : 'Nos 5 anos de histórico (218 ações), os sinais de venda tiveram resultado médio negativo depois do stop: use como alerta de fraqueza, não como setup.'
   const naoAvaliado = ['risco de evento (balanço, eleição, juros): não há calendário no app', 'regime do índice: não entra neste cálculo']
   const n = e.barras.length
   if (n < 35) {
-    return { setup: null, alvo: null, retornoRisco: null, filtros: [], valido: false, conclusao: 'Sem leitura: histórico curto demais para medir candles e volatilidade.', naoAvaliado }
+    return { setup: null, alvo: null, retornoRisco: null, filtros: [], valido: false, conclusao: 'Sem leitura: histórico curto demais para medir candles e volatilidade.', naoAvaliado, ressalva: '' }
   }
   const setup = sinalAtivo(e.sinais, n)
 
   if (!setup) {
     // Sem sinal, nada a fazer. Os filtros de contexto (nos dois sentidos) explicam o que pesa contra, se houver.
-    const motivos = [...filtroDeContexto(e, 'compra').filter((f) => f.status === 'reprova' && f.chave !== 'tendencia'), ...filtroDeContexto(e, 'venda').filter((f) => f.status === 'reprova' && (f.chave === 'esticada' || f.chave === 'exaustao'))]
+    const motivos = [...filtroDeContexto(e, 'compra').filter((f) => f.status !== 'ok' && f.chave !== 'tendencia'), ...filtroDeContexto(e, 'venda').filter((f) => f.status !== 'ok' && (f.chave === 'esticada' || f.chave === 'exaustao'))]
     const unicos = motivos.filter((f, i) => motivos.findIndex((g) => g.motivo === f.motivo) === i)
     const resto = unicos.length ? ` ${unicos.map((f) => f.motivo.charAt(0).toUpperCase() + f.motivo.slice(1)).join('; ')}.` : ''
-    return { setup: null, alvo: null, retornoRisco: null, filtros: unicos, valido: false, conclusao: `Sem sinal: nenhum candle de sinal nos últimos 3 candles, então não há gatilho nem stop a medir.${resto}`, naoAvaliado }
+    return { setup: null, alvo: null, retornoRisco: null, filtros: unicos, valido: false, conclusao: `Sem sinal: nenhum candle de sinal nos últimos 3 candles, então não há gatilho nem stop a medir.${resto}`, naoAvaliado, ressalva: '' }
   }
 
   const risco = Math.abs(setup.gatilho - setup.stop)
@@ -197,5 +203,5 @@ export function leituraFarol(e: EntradaDaLeitura): LeituraFarol {
   const conclusao = valido
     ? `Setup: ${base}${alvoTxt}.${acionado}`
     : `Sinal reprovado: ${base}${alvoTxt}. Reprovado em: ${reprovados.map((f) => f.rotulo.toLowerCase()).join(', ')}.${acionado}`
-  return { setup, alvo, retornoRisco, filtros, valido, conclusao, naoAvaliado }
+  return { setup, alvo, retornoRisco, filtros, valido, conclusao, naoAvaliado, ressalva: ressalva(setup.lado) }
 }

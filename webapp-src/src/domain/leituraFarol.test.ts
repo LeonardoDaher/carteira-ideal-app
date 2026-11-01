@@ -104,6 +104,18 @@ describe('leituraFarol', () => {
     expect(l.conclusao).toContain('fechamentos seguidos')
   })
 
+  it('ressalva do histórico: compra e venda dizem coisas diferentes, e sem setup não há ressalva', () => {
+    expect(leituraFarol(entrada(ignicaoAlta())).ressalva).toContain('sinais de compra')
+    expect(leituraFarol(entrada([...calmo(), b(40, 100, 96.8, 100, 96.6, 1500)])).ressalva).toContain('resultado médio negativo')
+    expect(leituraFarol(entrada(calmo(60))).ressalva).toBe('')
+  })
+
+  it('exaustão e ação esticada são atenção, não reprovação (sem evidência no histórico de 5 anos)', () => {
+    const altas = Array.from({ length: 12 }, (_, k) => b(40 + k, 100 + k * 0.1, 100.1 + k * 0.1, 100.2 + k * 0.1, 99.9 + k * 0.1))
+    const l = leituraFarol(entrada([...calmo(), ...altas]))
+    expect(l.filtros.find((f) => f.chave === 'exaustao')?.status).toBe('alerta')
+  })
+
   it('stop inviável para swing reprova mesmo com alvo longe', () => {
     const barras = [...calmo(), b(40, 100, 103.2, 103.4, 80, 1500)]
     const l = leituraFarol(entrada(barras, { zonas: [zona('resistencia', 140, 141)] }))

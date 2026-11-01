@@ -119,6 +119,7 @@ function LeituraDoSetup({ l }: { l: LeituraFarol }) {
           ))}
         </ul>
       )}
+      {l.ressalva && <span className="tiny justify" data-testid="ressalva-do-setup">{l.ressalva}</span>}
       <span className="tiny muted justify">Não avaliado: {l.naoAvaliado.join('; ')}. Leitura do diário, por regra, para estudo: não é recomendação de compra ou venda.</span>
     </div>
   )
