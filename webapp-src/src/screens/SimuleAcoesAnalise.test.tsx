@@ -146,9 +146,9 @@ describe('Simule Ações: abas de análise', () => {
   it('o gráfico pode ligar e desligar indicadores e trocar o período', () => {
     abrir(/Análise técnica/)
     const media200 = screen.getByRole('button', { name: 'Média 200' })
-    expect(media200.getAttribute('aria-pressed')).toBe('false')
-    fireEvent.click(media200)
     expect(media200.getAttribute('aria-pressed')).toBe('true')
+    fireEvent.click(media200)
+    expect(media200.getAttribute('aria-pressed')).toBe('false')
     fireEvent.click(screen.getByRole('button', { name: '60 pregões' }))
     expect(screen.getByRole('button', { name: '60 pregões' }).getAttribute('aria-pressed')).toBe('true')
   })
@@ -183,9 +183,14 @@ describe('Simule Ações: abas de análise', () => {
     expect(screen.getByRole('img', { name: /candles diários de ALFA3, 800 pregões/ })).toBeTruthy()
   })
 
-  it('o gráfico tem Bollinger, média 9 e níveis; os níveis ficam escritos e podem ser desligados', () => {
+  it('o gráfico começa sem Bollinger, média 9, níveis, sinais e linhas; ligados, os níveis ficam escritos e podem ser desligados', () => {
     abrir(/Análise técnica/)
-    for (const nome of ['Bollinger', 'Média 9', 'Níveis e gaps']) expect(screen.getByRole('button', { name: nome }).getAttribute('aria-pressed')).toBe('true')
+    for (const nome of ['Bollinger', 'Média 9', 'Níveis e gaps', 'Sinais de candle', 'Linhas de tendência']) expect(screen.getByRole('button', { name: nome }).getAttribute('aria-pressed')).toBe('false')
+    for (const nome of ['Média 21', 'Média 80', 'Média 200', 'Suportes e resistências', 'Volume', 'IFR', 'MACD', 'Estocástico']) expect(screen.getByRole('button', { name: nome }).getAttribute('aria-pressed')).toBe('true')
+    expect(screen.queryByTestId('niveis-do-grafico')).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Níveis e gaps' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Bollinger' }))
+    expect(screen.getByRole('button', { name: 'Bollinger' }).getAttribute('aria-pressed')).toBe('true')
     const niveis = screen.getByTestId('niveis-do-grafico').textContent ?? ''
     expect(niveis).toMatch(/abertura da semana de \d\d\/\d\d: R\$/)
     expect(niveis).toContain('aproximada pelo fechamento anterior')
@@ -208,6 +213,8 @@ describe('Simule Ações: abas de análise', () => {
     expect(lista.textContent).toMatch(/gatilho R\$ .* · stop R\$ /)
     expect(lista.textContent).toContain('não ordem de compra ou venda')
     const botao = screen.getByRole('button', { name: 'Sinais de candle' })
+    expect(botao.getAttribute('aria-pressed')).toBe('false')
+    fireEvent.click(botao)
     expect(botao.getAttribute('aria-pressed')).toBe('true')
     fireEvent.click(botao)
     expect(botao.getAttribute('aria-pressed')).toBe('false')
@@ -228,9 +235,12 @@ describe('Simule Ações: abas de análise', () => {
     expect(leitura.textContent).toContain('não é recomendação')
   })
 
-  it('linhas de tendência: botão ligado por padrão, nota explicando a reta ou dizendo que não há, e desliga', () => {
+  it('linhas de tendência: começam desligadas; ligadas, a nota explica a reta ou diz que não há, e desliga', () => {
     abrir(/Análise técnica/, historicoLongoDeAlfa())
     const botao = screen.getByRole('button', { name: 'Linhas de tendência' })
+    expect(botao.getAttribute('aria-pressed')).toBe('false')
+    expect(screen.queryByTestId('linhas-de-tendencia')).toBeNull()
+    fireEvent.click(botao)
     expect(botao.getAttribute('aria-pressed')).toBe('true')
     const nota = screen.getByTestId('linhas-de-tendencia')
     expect(nota.textContent).toMatch(/LTA|LTB|Sem linha de tendência/)
@@ -240,6 +250,7 @@ describe('Simule Ações: abas de análise', () => {
 
   it('com o histórico longo a abertura da semana é a real', () => {
     abrir(/Análise técnica/, historicoLongoDeAlfa())
+    fireEvent.click(screen.getByRole('button', { name: 'Níveis e gaps' }))
     expect(screen.getByTestId('niveis-do-grafico').textContent).not.toContain('aproximada pelo fechamento anterior')
   })
 

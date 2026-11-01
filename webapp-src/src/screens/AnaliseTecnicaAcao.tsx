@@ -164,7 +164,7 @@ function NotaDosNiveis({ n }: { n: { abertura: ReturnType<typeof aberturaDaSeman
 export function AnaliseTecnicaAcao({ dados, ticker, nome, horizonte }: { dados: DadosDaAnalise; ticker: string; nome: string | null; horizonte: Horizonte }) {
   const [periodicidade, setPeriodicidade] = useState<Periodicidade>('diario')
   const [janela, setJanela] = useState(120)
-  const [opcoes, setOpcoes] = useState<OpcoesDoGrafico>({ mm21: true, mm80: true, mm200: false, zonas: true, volume: true, ifr: true, macd: true, estocastico: true, bollinger: true, ema9: true, niveis: true, sinais: true, linhas: true })
+  const [opcoes, setOpcoes] = useState<OpcoesDoGrafico>({ mm21: true, mm80: true, mm200: true, zonas: true, volume: true, ifr: true, macd: true, estocastico: true, bollinger: false, ema9: false, niveis: false, sinais: false, linhas: false })
   const barrasDoGrafico = useMemo(() => {
     const b = dados.barrasDoGrafico ?? []
     return periodicidade === 'diario' ? b : agregar(b, periodicidade === 'semanal' ? 'semana' : 'mes')
