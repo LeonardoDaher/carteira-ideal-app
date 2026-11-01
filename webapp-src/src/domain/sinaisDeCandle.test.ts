@@ -108,10 +108,50 @@ describe('sinaisDeCandle', () => {
     expect(tipos(s)).toContain('trap-banda-alta')
   })
 
+  it('rompimento de base: fecha acima de uma consolidação de 12 candles ou mais, com volume e fechamento firme', () => {
+    const s = sinaisDeCandle([...calmo(), b(40, 100.5, 102, 102.2, 100.4, 1500)])
+    const rb = s.find((x) => x.tipo === 'rompimento-base')
+    expect(rb).toBeDefined()
+    expect(rb!.lado).toBe('compra')
+    expect(rb!.gatilho).toBe(102.2)
+    expect(rb!.explicacao).toContain('base de 40 candles')
+    // sem volume, ou sem sair da base, não há rompimento
+    expect(tipos(sinaisDeCandle([...calmo(), b(40, 100.5, 102, 102.2, 100.4, 300)]))).not.toContain('rompimento-base')
+    expect(tipos(sinaisDeCandle([...calmo(), b(40, 100, 100.9, 101, 100, 1500)]))).not.toContain('rompimento-base')
+    // base larga demais (mais de 12%) não é base
+    const larga = Array.from({ length: 40 }, (_, i) => b(i, 100, 100, i % 2 ? 110 : 101, i % 2 ? 99 : 90))
+    expect(tipos(sinaisDeCandle([...larga, b(40, 105, 112, 112.5, 104, 1500)]))).not.toContain('rompimento-base')
+  })
+
+  it('rompimento de base de baixa é o espelho', () => {
+    const s = sinaisDeCandle([...calmo(), b(40, 99.5, 98, 99.6, 97.8, 1500)])
+    expect(s.find((x) => x.tipo === 'rompimento-base-baixa')?.lado).toBe('venda')
+  })
+
+  it('regra dos 50% do gap: gap de alta, volta ao meio de corpo a corpo e fecha acima dele', () => {
+    const gap = [b(40, 104, 104.5, 105, 103.8), b(41, 104.5, 104.2, 104.8, 103.5)]
+    const s = sinaisDeCandle([...calmo(), ...gap, b(42, 103, 103.6, 103.8, 101.9)])
+    const g = s.find((x) => x.tipo === 'gap-50-compra')
+    expect(g).toBeDefined()
+    expect(g!.indice).toBe(42)
+    expect(g!.explicacao).toContain('102,00')
+    // quem já tocou o meio antes não conta de novo
+    const jaTocou = sinaisDeCandle([...calmo(), ...gap, b(42, 103, 103.6, 103.8, 101.9), b(43, 103.6, 104, 104.2, 101.8)])
+    expect(jaTocou.filter((x) => x.tipo === 'gap-50-compra').map((x) => x.indice)).toEqual([42])
+    // sem voltar ao meio, nada
+    expect(tipos(sinaisDeCandle([...calmo(), ...gap, b(42, 104.2, 104.6, 104.8, 103.4)]))).not.toContain('gap-50-compra')
+  })
+
+  it('regra dos 50% do gap de baixa: sobe ao meio e fecha abaixo dele', () => {
+    const gap = [b(40, 96, 95.5, 96.2, 95), b(41, 95.5, 95.8, 96.5, 95.2)]
+    const s = sinaisDeCandle([...calmo(), ...gap, b(42, 97, 96.4, 98.1, 96.2)])
+    expect(s.find((x) => x.tipo === 'gap-50-venda')?.lado).toBe('venda')
+  })
+
   it('sinalAtivo: devolve o mais recente que ainda vale, e nada se o último sinal é antigo', () => {
     const b1 = [...calmo(), b(40, 100, 103.2, 103.4, 100, 1500)]
     const s = sinaisDeCandle(b1)
-    expect(sinalAtivo(s, b1.length)?.tipo).toBe('ignicao-alta')
+    expect(['ignicao-alta', 'rompimento-base']).toContain(sinalAtivo(s, b1.length)?.tipo)
     expect(sinalAtivo(s, b1.length + 10)).toBeNull()
     expect(sinalAtivo([], 50)).toBeNull()
   })

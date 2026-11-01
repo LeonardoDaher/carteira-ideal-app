@@ -91,3 +91,21 @@ Nada foi ajustado só porque um valor ficou melhor em um período: escolher limi
 - Candidatos para uma segunda rodada, com dados novos ou outra janela: volume mínimo de 2×, engolfo de alta como sinal principal de compra, retirar ou rebaixar sinais de venda e a barra ignorada.
 - Ainda não medidos: alvo e retorno/risco (o alvo depende de zonas calculadas em cada data), tendência a favor, rompimento de base e regra dos 50% do gap (não implementados), saída por parcial em 1:1 e stop móvel.
 - O backtest não decide a nota da análise técnica: a nota e a leitura de tendência continuam como estavam.
+
+## 5. Segunda rodada: rompimento de base e regra dos 50% do gap (D133)
+
+Os dois sinais que faltavam da Fase 2 entraram em `sinaisDeCandle` e foram medidos do mesmo jeito (mesma entrada, saída, treino e teste; 28.179 operações com todos os sinais).
+
+- **Rompimento de base:** o fechamento sai de uma base (12 candles ou mais, amplitude até 12%) que terminou no candle anterior, com 0,3% de folga, volume pelo menos na média de 21 e fechamento firme (terço da direção). A variação "com bandas de Bollinger estreitas antes" (largura no quinto mais baixo dos 120 pregões anteriores) é registrada na explicação e medida à parte.
+- **Regra dos 50% do gap:** gap de pelo menos 0,8% nos últimos 15 candles; o preço toca o meio do gap, de corpo a corpo, pela primeira vez e fecha de volta no lado do gap (acima, no gap de alta). O sinal vale uma vez por gap.
+
+| Sinal (média em R, treino / teste) | Treino | Teste | n (treino / teste) |
+|---|---|---|---|
+| Rompimento de base, alta | -0,72 ± 0,76 | +0,05 ± 0,07 | 722 / 887 |
+| ... com bandas estreitas | -0,06 ± 0,08 | +0,13 ± 0,10 | 418 / 335 |
+| Rompimento de base, baixa | -0,24 ± 0,06 | -0,09 ± 0,06 | 709 / 679 |
+| ... com bandas estreitas | +0,08 ± 0,09 | -0,10 ± 0,09 | 393 / 338 |
+| 50% do gap de alta | -0,33 ± 0,17 | +0,37 ± 0,34 | 62 / 51 |
+| 50% do gap de baixa | -0,41 ± 0,21 | -0,56 ± 0,16 | 59 / 53 |
+
+**Leitura:** nenhum dos dois mostrou vantagem robusta. O rompimento de alta fica perto de zero (o -0,72 do treino vem de poucas perdas enormes, com erro-padrão de 0,76), e as bandas estreitas melhoram o resultado nos dois períodos, mas dentro do erro. O gap de 50% tem poucos casos (cerca de 50 por período), inverte de sinal entre treino e teste na alta e é negativo na baixa. **Ficam no app como leitura descritiva, sem peso na nota e sem mudar filtros**, com a mesma ressalva por lado da seção 3.

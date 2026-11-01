@@ -245,7 +245,7 @@ export function AnaliseTecnicaAcao({ dados, ticker, nome, horizonte }: { dados: 
         </Modulo>
       )}
 
-      <Modulo titulo="Sinais de candle" subtitulo="ignição, elefante, ignorada, martelo, engolfo e trap">
+      <Modulo titulo="Sinais de candle" subtitulo="ignição, elefante, ignorada, martelo, engolfo, trap, rompimento de base e gap">
         <SinaisDeCandle sinais={sinais} barras={barrasDoGrafico} periodicidade={periodicidade} />
       </Modulo>
 

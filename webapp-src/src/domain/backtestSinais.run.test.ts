@@ -44,7 +44,7 @@ function operacoesDosSinais(dados: { ticker: string; barras: Barra[] }[], limite
   for (const { ticker, barras } of dados) {
     for (const s of sinaisDeCandle(barras, limites)) {
       const o = simular(barras, s)
-      if (o) ops.push({ ...o, ticker, tipo: s.tipo, filtros: comContexto ? contexto(barras, s.indice, s.lado) : {} })
+      if (o) ops.push({ ...o, ticker, tipo: s.tipo + (s.explicacao.includes('estreitas') ? '+estreitas' : ''), filtros: comContexto ? contexto(barras, s.indice, s.lado) : {} })
     }
   }
   return ops

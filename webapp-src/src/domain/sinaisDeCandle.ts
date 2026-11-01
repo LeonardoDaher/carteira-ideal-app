@@ -6,7 +6,7 @@
 
 import type { Barra } from './analiseTecnica'
 import { atrSerie } from './analiseTecnica'
-import { bollinger } from './niveisDoGrafico'
+import { bollinger, caixaDaBase, larguraDasBandas } from './niveisDoGrafico'
 
 export type TipoDeSinal =
   | 'ignicao-alta'
@@ -23,6 +23,10 @@ export type TipoDeSinal =
   | 'trap-topo'
   | 'trap-banda-baixa'
   | 'trap-banda-alta'
+  | 'rompimento-base'
+  | 'rompimento-base-baixa'
+  | 'gap-50-compra'
+  | 'gap-50-venda'
 
 export interface LimitesDeSinal {
   /** Corpo mínimo da barra de ignição, em ATRs. */
@@ -45,6 +49,13 @@ export interface LimitesDeSinal {
   profundidadeTrap: number
   /** Candles que o sinal fica valendo à espera do gatilho. */
   validade: number
+  /** Base de consolidação: mínimo de candles, amplitude máxima (%) e folga do fechamento além do extremo (fração). */
+  candlesBase: number
+  amplitudeBasePct: number
+  folgaRompimento: number
+  /** Regra dos 50% do gap: tamanho mínimo do gap (%) e candles em que ele ainda vale. */
+  gapMinimoPct: number
+  janelaGap: number
 }
 
 export const LIMITES_PADRAO: LimitesDeSinal = {
@@ -60,6 +71,11 @@ export const LIMITES_PADRAO: LimitesDeSinal = {
   janelaTrap: 15,
   profundidadeTrap: 0.25,
   validade: 5,
+  candlesBase: 12,
+  amplitudeBasePct: 12,
+  folgaRompimento: 0.003,
+  gapMinimoPct: 0.8,
+  janelaGap: 15,
 }
 
 export type Situacao = 'aguardando' | 'acionado' | 'invalidado' | 'expirado'
@@ -103,6 +119,10 @@ const INFO: Record<TipoDeSinal, { rotulo: string; sigla: string; lado: 'compra' 
   'trap-topo': { rotulo: 'Trap de topo', sigla: 'TR', lado: 'venda' },
   'trap-banda-baixa': { rotulo: 'Trap da banda inferior', sigla: 'TB', lado: 'compra' },
   'trap-banda-alta': { rotulo: 'Trap da banda superior', sigla: 'TB', lado: 'venda' },
+  'rompimento-base': { rotulo: 'Rompimento de base (alta)', sigla: 'RB', lado: 'compra' },
+  'rompimento-base-baixa': { rotulo: 'Rompimento de base (baixa)', sigla: 'RB', lado: 'venda' },
+  'gap-50-compra': { rotulo: 'Reação nos 50% do gap de alta', sigla: 'G5', lado: 'compra' },
+  'gap-50-venda': { rotulo: 'Rejeição nos 50% do gap de baixa', sigla: 'G5', lado: 'venda' },
 }
 
 const x = (v: number, casas = 1) => v.toLocaleString('pt-BR', { minimumFractionDigits: casas, maximumFractionDigits: casas })
@@ -122,6 +142,7 @@ export function sinaisDeCandle(barras: Barra[], limites: LimitesDeSinal = LIMITE
     for (let j = i - 21; j < i; j++) s += barras[j].vol
     return s / 21
   }
+  const larguras = larguraDasBandas(bandas)
   const saida: SinalDeCandle[] = []
 
   const registrar = (i: number, tipo: TipoDeSinal, explicacao: string) => {
@@ -211,6 +232,52 @@ export function sinaisDeCandle(barras: Barra[], limites: LimitesDeSinal = LIMITE
     const sup = bandas.superior[i]
     if (inf !== null && fundo(inf) && alta) registrar(i, 'trap-banda-baixa', `furou a banda inferior de Bollinger (${x(inf, 2)}) e fechou de volta dentro`)
     else if (sup !== null && topo(sup) && baixa) registrar(i, 'trap-banda-alta', `furou a banda superior de Bollinger (${x(sup, 2)}) e fechou de volta dentro`)
+  }
+  // Rompimento de base e regra dos 50% do gap: dependem de vários candles, não só do candle de sinal.
+  for (let i = 30; i < n; i++) {
+    const a = atr[i - 1]
+    if (a === null || a <= 0) continue
+    const b = barras[i]
+    const ab = abertura(i)
+    const amp = b.max - b.min
+    const terco = amp > 0 ? (b.fech - b.min) / amp : 0.5
+    const volRel = mediaVolume(i) > 0 ? b.vol / mediaVolume(i) : 0
+    const volOk = volRel >= limites.volumeMinimo
+    // Rompimento de base: o fechamento sai de uma consolidação que terminou no candle anterior, com volume e fechamento firme.
+    const anteriores = barras.slice(i - limites.candlesBase, i)
+    const topoRecente = Math.max(...anteriores.map((c) => c.max))
+    const fundoRecente = Math.min(...anteriores.map((c) => c.min))
+    const acima = b.fech > topoRecente * (1 + limites.folgaRompimento) && b.fech > ab && terco >= 2 / 3
+    const abaixo = b.fech < fundoRecente * (1 - limites.folgaRompimento) && b.fech < ab && terco <= 1 / 3
+    if ((acima || abaixo) && volOk) {
+      const base = caixaDaBase(barras.slice(0, i), limites.candlesBase, 80, limites.amplitudeBasePct)
+      if (base && base.indiceFim === i - 1) {
+        const janela = larguras.slice(Math.max(0, i - 120), i).filter((v): v is number => v !== null)
+        const ultima = larguras[i - 1]
+        const estreitas = ultima !== null && janela.length >= 60 && janela.filter((v) => v < ultima).length / janela.length <= 0.2
+        const desc = `base de ${base.candles} candles entre ${x(base.fundo, 2)} e ${x(base.topo, 2)}, volume ${x(volRel)}× a média${estreitas ? ', bandas de Bollinger estreitas antes do rompimento' : ''}`
+        if (acima && b.fech > base.topo * (1 + limites.folgaRompimento)) registrar(i, 'rompimento-base', `fechou acima da ${desc}`)
+        else if (abaixo && b.fech < base.fundo * (1 - limites.folgaRompimento)) registrar(i, 'rompimento-base-baixa', `fechou abaixo da ${desc}`)
+      }
+    }
+    // Regra dos 50% do gap: depois de um gap de alta (ou de baixa), o preço volta ao meio do gap, de corpo a corpo, e reage.
+    for (let g = i - 2; g >= Math.max(1, i - limites.janelaGap); g--) {
+      const pre = barras[g - 1]
+      const dia = barras[g]
+      const corpoPre = [abertura(g - 1), pre.fech]
+      const corpoDia = [abertura(g), dia.fech]
+      const alto = dia.min > pre.max && ((dia.min - pre.max) / pre.max) * 100 >= limites.gapMinimoPct
+      const baixo = dia.max < pre.min && ((pre.min - dia.max) / pre.min) * 100 >= limites.gapMinimoPct
+      if (!alto && !baixo) continue
+      const meio = alto ? (Math.max(...corpoPre) + Math.min(...corpoDia)) / 2 : (Math.min(...corpoPre) + Math.max(...corpoDia)) / 2
+      const entre = barras.slice(g + 1, i)
+      const jaTocou = alto ? entre.some((c) => c.min <= meio) : entre.some((c) => c.max >= meio)
+      const gapFechou = alto ? entre.some((c) => c.min <= pre.max) : entre.some((c) => c.max >= pre.min)
+      if (jaTocou || gapFechou) break
+      if (alto && b.min <= meio && b.fech > meio && b.fech > ab) registrar(i, 'gap-50-compra', `gap de alta de ${dia.data.slice(8, 10)}/${dia.data.slice(5, 7)} (${x(((dia.min - pre.max) / pre.max) * 100)}%): o preço tocou o meio do gap, de corpo a corpo (${x(meio, 2)}), e fechou acima dele`)
+      if (baixo && b.max >= meio && b.fech < meio && b.fech < ab) registrar(i, 'gap-50-venda', `gap de baixa de ${dia.data.slice(8, 10)}/${dia.data.slice(5, 7)} (${x(((pre.min - dia.max) / pre.min) * 100)}%): o preço tocou o meio do gap, de corpo a corpo (${x(meio, 2)}), e fechou abaixo dele`)
+      break
+    }
   }
   return saida.sort((p, q) => p.indice - q.indice)
 }

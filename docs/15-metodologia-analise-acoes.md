@@ -11,7 +11,7 @@ Decisão D119. Três abas dentro de **Simule Ações**, para **uma ação por ve
 | Fundamentos da CVM | `scripts/atualizar-fundamentos.mjs` + `scripts/fundamentos-calculo.mjs` → `webapp-src/public/dados/fundamentos.json` | terça a sábado, de madrugada (`atualizar-fundamentos.yml`) |
 | Análise técnica | `webapp-src/src/domain/analiseTecnica.ts` | no app, ao abrir a aba |
 | Indicadores e níveis do gráfico (Bollinger, abertura da semana, gaps, média de 200 semanas, base) | `webapp-src/src/domain/niveisDoGrafico.ts` | no app, ao abrir a aba (D121) |
-| Sinais de candle (ignição, elefante, ignorada, martelo, engolfo, trap) | `webapp-src/src/domain/sinaisDeCandle.ts` | no app, ao abrir a aba (D130) |
+| Sinais de candle (ignição, elefante, ignorada, martelo, engolfo, trap, rompimento de base, 50% do gap) | `webapp-src/src/domain/sinaisDeCandle.ts` | no app, ao abrir a aba (D130) |
 | Leitura do setup (alvo, retorno/risco e filtros) | `webapp-src/src/domain/leituraFarol.ts` | no app, ao abrir a aba (D131) |
 | Backtest dos sinais (calibragem) | `webapp-src/src/domain/backtestSinais.ts` e `.run.test.ts` | sob demanda, à mão (D132, `docs/18`) |
 | Análise fundamentalista | `webapp-src/src/domain/analiseFundamentalista.ts` | no app, com o preço do dia |

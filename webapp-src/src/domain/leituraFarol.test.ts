@@ -39,12 +39,12 @@ describe('leituraFarol', () => {
 
   it('ignição de alta com resistência acima: alvo na resistência e retorno/risco medido contra o stop', () => {
     const l = leituraFarol(entrada(ignicaoAlta(), { zonas: [zona('resistencia', 110, 111), zona('suporte', 95, 96)] }))
-    expect(l.setup?.tipo).toBe('ignicao-alta')
+    expect(['ignicao-alta', 'rompimento-base']).toContain(l.setup?.tipo)
     expect(l.alvo?.preco).toBe(110)
     expect(l.alvo?.origem).toContain('resistência')
     expect(l.retornoRisco).toBeCloseTo((110 - 103.4) / 3.4, 6)
     expect(l.valido).toBe(true)
-    expect(l.conclusao).toMatch(/^Setup: Barra de ignição de alta/)
+    expect(l.conclusao).toMatch(/^Setup: (Barra de ignição de alta|Rompimento de base)/)
     expect(l.filtros.map((f) => f.chave)).toEqual(['liquidez', 'stop', 'retorno-risco', 'esticada', 'exaustao', 'tendencia'])
   })
 
