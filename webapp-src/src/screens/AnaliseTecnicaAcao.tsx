@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import type { DadosDaAnalise } from './useAnaliseDaAcao'
-import { ROTULO_LEITURA, ROTULO_VIES, agregar } from '../domain/analiseTecnica'
+import { ROTULO_LEITURA, ROTULO_VIES, agregar, zonasDePreco } from '../domain/analiseTecnica'
 import type { AnaliseTecnica, Barra, Horizonte, Leitura, Viés } from '../domain/analiseTecnica'
 import type { EstadoHistoricoLongo } from '../data/useHistoricoLongo'
 import { ROTULO_HORIZONTE } from '../domain/confluencia'
@@ -60,6 +60,12 @@ export function AnaliseTecnicaAcao({ dados, ticker, nome, horizonte }: { dados: 
     const b = dados.barrasDoGrafico ?? []
     return periodicidade === 'diario' ? b : agregar(b, periodicidade === 'semanal' ? 'semana' : 'mes')
   }, [dados.barrasDoGrafico, periodicidade])
+  // Zonas do gráfico: com o histórico longo carregado, calculadas sobre ele (suportes e resistências de anos atrás, que a leitura de
+  // 12 meses não enxerga); sem ele, as da leitura técnica. A nota e a hipótese operacional continuam usando as de 12 meses.
+  const zonasDoGrafico = useMemo(
+    () => (dados.tecnica && dados.barrasDoGrafico && dados.barrasDoGrafico !== dados.barras ? zonasDePreco(dados.barrasDoGrafico, dados.tecnica.volatilidade.atrPct) : (dados.tecnica?.zonas ?? [])),
+    [dados.tecnica, dados.barrasDoGrafico, dados.barras],
+  )
   // Só oferece janelas que cabem no histórico disponível; "Tudo" some quando a última janela já o cobre.
   const caben = JANELAS[periodicidade].filter((j) => j.n !== 0 && j.n < barrasDoGrafico.length * 1.1)
   const janelas = caben.length && caben[caben.length - 1].n >= barrasDoGrafico.length * 0.95 ? caben : [...caben, { n: 0, rotulo: 'Tudo' }]
@@ -108,7 +114,7 @@ export function AnaliseTecnicaAcao({ dados, ticker, nome, horizonte }: { dados: 
             </button>
           ))}
         </div>
-        <GraficoPrecoAcao key={`${ticker}-${periodicidade}-${janelaAtiva}`} barras={barrasDoGrafico} zonas={t.zonas} nome={ticker} periodicidade={periodicidade} janela={janelaAtiva === 0 ? barrasDoGrafico.length : Math.min(janelaAtiva, barrasDoGrafico.length)} opcoes={opcoes} />
+        <GraficoPrecoAcao key={`${ticker}-${periodicidade}-${janelaAtiva}`} barras={barrasDoGrafico} zonas={zonasDoGrafico} nome={ticker} periodicidade={periodicidade} janela={janelaAtiva === 0 ? barrasDoGrafico.length : Math.min(janelaAtiva, barrasDoGrafico.length)} opcoes={opcoes} />
         <NotaDoHistorico barras={barrasDoGrafico} estado={dados.historicoLongo} />
         <span className="tiny muted justify">Todo o histórico de preços vem de arquivos da B3. O volume é financeiro (R$), não quantidade de ações. Dividendos não ajustam o preço.</span>
       </Modulo>

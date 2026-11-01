@@ -195,6 +195,14 @@ describe('zonas e padrões', () => {
     expect(res!.distanciaPct).toBeGreaterThan(5)
   })
 
+  it('nenhuma zona passa da tolerância de largura, mesmo com pivôs em fila subindo devagar', () => {
+    // Oscila 1% para cima e para baixo enquanto a média sobe 30% no total: antes, os pivôs encadeavam numa zona de 20% a 30%.
+    const f = Array.from({ length: 200 }, (_, i) => 20 * (1 + (i / 200) * 0.3) * (1 + (i % 8 < 4 ? 0.01 : -0.01)))
+    const zonas = zonasDePreco(barrasDe(f), 2)
+    expect(zonas.length).toBeGreaterThan(0)
+    for (const z of zonas) expect(z.superior / z.inferior - 1).toBeLessThanOrEqual(0.03 + 1e-9)
+  })
+
   it('topo duplo só é confirmado com fechamento abaixo da linha de pescoço', () => {
     const base = (ultimoFech: number) => {
       const f: number[] = []

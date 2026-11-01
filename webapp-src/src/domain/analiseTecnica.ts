@@ -696,13 +696,17 @@ interface Aglomerado {
   indices: number[]
 }
 
-/** Agrupa pivôs próximos (até `tolerancia` de distância relativa) em zonas. */
+/**
+ * Agrupa pivôs próximos em zonas. A distância é medida a partir do MENOR preço da zona, então nenhuma zona passa de `tolerancia` de
+ * largura. Medir a partir do último pivô (encadeamento) juntava pivôs em fila e criava "zonas" de 20% a 80% de largura, que não
+ * são nível nenhum (auditoria de 31/10/2026: 158 de 211 ações tinham zona com mais de 8%).
+ */
 function aglomerar(pivosTodos: Pivo[], tolerancia: number): Aglomerado[] {
   const ordenados = [...pivosTodos].sort((a, c) => a.preco - c.preco)
   const grupos: Aglomerado[] = []
   for (const p of ordenados) {
     const g = grupos[grupos.length - 1]
-    if (g && p.preco <= Math.max(...g.precos) * (1 + tolerancia)) {
+    if (g && p.preco <= g.precos[0] * (1 + tolerancia)) {
       g.precos.push(p.preco)
       g.indices.push(p.i)
     } else grupos.push({ precos: [p.preco], indices: [p.i] })
