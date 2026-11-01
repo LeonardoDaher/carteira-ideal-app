@@ -4,7 +4,7 @@ Documento de estudo, **não é decisão**. Registra como o analista Thiago Bisi 
 
 ## Fontes e limites
 
-- **Transcrições lidas (automáticas, sem revisão):** Farol de 30/10/2026 (inteira), 23/10/2026 (metade final: ações) e 15/10/2026 (metade final: ações). Três vídeos, quatro dias de contexto: **amostra pequena**. O de 30/10 foi o dia seguinte a uma semana de queda histórica (eleição) e não representa um dia normal.
+- **Transcrições lidas (automáticas, sem revisão):** Farol de 30/10/2026 (inteira), 23/10, 15/10 e 09/10/2026 (metade final de cada: ações). **Quatro vídeos: amostra ainda pequena.** O de 30/10 foi depois de uma semana de queda histórica (eleição) e o de 09/10 foi um dia de máxima histórica do índice, duas situações extremas e opostas. Outras transcrições (16/10, 17/09, 21/10 e mais) não carregaram no navegador do app e ficaram de fora.
 - A transcrição não mostra o que ele desenha. Linhas, canais e zonas são lidos pelo que ele diz ("aqui nos 17,80", "essa faixa"), sem ver o traço.
 - É análise **discricionária**: parte do que ele faz é julgamento visual do dia. O que não vira regra clara fica marcado como "discricionário".
 - Os critérios abaixo são conceitos gerais de análise gráfica clássica. Não copiar texto, imagens nem nomes de métodos próprios dele no app. Os vídeos também divulgam cursos pagos; isso não é aproveitado.
@@ -49,6 +49,13 @@ LTA e LTB (linhas de tendência de alta e de baixa), **linha de retorno** (a par
 21. Risco de **gap de abertura** (stop não executa); em evento de risco (eleição, balanço) o swing é evitado.
 22. Posição aberta que perde o sinal sai e reentra se vier novo sinal.
 
+### Ação em tendência forte (acrescentado pelo vídeo de 09/10)
+28. **Não persegue o movimento**: "difícil se posicionar no meio de um movimento forte"; se a ação já correu da barra de sinal, "pagar ainda mais caro não dá, tem que esperar uma correção" (de preferência até a média de 21 ou até dentro do gap).
+29. Entrada possível: **superação da máxima do dia anterior** logo no começo do pregão, com stop abaixo da mínima do sinal.
+30. **Stop por mínimas** (stop móvel) enquanto o papel sobe: abaixo da mínima do dia ou da véspera. Quem opera assim "não é stopado há bastante tempo".
+31. Aceita **stop largo (12%) só se o alvo entregar pelo menos o mesmo** (relação retorno/risco de 1 ou mais). Alvo: "a resistência mais forte" (por exemplo 8,65); a média de 200 aparece como teto em que o papel "trava".
+32. **Rompimento de máxima histórica** é lido pelo comportamento: sombra e retomada no dia seguinte indicam rompimento verdadeiro, e não falso. Fundo duplo, rompimento do gap, "respiro" e depois rompimento da cabeça do pullback é uma sequência de compra que ele aprecia.
+
 ### Volume e qualidade
 23. Volume confirma reversão e rompimento; alta com volume pequeno não muda nada; movimento feito no **leilão** é suspeito.
 
@@ -75,7 +82,8 @@ LTA e LTB (linhas de tendência de alta e de baixa), **linha de retorno** (a par
 | Gatilho: superar a máxima do candle de sinal (15, 16) | Hipótese de entrada no suporte; sem gatilho de candle | Sim |
 | Rompimento, pullback, falso (17) | Sim, rompimento "confirmado, tentativa ou falso" | Já feito; falta pullback e a regra de 1 candle |
 | Fundo duplo após romper topo intermediário (18) | Fundo duplo sim, sem a regra do topo intermediário | Sim |
-| Stop abaixo do sinal, relação retorno/risco (19, 20) | Sim, stop = suporte menos meio ATR, retorno/risco ≥ 1 | Já feito; falta stop pelo candle de sinal |
+| Stop abaixo do sinal, relação retorno/risco (19, 20, 31) | Sim, stop = suporte menos meio ATR, retorno/risco ≥ 1 | Já feito; falta stop pelo candle de sinal e stop móvel por mínimas (30) |
+| Não perseguir movimento esticado (28) | Parcial: nota de risco e distância às médias | Sim: distância à média de 21 em ATR |
 | Risco de gap e evento (21, 26) | Não | Parcial (data de balanço não está nos dados) |
 | Volume em correção e leilão (6, 23) | Volume contra média de 20 e nas altas contra as quedas; sem leilão | Leilão não (sem dado); resto sim |
 | Contexto do índice (24) | Referência de mercado (BOVA11) na nota | Já feito em parte |
