@@ -11,6 +11,8 @@ import type { Tom } from '../ui/BlocosDeAnalise'
 import { dataLonga, numero, percentual, reais } from '../ui/formatoAnalise'
 import { sinaisDeCandle, sinalAtivo } from '../domain/sinaisDeCandle'
 import type { SinalDeCandle } from '../domain/sinaisDeCandle'
+import { leituraFarol } from '../domain/leituraFarol'
+import type { LeituraFarol, StatusDoFiltro } from '../domain/leituraFarol'
 import { aberturaDaSemana, caixaDaBase, gapsAbertos, mediaDe200Semanas } from '../domain/niveisDoGrafico'
 
 type Periodicidade = 'diario' | 'semanal' | 'mensal'
@@ -86,6 +88,42 @@ function SinaisDeCandle({ sinais, barras, periodicidade }: { sinais: SinalDeCand
   )
 }
 
+const TOM_FILTRO: Record<StatusDoFiltro, Tom> = { ok: 'positivo', alerta: 'neutro', reprova: 'negativo' }
+const ROTULO_FILTRO: Record<StatusDoFiltro, string> = { ok: 'Passa', alerta: 'Atenção', reprova: 'Reprova' }
+
+/** Resumo do setup do diário: gatilho, stop, alvo, retorno/risco e cada filtro com o motivo, ou por que não há setup. */
+function LeituraDoSetup({ l }: { l: LeituraFarol }) {
+  const s = l.setup
+  return (
+    <div className="col" style={{ gap: 8 }} data-testid="leitura-do-setup">
+      <div className="row-between" style={{ gap: 8 }}>
+        <strong>{s ? (l.valido ? 'Setup sem filtro reprovado' : 'Sinal reprovado em algum filtro') : 'Sem sinal'}</strong>
+        <Selo tom={s ? (l.valido ? 'positivo' : 'negativo') : 'neutro'}>{s ? (s.lado === 'compra' ? 'Compra' : 'Venda') : 'Nada a fazer'}</Selo>
+      </div>
+      <span className="small justify">{l.conclusao}</span>
+      {s && (
+        <div className="col" style={{ gap: 2 }}>
+          <Linha rotulo={s.lado === 'compra' ? 'Gatilho (supera a máxima)' : 'Gatilho (perde a mínima)'} valor={reais(s.gatilho)} />
+          <Linha rotulo="Stop" valor={`${reais(s.stop)} (${numero(s.stopPct, 1)}%)`} />
+          <Linha rotulo="Alvo" valor={l.alvo ? `${reais(l.alvo.preco)}` : 'sem alvo técnico à frente'} />
+          <Linha rotulo="Retorno/risco" valor={l.retornoRisco === null ? 'n/d' : `${numero(l.retornoRisco, 1)} para 1`} />
+        </div>
+      )}
+      {l.filtros.length > 0 && (
+        <ul className="col" style={{ gap: 4, margin: 0, paddingLeft: 0, listStyle: 'none' }}>
+          {l.filtros.map((f) => (
+            <li key={f.chave} className="row" style={{ gap: 8, alignItems: 'flex-start' }}>
+              <Selo tom={TOM_FILTRO[f.status]}>{ROTULO_FILTRO[f.status]}</Selo>
+              <span className="small"><strong>{f.rotulo}:</strong> {f.motivo}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+      <span className="tiny muted justify">Não avaliado: {l.naoAvaliado.join('; ')}. Leitura do diário, por regra, para estudo: não é recomendação de compra ou venda.</span>
+    </div>
+  )
+}
+
 /** Explica em texto cada nível desenhado no gráfico (origem e valor), para quem não enxerga as cores ou quer a conta. */
 function NotaDosNiveis({ n }: { n: { abertura: ReturnType<typeof aberturaDaSemana>; media200: ReturnType<typeof mediaDe200Semanas>; gaps: ReturnType<typeof gapsAbertos>; caixa: ReturnType<typeof caixaDaBase> } }) {
   const itens: string[] = []
@@ -135,8 +173,17 @@ export function AnaliseTecnicaAcao({ dados, ticker, nome, horizonte }: { dados: 
     return { niveis, gaps: gapsAbertos(b), caixa: caixaDaBase(b), abertura, media200 }
   }, [dados.barrasDoGrafico])
   // Sinais de candle sobre os candles que estão na tela (diário, semanal ou mensal), com o gatilho e o stop do mais recente que ainda vale.
-  const sinais = useMemo(() => sinaisDeCandle(barrasDoGrafico), [barrasDoGrafico])
+  const sinaisDiarios = useMemo(() => sinaisDeCandle(dados.barrasDoGrafico ?? []), [dados.barrasDoGrafico])
+  const sinais = useMemo(() => (periodicidade === 'diario' ? sinaisDiarios : sinaisDeCandle(barrasDoGrafico)), [periodicidade, sinaisDiarios, barrasDoGrafico])
   const ativo = useMemo(() => sinalAtivo(sinais, barrasDoGrafico.length), [sinais, barrasDoGrafico.length])
+  // Leitura do setup: sempre sobre o diário, com as zonas e os níveis do gráfico e a tendência da leitura técnica.
+  const leitura = useMemo(
+    () =>
+      dados.tecnica && dados.barrasDoGrafico
+        ? leituraFarol({ barras: dados.barrasDoGrafico, sinais: sinaisDiarios, zonas: zonasDoGrafico, gaps: niveisDoGrafico.gaps, caixa: niveisDoGrafico.caixa, media200Semanas: niveisDoGrafico.media200?.preco ?? null, tendenciaDiaria: dados.tecnica.tendencia.diario.leitura, tendenciaSemanal: dados.tecnica.tendencia.semanal.leitura })
+        : null,
+    [dados.tecnica, dados.barrasDoGrafico, sinaisDiarios, zonasDoGrafico, niveisDoGrafico],
+  )
   // Só oferece janelas que cabem no histórico disponível; "Tudo" some quando a última janela já o cobre.
   const caben = JANELAS[periodicidade].filter((j) => j.n !== 0 && j.n < barrasDoGrafico.length * 1.1)
   const janelas = caben.length && caben[caben.length - 1].n >= barrasDoGrafico.length * 0.95 ? caben : [...caben, { n: 0, rotulo: 'Tudo' }]
@@ -185,11 +232,17 @@ export function AnaliseTecnicaAcao({ dados, ticker, nome, horizonte }: { dados: 
             </button>
           ))}
         </div>
-        <GraficoPrecoAcao key={`${ticker}-${periodicidade}-${janelaAtiva}`} barras={barrasDoGrafico} zonas={zonasDoGrafico} niveis={niveisDoGrafico.niveis} gaps={niveisDoGrafico.gaps} caixa={niveisDoGrafico.caixa} sinais={sinais} sinalAtivo={ativo} nome={ticker} periodicidade={periodicidade} janela={janelaAtiva === 0 ? barrasDoGrafico.length : Math.min(janelaAtiva, barrasDoGrafico.length)} opcoes={opcoes} />
+        <GraficoPrecoAcao key={`${ticker}-${periodicidade}-${janelaAtiva}`} barras={barrasDoGrafico} zonas={zonasDoGrafico} niveis={niveisDoGrafico.niveis} gaps={niveisDoGrafico.gaps} caixa={niveisDoGrafico.caixa} sinais={sinais} sinalAtivo={ativo} alvo={periodicidade === 'diario' ? (leitura?.alvo?.preco ?? null) : null} nome={ticker} periodicidade={periodicidade} janela={janelaAtiva === 0 ? barrasDoGrafico.length : Math.min(janelaAtiva, barrasDoGrafico.length)} opcoes={opcoes} />
         <NotaDoHistorico barras={barrasDoGrafico} estado={dados.historicoLongo} />
         {opcoes.niveis && <NotaDosNiveis n={niveisDoGrafico} />}
         <span className="tiny muted justify">Todo o histórico de preços vem de arquivos da B3. O volume é financeiro (R$), não quantidade de ações. Dividendos não ajustam o preço.</span>
       </Modulo>
+
+      {leitura && (
+        <Modulo titulo="Leitura do setup" subtitulo="gatilho, stop, alvo, retorno/risco e filtros" aberto>
+          <LeituraDoSetup l={leitura} />
+        </Modulo>
+      )}
 
       <Modulo titulo="Sinais de candle" subtitulo="ignição, elefante, ignorada, martelo, engolfo e trap">
         <SinaisDeCandle sinais={sinais} barras={barrasDoGrafico} periodicidade={periodicidade} />

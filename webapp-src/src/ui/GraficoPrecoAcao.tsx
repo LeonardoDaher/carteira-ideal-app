@@ -37,6 +37,7 @@ const COR_GAP = 'oklch(70% 0.12 300)'
 const COR_BASE = 'oklch(72% 0.2 350)'
 const COR_SINAL_COMPRA = 'oklch(80% 0.18 150)'
 const COR_SINAL_VENDA = 'oklch(66% 0.22 25)'
+const COR_ALVO = 'oklch(78% 0.14 230)'
 
 export interface OpcoesDoGrafico {
   mm21: boolean
@@ -93,7 +94,7 @@ function passoRedondo(amplitude: number, linhas = 4) {
  * Com o histórico longo do COTAHIST (`abe`) o corpo vai da abertura real ao fechamento; sem ele (Boletim de Preços, que não traz a
  * abertura) vai do fechamento do pregão anterior ao do dia, e o gap de abertura não aparece. O pavio vai da mínima à máxima. Toque, arraste ou use as setas para ler cada dia.
  */
-export function GraficoPrecoAcao({ barras, zonas, nome, janela = 120, opcoes, periodicidade = 'diario', niveis = [], gaps = [], caixa = null, sinais = [], sinalAtivo = null }: { barras: Barra[]; zonas: ZonaPreco[]; nome: string; janela?: number; opcoes: OpcoesDoGrafico; periodicidade?: 'diario' | 'semanal' | 'mensal'; niveis?: (NivelDePreco & { cor?: string })[]; gaps?: GapAberto[]; caixa?: CaixaDaBase | null; sinais?: SinalDeCandle[]; sinalAtivo?: SinalDeCandle | null }) {
+export function GraficoPrecoAcao({ barras, zonas, nome, janela = 120, opcoes, periodicidade = 'diario', niveis = [], gaps = [], caixa = null, sinais = [], sinalAtivo = null, alvo = null }: { barras: Barra[]; zonas: ZonaPreco[]; nome: string; janela?: number; opcoes: OpcoesDoGrafico; periodicidade?: 'diario' | 'semanal' | 'mensal'; niveis?: (NivelDePreco & { cor?: string })[]; gaps?: GapAberto[]; caixa?: CaixaDaBase | null; sinais?: SinalDeCandle[]; sinalAtivo?: SinalDeCandle | null; alvo?: number | null }) {
   const [indice, setIndice] = useState<number | null>(null)
   const [vista, setVista] = useState<VistaDoGrafico>({ qtd: janela, desloc: 0 })
   const svgRef = useRef<SVGSVGElement>(null)
@@ -160,7 +161,8 @@ export function GraficoPrecoAcao({ barras, zonas, nome, janela = 120, opcoes, pe
     const kCaixaIni = caixa ? vis.findIndex((b) => b.data >= caixa.inicio) : -1
     const kCaixaFim = caixa ? vis.reduce((m, b, k) => (b.data <= caixa.fim ? k : m), -1) : -1
     const ativoVisivel = opcoes.sinais && sinalAtivo ? sinalAtivo : null
-    for (const v of ativoVisivel ? [ativoVisivel.gatilho, ativoVisivel.stop] : []) {
+    const alvoVisivel = ativoVisivel && alvo !== null ? alvo : null
+    for (const v of ativoVisivel ? [ativoVisivel.gatilho, ativoVisivel.stop, ...(alvoVisivel !== null ? [alvoVisivel] : [])] : []) {
       if (perto(v, v)) {
         minimo = Math.min(minimo, v)
         maximo = Math.max(maximo, v)
@@ -228,12 +230,12 @@ export function GraficoPrecoAcao({ barras, zonas, nome, janela = 120, opcoes, pe
     const rotulosZona = [
       ...zonasVisiveis.map((z) => ({ cor: z.tipo === 'suporte' ? COR_SUPORTE : COR_RESISTENCIA, valor: z.tipo === 'suporte' ? z.superior : z.inferior, y: y(z.tipo === 'suporte' ? z.superior : z.inferior) })),
       ...niveisVisiveis.map((nv) => ({ cor: nv.cor ?? COR_ABERTURA, valor: nv.preco, y: y(nv.preco) })),
-      ...(ativoVisivel ? [{ cor: COR_SINAL_COMPRA, valor: ativoVisivel.gatilho, y: y(ativoVisivel.gatilho) }, { cor: COR_SINAL_VENDA, valor: ativoVisivel.stop, y: y(ativoVisivel.stop) }] : []),
+      ...(ativoVisivel ? [{ cor: COR_SINAL_COMPRA, valor: ativoVisivel.gatilho, y: y(ativoVisivel.gatilho) }, { cor: COR_SINAL_VENDA, valor: ativoVisivel.stop, y: y(ativoVisivel.stop) }, ...(alvoVisivel !== null ? [{ cor: COR_ALVO, valor: alvoVisivel, y: y(alvoVisivel) }] : [])] : []),
     ].sort((a, b) => a.y - b.y)
     for (let k = 1; k < rotulosZona.length; k++) rotulosZona[k].y = Math.max(rotulosZona[k].y, rotulosZona[k - 1].y + 9)
     const gradeSemColisao = grade.filter((v) => rotulosZona.every((r) => Math.abs(r.y - y(v)) > 9))
     return {
-      inicio, ativoVisivel, vis, n, largura, x, y, yVol, grade: gradeSemColisao, marcas, zonasVisiveis, niveisVisiveis, gapsVisiveis, caixaVisivel, kCaixaIni, kCaixaFim, minimo, maximo, H, fundoPaineis, rotulosZona,
+      inicio, ativoVisivel, alvoVisivel, vis, n, largura, x, y, yVol, grade: gradeSemColisao, marcas, zonasVisiveis, niveisVisiveis, gapsVisiveis, caixaVisivel, kCaixaIni, kCaixaFim, minimo, maximo, H, fundoPaineis, rotulosZona,
       pVolume, pIfr, pMacd, pEst, yIfr, yMacd, yEst, ifr, mLinha, mSinal, mHist, eK, eD,
       cK: linha(eK, yEst), cD: linha(eD, yEst),
       c21: linha(v21), c80: linha(v80), c200: linha(v200), cE9: linha(ve9), cSup: linha(bSup), cInf: linha(bInf),
@@ -244,7 +246,7 @@ export function GraficoPrecoAcao({ barras, zonas, nome, janela = 120, opcoes, pe
       })(),
       cIfr: linha(ifr, yIfr), cMacd: linha(mLinha, yMacd), cSinal: linha(mSinal, yMacd),
     }
-  }, [barras, ind, total, qtd, desloc, zonas, opcoes.mm21, opcoes.mm80, opcoes.mm200, opcoes.zonas, opcoes.volume, opcoes.ifr, opcoes.macd, opcoes.estocastico, opcoes.bollinger, opcoes.ema9, opcoes.niveis, opcoes.sinais, sinalAtivo, niveis, gaps, caixa])
+  }, [barras, ind, total, qtd, desloc, zonas, opcoes.mm21, opcoes.mm80, opcoes.mm200, opcoes.zonas, opcoes.volume, opcoes.ifr, opcoes.macd, opcoes.estocastico, opcoes.bollinger, opcoes.ema9, opcoes.niveis, opcoes.sinais, sinalAtivo, alvo, niveis, gaps, caixa])
 
   const { vis, n, x, y, yVol, largura, H, pVolume, pIfr, pMacd, pEst } = dados
   if (n < 2) return <div className="small muted" role="status">Histórico insuficiente para o gráfico.</div>
@@ -416,6 +418,7 @@ export function GraficoPrecoAcao({ barras, zonas, nome, janela = 120, opcoes, pe
           <g>
             <line x1={x(Math.max(0, dados.ativoVisivel.indice - dados.inicio))} x2={W - R} y1={y(dados.ativoVisivel.gatilho)} y2={y(dados.ativoVisivel.gatilho)} stroke={COR_SINAL_COMPRA} strokeWidth={0.9} strokeDasharray="4 2" />
             <line x1={x(Math.max(0, dados.ativoVisivel.indice - dados.inicio))} x2={W - R} y1={y(dados.ativoVisivel.stop)} y2={y(dados.ativoVisivel.stop)} stroke={COR_SINAL_VENDA} strokeWidth={0.9} strokeDasharray="4 2" />
+            {dados.alvoVisivel !== null && <line x1={x(Math.max(0, dados.ativoVisivel.indice - dados.inicio))} x2={W - R} y1={y(dados.alvoVisivel)} y2={y(dados.alvoVisivel)} stroke={COR_ALVO} strokeWidth={0.9} strokeDasharray="1 3" />}
           </g>
         )}
 
@@ -494,7 +497,7 @@ export function GraficoPrecoAcao({ barras, zonas, nome, janela = 120, opcoes, pe
         {opcoes.mm21 && <span><svg width="18" height="8" aria-hidden="true"><line x1="1" x2="17" y1="4" y2="4" stroke={COR_MM21} strokeWidth="1" /></svg> Média 21</span>}
         {opcoes.mm80 && <span><svg width="18" height="8" aria-hidden="true"><line x1="1" x2="17" y1="4" y2="4" stroke={COR_MM80} strokeWidth="1" /></svg> Média 80</span>}
         {opcoes.mm200 && <span><svg width="18" height="8" aria-hidden="true"><line x1="1" x2="17" y1="4" y2="4" stroke={COR_MM200} strokeWidth="2.5" strokeDasharray="5 2" /></svg> Média 200</span>}
-        {opcoes.sinais && sinais.length > 0 && <span><svg width="10" height="10" aria-hidden="true"><path d="M5 1L1 8H9Z" fill={COR_SINAL_COMPRA} /></svg> Sinal de compra <svg width="10" height="10" aria-hidden="true"><path d="M5 9L1 2H9Z" fill={COR_SINAL_VENDA} /></svg> de venda{dados.ativoVisivel ? ' (linhas: gatilho e stop do sinal recente)' : ''}</span>}
+        {opcoes.sinais && sinais.length > 0 && <span><svg width="10" height="10" aria-hidden="true"><path d="M5 1L1 8H9Z" fill={COR_SINAL_COMPRA} /></svg> Sinal de compra <svg width="10" height="10" aria-hidden="true"><path d="M5 9L1 2H9Z" fill={COR_SINAL_VENDA} /></svg> de venda{dados.ativoVisivel ? ' (linhas: gatilho, stop e alvo do sinal recente)' : ''}</span>}
         {opcoes.ema9 && <span><svg width="18" height="8" aria-hidden="true"><line x1="1" x2="17" y1="4" y2="4" stroke={COR_EMA9} strokeWidth="1" /></svg> Média 9 (exp.)</span>}
         {opcoes.bollinger && <span><svg width="18" height="8" aria-hidden="true"><line x1="1" x2="17" y1="4" y2="4" stroke={COR_BANDA} strokeWidth="1" /></svg> Bandas de Bollinger (21, 2)</span>}
         {opcoes.niveis && dados.niveisVisiveis.some((nv) => nv.chave === 'abertura-semana') && <span><svg width="18" height="8" aria-hidden="true"><line x1="1" x2="17" y1="4" y2="4" stroke={COR_ABERTURA} strokeWidth="1.2" strokeDasharray="3 2" /></svg> Abertura da semana</span>}

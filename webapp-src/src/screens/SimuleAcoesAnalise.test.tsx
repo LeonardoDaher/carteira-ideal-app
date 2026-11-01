@@ -213,6 +213,21 @@ describe('Simule Ações: abas de análise', () => {
     expect(botao.getAttribute('aria-pressed')).toBe('false')
   })
 
+  it('leitura do setup: mostra gatilho, stop, filtros e o aviso, e sem candle forte diz que não há sinal', () => {
+    const h = historicoLongoDeAlfa()
+    const ultima = h.ALFA3.barras[h.ALFA3.barras.length - 1]
+    ultima[1] = ultima[4] * 0.96
+    ultima[3] = ultima[1] * 0.995
+    ultima[2] = ultima[4] * 1.001
+    ultima[5] = 90_000
+    abrir(/Análise técnica/, h)
+    const leitura = screen.getByTestId('leitura-do-setup')
+    expect(leitura.textContent).toMatch(/Gatilho \(supera a máxima\)/)
+    expect(leitura.textContent).toMatch(/Retorno\/risco/)
+    expect(leitura.textContent).toContain('Liquidez:')
+    expect(leitura.textContent).toContain('não é recomendação')
+  })
+
   it('com o histórico longo a abertura da semana é a real', () => {
     abrir(/Análise técnica/, historicoLongoDeAlfa())
     expect(screen.getByTestId('niveis-do-grafico').textContent).not.toContain('aproximada pelo fechamento anterior')

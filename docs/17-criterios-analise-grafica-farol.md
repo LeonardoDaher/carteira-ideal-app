@@ -208,7 +208,7 @@ Tudo calculado por regra, descritivo, sem prometer retorno (exceção D19 como a
 
 1. **Indicadores e níveis** (camadas 1 e 2): Bollinger, EMA 9, abertura da semana, gaps, média de 200 semanal, caixa da base. **Feita em 01/11/2026 (D121)**; só falta calibrar os limiares.
 2. **Candles e setups medidos** (camada 3 e parte da 4): ignição, elefante, ignorada, martelo, engolfo, trap, rompimento de base, regra dos 50% do gap, com testes unitários por padrão. **Candles feitos em 01/11/2026 (D130)**; faltam o rompimento de base e a regra dos 50% do gap.
-3. **Leitura Farol e filtros** (camada 4): gatilho, stop, alvo, retorno/risco, motivos de "sem sinal".
+3. **Leitura Farol e filtros** (camada 4): gatilho, stop, alvo, retorno/risco, motivos de "sem sinal". **Feita em 01/11/2026 (D131)**, sem o regime do índice e o risco de evento.
 4. **Calibragem e backtest** com o histórico de 5 anos, e só então fixar limiares e eventual pontuação.
 5. **Linhas de tendência** e eventual **60 minutos** se houver fonte de dados.
 

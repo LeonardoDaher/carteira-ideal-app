@@ -12,6 +12,7 @@ Decisão D119. Três abas dentro de **Simule Ações**, para **uma ação por ve
 | Análise técnica | `webapp-src/src/domain/analiseTecnica.ts` | no app, ao abrir a aba |
 | Indicadores e níveis do gráfico (Bollinger, abertura da semana, gaps, média de 200 semanas, base) | `webapp-src/src/domain/niveisDoGrafico.ts` | no app, ao abrir a aba (D121) |
 | Sinais de candle (ignição, elefante, ignorada, martelo, engolfo, trap) | `webapp-src/src/domain/sinaisDeCandle.ts` | no app, ao abrir a aba (D130) |
+| Leitura do setup (alvo, retorno/risco e filtros) | `webapp-src/src/domain/leituraFarol.ts` | no app, ao abrir a aba (D131) |
 | Análise fundamentalista | `webapp-src/src/domain/analiseFundamentalista.ts` | no app, com o preço do dia |
 | Confluência | `webapp-src/src/domain/confluencia.ts` | no app |
 
