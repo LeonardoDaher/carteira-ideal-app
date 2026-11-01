@@ -14,5 +14,6 @@ Leia nesta ordem se você está chegando agora ao projeto:
 | 9 | [Metodologia do Top 15 ações mais baratas](09-metodologia-acoes-baratas.md) | Consultoria / auditoria | Fontes, fórmulas, contas da CVM, filtros, trilha de auditoria, limitações e checklist de publicação (D49) |
 | 15 | [Metodologia da análise de ações](15-metodologia-analise-acoes.md) | Consultoria / auditoria | Análise técnica, fundamentalista e confluência: dados, fórmulas, pesos, premissas, limites e operação (D119) |
 | 16 | [Metodologia do Top 15 ações pagadoras de dividendos](16-metodologia-acoes-dividendos.md) | Consultoria / auditoria | Proventos da B3, dividend yield de 12 meses, ajustes, auditoria e conferência com o Investidor10 (D122) |
+| 17 | [Critérios de análise gráfica observados no Farol](17-criterios-analise-grafica-farol.md) | Consultoria / estudo | Estudo, não decisão: como um analista lê suportes, resistências, candles, entradas e stops, e o que o app já tem e falta |
 
 > **Confidencialidade.** Esta pasta descreve a metodologia proprietária em detalhe. Ela só deve existir em repositório **privado**.
