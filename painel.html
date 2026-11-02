@@ -106,6 +106,10 @@
           <div class="card" id="c-perfis"></div>
           <div class="card" id="c-outros"></div>
         </section>
+        <section class="grade">
+          <div class="card" id="c-retencao"></div>
+          <div class="card" id="c-telas"></div>
+        </section>
         <div class="acoes">
           <button type="button" id="btn-imprimir">Imprimir ou salvar em PDF</button>
           <button type="button" id="btn-csv">Baixar dados por dia (CSV)</button>
@@ -127,7 +131,7 @@
         arquitetura_concluida: "Terminaram a arquitetura patrimonial (14 no total)",
         recomendacao_gerada: "Receberam a carteira de referência"
       };
-      var TELAS = { aprender: "Aprender", trilha: "Trilhas", aprenderVideo: "Videoaulas", simuleFii: "Simule FII", simuleTesouro: "Simule Tesouro", simuleBdr: "Simule BDR", simuleEtf: "Simule ETF", simuleOpcoes: "Simule Opções", minhaCarteira: "Meus Ativos", meuMes: "Meu Mês", carteira: "Carteira", simulador: "Simulador" };
+      var TELAS = { aprender: "Aprender", trilha: "Trilhas", aprenderVideo: "Videoaulas", simuleFii: "Simule FII", simuleTesouro: "Simule Tesouro", simuleBdr: "Simule BDR", simuleEtf: "Simule ETF", simuleOpcoes: "Simule Opções", simuleAcoes: "Simule Ações", simuleFuturos: "Simule Futuros", simuleAtivos: "Simule Ativos", simuleImovel: "Simule Imóvel", simuleCarro: "Simule Carro", simuleMoto: "Simule Moto", simuleBens: "Simule Bens", suaHp12c: "Sua HP 12C", minhaCarteira: "Meus Ativos", meuMes: "Meu Mês", carteira: "Carteira", simulador: "Simulador" };
       var CAP = { baixa: "Baixa", media: "Média", alta: "Alta" };
       var PRAZO = { curto: "Curto prazo", medio: "Médio prazo", longo: "Longo prazo" };
 
@@ -215,6 +219,26 @@
         if (totalVeto) o += '<p class="desc" style="margin-top:14px"><strong>Restrição dura (veto):</strong> ' + pctTxt(pct(veto.sim || 0, totalVeto)) + " das pessoas tiveram o perfil patrimonial travado em Defensivo (dívida cara, reserva curta ou gasto grande em até 24 meses).</p>";
         o += bloco("Telas mais abertas", somarDim(mensal, "tela"), TELAS);
         $("#c-outros").innerHTML = o;
+
+        // Retenção (quem volta) e pessoas distintas por tela
+        var ret = d.retencao || {};
+        var r7 = ret.voltaramEmAte7Dias || { base: 0, voltaram: 0, percentual: null };
+        var r30 = ret.voltaramEmAte30Dias || { base: 0, voltaram: 0, percentual: null };
+        var rh = '<h2>Quem volta</h2><p class="desc">Entre as pessoas que usaram o app pela primeira vez, quantas voltaram depois. Só entram as pessoas cujo prazo já fechou.</p>';
+        rh += linhaBarra("Voltaram em até 7 dias", r7.voltaram, r7.base);
+        rh += linhaBarra("Voltaram em até 30 dias", r30.voltaram, r30.base);
+        rh += '<p class="insight">' + (r7.percentual === null ? "Ainda sem pessoas suficientes com 7 dias de uso para calcular." : "<strong>" + pctTxt(r7.percentual) + "</strong> voltaram em até 7 dias (" + fmt(r7.voltaram) + " de " + fmt(r7.base) + ")." + (r30.percentual === null ? "" : " Em 30 dias: <strong>" + pctTxt(r30.percentual) + "</strong>.")) + "</p>";
+        $("#c-retencao").innerHTML = rh;
+
+        var pt = d.pessoasPorTela || {};
+        var th = '<h2>Pessoas por função</h2><p class="desc">Pessoas distintas que abriram cada tela (soma dos meses do período). Mostra o que as pessoas de fato usam.</p>';
+        var itensTela = ordenar(pt);
+        var maxTela = itensTela.length ? itensTela[0][1] : 0;
+        itensTela.slice(0, 12).forEach(function (p) { th += linhaBarra(TELAS[p[0]] || p[0], p[1], maxTela); });
+        if (!itensTela.length) th += '<p class="desc">Ainda sem dados.</p>';
+        var ev = d.eventosNoPeriodo || {};
+        th += '<p class="insight">Instalaram o app: <strong>' + fmt(ev.app_instalado) + "</strong> · Ativaram alertas de preço: <strong>" + fmt(ev.alerta_ativado) + "</strong>.</p>";
+        $("#c-telas").innerHTML = th;
 
         $("#conteudo").hidden = false;
       }

@@ -13,6 +13,10 @@ sem coletar dado pessoal e mantendo custo zero enquanto o projeto não for comer
 | `recomendacao_gerada` | ao chegar no resultado (com perfil-mãe, prazo, capacidade real e veto) |
 | `recomendacao_erro` | falha ao calcular |
 | `tela_vista` | 1x por sessão em Aprender, Simule*, Meu Mês, Carteira, Simulador |
+| `app_instalado` | quando o navegador avisa que o app foi adicionado à tela inicial |
+| `alerta_ativado` | quando a pessoa liga os avisos de preço-teto |
+
+**Retenção (D136).** Na `visita`, o app envia também a *coorte*: o dia (AAAA-MM-DD, Brasília) da primeira visita daquele navegador, guardado no próprio aparelho. O painel mostra quantas pessoas de cada coorte voltaram em até 7 e em até 30 dias (só coortes cujo prazo já fechou entram no percentual) e quantas pessoas distintas abriram cada tela. Navegadores que já usavam o app antes dessa versão entram como coorte do dia em que abrirem a versão nova; quem limpa os dados do navegador volta como pessoa nova.
 
 Origem/parceiro: abra o app com `?ref=nome-do-parceiro` (ex.: `carteiraideal.app.br/app/?ref=bancoxyz`).
 Todos os eventos daquela pessoa passam a carregar a origem.
@@ -37,7 +41,7 @@ curl -H "Authorization: Bearer $METRICAS_TOKEN" "https://carteiraideal.app.br/ap
 ```
 Devolve: visitantes únicos no período, recomendações geradas, funil (pessoas por etapa),
 taxa de conclusão, usuários ativos por mês (MAU), distribuição dos 9 Perfis-Mãe / prazo /
-capacidade real / veto, e o detalhe por dia.
+capacidade real / veto, retenção em 7 e 30 dias (`retencao`), pessoas distintas por tela (`pessoasPorTela`) e o detalhe por dia.
 
 ## Limites
 - Vercel Hobby é para uso não comercial; ao fechar parceria paga, migrar para Pro.

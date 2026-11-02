@@ -276,6 +276,10 @@ export function useAppState() {
   useEffect(() => {
     if (!hidratado) return
     registrarEvento('visita', undefined, { unicoPorSessao: true })
+    // Instalação do app (PWA): conta quando o navegador avisa que a pessoa adicionou à tela inicial.
+    const aoInstalar = () => void registrarEvento('app_instalado', undefined, { unicoPorSessao: true })
+    window.addEventListener('appinstalled', aoInstalar)
+    return () => window.removeEventListener('appinstalled', aoInstalar)
   }, [hidratado])
 
   useEffect(() => {

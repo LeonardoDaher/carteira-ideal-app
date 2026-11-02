@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { storage } from '../data/storage'
+import { registrarEvento } from '../data/analytics'
 import { ativarPush, desativarPush, pushLigado, sincronizarPush } from '../data/pushPreco'
 import { useArquivoDados } from '../data/useArquivoDados'
 import { SNAPSHOT_ACOES_DIVIDENDOS } from '../data/snapshotAcoesDividendos'
@@ -143,6 +144,7 @@ export function PrecoTetoAcoes({
       if (r === 'ligado') {
         setPushOn(true)
         atualizar({ push: true })
+        void registrarEvento('alerta_ativado')
         return
       }
       setPushMsg(

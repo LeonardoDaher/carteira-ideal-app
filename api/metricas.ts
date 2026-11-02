@@ -5,7 +5,7 @@
 // Variables). Sem o token configurado, o endpoint fica fechado.
 import type { VercelRequest, VercelResponse } from './_tipos'
 import { pipeline, metricasHabilitadas } from './_redis.js'
-import { EVENTOS_FUNIL, EVENTOS_EXTRAS, dataBrasilia } from './_eventos.js'
+import { EVENTOS_FUNIL, EVENTOS_EXTRAS, TELAS_CONTADAS, dataBrasilia, somarDias } from './_eventos.js'
 import { timingSafeEqual, createHash } from 'node:crypto'
 import { chaveDeChamadas, contadorComReserva, contadorEmMemoria, contadorRedis, JANELA_CHAMADAS_SEGUNDOS, passouDoLimite } from './_limite.js'
 import type { Contador } from './_limite.js'
@@ -23,6 +23,9 @@ function mesmoToken(a: string, b: string): boolean {
   const hb = createHash('sha256').update(b).digest()
   return timingSafeEqual(ha, hb)
 }
+
+// Retenção olha no máximo as coortes dos últimos 90 dias (cada coorte custa 2 consultas ao Redis).
+const MAX_COORTES = 90
 
 const TODOS_EVENTOS = [...EVENTOS_FUNIL, ...EVENTOS_EXTRAS]
 
@@ -75,6 +78,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   for (const ev of EVENTOS_FUNIL) comandos.push(['PFCOUNT', ...lista.map((d) => `ue:${d}:${ev}`)])
   comandos.push(['PFCOUNT', ...lista.map((d) => `u:d:${d}`)])
 
+  // Retenção: por coorte (dia da primeira visita), quantos voltaram em até 7 e em até 30 dias.
+  const hoje = lista[lista.length - 1]
+  const coortes = lista.slice(-MAX_COORTES)
+  for (const c of coortes) {
+    comandos.push(['PFCOUNT', `rc:${c}:${c}`])
+    const apos = (n: number) => Array.from({ length: n }, (_, k) => somarDias(c, k + 1)).filter((d) => d <= hoje).map((d) => `rc:${c}:${d}`)
+    const ate7 = apos(7)
+    const ate30 = apos(30)
+    comandos.push(ate7.length ? ['PFCOUNT', ...ate7] : ['PFCOUNT', 'rc:vazio'])
+    comandos.push(ate30.length ? ['PFCOUNT', ...ate30] : ['PFCOUNT', 'rc:vazio'])
+  }
+  // Pessoas distintas por tela, em cada mês do período
+  for (const mes of meses) for (const t of TELAS_CONTADAS) comandos.push(['PFCOUNT', `ut:${mes}:${t}`])
+
   try {
     const r = await pipeline(comandos)
     let i = 0
@@ -92,6 +109,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const funil = EVENTOS_FUNIL.map((ev) => ({ etapa: ev, pessoas: Number(r[i++]) }))
     const visitantesUnicosNoPeriodo = Number(r[i++])
 
+    const coorteDados = coortes.map((c) => ({ coorte: c, novos: Number(r[i++]), voltaram7: Number(r[i++]), voltaram30: Number(r[i++]) }))
+    const pessoasPorTela: Record<string, number> = {}
+    for (const _mes of meses) {
+      for (const t of TELAS_CONTADAS) {
+        const n = Number(r[i++])
+        // Soma dos meses: uma pessoa ativa em dois meses conta duas vezes (é um uso, não um total único).
+        if (n > 0) pessoasPorTela[t] = (pessoasPorTela[t] ?? 0) + n
+      }
+    }
+    // Só entram no percentual as coortes velhas o bastante para a janela ter fechado.
+    const idade = (c: string) => (Date.parse(`${hoje}T00:00:00Z`) - Date.parse(`${c}T00:00:00Z`)) / 86_400_000
+    const resumo = (janela: 7 | 30) => {
+      const fechadas = coorteDados.filter((c) => idade(c.coorte) >= janela)
+      const base = fechadas.reduce((s, c) => s + c.novos, 0)
+      const voltaram = fechadas.reduce((s, c) => s + (janela === 7 ? c.voltaram7 : c.voltaram30), 0)
+      return { base, voltaram, percentual: base > 0 ? Math.round((voltaram / base) * 1000) / 10 : null }
+    }
+    const retencao = { voltaramEmAte7Dias: resumo(7), voltaramEmAte30Dias: resumo(30), coortes: coorteDados }
+
     const total = (ev: string) => porDia.reduce((s, d) => s + (d.eventos[ev] ?? 0), 0)
     const eventosNoPeriodo = Object.fromEntries(TODOS_EVENTOS.map((ev) => [ev, total(ev)]))
     const taxaConclusao =
@@ -103,6 +139,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       recomendacoesGeradas: eventosNoPeriodo.recomendacao_gerada,
       taxaConclusaoFunilPercentual: taxaConclusao,
       funil,
+      retencao,
+      pessoasPorTela,
       eventosNoPeriodo,
       mensal,
       porDia,

@@ -17,6 +17,8 @@ export type EventoUso =
   | 'recomendacao_gerada'
   | 'recomendacao_erro'
   | 'tela_vista'
+  | 'app_instalado'
+  | 'alerta_ativado'
 
 export type PropsEvento = {
   perfil?: string
@@ -28,9 +30,11 @@ export type PropsEvento = {
 
 const CHAVE_ID = 'carteiraideal.idAnonimo'
 const CHAVE_REF = 'carteiraideal.ref'
+const CHAVE_COORTE = 'carteiraideal.primeiraVisita'
 
 let idEmMemoria: string | null = null
 let refEmMemoria: string | null = null
+let coorteEmMemoria: string | null = null
 
 function gerarId(): string {
   try {
@@ -79,6 +83,23 @@ async function obterRef(): Promise<string | undefined> {
   return ref || undefined
 }
 
+/** Dia (AAAA-MM-DD, horário de Brasília) da primeira visita deste navegador. Só serve para medir retenção. */
+async function obterCoorte(): Promise<string | undefined> {
+  if (coorteEmMemoria !== null) return coorteEmMemoria || undefined
+  let coorte = ''
+  try {
+    coorte = (await storage.getItem(CHAVE_COORTE)) ?? ''
+    if (!/^d{4}-d{2}-d{2}$/.test(coorte)) {
+      coorte = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(new Date())
+      await storage.setItem(CHAVE_COORTE, coorte)
+    }
+  } catch {
+    coorte = ''
+  }
+  coorteEmMemoria = coorte
+  return coorte || undefined
+}
+
 /** Guarda na sessão do navegador (some ao fechar a aba) o que já foi enviado. */
 function jaEnviouNaSessao(chave: string): boolean {
   const k = `carteiraideal.ev.${chave}`
@@ -97,8 +118,8 @@ export async function registrarEvento(evento: EventoUso, props?: PropsEvento, op
     if (naoRastrear()) return
     const chaveSessao = `${evento}:${props?.tela ?? ''}`
     if (opcoes?.unicoPorSessao && jaEnviouNaSessao(chaveSessao)) return
-    const [id, ref] = await Promise.all([obterId(), obterRef()])
-    const corpo = JSON.stringify({ evento, id, ref, props })
+    const [id, ref, coorte] = await Promise.all([obterId(), obterRef(), evento === 'visita' ? obterCoorte() : Promise.resolve(undefined)])
+    const corpo = JSON.stringify({ evento, id, ref, coorte, props })
     // sendBeacon sobrevive ao fechamento da aba; fetch keepalive é o plano B.
     const enviado =
       typeof navigator !== 'undefined' && 'sendBeacon' in navigator

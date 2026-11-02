@@ -4,10 +4,11 @@
 // contadores diários. Nunca devolve erro ao navegador por falha de métrica: contar não
 // pode atrapalhar quem está usando o app.
 //
-// Corpo esperado: { evento, id, ref?, props? { perfil?, prazo?, capacidade?, veto?, tela? } }
+// Corpo esperado: { evento, id, ref?, coorte?, props? { perfil?, prazo?, capacidade?, veto?, tela? } }
+// `coorte` é o dia (AAAA-MM-DD) da primeira visita do navegador; serve só para medir retenção.
 import type { VercelRequest, VercelResponse } from './_tipos'
 import { pipeline, metricasHabilitadas } from './_redis.js'
-import { EVENTOS_ACEITOS, dataBrasilia, idAnonimoValido, refValido, rotuloValido } from './_eventos.js'
+import { EVENTOS_ACEITOS, dataBrasilia, dataValida, idAnonimoValido, refValido, rotuloValido, somarDias, TELAS_CONTADAS } from './_eventos.js'
 import { aplicarCors } from './_cors.js'
 import { chaveDeChamadas, contadorComReserva, contadorEmMemoria, contadorRedis, JANELA_CHAMADAS_SEGUNDOS, passouDoLimite } from './_limite.js'
 import type { Contador } from './_limite.js'
@@ -73,6 +74,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     comandos.push(['PFADD', `ur:m:${mes}:${ref}`, id])
   }
 
+  // Retenção: em cada visita, marca a pessoa no dia da sua coorte. Descarta coorte futura ou com mais de 400 dias.
+  const coorte = corpo?.coorte
+  if (evento === 'visita' && dataValida(coorte) && coorte <= dia && coorte >= somarDias(dia, -400)) {
+    comandos.push(['PFADD', `rc:${coorte}:${dia}`, id])
+  }
+
   // Dimensões do resultado (só quando a recomendação é gerada)
   const props = (corpo?.props ?? {}) as Record<string, unknown>
   if (evento === 'recomendacao_gerada') {
@@ -86,6 +93,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
   if (evento === 'tela_vista' && rotuloValido(props.tela)) {
     comandos.push(['HINCRBY', `dim:${mes}:tela`, props.tela, 1])
+    if ((TELAS_CONTADAS as readonly string[]).includes(props.tela)) comandos.push(['PFADD', `ut:${mes}:${props.tela}`, id])
   }
 
   try {

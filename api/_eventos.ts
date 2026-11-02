@@ -15,7 +15,7 @@ export const EVENTOS_FUNIL = [
 ] as const
 
 /** Demais eventos aceitos. */
-export const EVENTOS_EXTRAS = ['recomendacao_erro', 'tela_vista'] as const
+export const EVENTOS_EXTRAS = ['recomendacao_erro', 'tela_vista', 'app_instalado', 'alerta_ativado'] as const
 
 export const EVENTOS_ACEITOS: readonly string[] = [...EVENTOS_FUNIL, ...EVENTOS_EXTRAS]
 
@@ -42,3 +42,24 @@ export function refValido(ref: unknown): ref is string {
 export function rotuloValido(valor: unknown): valor is string {
   return typeof valor === 'string' && /^[\p{L}0-9 ()/_.\-–]{1,60}$/u.test(valor)
 }
+
+/** Data AAAA-MM-DD válida (usada como coorte: dia da primeira visita do navegador). */
+export function dataValida(valor: unknown): valor is string {
+  if (typeof valor !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(valor)) return false
+  const d = new Date(`${valor}T00:00:00Z`)
+  return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === valor
+}
+
+/** Soma (ou subtrai) dias a uma data AAAA-MM-DD, sem depender de fuso. */
+export function somarDias(data: string, dias: number): string {
+  const d = new Date(`${data}T00:00:00Z`)
+  d.setUTCDate(d.getUTCDate() + dias)
+  return d.toISOString().slice(0, 10)
+}
+
+/** Telas cujas pessoas distintas são contadas por mês (as demais entram só na contagem de aberturas). */
+export const TELAS_CONTADAS = [
+  'aprender', 'trilha', 'aprenderVideo', 'simuleFii', 'simuleTesouro', 'simuleBdr', 'simuleEtf',
+  'simuleFuturos', 'simuleOpcoes', 'simuleAcoes', 'simuleAtivos', 'simuleImovel', 'simuleCarro',
+  'simuleMoto', 'simuleBens', 'suaHp12c', 'meuMes', 'minhaCarteira', 'carteira', 'simulador',
+] as const

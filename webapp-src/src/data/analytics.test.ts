@@ -52,4 +52,21 @@ describe('registrarEvento (métricas anônimas)', () => {
     })
     await expect(registrarEvento('visita')).resolves.toBeUndefined()
   })
+
+  it('leva o dia da primeira visita (coorte) só na visita e o mantém entre chamadas', async () => {
+    await registrarEvento('visita')
+    await registrarEvento('questionario_iniciado')
+    const visita = await corpoEnviado(0)
+    const outro = await corpoEnviado(1)
+    expect(visita.coorte).toMatch(/^\d{4}-\d{2}-\d{2}$/)
+    expect(outro.coorte).toBeUndefined()
+    expect(localStorage.getItem('carteiraideal.primeiraVisita') ?? visita.coorte).toBe(visita.coorte)
+  })
+
+  it('registra instalação do app e ativação de alerta como eventos', async () => {
+    await registrarEvento('app_instalado')
+    await registrarEvento('alerta_ativado')
+    expect((await corpoEnviado(0)).evento).toBe('app_instalado')
+    expect((await corpoEnviado(1)).evento).toBe('alerta_ativado')
+  })
 })
