@@ -11,7 +11,7 @@
 //
 // Limite de chamadas por IP (api/_limite.ts): 60 a cada 15 minutos, para que ninguém reconstrua
 // as matrizes chamando a API milhares de vezes. Falha aberta: erro na contagem nunca bloqueia.
-import type { VercelRequest, VercelResponse } from './_tipos'
+import type { VercelRequest, VercelResponse } from './_tipos.js'
 import { gerarRecomendacao } from '../webapp-src/src/domain/engine.js'
 import { validarPayload } from './_validacao.js'
 import { chaveDeChamadas, contadorComReserva, contadorEmMemoria, contadorRedis, JANELA_CHAMADAS_SEGUNDOS, passouDoLimite } from './_limite.js'
