@@ -6,9 +6,6 @@ import { LogoAtivo } from '../ui/LogoAtivo'
 
 type Visao = 'vao' | 'ja'
 
-const MESES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro']
-const rotuloDoMes = (data: string) => `${MESES[Number(data.slice(5, 7)) - 1]} de ${data.slice(0, 4)}`
-
 const casaBusca = (i: ItemRadar, busca: string) => {
   const b = busca.trim().toLowerCase()
   return !b || i.ticker.toLowerCase().includes(b) || (i.nome ?? '').toLowerCase().includes(b)
@@ -28,20 +25,24 @@ function Cabecalho({ i }: { i: ItemRadar }) {
   )
 }
 
+function textoPrazo(i: ItemRadar): string {
+  const d = i.diasParaEstimativa ?? 0
+  if (i.situacao === 'aguardando') return i.foraDoPrazo ? 'fora do prazo' : 'atrasado'
+  if (d === 0) return 'hoje'
+  return `em ${d} ${d === 1 ? 'dia' : 'dias'}`
+}
+
 function LinhaPendente({ i, aoAnalisar }: { i: ItemRadar; aoAnalisar: (t: string) => void }) {
   const p = i.proxima!
-  const atrasada = i.situacao === 'aguardando'
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }} data-testid="balanco-pendente">
       <Cabecalho i={i} />
-      <div className="col" style={{ gap: 1, alignItems: 'flex-end', textAlign: 'right' }}>
+      <div className="col" style={{ gap: 1, alignItems: 'flex-end', textAlign: 'right', flexShrink: 0 }}>
         <span style={{ fontWeight: 700, whiteSpace: 'nowrap' }}>{p.rotulo} · {formatarData(p.estimativa)}</span>
         <span className="tiny muted">
-          {atrasada
-            ? i.foraDoPrazo ? 'prazo legal vencido, não consta na CVM' : 'passou da data usual, ainda não consta'
-            : p.base === 'historico' ? `estimativa pelos últimos ${p.anosNaBase} ${p.anosNaBase === 1 ? 'ano' : 'anos'}` : 'estimativa pelo prazo legal'}
+          {textoPrazo(i)}
           {' · '}
-          <button type="button" className="chip" style={{ padding: '1px 8px' }} onClick={() => aoAnalisar(i.ticker)}>último balanço</button>
+          <button type="button" className="chip" style={{ padding: '1px 8px' }} onClick={() => aoAnalisar(i.ticker)}>analisar</button>
         </span>
       </div>
     </div>
@@ -74,13 +75,8 @@ export function RadarBalancos({ itens, hoje, dataCorte, aoAnalisar }: { itens: I
   const [busca, setBusca] = useState('')
   const vao = pendentes(itens).filter((i) => casaBusca(i, busca))
   const ja = divulgadosRecentes(itens, hoje).filter((i) => casaBusca(i, busca))
-  const atrasadas = vao.filter((i) => i.situacao === 'aguardando')
-  const proximas = vao.filter((i) => i.situacao === 'vai-divulgar')
-  const porMes = new Map<string, ItemRadar[]>()
-  for (const i of proximas) {
-    const m = i.proxima!.estimativa.slice(0, 7)
-    porMes.set(m, [...(porMes.get(m) ?? []), i])
-  }
+  const atrasadas = vao.filter((i) => i.situacao === 'aguardando').length
+  const lista = [...vao.filter((i) => i.situacao === 'vai-divulgar'), ...vao.filter((i) => i.situacao === 'aguardando')]
 
   return (
     <div className="col" style={{ gap: 14 }} data-testid="radar-balancos">
@@ -115,25 +111,17 @@ export function RadarBalancos({ itens, hoje, dataCorte, aoAnalisar }: { itens: I
       />
 
       {visao === 'vao' ? (
-        <>
-          {atrasadas.length > 0 && (
-            <section className="card col" style={{ gap: 10 }} aria-label="Ainda não divulgaram" data-testid="balancos-atrasados">
-              <h3 style={{ fontSize: 15 }}>Ainda não divulgaram</h3>
-              <span className="tiny muted">Já passou da data que a empresa costuma usar e o balanço ainda não chegou à CVM.</span>
-              {atrasadas.map((i) => <LinhaPendente key={i.ticker} i={i} aoAnalisar={aoAnalisar} />)}
-            </section>
+        <section className="card col" style={{ gap: 10 }} aria-label="Vão divulgar">
+          <span className="tiny muted">
+            {vao.length} {vao.length === 1 ? 'empresa deve divulgar' : 'empresas devem divulgar'} · pela data estimada, das próximas às mais distantes
+            {atrasadas > 0 ? ` · ${atrasadas} no fim da lista passaram da data usual e ainda não constam na CVM` : ''}
+          </span>
+          {vao.length === 0 ? (
+            <span className="muted small" role="status">Nenhuma empresa {busca ? 'para essa busca ' : ''}aguardando divulgação.</span>
+          ) : (
+            lista.map((i) => <LinhaPendente key={i.ticker} i={i} aoAnalisar={aoAnalisar} />)
           )}
-          {[...porMes.entries()].map(([mes, lista]) => (
-            <section key={mes} className="card col" style={{ gap: 10 }} aria-label={rotuloDoMes(`${mes}-01`)}>
-              <h3 style={{ fontSize: 15, textTransform: 'capitalize' }}>{rotuloDoMes(`${mes}-01`)}</h3>
-              <span className="tiny muted">{lista.length} {lista.length === 1 ? 'empresa' : 'empresas'} · em ordem de data estimada</span>
-              {lista.map((i) => <LinhaPendente key={i.ticker} i={i} aoAnalisar={aoAnalisar} />)}
-            </section>
-          ))}
-          {vao.length === 0 && (
-            <div className="card muted small" role="status">Nenhuma empresa {busca ? 'para essa busca ' : ''}aguardando divulgação.</div>
-          )}
-        </>
+        </section>
       ) : (
         <section className="card col" style={{ gap: 10 }} aria-label="Divulgaram há pouco">
           <span className="tiny muted">{ja.length} {ja.length === 1 ? 'empresa divulgou' : 'empresas divulgaram'} nos últimos 45 dias · do mais recente ao mais antigo</span>
