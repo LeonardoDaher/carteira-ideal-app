@@ -169,7 +169,7 @@ export async function executar({
   const dataPrecos = historico.pregoes.at(-1)
   const dataCorte = dataPrecos
   const ano = Number(dataCorte.slice(0, 4))
-  const empresas = empresasDoCadastro(configAcoes)
+  const empresas = empresasDoCadastro(configAcoes, { incluirExtras: true })
   const financeiros = new Set(cfg.universo?.setoresExcluidos ?? [])
   log(`Fundamentos: ${empresas.length} empresas no cadastro · preços de ${dataPrecos}`)
 
@@ -229,7 +229,7 @@ export async function executar({
         preco, cfg, dataCorte, desdobramentos: configPrecos.desdobramentos?.[e.ticker] ?? [],
       })
       if (r.erro) excluidas.push({ ticker: e.ticker, etapa: r.etapa, motivo: r.erro })
-      else saida[e.ticker] = r.empresa
+      else saida[e.ticker] = e.extra ? { ...r.empresa, extra: true } : r.empresa
     }
 
     const publicadas = Object.keys(saida).length

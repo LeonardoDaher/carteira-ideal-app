@@ -1,5 +1,5 @@
 {
-  "_leia": "Configuração do job diário de Ações (D43). Preço e volume vêm do Boletim de Preços oficial da B3 (BVBG.086), sem cota e sem brapi; setor e nome vêm DESTE arquivo ('setores'). Cada setor lista as empresas com um código por empresa (a classe mais negociada). O job só publica o ticker que negociou nos últimos 21 pregões; o que não negociou aparece como [sem negócio] no log e some da tela. Ticker com 'revisar': true tinha código ou situação a confirmar quando o cadastro foi montado. O job só roda com 'conferidoPeloResponsavel': true. Fora do cadastro, todo código de ação com negócio nos últimos 'pregoesBusca' pregões entra só na busca, em 'Outros'. 'desdobramentos': { TICKER: [{ data, fator }] }, como em config/bdrs.json (fator = ações novas por ação antiga; grupamento 10:1 = 0.1).",
+  "_leia": "Configuração do job diário de Ações (D43). Preço e volume vêm do Boletim de Preços oficial da B3 (BVBG.086), sem cota e sem brapi; setor e nome vêm DESTE arquivo ('setores'). Cada setor lista as empresas com um código por empresa (a classe mais negociada). 'extra': true marca as ações só da tela (D136): outras classes ON (final 3) e empresas fora dos rankings; entram na lista, nas séries, nos fundamentos e nos balanços, mas não no universo dos Top 15 (baratas, endividadas, dividendos) nem nas medianas de pares. O job só publica o ticker que negociou nos últimos 21 pregões; o que não negociou aparece como [sem negócio] no log e some da tela. Ticker com 'revisar': true tinha código ou situação a confirmar quando o cadastro foi montado. O job só roda com 'conferidoPeloResponsavel': true. Fora do cadastro, todo código de ação com negócio nos últimos 'pregoesBusca' pregões entra só na busca, em 'Outros'. 'desdobramentos': { TICKER: [{ data, fator }] }, como em config/bdrs.json (fator = ações novas por ação antiga; grupamento 10:1 = 0.1).",
   "conferidoPeloResponsavel": true,
   "minimoPregoesHistorico": 21,
   "minimoEmpresasParaPublicar": 150,
@@ -20,19 +20,25 @@
       {"ticker": "DMMO3", "nome": "Dommo Energia"},
       {"ticker": "OPCT3", "nome": "OceanPact"},
       {"ticker": "CSAN3", "nome": "Cosan"},
-      {"ticker": "RPMG3", "nome": "Refinaria de Manguinhos"}
+      {"ticker": "RPMG3", "nome": "Refinaria de Manguinhos"},
+      {"ticker": "PETR3", "nome": "Petrobras ON", "extra": true},
+      {"ticker": "OSXB3", "nome": "OSX Brasil", "extra": true}
     ]},
     {"setor": "Distribuição de combustíveis e etanol", "grupoB3": "Petróleo, Gás e Biocombustíveis", "empresas": [
       {"ticker": "VBBR3", "nome": "Vibra Energia"},
       {"ticker": "UGPA3", "nome": "Ultrapar"},
       {"ticker": "RAIZ4", "nome": "Raízen", "revisar": true},
-      {"ticker": "CGAS5", "nome": "Comgás"}
+      {"ticker": "CGAS5", "nome": "Comgás"},
+      {"ticker": "CGAS3", "nome": "Comgás ON", "extra": true},
+      {"ticker": "CEGR3", "nome": "CEG (Gás Natural Rio)", "extra": true},
+      {"ticker": "PASS3", "nome": "Compass Gás e Energia", "extra": true}
     ]},
     {"setor": "Mineração", "grupoB3": "Materiais Básicos", "empresas": [
       {"ticker": "VALE3", "nome": "Vale"},
       {"ticker": "CMIN3", "nome": "CSN Mineração"},
       {"ticker": "BRAP4", "nome": "Bradespar"},
-      {"ticker": "CBAV3", "nome": "CBA (Companhia Brasileira de Alumínio)"}
+      {"ticker": "CBAV3", "nome": "CBA (Companhia Brasileira de Alumínio)"},
+      {"ticker": "BRAP3", "nome": "Bradespar ON", "extra": true}
     ]},
     {"setor": "Siderurgia e metalurgia", "grupoB3": "Materiais Básicos", "empresas": [
       {"ticker": "GGBR4", "nome": "Gerdau"},
@@ -40,20 +46,34 @@
       {"ticker": "CSNA3", "nome": "CSN"},
       {"ticker": "USIM5", "nome": "Usiminas"},
       {"ticker": "FESA4", "nome": "Ferbasa"},
-      {"ticker": "TKNO4", "nome": "Tekno"}
+      {"ticker": "TKNO4", "nome": "Tekno"},
+      {"ticker": "FESA3", "nome": "Ferbasa ON", "extra": true},
+      {"ticker": "GGBR3", "nome": "Gerdau ON", "extra": true},
+      {"ticker": "GOAU3", "nome": "Metalúrgica Gerdau ON", "extra": true},
+      {"ticker": "USIM3", "nome": "Usiminas ON", "extra": true},
+      {"ticker": "PATI3", "nome": "Panatlântica", "extra": true},
+      {"ticker": "PMAM3", "nome": "Paranapanema", "extra": true}
     ]},
     {"setor": "Papel, celulose e madeira", "grupoB3": "Materiais Básicos", "empresas": [
       {"ticker": "SUZB3", "nome": "Suzano"},
       {"ticker": "KLBN11", "nome": "Klabin"},
       {"ticker": "RANI3", "nome": "Irani"},
-      {"ticker": "EUCA4", "nome": "Eucatex"}
+      {"ticker": "EUCA4", "nome": "Eucatex"},
+      {"ticker": "EUCA3", "nome": "Eucatex ON", "extra": true},
+      {"ticker": "KLBN3", "nome": "Klabin ON", "extra": true},
+      {"ticker": "MSPA3", "nome": "Melhoramentos", "extra": true}
     ]},
     {"setor": "Química e petroquímica", "grupoB3": "Materiais Básicos", "empresas": [
       {"ticker": "BRKM5", "nome": "Braskem"},
       {"ticker": "UNIP6", "nome": "Unipar"},
       {"ticker": "CRPG6", "nome": "Tronox Pigmentos"},
       {"ticker": "VITT3", "nome": "Vittia"},
-      {"ticker": "FHER3", "nome": "Fertilizantes Heringer", "revisar": true}
+      {"ticker": "FHER3", "nome": "Fertilizantes Heringer", "revisar": true},
+      {"ticker": "BRKM3", "nome": "Braskem ON", "extra": true},
+      {"ticker": "UNIP3", "nome": "Unipar ON", "extra": true},
+      {"ticker": "DEXP3", "nome": "Dexxos", "extra": true},
+      {"ticker": "NUTR3", "nome": "Nutriplant", "extra": true},
+      {"ticker": "SNSY3", "nome": "Sansuy", "extra": true}
     ]},
     {"setor": "Máquinas, equipamentos e aeroespacial", "grupoB3": "Bens Industriais", "empresas": [
       {"ticker": "WEGE3", "nome": "WEG"},
@@ -66,7 +86,12 @@
       {"ticker": "TUPY3", "nome": "Tupy"},
       {"ticker": "MYPK3", "nome": "Iochpe-Maxion"},
       {"ticker": "MTSA4", "nome": "Metisa"},
-      {"ticker": "LUPA3", "nome": "Lupatech"}
+      {"ticker": "LUPA3", "nome": "Lupatech"},
+      {"ticker": "EALT3", "nome": "Electro Aço Altona ON", "extra": true},
+      {"ticker": "SHUL3", "nome": "Schulz ON", "extra": true},
+      {"ticker": "BDLL3", "nome": "Bardella", "extra": true},
+      {"ticker": "INEP3", "nome": "Inepar", "extra": true},
+      {"ticker": "TASA3", "nome": "Taurus Armas", "extra": true}
     ]},
     {"setor": "Autopeças e veículos", "grupoB3": "Bens Industriais", "empresas": [
       {"ticker": "RAPT4", "nome": "Randon"},
@@ -74,7 +99,15 @@
       {"ticker": "POMO4", "nome": "Marcopolo"},
       {"ticker": "LEVE3", "nome": "Mahle Metal Leve"},
       {"ticker": "MWET4", "nome": "Wetzel"},
-      {"ticker": "RSUL4", "nome": "Recrusul"}
+      {"ticker": "RSUL4", "nome": "Recrusul"},
+      {"ticker": "MWET3", "nome": "Wetzel ON", "extra": true},
+      {"ticker": "POMO3", "nome": "Marcopolo ON", "extra": true},
+      {"ticker": "RAPT3", "nome": "Randon ON", "extra": true},
+      {"ticker": "AMOB3", "nome": "Automob", "extra": true},
+      {"ticker": "BMKS3", "nome": "Monark", "extra": true},
+      {"ticker": "PLAS3", "nome": "Plascar", "extra": true},
+      {"ticker": "RCSL3", "nome": "Recrusul", "extra": true},
+      {"ticker": "WLMM3", "nome": "WLM", "extra": true}
     ]},
     {"setor": "Transporte e infraestrutura", "grupoB3": "Bens Industriais", "empresas": [
       {"ticker": "MOTV3", "nome": "Motiva (ex-CCR)", "revisar": true},
@@ -85,7 +118,10 @@
       {"ticker": "LOGN3", "nome": "Log-In"},
       {"ticker": "TGMA3", "nome": "Tegma"},
       {"ticker": "AZUL4", "nome": "Azul", "revisar": true},
-      {"ticker": "JSLG3", "nome": "JSL"}
+      {"ticker": "JSLG3", "nome": "JSL"},
+      {"ticker": "AZUL3", "nome": "Azul ON", "extra": true},
+      {"ticker": "ALPK3", "nome": "Estapar", "extra": true},
+      {"ticker": "TPIS3", "nome": "Triunfo", "extra": true}
     ]},
     {"setor": "Locação de veículos e frotas", "grupoB3": "Bens Industriais", "empresas": [
       {"ticker": "RENT3", "nome": "Localiza"},
@@ -97,7 +133,9 @@
     {"setor": "Serviços e locação de equipamentos", "grupoB3": "Bens Industriais", "empresas": [
       {"ticker": "MILS3", "nome": "Mills"},
       {"ticker": "PRNR3", "nome": "Priner"},
-      {"ticker": "AMBP3", "nome": "Ambipar"}
+      {"ticker": "AMBP3", "nome": "Ambipar"},
+      {"ticker": "CTAX3", "nome": "Contax", "extra": true},
+      {"ticker": "GGPS3", "nome": "GPS", "extra": true}
     ]},
     {"setor": "Energia elétrica: geração", "grupoB3": "Utilidade Pública", "empresas": [
       {"ticker": "AXIA3", "nome": "Axia Energia (ex-Eletrobras)", "revisar": true},
@@ -106,13 +144,22 @@
       {"ticker": "EGIE3", "nome": "Engie Brasil"},
       {"ticker": "SRNA3", "nome": "Serena Energia"},
       {"ticker": "AESB3", "nome": "AES Brasil", "revisar": true},
-      {"ticker": "GEPA4", "nome": "Rio Paranapanema Energia"}
+      {"ticker": "GEPA4", "nome": "Rio Paranapanema Energia"},
+      {"ticker": "GEPA3", "nome": "Rio Paranapanema Energia ON", "extra": true},
+      {"ticker": "AZTE3", "nome": "AZT Energia", "extra": true},
+      {"ticker": "CEBR3", "nome": "CEB (Cia Energética de Brasília)", "extra": true},
+      {"ticker": "RNEW3", "nome": "Renova Energia", "extra": true}
     ]},
     {"setor": "Energia elétrica: transmissão", "grupoB3": "Utilidade Pública", "empresas": [
       {"ticker": "TAEE11", "nome": "Taesa"},
       {"ticker": "ISAE4", "nome": "ISA Energia"},
       {"ticker": "ALUP11", "nome": "Alupar"},
-      {"ticker": "CMIG4", "nome": "Cemig"}
+      {"ticker": "CMIG4", "nome": "Cemig"},
+      {"ticker": "ALUP3", "nome": "Alupar ON", "extra": true},
+      {"ticker": "CMIG3", "nome": "Cemig ON", "extra": true},
+      {"ticker": "ISAE3", "nome": "ISA Energia ON", "extra": true},
+      {"ticker": "TAEE3", "nome": "Taesa ON", "extra": true},
+      {"ticker": "AFLT3", "nome": "Afluente Transmissão", "extra": true}
     ]},
     {"setor": "Energia elétrica: distribuição", "grupoB3": "Utilidade Pública", "empresas": [
       {"ticker": "EQTL3", "nome": "Equatorial"},
@@ -124,14 +171,23 @@
       {"ticker": "CLSC4", "nome": "Celesc"},
       {"ticker": "CEEB3", "nome": "Coelba"},
       {"ticker": "ENMT3", "nome": "Energisa Mato Grosso"},
-      {"ticker": "EKTR4", "nome": "Elektro", "revisar": true}
+      {"ticker": "EKTR4", "nome": "Elektro", "revisar": true},
+      {"ticker": "CLSC3", "nome": "Celesc ON", "extra": true},
+      {"ticker": "ENGI3", "nome": "Energisa ON", "extra": true},
+      {"ticker": "CBEE3", "nome": "Ampla Energia", "extra": true},
+      {"ticker": "CEED3", "nome": "CEEE-D", "extra": true},
+      {"ticker": "COCE3", "nome": "Coelce", "extra": true},
+      {"ticker": "EQPA3", "nome": "Equatorial Pará", "extra": true},
+      {"ticker": "GPAR3", "nome": "Celgpar", "extra": true},
+      {"ticker": "REDE3", "nome": "Rede Energia", "extra": true}
     ]},
     {"setor": "Saneamento e resíduos", "grupoB3": "Utilidade Pública", "empresas": [
       {"ticker": "SBSP3", "nome": "Sabesp"},
       {"ticker": "CSMG3", "nome": "Copasa"},
       {"ticker": "SAPR11", "nome": "Sanepar"},
       {"ticker": "ORVR3", "nome": "Orizon"},
-      {"ticker": "CASN3", "nome": "Cesan", "revisar": true}
+      {"ticker": "CASN3", "nome": "Cesan", "revisar": true},
+      {"ticker": "SAPR3", "nome": "Sanepar ON", "extra": true}
     ]},
     {"setor": "Bancos", "grupoB3": "Financeiro", "empresas": [
       {"ticker": "ITUB4", "nome": "Itaú Unibanco"},
@@ -149,7 +205,17 @@
       {"ticker": "BEES3", "nome": "Banestes"},
       {"ticker": "BAZA3", "nome": "Banco da Amazônia"},
       {"ticker": "BSLI4", "nome": "BRB Banco de Brasília"},
-      {"ticker": "MERC4", "nome": "Mercantil do Brasil"}
+      {"ticker": "MERC4", "nome": "Mercantil do Brasil"},
+      {"ticker": "BBDC3", "nome": "Bradesco ON", "extra": true},
+      {"ticker": "BPAC3", "nome": "BTG Pactual ON", "extra": true},
+      {"ticker": "BRSR3", "nome": "Banrisul ON", "extra": true},
+      {"ticker": "BSLI3", "nome": "BRB Banco de Brasília ON", "extra": true},
+      {"ticker": "ITUB3", "nome": "Itaú Unibanco ON", "extra": true},
+      {"ticker": "PINE3", "nome": "Banco Pine ON", "extra": true},
+      {"ticker": "SANB3", "nome": "Santander Brasil ON", "extra": true},
+      {"ticker": "BGIP3", "nome": "Banese", "extra": true},
+      {"ticker": "BMEB3", "nome": "Banco Mercantil do Brasil", "extra": true},
+      {"ticker": "BMIN3", "nome": "Banco Mercantil de Investimentos", "extra": true}
     ]},
     {"setor": "Seguros e previdência", "grupoB3": "Financeiro", "empresas": [
       {"ticker": "BBSE3", "nome": "BB Seguridade"},
@@ -162,7 +228,15 @@
     {"setor": "Bolsa, holdings e serviços financeiros", "grupoB3": "Financeiro", "empresas": [
       {"ticker": "B3SA3", "nome": "B3"},
       {"ticker": "ITSA4", "nome": "Itaúsa"},
-      {"ticker": "CASH3", "nome": "Méliuz", "revisar": true}
+      {"ticker": "CASH3", "nome": "Méliuz", "revisar": true},
+      {"ticker": "ITSA3", "nome": "Itaúsa ON", "extra": true},
+      {"ticker": "ARND3", "nome": "Arandu", "extra": true},
+      {"ticker": "CSUD3", "nome": "CSU Digital", "extra": true},
+      {"ticker": "FIGE3", "nome": "Investimentos Bemge", "extra": true},
+      {"ticker": "MAPT3", "nome": "Cemepe", "extra": true},
+      {"ticker": "OBTC3", "nome": "OranjeBTC", "extra": true},
+      {"ticker": "PEAB3", "nome": "Participações Aliança da Bahia", "extra": true},
+      {"ticker": "RPAD3", "nome": "Alfa Holdings", "extra": true}
     ]},
     {"setor": "Shoppings e imóveis comerciais", "grupoB3": "Financeiro", "empresas": [
       {"ticker": "MULT3", "nome": "Multiplan"},
@@ -170,7 +244,14 @@
       {"ticker": "IGTI11", "nome": "Iguatemi"},
       {"ticker": "JHSF3", "nome": "JHSF"},
       {"ticker": "LOGG3", "nome": "LOG Commercial Properties"},
-      {"ticker": "HBRE3", "nome": "HBR Realty"}
+      {"ticker": "HBRE3", "nome": "HBR Realty"},
+      {"ticker": "IGTI3", "nome": "Iguatemi ON", "extra": true},
+      {"ticker": "GSHP3", "nome": "General Shopping", "extra": true},
+      {"ticker": "LPSB3", "nome": "Lopes Brasil", "extra": true},
+      {"ticker": "NEXP3", "nome": "Nexpe", "extra": true},
+      {"ticker": "NORD3", "nome": "Nordon", "extra": true},
+      {"ticker": "SCAR3", "nome": "São Carlos Empreendimentos", "extra": true},
+      {"ticker": "SYNE3", "nome": "SYN", "extra": true}
     ]},
     {"setor": "Construção civil e incorporação", "grupoB3": "Consumo Cíclico", "empresas": [
       {"ticker": "CYRE3", "nome": "Cyrela"},
@@ -188,12 +269,23 @@
       {"ticker": "TRIS3", "nome": "Trisul"},
       {"ticker": "HBOR3", "nome": "Helbor"},
       {"ticker": "RDNI3", "nome": "RNI"},
-      {"ticker": "TCSA3", "nome": "Tecnisa"}
+      {"ticker": "TCSA3", "nome": "Tecnisa"},
+      {"ticker": "AVLL3", "nome": "Alphaville", "extra": true},
+      {"ticker": "AZEV3", "nome": "Azevedo & Travassos", "extra": true},
+      {"ticker": "CALI3", "nome": "Construtora Adolpho Lindenberg", "extra": true},
+      {"ticker": "CCTY3", "nome": "RDVC City", "extra": true},
+      {"ticker": "FIEI3", "nome": "FICA Empreendimentos", "extra": true},
+      {"ticker": "GFSA3", "nome": "Gafisa", "extra": true},
+      {"ticker": "JFEN3", "nome": "João Fortes", "extra": true},
+      {"ticker": "PDGR3", "nome": "PDG Realty", "extra": true},
+      {"ticker": "VIVR3", "nome": "Viver", "extra": true}
     ]},
     {"setor": "Materiais de construção e acabamento", "grupoB3": "Consumo Cíclico", "empresas": [
       {"ticker": "DXCO3", "nome": "Dexco"},
       {"ticker": "PTBL3", "nome": "Portobello"},
-      {"ticker": "ETER3", "nome": "Eternit"}
+      {"ticker": "ETER3", "nome": "Eternit"},
+      {"ticker": "HAGA3", "nome": "Haga", "extra": true},
+      {"ticker": "UCAS3", "nome": "Unicasa", "extra": true}
     ]},
     {"setor": "Moda e vestuário", "grupoB3": "Consumo Cíclico", "empresas": [
       {"ticker": "LREN3", "nome": "Lojas Renner"},
@@ -203,13 +295,19 @@
       {"ticker": "AMAR3", "nome": "Marisa"},
       {"ticker": "TFCO4", "nome": "Track&Field"},
       {"ticker": "VIVA3", "nome": "Vivara"},
-      {"ticker": "CGRA4", "nome": "Grazziotin"}
+      {"ticker": "CGRA4", "nome": "Grazziotin"},
+      {"ticker": "CGRA3", "nome": "Grazziotin ON", "extra": true},
+      {"ticker": "MNDL3", "nome": "Mundial", "extra": true},
+      {"ticker": "RIAA3", "nome": "Riachuelo (Guararapes)", "extra": true},
+      {"ticker": "VSTE3", "nome": "Veste", "extra": true}
     ]},
     {"setor": "Calçados e artigos esportivos", "grupoB3": "Consumo Cíclico", "empresas": [
       {"ticker": "GRND3", "nome": "Grendene"},
       {"ticker": "VULC3", "nome": "Vulcabras"},
       {"ticker": "CAMB3", "nome": "Cambuci"},
-      {"ticker": "ALPA4", "nome": "Alpargatas (Havaianas)"}
+      {"ticker": "ALPA4", "nome": "Alpargatas (Havaianas)"},
+      {"ticker": "ALPA3", "nome": "Alpargatas (Havaianas) ON", "extra": true},
+      {"ticker": "SBFG3", "nome": "Grupo SBF (Centauro)", "extra": true}
     ]},
     {"setor": "Varejo de eletro, móveis e e-commerce", "grupoB3": "Consumo Cíclico", "empresas": [
       {"ticker": "MGLU3", "nome": "Magazine Luiza"},
@@ -219,39 +317,53 @@
       {"ticker": "MBLY3", "nome": "Mobly"},
       {"ticker": "ESPA3", "nome": "Espaçolaser"},
       {"ticker": "PETZ3", "nome": "Petz", "revisar": true},
-      {"ticker": "ENJU3", "nome": "Enjoei"}
+      {"ticker": "ENJU3", "nome": "Enjoei"},
+      {"ticker": "IFCM3", "nome": "Infracommerce", "extra": true},
+      {"ticker": "TOKY3", "nome": "Tok&Stok (Grupo Toky)", "extra": true},
+      {"ticker": "WEST3", "nome": "Westwing", "extra": true}
     ]},
     {"setor": "Têxtil e eletrodomésticos", "grupoB3": "Consumo Cíclico", "empresas": [
       {"ticker": "WHRL4", "nome": "Whirlpool"},
       {"ticker": "CTNM4", "nome": "Coteminas"},
       {"ticker": "TXRX4", "nome": "Têxtil Renauxview"},
-      {"ticker": "TEKA4", "nome": "Teka"}
+      {"ticker": "TEKA4", "nome": "Teka"},
+      {"ticker": "WHRL3", "nome": "Whirlpool ON", "extra": true},
+      {"ticker": "CEDO3", "nome": "Cedro Têxtil", "extra": true},
+      {"ticker": "CTKA3", "nome": "Karsten", "extra": true},
+      {"ticker": "DOHL3", "nome": "Döhler", "extra": true}
     ]},
     {"setor": "Educação", "grupoB3": "Consumo Cíclico", "empresas": [
       {"ticker": "COGN3", "nome": "Cogna"},
       {"ticker": "YDUQ3", "nome": "Yduqs"},
       {"ticker": "ANIM3", "nome": "Ânima"},
       {"ticker": "SEER3", "nome": "Ser Educacional"},
-      {"ticker": "CSED3", "nome": "Cruzeiro do Sul Educacional"}
+      {"ticker": "CSED3", "nome": "Cruzeiro do Sul Educacional"},
+      {"ticker": "ATED3", "nome": "Atom Educação", "extra": true},
+      {"ticker": "BIED3", "nome": "Bioma Educação", "extra": true},
+      {"ticker": "VTRU3", "nome": "Vitru Educação", "extra": true}
     ]},
     {"setor": "Turismo, lazer e restaurantes", "grupoB3": "Consumo Cíclico", "empresas": [
       {"ticker": "SMFT3", "nome": "Smart Fit"},
       {"ticker": "CVCB3", "nome": "CVC"},
       {"ticker": "ZAMP3", "nome": "Zamp (Burger King)"},
       {"ticker": "MEAL3", "nome": "IMC Alimentação"},
-      {"ticker": "SHOW3", "nome": "T4F Entretenimento"}
+      {"ticker": "SHOW3", "nome": "T4F Entretenimento"},
+      {"ticker": "AHEB3", "nome": "SPTuris (São Paulo Turismo)", "extra": true},
+      {"ticker": "RVEE3", "nome": "Revee", "extra": true}
     ]},
     {"setor": "Carnes e proteínas", "grupoB3": "Consumo não Cíclico", "empresas": [
       {"ticker": "MBRF3", "nome": "MBRF (BRF + Marfrig)", "revisar": true},
       {"ticker": "BEEF3", "nome": "Minerva"},
-      {"ticker": "JBSS3", "nome": "JBS", "revisar": true}
+      {"ticker": "JBSS3", "nome": "JBS", "revisar": true},
+      {"ticker": "FASA3", "nome": "FASA", "extra": true}
     ]},
     {"setor": "Alimentos e bebidas", "grupoB3": "Consumo não Cíclico", "empresas": [
       {"ticker": "ABEV3", "nome": "Ambev"},
       {"ticker": "CAML3", "nome": "Camil"},
       {"ticker": "MDIA3", "nome": "M. Dias Branco"},
       {"ticker": "ODER4", "nome": "Conservas Oderich"},
-      {"ticker": "MNPR3", "nome": "Minupar"}
+      {"ticker": "MNPR3", "nome": "Minupar"},
+      {"ticker": "JOPA3", "nome": "Josapar", "extra": true}
     ]},
     {"setor": "Agronegócio, açúcar e etanol", "grupoB3": "Consumo não Cíclico", "empresas": [
       {"ticker": "SLCE3", "nome": "SLC Agrícola"},
@@ -260,7 +372,8 @@
       {"ticker": "TTEN3", "nome": "3tentos"},
       {"ticker": "AGRO3", "nome": "BrasilAgro"},
       {"ticker": "AGXY3", "nome": "AgroGalaxy", "revisar": true},
-      {"ticker": "SOJA3", "nome": "Boa Safra Sementes"}
+      {"ticker": "SOJA3", "nome": "Boa Safra Sementes"},
+      {"ticker": "LAND3", "nome": "Terra Santa Agro", "extra": true}
     ]},
     {"setor": "Varejo alimentar", "grupoB3": "Consumo não Cíclico", "empresas": [
       {"ticker": "ASAI3", "nome": "Assaí"},
@@ -272,7 +385,9 @@
       {"ticker": "RADL3", "nome": "RaiaDrogasil"},
       {"ticker": "PGMN3", "nome": "Pague Menos"},
       {"ticker": "PNVL3", "nome": "Panvel (Dimed)"},
-      {"ticker": "NATU3", "nome": "Natura"}
+      {"ticker": "NATU3", "nome": "Natura"},
+      {"ticker": "AUAU3", "nome": "Petz Cobasi", "extra": true},
+      {"ticker": "DMVF3", "nome": "D1000 Varejo Farma", "extra": true}
     ]},
     {"setor": "Hospitais, planos e diagnósticos", "grupoB3": "Saúde", "empresas": [
       {"ticker": "HAPV3", "nome": "Hapvida"},
@@ -285,7 +400,9 @@
       {"ticker": "ODPV3", "nome": "Odontoprev"},
       {"ticker": "AALR3", "nome": "Alliar"},
       {"ticker": "KRSA3", "nome": "Kora Saúde", "revisar": true},
-      {"ticker": "VVEO3", "nome": "Viveo", "revisar": true}
+      {"ticker": "VVEO3", "nome": "Viveo", "revisar": true},
+      {"ticker": "BALM3", "nome": "Baumer", "extra": true},
+      {"ticker": "SAUD3", "nome": "Bradsaúde", "extra": true}
     ]},
     {"setor": "Medicamentos e saúde animal", "grupoB3": "Saúde", "empresas": [
       {"ticker": "HYPE3", "nome": "Hypera Pharma"},
@@ -299,13 +416,16 @@
       {"ticker": "LWSA3", "nome": "Locaweb"},
       {"ticker": "BMOB3", "nome": "Bemobi"},
       {"ticker": "NGRD3", "nome": "Neogrid"},
-      {"ticker": "DOTZ3", "nome": "Dotz", "revisar": true}
+      {"ticker": "DOTZ3", "nome": "Dotz", "revisar": true},
+      {"ticker": "VLID3", "nome": "Valid", "extra": true},
+      {"ticker": "WDCN3", "nome": "WDC Networks", "extra": true}
     ]},
     {"setor": "Hardware e eletrônicos", "grupoB3": "Tecnologia da Informação", "empresas": [
       {"ticker": "POSI3", "nome": "Positivo"},
       {"ticker": "INTB3", "nome": "Intelbras"},
       {"ticker": "MLAS3", "nome": "Multilaser"},
-      {"ticker": "PDTC3", "nome": "Padtec"}
+      {"ticker": "PDTC3", "nome": "Padtec"},
+      {"ticker": "ALLD3", "nome": "Allied", "extra": true}
     ]},
     {"setor": "Telecomunicações", "grupoB3": "Comunicações", "empresas": [
       {"ticker": "VIVT3", "nome": "Vivo (Telefônica Brasil)"},
@@ -313,7 +433,10 @@
       {"ticker": "TELB4", "nome": "Telebras"},
       {"ticker": "DESK3", "nome": "Desktop"},
       {"ticker": "BRIT3", "nome": "Brisanet"},
-      {"ticker": "FIQE3", "nome": "Unifique"}
+      {"ticker": "FIQE3", "nome": "Unifique"},
+      {"ticker": "TELB3", "nome": "Telebras ON", "extra": true},
+      {"ticker": "BRST3", "nome": "Brisanet", "extra": true},
+      {"ticker": "DTCY3", "nome": "Dtcom", "extra": true}
     ]}
   ]
 }

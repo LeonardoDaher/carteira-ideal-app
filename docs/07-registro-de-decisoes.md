@@ -2297,3 +2297,19 @@ No backtest (`docs/18`, seção 6) a compra perto da LTA ficou à frente das dem
 ## D135 (01/11/2026): padrão do gráfico mais limpo
 
 Pedido do responsável: o gráfico ficou poluído com tudo ligado. Passam a começar **desligados**: bandas de Bollinger, média 9, "Níveis e gaps", "Sinais de candle" e "Linhas de tendência". Começam **ligados**: médias de 21, 80 e **200** (que antes começava desligada), suportes e resistências, volume, IFR, MACD e estocástico. Os botões continuam ligando e desligando cada camada, e a lista "Sinais de candle" e a "Leitura do setup" seguem na tela, independentes dos botões (o botão só controla o desenho no gráfico). A escolha vale a cada abertura; o app não guarda a preferência.
+
+
+## D136 (03/11/2026): todas as ações com final 3 (ON) na aba Simule Ações
+
+Pedido do responsável: BBDC3 (e as demais ações terminadas em 3) não apareciam na lista por setor nem nas análises. Causa: o cadastro (`config/acoes.json`) tinha **um código por empresa** (a classe mais negociada, como BBDC4), e os outros códigos só existiam na busca, em "Outros", sem série, fundamentos nem balanço.
+
+Entraram **123 códigos** no cadastro, marcados com `"extra": true`: 38 ON de empresas que já estavam (BBDC3, ITUB3, PETR3, CMIG3, GGBR3, SANB3 etc., no mesmo setor da outra classe, nome "Empresa ON") e 85 empresas que só tinham o código na busca (nome de pregão e segmento conferidos na B3; setor escolhido pelo assistente entre os 36 já existentes). Ficaram de fora ECOM3, EPAR3, FICT3, OIBR3 e TECN3 (sem cadastro ativo na B3); seguem na busca.
+
+Regras do "extra":
+- **Entra** na lista por setor, na busca, nas séries (análise técnica), nos fundamentos (`extra: true` no registro), nos balanços (a consulta à B3 é uma por raiz de 4 letras e vale para as duas classes), na análise fundamentalista, na confluência, no preço teto e nos Top 15 de confluência.
+- **Não entra** na universo da triagem de valor (Top 15 baratas e endividadas, que partem de `empresasDoCadastro` sem extras), nem no do Top 15 de dividendos: os rankings publicados e aprovados **não mudam**. Também não entram nas **medianas de pares** da análise fundamentalista (e, para um extra, a outra classe da mesma empresa não é par dela).
+- Os radares de dividendos já deduplicam por raiz de 4 letras, então não mudaram.
+
+Para os dados novos aparecerem depois do envio: rodar "Carga inicial de Ações" (os extras só têm 21 pregões guardados; a série longa precisa da carga), "Atualizar histórico de ações" (5 anos do COTAHIST no gráfico), "Atualizar fundamentos" e "Atualizar balanços". Enquanto isso, o extra aparece na lista e na simulação, e a análise técnica avisa que o histórico é curto.
+
+Testes: `scripts/acoes-extras.test.mjs` (4) e um caso novo em `analiseFundamentalista.test.ts`.

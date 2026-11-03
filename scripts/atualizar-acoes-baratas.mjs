@@ -59,9 +59,9 @@ export function mesclarDesdobramentos(...fontes) {
 }
 
 /** Empresas do cadastro curado, na ordem do arquivo. */
-export function empresasDoCadastro(configAcoes) {
+export function empresasDoCadastro(configAcoes, { incluirExtras = false } = {}) {
   const lista = []
-  for (const s of configAcoes.setores ?? []) for (const e of s.empresas) lista.push({ ticker: e.ticker.toUpperCase(), nome: e.nome, setor: s.setor })
+  for (const s of configAcoes.setores ?? []) for (const e of s.empresas) if (incluirExtras || !e.extra) lista.push({ ticker: e.ticker.toUpperCase(), nome: e.nome, setor: s.setor, ...(e.extra ? { extra: true } : {}) })
   return lista
 }
 

@@ -53,31 +53,37 @@ export function formatarBalancos(saida) {
  * derruba o job (fica só com o dado da CVM). Uma consulta de cadastro e uma de resumo por empresa; o dia da entrega só é procurado quando há balanço novo.
  */
 export async function completarComB3({ saida, docsPorTicker, dataCorte, fetchImpl = fetch, log = console.log, pausaMs = 300 }) {
-  const vistas = new Set()
+  // Uma consulta por raiz (4 letras): as classes da mesma empresa (BBDC3 e BBDC4) usam o mesmo balanço da B3.
+  const porRaiz = new Map()
   let novos = 0
   let falhas = 0
   for (const ticker of Object.keys(saida)) {
     const raiz = ticker.slice(0, 4)
-    if (vistas.has(raiz)) continue
-    vistas.add(raiz)
     try {
-      const codigo = await codigoCvmDaRaiz(raiz, { fetchImpl })
-      if (!codigo) continue
-      const b3 = await baixarFinanceiro(codigo, { fetchImpl })
-      const ultimo = saida[ticker].trimestres.at(-1)
-      if (!b3 || b3.periodo <= ultimo.periodo) continue
-      const tipo = b3.periodo.slice(5) === '12-31' ? 'DFP' : 'ITR'
-      const entrega = await acharEntrega({ raiz, periodo: b3.periodo, tipo, hoje: dataCorte, fetchImpl })
-      const atualizada = incorporarB3({ empresa: saida[ticker], docs: docsPorTicker.get(ticker) ?? [], b3, entrega, dataCorte })
+      let achado = porRaiz.get(raiz)
+      if (achado === undefined) {
+        achado = null
+        const codigo = await codigoCvmDaRaiz(raiz, { fetchImpl })
+        const b3 = codigo ? await baixarFinanceiro(codigo, { fetchImpl }) : null
+        const ultimo = saida[ticker].trimestres.at(-1)
+        if (b3 && b3.periodo > ultimo.periodo) {
+          const tipo = b3.periodo.slice(5) === '12-31' ? 'DFP' : 'ITR'
+          achado = { b3, entrega: await acharEntrega({ raiz, periodo: b3.periodo, tipo, hoje: dataCorte, fetchImpl }) }
+        }
+        porRaiz.set(raiz, achado)
+        if (pausaMs) await new Promise((r) => setTimeout(r, pausaMs))
+      }
+      if (!achado) continue
+      const atualizada = incorporarB3({ empresa: saida[ticker], docs: docsPorTicker.get(ticker) ?? [], b3: achado.b3, entrega: achado.entrega, dataCorte })
       if (atualizada !== saida[ticker]) {
         novos++
         saida[ticker] = atualizada
       }
     } catch (e) {
       falhas++
+      porRaiz.set(raiz, null)
       log(`  [B3] ${ticker}: ${e.message}`)
     }
-    if (pausaMs) await new Promise((r) => setTimeout(r, pausaMs))
   }
   log(`  B3: ${novos} empresas com balanço mais novo que a CVM (${falhas} falhas)`)
 }
@@ -190,7 +196,7 @@ export async function executar({ raiz = RAIZ_PADRAO, dadosLocais = null, forcarS
 
   const dataCorte = hojeEmBrasilia(agora)
   const ano = Number(dataCorte.slice(0, 4))
-  const empresas = empresasDoCadastro(configAcoes)
+  const empresas = empresasDoCadastro(configAcoes, { incluirExtras: true })
   const financeiros = new Set(cfg.universo?.setoresExcluidos ?? [])
   log(`Balanços: ${empresas.length} empresas no cadastro · data de corte ${dataCorte}`)
 

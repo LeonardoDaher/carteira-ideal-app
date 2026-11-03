@@ -54,6 +54,8 @@ export interface EmpresaFundamentos {
   nome: string
   setor: string
   financeira: boolean
+  /** Ação só da tela (outra classe de uma empresa do cadastro ou empresa fora dos rankings): não entra nas medianas de pares (D136). */
+  extra?: boolean
   cnpj: string
   ultimaDemonstracao: { doc: 'DFP' | 'ITR'; dtRefer: string; dtReceb: string | null; versao: number; link: string | null }
   anual: PeriodoFundamental[]
@@ -429,7 +431,8 @@ export type OrigemMultiplo = 'setor' | 'grupo'
  */
 export function medianaSetorial(alvo: EmpresaFundamentos, todas: EmpresaFundamentos[], precoDe: PrecoDe): { n: number; medianas: MultiplosEmpresa; origem: Partial<Record<keyof MultiplosEmpresa, OrigemMultiplo>>; grupo: string | null; nGrupo: number } {
   const chaves: (keyof MultiplosEmpresa)[] = ['pl', 'pvp', 'evEbitda', 'evEbit', 'pVendas', 'pFcf', 'dy']
-  const paresDe = (filtro: (x: EmpresaFundamentos) => boolean) => todas.filter((x) => x.ticker !== alvo.ticker && x.financeira === alvo.financeira && filtro(x))
+  // Pares: as ações só da tela (outras classes e empresas fora dos rankings, D136) não entram na mediana, e a outra classe da própria empresa não é par dela.
+  const paresDe = (filtro: (x: EmpresaFundamentos) => boolean) => todas.filter((x) => !x.extra && (!alvo.extra || x.cnpj !== alvo.cnpj) && x.ticker !== alvo.ticker && x.financeira === alvo.financeira && filtro(x))
   const medianasDe = (pares: EmpresaFundamentos[]) => {
     const mult = pares.map((x) => multiplosDe(x, precoDe))
     const saida = {} as Record<keyof MultiplosEmpresa, number | null>

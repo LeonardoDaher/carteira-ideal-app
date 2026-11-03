@@ -89,6 +89,7 @@ export function empresasDoCadastro({ cadastro, historico, cfg, lerAjustes = () =
   const saida = []
   for (const setor of cadastro.setores) {
     for (const e of setor.empresas) {
+      if (e.extra) continue // ações só da tela (D136): o universo do ranking de dividendos não muda
       const serie = historico.ativos?.[e.ticker] ?? []
       const ultimo = historico.ultimoNegocio?.[e.ticker]
       const recentes = serie.slice(-cfg.sessoesLiquidez)

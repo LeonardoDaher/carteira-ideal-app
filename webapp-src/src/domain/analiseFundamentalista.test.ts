@@ -130,6 +130,16 @@ describe('mercado e múltiplos', () => {
     expect(outroSetor.n).toBe(0)
   })
 
+  it('ação só da tela (extra) não entra na mediana dos outros, e a outra classe da própria empresa não é par dela', () => {
+    const alvo = empresa({ ticker: 'ALVO3' })
+    const base = pares()
+    const extra = { ...empresa({ ticker: 'EXTRA3' }), extra: true } as EmpresaFundamentos
+    expect(medianaSetorial(alvo, [alvo, ...base, extra], precoFixo(10)).n).toBe(base.length)
+    const on: EmpresaFundamentos = { ...empresa({ ticker: 'ALVO4' }), extra: true }
+    const irma = { ...empresa({ ticker: 'ALVO4' }), cnpj: '1' }
+    expect(medianaSetorial(on, [on, irma, ...base.map((p, i) => ({ ...p, cnpj: String(i + 2) }))], precoFixo(10)).n).toBe(base.length)
+  })
+
   it('setor com poucos pares usa o grupo B3, com a mesma regra de 4 pares, e diz de onde veio', () => {
     const alvo = empresa({ ticker: 'ALVO3', setor: 'Calçados e artigos esportivos' })
     const doGrupo = pares('Moda e vestuário') // mesmo grupo B3: Tecidos, vestuário e calçados
