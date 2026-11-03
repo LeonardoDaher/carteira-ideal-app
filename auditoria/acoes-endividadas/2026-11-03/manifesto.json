@@ -1,0 +1,88 @@
+{
+  "esquema": 1,
+  "versaoMetodologia": "1.1.0",
+  "geradoEm": "2026-11-03T10:07:06.837Z",
+  "dataExecucao": "2026-11-03",
+  "dataPrecos": "2026-10-30",
+  "dataCorte": "2026-10-30",
+  "origemInsumos": "auditoria/acoes-baratas/2026-10-30",
+  "ambiente": {
+    "node": "v22.23.4",
+    "plataforma": "linux",
+    "commit": "9422558abc4c7d61a8b48eb23b04841f7d68b33c",
+    "execucao": "41616527063"
+  },
+  "codigo": {
+    "calculoSha256": "37d26cf294689f4f78875dd23bfd6500373265e58482aa55c60c2d2c22bfcef2",
+    "endividadasSha256": "8799c2fad71d19237afd6055f67edce59872e3a8b6d6400bc1a310de64103f13",
+    "baseSha256": "a74e0604268ee993f37f22c62e0a2549dcc99371c829bc2d625f9cc1573d7d24"
+  },
+  "hashes": {
+    "config": "e8f089bcce1bda9a815d3b7e05fd86e7e743768be098abcd2ee67e50b24fee7c",
+    "insumos": "8a2128deda1e8bde612d10a5d9be074e09d83d4daf2dd22173c4fa1f9acd0a99",
+    "resultado": "4167a69ca3928c2a5c4cbc7433393e7e839010837dcfeffc84429827b0ffaeb5",
+    "memoria": "90c216045905a477c29b0885ef417c2738873d24f2b8d25a87a1cf6cf49c69f7",
+    "arquivos": {
+      "insumos.json.gz": "97741dc9e2f789ed878b172ed7065c644d5e2640f15a19916c8fddaaef204b76",
+      "config.json": "da6c4aca6080a80978324a1baf6b2e962f77ade812c412008b123063143c65cd",
+      "config-base.json": "68da7bb4b0117b573fbdfaa3b228c0d38210694168365ef793adf124a0aef572",
+      "resultado.json": "ba10d29134529818a1e06c62b02336713877c745de015c5196fd816d5b41cb96",
+      "memoria-de-calculo.json.gz": "fd8e3f59fa94cb48660900ae0c53f7d3aa975d20e239a78ceb465a9c7c5e23b0",
+      "ranking.csv": "4cc6ef8a7e57b2ae8191dced3d0b63dbfaa0ed91c8cd3e8d3c8cc21ce9303397",
+      "sem-ebitda-positivo.csv": "2413192234c628c31faa56898ba2ef0326774f911a80e1082bd0e194ae806c17",
+      "exclusoes.csv": "05635e7f931c9cf192e3991723b6fd6b82304b8f0b3d258bb0b98f4e66087575"
+    }
+  },
+  "fontes": [
+    {
+      "papel": "Insumos congelados da auditoria completa das ações baratas (demonstrações da CVM)",
+      "url": "auditoria/acoes-baratas/2026-10-30/insumos.json.gz (neste repositório)",
+      "sha256": "97741dc9e2f789ed878b172ed7065c644d5e2640f15a19916c8fddaaef204b76"
+    },
+    {
+      "papel": "Histórico de preços da B3 (Boletim BVBG.086)",
+      "url": "historico/acoes.json (neste repositório)",
+      "ultimoPregao": "2026-10-30"
+    }
+  ],
+  "contagens": {
+    "universo": 229,
+    "avaliadas": 136,
+    "noRanking": 116,
+    "semEbitdaPositivo": 0,
+    "exclusoes": 113,
+    "etapas": [
+      {
+        "id": "universo",
+        "descricao": "Setor fora do escopo (bancos, seguros, bolsa/holdings), duplicidade econômica, empresa sem CNPJ mapeado ou sem preço",
+        "entram": 229,
+        "saem": 51
+      },
+      {
+        "id": "liquidez",
+        "descricao": "Liquidez média diária do emissor abaixo de R$ 3.000.000 (21 pregões)",
+        "entram": 178,
+        "saem": 40
+      },
+      {
+        "id": "dados_contabeis",
+        "descricao": "Demonstrações da CVM completas, atuais e coerentes (balanço fecha, DRE fecha, descrição das contas, capital plausível)",
+        "entram": 138,
+        "saem": 2
+      },
+      {
+        "id": "endividamento",
+        "descricao": "Sem EBITDA calculável (DVA sem a linha de depreciação) ou com caixa maior que a dívida (dívida líquida ≤ 0)",
+        "entram": 136,
+        "saem": 20
+      },
+      {
+        "id": "ranking",
+        "descricao": "Dívida líquida ÷ EBITDA, ordem decrescente (EBITDA positivo); EBITDA zero ou negativo vai para a lista à parte",
+        "entram": 116,
+        "saem": 0
+      }
+    ]
+  },
+  "publicadoNoApp": true
+}

@@ -1,19 +1,19 @@
 {
   "publicado": true,
   "versaoMetodologia": "1.1.0",
-  "geradoEm": "2026-10-31T08:55:32.962Z",
-  "dataExecucao": "2026-10-31",
+  "geradoEm": "2026-11-03T10:07:06.837Z",
+  "dataExecucao": "2026-11-03",
   "dataPrecos": "2026-10-30",
-  "dataCorte": "2026-10-05",
-  "pastaAuditoria": "auditoria/acoes-endividadas/2026-10-17",
-  "hashResultado": "4a53caba188a27f4783ec9bb51cdac91f9e3a9a715075bedec43735f0cff7005",
-  "hashInsumos": "a6a424928c20f3b9b011ebacb5750ec82a0f9796cad6a1800febcef59cefba3c",
+  "dataCorte": "2026-10-30",
+  "pastaAuditoria": "auditoria/acoes-endividadas/2026-11-03",
+  "hashResultado": "4167a69ca3928c2a5c4cbc7433393e7e839010837dcfeffc84429827b0ffaeb5",
+  "hashInsumos": "8a2128deda1e8bde612d10a5d9be074e09d83d4daf2dd22173c4fa1f9acd0a99",
   "hashConfig": "e8f089bcce1bda9a815d3b7e05fd86e7e743768be098abcd2ee67e50b24fee7c",
-  "modoAuditoria": "diaria",
-  "auditoriaCompletaEm": "2026-10-17",
+  "modoAuditoria": "completa",
+  "auditoriaCompletaEm": "2026-11-03",
   "tamanhoDaLista": 15,
-  "universo": 226,
-  "avaliadas": 132,
+  "universo": 229,
+  "avaliadas": 136,
   "aviso": "Não é recomendação de investimento. Esta lista ordena as empresas pela razão entre a dívida líquida e o EBITDA dos últimos 12 meses, com dados das demonstrações financeiras publicadas na CVM, pela mesma fórmula para todas, sem nota nem opinião nossa. Dívida alta não quer dizer que a empresa está em risco, nem que a ação está barata ou cara: o endividamento convive com setores de investimento pesado (energia, saneamento, concessões) e com dívida de longo prazo e barata. A medida não captura prazo, custo, moeda nem garantias da dívida, e o EBITDA de 12 meses pode estar deprimido ou inflado por eventos pontuais. Empresas financeiras (bancos, seguradoras) ficam fora porque dívida é a matéria-prima do negócio delas. Leia as demonstrações e o formulário de referência antes de investir. Rentabilidade passada não garante rentabilidade futura e investir em ações pode causar perda de parte ou de todo o dinheiro aplicado. Converse com um profissional certificado antes de investir.",
   "parametros": {
     "indicador": "dlEbitda",
@@ -27,39 +27,39 @@
     ]
   },
   "contagens": {
-    "ranking": 112,
+    "ranking": 116,
     "semEbitdaPositivo": 0,
-    "exclusoes": 114
+    "exclusoes": 113
   },
   "etapas": [
     {
       "id": "universo",
       "descricao": "Setor fora do escopo (bancos, seguros, bolsa/holdings), duplicidade econômica, empresa sem CNPJ mapeado ou sem preço",
-      "entram": 226,
-      "saem": 52
+      "entram": 229,
+      "saem": 51
     },
     {
       "id": "liquidez",
       "descricao": "Liquidez média diária do emissor abaixo de R$ 3.000.000 (21 pregões)",
-      "entram": 174,
+      "entram": 178,
       "saem": 40
     },
     {
       "id": "dados_contabeis",
       "descricao": "Demonstrações da CVM completas, atuais e coerentes (balanço fecha, DRE fecha, descrição das contas, capital plausível)",
-      "entram": 134,
+      "entram": 138,
       "saem": 2
     },
     {
       "id": "endividamento",
       "descricao": "Sem EBITDA calculável (DVA sem a linha de depreciação) ou com caixa maior que a dívida (dívida líquida ≤ 0)",
-      "entram": 132,
+      "entram": 136,
       "saem": 20
     },
     {
       "id": "ranking",
       "descricao": "Dívida líquida ÷ EBITDA, ordem decrescente (EBITDA positivo); EBITDA zero ou negativo vai para a lista à parte",
-      "entram": 112,
+      "entram": 116,
       "saem": 0
     }
   ],
@@ -349,7 +349,7 @@
     {
       "ticker": "LOGG3",
       "nome": "LOG Commercial Properties",
-      "setor": "Serviços e locação de equipamentos",
+      "setor": "Shoppings e imóveis comerciais",
       "cotacao": 20.23,
       "dataCotacao": "2026-10-30",
       "dlEbitda": 8.6103,
@@ -632,66 +632,66 @@
       "setor": "Alimentos e bebidas",
       "cotacao": 3.98,
       "dataCotacao": "2026-10-30",
-      "dlEbitda": 5.6928,
-      "dividaLiquida": 4491145000,
-      "dividaBruta": 5946954000,
-      "caixa": 1455809000,
-      "ebitda": 788913000,
-      "ebitAjustado": 499383000,
-      "plControladores": 2988672000,
+      "dlEbitda": 5.7621,
+      "dividaLiquida": 4371318000,
+      "dividaBruta": 6225035000,
+      "caixa": 1853717000,
+      "ebitda": 758632000,
+      "ebitAjustado": 463345000,
+      "plControladores": 3051642000,
       "mktcap": 1357463503.36,
-      "coberturaJuros": 0.5353,
+      "coberturaJuros": 0.4963,
       "semDespesaFinanceira": false,
       "alertas": [],
       "demonstracao": {
         "doc": "ITR",
-        "dtRefer": "2026-05-31",
-        "dtReceb": "2026-07-14",
-        "linkDoc": "http://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=159513",
+        "dtRefer": "2026-08-31",
+        "dtReceb": "2026-10-08",
+        "linkDoc": "http://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=161619",
         "consolidacao": "consolidada"
       },
       "calculo": {
         "dividaCurta": {
           "cd": "2.01.04",
-          "valor": 1297227000,
-          "formula": "saldo em 2026-05-31"
+          "valor": 1585966000,
+          "formula": "saldo em 2026-08-31"
         },
         "dividaLonga": {
           "cd": "2.02.01",
-          "valor": 4649727000,
-          "formula": "saldo em 2026-05-31"
+          "valor": 4639069000,
+          "formula": "saldo em 2026-08-31"
         },
         "caixaEEquivalentes": {
           "cd": "1.01.01",
-          "valor": 1430714000,
-          "formula": "saldo em 2026-05-31"
+          "valor": 1853717000,
+          "formula": "saldo em 2026-08-31"
         },
         "aplicacoesFinanceiras": {
           "cd": "1.01.02",
-          "valor": 25095000,
-          "formula": "saldo em 2026-05-31"
+          "valor": 0,
+          "formula": "saldo em 2026-08-31"
         },
         "ebit": {
           "cd": "3.05",
-          "valor": 602644000,
-          "formula": "exercício 2026-02-28 + acumulado 2026-03-01→2026-05-31 − acumulado 2025-03-01→2025-05-31"
+          "valor": 571626000,
+          "formula": "exercício 2026-02-28 + acumulado 2026-03-01→2026-08-31 − acumulado 2025-03-01→2025-08-31"
         },
         "depreciacaoEAmortizacao": {
           "cd": "7.04.01",
-          "valor": -289530000,
-          "formula": "exercício 2026-02-28 + acumulado 2026-03-01→2026-05-31 − acumulado 2025-03-01→2025-05-31"
+          "valor": -295287000,
+          "formula": "exercício 2026-02-28 + acumulado 2026-03-01→2026-08-31 − acumulado 2025-03-01→2025-08-31"
         },
         "ebitAjustado": {
-          "formula": "EBIT (3.05) − equivalência patrimonial (3.04.06) + recuperabilidade de ativos (3.04.03) − outras receitas operacionais (3.04.04) + outras despesas operacionais (3.04.05)",
-          "valor": 499383000
+          "formula": "EBIT (3.05) + equivalência patrimonial (3.04.06) + recuperabilidade de ativos (3.04.03) − outras receitas operacionais (3.04.04) + outras despesas operacionais (3.04.05)",
+          "valor": 463345000
         },
         "ebitda": {
           "formula": "EBIT ajustado + |depreciação e amortização 12m (DVA 7.04.01, que vem com sinal negativo)|",
-          "valor": 788913000
+          "valor": 758632000
         },
         "dividaLiquida": {
           "formula": "dívida bruta − caixa",
-          "valor": 4491145000
+          "valor": 4371318000
         }
       },
       "posicao": 9
@@ -702,66 +702,66 @@
       "setor": "Máquinas, equipamentos e aeroespacial",
       "cotacao": 5.32,
       "dataCotacao": "2026-10-30",
-      "dlEbitda": 4.3338,
-      "dividaLiquida": 581249000,
-      "dividaBruta": 949534000,
-      "caixa": 368285000,
-      "ebitda": 134119000,
-      "ebitAjustado": 60748000,
-      "plControladores": 1248996000,
+      "dlEbitda": 4.8746,
+      "dividaLiquida": 527408000,
+      "dividaBruta": 897069000,
+      "caixa": 369661000,
+      "ebitda": 108195000,
+      "ebitAjustado": 32796000,
+      "plControladores": 1265810000,
       "mktcap": 495668374.04,
-      "coberturaJuros": 2.3764,
+      "coberturaJuros": 1.1663,
       "semDespesaFinanceira": false,
       "alertas": [],
       "demonstracao": {
         "doc": "ITR",
-        "dtRefer": "2026-06-30",
-        "dtReceb": "2026-07-14",
-        "linkDoc": "http://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=159516",
+        "dtRefer": "2026-09-30",
+        "dtReceb": "2026-10-20",
+        "linkDoc": "http://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=161773",
         "consolidacao": "consolidada"
       },
       "calculo": {
         "dividaCurta": {
           "cd": "2.01.04",
-          "valor": 308440000,
-          "formula": "saldo em 2026-06-30"
+          "valor": 308596000,
+          "formula": "saldo em 2026-09-30"
         },
         "dividaLonga": {
           "cd": "2.02.01",
-          "valor": 641094000,
-          "formula": "saldo em 2026-06-30"
+          "valor": 588473000,
+          "formula": "saldo em 2026-09-30"
         },
         "caixaEEquivalentes": {
           "cd": "1.01.01",
-          "valor": 340523000,
-          "formula": "saldo em 2026-06-30"
+          "valor": 348583000,
+          "formula": "saldo em 2026-09-30"
         },
         "aplicacoesFinanceiras": {
           "cd": "1.01.02",
-          "valor": 27762000,
-          "formula": "saldo em 2026-06-30"
+          "valor": 21078000,
+          "formula": "saldo em 2026-09-30"
         },
         "ebit": {
           "cd": "3.05",
-          "valor": 77561000,
-          "formula": "exercício 2025-12-31 + acumulado 2026-01-01→2026-06-30 − acumulado 2025-01-01→2025-06-30"
+          "valor": 66777000,
+          "formula": "exercício 2025-12-31 + acumulado 2026-01-01→2026-09-30 − acumulado 2025-01-01→2025-09-30"
         },
         "depreciacaoEAmortizacao": {
           "cd": "7.04.01",
-          "valor": -73371000,
-          "formula": "exercício 2025-12-31 + acumulado 2026-01-01→2026-06-30 − acumulado 2025-01-01→2025-06-30"
+          "valor": -75399000,
+          "formula": "exercício 2025-12-31 + acumulado 2026-01-01→2026-09-30 − acumulado 2025-01-01→2025-09-30"
         },
         "ebitAjustado": {
           "formula": "EBIT (3.05) + equivalência patrimonial (3.04.06) + recuperabilidade de ativos (3.04.03) − outras receitas operacionais (3.04.04) + outras despesas operacionais (3.04.05)",
-          "valor": 60748000
+          "valor": 32796000
         },
         "ebitda": {
           "formula": "EBIT ajustado + |depreciação e amortização 12m (DVA 7.04.01, que vem com sinal negativo)|",
-          "valor": 134119000
+          "valor": 108195000
         },
         "dividaLiquida": {
           "formula": "dívida bruta − caixa",
-          "valor": 581249000
+          "valor": 527408000
         }
       },
       "posicao": 10
@@ -839,6 +839,76 @@
       "posicao": 11
     },
     {
+      "ticker": "HBRE3",
+      "nome": "HBR Realty",
+      "setor": "Shoppings e imóveis comerciais",
+      "cotacao": 1.76,
+      "dataCotacao": "2026-10-30",
+      "dlEbitda": 4.1576,
+      "dividaLiquida": 1549776000,
+      "dividaBruta": 1708548000,
+      "caixa": 158772000,
+      "ebitda": 372761000,
+      "ebitAjustado": 365892000,
+      "plControladores": 1783261000,
+      "mktcap": 181255528.96,
+      "coberturaJuros": 1.6775,
+      "semDespesaFinanceira": false,
+      "alertas": [],
+      "demonstracao": {
+        "doc": "ITR",
+        "dtRefer": "2026-06-30",
+        "dtReceb": "2026-08-06",
+        "linkDoc": "http://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=160239",
+        "consolidacao": "consolidada"
+      },
+      "calculo": {
+        "dividaCurta": {
+          "cd": "2.01.04",
+          "valor": 188423000,
+          "formula": "saldo em 2026-06-30"
+        },
+        "dividaLonga": {
+          "cd": "2.02.01",
+          "valor": 1520125000,
+          "formula": "saldo em 2026-06-30"
+        },
+        "caixaEEquivalentes": {
+          "cd": "1.01.01",
+          "valor": 15871000,
+          "formula": "saldo em 2026-06-30"
+        },
+        "aplicacoesFinanceiras": {
+          "cd": "1.01.02",
+          "valor": 142901000,
+          "formula": "saldo em 2026-06-30"
+        },
+        "ebit": {
+          "cd": "3.05",
+          "valor": 367924000,
+          "formula": "exercício 2025-12-31 + acumulado 2026-01-01→2026-06-30 − acumulado 2025-01-01→2025-06-30"
+        },
+        "depreciacaoEAmortizacao": {
+          "cd": "7.04.01",
+          "valor": -6869000,
+          "formula": "exercício 2025-12-31 + acumulado 2026-01-01→2026-06-30 − acumulado 2025-01-01→2025-06-30"
+        },
+        "ebitAjustado": {
+          "formula": "EBIT (3.05) − equivalência patrimonial (3.04.06) + recuperabilidade de ativos (3.04.03) + outras receitas operacionais (3.04.04) + outras despesas operacionais (3.04.05)",
+          "valor": 365892000
+        },
+        "ebitda": {
+          "formula": "EBIT ajustado + |depreciação e amortização 12m (DVA 7.04.01, que vem com sinal negativo)|",
+          "valor": 372761000
+        },
+        "dividaLiquida": {
+          "formula": "dívida bruta − caixa",
+          "valor": 1549776000
+        }
+      },
+      "posicao": 12
+    },
+    {
       "ticker": "EQTL3",
       "nome": "Equatorial",
       "setor": "Energia elétrica: distribuição",
@@ -906,7 +976,7 @@
           "valor": 54149470000
         }
       },
-      "posicao": 12
+      "posicao": 13
     },
     {
       "ticker": "TAEE11",
@@ -976,7 +1046,7 @@
           "valor": 10413735000
         }
       },
-      "posicao": 13
+      "posicao": 14
     },
     {
       "ticker": "TUPY3",
@@ -1046,757 +1116,715 @@
           "valor": 1904545000
         }
       },
-      "posicao": 14
-    },
-    {
-      "ticker": "ORVR3",
-      "nome": "Orizon",
-      "setor": "Saneamento e resíduos",
-      "cotacao": 15.96,
-      "dataCotacao": "2026-10-30",
-      "dlEbitda": 4.0616,
-      "dividaLiquida": 2227039000,
-      "dividaBruta": 3762090000,
-      "caixa": 1535051000,
-      "ebitda": 548316000,
-      "ebitAjustado": 349456000,
-      "plControladores": 4851724000,
-      "mktcap": 8766764160,
-      "coberturaJuros": 1.0164,
-      "semDespesaFinanceira": false,
-      "alertas": [],
-      "demonstracao": {
-        "doc": "ITR",
-        "dtRefer": "2026-06-30",
-        "dtReceb": "2026-08-14",
-        "linkDoc": "http://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=160749",
-        "consolidacao": "consolidada"
-      },
-      "calculo": {
-        "dividaCurta": {
-          "cd": "2.01.04",
-          "valor": 0,
-          "formula": "saldo em 2026-06-30"
-        },
-        "dividaLonga": {
-          "cd": "2.02.01",
-          "valor": 3762090000,
-          "formula": "saldo em 2026-06-30"
-        },
-        "caixaEEquivalentes": {
-          "cd": "1.01.01",
-          "valor": 1535051000,
-          "formula": "saldo em 2026-06-30"
-        },
-        "aplicacoesFinanceiras": {
-          "cd": "1.01.02",
-          "valor": 0,
-          "formula": "saldo em 2026-06-30"
-        },
-        "ebit": {
-          "cd": "3.05",
-          "valor": 347764000,
-          "formula": "exercício 2025-12-31 + acumulado 2026-01-01→2026-06-30 − acumulado 2025-01-01→2025-06-30"
-        },
-        "depreciacaoEAmortizacao": {
-          "cd": "7.04.01",
-          "valor": -198860000,
-          "formula": "exercício 2025-12-31 + acumulado 2026-01-01→2026-06-30 − acumulado 2025-01-01→2025-06-30"
-        },
-        "ebitAjustado": {
-          "formula": "EBIT (3.05) + equivalência patrimonial (3.04.06) + recuperabilidade de ativos (3.04.03) − outras receitas operacionais (3.04.04) + outras despesas operacionais (3.04.05)",
-          "valor": 349456000
-        },
-        "ebitda": {
-          "formula": "EBIT ajustado + |depreciação e amortização 12m (DVA 7.04.01, que vem com sinal negativo)|",
-          "valor": 548316000
-        },
-        "dividaLiquida": {
-          "formula": "dívida bruta − caixa",
-          "valor": 2227039000
-        }
-      },
       "posicao": 15
     }
   ],
   "restante": [
     {
+      "ticker": "ORVR3",
+      "nome": "Orizon",
+      "setor": "Saneamento e resíduos",
+      "posicao": 16,
+      "dlEbitda": 4.0616
+    },
+    {
       "ticker": "MRVE3",
       "nome": "MRV",
       "setor": "Construção civil e incorporação",
-      "posicao": 16,
+      "posicao": 17,
       "dlEbitda": 3.9438
     },
     {
       "ticker": "MTRE3",
       "nome": "Mitre Realty",
       "setor": "Construção civil e incorporação",
-      "posicao": 17,
+      "posicao": 18,
       "dlEbitda": 3.7887
     },
     {
       "ticker": "CSNA3",
       "nome": "CSN",
       "setor": "Siderurgia e metalurgia",
-      "posicao": 18,
+      "posicao": 19,
       "dlEbitda": 3.635
+    },
+    {
+      "ticker": "KLBN11",
+      "nome": "Klabin",
+      "setor": "Papel, celulose e madeira",
+      "posicao": 20,
+      "dlEbitda": 3.6278
     },
     {
       "ticker": "CSAN3",
       "nome": "Cosan",
       "setor": "Petróleo e gás",
-      "posicao": 19,
+      "posicao": 21,
       "dlEbitda": 3.5793
+    },
+    {
+      "ticker": "SOJA3",
+      "nome": "Boa Safra Sementes",
+      "setor": "Agronegócio, açúcar e etanol",
+      "posicao": 22,
+      "dlEbitda": 3.5656
     },
     {
       "ticker": "ISAE4",
       "nome": "ISA Energia",
       "setor": "Energia elétrica: transmissão",
-      "posicao": 20,
+      "posicao": 23,
       "dlEbitda": 3.5565
     },
     {
       "ticker": "AXIA3",
       "nome": "Axia Energia (ex-Eletrobras)",
       "setor": "Energia elétrica: geração",
-      "posicao": 21,
+      "posicao": 24,
       "dlEbitda": 3.4694
     },
     {
       "ticker": "SIMH3",
       "nome": "Simpar",
       "setor": "Locação de veículos e frotas",
-      "posicao": 22,
+      "posicao": 25,
       "dlEbitda": 3.4353
     },
     {
       "ticker": "ENEV3",
       "nome": "Eneva",
       "setor": "Energia elétrica: geração",
-      "posicao": 23,
+      "posicao": 26,
       "dlEbitda": 3.4222
     },
     {
       "ticker": "JALL3",
       "nome": "Jalles Machado",
       "setor": "Agronegócio, açúcar e etanol",
-      "posicao": 24,
+      "posicao": 27,
       "dlEbitda": 3.3982
     },
     {
       "ticker": "SUZB3",
       "nome": "Suzano",
       "setor": "Papel, celulose e madeira",
-      "posicao": 25,
+      "posicao": 28,
       "dlEbitda": 3.3878
     },
     {
       "ticker": "ENGI11",
       "nome": "Energisa",
       "setor": "Energia elétrica: distribuição",
-      "posicao": 26,
+      "posicao": 29,
       "dlEbitda": 3.3874
+    },
+    {
+      "ticker": "JSLG3",
+      "nome": "JSL",
+      "setor": "Transporte e infraestrutura",
+      "posicao": 30,
+      "dlEbitda": 3.3233
     },
     {
       "ticker": "EGIE3",
       "nome": "Engie Brasil",
       "setor": "Energia elétrica: geração",
-      "posicao": 27,
+      "posicao": 31,
       "dlEbitda": 3.3079
     },
     {
       "ticker": "CLSC4",
       "nome": "Celesc",
       "setor": "Energia elétrica: distribuição",
-      "posicao": 28,
+      "posicao": 32,
       "dlEbitda": 3.273
     },
     {
       "ticker": "MOTV3",
       "nome": "Motiva (ex-CCR)",
       "setor": "Transporte e infraestrutura",
-      "posicao": 29,
-      "dlEbitda": 3.2714
-    },
-    {
-      "ticker": "KLBN11",
-      "nome": "Klabin",
-      "setor": "Papel, celulose e madeira",
-      "posicao": 30,
-      "dlEbitda": 3.2667
+      "posicao": 33,
+      "dlEbitda": 3.2565
     },
     {
       "ticker": "EVEN3",
       "nome": "Even",
       "setor": "Construção civil e incorporação",
-      "posicao": 31,
+      "posicao": 34,
       "dlEbitda": 3.2184
-    },
-    {
-      "ticker": "MOVI3",
-      "nome": "Movida",
-      "setor": "Locação de veículos e frotas",
-      "posicao": 32,
-      "dlEbitda": 3.1279
     },
     {
       "ticker": "SLCE3",
       "nome": "SLC Agrícola",
       "setor": "Agronegócio, açúcar e etanol",
-      "posicao": 33,
+      "posicao": 35,
       "dlEbitda": 3.1139
     },
     {
       "ticker": "ARML3",
       "nome": "Armac",
       "setor": "Locação de veículos e frotas",
-      "posicao": 34,
+      "posicao": 36,
       "dlEbitda": 2.9905
+    },
+    {
+      "ticker": "MOVI3",
+      "nome": "Movida",
+      "setor": "Locação de veículos e frotas",
+      "posicao": 37,
+      "dlEbitda": 2.9897
     },
     {
       "ticker": "BEEF3",
       "nome": "Minerva",
       "setor": "Carnes e proteínas",
-      "posicao": 35,
+      "posicao": 38,
       "dlEbitda": 2.9865
     },
     {
       "ticker": "LIGT3",
       "nome": "Light",
       "setor": "Energia elétrica: distribuição",
-      "posicao": 36,
+      "posicao": 39,
       "dlEbitda": 2.9736
     },
     {
       "ticker": "VAMO3",
       "nome": "Vamos",
       "setor": "Locação de veículos e frotas",
-      "posicao": 37,
-      "dlEbitda": 2.9343
+      "posicao": 40,
+      "dlEbitda": 2.9415
     },
     {
       "ticker": "ALUP11",
       "nome": "Alupar",
       "setor": "Energia elétrica: transmissão",
-      "posicao": 38,
+      "posicao": 41,
       "dlEbitda": 2.9323
     },
     {
       "ticker": "RAPT4",
       "nome": "Randon",
       "setor": "Autopeças e veículos",
-      "posicao": 39,
+      "posicao": 42,
       "dlEbitda": 2.9165
     },
     {
       "ticker": "CPLE3",
       "nome": "Copel",
       "setor": "Energia elétrica: distribuição",
-      "posicao": 40,
+      "posicao": 43,
       "dlEbitda": 2.8573
     },
     {
       "ticker": "HBSA3",
       "nome": "Hidrovias do Brasil",
       "setor": "Transporte e infraestrutura",
-      "posicao": 41,
+      "posicao": 44,
       "dlEbitda": 2.7461
     },
     {
       "ticker": "DASA3",
       "nome": "Dasa",
       "setor": "Hospitais, planos e diagnósticos",
-      "posicao": 42,
+      "posicao": 45,
       "dlEbitda": 2.6607
     },
     {
       "ticker": "CYRE3",
       "nome": "Cyrela",
       "setor": "Construção civil e incorporação",
-      "posicao": 43,
+      "posicao": 46,
       "dlEbitda": 2.6283
     },
     {
       "ticker": "MYPK3",
       "nome": "Iochpe-Maxion",
       "setor": "Máquinas, equipamentos e aeroespacial",
-      "posicao": 44,
+      "posicao": 47,
       "dlEbitda": 2.5591
     },
     {
       "ticker": "CMIG4",
       "nome": "Cemig",
       "setor": "Energia elétrica: transmissão",
-      "posicao": 45,
+      "posicao": 48,
       "dlEbitda": 2.5473
     },
     {
       "ticker": "HAPV3",
       "nome": "Hapvida",
       "setor": "Hospitais, planos e diagnósticos",
-      "posicao": 46,
+      "posicao": 49,
       "dlEbitda": 2.525
     },
     {
       "ticker": "ANIM3",
       "nome": "Ânima",
       "setor": "Educação",
-      "posicao": 47,
+      "posicao": 50,
       "dlEbitda": 2.5135
     },
     {
       "ticker": "YDUQ3",
       "nome": "Yduqs",
       "setor": "Educação",
-      "posicao": 48,
+      "posicao": 51,
       "dlEbitda": 2.4887
     },
     {
       "ticker": "CSMG3",
       "nome": "Copasa",
       "setor": "Saneamento e resíduos",
-      "posicao": 49,
+      "posicao": 52,
       "dlEbitda": 2.4178
     },
     {
       "ticker": "RENT3",
       "nome": "Localiza",
       "setor": "Locação de veículos e frotas",
-      "posicao": 50,
+      "posicao": 53,
       "dlEbitda": 2.3422
     },
     {
       "ticker": "DXCO3",
       "nome": "Dexco",
       "setor": "Materiais de construção e acabamento",
-      "posicao": 51,
+      "posicao": 54,
       "dlEbitda": 2.3255
     },
     {
       "ticker": "UNIP6",
       "nome": "Unipar",
       "setor": "Química e petroquímica",
-      "posicao": 52,
+      "posicao": 55,
       "dlEbitda": 2.3227
     },
     {
       "ticker": "PRNR3",
       "nome": "Priner",
       "setor": "Serviços e locação de equipamentos",
-      "posicao": 53,
+      "posicao": 56,
       "dlEbitda": 2.292
     },
     {
       "ticker": "SBSP3",
       "nome": "Sabesp",
       "setor": "Saneamento e resíduos",
-      "posicao": 54,
+      "posicao": 57,
       "dlEbitda": 2.2555
     },
     {
       "ticker": "POSI3",
       "nome": "Positivo",
       "setor": "Hardware e eletrônicos",
-      "posicao": 55,
+      "posicao": 58,
       "dlEbitda": 2.2024
     },
     {
       "ticker": "RAIL3",
       "nome": "Rumo",
       "setor": "Transporte e infraestrutura",
-      "posicao": 56,
+      "posicao": 59,
       "dlEbitda": 2.179
     },
     {
       "ticker": "PNVL3",
       "nome": "Panvel (Dimed)",
       "setor": "Farmácias, higiene e beleza",
-      "posicao": 57,
+      "posicao": 60,
       "dlEbitda": 2.1749
-    },
-    {
-      "ticker": "HYPE3",
-      "nome": "Hypera Pharma",
-      "setor": "Medicamentos e saúde animal",
-      "posicao": 58,
-      "dlEbitda": 2.0827
     },
     {
       "ticker": "SMTO3",
       "nome": "São Martinho",
       "setor": "Agronegócio, açúcar e etanol",
-      "posicao": 59,
+      "posicao": 61,
       "dlEbitda": 2.0157
     },
     {
       "ticker": "TRIS3",
       "nome": "Trisul",
       "setor": "Construção civil e incorporação",
-      "posicao": 60,
+      "posicao": 62,
       "dlEbitda": 2.0112
     },
     {
       "ticker": "OPCT3",
       "nome": "OceanPact",
       "setor": "Petróleo e gás",
-      "posicao": 61,
+      "posicao": 63,
       "dlEbitda": 2.0079
     },
     {
       "ticker": "CPFE3",
       "nome": "CPFL Energia",
       "setor": "Energia elétrica: distribuição",
-      "posicao": 62,
+      "posicao": 64,
       "dlEbitda": 1.9774
     },
     {
       "ticker": "IGTI11",
       "nome": "Iguatemi",
       "setor": "Shoppings e imóveis comerciais",
-      "posicao": 63,
+      "posicao": 65,
       "dlEbitda": 1.976
     },
     {
-      "ticker": "RANI3",
-      "nome": "Irani",
-      "setor": "Papel, celulose e madeira",
-      "posicao": 64,
-      "dlEbitda": 1.8897
+      "ticker": "HYPE3",
+      "nome": "Hypera Pharma",
+      "setor": "Medicamentos e saúde animal",
+      "posicao": 66,
+      "dlEbitda": 1.9542
     },
     {
       "ticker": "CBAV3",
       "nome": "CBA (Companhia Brasileira de Alumínio)",
       "setor": "Mineração",
-      "posicao": 65,
+      "posicao": 67,
       "dlEbitda": 1.8623
     },
     {
       "ticker": "DESK3",
       "nome": "Desktop",
       "setor": "Telecomunicações",
-      "posicao": 66,
+      "posicao": 68,
       "dlEbitda": 1.8482
-    },
-    {
-      "ticker": "MULT3",
-      "nome": "Multiplan",
-      "setor": "Shoppings e imóveis comerciais",
-      "posicao": 67,
-      "dlEbitda": 1.8452
     },
     {
       "ticker": "COGN3",
       "nome": "Cogna",
       "setor": "Educação",
-      "posicao": 68,
+      "posicao": 69,
       "dlEbitda": 1.7807
     },
     {
       "ticker": "BRAV3",
       "nome": "Brava Energia",
       "setor": "Petróleo e gás",
-      "posicao": 69,
+      "posicao": 70,
       "dlEbitda": 1.7657
     },
     {
       "ticker": "BHIA3",
       "nome": "Casas Bahia",
       "setor": "Varejo de eletro, móveis e e-commerce",
-      "posicao": 70,
+      "posicao": 71,
       "dlEbitda": 1.7174
+    },
+    {
+      "ticker": "MULT3",
+      "nome": "Multiplan",
+      "setor": "Shoppings e imóveis comerciais",
+      "posicao": 72,
+      "dlEbitda": 1.6916
     },
     {
       "ticker": "VBBR3",
       "nome": "Vibra Energia",
       "setor": "Distribuição de combustíveis e etanol",
-      "posicao": 71,
+      "posicao": 73,
       "dlEbitda": 1.6853
     },
     {
       "ticker": "PRIO3",
       "nome": "PRIO",
       "setor": "Petróleo e gás",
-      "posicao": 72,
+      "posicao": 74,
       "dlEbitda": 1.6848
+    },
+    {
+      "ticker": "RANI3",
+      "nome": "Irani",
+      "setor": "Papel, celulose e madeira",
+      "posicao": 75,
+      "dlEbitda": 1.675
     },
     {
       "ticker": "FLRY3",
       "nome": "Fleury",
       "setor": "Hospitais, planos e diagnósticos",
-      "posicao": 73,
+      "posicao": 76,
       "dlEbitda": 1.5334
     },
     {
       "ticker": "AZZA3",
       "nome": "Azzas 2154",
       "setor": "Moda e vestuário",
-      "posicao": 74,
+      "posicao": 77,
       "dlEbitda": 1.4866
     },
     {
       "ticker": "LAVV3",
       "nome": "Lavvi",
       "setor": "Construção civil e incorporação",
-      "posicao": 75,
+      "posicao": 78,
       "dlEbitda": 1.4851
     },
     {
       "ticker": "ASAI3",
       "nome": "Assaí",
       "setor": "Varejo alimentar",
-      "posicao": 76,
+      "posicao": 79,
       "dlEbitda": 1.3941
     },
     {
       "ticker": "PCAR3",
       "nome": "Grupo Pão de Açúcar",
       "setor": "Varejo alimentar",
-      "posicao": 77,
+      "posicao": 80,
       "dlEbitda": 1.3246
     },
     {
       "ticker": "NATU3",
       "nome": "Natura",
       "setor": "Farmácias, higiene e beleza",
-      "posicao": 78,
+      "posicao": 81,
       "dlEbitda": 1.2667
     },
     {
       "ticker": "MILS3",
       "nome": "Mills",
       "setor": "Serviços e locação de equipamentos",
-      "posicao": 79,
+      "posicao": 82,
       "dlEbitda": 1.2138
     },
     {
       "ticker": "POMO4",
       "nome": "Marcopolo",
       "setor": "Autopeças e veículos",
-      "posicao": 80,
+      "posicao": 83,
       "dlEbitda": 1.1857
     },
     {
       "ticker": "FRAS3",
       "nome": "Fras-le",
       "setor": "Autopeças e veículos",
-      "posicao": 81,
+      "posicao": 84,
       "dlEbitda": 1.1742
     },
     {
       "ticker": "SMFT3",
       "nome": "Smart Fit",
       "setor": "Turismo, lazer e restaurantes",
-      "posicao": 82,
+      "posicao": 85,
       "dlEbitda": 1.1642
     },
     {
       "ticker": "MGLU3",
       "nome": "Magazine Luiza",
       "setor": "Varejo de eletro, móveis e e-commerce",
-      "posicao": 83,
+      "posicao": 86,
       "dlEbitda": 1.1412
     },
     {
       "ticker": "UGPA3",
       "nome": "Ultrapar",
       "setor": "Distribuição de combustíveis e etanol",
-      "posicao": 84,
+      "posicao": 87,
       "dlEbitda": 1.0969
     },
     {
       "ticker": "RECV3",
       "nome": "PetroReconcavo",
       "setor": "Petróleo e gás",
-      "posicao": 85,
+      "posicao": 88,
       "dlEbitda": 1.0865
     },
     {
       "ticker": "LEVE3",
       "nome": "Mahle Metal Leve",
       "setor": "Autopeças e veículos",
-      "posicao": 86,
+      "posicao": 89,
       "dlEbitda": 1.0343
     },
     {
       "ticker": "TOTS3",
       "nome": "Totvs",
       "setor": "Software e serviços de TI",
-      "posicao": 87,
+      "posicao": 90,
       "dlEbitda": 1.0242
     },
     {
       "ticker": "PGMN3",
       "nome": "Pague Menos",
       "setor": "Farmácias, higiene e beleza",
-      "posicao": 88,
+      "posicao": 91,
       "dlEbitda": 0.987
     },
     {
       "ticker": "JHSF3",
       "nome": "JHSF",
       "setor": "Shoppings e imóveis comerciais",
-      "posicao": 89,
+      "posicao": 92,
       "dlEbitda": 0.9864
     },
     {
       "ticker": "PETR4",
       "nome": "Petrobras",
       "setor": "Petróleo e gás",
-      "posicao": 90,
+      "posicao": 93,
       "dlEbitda": 0.971
     },
     {
       "ticker": "QUAL3",
       "nome": "Qualicorp",
       "setor": "Hospitais, planos e diagnósticos",
-      "posicao": 91,
+      "posicao": 94,
       "dlEbitda": 0.928
-    },
-    {
-      "ticker": "SAPR11",
-      "nome": "Sanepar",
-      "setor": "Saneamento e resíduos",
-      "posicao": 92,
-      "dlEbitda": 0.8058
-    },
-    {
-      "ticker": "GGBR4",
-      "nome": "Gerdau",
-      "setor": "Siderurgia e metalurgia",
-      "posicao": 93,
-      "dlEbitda": 0.7551
     },
     {
       "ticker": "VALE3",
       "nome": "Vale",
       "setor": "Mineração",
-      "posicao": 94,
-      "dlEbitda": 0.7551
+      "posicao": 95,
+      "dlEbitda": 0.8076
+    },
+    {
+      "ticker": "SAPR11",
+      "nome": "Sanepar",
+      "setor": "Saneamento e resíduos",
+      "posicao": 96,
+      "dlEbitda": 0.8058
     },
     {
       "ticker": "VULC3",
       "nome": "Vulcabras",
       "setor": "Calçados e artigos esportivos",
-      "posicao": 95,
+      "posicao": 97,
       "dlEbitda": 0.7383
+    },
+    {
+      "ticker": "GGBR4",
+      "nome": "Gerdau",
+      "setor": "Siderurgia e metalurgia",
+      "posicao": 98,
+      "dlEbitda": 0.6438
     },
     {
       "ticker": "RDOR3",
       "nome": "Rede D'Or",
       "setor": "Hospitais, planos e diagnósticos",
-      "posicao": 96,
+      "posicao": 99,
       "dlEbitda": 0.6098
     },
     {
       "ticker": "CSED3",
       "nome": "Cruzeiro do Sul Educacional",
       "setor": "Educação",
-      "posicao": 97,
+      "posicao": 100,
       "dlEbitda": 0.5832
     },
     {
       "ticker": "FIQE3",
       "nome": "Unifique",
       "setor": "Telecomunicações",
-      "posicao": 98,
+      "posicao": 101,
       "dlEbitda": 0.5581
     },
     {
       "ticker": "RADL3",
       "nome": "RaiaDrogasil",
       "setor": "Farmácias, higiene e beleza",
-      "posicao": 99,
+      "posicao": 102,
       "dlEbitda": 0.5473
     },
     {
       "ticker": "SEER3",
       "nome": "Ser Educacional",
       "setor": "Educação",
-      "posicao": 100,
+      "posicao": 103,
       "dlEbitda": 0.5399
     },
     {
       "ticker": "CVCB3",
       "nome": "CVC",
       "setor": "Turismo, lazer e restaurantes",
-      "posicao": 101,
+      "posicao": 104,
       "dlEbitda": 0.5276
     },
     {
       "ticker": "ALPA4",
       "nome": "Alpargatas (Havaianas)",
       "setor": "Calçados e artigos esportivos",
-      "posicao": 102,
+      "posicao": 105,
       "dlEbitda": 0.4714
     },
     {
       "ticker": "DIRR3",
       "nome": "Direcional",
       "setor": "Construção civil e incorporação",
-      "posicao": 103,
+      "posicao": 106,
       "dlEbitda": 0.4566
     },
     {
       "ticker": "VIVT3",
       "nome": "Vivo (Telefônica Brasil)",
       "setor": "Telecomunicações",
-      "posicao": 104,
+      "posicao": 107,
       "dlEbitda": 0.4378
     },
     {
       "ticker": "GMAT3",
       "nome": "Grupo Mateus",
       "setor": "Varejo alimentar",
-      "posicao": 105,
+      "posicao": 108,
       "dlEbitda": 0.4298
     },
     {
       "ticker": "TEND3",
       "nome": "Tenda",
       "setor": "Construção civil e incorporação",
-      "posicao": 106,
+      "posicao": 109,
       "dlEbitda": 0.3335
     },
     {
       "ticker": "MDNE3",
       "nome": "Moura Dubeux",
       "setor": "Construção civil e incorporação",
-      "posicao": 107,
+      "posicao": 110,
       "dlEbitda": 0.3243
+    },
+    {
+      "ticker": "EMBJ3",
+      "nome": "Embraer",
+      "setor": "Máquinas, equipamentos e aeroespacial",
+      "posicao": 111,
+      "dlEbitda": 0.2527
     },
     {
       "ticker": "PLPL3",
       "nome": "Plano&Plano",
       "setor": "Construção civil e incorporação",
-      "posicao": 108,
+      "posicao": 112,
       "dlEbitda": 0.2041
     },
     {
       "ticker": "CMIN3",
       "nome": "CSN Mineração",
       "setor": "Mineração",
-      "posicao": 109,
+      "posicao": 113,
       "dlEbitda": 0.1655
     },
     {
       "ticker": "CEAB3",
       "nome": "C&A",
       "setor": "Moda e vestuário",
-      "posicao": 110,
+      "posicao": 114,
       "dlEbitda": 0.1252
     },
     {
       "ticker": "VIVA3",
       "nome": "Vivara",
       "setor": "Moda e vestuário",
-      "posicao": 111,
+      "posicao": 115,
       "dlEbitda": 0.1012
     },
     {
       "ticker": "TGMA3",
       "nome": "Tegma",
       "setor": "Transporte e infraestrutura",
-      "posicao": 112,
+      "posicao": 116,
       "dlEbitda": 0.0734
     }
   ],
@@ -1824,7 +1852,7 @@
       "setor": "Alimentos e bebidas",
       "etapa": "endividamento",
       "codigo": "caixa_liquido",
-      "motivo": "Dívida líquida de R$ -15.397.436.000 (não positiva): o caixa cobre a dívida bruta de R$ 2.948.960.000."
+      "motivo": "Dívida líquida de R$ -19.199.355.000 (não positiva): o caixa cobre a dívida bruta de R$ 2.714.759.000."
     },
     {
       "ticker": "AERI3",
@@ -2155,14 +2183,6 @@
       "motivo": "Volume médio diário de R$ 16.136 abaixo do mínimo."
     },
     {
-      "ticker": "EMBR3",
-      "nome": "Embraer",
-      "setor": "Máquinas, equipamentos e aeroespacial",
-      "etapa": "universo",
-      "codigo": "sem_cnpj",
-      "motivo": "Código não mapeado para um CNPJ da CVM (conferir config/acoes-baratas-cnpj.json)."
-    },
-    {
       "ticker": "ENJU3",
       "nome": "Enjoei",
       "setor": "Varejo de eletro, móveis e e-commerce",
@@ -2264,7 +2284,7 @@
       "setor": "Hardware e eletrônicos",
       "etapa": "endividamento",
       "codigo": "caixa_liquido",
-      "motivo": "Dívida líquida de R$ -569.590.000 (não positiva): o caixa cobre a dívida bruta de R$ 875.652.000."
+      "motivo": "Dívida líquida de R$ -667.039.000 (não positiva): o caixa cobre a dívida bruta de R$ 889.217.000."
     },
     {
       "ticker": "IRBR3",
@@ -2664,7 +2684,7 @@
       "setor": "Siderurgia e metalurgia",
       "etapa": "endividamento",
       "codigo": "caixa_liquido",
-      "motivo": "Dívida líquida de R$ -599.249.000 (não positiva): o caixa cobre a dívida bruta de R$ 6.223.308.000."
+      "motivo": "Dívida líquida de R$ -566.003.000 (não positiva): o caixa cobre a dívida bruta de R$ 6.181.166.000."
     },
     {
       "ticker": "VITT3",
@@ -2688,7 +2708,7 @@
       "setor": "Máquinas, equipamentos e aeroespacial",
       "etapa": "endividamento",
       "codigo": "caixa_liquido",
-      "motivo": "Dívida líquida de R$ -3.734.796.000 (não positiva): o caixa cobre a dívida bruta de R$ 5.066.346.000."
+      "motivo": "Dívida líquida de R$ -2.585.002.000 (não positiva): o caixa cobre a dívida bruta de R$ 3.754.445.000."
     },
     {
       "ticker": "WHRL4",
