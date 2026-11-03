@@ -114,3 +114,16 @@ O navegador do cliente nunca chama a CVM nem a brapi, e a chave da brapi fica s�
 | Jornada ponta a ponta | Navegador real, servidor local com a API verdadeira, todas as telas | ✅ sem erros de JavaScript |
 
 Lacuna conhecida: a API em si (`api/`) foi testada manualmente (casos 200, 400, 405 e veto), mas ainda não tem testes automatizados. Ver [Próximos passos](06-proximos-passos.md).
+
+
+## Dados de mercado sob demanda (D137)
+
+Os JSON gerados pelos jobs (`webapp-src/src/data/*.json`, 20 arquivos) não vão mais dentro do `index.html`. O build os publica em `app/dados/<chave>.json` e o app os baixa quando a tela precisa:
+
+```
+jobs (GitHub Actions) ─► src/data/<chave>.json ─► build (plugin dadosDeMercado) ─► app/dados/<chave>.json
+                                                                                         │ fetch, só quando a tela abre
+App.tsx ─ DADOS_DA_TELA[tela] ─► ComDados ─► data/arquivosMercado.ts (registro) ─► snapshot*.ts (export let SNAPSHOT_*)
+```
+
+Detalhes, regra de ouro (não copiar `SNAPSHOT_*` no nível do módulo) e medições em `docs/07`, D137.

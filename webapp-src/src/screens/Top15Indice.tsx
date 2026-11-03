@@ -58,7 +58,8 @@ export const TEXTOS_INDICE: Record<ClasseIndice, Textos> = {
   },
 }
 
-const SNAPSHOT_PADRAO: Record<ClasseIndice, SnapshotIndice> = { ifix: SNAPSHOT_IFIX_MAIORES_PESOS, ibov: SNAPSHOT_IBOV_MAIORES_PESOS }
+// Função, e não constante (D137): o dado é baixado depois que o módulo carrega, e uma cópia no nível do módulo ficaria vazia para sempre.
+const snapshotPadrao = (): Record<ClasseIndice, SnapshotIndice> => ({ ifix: SNAPSHOT_IFIX_MAIORES_PESOS, ibov: SNAPSHOT_IBOV_MAIORES_PESOS })
 
 /**
  * Caixa "Top 15 do IFIX" / "Top 15 do Ibovespa" (D72): os 15 maiores pesos da carteira teórica oficial da B3. O peso é
@@ -66,7 +67,7 @@ const SNAPSHOT_PADRAO: Record<ClasseIndice, SnapshotIndice> = { ifix: SNAPSHOT_I
  */
 export function Top15Indice({ classe, snapshot }: { classe: ClasseIndice; snapshot?: SnapshotIndice }) {
   const t = TEXTOS_INDICE[classe]
-  const s = snapshot ?? SNAPSHOT_PADRAO[classe]
+  const s = snapshot ?? snapshotPadrao()[classe]
   if (!s.publicado || s.ranking.length === 0) {
     return (
       <div className="card col" style={{ gap: 8 }} role="status" data-testid={`${t.id}-validacao`}>

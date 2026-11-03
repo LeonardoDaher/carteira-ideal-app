@@ -1,4 +1,4 @@
-import dados from './fiiBaratos.json'
+import { registrarDados } from './arquivosMercado'
 import type { SnapshotFiiBaratos } from '../domain/fiiBaratos'
 
 /**
@@ -7,4 +7,7 @@ import type { SnapshotFiiBaratos } from '../domain/fiiBaratos'
  * config/fii-baratos.json, o arquivo vem com `publicado: false` e sem lista. Com o acesso por código, o arquivo
  * traz só o cabeçalho e a lista vem da função api/top15-fiis.
  */
-export const SNAPSHOT_FII_BARATOS = dados as unknown as SnapshotFiiBaratos
+export let SNAPSHOT_FII_BARATOS = undefined as unknown as SnapshotFiiBaratos
+registrarDados<SnapshotFiiBaratos>('fiiBaratos', (d) => {
+  SNAPSHOT_FII_BARATOS = d
+})

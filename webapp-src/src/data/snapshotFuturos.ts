@@ -1,4 +1,4 @@
-import dadosFuturos from './futuros.json'
+import { registrarDados } from './arquivosMercado'
 import type { SnapshotFuturos } from '../domain/futuros'
 
 /**
@@ -6,4 +6,7 @@ import type { SnapshotFuturos } from '../domain/futuros'
  * `unknown` pelo mesmo motivo de snapshotEtfs.ts: com dados reais, a conversão direta quebrou o build na Vercel (D16).
  * O formato é garantido pelo script e pelos testes dele.
  */
-export const SNAPSHOT_FUTUROS = dadosFuturos as unknown as SnapshotFuturos
+export let SNAPSHOT_FUTUROS = undefined as unknown as SnapshotFuturos
+registrarDados<SnapshotFuturos>('futuros', (d) => {
+  SNAPSHOT_FUTUROS = d
+})

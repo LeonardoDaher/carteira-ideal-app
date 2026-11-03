@@ -2313,3 +2313,22 @@ Regras do "extra":
 Para os dados novos aparecerem depois do envio: rodar "Carga inicial de Ações" (os extras só têm 21 pregões guardados; a série longa precisa da carga), "Atualizar histórico de ações" (5 anos do COTAHIST no gráfico), "Atualizar fundamentos" e "Atualizar balanços". Enquanto isso, o extra aparece na lista e na simulação, e a análise técnica avisa que o histórico é curto.
 
 Testes: `scripts/acoes-extras.test.mjs` (4) e um caso novo em `analiseFundamentalista.test.ts`.
+
+
+## D137 (03/11/2026): dados de mercado baixados sob demanda, fora do `index.html`
+
+**Problema medido.** O app compilado tinha 3,06 MB (820 KB com gzip). Cerca de 1,1 MB eram os 20 JSON de mercado dos jobs diários, importados pelo código e embutidos no arquivo. Toda atualização de preço (segunda a sexta) mudava o `index.html` inteiro: o navegador de quem já usava o app baixava de novo também o código, que não tinha mudado.
+
+**O que mudou.**
+- Os 20 JSON continuam sendo gravados pelos jobs em `webapp-src/src/data/` (nenhum script nem workflow mudou). O plugin `dadosDeMercado` de `vite.config.ts` os publica, compactados, em `dados/<chave>.json`, ao lado do app.
+- `data/arquivosMercado.ts` é o registro: baixa o arquivo, guarda em memória na sessão, divide a busca entre pedidos simultâneos e não guarda falha. Cada `data/snapshot*.ts` continua exportando a mesma constante de antes (`SNAPSHOT_ACOES` etc.), agora como `export let` preenchido quando o arquivo chega. Os componentes não mudaram.
+- `App.tsx` só mostra uma tela depois que os arquivos listados em `data/dadosDaTela.ts` chegaram (`ui/ComDados.tsx`): "Carregando os dados de mercado…", ou aviso com "Tentar de novo" se a rede falhar. Já em memória, a tela abre na hora. Questionário, resultado, carteira de referência, aulas, Meu Mês, Simule Bens e HP 12C não baixam nenhum arquivo.
+- Três pontos liam o dado no nível do módulo e foram trocados por leitura na hora do uso: `SimuleFii` (novo `data/snapshotFii.ts`), `catalogoAtivos.ts` (remontado a cada arquivo que chega) e os padrões de `SimuleTesouro`, `CenarioJuros`, `TaxasTesouroHoje`, `Top15Indice` e `Top15MaisNegociados`.
+
+**Regra para quem mexer depois.** Nunca copiar um `SNAPSHOT_*` ou `CATALOGO_ATIVOS` para uma constante no nível do módulo: a cópia ficaria vazia para sempre. Ler dentro de função, componente ou parâmetro padrão.
+
+**Rede de segurança.** `data/dadosPorTela.test.ts` percorre os imports de cada tela e falha se ela alcançar um arquivo que não está em `DADOS_DA_TELA` (ou se a tabela listar um a mais). `App.dadosSobDemanda.test.tsx` abre 11 telas com os módulos recém-carregados e o registro vazio, como no navegador, e confere o que foi baixado (os outros testes recebem os JSON antes, por `testes/prepararDados.ts`, e nunca veriam um erro desses). `data/arquivosMercado.test.tsx` cobre carregando, pronto, falha e "tentar de novo".
+
+**Medido** (Chromium, CPU 4x mais lenta, sem cache): `index.html` 3,06 MB → 1,94 MB (gzip 820 → 612 KB). Tela inicial no 4G lento: 4,6 s → 3,6 s. Simule Tesouro: 4,6 s → 3,9 s. Simule Ações, que precisa de 17 arquivos: sem ganho (4,8 s → 4,7 s). Uma atualização só de dados agora deixa o `index.html` idêntico byte a byte (conferido), então o cache do código sobrevive.
+
+**Limites.** O ganho maior no primeiro carregamento ainda depende de dividir o código das telas (hoje o app é um arquivo só por causa do `vite-plugin-singlefile`; ~1,4 MB do que sobra é código). `snapshotTop15Mercado.ts` registra sete rankings num módulo só, então Simule FII, ETF e BDR baixam os sete mesmo usando dois ou três; separar em módulos menores reduz isso. O CSP continua com `'unsafe-inline'`, pela mesma razão do arquivo único.

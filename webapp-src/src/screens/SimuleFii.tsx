@@ -3,8 +3,7 @@ import { SNAPSHOT_FIIS_MAIS_NEGOCIADOS, SNAPSHOT_IFIX_MAIORES_PESOS } from '../d
 import { NosRadares } from '../ui/DestaquesDoAtivo'
 import { indexarDestaques } from '../domain/destaquesRadares'
 import type { IndiceDeDestaques } from '../domain/destaquesRadares'
-import dadosRendimentos from '../data/rendimentosFii.json'
-import dadosPrecos from '../data/fiisPreco.json'
+import { snapshotPadraoFii } from '../data/snapshotFii'
 import {
   QUANTIDADES_PADRAO,
   TEXTO_MOTIVO_CONFIANCA,
@@ -22,8 +21,7 @@ import {
   tabelaSimulacao,
   ultimoRendimento,
 } from '../domain/rendaFii'
-import { aplicarPrecoDiario } from '../domain/rendaFii'
-import type { FundoFii, PrecosDiariosFii, SnapshotRendimentosFii } from '../domain/rendaFii'
+import type { FundoFii, SnapshotRendimentosFii } from '../domain/rendaFii'
 import { VoltarInicio } from '../ui/VoltarInicio'
 import { LogoAtivo } from '../ui/LogoAtivo'
 import { FaixaCotacoes, itensDeFiis } from '../ui/FaixaCotacoes'
@@ -32,8 +30,6 @@ import { AvisoEducacional } from '../ui/AvisoEducacional'
 import { Top15FiisBaratos } from './Top15FiisBaratos'
 import { Top15FiisMaisNegociados, Top15IfixMaioresPesos } from './Top15EtfsMaisNegociados'
 import type { AppCtx } from '../state/useAppState'
-
-const SNAPSHOT_PADRAO = aplicarPrecoDiario(dadosRendimentos as SnapshotRendimentosFii, dadosPrecos as unknown as PrecosDiariosFii)
 
 /** Radares que valem para FIIs: liquidez e peso no IFIX. */
 const SELOS_FII = ['maisNegociado', 'naCategoria', 'indice'] as const
@@ -57,7 +53,7 @@ function inteiro(valor: number) {
 }
 
 export function SimuleFii({
-  snapshot = SNAPSHOT_PADRAO,
+  snapshot = snapshotPadraoFii(),
   destaques,
 }: {
   /** Recebido como as demais telas. Desde que saiu da barra de abas, esta tela não navega

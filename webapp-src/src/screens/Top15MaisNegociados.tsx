@@ -99,12 +99,13 @@ export const TEXTOS: Record<ClasseMaisNegociados, Textos> = {
   },
 }
 
-const SNAPSHOT_PADRAO: Record<ClasseMaisNegociados, SnapshotMaisNegociados> = {
+// Função, e não constante (D137): o dado é baixado depois que o módulo carrega, e uma cópia no nível do módulo ficaria vazia para sempre.
+const snapshotPadrao = (): Record<ClasseMaisNegociados, SnapshotMaisNegociados> => ({
   etfs: SNAPSHOT_ETFS_MAIS_NEGOCIADOS,
   fiis: SNAPSHOT_FIIS_MAIS_NEGOCIADOS,
   acoes: SNAPSHOT_ACOES_MAIS_NEGOCIADAS,
   bdrs: SNAPSHOT_BDRS_MAIS_NEGOCIADOS,
-}
+})
 
 /**
  * Caixa "Top 15 mais negociados" das telas Simule ETF, Simule FII, Simule Ações e Simule BDR (D70 e D71). Ranking
@@ -114,7 +115,7 @@ const SNAPSHOT_PADRAO: Record<ClasseMaisNegociados, SnapshotMaisNegociados> = {
  */
 export function Top15MaisNegociados({ classe, snapshot }: { classe: ClasseMaisNegociados; snapshot?: SnapshotMaisNegociados }) {
   const t = TEXTOS[classe]
-  const s = snapshot ?? SNAPSHOT_PADRAO[classe]
+  const s = snapshot ?? snapshotPadrao()[classe]
   if (!s.publicado || s.geral.length === 0) return <EmValidacao t={t} />
   const categorias = Object.keys(s.porCategoria)
   const rotuloVariacao = s.parametros.janela3Meses === 63 ? 'Variação em 3 meses' : `Variação em ${s.parametros.janela3Meses} pregões`

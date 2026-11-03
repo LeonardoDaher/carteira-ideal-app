@@ -1,4 +1,4 @@
-import dadosBdrs from './bdrs.json'
+import { registrarDados } from './arquivosMercado'
 import type { SnapshotBdrs } from '../domain/bdrs'
 
 /**
@@ -7,4 +7,7 @@ import type { SnapshotBdrs } from '../domain/bdrs'
  * como tipos genéricos (ex.: `tipo: string`), e a conversão direta quebrou o build na Vercel
  * com dados reais (D16). O formato é garantido pelo script e pelos testes dele.
  */
-export const SNAPSHOT_BDRS = dadosBdrs as unknown as SnapshotBdrs
+export let SNAPSHOT_BDRS = undefined as unknown as SnapshotBdrs
+registrarDados<SnapshotBdrs>('bdrs', (d) => {
+  SNAPSHOT_BDRS = d
+})

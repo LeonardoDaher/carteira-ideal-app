@@ -1,10 +1,4 @@
-import etfs from './etfsMaisNegociados.json'
-import bdrs from './bdrsDesconto.json'
-import fiisNeg from './fiisMaisNegociados.json'
-import acoesNeg from './acoesMaisNegociadas.json'
-import bdrsNeg from './bdrsMaisNegociados.json'
-import ifix from './ifixMaioresPesos.json'
-import ibov from './ibovMaioresPesos.json'
+import { registrarDados } from './arquivosMercado'
 import type { SnapshotBdrsDesconto, SnapshotEtfsMaisNegociados, SnapshotIndice } from '../domain/top15Mercado'
 
 /**
@@ -14,10 +8,31 @@ import type { SnapshotBdrsDesconto, SnapshotEtfsMaisNegociados, SnapshotIndice }
  * config/top15-bdrs.json, os arquivos vêm com `publicado: false` e sem lista. No BDR, com o acesso por código, o
  * arquivo traz só o cabeçalho e a lista vem da função api/top15-bdrs.
  */
-export const SNAPSHOT_ETFS_MAIS_NEGOCIADOS = etfs as unknown as SnapshotEtfsMaisNegociados
-export const SNAPSHOT_BDRS_DESCONTO = bdrs as unknown as SnapshotBdrsDesconto
-export const SNAPSHOT_FIIS_MAIS_NEGOCIADOS = fiisNeg as unknown as SnapshotEtfsMaisNegociados
-export const SNAPSHOT_ACOES_MAIS_NEGOCIADAS = acoesNeg as unknown as SnapshotEtfsMaisNegociados
-export const SNAPSHOT_BDRS_MAIS_NEGOCIADOS = bdrsNeg as unknown as SnapshotEtfsMaisNegociados
-export const SNAPSHOT_IFIX_MAIORES_PESOS = ifix as unknown as SnapshotIndice
-export const SNAPSHOT_IBOV_MAIORES_PESOS = ibov as unknown as SnapshotIndice
+export let SNAPSHOT_ETFS_MAIS_NEGOCIADOS = undefined as unknown as SnapshotEtfsMaisNegociados
+registrarDados<SnapshotEtfsMaisNegociados>('etfsMaisNegociados', (d) => {
+  SNAPSHOT_ETFS_MAIS_NEGOCIADOS = d
+})
+export let SNAPSHOT_BDRS_DESCONTO = undefined as unknown as SnapshotBdrsDesconto
+registrarDados<SnapshotBdrsDesconto>('bdrsDesconto', (d) => {
+  SNAPSHOT_BDRS_DESCONTO = d
+})
+export let SNAPSHOT_FIIS_MAIS_NEGOCIADOS = undefined as unknown as SnapshotEtfsMaisNegociados
+registrarDados<SnapshotEtfsMaisNegociados>('fiisMaisNegociados', (d) => {
+  SNAPSHOT_FIIS_MAIS_NEGOCIADOS = d
+})
+export let SNAPSHOT_ACOES_MAIS_NEGOCIADAS = undefined as unknown as SnapshotEtfsMaisNegociados
+registrarDados<SnapshotEtfsMaisNegociados>('acoesMaisNegociadas', (d) => {
+  SNAPSHOT_ACOES_MAIS_NEGOCIADAS = d
+})
+export let SNAPSHOT_BDRS_MAIS_NEGOCIADOS = undefined as unknown as SnapshotEtfsMaisNegociados
+registrarDados<SnapshotEtfsMaisNegociados>('bdrsMaisNegociados', (d) => {
+  SNAPSHOT_BDRS_MAIS_NEGOCIADOS = d
+})
+export let SNAPSHOT_IFIX_MAIORES_PESOS = undefined as unknown as SnapshotIndice
+registrarDados<SnapshotIndice>('ifixMaioresPesos', (d) => {
+  SNAPSHOT_IFIX_MAIORES_PESOS = d
+})
+export let SNAPSHOT_IBOV_MAIORES_PESOS = undefined as unknown as SnapshotIndice
+registrarDados<SnapshotIndice>('ibovMaioresPesos', (d) => {
+  SNAPSHOT_IBOV_MAIORES_PESOS = d
+})

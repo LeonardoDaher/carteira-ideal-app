@@ -1,4 +1,4 @@
-import dadosMercado from './mercadoOficial.json'
+import { registrarDados } from './arquivosMercado'
 import type { SnapshotMercado } from '../domain/mercadoOficial'
 
 /**
@@ -10,4 +10,7 @@ import type { SnapshotMercado } from '../domain/mercadoOficial'
  * dados reais o build quebrou na Vercel (25/09/2026). O formato é garantido pelo script e
  * pelos testes dele, não pelo compilador.
  */
-export const SNAPSHOT_MERCADO = dadosMercado as unknown as SnapshotMercado
+export let SNAPSHOT_MERCADO = undefined as unknown as SnapshotMercado
+registrarDados<SnapshotMercado>('mercadoOficial', (d) => {
+  SNAPSHOT_MERCADO = d
+})

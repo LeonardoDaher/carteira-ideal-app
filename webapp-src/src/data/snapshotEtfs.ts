@@ -1,4 +1,4 @@
-import dadosEtfs from './etfs.json'
+import { registrarDados } from './arquivosMercado'
 import type { SnapshotEtfs } from '../domain/etfs'
 
 /**
@@ -7,4 +7,7 @@ import type { SnapshotEtfs } from '../domain/etfs'
  * conversão direta quebrou o build na Vercel (D16). O formato é garantido pelo script e pelos
  * testes dele.
  */
-export const SNAPSHOT_ETFS = dadosEtfs as unknown as SnapshotEtfs
+export let SNAPSHOT_ETFS = undefined as unknown as SnapshotEtfs
+registrarDados<SnapshotEtfs>('etfs', (d) => {
+  SNAPSHOT_ETFS = d
+})
