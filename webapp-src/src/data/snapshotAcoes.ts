@@ -1,4 +1,4 @@
-import dadosAcoes from './acoes.json'
+import { registrarDados } from './arquivosMercado'
 import type { SnapshotAcoes } from '../domain/acoes'
 
 /**
@@ -7,4 +7,7 @@ import type { SnapshotAcoes } from '../domain/acoes'
  * tipos genéricos e a conversão direta quebra o build. O formato é garantido pelo script e
  * pelos testes dele. Antes da primeira carga, o arquivo tem setores vazios e a tela avisa.
  */
-export const SNAPSHOT_ACOES = dadosAcoes as unknown as SnapshotAcoes
+export let SNAPSHOT_ACOES = undefined as unknown as SnapshotAcoes
+registrarDados<SnapshotAcoes>('acoes', (d) => {
+  SNAPSHOT_ACOES = d
+})

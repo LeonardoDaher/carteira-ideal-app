@@ -17,7 +17,6 @@ import { rolarParaResultado } from '../ui/rolarParaResultado'
 import { AvisoEducacional } from '../ui/AvisoEducacional'
 import type { AppCtx } from '../state/useAppState'
 
-const SNAPSHOT_PADRAO = SNAPSHOT_MERCADO
 
 const FAMILIAS: { familia: string; rotulo: string; indexador: Indexador }[] = [
   { familia: 'Tesouro Selic', rotulo: 'Selic', indexador: 'selic' },
@@ -26,7 +25,7 @@ const FAMILIAS: { familia: string; rotulo: string; indexador: Indexador }[] = [
 ]
 
 export function SimuleTesouro({
-  snapshot = SNAPSHOT_PADRAO,
+  snapshot = SNAPSHOT_MERCADO,
 }: {
   /** Recebido como as demais telas; esta tela só volta à landing, então não usa o contexto. */
   ctx: AppCtx

@@ -12,7 +12,6 @@ import {
 import type { Indexador, SnapshotMercado } from '../domain/mercadoOficial'
 import { TargetIcon } from './Icon'
 
-const SNAPSHOT_PADRAO = SNAPSHOT_MERCADO
 
 /**
  * Títulos à venda de uma família do Tesouro Direto na última data-base publicada, em ordem
@@ -21,7 +20,7 @@ const SNAPSHOT_PADRAO = SNAPSHOT_MERCADO
 export function TaxasTesouroHoje({
   familia,
   indexador,
-  snapshot = SNAPSHOT_PADRAO,
+  snapshot = SNAPSHOT_MERCADO,
   hoje = new Date(),
 }: {
   familia: string

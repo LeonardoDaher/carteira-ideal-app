@@ -1,4 +1,4 @@
-import acoesEndividadas from './acoesEndividadas.json'
+import { registrarDados } from './arquivosMercado'
 import type { SnapshotAcoesEndividadas } from '../domain/acoesEndividadas'
 
 /**
@@ -6,4 +6,7 @@ import type { SnapshotAcoesEndividadas } from '../domain/acoesEndividadas'
  * (mesmo padrão de snapshotTop15Mercado.ts). Enquanto o responsável não aprovar a publicação em config/acoes-endividadas.json, o
  * arquivo vem com `publicado: false` e sem lista. Acesso aberto: o arquivo traz tudo.
  */
-export const SNAPSHOT_ACOES_ENDIVIDADAS = acoesEndividadas as unknown as SnapshotAcoesEndividadas
+export let SNAPSHOT_ACOES_ENDIVIDADAS = undefined as unknown as SnapshotAcoesEndividadas
+registrarDados<SnapshotAcoesEndividadas>('acoesEndividadas', (d) => {
+  SNAPSHOT_ACOES_ENDIVIDADAS = d
+})

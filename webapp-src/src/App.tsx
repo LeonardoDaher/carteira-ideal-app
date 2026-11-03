@@ -28,6 +28,8 @@ import { SimuleMoto } from './screens/SimuleMoto'
 import { MeuMes } from './screens/MeuMes'
 import { MinhaCarteira } from './screens/MinhaCarteira'
 import { Marca } from './ui/Marca'
+import { ComDados } from './ui/ComDados'
+import { DADOS_DA_TELA } from './data/dadosDaTela'
 import type { Screen } from './state/useAppState'
 
 const TELAS_COM_LOGO_PROPRIA: Screen[] = ['onboarding', 'aprender', 'simuleTesouro', 'simuleFii', 'simuleBdr', 'simuleEtf', 'simuleFuturos', 'simuleOpcoes', 'simuleAcoes', 'simuleAtivos', 'simuleImovel', 'simuleCarro', 'simuleMoto', 'simuleBens', 'suaHp12c', 'meuMes', 'minhaCarteira']
@@ -75,10 +77,11 @@ function App() {
   // link (VoltarInicio) e a tela inicial a traz acima do seletor Claro/Escuro. No computador,
   // nas telas com abas, a logo fica no topo do menu lateral e esta some pelo CSS.
   const temLogoPropria = TELAS_COM_LOGO_PROPRIA.includes(ctx.screen)
+  const chavesDaTela = DADOS_DA_TELA[ctx.screen]
   return (
     <div className={`app-frame tela-${ctx.screen}`}>
       {!temLogoPropria && <Marca className="marca-topo" />}
-      {screens[ctx.screen]()}
+      {chavesDaTela ? <ComDados chaves={chavesDaTela}>{screens[ctx.screen]()}</ComDados> : screens[ctx.screen]()}
     </div>
   )
 }
