@@ -1,0 +1,227 @@
+{
+  "esquema": 1,
+  "versaoMetodologia": "1.0.7",
+  "geradoEm": "2026-11-03T09:30:01.049Z",
+  "dataPrecos": "2026-10-30",
+  "dataCorte": "2026-10-30",
+  "ambiente": {
+    "node": "v22.23.4",
+    "plataforma": "linux",
+    "commit": "0856dfdf84c93c8296e67980057b429d644ef50c",
+    "execucao": "41611410145"
+  },
+  "codigo": {
+    "calculoSha256": "a74e0604268ee993f37f22c62e0a2549dcc99371c829bc2d625f9cc1573d7d24",
+    "extracaoSha256": "9165e90d366c4feeca60a2e6966f6a0c0d4a7d3ea0ead92f91de0cf4095531c7"
+  },
+  "hashes": {
+    "config": "f5cf4d13692174ab91eb31986ad2246864a324385f90b9dcd504c521a152c4fe",
+    "insumos": "8a2128deda1e8bde612d10a5d9be074e09d83d4daf2dd22173c4fa1f9acd0a99",
+    "resultado": "b52169cf735a57bda618926ce1907cb0d40817f0d9fe9cc1684371bff29a3f79",
+    "memoria": "18e3af70f82c81f19356f14d87a21002d14cae42c0bfe8bc7c2ca5f2d21f11c8",
+    "arquivos": {
+      "insumos.json.gz": "97741dc9e2f789ed878b172ed7065c644d5e2640f15a19916c8fddaaef204b76",
+      "config.json": "68da7bb4b0117b573fbdfaa3b228c0d38210694168365ef793adf124a0aef572",
+      "resultado.json": "7ef857698905ad37d3564cfff58e5bb2868d371efb273c5a6049ad71c0e7388d",
+      "memoria-de-calculo.json.gz": "e90bbe2e73dd07940216b515a4376cc4156d4948ea745ba27193e61914c9cb9d",
+      "ranking.csv": "17fd1e0530ce1b64c237a131ba4ac330d51f67f86a5e935e40f8a1ec12170d0e",
+      "exclusoes.csv": "91d442d6a17b0e6d4531a330e650a2feedeb7363266166eb8233f60feae801be",
+      "mapeamento-ticker-cnpj.csv": "c4437d9bc02dd83c85e900504b17641cc7304a6357afb15904ad637aefe811b4"
+    }
+  },
+  "fontes": [
+    {
+      "papel": "FCA (valores mobiliários)",
+      "url": "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/FCA/DADOS/fca_cia_aberta_2026.zip",
+      "arquivo": "fca_cia_aberta_2026.zip",
+      "bytes": 362935,
+      "sha256": "7cc2ed67a931f1056be04856fb20de2fb5184820bbadb05b82dab5dffb879c2f",
+      "baixadoEm": "2026-11-03T09:29:32.064Z"
+    },
+    {
+      "papel": "FCA (valores mobiliários)",
+      "url": "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/FCA/DADOS/fca_cia_aberta_2025.zip",
+      "arquivo": "fca_cia_aberta_2025.zip",
+      "bytes": 383613,
+      "sha256": "a1923e812ae255ea195d91baf30a5771e73cf39b7a03463a139d2883a9be14b9",
+      "baixadoEm": "2026-11-03T09:29:32.114Z"
+    },
+    {
+      "papel": "DFP 2021",
+      "url": "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/DFP/DADOS/dfp_cia_aberta_2021.zip",
+      "arquivo": "dfp_cia_aberta_2021.zip",
+      "bytes": 13283026,
+      "sha256": "64b8693b709538a0357c5179ae02231cb380d0000956ee57a873a21d4efda2e4",
+      "baixadoEm": "2026-11-03T09:29:32.347Z"
+    },
+    {
+      "papel": "DFP 2022",
+      "url": "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/DFP/DADOS/dfp_cia_aberta_2022.zip",
+      "arquivo": "dfp_cia_aberta_2022.zip",
+      "bytes": 13449819,
+      "sha256": "0a40fd3cf0f151e0e2f8b608426768958324308e3dfc9c462c35d5a212036c9e",
+      "baixadoEm": "2026-11-03T09:29:34.196Z"
+    },
+    {
+      "papel": "DFP 2023",
+      "url": "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/DFP/DADOS/dfp_cia_aberta_2023.zip",
+      "arquivo": "dfp_cia_aberta_2023.zip",
+      "bytes": 13563276,
+      "sha256": "76502c1044a51fa688a748aeca1a0325b47c670da99f2c7044e5accdad2c3cca",
+      "baixadoEm": "2026-11-03T09:29:35.860Z"
+    },
+    {
+      "papel": "DFP 2024",
+      "url": "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/DFP/DADOS/dfp_cia_aberta_2024.zip",
+      "arquivo": "dfp_cia_aberta_2024.zip",
+      "bytes": 13397602,
+      "sha256": "2071e7908c2d1fa945b21b3d6a982eb41b1550360f19e5185cb5eb6fbf9a8fb9",
+      "baixadoEm": "2026-11-03T09:29:37.623Z"
+    },
+    {
+      "papel": "DFP 2025",
+      "url": "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/DFP/DADOS/dfp_cia_aberta_2025.zip",
+      "arquivo": "dfp_cia_aberta_2025.zip",
+      "bytes": 12806186,
+      "sha256": "85f53d6aba99557ebb8a5f8b247c0610973230c1a0f97ab267da2216816a8ab6",
+      "baixadoEm": "2026-11-03T09:29:40.340Z"
+    },
+    {
+      "papel": "DFP 2026",
+      "url": "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/DFP/DADOS/dfp_cia_aberta_2026.zip",
+      "arquivo": "dfp_cia_aberta_2026.zip",
+      "bytes": 243348,
+      "sha256": "0b4f99dca3b8ad5d460fcf1f324381717f8642eafa65827145b6e7280046a4c5",
+      "baixadoEm": "2026-11-03T09:29:43.213Z"
+    },
+    {
+      "papel": "ITR 2025",
+      "url": "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/ITR/DADOS/itr_cia_aberta_2025.zip",
+      "arquivo": "itr_cia_aberta_2025.zip",
+      "bytes": 31684926,
+      "sha256": "52a0148e26ff0e9ffeaf60eb816d8a4f23d10f817e8772140a36ce81635ef8d8",
+      "baixadoEm": "2026-11-03T09:29:43.627Z"
+    },
+    {
+      "papel": "ITR 2026",
+      "url": "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/ITR/DADOS/itr_cia_aberta_2026.zip",
+      "arquivo": "itr_cia_aberta_2026.zip",
+      "bytes": 20342520,
+      "sha256": "fe34b2eb27a701a9f978d39bc2e0d5228b906c0365d6c5e23d86590eef9aa788",
+      "baixadoEm": "2026-11-03T09:29:48.849Z"
+    },
+    {
+      "papel": "Histórico de preços da B3 (Boletim BVBG.086)",
+      "url": "historico/acoes.json (neste repositório)",
+      "ultimoPregao": "2026-10-30"
+    }
+  ],
+  "extracao": [
+    {
+      "arquivo": "dfp_cia_aberta_2021.zip",
+      "linhasLidas": 726888,
+      "linhasGuardadas": 1022,
+      "moedaDiferente": 0,
+      "arquivos": 12
+    },
+    {
+      "arquivo": "dfp_cia_aberta_2022.zip",
+      "linhasLidas": 738845,
+      "linhasGuardadas": 1033,
+      "moedaDiferente": 0,
+      "arquivos": 12
+    },
+    {
+      "arquivo": "dfp_cia_aberta_2023.zip",
+      "linhasLidas": 753463,
+      "linhasGuardadas": 1043,
+      "moedaDiferente": 0,
+      "arquivos": 12
+    },
+    {
+      "arquivo": "dfp_cia_aberta_2024.zip",
+      "linhasLidas": 724254,
+      "linhasGuardadas": 16592,
+      "moedaDiferente": 0,
+      "arquivos": 12
+    },
+    {
+      "arquivo": "dfp_cia_aberta_2025.zip",
+      "linhasLidas": 687759,
+      "linhasGuardadas": 16144,
+      "moedaDiferente": 0,
+      "arquivos": 12
+    },
+    {
+      "arquivo": "dfp_cia_aberta_2026.zip",
+      "linhasLidas": 11534,
+      "linhasGuardadas": 400,
+      "moedaDiferente": 0,
+      "arquivos": 12
+    },
+    {
+      "arquivo": "itr_cia_aberta_2025.zip",
+      "linhasLidas": 2243882,
+      "linhasGuardadas": 66270,
+      "moedaDiferente": 0,
+      "arquivos": 12
+    },
+    {
+      "arquivo": "itr_cia_aberta_2026.zip",
+      "linhasLidas": 1406648,
+      "linhasGuardadas": 41840,
+      "moedaDiferente": 0,
+      "arquivos": 12
+    }
+  ],
+  "contagens": {
+    "universo": 229,
+    "noRanking": 95,
+    "exclusoes": 134,
+    "etapas": [
+      {
+        "id": "universo",
+        "descricao": "Setor fora do escopo (bancos, seguros, bolsa/holdings) ou empresa sem CNPJ mapeado",
+        "entram": 229,
+        "saem": 51
+      },
+      {
+        "id": "liquidez",
+        "descricao": "Liquidez média diária do emissor abaixo de R$ 3.000.000 (21 pregões)",
+        "entram": 178,
+        "saem": 40
+      },
+      {
+        "id": "volatilidade",
+        "descricao": "Decil mais volátil do universo (volatilidade anualizada de 252 pregões acima do percentil 90)",
+        "entram": 138,
+        "saem": 30
+      },
+      {
+        "id": "dados_contabeis",
+        "descricao": "Demonstrações da CVM completas, atuais e coerentes (balanço fecha, DRE fecha, descrição das contas, capital plausível)",
+        "entram": 108,
+        "saem": 7
+      },
+      {
+        "id": "lucro",
+        "descricao": "Sem lucro nos últimos 12 meses (4 trimestres)",
+        "entram": 101,
+        "saem": 6
+      },
+      {
+        "id": "indicador",
+        "descricao": "EV ou valor de mercado não positivos (rendimentos indefinidos)",
+        "entram": 95,
+        "saem": 0
+      },
+      {
+        "id": "ranking",
+        "descricao": "Indicador composto (ranks) e ordenação decrescente",
+        "entram": 95,
+        "saem": 0
+      }
+    ]
+  },
+  "publicadoNoApp": true
+}

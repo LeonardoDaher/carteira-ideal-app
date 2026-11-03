@@ -3,15 +3,15 @@
   "acessoRestrito": true,
   "instagram": "acarteiraideal",
   "versaoMetodologia": "1.0.7",
-  "geradoEm": "2026-10-31T08:24:11.019Z",
+  "geradoEm": "2026-11-03T09:30:01.049Z",
   "dataPrecos": "2026-10-30",
-  "dataCorte": "2026-10-05",
-  "pastaAuditoria": "auditoria/acoes-baratas/2026-10-05",
-  "hashResultado": "a8bad4ec8229bcbc8b8850e161a03c8e15cec4c44ca5bb2ea19618439bbacd96",
-  "hashInsumos": "a6a424928c20f3b9b011ebacb5750ec82a0f9796cad6a1800febcef59cefba3c",
+  "dataCorte": "2026-10-30",
+  "pastaAuditoria": "auditoria/acoes-baratas/2026-10-30",
+  "hashResultado": "b52169cf735a57bda618926ce1907cb0d40817f0d9fe9cc1684371bff29a3f79",
+  "hashInsumos": "8a2128deda1e8bde612d10a5d9be074e09d83d4daf2dd22173c4fa1f9acd0a99",
   "hashConfig": "f5cf4d13692174ab91eb31986ad2246864a324385f90b9dcd504c521a152c4fe",
   "tamanhoDaLista": 15,
-  "universo": 226,
+  "universo": 229,
   "parametros": {
     "liquidezMinimaDiariaReais": 3000000,
     "sessoesLiquidez": 21,
@@ -42,6 +42,6 @@
   "etapas": [],
   "ranking": [],
   "exclusoes": [],
-  "modoAuditoria": "diaria",
-  "auditoriaCompletaEm": "2026-10-05"
+  "modoAuditoria": "completa",
+  "auditoriaCompletaEm": "2026-10-30"
 }
