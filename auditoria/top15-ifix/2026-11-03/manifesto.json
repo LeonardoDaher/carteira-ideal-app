@@ -1,0 +1,62 @@
+{
+  "esquema": "top15-mercado/1",
+  "classe": "ifix",
+  "versaoMetodologia": "1.1.1",
+  "geradoEm": "2026-11-03T08:34:17.377Z",
+  "dataExecucao": "2026-11-03",
+  "ultimoPregao": "2026-11-03",
+  "ambiente": {
+    "node": "v22.23.4",
+    "plataforma": "linux",
+    "commit": "7bef02fafc9b54918ba99e3d81516dc08bd45add",
+    "execucao": "41604230052"
+  },
+  "codigo": {
+    "calculoSha256": "a293113e3eefb7a54debc233465ee7baac9ed1d8bd54eac421204d754bffda26",
+    "extracaoSha256": "00e600c8530b58924fdd245f28e5fae6f7fb116cc5cb11d95412c9d829aed208"
+  },
+  "hashes": {
+    "config": "8a416250269aa18e0412e499edb74e2e31af360fccfe87fdbabee14015ce2660",
+    "insumos": "9aa203ca96b7be0978a7835f504ad4ecfcb7ea6b4bdc3b15e9fab1cb6edb89fa",
+    "resultado": "bbb1facfd2efa2ee60d003f780113a361c9232835944f95ad9718275d93674e1",
+    "memoria": "b353a97495fbe63f2bfaceb0bdd7d74838dcb862dfe408c86ca0284f8430ce5f",
+    "arquivos": {
+      "insumos.json.gz": "a2ea6a29b4ee41edcb39492dc8e29f3b3bac9702282c5d06066b24a1c86f5c9b",
+      "config.json": "07dc4833c6d007e443dd553e29cf6084c1f181a28275ffcb8d18902007702220",
+      "resultado.json": "9596e420ff5baac93e7351df707b28762a3acb543ff7ba18fed99c668da4c083",
+      "memoria-de-calculo.json.gz": "0de2a7f91c53c2124746c574944fce7067160755f76c1e2b83bcd5bfddf707df",
+      "ranking.csv": "309346f47d1ebc9334391009edd4f5d92b0e1eef689906da9b1cd8786e200847"
+    }
+  },
+  "fontes": [
+    {
+      "papel": "Carteira teórica do Índice de Fundos Imobiliários (IFIX) (B3, indexProxy/GetPortfolioDay)",
+      "url": "https://sistemaswebb3-listados.b3.com.br/indexProxy/indexCall/GetPortfolioDay/eyJsYW5ndWFnZSI6InB0LWJyIiwicGFnZU51bWJlciI6MSwicGFnZVNpemUiOjIwMCwiaW5kZXgiOiJJRklYIiwic2VnbWVudCI6IjEifQ==",
+      "sha256": "3375d5769a3acd55898d8e8cadaa17dc947f2e2708b2ba9c00ae38e304e009f7",
+      "bytes": 12663,
+      "baixadoEm": "2026-11-03T08:34:17.374Z",
+      "dataDaCarteira": "2026-11-03"
+    },
+    {
+      "papel": "Histórico diário (B3, Boletim de Preços BVBG.086): cotação e volume (informativos)",
+      "url": "historico/fiis.json (neste repositório)",
+      "arquivo": "fiis.json",
+      "bytes": 409331,
+      "sha256": "9d3777c643047973b1d9060d5fb13471f6fbe0349b09f391e3dd81eb452c545a",
+      "ultimoPregao": "2026-10-30"
+    },
+    {
+      "papel": "Segmento dos FIIs (job de FIIs)",
+      "url": "webapp-src/src/data/rendimentosFii.json (neste repositório)",
+      "arquivo": "rendimentosFii.json",
+      "bytes": 78031,
+      "sha256": "543d0fbb0cf3670f40cc311d1793de452ea52b47cbb0e00d13b408590e47541d"
+    }
+  ],
+  "contagens": {
+    "universo": 97,
+    "elegiveis": 97,
+    "exclusoes": 0
+  },
+  "publicadoNoApp": true
+}

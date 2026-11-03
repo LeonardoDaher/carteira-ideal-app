@@ -1,0 +1,50 @@
+{
+  "esquema": "top15-mercado/1",
+  "classe": "etfs",
+  "versaoMetodologia": "1.1.0",
+  "geradoEm": "2026-11-03T08:34:15.563Z",
+  "dataExecucao": "2026-11-03",
+  "ultimoPregao": "2026-10-30",
+  "ambiente": {
+    "node": "v22.23.4",
+    "plataforma": "linux",
+    "commit": "7bef02fafc9b54918ba99e3d81516dc08bd45add",
+    "execucao": "41604230052"
+  },
+  "codigo": {
+    "calculoSha256": "a293113e3eefb7a54debc233465ee7baac9ed1d8bd54eac421204d754bffda26",
+    "extracaoSha256": "00e600c8530b58924fdd245f28e5fae6f7fb116cc5cb11d95412c9d829aed208"
+  },
+  "hashes": {
+    "config": "98044bf1f49cd6fcf5e6bcfeef3e4ed62efc9c988f74fe7d828edf80a7d4e652",
+    "insumos": "21a8d1fdef9750015a7e3082cbbf271be939b05b9b31490c09b41b937a3c044c",
+    "resultado": "04c997c2bf0b977154461976be6f98b7ce0a6aa475232b27b73f6bf32d9dd9ef",
+    "memoria": "429a68c99f1a30cbc16630c90a77bd802f68d020c62cd3c2a89e83a9515e96aa",
+    "arquivos": {
+      "insumos.json.gz": "d573512372be62c5524a91ea49e804465d060a246801ad992c9c1177cb7b6deb",
+      "config.json": "5356867bd67e50beaea48be5fc2cd3f11a49fe50ed0d9bf54286216e41d1887e",
+      "resultado.json": "2e8a67361b586c29c4a0c532749f5b39924a4b5339accec9972b4bc7a2429bd1",
+      "memoria-de-calculo.json.gz": "4a21c58db49a526a9de6ff8237c00ed81781e0817db2541f5a3dc3bb2c16303e",
+      "ranking-geral.csv": "204d82e722c6c36f96eb5bf258cd4027967a32b1004f65af2e1f3a9bc145d327",
+      "ranking-por-categoria.csv": "5d7fdc59a353247fea4cf3f072f6c838e06e3acce2264354d9c18cb66dff2b90",
+      "exclusoes.csv": "a6c69e413f89b5de1aa6be914eba1cc991611c6b38a491dfcbe66e61321db4a1"
+    }
+  },
+  "fontes": [
+    {
+      "papel": "Histórico diário (B3, Boletim de Preços BVBG.086)",
+      "url": "historico/etfs.json (neste repositório)",
+      "arquivo": "etfs.json",
+      "bytes": 1641245,
+      "sha256": "feacd153911be33c6e21984169329fdd8ed94ae15911c0814d594d5d8a3a00ec",
+      "pregoes": 260,
+      "ultimoPregao": "2026-10-30"
+    }
+  ],
+  "contagens": {
+    "universo": 252,
+    "elegiveis": 102,
+    "exclusoes": 150
+  },
+  "publicadoNoApp": true
+}
