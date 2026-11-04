@@ -1,5 +1,5 @@
-# Diagnóstico (só leitura, não faz commit): descobre em qual arquivo do Boletim Diário da B3 estão a abertura, a máxima, a mínima e o
-# fechamento do IBOV e do IFIX, para o job diário dos índices (D140). Pode ser apagado depois que o job diário estiver no ar.
+# Diagnóstico (só leitura, não faz commit): confere o formato do arquivo de índices (IR) do Boletim Diário da B3 e até que data para
+# trás ele existe, para o job diário dos índices (D140). Pode ser apagado depois que o job diário estiver no ar.
 name: Descobrir índices na B3 (diagnóstico)
 
 on:
@@ -16,43 +16,33 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
-      - name: Procurar IBOV e IFIX nos arquivos do boletim
+      - name: Formato do XML e profundidade do histórico
         shell: bash
         run: |
           set -u
           mkdir -p /tmp/b3 && cd /tmp/b3
-          # Dias úteis recentes, do mais novo para o mais antigo.
-          dias=()
-          for i in 1 2 3 4 5 6 7; do d=$(date -u -d "-$i day" +%y%m%d); w=$(date -u -d "-$i day" +%u); [ "$w" -lt 6 ] && dias+=("$d"); done
-          achou=0
-          for d in "${dias[@]}"; do
-            for p in IR PR ID IN DI; do
-              f="$p$d"
-              code=$(curl -sS -m 120 -A 'carteira-ideal (github actions)' -o "$f-download.zip" -w '%{http_code}' "https://www.b3.com.br/pesquisapregao/download?filelist=$f.zip," || echo erro)
-              tam=$(stat -c %s "$f-download.zip" 2>/dev/null || echo 0)
-              echo "== $f: http=$code tamanho=$tam"
-              [ "$tam" -lt 1024 ] && continue
-              echo "-- conteúdo de $f-download.zip:"; unzip -Z1 "$f-download.zip" | head -20
-              interno=$(unzip -Z1 "$f-download.zip" | grep -i '\.zip$' | head -1 || true)
-              if [ -n "$interno" ]; then unzip -o -q "$f-download.zip" "$interno" -d "$f"; zipx="$f/$interno"; else zipx="$f-download.zip"; fi
-              echo "-- arquivos dentro:"; unzip -Z "$zipx" | head -12
-              mkdir -p "$f-xml"
-              # Só os XMLs de índice (BVBG.087) e, nos demais, o primeiro XML.
-              for x in $(unzip -Z1 "$zipx" | grep -i '\.xml$'); do
-                unzip -o -q "$zipx" "$x" -d "$f-xml"
-                n=$(grep -c -E '>(IBOV|IFIX)<' "$f-xml/$x" || true)
-                echo "   $x: $n linhas com IBOV/IFIX"
-                if [ "${n:-0}" -gt 0 ]; then
-                  achou=1
-                  echo "----- trecho do IBOV em $x -----"
-                  grep -n -m1 -B12 -A30 '>IBOV<' "$f-xml/$x" | head -90
-                  echo "----- trecho do IFIX em $x -----"
-                  grep -n -m1 -B12 -A30 '>IFIX<' "$f-xml/$x" | head -90
-                fi
-                rm -f "$f-xml/$x"
-              done
-              rm -rf "$f" "$f-xml" "$f-download.zip"
+          baixar() { # $1 = AAMMDD ; deixa o XML em /tmp/b3/x.xml e devolve 0 se houver pregão
+            local f="IR$1"
+            curl -sS -m 120 -A 'carteira-ideal (github actions)' -o "$f.zip" "https://www.b3.com.br/pesquisapregao/download?filelist=$f.zip," || return 2
+            local tam; tam=$(stat -c %s "$f.zip")
+            [ "$tam" -lt 1024 ] && { echo "   $f: sem arquivo (tamanho=$tam)"; rm -f "$f.zip"; return 1; }
+            local interno; interno=$(unzip -Z1 "$f.zip" | grep -i '\.zip$' | head -1)
+            unzip -o -q "$f.zip" "$interno" -d "$f" && unzip -o -q "$f/$interno" -d "$f/x"
+            local ultimo; ultimo=$(ls "$f/x" | sort | tail -1)
+            cp "$f/x/$ultimo" x.xml; rm -rf "$f" "$f.zip"; return 0
+          }
+          echo "=== Formato do XML (último pregão com arquivo) ==="
+          for i in 1 2 3 4 5; do d=$(date -u -d "-$i day" +%y%m%d); w=$(date -u -d "-$i day" +%u); [ "$w" -lt 6 ] || continue
+            if baixar "$d"; then echo "arquivo de $d"; break; fi; done
+          echo "--- primeiras 40 linhas ---"; head -40 x.xml
+          echo "--- todas as tags <Dt> (valor e contagem) ---"; grep -o '<Dt>[^<]*</Dt>' x.xml | sort | uniq -c
+          echo "--- outras tags com 'Dt' no nome (contagem) ---"; grep -o '<[A-Za-z]*Dt[A-Za-z]*>' x.xml | sort | uniq -c
+          echo "--- blocos IndxInf: $(grep -c '<IndxInf>' x.xml) ; códigos ---"; grep -A2 '<SctyId>' x.xml | grep -o '<TckrSymb>[^<]*' | sed 's/<TckrSymb>//' | tr '\n' ' '; echo
+          echo "--- Ibovespa: valores de abertura/mín/máx/fechamento por pregão ---"
+          echo "=== Profundidade: existe arquivo IR em datas antigas? ==="
+          for anos in 1 2 3 5; do
+            for k in 0 1 2 3 4; do
+              d=$(date -u -d "-$anos year -$k day" +%y%m%d); w=$(date -u -d "-$anos year -$k day" +%u); [ "$w" -lt 6 ] || continue
+              if baixar "$d"; then echo "   $anos ano(s) atrás: $d tem arquivo; IBOV: $(grep -A22 '<TckrSymb>IBOV<' x.xml | grep -E 'OpngPric|ClsgPric' | tr -d ' ' | tr '\n' ' ')"; break; fi
             done
-            [ "$achou" = 1 ] && break
           done
-          echo "achou=$achou"
