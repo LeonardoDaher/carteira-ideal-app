@@ -9,7 +9,7 @@ import type { AcaoBusca, GrupoAcoes } from '../domain/acoes'
 import { ROTULO_RECOMENDACAO } from '../domain/analiseFundamentalista'
 import type { SnapshotFundamentos } from '../domain/analiseFundamentalista'
 import { TAXA_BAZIN_PADRAO, tickersParaAvisar } from '../domain/precoTeto'
-import { calcularItensPrecoTeto, textoDoAviso } from '../domain/precoTetoLote'
+import { aprovadasNos3Filtros, calcularItensPrecoTeto, textoDoAviso } from '../domain/precoTetoLote'
 import type { PrecoTeto, StatusTeto } from '../domain/precoTeto'
 import { EstadoDoArquivo } from '../ui/BlocosDeAnalise'
 import { CAMINHO_FUNDAMENTOS, premissasDoMercado } from './useAnaliseDaAcao'
@@ -220,6 +220,8 @@ export function PrecoTetoAcoes({
         </div>
       </div>
 
+      <CartaoAprovadas itens={itens} aoAcompanhar={adicionar} acompanhadas={guardado.acompanhadas} />
+
       <div className="card col" style={{ gap: 8 }}>
         <span style={{ fontWeight: 700, fontSize: 14 }}>Retorno mínimo em dividendos (Bazin)</span>
         <div className="row" style={{ gap: 8, flexWrap: 'wrap' }} role="group" aria-label="Retorno mínimo em dividendos">
@@ -313,6 +315,60 @@ export function PrecoTetoAcoes({
       <ListaTodas itens={itens} grupos={grupos} nomeDe={nomeDe} aoAcompanhar={(ticker) => adicionar(ticker)} acompanhadas={guardado.acompanhadas} />
 
       <div className="card-outline small muted justify" style={{ lineHeight: 1.5 }} role="note">{AVISO}</div>
+    </div>
+  )
+}
+
+const AMARELO = '#e8cb00'
+
+/**
+ * Card amarelo "Ações aprovadas nos 3 filtros": todas as verdes (abaixo dos tetos de Bazin e Graham) com a análise fundamentalista
+ * concordando. Muda com o retorno mínimo escolhido. Não é recomendação: só mostra onde as três leituras do app coincidem.
+ */
+function CartaoAprovadas({ itens, aoAcompanhar, acompanhadas }: { itens: Map<string, PrecoTeto>; aoAcompanhar: (t: string) => void; acompanhadas: string[] }) {
+  const aprovadas = useMemo(() => aprovadasNos3Filtros(itens.values()), [itens])
+  return (
+    <div
+      className="card col"
+      style={{ gap: 8, borderColor: AMARELO, background: `color-mix(in oklch, ${AMARELO} 12%, var(--surface))` }}
+      data-testid="aprovadas-3-filtros"
+    >
+      <div className="row" style={{ justifyContent: 'space-between', gap: 8, alignItems: 'center' }}>
+        <span style={{ fontWeight: 700, fontSize: 15, color: AMARELO }}>Ações aprovadas nos 3 filtros</span>
+        <span className="badge" style={{ color: AMARELO, background: `color-mix(in oklch, ${AMARELO} 20%, transparent)` }} data-testid="aprovadas-total">{aprovadas.length}</span>
+      </div>
+      <span className="tiny muted justify" style={{ lineHeight: 1.5 }}>
+        Preço abaixo do teto de Bazin, abaixo do teto de Graham e a análise fundamentalista concordando (✔). Só mostra onde as três leituras do app
+        coincidem, com o retorno mínimo escolhido abaixo. Não é recomendação de investimento.
+      </span>
+      {aprovadas.length === 0 ? (
+        <span className="small muted" data-testid="aprovadas-vazio">Nenhuma ação aprovada nos 3 filtros com este retorno mínimo.</span>
+      ) : (
+        <ul className="col" style={{ gap: 2, listStyle: 'none', padding: 0, margin: 0 }} aria-label="Ações aprovadas nos 3 filtros">
+          <li className="row tiny muted" style={{ padding: '0 10px', gap: 8 }} aria-hidden="true">
+            <span style={{ flex: '1 1 0' }}>Ação</span>
+            <span style={{ width: 70, textAlign: 'right' }}>Preço</span>
+            <span style={{ width: 70, textAlign: 'right' }}>Teto</span>
+            <span style={{ width: 48, textAlign: 'right' }}>Dist.</span>
+            <span style={{ width: 16 }} />
+          </li>
+          {aprovadas.map((i) => (
+            <li key={i.ticker} className="row" style={{ gap: 8, alignItems: 'center', padding: '6px 10px', borderRadius: 8, borderLeft: `3px solid ${AMARELO}`, background: 'var(--surface2)' }} data-testid={`aprovada-${i.ticker}`}>
+              <span className="col" style={{ flex: '1 1 0', minWidth: 0, gap: 0 }}>
+                <span style={{ fontWeight: 700, fontSize: 13 }}><LogoAtivo ticker={i.ticker} tamanho={24} inline />{i.ticker}</span>
+                <span className="tiny muted" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{i.nome}</span>
+              </span>
+              <span style={{ width: 70, textAlign: 'right', fontSize: 13 }}>{reais(i.preco)}</span>
+              <span style={{ width: 70, textAlign: 'right', fontSize: 13, fontWeight: 700 }}>{i.tetoGatilho !== null ? reais(i.tetoGatilho) : '—'}</span>
+              <span className="tiny" style={{ width: 48, textAlign: 'right', color: 'var(--success)' }}>{i.distanciaPct !== null ? pct(i.distanciaPct) : '—'}</span>
+              <Selo item={i} />
+              {!acompanhadas.includes(i.ticker) && (
+                <button className="btn btn-secondary" style={{ padding: '2px 8px', fontSize: 12 }} onClick={() => aoAcompanhar(i.ticker)} aria-label={`Acompanhar ${i.ticker}`}>+</button>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   )
 }

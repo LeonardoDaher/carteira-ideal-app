@@ -45,6 +45,14 @@ export function calcularItensPrecoTeto({
   return mapa
 }
 
+/**
+ * "Ações aprovadas nos 3 filtros": as verdes (preço abaixo do teto de Bazin e do de Graham) em que a análise fundamentalista também
+ * concorda. É só a interseção das duas leituras que a tela já mostra, sem conta nova. Ordem alfabética, igual à lista de todas as ações.
+ */
+export function aprovadasNos3Filtros(itens: Iterable<PrecoTeto>): PrecoTeto[] {
+  return [...itens].filter((i) => i.status === 'abaixo-do-teto' && i.selo.tipo === 'concorda').sort((a, b) => a.ticker.localeCompare(b.ticker))
+}
+
 /** Texto do aviso de uma ação (notificação do navegador e push). */
 export function textoDoAviso(item: PrecoTeto): { titulo: string; corpo: string } {
   return {
