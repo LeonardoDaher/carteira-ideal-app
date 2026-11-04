@@ -93,6 +93,8 @@ export function PrecoTetoAcoes({
   const [pushOn, setPushOn] = useState(false)
   const [pushOcupado, setPushOcupado] = useState(false)
   const [pushMsg, setPushMsg] = useState<string | null>(null)
+  const [soAprovadas, setSoAprovadas] = useState(false)
+  const listaRef = useRef<HTMLDivElement>(null)
   const guardadoRef = useRef(guardado)
   guardadoRef.current = guardado
 
@@ -220,7 +222,7 @@ export function PrecoTetoAcoes({
         </div>
       </div>
 
-      <CartaoAprovadas itens={itens} aoAcompanhar={adicionar} acompanhadas={guardado.acompanhadas} />
+      <CardAprovadas ativo={soAprovadas} aoAlternar={() => { setSoAprovadas((v) => !v); setTimeout(() => listaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50) }} />
 
       <div className="card col" style={{ gap: 8 }}>
         <span style={{ fontWeight: 700, fontSize: 14 }}>Retorno mínimo em dividendos (Bazin)</span>
@@ -312,7 +314,7 @@ export function PrecoTetoAcoes({
         )}
       </div>
 
-      <ListaTodas itens={itens} grupos={grupos} nomeDe={nomeDe} aoAcompanhar={(ticker) => adicionar(ticker)} acompanhadas={guardado.acompanhadas} />
+      <ListaTodas soAprovadas={soAprovadas} listaRef={listaRef} itens={itens} grupos={grupos} nomeDe={nomeDe} aoAcompanhar={(ticker) => adicionar(ticker)} acompanhadas={guardado.acompanhadas} />
 
       <div className="card-outline small muted justify" style={{ lineHeight: 1.5 }} role="note">{AVISO}</div>
     </div>
@@ -322,54 +324,23 @@ export function PrecoTetoAcoes({
 const AMARELO = '#e8cb00'
 
 /**
- * Card amarelo "Ações aprovadas nos 3 filtros": todas as verdes (abaixo dos tetos de Bazin e Graham) com a análise fundamentalista
- * concordando. Muda com o retorno mínimo escolhido. Não é recomendação: só mostra onde as três leituras do app coincidem.
+ * Card amarelo "Ações aprovadas nos 3 filtros": só o título. Ao tocar, a lista "Todas as ações" lá embaixo passa a mostrar apenas as
+ * aprovadas (verdes, com a análise fundamentalista concordando); tocar de novo volta a lista completa.
  */
-function CartaoAprovadas({ itens, aoAcompanhar, acompanhadas }: { itens: Map<string, PrecoTeto>; aoAcompanhar: (t: string) => void; acompanhadas: string[] }) {
-  const aprovadas = useMemo(() => aprovadasNos3Filtros(itens.values()), [itens])
+function CardAprovadas({ ativo, aoAlternar }: { ativo: boolean; aoAlternar: () => void }) {
   return (
-    <div
-      className="card col"
-      style={{ gap: 8, borderColor: AMARELO, background: `color-mix(in oklch, ${AMARELO} 12%, var(--surface))` }}
+    <button
+      type="button"
+      onClick={aoAlternar}
+      aria-pressed={ativo}
       data-testid="aprovadas-3-filtros"
+      style={{
+        width: '100%', padding: '18px 16px', borderRadius: 14, border: ativo ? '3px solid var(--text)' : '3px solid transparent', cursor: 'pointer',
+        background: AMARELO, color: '#14110a', fontWeight: 700, fontSize: 16, textAlign: 'center',
+      }}
     >
-      <div className="row" style={{ justifyContent: 'space-between', gap: 8, alignItems: 'center' }}>
-        <span style={{ fontWeight: 700, fontSize: 15, color: AMARELO }}>Ações aprovadas nos 3 filtros</span>
-        <span className="badge" style={{ color: AMARELO, background: `color-mix(in oklch, ${AMARELO} 20%, transparent)` }} data-testid="aprovadas-total">{aprovadas.length}</span>
-      </div>
-      <span className="tiny muted justify" style={{ lineHeight: 1.5 }}>
-        Preço abaixo do teto de Bazin, abaixo do teto de Graham e a análise fundamentalista concordando (✔). Só mostra onde as três leituras do app
-        coincidem, com o retorno mínimo escolhido abaixo. Não é recomendação de investimento.
-      </span>
-      {aprovadas.length === 0 ? (
-        <span className="small muted" data-testid="aprovadas-vazio">Nenhuma ação aprovada nos 3 filtros com este retorno mínimo.</span>
-      ) : (
-        <ul className="col" style={{ gap: 2, listStyle: 'none', padding: 0, margin: 0 }} aria-label="Ações aprovadas nos 3 filtros">
-          <li className="row tiny muted" style={{ padding: '0 10px', gap: 8 }} aria-hidden="true">
-            <span style={{ flex: '1 1 0' }}>Ação</span>
-            <span style={{ width: 70, textAlign: 'right' }}>Preço</span>
-            <span style={{ width: 70, textAlign: 'right' }}>Teto</span>
-            <span style={{ width: 48, textAlign: 'right' }}>Dist.</span>
-            <span style={{ width: 16 }} />
-          </li>
-          {aprovadas.map((i) => (
-            <li key={i.ticker} className="row" style={{ gap: 8, alignItems: 'center', padding: '6px 10px', borderRadius: 8, borderLeft: `3px solid ${AMARELO}`, background: 'var(--surface2)' }} data-testid={`aprovada-${i.ticker}`}>
-              <span className="col" style={{ flex: '1 1 0', minWidth: 0, gap: 0 }}>
-                <span style={{ fontWeight: 700, fontSize: 13 }}><LogoAtivo ticker={i.ticker} tamanho={24} inline />{i.ticker}</span>
-                <span className="tiny muted" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{i.nome}</span>
-              </span>
-              <span style={{ width: 70, textAlign: 'right', fontSize: 13 }}>{reais(i.preco)}</span>
-              <span style={{ width: 70, textAlign: 'right', fontSize: 13, fontWeight: 700 }}>{i.tetoGatilho !== null ? reais(i.tetoGatilho) : '—'}</span>
-              <span className="tiny" style={{ width: 48, textAlign: 'right', color: 'var(--success)' }}>{i.distanciaPct !== null ? pct(i.distanciaPct) : '—'}</span>
-              <Selo item={i} />
-              {!acompanhadas.includes(i.ticker) && (
-                <button className="btn btn-secondary" style={{ padding: '2px 8px', fontSize: 12 }} onClick={() => aoAcompanhar(i.ticker)} aria-label={`Acompanhar ${i.ticker}`}>+</button>
-              )}
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+      Ações aprovadas nos 3 filtros
+    </button>
   )
 }
 
@@ -455,7 +426,7 @@ const pct = (v: number) => `${v > 0 ? '+' : v < 0 ? '−' : ''}${Math.abs(v).toL
  * Lista fininha de TODAS as ações do cadastro, em ordem alfabética, com o preço, o preço teto, a distância até ele e o selo da análise
  * fundamentalista. Só as que estão abaixo dos tetos de Bazin e Graham ficam em verde; as demais mostram o teto sem destaque. Tocar numa linha abre o cartão.
  */
-function ListaTodas({ itens, grupos, nomeDe, aoAcompanhar, acompanhadas }: { itens: Map<string, PrecoTeto>; grupos: GrupoAcoes[]; nomeDe: (t: string) => string | null; aoAcompanhar: (t: string) => void; acompanhadas: string[] }) {
+function ListaTodas({ soAprovadas, listaRef, itens, grupos, nomeDe, aoAcompanhar, acompanhadas }: { soAprovadas: boolean; listaRef: React.RefObject<HTMLDivElement | null>; itens: Map<string, PrecoTeto>; grupos: GrupoAcoes[]; nomeDe: (t: string) => string | null; aoAcompanhar: (t: string) => void; acompanhadas: string[] }) {
   const [filtro, setFiltro] = useState('')
   // Setor escolhido: 'g:Grupo' (todo o grande setor da B3) ou 's:Setor' (um setor dentro dele); vazio = todos.
   const [setorEscolhido, setSetorEscolhido] = useState('')
@@ -467,17 +438,19 @@ function ListaTodas({ itens, grupos, nomeDe, aoAcompanhar, acompanhadas }: { ite
     for (const g of grupos) for (const s of g.setores) if ((tipo === 'g' && g.grupo === nome) || (tipo === 's' && s.setor === nome)) for (const e of s.empresas) conjunto.add(e.ticker)
     return conjunto
   }, [setorEscolhido, grupos])
+  const aprovadas = useMemo(() => new Set(aprovadasNos3Filtros(itens.values()).map((i) => i.ticker)), [itens])
   const linhas = useMemo(() => {
     const q = filtro.trim().toLowerCase()
     return [...itens.values()]
+      .filter((i) => !soAprovadas || aprovadas.has(i.ticker))
       .filter((i) => !doSetor || doSetor.has(i.ticker))
       .filter((i) => !q || i.ticker.toLowerCase().includes(q) || (nomeDe(i.ticker) ?? i.nome ?? '').toLowerCase().includes(q))
       .sort((a, b) => a.ticker.localeCompare(b.ticker))
-  }, [itens, filtro, nomeDe, doSetor])
+  }, [itens, filtro, nomeDe, doSetor, soAprovadas, aprovadas])
   const verdes = useMemo(() => [...itens.values()].filter((i) => i.status === 'abaixo-do-teto').length, [itens])
   return (
-    <div className="col" style={{ gap: 8 }} data-testid="lista-todas">
-      <span style={{ fontWeight: 700, fontSize: 14 }}>{doSetor ? 'Ações do setor' : 'Todas as ações'} ({doSetor || filtro.trim() ? linhas.length : itens.size})</span>
+    <div className="col" style={{ gap: 8 }} data-testid="lista-todas" ref={listaRef}>
+      <span style={{ fontWeight: 700, fontSize: 14 }}>{soAprovadas ? 'Ações aprovadas nos 3 filtros' : doSetor ? 'Ações do setor' : 'Todas as ações'} ({soAprovadas || doSetor || filtro.trim() ? linhas.length : itens.size})</span>
       <span className="tiny muted justify">
         O preço teto de cada ação do app, em ordem alfabética. Em verde, as {verdes} abaixo dos tetos de Bazin e Graham. O símbolo à direita é a leitura da análise fundamentalista: ✔ concorda, • neutra, ⚠ alerta.
       </span>
