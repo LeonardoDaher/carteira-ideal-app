@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { rolarParaResultado } from './rolarParaResultado'
+import { rolarParaPainel, rolarParaResultado } from './rolarParaResultado'
 
 /** Monta um cartão no DOM com o topo na posição pedida e a janela com a largura/altura pedidas. */
 function preparar({ largura, altura, topo }: { largura: number; altura: number; topo: number }) {
@@ -85,5 +85,39 @@ describe('rolarParaResultado', () => {
     rolarParaResultado('nao-existe')
     await proximoQuadro()
     expect(rolar).toHaveBeenCalledWith({ behavior: 'auto', block: 'start' })
+  })
+})
+
+describe('rolarParaPainel', () => {
+  beforeEach(() => {
+    document.body.innerHTML = ''
+  })
+
+  it('rola até o painel da aba quando ele está abaixo da dobra', async () => {
+    const painel = document.createElement('div')
+    painel.id = 'painel-teste'
+    const rolar = vi.fn()
+    painel.scrollIntoView = rolar
+    painel.getBoundingClientRect = () => ({ top: 900, bottom: 1500, left: 0, right: 0, width: 0, height: 600, x: 0, y: 900, toJSON: () => ({}) })
+    document.body.appendChild(painel)
+    window.matchMedia = (() => ({ matches: false, media: '', addEventListener: () => {}, removeEventListener: () => {} })) as unknown as typeof window.matchMedia
+    rolarParaPainel('painel-teste')
+    await proximoQuadro()
+    await proximoQuadro()
+    expect(rolar).toHaveBeenCalledWith({ behavior: 'smooth', block: 'start' })
+  })
+
+  it('não mexe se o painel já está no topo da janela, nem se o id não existe', async () => {
+    const painel = document.createElement('div')
+    painel.id = 'painel-teste'
+    const rolar = vi.fn()
+    painel.scrollIntoView = rolar
+    painel.getBoundingClientRect = () => ({ top: 3, bottom: 600, left: 0, right: 0, width: 0, height: 600, x: 0, y: 3, toJSON: () => ({}) })
+    document.body.appendChild(painel)
+    rolarParaPainel('painel-teste')
+    rolarParaPainel('nao-existe')
+    await proximoQuadro()
+    await proximoQuadro()
+    expect(rolar).not.toHaveBeenCalled()
   })
 })

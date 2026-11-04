@@ -1,6 +1,7 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": "dist-site",
+  "ignoreCommand": "bash scripts/vercel-ignorar-build.sh",
   "redirects": [
     {
       "source": "/:caminho*",

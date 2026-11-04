@@ -86,6 +86,7 @@ export function SimuleEtf({
       <FaixaCotacoes itens={itensDeEtfs(snapshot)} dataPregao={snapshot.dataPregao} />
 
       <AbasDaTela
+        rolarAoTrocar
         prefixo="etf"
         rotulo="O que você quer ver"
         ativa={aba}

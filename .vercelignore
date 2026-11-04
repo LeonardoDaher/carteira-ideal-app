@@ -1,0 +1,13 @@
+# Pastas e arquivos que o site e a API NÃO usam no build (conferido em 04/11/2026: o build sem eles gera
+# exatamente os mesmos 636 arquivos de dist-site). Não ignorar: dados-privados/ (lida pelas funções em api/),
+# webapp-src/, scripts/, config/, privacidade/, assets/ e os arquivos da landing na raiz.
+/auditoria
+/historico
+/divulgacao
+/docs
+/.github
+/*.md
+/ARQUIVOS-ALTERADOS*
+/LEIA-ME*
+/gerar-paginas (1).mjs
+/index (1).html

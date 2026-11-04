@@ -103,6 +103,7 @@ export function SimuleBdr({
       <FaixaCotacoes itens={itensDeBdrs(snapshot)} dataPregao={snapshot.dataPregao} />
 
       <AbasDaTela
+        rolarAoTrocar
         prefixo="bdr"
         rotulo="O que você quer ver"
         ativa={aba}
