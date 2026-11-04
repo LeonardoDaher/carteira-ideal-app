@@ -1,14 +1,14 @@
 {
   "publicado": true,
   "versaoMetodologia": "1.1.0",
-  "geradoEm": "2026-11-03T10:53:06.951Z",
-  "dataExecucao": "2026-11-03",
-  "dataPrecos": "2026-10-30",
+  "geradoEm": "2026-11-04T10:56:14.823Z",
+  "dataExecucao": "2026-11-04",
+  "dataPrecos": "2026-11-03",
   "pastaAuditoria": "auditoria/acoes-dividendos/2026-11-03",
-  "hashResultado": "1c58e897f9649c1b8c0d728904c4e34432664ad8d6f48d38c8739787414dc15f",
-  "hashInsumos": "6d6c9ed2fec42c87202424b726479552b7f567573bef294517485301356433f8",
+  "hashResultado": "a66f3403a869d66ba1c8f7b572fd1b656893275a64425a7a784e0b4c6b0709e6",
+  "hashInsumos": "111260133fe8e56551e2cb6e8cb4f76dd9fe3107b0665d0829c2e69bd372bd3a",
   "hashConfig": "f484e5d2dfa904f32eb1a3d137e710ecb515a1e5f96a46c9c18ea953516979c4",
-  "modoAuditoria": "completa",
+  "modoAuditoria": "diaria",
   "auditoriaCompletaEm": "2026-11-03",
   "tamanhoDaLista": 15,
   "rankingAteOnde": 100,
@@ -17,7 +17,7 @@
   "aviso": "Não é recomendação de investimento. Esta lista ordena as ações da B3 pelo dividend yield dos últimos 12 meses: os proventos em dinheiro por ação (dividendos e juros sobre capital próprio, brutos) com data com nos últimos 12 meses, divididos pelo preço de fechamento mais recente, com dados publicados pela B3, pela mesma fórmula para todas, sem nota nem opinião nossa. Dividend yield alto não quer dizer que a ação é boa nem que o pagamento vai se repetir: pode vir de um provento extraordinário, de preço em queda ou de lucro que não volta. O passado não garante o futuro. Rentabilidade passada não garante rentabilidade futura e investir em ações pode causar perda de parte ou de todo o dinheiro aplicado. Converse com um profissional certificado antes de investir.",
   "parametros": {
     "janelaDias": 365,
-    "janelaInicio": "2025-10-30",
+    "janelaInicio": "2025-11-03",
     "liquidezMinimaDiariaReais": 3000000,
     "sessoesLiquidez": 21,
     "alertaDyAcimaDe": 0.2
@@ -27,160 +27,160 @@
     "exclusoes": 100
   },
   "dyPorTicker": {
-    "PETR4": 0.06935,
-    "BRAV3": 0.00671,
-    "RECV3": 0.154619,
-    "OPCT3": 0.010823,
-    "VBBR3": 0.065093,
-    "UGPA3": 0.062972,
-    "CGAS5": 0.066965,
-    "VALE3": 0.090495,
-    "CMIN3": 0.079376,
-    "BRAP4": 0.129015,
-    "CBAV3": 0.003918,
-    "GGBR4": 0.031437,
-    "GOAU4": 0.034429,
-    "FESA4": 0.129808,
-    "SUZB3": 0.02236,
-    "KLBN11": 0.067507,
-    "RANI3": 0.053004,
-    "EUCA4": 0.060319,
-    "UNIP6": 0.126996,
-    "VITT3": 0.082411,
-    "WEGE3": 0.041424,
-    "EMBJ3": 0.012284,
-    "ROMI3": 0.097744,
-    "KEPL3": 0.046007,
-    "SHUL4": 0.153544,
-    "EALT4": 0.094442,
-    "MYPK3": 0,
-    "MTSA4": 0.079673,
-    "FRAS3": 0.03078,
-    "POMO4": 0.249754,
-    "LEVE3": 0.094229,
-    "RSUL4": 0.06173,
-    "MOTV3": 0.066527,
-    "ECOR3": 0.06185,
-    "RAIL3": 0.007867,
-    "TGMA3": 0.100777,
-    "JSLG3": 0.351384,
-    "RENT3": 0.075771,
-    "MOVI3": 0.134023,
-    "VAMO3": 0.059118,
-    "SIMH3": 0.035393,
-    "ARML3": 0.136196,
-    "MILS3": 0.054381,
-    "AXIA3": 0.031547,
-    "EGIE3": 0.042652,
-    "GEPA4": 0.209175,
-    "TAEE11": 0.07594,
-    "ISAE4": 0.073286,
-    "ALUP11": 0.034395,
-    "CMIG4": 0.113143,
-    "EQTL3": 0.048567,
-    "ENGI11": 0.025681,
-    "CPFE3": 0.089058,
-    "CPLE3": 0.074204,
-    "CLSC4": 0.077765,
-    "CEEB3": 0.043404,
-    "ENMT3": 0.048409,
-    "EKTR4": 0.042925,
-    "SBSP3": 0.027496,
-    "CSMG3": 0.041431,
-    "SAPR11": 0.017906,
+    "PETR4": 0.072085,
+    "BRAV3": 0.007011,
+    "RECV3": 0.158499,
+    "OPCT3": 0.010373,
+    "VBBR3": 0.066166,
+    "UGPA3": 0.064371,
+    "CGAS5": 0.066995,
+    "VALE3": 0.093153,
+    "CMIN3": 0.083681,
+    "BRAP4": 0.130443,
+    "CBAV3": 0.003942,
+    "GGBR4": 0.030993,
+    "GOAU4": 0.03397,
+    "FESA4": 0.131119,
+    "SUZB3": 0.021906,
+    "KLBN11": 0.066808,
+    "RANI3": 0.048823,
+    "EUCA4": 0.060742,
+    "UNIP6": 0.128177,
+    "VITT3": 0.059772,
+    "WEGE3": 0.040741,
+    "EMBJ3": 0.011784,
+    "ROMI3": 0.102767,
+    "KEPL3": 0.045499,
+    "SHUL4": 0.155435,
+    "EALT4": 0.096894,
+    "MTSA4": 0.082367,
+    "FRAS3": 0.030689,
+    "POMO4": 0.258849,
+    "LEVE3": 0.094887,
+    "RSUL4": 0.062421,
+    "MOTV3": 0.066149,
+    "ECOR3": 0.061724,
+    "RAIL3": 0.007872,
+    "TGMA3": 0.098401,
+    "JSLG3": 0.34755,
+    "RENT3": 0.076987,
+    "MOVI3": 0.133784,
+    "VAMO3": 0.059873,
+    "SIMH3": 0.032943,
+    "ARML3": 0.137119,
+    "MILS3": 0.053454,
+    "AXIA3": 0.032254,
+    "EGIE3": 0.042881,
+    "GEPA4": 0.203199,
+    "TAEE11": 0.076793,
+    "ISAE4": 0.073167,
+    "ALUP11": 0.035122,
+    "CMIG4": 0.115553,
+    "EQTL3": 0.049232,
+    "ENGI11": 0.026208,
+    "CPFE3": 0.089657,
+    "CPLE3": 0.075308,
+    "CLSC4": 0.078529,
+    "CEEB3": 0.044144,
+    "ENMT3": 0.053932,
+    "EKTR4": 0.043402,
+    "SBSP3": 0.027983,
+    "CSMG3": 0.042176,
+    "SAPR11": 0.018568,
     "CASN3": 0.018578,
-    "ITUB4": 0.080585,
-    "BBDC4": 0.116485,
-    "BBAS3": 0.041921,
-    "SANB11": 0.090743,
-    "BPAC11": 0.027564,
-    "ABCB4": 0.121786,
-    "BRSR6": 0.124423,
-    "BMGB4": 0.107045,
-    "PINE4": 0.080404,
+    "ITUB4": 0.080558,
+    "BBDC4": 0.118887,
+    "BBAS3": 0.042646,
+    "SANB11": 0.088741,
+    "BPAC11": 0.027856,
+    "ABCB4": 0.122393,
+    "BRSR6": 0.125438,
+    "BMGB4": 0.10282,
+    "PINE4": 0.080971,
     "BNBR3": 0.062937,
-    "BEES3": 0.094209,
-    "BAZA3": 0.187274,
-    "BBSE3": 0.111086,
-    "CXSE3": 0.063243,
-    "PSSA3": 0.067028,
-    "IRBR3": 0.028368,
-    "WIZC3": 0.107109,
-    "B3SA3": 0.067209,
-    "ITSA4": 0.090586,
-    "MULT3": 0.0461,
-    "ALOS3": 0.149273,
-    "IGTI11": 0.030983,
-    "JHSF3": 0.088037,
-    "LOGG3": 0.339835,
-    "HBRE3": 0.662175,
-    "CYRE3": 0.134281,
-    "DIRR3": 0.192308,
-    "CURY3": 0.166305,
-    "TEND3": 0.07304,
-    "PLPL3": 0.110253,
-    "EZTC3": 0.11052,
-    "EVEN3": 0.290885,
-    "LAVV3": 0.324286,
-    "MTRE3": 0.124741,
-    "MELK3": 0.183546,
-    "MDNE3": 0.298597,
-    "TRIS3": 0.205882,
-    "HBOR3": 0.09514,
-    "ETER3": 0.0637,
-    "LREN3": 0.1025,
-    "CEAB3": 0.079634,
-    "AZZA3": 0.172798,
-    "TFCO4": 0.034242,
-    "VIVA3": 0.040327,
-    "CGRA4": 0.252352,
-    "GRND3": 0.418022,
-    "VULC3": 0.268864,
-    "CAMB3": 0.168636,
-    "ALPA4": 0.043697,
-    "MGLU3": 0.015196,
-    "ESPA3": 0.081315,
+    "BEES3": 0.095277,
+    "BAZA3": 0.188304,
+    "BBSE3": 0.11253,
+    "CXSE3": 0.066544,
+    "PSSA3": 0.067663,
+    "IRBR3": 0.027877,
+    "WIZC3": 0.109534,
+    "B3SA3": 0.06632,
+    "ITSA4": 0.090805,
+    "MULT3": 0.046376,
+    "ALOS3": 0.149146,
+    "IGTI11": 0.031299,
+    "JHSF3": 0.086684,
+    "LOGG3": 0.341524,
+    "HBRE3": 0.658434,
+    "CYRE3": 0.136761,
+    "DIRR3": 0.193267,
+    "CURY3": 0.171401,
+    "TEND3": 0.075337,
+    "PLPL3": 0.114081,
+    "EZTC3": 0.110029,
+    "EVEN3": 0.288141,
+    "LAVV3": 0.321709,
+    "MTRE3": 0.12137,
+    "MELK3": 0.178055,
+    "MDNE3": 0.294899,
+    "TRIS3": 0.208387,
+    "HBOR3": 0.089998,
+    "ETER3": 0.061189,
+    "LREN3": 0.101483,
+    "CEAB3": 0.078673,
+    "AZZA3": 0.182074,
+    "TFCO4": 0.034347,
+    "VIVA3": 0.040514,
+    "CGRA4": 0.256596,
+    "GRND3": 0.425188,
+    "VULC3": 0.274823,
+    "CAMB3": 0.161284,
+    "ALPA4": 0.044708,
+    "MGLU3": 0.015973,
+    "ESPA3": 0.083996,
     "ENJU3": 0,
-    "WHRL4": 0.036319,
-    "COGN3": 0.075064,
-    "YDUQ3": 0.063877,
-    "ANIM3": 0.033967,
-    "SEER3": 0.082457,
-    "CSED3": 0.109356,
-    "SMFT3": 0.066841,
-    "BEEF3": 0.076745,
-    "ABEV3": 0.057973,
+    "WHRL4": 0.038482,
+    "COGN3": 0.085943,
+    "YDUQ3": 0.063098,
+    "ANIM3": 0.033241,
+    "SEER3": 0.082304,
+    "CSED3": 0.118136,
+    "SMFT3": 0.065449,
+    "BEEF3": 0.078911,
+    "ABEV3": 0.057578,
     "CAML3": 0.073667,
-    "MDIA3": 0.062302,
-    "MNPR3": 0.035215,
-    "SLCE3": 0.047307,
-    "SMTO3": 0.01027,
-    "JALL3": 0.003797,
-    "TTEN3": 0.017726,
-    "AGRO3": 0.017398,
-    "SOJA3": 0.048062,
-    "ASAI3": 0.013242,
-    "GMAT3": 0.014164,
-    "RADL3": 0.029606,
-    "PGMN3": 0.103907,
-    "PNVL3": 0.047255,
-    "RDOR3": 0.13282,
-    "MATD3": 0.034603,
-    "FLRY3": 0.063497,
-    "QUAL3": 0.006804,
-    "HYPE3": 0.050852,
-    "BLAU3": 0.082794,
-    "PFRM3": 0.095738,
-    "TOTS3": 0.02125,
-    "LWSA3": 0.013817,
-    "BMOB3": 0.083816,
-    "POSI3": 0.061713,
-    "INTB3": 0.091084,
-    "MLAS3": 0.028039,
-    "VIVT3": 0.04291,
-    "TIMS3": 0.076804,
-    "DESK3": 0.009546,
-    "FIQE3": 0.119207
+    "MDIA3": 0.061108,
+    "MNPR3": 0.034106,
+    "SLCE3": 0.048329,
+    "SMTO3": 0.010294,
+    "JALL3": 0.00389,
+    "TTEN3": 0.018204,
+    "AGRO3": 0.017509,
+    "SOJA3": 0.049574,
+    "ASAI3": 0.013784,
+    "GMAT3": 0.014286,
+    "RADL3": 0.030323,
+    "PGMN3": 0.101453,
+    "PNVL3": 0.046975,
+    "RDOR3": 0.134475,
+    "MATD3": 0.034366,
+    "FLRY3": 0.063591,
+    "QUAL3": 0.006753,
+    "HYPE3": 0.051359,
+    "BLAU3": 0.085544,
+    "PFRM3": 0.073917,
+    "OFSA3": 0.052502,
+    "TOTS3": 0.021431,
+    "LWSA3": 0.014138,
+    "BMOB3": 0.08332,
+    "POSI3": 0.059861,
+    "INTB3": 0.088037,
+    "MLAS3": 0.027429,
+    "VIVT3": 0.043795,
+    "TIMS3": 0.075699,
+    "DESK3": 0.009507,
+    "FIQE3": 0.121041
   },
   "etapas": [
     {
@@ -199,13 +199,13 @@
       "id": "dados_b3",
       "descricao": "A B3 não tem proventos publicados para a empresa",
       "entram": 157,
-      "saem": 27
+      "saem": 28
     },
     {
       "id": "proventos",
-      "descricao": "Não pagou proventos em dinheiro nos últimos 365 dias (2025-10-30 a 2026-10-30)",
-      "entram": 130,
-      "saem": 1
+      "descricao": "Não pagou proventos em dinheiro nos últimos 365 dias (2025-11-03 a 2026-11-03)",
+      "entram": 129,
+      "saem": 0
     }
   ],
   "ranking": [
@@ -215,9 +215,9 @@
       "nome": "HBR Realty",
       "setor": "Shoppings e imóveis comerciais",
       "classe": "ON",
-      "cotacao": 1.76,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.662175,
+      "cotacao": 1.77,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.658434,
       "proventosPorAcao": 1.165429,
       "dividendos": 1.165429,
       "jcp": 0,
@@ -249,9 +249,9 @@
       "nome": "Grendene",
       "setor": "Calçados e artigos esportivos",
       "classe": "ON",
-      "cotacao": 3.56,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.418022,
+      "cotacao": 3.5,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.425188,
       "proventosPorAcao": 1.488158,
       "dividendos": 1.214374,
       "jcp": 0.273784,
@@ -343,9 +343,9 @@
       "nome": "JSL",
       "setor": "Transporte e infraestrutura",
       "classe": "ON",
-      "cotacao": 5.44,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.351384,
+      "cotacao": 5.5,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.34755,
       "proventosPorAcao": 1.911527,
       "dividendos": 1.4803,
       "jcp": 0.431227,
@@ -377,9 +377,9 @@
       "nome": "LOG Commercial Properties",
       "setor": "Shoppings e imóveis comerciais",
       "classe": "ON",
-      "cotacao": 20.23,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.339835,
+      "cotacao": 20.13,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.341524,
       "proventosPorAcao": 6.874871,
       "dividendos": 6.874871,
       "jcp": 0,
@@ -426,9 +426,9 @@
       "nome": "Lavvi",
       "setor": "Construção civil e incorporação",
       "classe": "ON",
-      "cotacao": 7.49,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.324286,
+      "cotacao": 7.55,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.321709,
       "proventosPorAcao": 2.428903,
       "dividendos": 2.428903,
       "jcp": 0,
@@ -465,9 +465,9 @@
       "nome": "Moura Dubeux",
       "setor": "Construção civil e incorporação",
       "classe": "ON",
-      "cotacao": 15.95,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.298597,
+      "cotacao": 16.15,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.294899,
       "proventosPorAcao": 4.762615,
       "dividendos": 4.762615,
       "jcp": 0,
@@ -529,9 +529,9 @@
       "nome": "Even",
       "setor": "Construção civil e incorporação",
       "classe": "ON",
-      "cotacao": 3.15,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.290885,
+      "cotacao": 3.18,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.288141,
       "proventosPorAcao": 0.916288,
       "dividendos": 0.916288,
       "jcp": 0,
@@ -563,9 +563,9 @@
       "nome": "Vulcabras",
       "setor": "Calçados e artigos esportivos",
       "classe": "ON",
-      "cotacao": 11.53,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.268864,
+      "cotacao": 11.28,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.274823,
       "proventosPorAcao": 3.1,
       "dividendos": 3.1,
       "jcp": 0,
@@ -607,9 +607,9 @@
       "nome": "Marcopolo",
       "setor": "Autopeças e veículos",
       "classe": "PN",
-      "cotacao": 3.7,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.249754,
+      "cotacao": 3.57,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.258849,
       "proventosPorAcao": 0.924091,
       "dividendos": 0.757273,
       "jcp": 0.166818,
@@ -657,9 +657,9 @@
       "nome": "Trisul",
       "setor": "Construção civil e incorporação",
       "classe": "ON",
-      "cotacao": 4.16,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.205882,
+      "cotacao": 4.11,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.208387,
       "proventosPorAcao": 0.856469,
       "dividendos": 0.856469,
       "jcp": 0,
@@ -707,9 +707,9 @@
       "nome": "Direcional",
       "setor": "Construção civil e incorporação",
       "classe": "ON",
-      "cotacao": 8.06,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.192308,
+      "cotacao": 8.02,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.193267,
       "proventosPorAcao": 1.55,
       "dividendos": 1.55,
       "jcp": 0,
@@ -734,9 +734,9 @@
       "nome": "Azzas 2154",
       "setor": "Moda e vestuário",
       "classe": "ON",
-      "cotacao": 14.33,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.172798,
+      "cotacao": 13.6,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.182074,
       "proventosPorAcao": 2.476202,
       "dividendos": 2.476202,
       "jcp": 0,
@@ -766,9 +766,9 @@
       "nome": "Cury",
       "setor": "Construção civil e incorporação",
       "classe": "ON",
-      "cotacao": 25.9,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.166305,
+      "cotacao": 25.13,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.171401,
       "proventosPorAcao": 4.307296,
       "dividendos": 4.307296,
       "jcp": 0,
@@ -815,9 +815,9 @@
       "nome": "PetroReconcavo",
       "setor": "Petróleo e gás",
       "classe": "ON",
-      "cotacao": 11.03,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.154619,
+      "cotacao": 10.76,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.158499,
       "proventosPorAcao": 1.705452,
       "dividendos": 1.023968,
       "jcp": 0.681484,
@@ -862,9 +862,9 @@
       "nome": "Schulz",
       "setor": "Máquinas, equipamentos e aeroespacial",
       "classe": "PN",
-      "cotacao": 4.11,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.153544,
+      "cotacao": 4.06,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.155435,
       "proventosPorAcao": 0.631067,
       "dividendos": 0.291823,
       "jcp": 0.339244,
@@ -919,9 +919,9 @@
       "nome": "Allos",
       "setor": "Shoppings e imóveis comerciais",
       "classe": "ON",
-      "cotacao": 23.5,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.149273,
+      "cotacao": 23.52,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.149146,
       "proventosPorAcao": 3.507909,
       "dividendos": 3.21543,
       "jcp": 0.29248,
@@ -1006,9 +1006,9 @@
       "nome": "Armac",
       "setor": "Locação de veículos e frotas",
       "classe": "ON",
-      "cotacao": 2.97,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.136196,
+      "cotacao": 2.95,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.137119,
       "proventosPorAcao": 0.404501,
       "dividendos": 0.303591,
       "jcp": 0.10091,
@@ -1038,9 +1038,9 @@
       "nome": "Cyrela",
       "setor": "Construção civil e incorporação",
       "classe": "ON",
-      "cotacao": 17.09,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.134281,
+      "cotacao": 16.78,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.136761,
       "proventosPorAcao": 2.294856,
       "dividendos": 2.294856,
       "jcp": 0,
@@ -1068,40 +1068,13 @@
     },
     {
       "posicao": 19,
-      "ticker": "MOVI3",
-      "nome": "Movida",
-      "setor": "Locação de veículos e frotas",
-      "classe": "ON",
-      "cotacao": 5.61,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.134023,
-      "proventosPorAcao": 0.751867,
-      "dividendos": 0,
-      "jcp": 0.751867,
-      "rendimentos": 0,
-      "pagamentos": 1,
-      "ultimaDataCom": "2025-12-19",
-      "primeiraDataCom": "2025-12-19",
-      "historicoParcial": false,
-      "ajustesAplicados": [],
-      "alertas": [],
-      "proventos": [
-        {
-          "dataCom": "2025-12-19",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.75186692
-        }
-      ]
-    },
-    {
-      "posicao": 20,
       "ticker": "RDOR3",
       "nome": "Rede D'Or",
       "setor": "Hospitais, planos e diagnósticos",
       "classe": "ON",
-      "cotacao": 31.68,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.13282,
+      "cotacao": 31.29,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.134475,
       "proventosPorAcao": 4.207724,
       "dividendos": 3.499835,
       "jcp": 0.707889,
@@ -1146,14 +1119,41 @@
       ]
     },
     {
+      "posicao": 20,
+      "ticker": "MOVI3",
+      "nome": "Movida",
+      "setor": "Locação de veículos e frotas",
+      "classe": "ON",
+      "cotacao": 5.62,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.133784,
+      "proventosPorAcao": 0.751867,
+      "dividendos": 0,
+      "jcp": 0.751867,
+      "rendimentos": 0,
+      "pagamentos": 1,
+      "ultimaDataCom": "2025-12-19",
+      "primeiraDataCom": "2025-12-19",
+      "historicoParcial": false,
+      "ajustesAplicados": [],
+      "alertas": [],
+      "proventos": [
+        {
+          "dataCom": "2025-12-19",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.75186692
+        }
+      ]
+    },
+    {
       "posicao": 21,
       "ticker": "FESA4",
       "nome": "Ferbasa",
       "setor": "Siderurgia e metalurgia",
       "classe": "PN",
-      "cotacao": 5,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.129808,
+      "cotacao": 4.95,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.131119,
       "proventosPorAcao": 0.649041,
       "dividendos": 0,
       "jcp": 0.649041,
@@ -1183,9 +1183,9 @@
       "nome": "Bradespar",
       "setor": "Mineração",
       "classe": "PN",
-      "cotacao": 18.27,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.129015,
+      "cotacao": 18.07,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.130443,
       "proventosPorAcao": 2.357102,
       "dividendos": 0.867161,
       "jcp": 1.489941,
@@ -1225,9 +1225,9 @@
       "nome": "Unipar",
       "setor": "Química e petroquímica",
       "classe": "PNB",
-      "cotacao": 51,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.126996,
+      "cotacao": 50.53,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.128177,
       "proventosPorAcao": 6.476802,
       "dividendos": 6.476802,
       "jcp": 0,
@@ -1253,13 +1253,97 @@
     },
     {
       "posicao": 24,
+      "ticker": "BRSR6",
+      "nome": "Banrisul",
+      "setor": "Bancos",
+      "classe": "PNB",
+      "cotacao": 12.26,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.125438,
+      "proventosPorAcao": 1.537864,
+      "dividendos": 0.070855,
+      "jcp": 1.467009,
+      "rendimentos": 0,
+      "pagamentos": 6,
+      "ultimaDataCom": "2026-09-11",
+      "primeiraDataCom": "2025-12-12",
+      "historicoParcial": false,
+      "ajustesAplicados": [],
+      "alertas": [],
+      "proventos": [
+        {
+          "dataCom": "2026-09-11",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.22006263
+        },
+        {
+          "dataCom": "2026-06-12",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.22006263
+        },
+        {
+          "dataCom": "2026-05-04",
+          "tipo": "DIVIDENDO",
+          "valor": 0.07085547
+        },
+        {
+          "dataCom": "2026-03-13",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.22006263
+        },
+        {
+          "dataCom": "2025-12-26",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.44004976
+        },
+        {
+          "dataCom": "2025-12-12",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.36677105
+        }
+      ]
+    },
+    {
+      "posicao": 25,
+      "ticker": "ABCB4",
+      "nome": "ABC Brasil",
+      "setor": "Bancos",
+      "classe": "PN",
+      "cotacao": 22.06,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.122393,
+      "proventosPorAcao": 2.7,
+      "dividendos": 0,
+      "jcp": 2.7,
+      "rendimentos": 0,
+      "pagamentos": 2,
+      "ultimaDataCom": "2026-06-29",
+      "primeiraDataCom": "2025-12-29",
+      "historicoParcial": false,
+      "ajustesAplicados": [],
+      "alertas": [],
+      "proventos": [
+        {
+          "dataCom": "2026-06-29",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 1.168
+        },
+        {
+          "dataCom": "2025-12-29",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 1.532
+        }
+      ]
+    },
+    {
+      "posicao": 26,
       "ticker": "MTRE3",
       "nome": "Mitre Realty",
       "setor": "Construção civil e incorporação",
       "classe": "ON",
-      "cotacao": 2.88,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.124741,
+      "cotacao": 2.96,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.12137,
       "proventosPorAcao": 0.359254,
       "dividendos": 0.359254,
       "jcp": 0,
@@ -1324,98 +1408,14 @@
       ]
     },
     {
-      "posicao": 25,
-      "ticker": "BRSR6",
-      "nome": "Banrisul",
-      "setor": "Bancos",
-      "classe": "PNB",
-      "cotacao": 12.36,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.124423,
-      "proventosPorAcao": 1.537864,
-      "dividendos": 0.070855,
-      "jcp": 1.467009,
-      "rendimentos": 0,
-      "pagamentos": 6,
-      "ultimaDataCom": "2026-09-11",
-      "primeiraDataCom": "2025-12-12",
-      "historicoParcial": false,
-      "ajustesAplicados": [],
-      "alertas": [],
-      "proventos": [
-        {
-          "dataCom": "2026-09-11",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.22006263
-        },
-        {
-          "dataCom": "2026-06-12",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.22006263
-        },
-        {
-          "dataCom": "2026-05-04",
-          "tipo": "DIVIDENDO",
-          "valor": 0.07085547
-        },
-        {
-          "dataCom": "2026-03-13",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.22006263
-        },
-        {
-          "dataCom": "2025-12-26",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.44004976
-        },
-        {
-          "dataCom": "2025-12-12",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.36677105
-        }
-      ]
-    },
-    {
-      "posicao": 26,
-      "ticker": "ABCB4",
-      "nome": "ABC Brasil",
-      "setor": "Bancos",
-      "classe": "PN",
-      "cotacao": 22.17,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.121786,
-      "proventosPorAcao": 2.7,
-      "dividendos": 0,
-      "jcp": 2.7,
-      "rendimentos": 0,
-      "pagamentos": 2,
-      "ultimaDataCom": "2026-06-29",
-      "primeiraDataCom": "2025-12-29",
-      "historicoParcial": false,
-      "ajustesAplicados": [],
-      "alertas": [],
-      "proventos": [
-        {
-          "dataCom": "2026-06-29",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 1.168
-        },
-        {
-          "dataCom": "2025-12-29",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 1.532
-        }
-      ]
-    },
-    {
       "posicao": 27,
       "ticker": "FIQE3",
       "nome": "Unifique",
       "setor": "Telecomunicações",
       "classe": "ON",
-      "cotacao": 5.28,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.119207,
+      "cotacao": 5.2,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.121041,
       "proventosPorAcao": 0.629411,
       "dividendos": 0.552378,
       "jcp": 0.077033,
@@ -1482,20 +1482,25 @@
       "nome": "Bradesco",
       "setor": "Bancos",
       "classe": "PN",
-      "cotacao": 13.86,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.116485,
+      "cotacao": 13.58,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.118887,
       "proventosPorAcao": 1.614486,
       "dividendos": 0,
       "jcp": 1.614486,
       "rendimentos": 0,
       "pagamentos": 16,
-      "ultimaDataCom": "2026-10-13",
-      "primeiraDataCom": "2025-11-03",
+      "ultimaDataCom": "2026-11-03",
+      "primeiraDataCom": "2025-12-01",
       "historicoParcial": false,
       "ajustesAplicados": [],
       "alertas": [],
       "proventos": [
+        {
+          "dataCom": "2026-11-03",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.01897481
+        },
         {
           "dataCom": "2026-10-13",
           "tipo": "JRS CAP PROPRIO",
@@ -1570,23 +1575,50 @@
           "dataCom": "2025-12-01",
           "tipo": "JRS CAP PROPRIO",
           "valor": 0.01897481
-        },
-        {
-          "dataCom": "2025-11-03",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.01897481
         }
       ]
     },
     {
       "posicao": 29,
+      "ticker": "CSED3",
+      "nome": "Cruzeiro do Sul Educacional",
+      "setor": "Educação",
+      "classe": "ON",
+      "cotacao": 4.11,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.118136,
+      "proventosPorAcao": 0.48554,
+      "dividendos": 0.48554,
+      "jcp": 0,
+      "rendimentos": 0,
+      "pagamentos": 2,
+      "ultimaDataCom": "2026-04-28",
+      "primeiraDataCom": "2025-12-18",
+      "historicoParcial": false,
+      "ajustesAplicados": [],
+      "alertas": [],
+      "proventos": [
+        {
+          "dataCom": "2026-04-28",
+          "tipo": "DIVIDENDO",
+          "valor": 0.21122363
+        },
+        {
+          "dataCom": "2025-12-18",
+          "tipo": "DIVIDENDO",
+          "valor": 0.2743164
+        }
+      ]
+    },
+    {
+      "posicao": 30,
       "ticker": "CMIG4",
       "nome": "Cemig",
       "setor": "Energia elétrica: transmissão",
       "classe": "PN",
-      "cotacao": 10.07,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.113143,
+      "cotacao": 9.86,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.115553,
       "proventosPorAcao": 1.139352,
       "dividendos": 0.382231,
       "jcp": 0.757121,
@@ -1656,14 +1688,41 @@
       ]
     },
     {
-      "posicao": 30,
+      "posicao": 31,
+      "ticker": "PLPL3",
+      "nome": "Plano&Plano",
+      "setor": "Construção civil e incorporação",
+      "classe": "ON",
+      "cotacao": 4.32,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.114081,
+      "proventosPorAcao": 0.49283,
+      "dividendos": 0.49283,
+      "jcp": 0,
+      "rendimentos": 0,
+      "pagamentos": 1,
+      "ultimaDataCom": "2025-12-29",
+      "primeiraDataCom": "2025-12-29",
+      "historicoParcial": false,
+      "ajustesAplicados": [],
+      "alertas": [],
+      "proventos": [
+        {
+          "dataCom": "2025-12-29",
+          "tipo": "DIVIDENDO",
+          "valor": 0.49282987
+        }
+      ]
+    },
+    {
+      "posicao": 32,
       "ticker": "BBSE3",
       "nome": "BB Seguridade",
       "setor": "Seguros e previdência",
       "classe": "ON",
-      "cotacao": 41.32,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.111086,
+      "cotacao": 40.79,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.11253,
       "proventosPorAcao": 4.590091,
       "dividendos": 4.53325,
       "jcp": 0,
@@ -1693,14 +1752,14 @@
       ]
     },
     {
-      "posicao": 31,
+      "posicao": 33,
       "ticker": "EZTC3",
       "nome": "EZTEC",
       "setor": "Construção civil e incorporação",
       "classe": "ON",
-      "cotacao": 8.96,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.11052,
+      "cotacao": 9,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.110029,
       "proventosPorAcao": 0.990259,
       "dividendos": 0.990259,
       "jcp": 0,
@@ -1742,73 +1801,14 @@
       ]
     },
     {
-      "posicao": 32,
-      "ticker": "PLPL3",
-      "nome": "Plano&Plano",
-      "setor": "Construção civil e incorporação",
-      "classe": "ON",
-      "cotacao": 4.47,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.110253,
-      "proventosPorAcao": 0.49283,
-      "dividendos": 0.49283,
-      "jcp": 0,
-      "rendimentos": 0,
-      "pagamentos": 1,
-      "ultimaDataCom": "2025-12-29",
-      "primeiraDataCom": "2025-12-29",
-      "historicoParcial": false,
-      "ajustesAplicados": [],
-      "alertas": [],
-      "proventos": [
-        {
-          "dataCom": "2025-12-29",
-          "tipo": "DIVIDENDO",
-          "valor": 0.49282987
-        }
-      ]
-    },
-    {
-      "posicao": 33,
-      "ticker": "CSED3",
-      "nome": "Cruzeiro do Sul Educacional",
-      "setor": "Educação",
-      "classe": "ON",
-      "cotacao": 4.44,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.109356,
-      "proventosPorAcao": 0.48554,
-      "dividendos": 0.48554,
-      "jcp": 0,
-      "rendimentos": 0,
-      "pagamentos": 2,
-      "ultimaDataCom": "2026-04-28",
-      "primeiraDataCom": "2025-12-18",
-      "historicoParcial": false,
-      "ajustesAplicados": [],
-      "alertas": [],
-      "proventos": [
-        {
-          "dataCom": "2026-04-28",
-          "tipo": "DIVIDENDO",
-          "valor": 0.21122363
-        },
-        {
-          "dataCom": "2025-12-18",
-          "tipo": "DIVIDENDO",
-          "valor": 0.2743164
-        }
-      ]
-    },
-    {
       "posicao": 34,
       "ticker": "WIZC3",
       "nome": "Wiz Soluções",
       "setor": "Seguros e previdência",
       "classe": "ON",
-      "cotacao": 5.87,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.107109,
+      "cotacao": 5.74,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.109534,
       "proventosPorAcao": 0.628728,
       "dividendos": 0.628728,
       "jcp": 0,
@@ -1838,9 +1838,9 @@
       "nome": "Banco BMG",
       "setor": "Bancos",
       "classe": "PN",
-      "cotacao": 5.11,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.107045,
+      "cotacao": 5.32,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.10282,
       "proventosPorAcao": 0.547,
       "dividendos": 0,
       "jcp": 0.547,
@@ -1881,28 +1881,38 @@
     },
     {
       "posicao": 36,
-      "ticker": "PGMN3",
-      "nome": "Pague Menos",
-      "setor": "Farmácias, higiene e beleza",
+      "ticker": "ROMI3",
+      "nome": "Romi",
+      "setor": "Máquinas, equipamentos e aeroespacial",
       "classe": "ON",
-      "cotacao": 2.48,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.103907,
-      "proventosPorAcao": 0.25769,
+      "cotacao": 5.06,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.102767,
+      "proventosPorAcao": 0.52,
       "dividendos": 0,
-      "jcp": 0.25769,
+      "jcp": 0.52,
       "rendimentos": 0,
-      "pagamentos": 1,
-      "ultimaDataCom": "2025-12-23",
-      "primeiraDataCom": "2025-12-23",
+      "pagamentos": 3,
+      "ultimaDataCom": "2026-09-29",
+      "primeiraDataCom": "2025-12-30",
       "historicoParcial": false,
       "ajustesAplicados": [],
       "alertas": [],
       "proventos": [
         {
-          "dataCom": "2025-12-23",
+          "dataCom": "2026-09-29",
           "tipo": "JRS CAP PROPRIO",
-          "valor": 0.25768973
+          "valor": 0.28
+        },
+        {
+          "dataCom": "2026-06-15",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.06
+        },
+        {
+          "dataCom": "2025-12-30",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.18
         }
       ]
     },
@@ -1912,9 +1922,9 @@
       "nome": "Lojas Renner",
       "setor": "Moda e vestuário",
       "classe": "ON",
-      "cotacao": 8.98,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.1025,
+      "cotacao": 9.07,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.101483,
       "proventosPorAcao": 0.920447,
       "dividendos": 0,
       "jcp": 0.920447,
@@ -1950,13 +1960,40 @@
     },
     {
       "posicao": 38,
+      "ticker": "PGMN3",
+      "nome": "Pague Menos",
+      "setor": "Farmácias, higiene e beleza",
+      "classe": "ON",
+      "cotacao": 2.54,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.101453,
+      "proventosPorAcao": 0.25769,
+      "dividendos": 0,
+      "jcp": 0.25769,
+      "rendimentos": 0,
+      "pagamentos": 1,
+      "ultimaDataCom": "2025-12-23",
+      "primeiraDataCom": "2025-12-23",
+      "historicoParcial": false,
+      "ajustesAplicados": [],
+      "alertas": [],
+      "proventos": [
+        {
+          "dataCom": "2025-12-23",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.25768973
+        }
+      ]
+    },
+    {
+      "posicao": 39,
       "ticker": "TGMA3",
       "nome": "Tegma",
       "setor": "Transporte e infraestrutura",
       "classe": "ON",
-      "cotacao": 36.02,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.100777,
+      "cotacao": 36.89,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.098401,
       "proventosPorAcao": 3.63,
       "dividendos": 3.16,
       "jcp": 0.47,
@@ -1996,83 +2033,14 @@
       ]
     },
     {
-      "posicao": 39,
-      "ticker": "ROMI3",
-      "nome": "Romi",
-      "setor": "Máquinas, equipamentos e aeroespacial",
-      "classe": "ON",
-      "cotacao": 5.32,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.097744,
-      "proventosPorAcao": 0.52,
-      "dividendos": 0,
-      "jcp": 0.52,
-      "rendimentos": 0,
-      "pagamentos": 3,
-      "ultimaDataCom": "2026-09-29",
-      "primeiraDataCom": "2025-12-30",
-      "historicoParcial": false,
-      "ajustesAplicados": [],
-      "alertas": [],
-      "proventos": [
-        {
-          "dataCom": "2026-09-29",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.28
-        },
-        {
-          "dataCom": "2026-06-15",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.06
-        },
-        {
-          "dataCom": "2025-12-30",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.18
-        }
-      ]
-    },
-    {
       "posicao": 40,
-      "ticker": "HBOR3",
-      "nome": "Helbor",
-      "setor": "Construção civil e incorporação",
-      "classe": "ON",
-      "cotacao": 1.4,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.09514,
-      "proventosPorAcao": 0.133197,
-      "dividendos": 0.133197,
-      "jcp": 0,
-      "rendimentos": 0,
-      "pagamentos": 2,
-      "ultimaDataCom": "2026-04-24",
-      "primeiraDataCom": "2026-01-05",
-      "historicoParcial": false,
-      "ajustesAplicados": [],
-      "alertas": [],
-      "proventos": [
-        {
-          "dataCom": "2026-04-24",
-          "tipo": "DIVIDENDO",
-          "valor": 0.00131386
-        },
-        {
-          "dataCom": "2026-01-05",
-          "tipo": "DIVIDENDO",
-          "valor": 0.13188276
-        }
-      ]
-    },
-    {
-      "posicao": 41,
       "ticker": "LEVE3",
       "nome": "Mahle Metal Leve",
       "setor": "Autopeças e veículos",
       "classe": "ON",
-      "cotacao": 30.26,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.094229,
+      "cotacao": 30.05,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.094887,
       "proventosPorAcao": 2.851362,
       "dividendos": 2.036268,
       "jcp": 0.815094,
@@ -2107,98 +2075,61 @@
       ]
     },
     {
-      "posicao": 42,
-      "ticker": "INTB3",
-      "nome": "Intelbras",
-      "setor": "Hardware e eletrônicos",
+      "posicao": 41,
+      "ticker": "VALE3",
+      "nome": "Vale",
+      "setor": "Mineração",
       "classe": "ON",
-      "cotacao": 13.87,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.091084,
-      "proventosPorAcao": 1.263335,
-      "dividendos": 1.202212,
-      "jcp": 0.061123,
+      "cotacao": 60.25,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.093153,
+      "proventosPorAcao": 5.612493,
+      "dividendos": 2.474252,
+      "jcp": 3.138241,
       "rendimentos": 0,
-      "pagamentos": 3,
-      "ultimaDataCom": "2026-09-21",
-      "primeiraDataCom": "2025-12-15",
+      "pagamentos": 2,
+      "ultimaDataCom": "2026-08-11",
+      "primeiraDataCom": "2025-12-11",
       "historicoParcial": false,
       "ajustesAplicados": [],
       "alertas": [],
       "proventos": [
         {
-          "dataCom": "2026-09-21",
+          "dataCom": "2026-08-11",
+          "tipo": "DIVIDENDO",
+          "valor": 0.46201609
+        },
+        {
+          "dataCom": "2026-08-11",
           "tipo": "JRS CAP PROPRIO",
-          "valor": 0.06112262
+          "valor": 1.56870581
         },
         {
-          "dataCom": "2026-08-03",
+          "dataCom": "2025-12-11",
           "tipo": "DIVIDENDO",
-          "valor": 0.28563649
+          "valor": 1.24410249
         },
         {
-          "dataCom": "2025-12-15",
+          "dataCom": "2025-12-11",
           "tipo": "DIVIDENDO",
-          "valor": 0.91657597
+          "valor": 0.76813354
+        },
+        {
+          "dataCom": "2025-12-11",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 1.56953503
         }
       ]
     },
     {
-      "posicao": 43,
-      "ticker": "SANB11",
-      "nome": "Santander Brasil",
-      "setor": "Bancos",
-      "classe": "UNT",
-      "cotacao": 23.94,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.090743,
-      "proventosPorAcao": 2.17238,
-      "dividendos": 0,
-      "jcp": 2.17238,
-      "rendimentos": 0,
-      "pagamentos": 5,
-      "ultimaDataCom": "2026-10-20",
-      "primeiraDataCom": "2026-01-02",
-      "historicoParcial": false,
-      "ajustesAplicados": [],
-      "alertas": [],
-      "proventos": [
-        {
-          "dataCom": "2026-10-20",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.4010039
-        },
-        {
-          "dataCom": "2026-07-21",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.53469394
-        },
-        {
-          "dataCom": "2026-04-20",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.53470084
-        },
-        {
-          "dataCom": "2026-01-20",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.53586362
-        },
-        {
-          "dataCom": "2026-01-02",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.16611772
-        }
-      ]
-    },
-    {
-      "posicao": 44,
+      "posicao": 42,
       "ticker": "ITSA4",
       "nome": "Itaúsa",
       "setor": "Bolsa, holdings e serviços financeiros",
       "classe": "PN",
-      "cotacao": 12.45,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.090586,
+      "cotacao": 12.42,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.090805,
       "proventosPorAcao": 1.1278,
       "dividendos": 0.760161,
       "jcp": 0.367639,
@@ -2260,61 +2191,46 @@
       ]
     },
     {
-      "posicao": 45,
-      "ticker": "VALE3",
-      "nome": "Vale",
-      "setor": "Mineração",
+      "posicao": 43,
+      "ticker": "HBOR3",
+      "nome": "Helbor",
+      "setor": "Construção civil e incorporação",
       "classe": "ON",
-      "cotacao": 62.02,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.090495,
-      "proventosPorAcao": 5.612493,
-      "dividendos": 2.474252,
-      "jcp": 3.138241,
+      "cotacao": 1.48,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.089998,
+      "proventosPorAcao": 0.133197,
+      "dividendos": 0.133197,
+      "jcp": 0,
       "rendimentos": 0,
       "pagamentos": 2,
-      "ultimaDataCom": "2026-08-11",
-      "primeiraDataCom": "2025-12-11",
+      "ultimaDataCom": "2026-04-24",
+      "primeiraDataCom": "2026-01-05",
       "historicoParcial": false,
       "ajustesAplicados": [],
       "alertas": [],
       "proventos": [
         {
-          "dataCom": "2026-08-11",
+          "dataCom": "2026-04-24",
           "tipo": "DIVIDENDO",
-          "valor": 0.46201609
+          "valor": 0.00131386
         },
         {
-          "dataCom": "2026-08-11",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 1.56870581
-        },
-        {
-          "dataCom": "2025-12-11",
+          "dataCom": "2026-01-05",
           "tipo": "DIVIDENDO",
-          "valor": 1.24410249
-        },
-        {
-          "dataCom": "2025-12-11",
-          "tipo": "DIVIDENDO",
-          "valor": 0.76813354
-        },
-        {
-          "dataCom": "2025-12-11",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 1.56953503
+          "valor": 0.13188276
         }
       ]
     },
     {
-      "posicao": 46,
+      "posicao": 44,
       "ticker": "CPFE3",
       "nome": "CPFL Energia",
       "setor": "Energia elétrica: distribuição",
       "classe": "ON",
-      "cotacao": 41.9,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.089058,
+      "cotacao": 41.62,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.089657,
       "proventosPorAcao": 3.731536,
       "dividendos": 3.731536,
       "jcp": 0,
@@ -2334,14 +2250,98 @@
       ]
     },
     {
+      "posicao": 45,
+      "ticker": "SANB11",
+      "nome": "Santander Brasil",
+      "setor": "Bancos",
+      "classe": "UNT",
+      "cotacao": 24.48,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.088741,
+      "proventosPorAcao": 2.17238,
+      "dividendos": 0,
+      "jcp": 2.17238,
+      "rendimentos": 0,
+      "pagamentos": 5,
+      "ultimaDataCom": "2026-10-20",
+      "primeiraDataCom": "2026-01-02",
+      "historicoParcial": false,
+      "ajustesAplicados": [],
+      "alertas": [],
+      "proventos": [
+        {
+          "dataCom": "2026-10-20",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.4010039
+        },
+        {
+          "dataCom": "2026-07-21",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.53469394
+        },
+        {
+          "dataCom": "2026-04-20",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.53470084
+        },
+        {
+          "dataCom": "2026-01-20",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.53586362
+        },
+        {
+          "dataCom": "2026-01-02",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.16611772
+        }
+      ]
+    },
+    {
+      "posicao": 46,
+      "ticker": "INTB3",
+      "nome": "Intelbras",
+      "setor": "Hardware e eletrônicos",
+      "classe": "ON",
+      "cotacao": 14.35,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.088037,
+      "proventosPorAcao": 1.263335,
+      "dividendos": 1.202212,
+      "jcp": 0.061123,
+      "rendimentos": 0,
+      "pagamentos": 3,
+      "ultimaDataCom": "2026-09-21",
+      "primeiraDataCom": "2025-12-15",
+      "historicoParcial": false,
+      "ajustesAplicados": [],
+      "alertas": [],
+      "proventos": [
+        {
+          "dataCom": "2026-09-21",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.06112262
+        },
+        {
+          "dataCom": "2026-08-03",
+          "tipo": "DIVIDENDO",
+          "valor": 0.28563649
+        },
+        {
+          "dataCom": "2025-12-15",
+          "tipo": "DIVIDENDO",
+          "valor": 0.91657597
+        }
+      ]
+    },
+    {
       "posicao": 47,
       "ticker": "JHSF3",
       "nome": "JHSF",
       "setor": "Shoppings e imóveis comerciais",
       "classe": "ON",
-      "cotacao": 8.97,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.088037,
+      "cotacao": 9.11,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.086684,
       "proventosPorAcao": 0.789692,
       "dividendos": 0.789692,
       "jcp": 0,
@@ -2417,48 +2417,45 @@
     },
     {
       "posicao": 48,
-      "ticker": "BMOB3",
-      "nome": "Bemobi",
-      "setor": "Software e serviços de TI",
+      "ticker": "COGN3",
+      "nome": "Cogna",
+      "setor": "Educação",
       "classe": "ON",
-      "cotacao": 23.51,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.083816,
-      "proventosPorAcao": 1.970525,
-      "dividendos": 1.090433,
-      "jcp": 0.880092,
+      "cotacao": 1.38,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.085943,
+      "proventosPorAcao": 0.118601,
+      "dividendos": 0.118601,
+      "jcp": 0,
       "rendimentos": 0,
-      "pagamentos": 3,
-      "ultimaDataCom": "2026-08-14",
-      "primeiraDataCom": "2025-12-11",
+      "pagamentos": 2,
+      "ultimaDataCom": "2026-04-27",
+      "primeiraDataCom": "2025-12-23",
       "historicoParcial": false,
-      "ajustesAplicados": [],
-      "alertas": [],
+      "ajustesAplicados": [
+        {
+          "data": "2025-12-26",
+          "fator": 1.1
+        }
+      ],
+      "alertas": [
+        "ajustado_por_desdobramento"
+      ],
       "proventos": [
         {
-          "dataCom": "2026-08-14",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.19178292
-        },
-        {
-          "dataCom": "2026-05-15",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.18818727
-        },
-        {
-          "dataCom": "2025-12-11",
+          "dataCom": "2026-04-27",
           "tipo": "DIVIDENDO",
-          "valor": 0.708817
+          "valor": 0.01429743
         },
         {
-          "dataCom": "2025-12-11",
+          "dataCom": "2025-12-23",
           "tipo": "DIVIDENDO",
-          "valor": 0.381616
+          "valor": 0.06013265
         },
         {
-          "dataCom": "2025-12-11",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.500122
+          "dataCom": "2025-12-23",
+          "tipo": "DIVIDENDO",
+          "valor": 0.04417096
         }
       ]
     },
@@ -2468,9 +2465,9 @@
       "nome": "Blau Farmacêutica",
       "setor": "Medicamentos e saúde animal",
       "classe": "ON",
-      "cotacao": 9.02,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.082794,
+      "cotacao": 8.73,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.085544,
       "proventosPorAcao": 0.746802,
       "dividendos": 0.432929,
       "jcp": 0.313873,
@@ -2518,13 +2515,107 @@
     },
     {
       "posicao": 50,
+      "ticker": "CMIN3",
+      "nome": "CSN Mineração",
+      "setor": "Mineração",
+      "classe": "ON",
+      "cotacao": 4.61,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.083681,
+      "proventosPorAcao": 0.385769,
+      "dividendos": 0.267397,
+      "jcp": 0.118371,
+      "rendimentos": 0,
+      "pagamentos": 3,
+      "ultimaDataCom": "2026-04-16",
+      "primeiraDataCom": "2025-11-07",
+      "historicoParcial": false,
+      "ajustesAplicados": [],
+      "alertas": [],
+      "proventos": [
+        {
+          "dataCom": "2026-04-16",
+          "tipo": "DIVIDENDO",
+          "valor": 0.14149298
+        },
+        {
+          "dataCom": "2026-01-02",
+          "tipo": "DIVIDENDO",
+          "valor": 0.0478111
+        },
+        {
+          "dataCom": "2026-01-02",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.03019082
+        },
+        {
+          "dataCom": "2025-11-07",
+          "tipo": "DIVIDENDO",
+          "valor": 0.0780932
+        },
+        {
+          "dataCom": "2025-11-07",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.08818043
+        }
+      ]
+    },
+    {
+      "posicao": 51,
+      "ticker": "BMOB3",
+      "nome": "Bemobi",
+      "setor": "Software e serviços de TI",
+      "classe": "ON",
+      "cotacao": 23.65,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.08332,
+      "proventosPorAcao": 1.970525,
+      "dividendos": 1.090433,
+      "jcp": 0.880092,
+      "rendimentos": 0,
+      "pagamentos": 3,
+      "ultimaDataCom": "2026-08-14",
+      "primeiraDataCom": "2025-12-11",
+      "historicoParcial": false,
+      "ajustesAplicados": [],
+      "alertas": [],
+      "proventos": [
+        {
+          "dataCom": "2026-08-14",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.19178292
+        },
+        {
+          "dataCom": "2026-05-15",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.18818727
+        },
+        {
+          "dataCom": "2025-12-11",
+          "tipo": "DIVIDENDO",
+          "valor": 0.708817
+        },
+        {
+          "dataCom": "2025-12-11",
+          "tipo": "DIVIDENDO",
+          "valor": 0.381616
+        },
+        {
+          "dataCom": "2025-12-11",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.500122
+        }
+      ]
+    },
+    {
+      "posicao": 52,
       "ticker": "SEER3",
       "nome": "Ser Educacional",
       "setor": "Educação",
       "classe": "ON",
-      "cotacao": 10.71,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.082457,
+      "cotacao": 10.73,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.082304,
       "proventosPorAcao": 0.883119,
       "dividendos": 0.883119,
       "jcp": 0,
@@ -2559,21 +2650,68 @@
       ]
     },
     {
-      "posicao": 51,
+      "posicao": 53,
+      "ticker": "PINE4",
+      "nome": "Banco Pine",
+      "setor": "Bancos",
+      "classe": "PN",
+      "cotacao": 9.92,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.080971,
+      "proventosPorAcao": 0.803237,
+      "dividendos": 0.02724,
+      "jcp": 0.775997,
+      "rendimentos": 0,
+      "pagamentos": 4,
+      "ultimaDataCom": "2026-10-20",
+      "primeiraDataCom": "2026-01-08",
+      "historicoParcial": false,
+      "ajustesAplicados": [],
+      "alertas": [],
+      "proventos": [
+        {
+          "dataCom": "2026-10-20",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.178953
+        },
+        {
+          "dataCom": "2026-07-14",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.271528
+        },
+        {
+          "dataCom": "2026-04-20",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.223044
+        },
+        {
+          "dataCom": "2026-01-08",
+          "tipo": "DIVIDENDO",
+          "valor": 0.0272395
+        },
+        {
+          "dataCom": "2026-01-08",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.1024724
+        }
+      ]
+    },
+    {
+      "posicao": 54,
       "ticker": "ITUB4",
       "nome": "Itaú Unibanco",
       "setor": "Bancos",
       "classe": "PN",
-      "cotacao": 38.69,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.080585,
-      "proventosPorAcao": 3.117823,
+      "cotacao": 38.49,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.080558,
+      "proventosPorAcao": 3.100687,
       "dividendos": 1.813809,
-      "jcp": 1.304014,
+      "jcp": 1.286879,
       "rendimentos": 0,
-      "pagamentos": 16,
+      "pagamentos": 15,
       "ultimaDataCom": "2026-10-30",
-      "primeiraDataCom": "2025-10-31",
+      "primeiraDataCom": "2025-11-28",
       "historicoParcial": false,
       "ajustesAplicados": [
         {
@@ -2664,70 +2802,50 @@
           "dataCom": "2025-11-28",
           "tipo": "JRS CAP PROPRIO",
           "valor": 0.01713592
-        },
-        {
-          "dataCom": "2025-10-31",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.01713592
         }
       ]
     },
     {
-      "posicao": 52,
-      "ticker": "PINE4",
-      "nome": "Banco Pine",
-      "setor": "Bancos",
-      "classe": "PN",
-      "cotacao": 9.99,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.080404,
-      "proventosPorAcao": 0.803237,
-      "dividendos": 0.02724,
-      "jcp": 0.775997,
+      "posicao": 55,
+      "ticker": "BEEF3",
+      "nome": "Minerva",
+      "setor": "Carnes e proteínas",
+      "classe": "ON",
+      "cotacao": 2.48,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.078911,
+      "proventosPorAcao": 0.195699,
+      "dividendos": 0.195699,
+      "jcp": 0,
       "rendimentos": 0,
-      "pagamentos": 4,
-      "ultimaDataCom": "2026-10-20",
-      "primeiraDataCom": "2026-01-08",
+      "pagamentos": 2,
+      "ultimaDataCom": "2026-04-28",
+      "primeiraDataCom": "2025-12-15",
       "historicoParcial": false,
       "ajustesAplicados": [],
       "alertas": [],
       "proventos": [
         {
-          "dataCom": "2026-10-20",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.178953
-        },
-        {
-          "dataCom": "2026-07-14",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.271528
-        },
-        {
-          "dataCom": "2026-04-20",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.223044
-        },
-        {
-          "dataCom": "2026-01-08",
+          "dataCom": "2026-04-28",
           "tipo": "DIVIDENDO",
-          "valor": 0.0272395
+          "valor": 0.03114733
         },
         {
-          "dataCom": "2026-01-08",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.1024724
+          "dataCom": "2025-12-15",
+          "tipo": "DIVIDENDO",
+          "valor": 0.16455196
         }
       ]
     },
     {
-      "posicao": 53,
+      "posicao": 56,
       "ticker": "CEAB3",
       "nome": "C&A",
       "setor": "Moda e vestuário",
       "classe": "ON",
-      "cotacao": 6.55,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.079634,
+      "cotacao": 6.63,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.078673,
       "proventosPorAcao": 0.5216,
       "dividendos": 0,
       "jcp": 0.5216,
@@ -2747,61 +2865,14 @@
       ]
     },
     {
-      "posicao": 54,
-      "ticker": "CMIN3",
-      "nome": "CSN Mineração",
-      "setor": "Mineração",
-      "classe": "ON",
-      "cotacao": 4.86,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.079376,
-      "proventosPorAcao": 0.385769,
-      "dividendos": 0.267397,
-      "jcp": 0.118371,
-      "rendimentos": 0,
-      "pagamentos": 3,
-      "ultimaDataCom": "2026-04-16",
-      "primeiraDataCom": "2025-11-07",
-      "historicoParcial": false,
-      "ajustesAplicados": [],
-      "alertas": [],
-      "proventos": [
-        {
-          "dataCom": "2026-04-16",
-          "tipo": "DIVIDENDO",
-          "valor": 0.14149298
-        },
-        {
-          "dataCom": "2026-01-02",
-          "tipo": "DIVIDENDO",
-          "valor": 0.0478111
-        },
-        {
-          "dataCom": "2026-01-02",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.03019082
-        },
-        {
-          "dataCom": "2025-11-07",
-          "tipo": "DIVIDENDO",
-          "valor": 0.0780932
-        },
-        {
-          "dataCom": "2025-11-07",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.08818043
-        }
-      ]
-    },
-    {
-      "posicao": 55,
+      "posicao": 57,
       "ticker": "CLSC4",
       "nome": "Celesc",
       "setor": "Energia elétrica: distribuição",
       "classe": "PN",
-      "cotacao": 171.72,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.077765,
+      "cotacao": 170.05,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.078529,
       "proventosPorAcao": 13.353852,
       "dividendos": 1.393077,
       "jcp": 11.960775,
@@ -2876,93 +2947,63 @@
       ]
     },
     {
-      "posicao": 56,
-      "ticker": "TIMS3",
-      "nome": "TIM",
-      "setor": "Telecomunicações",
-      "classe": "ON",
-      "cotacao": 19.17,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.076804,
-      "proventosPorAcao": 1.472341,
-      "dividendos": 0.749135,
-      "jcp": 0.723205,
-      "rendimentos": 0,
-      "pagamentos": 5,
-      "ultimaDataCom": "2026-09-22",
-      "primeiraDataCom": "2025-12-19",
-      "historicoParcial": false,
-      "ajustesAplicados": [],
-      "alertas": [],
-      "proventos": [
-        {
-          "dataCom": "2026-09-22",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.21668011
-        },
-        {
-          "dataCom": "2026-06-22",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.16745732
-        },
-        {
-          "dataCom": "2026-03-23",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.16327089
-        },
-        {
-          "dataCom": "2025-12-22",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.17579681
-        },
-        {
-          "dataCom": "2025-12-19",
-          "tipo": "DIVIDENDO",
-          "valor": 0.74913546
-        }
-      ]
-    },
-    {
-      "posicao": 57,
-      "ticker": "BEEF3",
-      "nome": "Minerva",
-      "setor": "Carnes e proteínas",
-      "classe": "ON",
-      "cotacao": 2.55,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.076745,
-      "proventosPorAcao": 0.195699,
-      "dividendos": 0.195699,
-      "jcp": 0,
-      "rendimentos": 0,
-      "pagamentos": 2,
-      "ultimaDataCom": "2026-04-28",
-      "primeiraDataCom": "2025-12-15",
-      "historicoParcial": false,
-      "ajustesAplicados": [],
-      "alertas": [],
-      "proventos": [
-        {
-          "dataCom": "2026-04-28",
-          "tipo": "DIVIDENDO",
-          "valor": 0.03114733
-        },
-        {
-          "dataCom": "2025-12-15",
-          "tipo": "DIVIDENDO",
-          "valor": 0.16455196
-        }
-      ]
-    },
-    {
       "posicao": 58,
+      "ticker": "RENT3",
+      "nome": "Localiza",
+      "setor": "Locação de veículos e frotas",
+      "classe": "ON",
+      "cotacao": 27.41,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.076987,
+      "proventosPorAcao": 2.110213,
+      "dividendos": 0,
+      "jcp": 2.110213,
+      "rendimentos": 0,
+      "pagamentos": 4,
+      "ultimaDataCom": "2026-09-25",
+      "primeiraDataCom": "2025-12-17",
+      "historicoParcial": false,
+      "ajustesAplicados": [
+        {
+          "data": "2025-12-30",
+          "fator": 1.038461
+        }
+      ],
+      "alertas": [
+        "ajustado_por_desdobramento"
+      ],
+      "proventos": [
+        {
+          "dataCom": "2026-09-25",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.55658041
+        },
+        {
+          "dataCom": "2026-06-26",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.53512738
+        },
+        {
+          "dataCom": "2026-03-27",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.52211867
+        },
+        {
+          "dataCom": "2025-12-17",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.49638667
+        }
+      ]
+    },
+    {
+      "posicao": 59,
       "ticker": "TAEE11",
       "nome": "Taesa",
       "setor": "Energia elétrica: transmissão",
       "classe": "UNT",
-      "cotacao": 39.59,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.07594,
+      "cotacao": 39.15,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.076793,
       "proventosPorAcao": 3.006457,
       "dividendos": 1.668577,
       "jcp": 1.33788,
@@ -3012,107 +3053,93 @@
       ]
     },
     {
-      "posicao": 59,
-      "ticker": "RENT3",
-      "nome": "Localiza",
-      "setor": "Locação de veículos e frotas",
-      "classe": "ON",
-      "cotacao": 27.85,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.075771,
-      "proventosPorAcao": 2.110213,
-      "dividendos": 0,
-      "jcp": 2.110213,
-      "rendimentos": 0,
-      "pagamentos": 4,
-      "ultimaDataCom": "2026-09-25",
-      "primeiraDataCom": "2025-12-17",
-      "historicoParcial": false,
-      "ajustesAplicados": [
-        {
-          "data": "2025-12-30",
-          "fator": 1.038461
-        }
-      ],
-      "alertas": [
-        "ajustado_por_desdobramento"
-      ],
-      "proventos": [
-        {
-          "dataCom": "2026-09-25",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.55658041
-        },
-        {
-          "dataCom": "2026-06-26",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.53512738
-        },
-        {
-          "dataCom": "2026-03-27",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.52211867
-        },
-        {
-          "dataCom": "2025-12-17",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.49638667
-        }
-      ]
-    },
-    {
       "posicao": 60,
-      "ticker": "COGN3",
-      "nome": "Cogna",
-      "setor": "Educação",
+      "ticker": "TIMS3",
+      "nome": "TIM",
+      "setor": "Telecomunicações",
       "classe": "ON",
-      "cotacao": 1.58,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.075064,
-      "proventosPorAcao": 0.118601,
-      "dividendos": 0.118601,
-      "jcp": 0,
+      "cotacao": 19.45,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.075699,
+      "proventosPorAcao": 1.472341,
+      "dividendos": 0.749135,
+      "jcp": 0.723205,
       "rendimentos": 0,
-      "pagamentos": 2,
-      "ultimaDataCom": "2026-04-27",
-      "primeiraDataCom": "2025-12-23",
+      "pagamentos": 5,
+      "ultimaDataCom": "2026-09-22",
+      "primeiraDataCom": "2025-12-19",
       "historicoParcial": false,
-      "ajustesAplicados": [
-        {
-          "data": "2025-12-26",
-          "fator": 1.1
-        }
-      ],
-      "alertas": [
-        "ajustado_por_desdobramento"
-      ],
+      "ajustesAplicados": [],
+      "alertas": [],
       "proventos": [
         {
-          "dataCom": "2026-04-27",
-          "tipo": "DIVIDENDO",
-          "valor": 0.01429743
+          "dataCom": "2026-09-22",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.21668011
         },
         {
-          "dataCom": "2025-12-23",
-          "tipo": "DIVIDENDO",
-          "valor": 0.06013265
+          "dataCom": "2026-06-22",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.16745732
         },
         {
-          "dataCom": "2025-12-23",
+          "dataCom": "2026-03-23",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.16327089
+        },
+        {
+          "dataCom": "2025-12-22",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.17579681
+        },
+        {
+          "dataCom": "2025-12-19",
           "tipo": "DIVIDENDO",
-          "valor": 0.04417096
+          "valor": 0.74913546
         }
       ]
     },
     {
       "posicao": 61,
+      "ticker": "TEND3",
+      "nome": "Tenda",
+      "setor": "Construção civil e incorporação",
+      "classe": "ON",
+      "cotacao": 19.4,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.075337,
+      "proventosPorAcao": 1.461535,
+      "dividendos": 1.461535,
+      "jcp": 0,
+      "rendimentos": 0,
+      "pagamentos": 2,
+      "ultimaDataCom": "2026-08-13",
+      "primeiraDataCom": "2025-12-23",
+      "historicoParcial": false,
+      "ajustesAplicados": [],
+      "alertas": [],
+      "proventos": [
+        {
+          "dataCom": "2026-08-13",
+          "tipo": "DIVIDENDO",
+          "valor": 0.63632873
+        },
+        {
+          "dataCom": "2025-12-23",
+          "tipo": "DIVIDENDO",
+          "valor": 0.82520577
+        }
+      ]
+    },
+    {
+      "posicao": 62,
       "ticker": "CPLE3",
       "nome": "Copel",
       "setor": "Energia elétrica: distribuição",
       "classe": "ON",
-      "cotacao": 14.32,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.074204,
+      "cotacao": 14.11,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.075308,
       "proventosPorAcao": 1.0626,
       "dividendos": 0.454535,
       "jcp": 0.608065,
@@ -3142,13 +3169,13 @@
       ]
     },
     {
-      "posicao": 62,
+      "posicao": 63,
       "ticker": "CAML3",
       "nome": "Camil",
       "setor": "Alimentos e bebidas",
       "classe": "ON",
       "cotacao": 3.98,
-      "dataCotacao": "2026-10-30",
+      "dataCotacao": "2026-11-03",
       "dy": 0.073667,
       "proventosPorAcao": 0.293194,
       "dividendos": 0.237487,
@@ -3189,14 +3216,14 @@
       ]
     },
     {
-      "posicao": 63,
+      "posicao": 64,
       "ticker": "ISAE4",
       "nome": "ISA Energia",
       "setor": "Energia elétrica: transmissão",
       "classe": "PN",
-      "cotacao": 24.76,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.073286,
+      "cotacao": 24.8,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.073167,
       "proventosPorAcao": 1.814549,
       "dividendos": 0.423933,
       "jcp": 1.390616,
@@ -3256,46 +3283,14 @@
       ]
     },
     {
-      "posicao": 64,
-      "ticker": "TEND3",
-      "nome": "Tenda",
-      "setor": "Construção civil e incorporação",
-      "classe": "ON",
-      "cotacao": 20.01,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.07304,
-      "proventosPorAcao": 1.461535,
-      "dividendos": 1.461535,
-      "jcp": 0,
-      "rendimentos": 0,
-      "pagamentos": 2,
-      "ultimaDataCom": "2026-08-13",
-      "primeiraDataCom": "2025-12-23",
-      "historicoParcial": false,
-      "ajustesAplicados": [],
-      "alertas": [],
-      "proventos": [
-        {
-          "dataCom": "2026-08-13",
-          "tipo": "DIVIDENDO",
-          "valor": 0.63632873
-        },
-        {
-          "dataCom": "2025-12-23",
-          "tipo": "DIVIDENDO",
-          "valor": 0.82520577
-        }
-      ]
-    },
-    {
       "posicao": 65,
       "ticker": "PETR4",
       "nome": "Petrobras",
       "setor": "Petróleo e gás",
       "classe": "PN",
-      "cotacao": 52.71,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.06935,
+      "cotacao": 50.71,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.072085,
       "proventosPorAcao": 3.655426,
       "dividendos": 0.767988,
       "jcp": 2.850564,
@@ -3371,13 +3366,60 @@
     },
     {
       "posicao": 66,
+      "ticker": "PSSA3",
+      "nome": "Porto Seguro",
+      "setor": "Seguros e previdência",
+      "classe": "ON",
+      "cotacao": 44.33,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.067663,
+      "proventosPorAcao": 2.999484,
+      "dividendos": 0.886101,
+      "jcp": 2.113383,
+      "rendimentos": 0,
+      "pagamentos": 5,
+      "ultimaDataCom": "2026-09-23",
+      "primeiraDataCom": "2025-12-26",
+      "historicoParcial": false,
+      "ajustesAplicados": [],
+      "alertas": [],
+      "proventos": [
+        {
+          "dataCom": "2026-09-23",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.52065721
+        },
+        {
+          "dataCom": "2026-06-22",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.51280365
+        },
+        {
+          "dataCom": "2026-03-31",
+          "tipo": "DIVIDENDO",
+          "valor": 0.88610136
+        },
+        {
+          "dataCom": "2026-03-30",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.54231784
+        },
+        {
+          "dataCom": "2025-12-26",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.53760384
+        }
+      ]
+    },
+    {
+      "posicao": 67,
       "ticker": "KLBN11",
       "nome": "Klabin",
       "setor": "Papel, celulose e madeira",
       "classe": "UNT",
-      "cotacao": 17.2,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.067507,
+      "cotacao": 17.38,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.066808,
       "proventosPorAcao": 1.161121,
       "dividendos": 1.161121,
       "jcp": 0,
@@ -3425,14 +3467,61 @@
       ]
     },
     {
-      "posicao": 67,
+      "posicao": 68,
+      "ticker": "CXSE3",
+      "nome": "Caixa Seguridade",
+      "setor": "Seguros e previdência",
+      "classe": "ON",
+      "cotacao": 20.77,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.066544,
+      "proventosPorAcao": 1.382128,
+      "dividendos": 1.38,
+      "jcp": 0,
+      "rendimentos": 0.002128,
+      "pagamentos": 4,
+      "ultimaDataCom": "2026-11-03",
+      "primeiraDataCom": "2026-01-02",
+      "historicoParcial": false,
+      "ajustesAplicados": [],
+      "alertas": [],
+      "proventos": [
+        {
+          "dataCom": "2026-11-03",
+          "tipo": "DIVIDENDO",
+          "valor": 0.35
+        },
+        {
+          "dataCom": "2026-08-03",
+          "tipo": "DIVIDENDO",
+          "valor": 0.35
+        },
+        {
+          "dataCom": "2026-04-30",
+          "tipo": "DIVIDENDO",
+          "valor": 0.33
+        },
+        {
+          "dataCom": "2026-01-02",
+          "tipo": "DIVIDENDO",
+          "valor": 0.35
+        },
+        {
+          "dataCom": "2026-01-02",
+          "tipo": "RENDIMENTO",
+          "valor": 0.0021284
+        }
+      ]
+    },
+    {
+      "posicao": 69,
       "ticker": "B3SA3",
       "nome": "B3",
       "setor": "Bolsa, holdings e serviços financeiros",
       "classe": "ON",
-      "cotacao": 13.43,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.067209,
+      "cotacao": 13.61,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.06632,
       "proventosPorAcao": 0.902621,
       "dividendos": 0,
       "jcp": 0.902621,
@@ -3497,140 +3586,14 @@
       ]
     },
     {
-      "posicao": 68,
-      "ticker": "PSSA3",
-      "nome": "Porto Seguro",
-      "setor": "Seguros e previdência",
-      "classe": "ON",
-      "cotacao": 44.75,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.067028,
-      "proventosPorAcao": 2.999484,
-      "dividendos": 0.886101,
-      "jcp": 2.113383,
-      "rendimentos": 0,
-      "pagamentos": 5,
-      "ultimaDataCom": "2026-09-23",
-      "primeiraDataCom": "2025-12-26",
-      "historicoParcial": false,
-      "ajustesAplicados": [],
-      "alertas": [],
-      "proventos": [
-        {
-          "dataCom": "2026-09-23",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.52065721
-        },
-        {
-          "dataCom": "2026-06-22",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.51280365
-        },
-        {
-          "dataCom": "2026-03-31",
-          "tipo": "DIVIDENDO",
-          "valor": 0.88610136
-        },
-        {
-          "dataCom": "2026-03-30",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.54231784
-        },
-        {
-          "dataCom": "2025-12-26",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.53760384
-        }
-      ]
-    },
-    {
-      "posicao": 69,
-      "ticker": "SMFT3",
-      "nome": "Smart Fit",
-      "setor": "Turismo, lazer e restaurantes",
-      "classe": "ON",
-      "cotacao": 15.52,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.066841,
-      "proventosPorAcao": 1.037374,
-      "dividendos": 0,
-      "jcp": 1.037374,
-      "rendimentos": 0,
-      "pagamentos": 4,
-      "ultimaDataCom": "2026-09-03",
-      "primeiraDataCom": "2025-12-05",
-      "historicoParcial": false,
-      "ajustesAplicados": [],
-      "alertas": [],
-      "proventos": [
-        {
-          "dataCom": "2026-09-03",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.06535105
-        },
-        {
-          "dataCom": "2026-06-03",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.06516385
-        },
-        {
-          "dataCom": "2026-03-23",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.06512392
-        },
-        {
-          "dataCom": "2025-12-05",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.84173491
-        }
-      ]
-    },
-    {
       "posicao": 70,
-      "ticker": "MOTV3",
-      "nome": "Motiva (ex-CCR)",
-      "setor": "Transporte e infraestrutura",
-      "classe": "ON",
-      "cotacao": 14,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.066527,
-      "proventosPorAcao": 0.931374,
-      "dividendos": 0.208059,
-      "jcp": 0.723315,
-      "rendimentos": 0,
-      "pagamentos": 3,
-      "ultimaDataCom": "2026-09-04",
-      "primeiraDataCom": "2025-12-10",
-      "historicoParcial": false,
-      "ajustesAplicados": [],
-      "alertas": [],
-      "proventos": [
-        {
-          "dataCom": "2026-09-04",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.72331535
-        },
-        {
-          "dataCom": "2026-04-20",
-          "tipo": "DIVIDENDO",
-          "valor": 0.06170433
-        },
-        {
-          "dataCom": "2025-12-10",
-          "tipo": "DIVIDENDO",
-          "valor": 0.1463547
-        }
-      ]
-    },
-    {
-      "posicao": 71,
       "ticker": "VBBR3",
       "nome": "Vibra Energia",
       "setor": "Distribuição de combustíveis e etanol",
       "classe": "ON",
-      "cotacao": 29.6,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.065093,
+      "cotacao": 29.12,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.066166,
       "proventosPorAcao": 1.926751,
       "dividendos": 0,
       "jcp": 1.926751,
@@ -3672,41 +3635,125 @@
       ]
     },
     {
-      "posicao": 72,
-      "ticker": "YDUQ3",
-      "nome": "Yduqs",
-      "setor": "Educação",
+      "posicao": 71,
+      "ticker": "MOTV3",
+      "nome": "Motiva (ex-CCR)",
+      "setor": "Transporte e infraestrutura",
       "classe": "ON",
-      "cotacao": 8.91,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.063877,
-      "proventosPorAcao": 0.569143,
-      "dividendos": 0.569143,
-      "jcp": 0,
+      "cotacao": 14.08,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.066149,
+      "proventosPorAcao": 0.931374,
+      "dividendos": 0.208059,
+      "jcp": 0.723315,
       "rendimentos": 0,
-      "pagamentos": 1,
-      "ultimaDataCom": "2025-12-26",
-      "primeiraDataCom": "2025-12-26",
+      "pagamentos": 3,
+      "ultimaDataCom": "2026-09-04",
+      "primeiraDataCom": "2025-12-10",
       "historicoParcial": false,
       "ajustesAplicados": [],
       "alertas": [],
       "proventos": [
         {
-          "dataCom": "2025-12-26",
+          "dataCom": "2026-09-04",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.72331535
+        },
+        {
+          "dataCom": "2026-04-20",
           "tipo": "DIVIDENDO",
-          "valor": 0.5691431
+          "valor": 0.06170433
+        },
+        {
+          "dataCom": "2025-12-10",
+          "tipo": "DIVIDENDO",
+          "valor": 0.1463547
+        }
+      ]
+    },
+    {
+      "posicao": 72,
+      "ticker": "SMFT3",
+      "nome": "Smart Fit",
+      "setor": "Turismo, lazer e restaurantes",
+      "classe": "ON",
+      "cotacao": 15.85,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.065449,
+      "proventosPorAcao": 1.037374,
+      "dividendos": 0,
+      "jcp": 1.037374,
+      "rendimentos": 0,
+      "pagamentos": 4,
+      "ultimaDataCom": "2026-09-03",
+      "primeiraDataCom": "2025-12-05",
+      "historicoParcial": false,
+      "ajustesAplicados": [],
+      "alertas": [],
+      "proventos": [
+        {
+          "dataCom": "2026-09-03",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.06535105
+        },
+        {
+          "dataCom": "2026-06-03",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.06516385
+        },
+        {
+          "dataCom": "2026-03-23",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.06512392
+        },
+        {
+          "dataCom": "2025-12-05",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.84173491
         }
       ]
     },
     {
       "posicao": 73,
+      "ticker": "UGPA3",
+      "nome": "Ultrapar",
+      "setor": "Distribuição de combustíveis e etanol",
+      "classe": "ON",
+      "cotacao": 31.07,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.064371,
+      "proventosPorAcao": 2,
+      "dividendos": 2,
+      "jcp": 0,
+      "rendimentos": 0,
+      "pagamentos": 2,
+      "ultimaDataCom": "2026-08-24",
+      "primeiraDataCom": "2025-12-05",
+      "historicoParcial": false,
+      "ajustesAplicados": [],
+      "alertas": [],
+      "proventos": [
+        {
+          "dataCom": "2026-08-24",
+          "tipo": "DIVIDENDO",
+          "valor": 1
+        },
+        {
+          "dataCom": "2025-12-05",
+          "tipo": "DIVIDENDO",
+          "valor": 1
+        }
+      ]
+    },
+    {
+      "posicao": 74,
       "ticker": "FLRY3",
       "nome": "Fleury",
       "setor": "Hospitais, planos e diagnósticos",
       "classe": "ON",
-      "cotacao": 20.47,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.063497,
+      "cotacao": 20.44,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.063591,
       "proventosPorAcao": 1.299791,
       "dividendos": 0.664201,
       "jcp": 0.63559,
@@ -3746,93 +3793,68 @@
       ]
     },
     {
-      "posicao": 74,
-      "ticker": "CXSE3",
-      "nome": "Caixa Seguridade",
-      "setor": "Seguros e previdência",
-      "classe": "ON",
-      "cotacao": 21.38,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.063243,
-      "proventosPorAcao": 1.352128,
-      "dividendos": 1.35,
-      "jcp": 0,
-      "rendimentos": 0.002128,
-      "pagamentos": 4,
-      "ultimaDataCom": "2026-08-03",
-      "primeiraDataCom": "2025-11-03",
-      "historicoParcial": false,
-      "ajustesAplicados": [],
-      "alertas": [],
-      "proventos": [
-        {
-          "dataCom": "2026-08-03",
-          "tipo": "DIVIDENDO",
-          "valor": 0.35
-        },
-        {
-          "dataCom": "2026-04-30",
-          "tipo": "DIVIDENDO",
-          "valor": 0.33
-        },
-        {
-          "dataCom": "2026-01-02",
-          "tipo": "DIVIDENDO",
-          "valor": 0.35
-        },
-        {
-          "dataCom": "2026-01-02",
-          "tipo": "RENDIMENTO",
-          "valor": 0.0021284
-        },
-        {
-          "dataCom": "2025-11-03",
-          "tipo": "DIVIDENDO",
-          "valor": 0.32
-        }
-      ]
-    },
-    {
       "posicao": 75,
-      "ticker": "UGPA3",
-      "nome": "Ultrapar",
-      "setor": "Distribuição de combustíveis e etanol",
+      "ticker": "YDUQ3",
+      "nome": "Yduqs",
+      "setor": "Educação",
       "classe": "ON",
-      "cotacao": 31.76,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.062972,
-      "proventosPorAcao": 2,
-      "dividendos": 2,
+      "cotacao": 9.02,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.063098,
+      "proventosPorAcao": 0.569143,
+      "dividendos": 0.569143,
       "jcp": 0,
       "rendimentos": 0,
-      "pagamentos": 2,
-      "ultimaDataCom": "2026-08-24",
-      "primeiraDataCom": "2025-12-05",
+      "pagamentos": 1,
+      "ultimaDataCom": "2025-12-26",
+      "primeiraDataCom": "2025-12-26",
       "historicoParcial": false,
       "ajustesAplicados": [],
       "alertas": [],
       "proventos": [
         {
-          "dataCom": "2026-08-24",
+          "dataCom": "2025-12-26",
           "tipo": "DIVIDENDO",
-          "valor": 1
-        },
-        {
-          "dataCom": "2025-12-05",
-          "tipo": "DIVIDENDO",
-          "valor": 1
+          "valor": 0.5691431
         }
       ]
     },
     {
       "posicao": 76,
+      "ticker": "ECOR3",
+      "nome": "Ecorodovias",
+      "setor": "Transporte e infraestrutura",
+      "classe": "ON",
+      "cotacao": 4.9,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.061724,
+      "proventosPorAcao": 0.302448,
+      "dividendos": 0.302448,
+      "jcp": 0,
+      "rendimentos": 0,
+      "pagamentos": 1,
+      "ultimaDataCom": "2026-05-12",
+      "primeiraDataCom": "2026-05-12",
+      "historicoParcial": false,
+      "ajustesAplicados": [],
+      "alertas": [],
+      "proventos": [
+        {
+          "dataCom": "2026-05-12",
+          "tipo": "DIVIDENDO",
+          "valor": 0.30244838
+        }
+      ]
+    },
+    {
+      "posicao": 77,
       "ticker": "MDIA3",
       "nome": "M. Dias Branco",
       "setor": "Alimentos e bebidas",
       "classe": "ON",
-      "cotacao": 15.35,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.062302,
+      "cotacao": 15.65,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.061108,
       "proventosPorAcao": 0.956333,
       "dividendos": 0.956333,
       "jcp": 0,
@@ -3912,68 +3934,14 @@
       ]
     },
     {
-      "posicao": 77,
-      "ticker": "ECOR3",
-      "nome": "Ecorodovias",
-      "setor": "Transporte e infraestrutura",
-      "classe": "ON",
-      "cotacao": 4.89,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.06185,
-      "proventosPorAcao": 0.302448,
-      "dividendos": 0.302448,
-      "jcp": 0,
-      "rendimentos": 0,
-      "pagamentos": 1,
-      "ultimaDataCom": "2026-05-12",
-      "primeiraDataCom": "2026-05-12",
-      "historicoParcial": false,
-      "ajustesAplicados": [],
-      "alertas": [],
-      "proventos": [
-        {
-          "dataCom": "2026-05-12",
-          "tipo": "DIVIDENDO",
-          "valor": 0.30244838
-        }
-      ]
-    },
-    {
       "posicao": 78,
-      "ticker": "POSI3",
-      "nome": "Positivo",
-      "setor": "Hardware e eletrônicos",
-      "classe": "ON",
-      "cotacao": 2.91,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.061713,
-      "proventosPorAcao": 0.179584,
-      "dividendos": 0.179584,
-      "jcp": 0,
-      "rendimentos": 0,
-      "pagamentos": 1,
-      "ultimaDataCom": "2026-01-06",
-      "primeiraDataCom": "2026-01-06",
-      "historicoParcial": false,
-      "ajustesAplicados": [],
-      "alertas": [],
-      "proventos": [
-        {
-          "dataCom": "2026-01-06",
-          "tipo": "DIVIDENDO",
-          "valor": 0.17958384
-        }
-      ]
-    },
-    {
-      "posicao": 79,
       "ticker": "VAMO3",
       "nome": "Vamos",
       "setor": "Locação de veículos e frotas",
       "classe": "ON",
-      "cotacao": 2.38,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.059118,
+      "cotacao": 2.35,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.059873,
       "proventosPorAcao": 0.140702,
       "dividendos": 0,
       "jcp": 0.140702,
@@ -3993,14 +3961,41 @@
       ]
     },
     {
+      "posicao": 79,
+      "ticker": "POSI3",
+      "nome": "Positivo",
+      "setor": "Hardware e eletrônicos",
+      "classe": "ON",
+      "cotacao": 3,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.059861,
+      "proventosPorAcao": 0.179584,
+      "dividendos": 0.179584,
+      "jcp": 0,
+      "rendimentos": 0,
+      "pagamentos": 1,
+      "ultimaDataCom": "2026-01-06",
+      "primeiraDataCom": "2026-01-06",
+      "historicoParcial": false,
+      "ajustesAplicados": [],
+      "alertas": [],
+      "proventos": [
+        {
+          "dataCom": "2026-01-06",
+          "tipo": "DIVIDENDO",
+          "valor": 0.17958384
+        }
+      ]
+    },
+    {
       "posicao": 80,
       "ticker": "ABEV3",
       "nome": "Ambev",
       "setor": "Alimentos e bebidas",
       "classe": "ON",
-      "cotacao": 14.6,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.057973,
+      "cotacao": 14.7,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.057578,
       "proventosPorAcao": 0.8464,
       "dividendos": 0.4612,
       "jcp": 0.3852,
@@ -4042,9 +4037,9 @@
       "nome": "Mills",
       "setor": "Serviços e locação de equipamentos",
       "classe": "ON",
-      "cotacao": 15.58,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.054381,
+      "cotacao": 15.85,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.053454,
       "proventosPorAcao": 0.847252,
       "dividendos": 0.659591,
       "jcp": 0.187661,
@@ -4070,13 +4065,126 @@
     },
     {
       "posicao": 82,
+      "ticker": "HYPE3",
+      "nome": "Hypera Pharma",
+      "setor": "Medicamentos e saúde animal",
+      "classe": "ON",
+      "cotacao": 21.06,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.051359,
+      "proventosPorAcao": 1.08162,
+      "dividendos": 0,
+      "jcp": 1.08162,
+      "rendimentos": 0,
+      "pagamentos": 4,
+      "ultimaDataCom": "2026-09-28",
+      "primeiraDataCom": "2025-12-26",
+      "historicoParcial": false,
+      "ajustesAplicados": [],
+      "alertas": [],
+      "proventos": [
+        {
+          "dataCom": "2026-09-28",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.26304
+        },
+        {
+          "dataCom": "2026-06-26",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.26304
+        },
+        {
+          "dataCom": "2026-03-31",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.26304
+        },
+        {
+          "dataCom": "2025-12-26",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.2925
+        }
+      ]
+    },
+    {
+      "posicao": 83,
+      "ticker": "SOJA3",
+      "nome": "Boa Safra Sementes",
+      "setor": "Agronegócio, açúcar e etanol",
+      "classe": "ON",
+      "cotacao": 5.72,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.049574,
+      "proventosPorAcao": 0.283563,
+      "dividendos": 0,
+      "jcp": 0.283563,
+      "rendimentos": 0,
+      "pagamentos": 1,
+      "ultimaDataCom": "2025-12-18",
+      "primeiraDataCom": "2025-12-18",
+      "historicoParcial": false,
+      "ajustesAplicados": [
+        {
+          "data": "2025-12-19",
+          "fator": 1.048629
+        }
+      ],
+      "alertas": [
+        "ajustado_por_desdobramento"
+      ],
+      "proventos": [
+        {
+          "dataCom": "2025-12-18",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.28356339
+        }
+      ]
+    },
+    {
+      "posicao": 84,
+      "ticker": "EQTL3",
+      "nome": "Equatorial",
+      "setor": "Energia elétrica: distribuição",
+      "classe": "ON",
+      "cotacao": 32.16,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.049232,
+      "proventosPorAcao": 1.583293,
+      "dividendos": 0,
+      "jcp": 1.583293,
+      "rendimentos": 0,
+      "pagamentos": 2,
+      "ultimaDataCom": "2025-12-29",
+      "primeiraDataCom": "2025-11-05",
+      "historicoParcial": false,
+      "ajustesAplicados": [],
+      "alertas": [],
+      "proventos": [
+        {
+          "dataCom": "2025-12-29",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.13329263
+        },
+        {
+          "dataCom": "2025-11-05",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.80480289
+        },
+        {
+          "dataCom": "2025-11-05",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.64519711
+        }
+      ]
+    },
+    {
+      "posicao": 85,
       "ticker": "RANI3",
       "nome": "Irani",
       "setor": "Papel, celulose e madeira",
       "classe": "ON",
-      "cotacao": 7.59,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.053004,
+      "cotacao": 8.24,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.048823,
       "proventosPorAcao": 0.402298,
       "dividendos": 0.402298,
       "jcp": 0,
@@ -4116,127 +4224,14 @@
       ]
     },
     {
-      "posicao": 83,
-      "ticker": "HYPE3",
-      "nome": "Hypera Pharma",
-      "setor": "Medicamentos e saúde animal",
-      "classe": "ON",
-      "cotacao": 21.27,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.050852,
-      "proventosPorAcao": 1.08162,
-      "dividendos": 0,
-      "jcp": 1.08162,
-      "rendimentos": 0,
-      "pagamentos": 4,
-      "ultimaDataCom": "2026-09-28",
-      "primeiraDataCom": "2025-12-26",
-      "historicoParcial": false,
-      "ajustesAplicados": [],
-      "alertas": [],
-      "proventos": [
-        {
-          "dataCom": "2026-09-28",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.26304
-        },
-        {
-          "dataCom": "2026-06-26",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.26304
-        },
-        {
-          "dataCom": "2026-03-31",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.26304
-        },
-        {
-          "dataCom": "2025-12-26",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.2925
-        }
-      ]
-    },
-    {
-      "posicao": 84,
-      "ticker": "EQTL3",
-      "nome": "Equatorial",
-      "setor": "Energia elétrica: distribuição",
-      "classe": "ON",
-      "cotacao": 32.6,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.048567,
-      "proventosPorAcao": 1.583293,
-      "dividendos": 0,
-      "jcp": 1.583293,
-      "rendimentos": 0,
-      "pagamentos": 2,
-      "ultimaDataCom": "2025-12-29",
-      "primeiraDataCom": "2025-11-05",
-      "historicoParcial": false,
-      "ajustesAplicados": [],
-      "alertas": [],
-      "proventos": [
-        {
-          "dataCom": "2025-12-29",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.13329263
-        },
-        {
-          "dataCom": "2025-11-05",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.80480289
-        },
-        {
-          "dataCom": "2025-11-05",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.64519711
-        }
-      ]
-    },
-    {
-      "posicao": 85,
-      "ticker": "SOJA3",
-      "nome": "Boa Safra Sementes",
-      "setor": "Agronegócio, açúcar e etanol",
-      "classe": "ON",
-      "cotacao": 5.9,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.048062,
-      "proventosPorAcao": 0.283563,
-      "dividendos": 0,
-      "jcp": 0.283563,
-      "rendimentos": 0,
-      "pagamentos": 1,
-      "ultimaDataCom": "2025-12-18",
-      "primeiraDataCom": "2025-12-18",
-      "historicoParcial": false,
-      "ajustesAplicados": [
-        {
-          "data": "2025-12-19",
-          "fator": 1.048629
-        }
-      ],
-      "alertas": [
-        "ajustado_por_desdobramento"
-      ],
-      "proventos": [
-        {
-          "dataCom": "2025-12-18",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.28356339
-        }
-      ]
-    },
-    {
       "posicao": 86,
       "ticker": "SLCE3",
       "nome": "SLC Agrícola",
       "setor": "Agronegócio, açúcar e etanol",
       "classe": "ON",
-      "cotacao": 17.02,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.047307,
+      "cotacao": 16.66,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.048329,
       "proventosPorAcao": 0.805165,
       "dividendos": 0.764906,
       "jcp": 0.040258,
@@ -4273,9 +4268,9 @@
       "nome": "Panvel (Dimed)",
       "setor": "Farmácias, higiene e beleza",
       "classe": "ON",
-      "cotacao": 10.08,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.047255,
+      "cotacao": 10.14,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.046975,
       "proventosPorAcao": 0.476328,
       "dividendos": 0,
       "jcp": 0.476328,
@@ -4360,9 +4355,9 @@
       "nome": "Multiplan",
       "setor": "Shoppings e imóveis comerciais",
       "classe": "ON",
-      "cotacao": 25.19,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.0461,
+      "cotacao": 25.04,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.046376,
       "proventosPorAcao": 1.161261,
       "dividendos": 0,
       "jcp": 1.161261,
@@ -4402,9 +4397,9 @@
       "nome": "Kepler Weber",
       "setor": "Máquinas, equipamentos e aeroespacial",
       "classe": "ON",
-      "cotacao": 6.27,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.046007,
+      "cotacao": 6.34,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.045499,
       "proventosPorAcao": 0.288464,
       "dividendos": 0.288464,
       "jcp": 0,
@@ -4434,9 +4429,9 @@
       "nome": "Alpargatas (Havaianas)",
       "setor": "Calçados e artigos esportivos",
       "classe": "PN",
-      "cotacao": 12.38,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.043697,
+      "cotacao": 12.1,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.044708,
       "proventosPorAcao": 0.540968,
       "dividendos": 0.377132,
       "jcp": 0.163836,
@@ -4466,9 +4461,9 @@
       "nome": "Vivo (Telefônica Brasil)",
       "setor": "Telecomunicações",
       "classe": "ON",
-      "cotacao": 30.7,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.04291,
+      "cotacao": 30.08,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.043795,
       "proventosPorAcao": 1.317339,
       "dividendos": 0,
       "jcp": 1.317339,
@@ -4543,9 +4538,9 @@
       "nome": "Engie Brasil",
       "setor": "Energia elétrica: geração",
       "classe": "ON",
-      "cotacao": 26.26,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.042652,
+      "cotacao": 26.12,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.042881,
       "proventosPorAcao": 1.12004,
       "dividendos": 1.032497,
       "jcp": 0.087543,
@@ -4580,9 +4575,9 @@
       "nome": "Banco do Brasil",
       "setor": "Bancos",
       "classe": "ON",
-      "cotacao": 16.47,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.041921,
+      "cotacao": 16.19,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.042646,
       "proventosPorAcao": 0.690432,
       "dividendos": 0,
       "jcp": 0.682431,
@@ -4652,9 +4647,9 @@
       "nome": "Copasa",
       "setor": "Saneamento e resíduos",
       "classe": "ON",
-      "cotacao": 48.11,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.041431,
+      "cotacao": 47.26,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.042176,
       "proventosPorAcao": 1.99323,
       "dividendos": 0.371792,
       "jcp": 1.621438,
@@ -4709,9 +4704,9 @@
       "nome": "WEG",
       "setor": "Máquinas, equipamentos e aeroespacial",
       "classe": "ON",
-      "cotacao": 48.36,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.041424,
+      "cotacao": 49.17,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.040741,
       "proventosPorAcao": 2.003247,
       "dividendos": 1.580195,
       "jcp": 0.423052,
@@ -4771,9 +4766,9 @@
       "nome": "Vivara",
       "setor": "Moda e vestuário",
       "classe": "ON",
-      "cotacao": 17.3,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.040327,
+      "cotacao": 17.22,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.040514,
       "proventosPorAcao": 0.697659,
       "dividendos": 0.697659,
       "jcp": 0,
@@ -4794,40 +4789,107 @@
     },
     {
       "posicao": 97,
-      "ticker": "SIMH3",
-      "nome": "Simpar",
-      "setor": "Locação de veículos e frotas",
-      "classe": "ON",
-      "cotacao": 4.84,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.035393,
-      "proventosPorAcao": 0.171303,
-      "dividendos": 0.171303,
+      "ticker": "ALUP11",
+      "nome": "Alupar",
+      "setor": "Energia elétrica: transmissão",
+      "classe": "UNT",
+      "cotacao": 30.75,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.035122,
+      "proventosPorAcao": 1.08,
+      "dividendos": 1.08,
       "jcp": 0,
       "rendimentos": 0,
-      "pagamentos": 1,
-      "ultimaDataCom": "2026-06-03",
-      "primeiraDataCom": "2026-06-03",
+      "pagamentos": 5,
+      "ultimaDataCom": "2026-08-13",
+      "primeiraDataCom": "2025-11-13",
       "historicoParcial": false,
       "ajustesAplicados": [],
       "alertas": [],
       "proventos": [
         {
-          "dataCom": "2026-06-03",
+          "dataCom": "2026-08-13",
           "tipo": "DIVIDENDO",
-          "valor": 0.17130348
+          "valor": 0.21
+        },
+        {
+          "dataCom": "2026-05-14",
+          "tipo": "DIVIDENDO",
+          "valor": 0.21
+        },
+        {
+          "dataCom": "2026-04-16",
+          "tipo": "DIVIDENDO",
+          "valor": 0.03
+        },
+        {
+          "dataCom": "2025-12-26",
+          "tipo": "DIVIDENDO",
+          "valor": 0.33
+        },
+        {
+          "dataCom": "2025-11-13",
+          "tipo": "DIVIDENDO",
+          "valor": 0.3
         }
       ]
     },
     {
       "posicao": 98,
+      "ticker": "TFCO4",
+      "nome": "Track&Field",
+      "setor": "Moda e vestuário",
+      "classe": "PN",
+      "cotacao": 9.77,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.034347,
+      "proventosPorAcao": 0.33557,
+      "dividendos": 0.010116,
+      "jcp": 0.325455,
+      "rendimentos": 0,
+      "pagamentos": 5,
+      "ultimaDataCom": "2026-09-24",
+      "primeiraDataCom": "2025-12-23",
+      "historicoParcial": false,
+      "ajustesAplicados": [],
+      "alertas": [],
+      "proventos": [
+        {
+          "dataCom": "2026-09-24",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.08624924
+        },
+        {
+          "dataCom": "2026-06-26",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.08522026
+        },
+        {
+          "dataCom": "2026-04-30",
+          "tipo": "DIVIDENDO",
+          "valor": 0.01011587
+        },
+        {
+          "dataCom": "2026-03-27",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.08450148
+        },
+        {
+          "dataCom": "2025-12-23",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.06948355
+        }
+      ]
+    },
+    {
+      "posicao": 99,
       "ticker": "GOAU4",
       "nome": "Metalúrgica Gerdau",
       "setor": "Siderurgia e metalurgia",
       "classe": "PN",
-      "cotacao": 11.11,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.034429,
+      "cotacao": 11.26,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.03397,
       "proventosPorAcao": 0.382504,
       "dividendos": 0.382504,
       "jcp": 0,
@@ -4869,96 +4931,29 @@
       ]
     },
     {
-      "posicao": 99,
-      "ticker": "ALUP11",
-      "nome": "Alupar",
-      "setor": "Energia elétrica: transmissão",
-      "classe": "UNT",
-      "cotacao": 31.4,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.034395,
-      "proventosPorAcao": 1.08,
-      "dividendos": 1.08,
+      "posicao": 100,
+      "ticker": "ANIM3",
+      "nome": "Ânima",
+      "setor": "Educação",
+      "classe": "ON",
+      "cotacao": 2.34,
+      "dataCotacao": "2026-11-03",
+      "dy": 0.033241,
+      "proventosPorAcao": 0.077785,
+      "dividendos": 0.077785,
       "jcp": 0,
       "rendimentos": 0,
-      "pagamentos": 5,
-      "ultimaDataCom": "2026-08-13",
-      "primeiraDataCom": "2025-11-13",
+      "pagamentos": 1,
+      "ultimaDataCom": "2026-04-24",
+      "primeiraDataCom": "2026-04-24",
       "historicoParcial": false,
       "ajustesAplicados": [],
       "alertas": [],
       "proventos": [
         {
-          "dataCom": "2026-08-13",
+          "dataCom": "2026-04-24",
           "tipo": "DIVIDENDO",
-          "valor": 0.21
-        },
-        {
-          "dataCom": "2026-05-14",
-          "tipo": "DIVIDENDO",
-          "valor": 0.21
-        },
-        {
-          "dataCom": "2026-04-16",
-          "tipo": "DIVIDENDO",
-          "valor": 0.03
-        },
-        {
-          "dataCom": "2025-12-26",
-          "tipo": "DIVIDENDO",
-          "valor": 0.33
-        },
-        {
-          "dataCom": "2025-11-13",
-          "tipo": "DIVIDENDO",
-          "valor": 0.3
-        }
-      ]
-    },
-    {
-      "posicao": 100,
-      "ticker": "TFCO4",
-      "nome": "Track&Field",
-      "setor": "Moda e vestuário",
-      "classe": "PN",
-      "cotacao": 9.8,
-      "dataCotacao": "2026-10-30",
-      "dy": 0.034242,
-      "proventosPorAcao": 0.33557,
-      "dividendos": 0.010116,
-      "jcp": 0.325455,
-      "rendimentos": 0,
-      "pagamentos": 5,
-      "ultimaDataCom": "2026-09-24",
-      "primeiraDataCom": "2025-12-23",
-      "historicoParcial": false,
-      "ajustesAplicados": [],
-      "alertas": [],
-      "proventos": [
-        {
-          "dataCom": "2026-09-24",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.08624924
-        },
-        {
-          "dataCom": "2026-06-26",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.08522026
-        },
-        {
-          "dataCom": "2026-04-30",
-          "tipo": "DIVIDENDO",
-          "valor": 0.01011587
-        },
-        {
-          "dataCom": "2026-03-27",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.08450148
-        },
-        {
-          "dataCom": "2025-12-23",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.06948355
+          "valor": 0.07778473
         }
       ]
     }
@@ -5186,7 +5181,7 @@
       "setor": "Distribuição de combustíveis e etanol",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Negocia em média R$ 165.802 por dia, abaixo do mínimo de R$ 3.000.000."
+      "motivo": "Negocia em média R$ 162.088 por dia, abaixo do mínimo de R$ 3.000.000."
     },
     {
       "ticker": "EUCA4",
@@ -5194,7 +5189,7 @@
       "setor": "Papel, celulose e madeira",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Negocia em média R$ 2.057.382 por dia, abaixo do mínimo de R$ 3.000.000."
+      "motivo": "Negocia em média R$ 2.070.543 por dia, abaixo do mínimo de R$ 3.000.000."
     },
     {
       "ticker": "CRPG6",
@@ -5210,7 +5205,7 @@
       "setor": "Química e petroquímica",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Negocia em média R$ 1.287.927 por dia, abaixo do mínimo de R$ 3.000.000."
+      "motivo": "Negocia em média R$ 1.347.740 por dia, abaixo do mínimo de R$ 3.000.000."
     },
     {
       "ticker": "FHER3",
@@ -5218,7 +5213,7 @@
       "setor": "Química e petroquímica",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Negocia em média R$ 37.995 por dia, abaixo do mínimo de R$ 3.000.000."
+      "motivo": "Negocia em média R$ 35.033 por dia, abaixo do mínimo de R$ 3.000.000."
     },
     {
       "ticker": "EALT4",
@@ -5226,7 +5221,7 @@
       "setor": "Máquinas, equipamentos e aeroespacial",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Negocia em média R$ 167.470 por dia, abaixo do mínimo de R$ 3.000.000."
+      "motivo": "Negocia em média R$ 169.849 por dia, abaixo do mínimo de R$ 3.000.000."
     },
     {
       "ticker": "AERI3",
@@ -5234,7 +5229,7 @@
       "setor": "Máquinas, equipamentos e aeroespacial",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Negocia em média R$ 352.498 por dia, abaixo do mínimo de R$ 3.000.000."
+      "motivo": "Negocia em média R$ 354.648 por dia, abaixo do mínimo de R$ 3.000.000."
     },
     {
       "ticker": "MTSA4",
@@ -5242,7 +5237,7 @@
       "setor": "Máquinas, equipamentos e aeroespacial",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Negocia em média R$ 37.073 por dia, abaixo do mínimo de R$ 3.000.000."
+      "motivo": "Negocia em média R$ 38.653 por dia, abaixo do mínimo de R$ 3.000.000."
     },
     {
       "ticker": "LUPA3",
@@ -5250,7 +5245,7 @@
       "setor": "Máquinas, equipamentos e aeroespacial",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Negocia em média R$ 143.260 por dia, abaixo do mínimo de R$ 3.000.000."
+      "motivo": "Negocia em média R$ 144.150 por dia, abaixo do mínimo de R$ 3.000.000."
     },
     {
       "ticker": "MWET4",
@@ -5266,7 +5261,7 @@
       "setor": "Autopeças e veículos",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Negocia em média R$ 271.358 por dia, abaixo do mínimo de R$ 3.000.000."
+      "motivo": "Negocia em média R$ 271.496 por dia, abaixo do mínimo de R$ 3.000.000."
     },
     {
       "ticker": "LOGN3",
@@ -5274,7 +5269,7 @@
       "setor": "Transporte e infraestrutura",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Negocia em média R$ 738.963 por dia, abaixo do mínimo de R$ 3.000.000."
+      "motivo": "Negocia em média R$ 862.324 por dia, abaixo do mínimo de R$ 3.000.000."
     },
     {
       "ticker": "AMBP3",
@@ -5282,7 +5277,7 @@
       "setor": "Serviços e locação de equipamentos",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Negocia em média R$ 950.717 por dia, abaixo do mínimo de R$ 3.000.000."
+      "motivo": "Negocia em média R$ 632.754 por dia, abaixo do mínimo de R$ 3.000.000."
     },
     {
       "ticker": "GEPA4",
@@ -5290,7 +5285,7 @@
       "setor": "Energia elétrica: geração",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Negocia em média R$ 41.646 por dia, abaixo do mínimo de R$ 3.000.000."
+      "motivo": "Negocia em média R$ 42.498 por dia, abaixo do mínimo de R$ 3.000.000."
     },
     {
       "ticker": "CEEB3",
@@ -5298,7 +5293,7 @@
       "setor": "Energia elétrica: distribuição",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Negocia em média R$ 91.543 por dia, abaixo do mínimo de R$ 3.000.000."
+      "motivo": "Negocia em média R$ 96.739 por dia, abaixo do mínimo de R$ 3.000.000."
     },
     {
       "ticker": "ENMT3",
@@ -5306,7 +5301,7 @@
       "setor": "Energia elétrica: distribuição",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Negocia em média R$ 23.786 por dia, abaixo do mínimo de R$ 3.000.000."
+      "motivo": "Negocia em média R$ 21.500 por dia, abaixo do mínimo de R$ 3.000.000."
     },
     {
       "ticker": "EKTR4",
@@ -5314,7 +5309,7 @@
       "setor": "Energia elétrica: distribuição",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Negocia em média R$ 16.136 por dia, abaixo do mínimo de R$ 3.000.000."
+      "motivo": "Negocia em média R$ 17.217 por dia, abaixo do mínimo de R$ 3.000.000."
     },
     {
       "ticker": "CASN3",
@@ -5338,7 +5333,7 @@
       "setor": "Bancos",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Negocia em média R$ 145.307 por dia, abaixo do mínimo de R$ 3.000.000."
+      "motivo": "Negocia em média R$ 138.476 por dia, abaixo do mínimo de R$ 3.000.000."
     },
     {
       "ticker": "BAZA3",
@@ -5346,7 +5341,7 @@
       "setor": "Bancos",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Negocia em média R$ 429.872 por dia, abaixo do mínimo de R$ 3.000.000."
+      "motivo": "Negocia em média R$ 434.423 por dia, abaixo do mínimo de R$ 3.000.000."
     },
     {
       "ticker": "BSLI4",
@@ -5354,7 +5349,7 @@
       "setor": "Bancos",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Negocia em média R$ 49.801 por dia, abaixo do mínimo de R$ 3.000.000."
+      "motivo": "Negocia em média R$ 48.567 por dia, abaixo do mínimo de R$ 3.000.000."
     },
     {
       "ticker": "MELK3",
@@ -5362,7 +5357,7 @@
       "setor": "Construção civil e incorporação",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Negocia em média R$ 2.806.267 por dia, abaixo do mínimo de R$ 3.000.000."
+      "motivo": "Negocia em média R$ 2.819.019 por dia, abaixo do mínimo de R$ 3.000.000."
     },
     {
       "ticker": "TCSA3",
@@ -5370,7 +5365,7 @@
       "setor": "Construção civil e incorporação",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Negocia em média R$ 286.413 por dia, abaixo do mínimo de R$ 3.000.000."
+      "motivo": "Negocia em média R$ 292.962 por dia, abaixo do mínimo de R$ 3.000.000."
     },
     {
       "ticker": "PTBL3",
@@ -5378,7 +5373,7 @@
       "setor": "Materiais de construção e acabamento",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Negocia em média R$ 2.272.066 por dia, abaixo do mínimo de R$ 3.000.000."
+      "motivo": "Negocia em média R$ 2.257.208 por dia, abaixo do mínimo de R$ 3.000.000."
     },
     {
       "ticker": "ETER3",
@@ -5386,7 +5381,7 @@
       "setor": "Materiais de construção e acabamento",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Negocia em média R$ 684.706 por dia, abaixo do mínimo de R$ 3.000.000."
+      "motivo": "Negocia em média R$ 697.278 por dia, abaixo do mínimo de R$ 3.000.000."
     },
     {
       "ticker": "AMAR3",
@@ -5394,7 +5389,7 @@
       "setor": "Moda e vestuário",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Negocia em média R$ 322.121 por dia, abaixo do mínimo de R$ 3.000.000."
+      "motivo": "Negocia em média R$ 325.520 por dia, abaixo do mínimo de R$ 3.000.000."
     },
     {
       "ticker": "CGRA4",
@@ -5402,7 +5397,7 @@
       "setor": "Moda e vestuário",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Negocia em média R$ 199.861 por dia, abaixo do mínimo de R$ 3.000.000."
+      "motivo": "Negocia em média R$ 210.030 por dia, abaixo do mínimo de R$ 3.000.000."
     },
     {
       "ticker": "CAMB3",
@@ -5410,7 +5405,7 @@
       "setor": "Calçados e artigos esportivos",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Negocia em média R$ 557.752 por dia, abaixo do mínimo de R$ 3.000.000."
+      "motivo": "Negocia em média R$ 563.213 por dia, abaixo do mínimo de R$ 3.000.000."
     },
     {
       "ticker": "ESPA3",
@@ -5418,7 +5413,7 @@
       "setor": "Varejo de eletro, móveis e e-commerce",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Negocia em média R$ 2.065.928 por dia, abaixo do mínimo de R$ 3.000.000."
+      "motivo": "Negocia em média R$ 2.066.735 por dia, abaixo do mínimo de R$ 3.000.000."
     },
     {
       "ticker": "ENJU3",
@@ -5426,7 +5421,7 @@
       "setor": "Varejo de eletro, móveis e e-commerce",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Negocia em média R$ 1.391.693 por dia, abaixo do mínimo de R$ 3.000.000."
+      "motivo": "Negocia em média R$ 1.407.885 por dia, abaixo do mínimo de R$ 3.000.000."
     },
     {
       "ticker": "WHRL4",
@@ -5434,7 +5429,7 @@
       "setor": "Têxtil e eletrodomésticos",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Negocia em média R$ 64.586 por dia, abaixo do mínimo de R$ 3.000.000."
+      "motivo": "Negocia em média R$ 62.884 por dia, abaixo do mínimo de R$ 3.000.000."
     },
     {
       "ticker": "TXRX4",
@@ -5442,7 +5437,7 @@
       "setor": "Têxtil e eletrodomésticos",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Negocia em média R$ 2.457 por dia, abaixo do mínimo de R$ 3.000.000."
+      "motivo": "Negocia em média R$ 2.465 por dia, abaixo do mínimo de R$ 3.000.000."
     },
     {
       "ticker": "MEAL3",
@@ -5450,7 +5445,7 @@
       "setor": "Turismo, lazer e restaurantes",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Negocia em média R$ 363.156 por dia, abaixo do mínimo de R$ 3.000.000."
+      "motivo": "Negocia em média R$ 361.410 por dia, abaixo do mínimo de R$ 3.000.000."
     },
     {
       "ticker": "MNPR3",
@@ -5458,7 +5453,7 @@
       "setor": "Alimentos e bebidas",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Negocia em média R$ 55.688 por dia, abaixo do mínimo de R$ 3.000.000."
+      "motivo": "Negocia em média R$ 55.278 por dia, abaixo do mínimo de R$ 3.000.000."
     },
     {
       "ticker": "AGXY3",
@@ -5466,7 +5461,7 @@
       "setor": "Agronegócio, açúcar e etanol",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Negocia em média R$ 18.098 por dia, abaixo do mínimo de R$ 3.000.000."
+      "motivo": "Negocia em média R$ 14.426 por dia, abaixo do mínimo de R$ 3.000.000."
     },
     {
       "ticker": "MATD3",
@@ -5474,7 +5469,7 @@
       "setor": "Hospitais, planos e diagnósticos",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Negocia em média R$ 2.261.773 por dia, abaixo do mínimo de R$ 3.000.000."
+      "motivo": "Negocia em média R$ 2.294.954 por dia, abaixo do mínimo de R$ 3.000.000."
     },
     {
       "ticker": "AALR3",
@@ -5482,7 +5477,7 @@
       "setor": "Hospitais, planos e diagnósticos",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Negocia em média R$ 256.467 por dia, abaixo do mínimo de R$ 3.000.000."
+      "motivo": "Negocia em média R$ 249.466 por dia, abaixo do mínimo de R$ 3.000.000."
     },
     {
       "ticker": "VVEO3",
@@ -5490,7 +5485,7 @@
       "setor": "Hospitais, planos e diagnósticos",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Negocia em média R$ 2.707.980 por dia, abaixo do mínimo de R$ 3.000.000."
+      "motivo": "Negocia em média R$ 2.733.175 por dia, abaixo do mínimo de R$ 3.000.000."
     },
     {
       "ticker": "PFRM3",
@@ -5498,7 +5493,7 @@
       "setor": "Medicamentos e saúde animal",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Negocia em média R$ 2.460.106 por dia, abaixo do mínimo de R$ 3.000.000."
+      "motivo": "Negocia em média R$ 2.407.515 por dia, abaixo do mínimo de R$ 3.000.000."
     },
     {
       "ticker": "OFSA3",
@@ -5506,7 +5501,7 @@
       "setor": "Medicamentos e saúde animal",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Negocia em média R$ 117.146 por dia, abaixo do mínimo de R$ 3.000.000."
+      "motivo": "Negocia em média R$ 127.263 por dia, abaixo do mínimo de R$ 3.000.000."
     },
     {
       "ticker": "BIOM3",
@@ -5514,7 +5509,7 @@
       "setor": "Medicamentos e saúde animal",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Negocia em média R$ 497.122 por dia, abaixo do mínimo de R$ 3.000.000."
+      "motivo": "Negocia em média R$ 488.612 por dia, abaixo do mínimo de R$ 3.000.000."
     },
     {
       "ticker": "DOTZ3",
@@ -5522,7 +5517,7 @@
       "setor": "Software e serviços de TI",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Negocia em média R$ 376.665 por dia, abaixo do mínimo de R$ 3.000.000."
+      "motivo": "Negocia em média R$ 364.509 por dia, abaixo do mínimo de R$ 3.000.000."
     },
     {
       "ticker": "PDTC3",
@@ -5530,7 +5525,7 @@
       "setor": "Hardware e eletrônicos",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Negocia em média R$ 137.752 por dia, abaixo do mínimo de R$ 3.000.000."
+      "motivo": "Negocia em média R$ 140.688 por dia, abaixo do mínimo de R$ 3.000.000."
     },
     {
       "ticker": "TELB4",
@@ -5538,7 +5533,7 @@
       "setor": "Telecomunicações",
       "etapa": "liquidez",
       "codigo": "liquidez_baixa",
-      "motivo": "Negocia em média R$ 180.103 por dia, abaixo do mínimo de R$ 3.000.000."
+      "motivo": "Negocia em média R$ 181.057 por dia, abaixo do mínimo de R$ 3.000.000."
     },
     {
       "ticker": "PRIO3",
@@ -5591,6 +5586,14 @@
     {
       "ticker": "TUPY3",
       "nome": "Tupy",
+      "setor": "Máquinas, equipamentos e aeroespacial",
+      "etapa": "dados_b3",
+      "codigo": "sem_dados_b3",
+      "motivo": "A B3 não tem proventos publicados para a empresa."
+    },
+    {
+      "ticker": "MYPK3",
+      "nome": "Iochpe-Maxion",
       "setor": "Máquinas, equipamentos e aeroespacial",
       "etapa": "dados_b3",
       "codigo": "sem_dados_b3",
@@ -5722,7 +5725,7 @@
       "setor": "Varejo alimentar",
       "etapa": "dados_b3",
       "codigo": "sem_dados_b3",
-      "motivo": "A B3 não tem proventos publicados para a empresa."
+      "motivo": "A B3 não tem cadastro para este código."
     },
     {
       "ticker": "NATU3",
@@ -5755,14 +5758,6 @@
       "etapa": "dados_b3",
       "codigo": "sem_dados_b3",
       "motivo": "A B3 não tem proventos publicados para a empresa."
-    },
-    {
-      "ticker": "MYPK3",
-      "nome": "Iochpe-Maxion",
-      "setor": "Máquinas, equipamentos e aeroespacial",
-      "etapa": "proventos",
-      "codigo": "sem_proventos",
-      "motivo": "Nenhum provento em dinheiro com data com nos últimos 12 meses."
     }
   ]
 }
