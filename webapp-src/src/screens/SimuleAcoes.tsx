@@ -6,7 +6,7 @@ import { VALORES_PADRAO, formatarVariacao } from '../domain/bdrs'
 import { formatarData, formatarVolume } from '../domain/rendaFii'
 import { VoltarInicio } from '../ui/VoltarInicio'
 import { LogoAtivo } from '../ui/LogoAtivo'
-import { rolarParaResultado } from '../ui/rolarParaResultado'
+import { rolarParaPainel, rolarParaResultado } from '../ui/rolarParaResultado'
 import { AvisoEducacional } from '../ui/AvisoEducacional'
 import { FaixaCotacoes, itensDeAcoes } from '../ui/FaixaCotacoes'
 import { Top15Baratas } from './Top15Baratas'
@@ -193,7 +193,10 @@ export function SimuleAcoes({
             aria-selected={marcado}
             aria-controls="painel-acoes"
             className={`vehicle-card ${marcado ? 'selected' : ''}`}
-            onClick={() => setAba(grupo ? (noTop15 ? aba : 'top15') : c.id)}
+            onClick={() => {
+              setAba(grupo ? (noTop15 ? aba : 'top15') : c.id)
+              rolarParaPainel('painel-acoes')
+            }}
           >
             <span aria-hidden="true" style={{ fontSize: 24, lineHeight: 1 }}>{c.emoji}</span>
             <span style={{ fontSize: 14 }}>{c.titulo}</span>
@@ -215,7 +218,10 @@ export function SimuleAcoes({
                 aria-selected={aba === c.id}
                 aria-controls="painel-acoes"
                 className={`vehicle-card ${aba === c.id ? 'selected' : ''}`}
-                onClick={() => setAba(c.id)}
+                onClick={() => {
+                setAba(c.id)
+                rolarParaPainel('painel-acoes')
+              }}
               >
                 <span aria-hidden="true" style={{ fontSize: 20, lineHeight: 1 }}>{c.emoji}</span>
                 <span style={{ fontSize: 13 }}>{c.titulo}</span>
@@ -243,7 +249,10 @@ export function SimuleAcoes({
               aria-selected={aba === c.id}
               aria-controls="painel-acoes"
               className={`vehicle-card ${aba === c.id ? 'selected' : ''}`}
-              onClick={() => setAba(c.id)}
+              onClick={() => {
+                setAba(c.id)
+                rolarParaPainel('painel-acoes')
+              }}
             >
               <span aria-hidden="true" style={{ fontSize: 24, lineHeight: 1 }}>{c.emoji}</span>
               <span style={{ fontSize: 14 }}>{c.titulo}</span>

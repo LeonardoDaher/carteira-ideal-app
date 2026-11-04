@@ -25,3 +25,24 @@ export function rolarParaResultado(id: string, opcoes: { soNoComputador?: boolea
     cartao.scrollIntoView({ behavior: semAnimacao ? 'auto' : 'smooth', block: 'start' })
   })
 }
+
+/**
+ * Leva a pessoa ao conteúdo de uma aba (ou de um contrato) logo depois do clique nas caixinhas do topo.
+ *
+ * As telas Simule têm várias caixinhas empilhadas antes do conteúdo; em qualquer tela o conteúdo da aba escolhida ficava
+ * abaixo da dobra e a pessoa precisava rolar. Aqui o topo do painel vai para o topo da janela (com a folga de
+ * `scroll-margin-top` do CSS). Se o painel já está encostado no topo, não mexe. Sem animação se o aparelho pede menos movimento.
+ */
+export function rolarParaPainel(id: string): void {
+  // Dois quadros: o primeiro deixa o React trocar o conteúdo, o segundo mede o painel já com a altura nova.
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      const painel = document.getElementById(id)
+      if (!painel || typeof painel.scrollIntoView !== 'function') return
+      const { top } = painel.getBoundingClientRect()
+      if (Math.abs(top) < 8) return
+      const semAnimacao = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+      painel.scrollIntoView({ behavior: semAnimacao ? 'auto' : 'smooth', block: 'start' })
+    })
+  })
+}

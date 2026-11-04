@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { rolarParaPainel } from './rolarParaResultado'
 
 export interface AbaDaTela<T extends string> {
   id: T
@@ -12,13 +13,15 @@ export interface AbaDaTela<T extends string> {
  * ranking Top 15 daquela classe (D70). `prefixo` torna os ids únicos por tela.
  */
 export function AbasDaTela<T extends string>({
-  prefixo, rotulo, abas, ativa, aoMudar, children,
+  prefixo, rotulo, abas, ativa, aoMudar, rolarAoTrocar = false, children,
 }: {
   prefixo: string
   rotulo: string
   abas: readonly AbaDaTela<T>[]
   ativa: T
   aoMudar: (id: T) => void
+  /** Depois do clique, rola até o conteúdo da aba (telas Simule, com muitas caixinhas antes do conteúdo). */
+  rolarAoTrocar?: boolean
   children: ReactNode
 }) {
   return (
@@ -32,7 +35,10 @@ export function AbasDaTela<T extends string>({
             aria-selected={ativa === c.id}
             aria-controls={`painel-${prefixo}-aba`}
             className={`vehicle-card ${ativa === c.id ? 'selected' : ''}`}
-            onClick={() => aoMudar(c.id)}
+            onClick={() => {
+              aoMudar(c.id)
+              if (rolarAoTrocar) rolarParaPainel(`painel-${prefixo}-aba`)
+            }}
           >
             <span aria-hidden="true" style={{ fontSize: 24, lineHeight: 1 }}>{c.emoji}</span>
             <span style={{ fontSize: 14 }}>{c.titulo}</span>

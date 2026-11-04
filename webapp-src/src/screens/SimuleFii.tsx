@@ -26,7 +26,7 @@ import type { FundoFii, SnapshotRendimentosFii } from '../domain/rendaFii'
 import { VoltarInicio } from '../ui/VoltarInicio'
 import { LogoAtivo } from '../ui/LogoAtivo'
 import { FaixaCotacoes, itensDeFiis } from '../ui/FaixaCotacoes'
-import { rolarParaResultado } from '../ui/rolarParaResultado'
+import { rolarParaPainel, rolarParaResultado } from '../ui/rolarParaResultado'
 import { AvisoEducacional } from '../ui/AvisoEducacional'
 import { Top15FiisBaratos } from './Top15FiisBaratos'
 import { Top15FiisMaisNegociados } from './Top15FiisMaisNegociados'
@@ -117,7 +117,10 @@ export function SimuleFii({
             aria-selected={aba === c.id}
             aria-controls="painel-fii-aba"
             className={`vehicle-card ${aba === c.id ? 'selected' : ''}`}
-            onClick={() => setAba(c.id)}
+            onClick={() => {
+              setAba(c.id)
+              rolarParaPainel('painel-fii-aba')
+            }}
           >
             <span aria-hidden="true" style={{ fontSize: 24, lineHeight: 1 }}>{c.emoji}</span>
             <span style={{ fontSize: 14 }}>{c.titulo}</span>

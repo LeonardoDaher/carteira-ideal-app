@@ -2237,3 +2237,6 @@ select option:disabled { color: #6b7280 !important; -webkit-text-fill-color: #6b
 }
 .faixa-strike input[type='range']:focus-visible::-webkit-slider-thumb { outline: 2px solid var(--accent); outline-offset: 2px; }
 .faixa-strike input[type='range']:focus-visible::-moz-range-thumb { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Rolagem automática ao trocar de aba nas telas Simule: deixa uma folga acima do painel. */
+[role="tabpanel"] { scroll-margin-top: 12px; }

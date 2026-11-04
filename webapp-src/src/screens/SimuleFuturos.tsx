@@ -13,6 +13,7 @@ import type { AbaDaTela } from '../ui/AbasDaTela'
 import { CampoNumero } from '../ui/CampoNumero'
 import { GraficoCurvaDI } from '../ui/GraficoCurvaDI'
 import { GraficoFuturo } from '../ui/GraficoFuturo'
+import { rolarParaPainel } from '../ui/rolarParaResultado'
 import type { AppCtx } from '../state/useAppState'
 
 const JANELAS = [60, 120, 252] as const
@@ -86,7 +87,10 @@ export function SimuleFuturos({
                 <h2 className="titulo-setor font-display">{g.grupo}</h2>
                 <div className="grade-tickers" role="group" aria-label={`Contratos do grupo ${g.grupo}`}>
                   {g.produtos.map((p) => (
-                    <button key={p.codigo} className={`chip ${p.codigo === produto.codigo ? 'selected' : ''}`} aria-pressed={p.codigo === produto.codigo} onClick={() => setCodigo(p.codigo)}>
+                    <button key={p.codigo} className={`chip ${p.codigo === produto.codigo ? 'selected' : ''}`} aria-pressed={p.codigo === produto.codigo} onClick={() => {
+                      setCodigo(p.codigo)
+                      rolarParaPainel('painel-futuros-aba')
+                    }}>
                       {p.apelido}
                     </button>
                   ))}
@@ -99,6 +103,7 @@ export function SimuleFuturos({
           </div>
 
           <AbasDaTela
+            rolarAoTrocar
             prefixo="futuros"
             rotulo="O que você quer ver"
             ativa={abaAtiva}

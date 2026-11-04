@@ -172,6 +172,7 @@ export function SimuleOpcoes({ snapshot, endividadas, carregarBaratas, armazenam
       {dados && <FaixaCotacoes itens={itensDeOpcoes(dados)} dataPregao={dados.dataPregao} />}
 
       <AbasDaTela
+        rolarAoTrocar
         prefixo="opcoes"
         rotulo="O que você quer ver"
         ativa={aba}
