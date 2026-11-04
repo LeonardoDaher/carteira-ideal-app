@@ -2367,3 +2367,22 @@ O arquivo principal (`index-*.js`) tem 255 KB (81 KB com gzip). O maior é o do 
 **Testes.** `ui/telaPreguicosa.test.tsx` (recarga uma vez, sem laço; preload que falha não derruba nada). `dadosPorTela.test.ts` e `App.dadosSobDemanda.test.tsx` passam a entender as telas como arquivos próprios. Em navegador real, sobre o site montado: 17 telas abrem sem erro, a tela inicial não baixa dados, e a falha de um arquivo de tela provoca uma única recarga e depois a tela de erro.
 
 **Fica para depois.** `snapshotTop15Mercado.ts` ainda junta sete rankings (Simule FII, ETF e BDR baixam os sete). O código do Simule Ações (359 KB) pode ser dividido por aba.
+
+## D139 (03/11/2026): um módulo por ranking do Top 15, cada tela baixa só os que usa
+
+**Contexto.** `snapshotTop15Mercado.ts` registrava sete rankings num módulo só, e `Top15MaisNegociados` e `Top15Indice` liam todos pelo mesmo mapa. Quem abria Simule FII, ETF ou BDR baixava os sete arquivos (cerca de 70 KB com gzip), mesmo precisando de um ou dois (limite anotado na D137 e na D138).
+
+**Decisão.** Sete módulos, um por arquivo de mercado (`snapshotEtfsMaisNegociados.ts`, `snapshotFiisMaisNegociados.ts`, `snapshotAcoesMaisNegociadas.ts`, `snapshotBdrsMaisNegociados.ts`, `snapshotBdrsDesconto.ts`, `snapshotIfixMaioresPesos.ts`, `snapshotIbovMaioresPesos.ts`). `Top15MaisNegociados` e `Top15Indice` não importam mais nenhum snapshot: o `snapshot` passou a ser obrigatório. Os atalhos por classe viraram um arquivo cada (`Top15EtfsMaisNegociados.tsx`, `Top15FiisMaisNegociados.tsx`, `Top15AcoesMaisNegociadas.tsx`, `Top15BdrsMaisNegociados.tsx`, `Top15IfixMaioresPesos.tsx`, `Top15IbovMaioresPesos.tsx`), cada um com o seu snapshot como valor padrão do parâmetro (lido na hora de desenhar, como manda a regra da D137). `data/snapshotTop15Mercado.ts` foi removido. A tabela `DADOS_DA_TELA` foi reescrita sem o grupo `TOP15_MERCADO`; o teste `dadosPorTela.test.ts` confere a tabela contra os imports reais.
+
+**Efeito (arquivos de mercado baixados por tela).**
+
+| Tela | Antes | Depois | Economia (gzip) |
+|---|---|---|---|
+| Simule FII | 13 | 8 | cerca de 38 KB |
+| Simule ETF | 11 | 5 | cerca de 39 KB |
+| Simule BDR | 11 | 6 | cerca de 28 KB |
+| Simule Ações | 17 | 12 | cerca de 33 KB |
+
+Mais 5 a 6 pedidos a menos por tela. A tela do detalhe do ativo deixa de baixar `bdrsDesconto`. O ganho é pequeno em comparação com a D138; vale mais pelos pedidos a menos em rede lenta e porque, daqui para a frente, uma tela nova que mostre um ranking só paga por ele.
+
+**Teste.** Os testes de integração em navegador real (17 telas) e o `App.dadosSobDemanda.test.tsx` confirmam que cada tela baixa exatamente o que a tabela diz.

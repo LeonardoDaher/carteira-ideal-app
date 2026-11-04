@@ -1,5 +1,4 @@
 import { Fragment } from 'react'
-import { SNAPSHOT_IBOV_MAIORES_PESOS, SNAPSHOT_IFIX_MAIORES_PESOS } from '../data/snapshotTop15Mercado'
 import { introAuditoria, notaAuditoriaDiaria } from '../domain/auditoriaDiaria'
 import { formatarVolumeDiario } from '../domain/fiiBaratos'
 import { formatarData } from '../domain/rendaFii'
@@ -58,16 +57,13 @@ export const TEXTOS_INDICE: Record<ClasseIndice, Textos> = {
   },
 }
 
-// Função, e não constante (D137): o dado é baixado depois que o módulo carrega, e uma cópia no nível do módulo ficaria vazia para sempre.
-const snapshotPadrao = (): Record<ClasseIndice, SnapshotIndice> => ({ ifix: SNAPSHOT_IFIX_MAIORES_PESOS, ibov: SNAPSHOT_IBOV_MAIORES_PESOS })
-
 /**
  * Caixa "Top 15 do IFIX" / "Top 15 do Ibovespa" (D72): os 15 maiores pesos da carteira teórica oficial da B3. O peso é
  * o que a B3 publica; o job só ordena e soma. A tela mostra e diz de onde veio, sem reordenar nem opinar.
  */
-export function Top15Indice({ classe, snapshot }: { classe: ClasseIndice; snapshot?: SnapshotIndice }) {
+export function Top15Indice({ classe, snapshot }: { classe: ClasseIndice; snapshot: SnapshotIndice }) {
   const t = TEXTOS_INDICE[classe]
-  const s = snapshot ?? snapshotPadrao()[classe]
+  const s = snapshot
   if (!s.publicado || s.ranking.length === 0) {
     return (
       <div className="card col" style={{ gap: 8 }} role="status" data-testid={`${t.id}-validacao`}>

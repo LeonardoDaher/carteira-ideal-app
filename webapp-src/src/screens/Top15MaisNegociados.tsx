@@ -1,5 +1,4 @@
 import { Fragment, useState } from 'react'
-import { SNAPSHOT_ACOES_MAIS_NEGOCIADAS, SNAPSHOT_BDRS_MAIS_NEGOCIADOS, SNAPSHOT_ETFS_MAIS_NEGOCIADOS, SNAPSHOT_FIIS_MAIS_NEGOCIADOS } from '../data/snapshotTop15Mercado'
 import { introAuditoria, notaAuditoriaDiaria } from '../domain/auditoriaDiaria'
 import { formatarVariacao } from '../domain/bdrs'
 import { formatarVolumeDiario } from '../domain/fiiBaratos'
@@ -99,23 +98,15 @@ export const TEXTOS: Record<ClasseMaisNegociados, Textos> = {
   },
 }
 
-// Função, e não constante (D137): o dado é baixado depois que o módulo carrega, e uma cópia no nível do módulo ficaria vazia para sempre.
-const snapshotPadrao = (): Record<ClasseMaisNegociados, SnapshotMaisNegociados> => ({
-  etfs: SNAPSHOT_ETFS_MAIS_NEGOCIADOS,
-  fiis: SNAPSHOT_FIIS_MAIS_NEGOCIADOS,
-  acoes: SNAPSHOT_ACOES_MAIS_NEGOCIADAS,
-  bdrs: SNAPSHOT_BDRS_MAIS_NEGOCIADOS,
-})
-
 /**
  * Caixa "Top 15 mais negociados" das telas Simule ETF, Simule FII, Simule Ações e Simule BDR (D70 e D71). Ranking
  * ABERTO (sem código) por volume financeiro: o resultado e a posição de cada ativo vêm prontos do job (pasta de
  * auditoria versionada); a tela só mostra, sem reordenar. É liquidez, não qualidade: o texto diz isso no topo, no
  * cartão e no aviso.
  */
-export function Top15MaisNegociados({ classe, snapshot }: { classe: ClasseMaisNegociados; snapshot?: SnapshotMaisNegociados }) {
+export function Top15MaisNegociados({ classe, snapshot }: { classe: ClasseMaisNegociados; snapshot: SnapshotMaisNegociados }) {
   const t = TEXTOS[classe]
-  const s = snapshot ?? snapshotPadrao()[classe]
+  const s = snapshot
   if (!s.publicado || s.geral.length === 0) return <EmValidacao t={t} />
   const categorias = Object.keys(s.porCategoria)
   const rotuloVariacao = s.parametros.janela3Meses === 63 ? 'Variação em 3 meses' : `Variação em ${s.parametros.janela3Meses} pregões`
