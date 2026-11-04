@@ -2332,3 +2332,38 @@ Testes: `scripts/acoes-extras.test.mjs` (4) e um caso novo em `analiseFundamenta
 **Medido** (Chromium, CPU 4x mais lenta, sem cache): `index.html` 3,06 MB → 1,94 MB (gzip 820 → 612 KB). Tela inicial no 4G lento: 4,6 s → 3,6 s. Simule Tesouro: 4,6 s → 3,9 s. Simule Ações, que precisa de 17 arquivos: sem ganho (4,8 s → 4,7 s). Uma atualização só de dados agora deixa o `index.html` idêntico byte a byte (conferido), então o cache do código sobrevive.
 
 **Limites.** O ganho maior no primeiro carregamento ainda depende de dividir o código das telas (hoje o app é um arquivo só por causa do `vite-plugin-singlefile`; ~1,4 MB do que sobra é código). `snapshotTop15Mercado.ts` registra sete rankings num módulo só, então Simule FII, ETF e BDR baixam os sete mesmo usando dois ou três; separar em módulos menores reduz isso. O CSP continua com `'unsafe-inline'`, pela mesma razão do arquivo único.
+
+## D138 (03/11/2026): código do app dividido por tela, sem `vite-plugin-singlefile`
+
+**Contexto.** Depois da D137 o `index.html` ainda tinha 1,94 MB (612 KB com gzip), quase tudo código de todas as telas, e quem abria só a tela inicial baixava o app inteiro.
+
+**Decisão.** Cada tela, menos a inicial (`Onboarding`), é um arquivo próprio, baixado quando a pessoa chega nela: `React.lazy` pelo helper `ui/telaPreguicosa.ts`, usado em `App.tsx`. O `vite-plugin-singlefile` saiu. O build agora publica:
+- `app/index.html` (4,6 KB) com o script do app e o CSS por endereço, não embutidos;
+- `app/codigo/*.js`, `*.css` e os quatro fundos `.jpg`, com nome que muda só quando o conteúdo muda (o Vite tem `base: './'` e `build.assetsDir: 'codigo'`). A pasta própria evita colisão com `/assets` da landing;
+- `app/dados/*.json` como antes (D137).
+
+**Cuidados.**
+- **Download em paralelo.** `App.tsx` chama `preload()` da tela já ao decidir qual desenhar, junto com o download dos dados dela (`ComDados`), para um não esperar o outro. Na tela inicial, quando o navegador está ocioso, baixa em segundo plano as telas do questionário (Idade até Carteira).
+- **Versão nova com o app aberto.** Se o arquivo de uma tela sumiu (saiu deploy novo), `telaPreguicosa` recarrega a página uma vez; a trava fica no `sessionStorage` (`ci:recarga-por-arquivo-antigo`) e, na segunda falha, o erro sobe para a `ErrorBoundary`, sem laço de recarga.
+- **Cache.** `vercel.json` manda `Cache-Control: public, max-age=31536000, immutable` para `/app/codigo/*` (arquivos com hash). Os de `dados/` continuam revalidando. Em uma visita de volta, o código vem do cache do navegador e só os dados são verificados.
+- **CSP (D87).** O `index.html` passa a ter um script externo do mesmo domínio (`'self'`) e o inline do tema, que continua com hash. O cabeçalho do `vercel.json` mantém `'unsafe-inline'` porque as outras páginas do site ainda têm scripts inline protegidos pela meta de hashes; sem ele, o cabeçalho as bloquearia.
+- **Imagens.** Sem o `assetsInlineLimit` gigante, os fundos (4 JPG, cerca de 110 KB em base64) deixam de ir dentro do código e o navegador baixa só o do tema e do tamanho de tela dele.
+- **Dependências.** Saíram `vite-plugin-singlefile`, `micromatch` e `braces` (os três alertas do `npm audit` que sobravam na D92).
+- **Lint.** `webapp-src/.oxlintrc.json` ignora `dist/`, que antes era um HTML e agora tem JS.
+
+**Medido** (Chromium com CPU 4x mais lenta, sem cache, comparando a produção da D137 com esta versão):
+
+| Rede | Tela | Antes | Depois |
+|---|---|---|---|
+| 4G bom (9 Mbps) | inicial | 1,74 s, 580 KB | 0,75 s, 178 KB |
+| 4G bom | Simule Tesouro | 2,02 s, 585 KB | 1,23 s, 169 KB |
+| 4G bom | Simule Ações | 2,48 s, 737 KB | 1,79 s, 459 KB |
+| 4G lento (1,6 Mbps) | inicial | 3,74 s, 555 KB | 1,61 s, 153 KB |
+| 4G lento | Simule Tesouro | 4,13 s, 560 KB | 2,08 s, 169 KB |
+| 4G lento | Simule Ações | 4,88 s, 697 KB | 3,46 s, 419 KB |
+
+O arquivo principal (`index-*.js`) tem 255 KB (81 KB com gzip). O maior é o do Simule Ações (359 KB), por causa do que a tela carrega junto (gráficos e análises).
+
+**Testes.** `ui/telaPreguicosa.test.tsx` (recarga uma vez, sem laço; preload que falha não derruba nada). `dadosPorTela.test.ts` e `App.dadosSobDemanda.test.tsx` passam a entender as telas como arquivos próprios. Em navegador real, sobre o site montado: 17 telas abrem sem erro, a tela inicial não baixa dados, e a falha de um arquivo de tela provoca uma única recarga e depois a tela de erro.
+
+**Fica para depois.** `snapshotTop15Mercado.ts` ainda junta sete rankings (Simule FII, ETF e BDR baixam os sete). O código do Simule Ações (359 KB) pode ser dividido por aba.
