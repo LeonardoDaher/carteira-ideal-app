@@ -165,7 +165,7 @@ describe('Simule Ações: aba de dividendos', () => {
   it('fica no cartão Top 15, abre a lista (ou o "em validação") e dá para voltar ao simulador', () => {
     render(<SimuleAcoes ctx={ctx} snapshot={{ geradoEm: null, dataPregao: null, fonte: null, cadastroId: null, pregoesNoHistorico: 0, sessoesLiquidez: 21, totais: { setores: 0, empresas: 0 }, gruposOrdem: [], setores: [], busca: [] } as never} />)
     const abas = within(screen.getByRole('tablist', { name: 'O que você quer ver' })).getAllByRole('tab')
-    expect(abas).toHaveLength(5)
+    expect(abas).toHaveLength(6)
     fireEvent.click(abas[1])
     const cartao = screen.getByRole('tab', { name: /Top 15 pagadoras de dividendos/ })
     expect(cartao.textContent).toContain('Dividend yield de 12 meses')

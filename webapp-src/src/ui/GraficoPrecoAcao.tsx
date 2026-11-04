@@ -100,12 +100,13 @@ function passoRedondo(amplitude: number, linhas = 4) {
  * Com o histórico longo do COTAHIST (`abe`) o corpo vai da abertura real ao fechamento; sem ele (Boletim de Preços, que não traz a
  * abertura) vai do fechamento do pregão anterior ao do dia, e o gap de abertura não aparece. O pavio vai da mínima à máxima. Toque, arraste ou use as setas para ler cada dia.
  */
-export function GraficoPrecoAcao({ barras, zonas, nome, janela = 120, opcoes, periodicidade = 'diario', niveis = [], gaps = [], caixa = null, sinais = [], sinalAtivo = null, alvo = null, linhas = [] }: { barras: Barra[]; zonas: ZonaPreco[]; nome: string; janela?: number; opcoes: OpcoesDoGrafico; periodicidade?: 'diario' | 'semanal' | 'mensal'; niveis?: (NivelDePreco & { cor?: string })[]; gaps?: GapAberto[]; caixa?: CaixaDaBase | null; sinais?: SinalDeCandle[]; sinalAtivo?: SinalDeCandle | null; alvo?: number | null; linhas?: LinhaDeTendencia[] }) {
+export function GraficoPrecoAcao({ barras, zonas, nome, janela = 120, opcoes, periodicidade = 'diario', niveis = [], gaps = [], caixa = null, sinais = [], sinalAtivo = null, alvo = null, linhas = [], unidadeDePreco = 'reais' }: { barras: Barra[]; zonas: ZonaPreco[]; nome: string; janela?: number; opcoes: OpcoesDoGrafico; periodicidade?: 'diario' | 'semanal' | 'mensal'; niveis?: (NivelDePreco & { cor?: string })[]; gaps?: GapAberto[]; caixa?: CaixaDaBase | null; sinais?: SinalDeCandle[]; sinalAtivo?: SinalDeCandle | null; alvo?: number | null; linhas?: LinhaDeTendencia[]; /** Índice (IBOV, IFIX) vale em pontos e não tem volume negociado. */ unidadeDePreco?: 'reais' | 'pontos' }) {
   const [indice, setIndice] = useState<number | null>(null)
   const [vista, setVista] = useState<VistaDoGrafico>({ qtd: janela, desloc: 0 })
   const svgRef = useRef<SVGSVGElement>(null)
   const arrasto = useRef<{ x: number; desloc: number } | null>(null)
   const idLeitura = useId()
+  const moeda = (v: number) => (unidadeDePreco === 'pontos' ? `${numero(v, 2)} pts` : reais(v))
   const total = barras.length
   const { qtd, desloc } = vistaValida(vista, total)
 
@@ -281,7 +282,7 @@ export function GraficoPrecoAcao({ barras, zonas, nome, janela = 120, opcoes, pe
   const anterior = i > 0 ? vis[i - 1].fech : null
   const variacao = anterior ? (atual.fech / anterior - 1) * 100 : null
   const unidade = periodicidade === 'mensal' ? 'meses' : periodicidade === 'semanal' ? 'semanas' : 'pregões'
-  const resumo = `Gráfico de candles ${periodicidade === 'mensal' ? 'mensais' : periodicidade === 'semanal' ? 'semanais' : 'diários'} de ${nome}, ${n} ${unidade}, de ${dataLonga(vis[0].data)} a ${dataLonga(vis[n - 1].data)}. Último fechamento ${reais(vis[n - 1].fech)}, mínima do período ${reais(dados.minimo)} e máxima ${reais(dados.maximo)}.`
+  const resumo = `Gráfico de candles ${periodicidade === 'mensal' ? 'mensais' : periodicidade === 'semanal' ? 'semanais' : 'diários'} de ${nome}, ${n} ${unidade}, de ${dataLonga(vis[0].data)} a ${dataLonga(vis[n - 1].data)}. Último fechamento ${moeda(vis[n - 1].fech)}, mínima do período ${moeda(dados.minimo)} e máxima ${moeda(dados.maximo)}.`
   const estiloEixo = { fill: 'var(--text-muted)', fontSize: 9, fontVariantNumeric: 'tabular-nums' } as const
 
   const caixaX = (clientX: number) => {
@@ -338,7 +339,7 @@ export function GraficoPrecoAcao({ barras, zonas, nome, janela = 120, opcoes, pe
         <span>Máx <strong>{numero(atual.max, 2)}</strong></span>
         <span>Mín <strong>{numero(atual.min, 2)}</strong></span>
         {variacao !== null && <span style={{ color: variacao >= 0 ? COR_ALTA : COR_BAIXA }}>{variacao > 0 ? '+' : ''}{numero(variacao, 2)}%</span>}
-        <span className="muted">R$ {numero(atual.vol / 1000, 1)} mi negociados</span>
+        {unidadeDePreco === 'reais' && <span className="muted">R$ {numero(atual.vol / 1000, 1)} mi negociados</span>}
         {opcoes.sinais && sinais.filter((s) => s.indice === dados.inicio + i).map((s) => <strong key={s.tipo} style={{ color: s.lado === 'compra' ? COR_SINAL_COMPRA : COR_SINAL_VENDA }}>{s.rotulo}</strong>)}
         {pEst && dados.eK[i] !== null && dados.eD[i] !== null && <span>Estoc. %K <strong>{numero(dados.eK[i] as number, 0)}</strong> %D <strong>{numero(dados.eD[i] as number, 0)}</strong></span>}
         {pIfr && dados.ifr[i] !== null && <span>IFR <strong>{numero(dados.ifr[i] as number, 0)}</strong></span>}

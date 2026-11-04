@@ -1,5 +1,6 @@
 import { useId, useMemo, useState } from 'react'
 import { SNAPSHOT_FIIS_MAIS_NEGOCIADOS } from '../data/snapshotFiisMaisNegociados'
+import { AnaliseDeIndice } from './AnaliseDeIndice'
 import { SNAPSHOT_IFIX_MAIORES_PESOS } from '../data/snapshotIfixMaioresPesos'
 import { NosRadares } from '../ui/DestaquesDoAtivo'
 import { indexarDestaques } from '../domain/destaquesRadares'
@@ -71,7 +72,7 @@ export function SimuleFii({
   const exibidos = grupos.flatMap((g) => g.fundos)
   const [tickerSelecionado, setTickerSelecionado] = useState<string | undefined>(exibidos[0]?.ticker)
   const [quantidadeLivre, setQuantidadeLivre] = useState('')
-  const [aba, setAba] = useState<'simulador' | 'top15' | 'negociados' | 'ifix'>('simulador')
+  const [aba, setAba] = useState<'simulador' | 'top15' | 'negociados' | 'ifix' | 'ifixTecnica'>('simulador')
 
   // A busca pode escolher um fundo fora da lista por setor: procura em todos.
   const fundo = snapshot.fundos.find((f) => f.ticker === tickerSelecionado) ?? exibidos[0]
@@ -108,6 +109,7 @@ export function SimuleFii({
             { id: 'top15', emoji: '🏷️', titulo: 'Top 15 mais baratos', descricao: 'Tijolo e papel, com auditoria' },
             { id: 'negociados', emoji: '📊', titulo: 'Top 15 mais negociados', descricao: 'Ranking por volume' },
             { id: 'ifix', emoji: '🏛️', titulo: 'Top 15 do IFIX', descricao: 'Maiores pesos do índice' },
+            { id: 'ifixTecnica', emoji: '📈', titulo: 'Análise do IFIX', descricao: 'Gráfico e leitura técnica do índice' },
           ] as const
         ).map((c) => (
           <button
@@ -130,7 +132,9 @@ export function SimuleFii({
       </div>
 
       <div id="painel-fii-aba" role="tabpanel" aria-labelledby={`aba-fii-${aba}`} className="col" style={{ gap: 'inherit' }}>
-      {aba === 'top15' ? (
+      {aba === 'ifixTecnica' ? (
+        <AnaliseDeIndice codigo="IFIX" />
+      ) : aba === 'top15' ? (
         <Top15FiisBaratos />
       ) : aba === 'ifix' ? (
         <Top15IfixMaioresPesos />

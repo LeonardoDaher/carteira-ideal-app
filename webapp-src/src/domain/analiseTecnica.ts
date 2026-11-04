@@ -6,6 +6,8 @@
 // não há candlestick (martelo, engolfo, doji...), e o "gap" é medido entre mínima e máxima de dias seguidos. O volume é
 // financeiro (R$), não quantidade de ações nem número de negócios. O histórico guarda até 260 pregões (cerca de 12 meses).
 
+import { comUnidade, moedaAtual } from './unidadeDePreco'
+import type { UnidadeDePreco } from './unidadeDePreco'
 import { mediaMovel } from './futuros'
 
 // ---------------------------------------------------------------------------------------
@@ -254,7 +256,7 @@ export const SEM_SINAL = 'Sem sinal técnico suficientemente consistente neste m
 // Utilidades
 // ---------------------------------------------------------------------------------------
 
-const reais = (v: number) => `R$ ${v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+const reais = (v: number) => moedaAtual(v)
 const pct = (v: number, sinal = false) => `${sinal && v > 0 ? '+' : ''}${v.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`
 const num = (v: number, casas = 1) => v.toLocaleString('pt-BR', { minimumFractionDigits: casas, maximumFractionDigits: casas })
 const limitar = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v))
@@ -1284,12 +1286,20 @@ export interface EntradaTecnica {
   referencia?: SnapshotSeries['referencia']
   alertas?: SnapshotSeries['alertas'][string]
   horizonte?: Horizonte
+  /** 'pontos' para índice (IBOV, IFIX): os textos saem em pontos, não em reais. Padrão: reais. */
+  unidade?: UnidadeDePreco
+  /** Índice não tem volume negociado: a leitura não usa volume (sem nota de volume nem penalidade de liquidez). */
+  semVolume?: boolean
 }
 
 /** Mínimo de pregões para a análise; abaixo disso devolve null. */
 export const MINIMO_PREGOES_TECNICA = 60
 
 export function analisarTecnica(entrada: EntradaTecnica): AnaliseTecnica | null {
+  return comUnidade(entrada.unidade ?? 'reais', () => calcularTecnica(entrada))
+}
+
+function calcularTecnica(entrada: EntradaTecnica): AnaliseTecnica | null {
   const horizonte = entrada.horizonte ?? 'medio'
   const { barras: b, diasSemNegocio } = montarBarras(entrada.pregoes, entrada.pontos)
   if (b.length < MINIMO_PREGOES_TECNICA) return null
@@ -1307,7 +1317,9 @@ export function analisarTecnica(entrada: EntradaTecnica): AnaliseTecnica | null 
     ...cruzamentosEntre(b, mediaMovel(fech, 50), mediaMovel(fech, 200), 'MMS 50', 'MMS 200', 120),
   ].sort((a, c) => a.pregoesAtras - c.pregoesAtras)
   const momentum = analisarMomentum(b, tendencia.diario.leitura)
-  const volume = analisarVolume(b)
+  const volume: VolumeAnalise = entrada.semVolume
+    ? { mediaFinanceira21: null, media20: null, relativo: null, altaSobreQueda: null, obvTendencia: null, obvConfirmaPreco: null, liquidez: 'alta', leitura: 'Índice não tem volume negociado: a leitura não usa volume.' }
+    : analisarVolume(b)
   const volatilidade = analisarVolatilidade(b)
   const zonas = zonasDePreco(b, volatilidade.atrPct)
   const rompimentos = detectarRompimentos(b, zonas)
@@ -1330,8 +1342,10 @@ export function analisarTecnica(entrada: EntradaTecnica): AnaliseTecnica | null 
     nota: Math.round(limitar(notaTend, 0, 100)),
     porque: periodos.map((p) => `${p === 'diario' ? 'diário' : p} em ${ROTULO_LEITURA[tendencia[p].leitura].toLowerCase()}`).join('; '),
   }
-  const componentes = [nTend, notaMomentum(momentum), notaVolume(volume), notaLocalizacao(zonas, preco), notaRisco(volatilidade, volume.liquidez)]
-  const total = Math.round(componentes.reduce((s, c) => s + c.peso * c.nota, 0))
+  const componentes = [nTend, notaMomentum(momentum), ...(entrada.semVolume ? [] : [notaVolume(volume)]), notaLocalizacao(zonas, preco), notaRisco(volatilidade, volume.liquidez)]
+  // Sem a nota de volume (índice), os pesos das demais são refeitos para somar 1; com volume, a conta é a de sempre.
+  const somaPesosDaNota = entrada.semVolume ? componentes.reduce((s, c) => s + c.peso, 0) : 1
+  const total = Math.round(componentes.reduce((s, c) => s + c.peso * c.nota, 0) / somaPesosDaNota)
   const vies = vieSDaNota(total)
 
   // Confiança: qualidade dos dados, concordância entre as evidências e clareza da estrutura. Não é probabilidade de lucro.
