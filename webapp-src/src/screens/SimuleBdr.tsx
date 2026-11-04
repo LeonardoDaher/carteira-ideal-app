@@ -1,5 +1,5 @@
 import { useId, useMemo, useState } from 'react'
-import { SNAPSHOT_BDRS_MAIS_NEGOCIADOS } from '../data/snapshotTop15Mercado'
+import { SNAPSHOT_BDRS_MAIS_NEGOCIADOS } from '../data/snapshotBdrsMaisNegociados'
 import { NosRadares } from '../ui/DestaquesDoAtivo'
 import { indexarDestaques } from '../domain/destaquesRadares'
 import type { IndiceDeDestaques } from '../domain/destaquesRadares'
@@ -21,7 +21,7 @@ import { rolarParaResultado } from '../ui/rolarParaResultado'
 import { AvisoEducacional } from '../ui/AvisoEducacional'
 import { AbasDaTela } from '../ui/AbasDaTela'
 import { Top15BdrsDesconto } from './Top15BdrsDesconto'
-import { Top15BdrsMaisNegociados } from './Top15EtfsMaisNegociados'
+import { Top15BdrsMaisNegociados } from './Top15BdrsMaisNegociados'
 import type { AppCtx } from '../state/useAppState'
 
 /** Radares que valem aqui: liquidez, no geral e na categoria. */

@@ -1,5 +1,6 @@
 import { useId, useMemo, useState } from 'react'
-import { SNAPSHOT_FIIS_MAIS_NEGOCIADOS, SNAPSHOT_IFIX_MAIORES_PESOS } from '../data/snapshotTop15Mercado'
+import { SNAPSHOT_FIIS_MAIS_NEGOCIADOS } from '../data/snapshotFiisMaisNegociados'
+import { SNAPSHOT_IFIX_MAIORES_PESOS } from '../data/snapshotIfixMaioresPesos'
 import { NosRadares } from '../ui/DestaquesDoAtivo'
 import { indexarDestaques } from '../domain/destaquesRadares'
 import type { IndiceDeDestaques } from '../domain/destaquesRadares'
@@ -28,7 +29,8 @@ import { FaixaCotacoes, itensDeFiis } from '../ui/FaixaCotacoes'
 import { rolarParaResultado } from '../ui/rolarParaResultado'
 import { AvisoEducacional } from '../ui/AvisoEducacional'
 import { Top15FiisBaratos } from './Top15FiisBaratos'
-import { Top15FiisMaisNegociados, Top15IfixMaioresPesos } from './Top15EtfsMaisNegociados'
+import { Top15FiisMaisNegociados } from './Top15FiisMaisNegociados'
+import { Top15IfixMaioresPesos } from './Top15IfixMaioresPesos'
 import type { AppCtx } from '../state/useAppState'
 
 /** Radares que valem para FIIs: liquidez e peso no IFIX. */

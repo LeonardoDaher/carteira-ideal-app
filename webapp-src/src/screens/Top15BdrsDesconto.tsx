@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { storage } from '../data/storage'
-import { SNAPSHOT_BDRS_DESCONTO } from '../data/snapshotTop15Mercado'
+import { SNAPSHOT_BDRS_DESCONTO } from '../data/snapshotBdrsDesconto'
 import { CHAVE_CODIGO_TOP15_BDRS, buscarTop15Bdrs } from '../domain/acessoTop15'
 import type { RespostaTop15Bdrs } from '../domain/acessoTop15'
 import { formatarPercentual } from '../domain/acoesBaratas'

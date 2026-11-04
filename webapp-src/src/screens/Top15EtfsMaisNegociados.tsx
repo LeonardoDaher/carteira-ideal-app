@@ -1,31 +1,8 @@
+import { SNAPSHOT_ETFS_MAIS_NEGOCIADOS } from '../data/snapshotEtfsMaisNegociados'
+import type { SnapshotMaisNegociados } from '../domain/top15Mercado'
 import { Top15MaisNegociados } from './Top15MaisNegociados'
-import { Top15Indice } from './Top15Indice'
-import type { SnapshotIndice, SnapshotMaisNegociados } from '../domain/top15Mercado'
 
-/**
- * Caixas "Top 15 mais negociados" (D70 e D71). Toda a tela está em Top15MaisNegociados.tsx; aqui ficam só os
- * atalhos de cada classe, com o arquivo de dados certo.
- */
-export function Top15EtfsMaisNegociados({ snapshot }: { snapshot?: SnapshotMaisNegociados }) {
+/** Atalho da classe, com o arquivo de dados certo (D70, D71). Importar só este módulo baixa só o arquivo desta classe (D139). */
+export function Top15EtfsMaisNegociados({ snapshot = SNAPSHOT_ETFS_MAIS_NEGOCIADOS }: { snapshot?: SnapshotMaisNegociados }) {
   return <Top15MaisNegociados classe="etfs" snapshot={snapshot} />
-}
-
-export function Top15FiisMaisNegociados({ snapshot }: { snapshot?: SnapshotMaisNegociados }) {
-  return <Top15MaisNegociados classe="fiis" snapshot={snapshot} />
-}
-
-export function Top15AcoesMaisNegociadas({ snapshot }: { snapshot?: SnapshotMaisNegociados }) {
-  return <Top15MaisNegociados classe="acoes" snapshot={snapshot} />
-}
-
-export function Top15BdrsMaisNegociados({ snapshot }: { snapshot?: SnapshotMaisNegociados }) {
-  return <Top15MaisNegociados classe="bdrs" snapshot={snapshot} />
-}
-
-export function Top15IfixMaioresPesos({ snapshot }: { snapshot?: SnapshotIndice }) {
-  return <Top15Indice classe="ifix" snapshot={snapshot} />
-}
-
-export function Top15IbovMaioresPesos({ snapshot }: { snapshot?: SnapshotIndice }) {
-  return <Top15Indice classe="ibov" snapshot={snapshot} />
 }

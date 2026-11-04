@@ -11,18 +11,17 @@ import type { Screen } from '../state/useAppState'
 const MERCADO: ChaveDeDados[] = ['mercadoOficial']
 /** Catálogo que reconhece FIIs, ETFs e BDRs pelo código (`catalogoAtivos.ts`). */
 const CATALOGO: ChaveDeDados[] = ['rendimentosFii', 'etfs', 'bdrs']
-/** Os sete rankings de `snapshotTop15Mercado.ts` (um módulo só). */
-const TOP15_MERCADO: ChaveDeDados[] = [
+/** Os rankings que `destaquesGerais()` junta (um módulo por arquivo, D139). O de BDRs com desconto não entra. */
+const RANKINGS_DOS_DESTAQUES: ChaveDeDados[] = [
   'acoesMaisNegociadas',
   'bdrsMaisNegociados',
   'etfsMaisNegociados',
   'fiisMaisNegociados',
-  'bdrsDesconto',
   'ibovMaioresPesos',
   'ifixMaioresPesos',
 ]
-/** O que `destaquesGerais()` junta: radares de ações, FIIs, BDRs e ETFs. */
-const DESTAQUES: ChaveDeDados[] = [...TOP15_MERCADO, 'radarDividendos', 'acoesEndividadas', 'acoesDividendos']
+/** O que `destaquesGerais()` junta: rankings e radares de ações, FIIs, BDRs e ETFs. */
+const DESTAQUES: ChaveDeDados[] = [...RANKINGS_DOS_DESTAQUES, 'radarDividendos', 'acoesEndividadas', 'acoesDividendos']
 
 export const DADOS_DA_TELA: Partial<Record<Screen, readonly ChaveDeDados[]>> = {
   simulador: CATALOGO,
@@ -34,11 +33,15 @@ export const DADOS_DA_TELA: Partial<Record<Screen, readonly ChaveDeDados[]>> = {
   simuleMoto: MERCADO,
   simuleFuturos: ['futuros'],
   simuleOpcoes: [...MERCADO, 'acoesEndividadas', ...CATALOGO],
-  simuleFii: [...CATALOGO, ...TOP15_MERCADO, 'fiiBaratos', 'fiisPreco', ...MERCADO],
-  simuleBdr: [...CATALOGO, ...TOP15_MERCADO, ...MERCADO],
-  simuleEtf: [...CATALOGO, ...TOP15_MERCADO, ...MERCADO],
+  simuleFii: [...CATALOGO, 'fiisMaisNegociados', 'ifixMaioresPesos', 'fiiBaratos', 'fiisPreco', ...MERCADO],
+  simuleBdr: [...CATALOGO, 'bdrsMaisNegociados', 'bdrsDesconto', ...MERCADO],
+  simuleEtf: [...CATALOGO, 'etfsMaisNegociados', ...MERCADO],
   simuleAcoes: [
-    ...DESTAQUES,
+    'acoesMaisNegociadas',
+    'ibovMaioresPesos',
+    'radarDividendos',
+    'acoesEndividadas',
+    'acoesDividendos',
     ...MERCADO,
     ...CATALOGO,
     'acoesBaratas',

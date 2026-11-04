@@ -1,10 +1,12 @@
 import { SNAPSHOT_ACOES_DIVIDENDOS } from './snapshotAcoesDividendos'
 import { SNAPSHOT_ACOES_ENDIVIDADAS } from './snapshotAcoesEndividadas'
 import { SNAPSHOT_RADAR_DIVIDENDOS } from './snapshotRadarDividendos'
-import {
-  SNAPSHOT_ACOES_MAIS_NEGOCIADAS, SNAPSHOT_BDRS_MAIS_NEGOCIADOS, SNAPSHOT_ETFS_MAIS_NEGOCIADOS, SNAPSHOT_FIIS_MAIS_NEGOCIADOS,
-  SNAPSHOT_IBOV_MAIORES_PESOS, SNAPSHOT_IFIX_MAIORES_PESOS,
-} from './snapshotTop15Mercado'
+import { SNAPSHOT_ACOES_MAIS_NEGOCIADAS } from './snapshotAcoesMaisNegociadas'
+import { SNAPSHOT_BDRS_MAIS_NEGOCIADOS } from './snapshotBdrsMaisNegociados'
+import { SNAPSHOT_ETFS_MAIS_NEGOCIADOS } from './snapshotEtfsMaisNegociados'
+import { SNAPSHOT_FIIS_MAIS_NEGOCIADOS } from './snapshotFiisMaisNegociados'
+import { SNAPSHOT_IBOV_MAIORES_PESOS } from './snapshotIbovMaioresPesos'
+import { SNAPSHOT_IFIX_MAIORES_PESOS } from './snapshotIfixMaioresPesos'
 import { indexarDestaques } from '../domain/destaquesRadares'
 import type { IndiceDeDestaques } from '../domain/destaquesRadares'
 

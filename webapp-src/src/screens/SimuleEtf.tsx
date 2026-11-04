@@ -1,5 +1,5 @@
 import { useId, useMemo, useState } from 'react'
-import { SNAPSHOT_ETFS_MAIS_NEGOCIADOS } from '../data/snapshotTop15Mercado'
+import { SNAPSHOT_ETFS_MAIS_NEGOCIADOS } from '../data/snapshotEtfsMaisNegociados'
 import { NosRadares } from '../ui/DestaquesDoAtivo'
 import { indexarDestaques } from '../domain/destaquesRadares'
 import type { IndiceDeDestaques } from '../domain/destaquesRadares'
