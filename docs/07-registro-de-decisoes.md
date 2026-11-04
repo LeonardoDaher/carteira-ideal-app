@@ -2386,3 +2386,20 @@ O arquivo principal (`index-*.js`) tem 255 KB (81 KB com gzip). O maior é o do 
 Mais 5 a 6 pedidos a menos por tela. A tela do detalhe do ativo deixa de baixar `bdrsDesconto`. O ganho é pequeno em comparação com a D138; vale mais pelos pedidos a menos em rede lenta e porque, daqui para a frente, uma tela nova que mostre um ranking só paga por ele.
 
 **Teste.** Os testes de integração em navegador real (17 telas) e o `App.dadosSobDemanda.test.tsx` confirmam que cada tela baixa exatamente o que a tabela diz.
+
+
+## D140 (04/11/2026): análise técnica do Ibovespa (Simule Ações) e do IFIX (Simule FII)
+
+**Contexto.** O app tinha a análise técnica só para ações (aba "Análise técnica" do Simule Ações). O pedido foi ter o gráfico e a leitura do IBOV e do IFIX. A tela de Simule Futuros não serve: é de contratos da B3 e o IFIX não tem futuro líquido. A decisão foi adaptar a análise das ações, cada índice na tela da sua classe.
+
+**Decisão.**
+- **Telas.** Cartão "Análise do Ibovespa" no Simule Ações e "Análise do IFIX" no Simule FII, ambos com `AnaliseDeIndice.tsx`, que reaproveita `AnaliseTecnicaAcao` (gráfico de candles, médias, zonas, IFR, MACD, estocástico, tendência por período, cenários, nota). O horizonte (curto, médio, longo) é escolhido na própria tela.
+- **Unidade.** Índice vale em pontos, não em reais. `domain/unidadeDePreco.ts` troca a unidade só durante a leitura (`comUnidade`), para os textos saírem "159.398,00 pts" sem repassar a unidade por dezenas de funções. Fora dela, tudo continua em reais.
+- **Sem volume.** Índice não tem volume negociado. Em `analisarTecnica`, `semVolume: true` tira a nota de volume (os pesos das outras refazem a soma 1) e a penalidade de liquidez; a tela esconde o botão, o módulo e o texto de volume. Com volume (ações), a conta é a de sempre: os testes conferem.
+- **Fora do índice.** A "Leitura do setup" (Farol) e os "Sinais de candle" ficam de fora. Foram calibrados com 5 anos de ações (docs/18) e não foram validados para índice.
+- **Dados.** `webapp-src/public/dados/indices-historico/<IBOV|IFIX>.json`, no mesmo formato do histórico longo das ações (`[data, abertura, máxima, mínima, fechamento, volume]`). Pasta própria porque o job semanal das ações apaga qualquer arquivo de `acoes-historico/` que não seja de ação. Sem o arquivo, a tela diz que o histórico ainda não foi carregado.
+- **Importador.** `scripts/importar-indice-historico.mjs` lê um CSV com data, abertura, máxima, mínima e fechamento, confere tudo (datas repetidas, máxima abaixo do fechamento, salto de mais de 20% em um dia, mínimo de 60 pregões) e só grava se estiver certo. `--mesclar` soma a um arquivo já existente.
+
+**Job diário.** `scripts/atualizar-indices.mjs`, com os fluxos "Atualizar índices" (dias úteis, 22h47, 00h47 e 9h25 de Brasília) e "Carga inicial dos índices". Fonte oficial e gratuita, a mesma da B3 dos boletins de preços: o arquivo de índices do Boletim Diário (`IRAAMMDD.zip`, XML BVBG.087), conferido em 04/11/2026 por um fluxo de diagnóstico no GitHub com o pregão de 03/11. Cada índice vem num bloco `<IndxInf>` com `TckrSymb`, `OpngPric`, `MinPric`, `MaxPric` e `ClsgPric` (pontos, sem volume), e o arquivo tem uma só tag `<Dt>`. O código é comparado por igualdade, porque há índices de nome parecido (IBOVEQWEIGHT). Há arquivos de pelo menos 5 anos atrás (conferidos 1, 2, 3 e 5 anos). O arquivo do pregão é gravado por volta das 21h30, por isso o horário de corte é 22h00. Dado estranho, ou só um dos índices faltando, faz o job falhar sem gravar nada. O importador de CSV continua valendo para corrigir ou complementar à mão.
+
+**Testes.** `AnaliseDeIndice.test.tsx` (8), `importar-indice-historico.test.mjs` (8) e `atualizar-indices.test.mjs` (4). Os testes que contavam os cartões do topo (5 para 6 em Ações, 4 para 5 em FII) foram atualizados.

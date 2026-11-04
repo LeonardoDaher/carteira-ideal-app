@@ -29,10 +29,10 @@ const OFFSET_BRASILIA_MS = -3 * 3_600_000
 // Funções puras (testadas em b3-boletim.test.mjs)
 // ---------------------------------------------------------------------------------------
 
-/** Código do arquivo do boletim para uma data AAAA-MM-DD: 2026-09-25 -> PR260925. */
-export function codigoBoletim(data) {
+/** Código do arquivo do boletim para uma data AAAA-MM-DD: 2026-09-25 -> PR260925 (preços) ou IR260925 (índices, prefixo 'IR'). */
+export function codigoBoletim(data, prefixo = 'PR') {
   const [ano, mes, dia] = String(data).split('-')
-  return `PR${ano.slice(-2)}${mes}${dia}`
+  return `${prefixo}${ano.slice(-2)}${mes}${dia}`
 }
 
 /** Data (AAAA-MM-DD) em Brasília de um instante. */
@@ -91,8 +91,8 @@ export function extrairPricRpt(bloco) {
 }
 
 /** Última versão do dia entre os XMLs do boletim (nomes crescentes ao longo do dia). */
-export function escolherUltimaVersao(nomes) {
-  const xmls = nomes.filter((n) => /^BVBG\.086\.01_.*\.xml$/i.test(path.basename(n))).sort()
+export function escolherUltimaVersao(nomes, tipo = '086') {
+  const xmls = nomes.filter((n) => new RegExp(`^BVBG\\.${tipo}\\.01_.*\\.xml$`, 'i').test(path.basename(n))).sort()
   return xmls.length ? xmls[xmls.length - 1] : null
 }
 
@@ -146,8 +146,8 @@ function descompactar(zip, pasta, apenas = null) {
  * devolver o zip vazio (dia sem pregão). Extrai só o XML necessário, para não ocupar ~540 MB
  * em disco por dia.
  */
-export async function baixarBoletim(data, pastaTemp, { fetchImpl = fetch, limiteMs = 180_000, tentativas = 4, pausaMs = 15_000, tentativasZip = 3 } = {}) {
-  const codigo = codigoBoletim(data)
+export async function baixarBoletim(data, pastaTemp, { fetchImpl = fetch, limiteMs = 180_000, tentativas = 4, pausaMs = 15_000, tentativasZip = 3, prefixo = 'PR', tipo = '086' } = {}) {
+  const codigo = codigoBoletim(data, prefixo)
   const baixar = async () => {
     for (let tentativa = 1; ; tentativa++) {
       try {
@@ -185,8 +185,8 @@ export async function baixarBoletim(data, pastaTemp, { fetchImpl = fetch, limite
         zipDosXmls = path.join(pasta, interno)
         nomes = execFileSync('unzip', ['-Z1', zipDosXmls], { encoding: 'utf8' }).split('\n').filter(Boolean)
       }
-      const ultima = escolherUltimaVersao(nomes)
-      if (!ultima) throw new Error(`O boletim ${codigo} não trouxe nenhum XML BVBG.086.01.`)
+      const ultima = escolherUltimaVersao(nomes, tipo)
+      if (!ultima) throw new Error(`O boletim ${codigo} não trouxe nenhum XML BVBG.${tipo}.01.`)
       descompactar(zipDosXmls, pasta, ultima)
       if (zipDosXmls !== externo) fs.rmSync(zipDosXmls, { force: true })
       return path.join(pasta, ultima)

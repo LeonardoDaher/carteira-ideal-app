@@ -15,6 +15,7 @@ import { Top15IbovMaioresPesos } from './Top15IbovMaioresPesos'
 import { Top15Endividadas } from './Top15Endividadas'
 import { Top15Dividendos } from './Top15Dividendos'
 import { Top15Confluencia } from './Top15Confluencia'
+import { AnaliseDeIndice } from './AnaliseDeIndice'
 import { AnaliseTecnicaAcao } from './AnaliseTecnicaAcao'
 import { AnaliseFundamentalistaAcao } from './AnaliseFundamentalistaAcao'
 import { ConfluenciaAcao } from './ConfluenciaAcao'
@@ -49,7 +50,7 @@ type Selecao = { origem: 'lista'; acao: Acao; setor: string } | { origem: 'busca
 /** Radares que valem para ações. */
 const SELOS_ACOES = ['dividendos', 'radar', 'maisNegociado', 'indice', 'endividada'] as const satisfies readonly (keyof DestaquesDoAtivo)[]
 
-type AbaAcoes = 'simulador' | 'top15' | 'negociadas' | 'ibov' | 'endividadas' | 'dividendos' | 'tecnica' | 'fundamentalista' | 'confluencia' | 'top15confluencia' | 'precoteto' | 'radar' | 'balancos'
+type AbaAcoes = 'simulador' | 'top15' | 'negociadas' | 'ibov' | 'endividadas' | 'dividendos' | 'tecnica' | 'fundamentalista' | 'confluencia' | 'top15confluencia' | 'precoteto' | 'radar' | 'balancos' | 'ibovTecnica'
 
 /** Os Top 15 de ações ficam todos dentro de um cartão só ("Top 15"), com um cartãozinho para cada lista. */
 const ABAS_TOP15 = [
@@ -178,6 +179,7 @@ export function SimuleAcoes({
           [
             { id: 'simulador', emoji: '🧮', titulo: 'Simulador', descricao: 'Quantas ações o valor compra' },
             { id: 'grupotop15', emoji: '🏆', titulo: 'Top 15', descricao: 'Rankings e triagens, em cartões' },
+            { id: 'ibovTecnica', emoji: '📈', titulo: 'Análise do Ibovespa', descricao: 'Gráfico e leitura técnica do índice' },
             { id: 'precoteto', emoji: '🎯', titulo: 'Preço teto de compra', descricao: 'Bazin, Graham e radar' },
             { id: 'radar', emoji: '📅', titulo: 'Agenda de dividendos', descricao: 'O que já foi anunciado, mês a mês' },
             { id: 'balancos', emoji: '📑', titulo: 'Balanços', descricao: 'Datas de divulgação e análise' },
@@ -290,6 +292,8 @@ export function SimuleAcoes({
             )}
           </>
         )
+      ) : aba === 'ibovTecnica' ? (
+        <AnaliseDeIndice codigo="IBOV" />
       ) : aba === 'top15' ? (
         <Top15Baratas />
       ) : aba === 'ibov' ? (

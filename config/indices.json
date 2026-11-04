@@ -1,0 +1,11 @@
+{
+  "_leia": "Configuração do job diário dos índices (IBOV e IFIX) da análise técnica. Fonte: arquivo de índices do Boletim Diário da B3 (IRAAMMDD.zip, XML BVBG.087), o mesmo site e o mesmo mecanismo do Boletim de Preços das ações. Cada índice vem num bloco <IndxInf> com abertura (OpngPric), mínima (MinPric), máxima (MaxPric) e fechamento (ClsgPric), em pontos; índice não tem volume. O arquivo de índices sai mais tarde que o de preços (o do pregão de 03/11/2026 foi gravado às 21h26), por isso o horário de corte é 22h00. O histórico fica em webapp-src/public/dados/indices-historico/<CODIGO>.json.",
+  "horarioCorteBoletim": "22:00",
+  "diasProcuraBoletim": 5,
+  "pausaEntreDownloadsMs": 1000,
+  "maximoPregoesGuardados": 1300,
+  "indices": [
+    { "codigo": "IBOV", "ticker": "IBOV", "nome": "Ibovespa" },
+    { "codigo": "IFIX", "ticker": "IFIX", "nome": "IFIX" }
+  ]
+}
