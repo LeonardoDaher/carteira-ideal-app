@@ -46,6 +46,8 @@ async function abrirApp() {
   render(<App />)
   // espera o app terminar de ler o aparelho (antes disso ele não desenha nada, de propósito)
   await waitFor(() => expect(document.querySelector('.app-frame[class*="tela-"]')).toBeTruthy())
+  // cada tela é um arquivo próprio (D138): espera o código da tela chegar
+  await waitFor(() => expect(screen.queryByText('Carregando a tela…')).toBeNull())
 }
 
 describe('reabrir o app depois de responder o questionário (API ainda calculando)', () => {

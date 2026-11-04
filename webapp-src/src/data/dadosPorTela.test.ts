@@ -57,7 +57,10 @@ function chavesAlcancadas(raiz: string): string[] {
 const app = arquivos.get('../App.tsx') ?? ''
 const telas = [...app.matchAll(/^\s+(\w+): \(\) => <(\w+) /gm)].map((m) => ({ tela: m[1], componente: m[2] }))
 function arquivoDaTela(componente: string): string {
-  const m = app.match(new RegExp(`import \\{ ${componente} \\} from '([^']+)'`))
+  // Tela inicial: import direto. As demais são arquivos próprios: `const X = telaPreguicosa(() => import('./screens/X'), 'X')` (D138).
+  const m =
+    app.match(new RegExp(`import \\{ ${componente} \\} from '([^']+)'`)) ??
+    app.match(new RegExp(`const ${componente} = telaPreguicosa\\(\\(\\) => import\\('([^']+)'\\)`))
   const alvo = m && resolver('../App.tsx', m[1])
   if (!alvo) throw new Error(`não achei o arquivo de ${componente}`)
   return alvo

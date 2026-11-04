@@ -4,7 +4,6 @@ import { readdirSync, readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vite'
 import type { Plugin } from 'vite'
-import { viteSingleFile } from 'vite-plugin-singlefile'
 
 /**
  * Publica os JSON de mercado de src/data/ como arquivos próprios em dados/<chave>.json (D137), em vez de embuti-los no index.html.
@@ -29,13 +28,16 @@ function dadosDeMercado(): Plugin {
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), dadosDeMercado(), viteSingleFile()],
+  plugins: [react(), dadosDeMercado()],
+  // O app é publicado em /app/ e os arquivos de código ficam em /app/codigo/ (D138). Endereços relativos: funcionam em /app/ e em
+  // /app/?tela=..., e a pasta própria evita a colisão com /assets, que é da landing.
+  base: './',
   // Logos ficam em public/logos (arquivos separados, baixados só quando a linha aparece). Só a lista de nomes entra no app: com
   // o app em um arquivo único, importar as imagens as embutiria em base64 e dobraria o tamanho da página (D133).
   define: { __LOGOS__: JSON.stringify(readdirSync(fileURLToPath(new URL('./public/logos', import.meta.url)))) },
   build: {
     cssCodeSplit: false,
-    assetsInlineLimit: 100000000,
+    assetsDir: 'codigo',
   },
   test: {
     environment: 'jsdom',

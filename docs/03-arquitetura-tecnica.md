@@ -27,7 +27,7 @@ O navegador conhece as **perguntas** (precisa exibi-las) e recebe o **resultado*
 │   ├── recomendacao.ts                POST /api/recomendacao (serverless)
 │   └── _validacao.ts                  Valida o JSON recebido (o "_" impede a Vercel de expor como rota)
 ├── webapp-src/                        Código-fonte do app
-│   ├── index.html, vite.config.ts     Entrada do Vite (gera 1 arquivo HTML via vite-plugin-singlefile)
+│   ├── index.html, vite.config.ts     Entrada do Vite (index.html pequeno + arquivos por tela em app/codigo/, D138)
 │   └── src/
 │       ├── App.tsx                    Roteia entre as 12 telas
 │       ├── screens/                   Uma tela por arquivo (ver jornada do cliente)
@@ -102,7 +102,7 @@ O navegador do cliente nunca chama a CVM nem a brapi, e a chave da brapi fica s�
 - **Conta paga no cartão.** `Conta.cartaoDesde` (só mensais): `contaNoCartao` e `contasNoCartao` em `orcamento.ts`. `gastoNoCartao` = `comprasNoCartao` + contas no cartão; `parcelasFuturas` usa as compras e as parcelas já assumidas das contas anuais. Conta anual no cartão: `Conta.cartaoAnual`, `parcelaAnualNoMes`, `anuaisNoCartao`, `coberturaDoCofrinho` (parte da fatura paga pelo cofrinho), `coberturaDaConta` (parte de uma conta), `gastoNoTeto` (tudo o que sai do salário na fatura: das anuais, só a parte que o cofrinho não cobre), `parcelamentoPodeTerComecado`, `inicioDaAnualNoCartao`, `quandoApareceNoCartao` e `jurosDoParcelamento`. Conta x dívida (evitar contar a parcela duas vezes): `pareceDivida`, `temDividaComParcelaFixa` e `contasEmDobroComDividas`, só para avisos na tela. Compras à vista do mês de uma vez: `acertarPeloTotal`, `aVistaLancadasNoMes`, `totalInformado`, `idTotalDoMes` e `ehTotalDoMes` (o que passa das compras à vista já anotadas vira uma compra à vista de id `total-AAAA-MM`; parcelados ficam fora). Parcelamento que já estava em andamento ao chegar no app: `compraEmAndamento` ("parcela k de n na fatura deste mês" vira uma compra de k meses atrás). Conta de todo mês no cartão parecida com compra parcelada: `compraParecidaComConta` e `contasEmDobroComCompras`, só para avisos. Compra parcelada com juros: `parcelamentoComJuros` (total, custo, taxa ao mês, trava de total abaixo do preço); `Compra.valorAVista` opcional guarda o preço quando há juros. Reserva acima da mini-reserva com dívida cara: `excedenteDaReserva` (sugestão em avalanche e juros evitados) e `usarExcedenteDaReserva` (baixa reserva e saldos).
 - **Aulas em texto.** `AulaTrilha` ganhou `texto`, `links` e `acao` (opcionais). Aula com texto conta como disponível (`aulaDisponivel`) mesmo sem `youtubeId`; com os dois, o vídeo vem primeiro e o texto abaixo.
 - **Estado no aparelho.** Respostas e progresso ficam no `localStorage` do navegador (chave `carteiraideal.estado`, versão 2). A landing lê essa chave para trocar o botão para "Ver minha carteira de referência". A API **não grava nada**.
-- **App em arquivo único.** Mantido o `vite-plugin-singlefile` para preservar a estrutura já usada pela landing (`./app/`).
+- **Código dividido por tela (D138).** Cada tela, menos a inicial, é um arquivo próprio em `app/codigo/` (`React.lazy` via `ui/telaPreguicosa.ts`), com cache imutável; os dados de mercado ficam em `app/dados/` (D137). Antes disso o app era um arquivo único (`vite-plugin-singlefile`).
 
 ## Qualidade
 

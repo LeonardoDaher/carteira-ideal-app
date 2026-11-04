@@ -51,7 +51,14 @@ describe('telas abertas com o registro de dados vazio, como em produção', () =
           <App />
         </ErrorBoundary>,
       )
-      await waitFor(() => expect(screen.queryByText(/Carregando os dados de mercado/)).toBeNull(), { timeout: 20000 })
+      await waitFor(
+        () => {
+          expect(screen.queryByText(/Carregando a tela/)).toBeNull() // código da tela (D138)
+          expect(screen.queryByText(/Carregando os dados de mercado/)).toBeNull() // dados de mercado (D137)
+          expect(document.body.textContent?.length ?? 0).toBeGreaterThan(200)
+        },
+        { timeout: 20000 },
+      )
       // Dá um instante para efeitos que rodam depois da primeira pintura da tela.
       await new Promise((r) => setTimeout(r, 50))
 
