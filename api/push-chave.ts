@@ -3,7 +3,7 @@
 // Devolve a chave PÚBLICA (VAPID) que o navegador precisa para criar a inscrição de avisos (D127). A chave privada nunca passa por aqui:
 // ela fica só nos secrets do GitHub, onde o job que envia os avisos roda. Sem a variável VAPID_PUBLIC_KEY, os avisos com o app fechado
 // ficam desligados (503) e o app segue com o aviso de quando está aberto.
-import type { VercelRequest, VercelResponse } from './_tipos'
+import type { VercelRequest, VercelResponse } from './_tipos.js'
 import { aplicarCors } from './_cors.js'
 import { metricasHabilitadas } from './_redis.js'
 

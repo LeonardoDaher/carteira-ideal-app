@@ -14,7 +14,7 @@ import type {
   ResultadoRecomendacao,
   RespostasArquitetura,
   RespostasQuestionario,
-} from './types'
+} from './types.js'
 
 const PONTOS: Record<Letra, number> = { a: 1, b: 2, c: 3, d: 4 }
 

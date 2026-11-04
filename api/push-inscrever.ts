@@ -6,7 +6,7 @@
 //
 // O que fica no Redis por aparelho: endereço de entrega do navegador e suas chaves, códigos acompanhados, taxa, quem já foi avisado e a
 // data da última atualização. Expira em 90 dias sem o app ser aberto (cada abertura renova). Nada identifica a pessoa.
-import type { VercelRequest, VercelResponse } from './_tipos'
+import type { VercelRequest, VercelResponse } from './_tipos.js'
 import { aplicarCors } from './_cors.js'
 import { chaveDeChamadas, contadorComReserva, contadorEmMemoria, contadorRedis, JANELA_CHAMADAS_SEGUNDOS, passouDoLimite } from './_limite.js'
 import type { Contador } from './_limite.js'

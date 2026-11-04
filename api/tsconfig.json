@@ -1,0 +1,14 @@
+{
+  "extends": "../tsconfig.api.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "../node_modules/.tmp/tsconfig.api-vercel.tsbuildinfo",
+    "strictNullChecks": true
+  },
+  "include": [
+    "./**/*.ts",
+    "../webapp-src/src/domain/**/*.ts"
+  ],
+  "exclude": [
+    "../webapp-src/src/**/*.test.ts"
+  ]
+}

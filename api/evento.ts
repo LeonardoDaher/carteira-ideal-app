@@ -6,7 +6,7 @@
 //
 // Corpo esperado: { evento, id, ref?, coorte?, props? { perfil?, prazo?, capacidade?, veto?, tela? } }
 // `coorte` é o dia (AAAA-MM-DD) da primeira visita do navegador; serve só para medir retenção.
-import type { VercelRequest, VercelResponse } from './_tipos'
+import type { VercelRequest, VercelResponse } from './_tipos.js'
 import { pipeline, metricasHabilitadas } from './_redis.js'
 import { EVENTOS_ACEITOS, dataBrasilia, dataValida, idAnonimoValido, refValido, rotuloValido, somarDias, TELAS_CONTADAS } from './_eventos.js'
 import { aplicarCors } from './_cors.js'
