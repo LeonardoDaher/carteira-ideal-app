@@ -4,6 +4,9 @@ name: Descobrir índices na B3 (diagnóstico)
 
 on:
   workflow_dispatch: {}
+  push:
+    branches: [analise-grafica-ibov-ifix]
+    paths: ['.github/workflows/descobrir-indices-b3.yml']
 
 permissions:
   contents: read
