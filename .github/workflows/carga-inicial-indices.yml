@@ -1,0 +1,59 @@
+# Carga inicial do histórico do IBOV e do IFIX (análise técnica do Simule Ações e do Simule FII). Rodar UMA VEZ, à mão, antes do job
+# diário "Atualizar índices" (e de novo para aumentar o histórico: rodar com um número maior só baixa o que falta).
+#
+# Baixa os arquivos de índices da B3 dos pregões mais recentes (padrão: 260, cerca de 1 ano; até 1300, cerca de 5 anos), um por vez.
+# O histórico só é publicado se o site compilar com ele.
+
+name: Carga inicial dos índices
+
+on:
+  workflow_dispatch:
+    inputs:
+      pregoes:
+        description: 'Quantos pregões carregar (260 = 1 ano, 1300 = 5 anos)'
+        required: true
+        default: '260'
+  # Primeira carga, antes de este fluxo chegar à branch principal (só roda se este arquivo mudar na branch).
+  push:
+    branches: [analise-grafica-ibov-ifix]
+    paths: ['.github/workflows/carga-inicial-indices.yml']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: indices
+  cancel-in-progress: false
+
+jobs:
+  carga:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Baixar os arquivos de índices e montar o histórico
+        run: node scripts/atualizar-indices.mjs --carga-inicial=${{ github.event.inputs.pregoes || '260' }}
+
+      - name: Conferir se o site compila com os dados novos
+        run: |
+          npm ci
+          npm run build
+
+      - name: Publicar (commit) o histórico
+        run: |
+          if [ -z "$(git status --porcelain webapp-src/public/dados/indices-historico)" ]; then
+            echo "Sem mudanças nos dados."
+            exit 0
+          fi
+          git config user.name "${{ vars.COMMIT_AUTOR_NOME || 'github-actions[bot]' }}"
+          git config user.email "${{ vars.COMMIT_AUTOR_EMAIL || '41898283+github-actions[bot]@users.noreply.github.com' }}"
+          git add webapp-src/public/dados/indices-historico
+          git commit -m "dados: carga inicial dos índices IBOV e IFIX ($(date -u +%Y-%m-%d))"
+          git pull --rebase
+          git push
