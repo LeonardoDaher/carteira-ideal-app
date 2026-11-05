@@ -1,26 +1,48 @@
 {
-  "geradoEm": "2026-11-03T11:20:23.612Z",
+  "geradoEm": "2026-11-05T11:34:21.599Z",
   "publicado": true,
-  "dataReferencia": "2026-11-03",
+  "dataReferencia": "2026-11-05",
   "anos": 3,
   "minimoDeAnos": 2,
-  "consultadas": 229,
+  "consultadas": 314,
   "falhas": [
+    "AHEB3",
+    "AMOB3",
+    "ARND3",
+    "ATED3",
+    "AVLL3",
+    "AZTE3",
     "AZUL4",
     "BIOM3",
+    "CCTY3",
+    "CEED3",
     "DMMO3",
+    "DMVF3",
     "DOTZ3",
+    "DTCY3",
     "GUAR3",
+    "HAGA3",
     "HBSA3",
+    "IFCM3",
     "KRSA3",
     "LIGT3",
+    "MAPT3",
     "MBLY3",
     "MEAL3",
     "MWET4",
+    "NORD3",
+    "NUTR3",
+    "OBTC3",
     "ODPV3",
     "ONCO3",
     "ORVR3",
-    "SRNA3"
+    "OSXB3",
+    "RNEW3",
+    "RVEE3",
+    "SNSY3",
+    "SRNA3",
+    "TOKY3",
+    "VIVR3"
   ],
   "empresas": [
     {
@@ -84,6 +106,26 @@
       "anosComHistorico": 3
     },
     {
+      "ticker": "AFLT3",
+      "nome": "Afluente Transmissão",
+      "setor": "Energia elétrica: transmissão",
+      "meses": [
+        0,
+        0,
+        0,
+        3,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        2
+      ],
+      "anosComHistorico": 3
+    },
+    {
       "ticker": "AGRO3",
       "nome": "BrasilAgro",
       "setor": "Agronegócio, açúcar e etanol",
@@ -120,6 +162,26 @@
         0,
         0,
         0
+      ],
+      "anosComHistorico": 3
+    },
+    {
+      "ticker": "ALLD3",
+      "nome": "Allied",
+      "setor": "Hardware e eletrônicos",
+      "meses": [
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        2
       ],
       "anosComHistorico": 3
     },
@@ -364,6 +426,26 @@
       "anosComHistorico": 3
     },
     {
+      "ticker": "BALM3",
+      "nome": "Baumer",
+      "setor": "Hospitais, planos e diagnósticos",
+      "meses": [
+        1,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        3
+      ],
+      "anosComHistorico": 3
+    },
+    {
       "ticker": "BAZA3",
       "nome": "Banco da Amazônia",
       "setor": "Bancos",
@@ -484,6 +566,26 @@
       "anosComHistorico": 3
     },
     {
+      "ticker": "BGIP3",
+      "nome": "Banese",
+      "setor": "Bancos",
+      "meses": [
+        1,
+        2,
+        0,
+        1,
+        0,
+        0,
+        0,
+        2,
+        0,
+        0,
+        1,
+        0
+      ],
+      "anosComHistorico": 3
+    },
+    {
       "ticker": "BLAU3",
       "nome": "Blau Farmacêutica",
       "setor": "Medicamentos e saúde animal",
@@ -504,6 +606,26 @@
       "anosComHistorico": 3
     },
     {
+      "ticker": "BMEB3",
+      "nome": "Banco Mercantil do Brasil",
+      "setor": "Bancos",
+      "meses": [
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        3
+      ],
+      "anosComHistorico": 3
+    },
+    {
       "ticker": "BMGB4",
       "nome": "Banco BMG",
       "setor": "Bancos",
@@ -520,6 +642,46 @@
         2,
         1,
         3
+      ],
+      "anosComHistorico": 3
+    },
+    {
+      "ticker": "BMIN3",
+      "nome": "Banco Mercantil de Investimentos",
+      "setor": "Bancos",
+      "meses": [
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "anosComHistorico": 3
+    },
+    {
+      "ticker": "BMKS3",
+      "nome": "Monark",
+      "setor": "Autopeças e veículos",
+      "meses": [
+        0,
+        0,
+        0,
+        3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1
       ],
       "anosComHistorico": 3
     },
@@ -684,6 +846,26 @@
       "anosComHistorico": 3
     },
     {
+      "ticker": "BRST3",
+      "nome": "Brisanet",
+      "setor": "Telecomunicações",
+      "meses": [
+        0,
+        0,
+        0,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      "anosComHistorico": 3
+    },
+    {
       "ticker": "BSLI4",
       "nome": "BRB Banco de Brasília",
       "setor": "Bancos",
@@ -700,6 +882,26 @@
         0,
         0,
         1
+      ],
+      "anosComHistorico": 3
+    },
+    {
+      "ticker": "CALI3",
+      "nome": "Construtora Adolpho Lindenberg",
+      "setor": "Construção civil e incorporação",
+      "meses": [
+        0,
+        0,
+        0,
+        3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
       ],
       "anosComHistorico": 3
     },
@@ -784,6 +986,26 @@
       "anosComHistorico": 3
     },
     {
+      "ticker": "CBEE3",
+      "nome": "Ampla Energia",
+      "setor": "Energia elétrica: distribuição",
+      "meses": [
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "anosComHistorico": 3
+    },
+    {
       "ticker": "CEAB3",
       "nome": "C&A",
       "setor": "Moda e vestuário",
@@ -804,6 +1026,26 @@
       "anosComHistorico": 3
     },
     {
+      "ticker": "CEBR3",
+      "nome": "CEB (Cia Energética de Brasília)",
+      "setor": "Energia elétrica: geração",
+      "meses": [
+        0,
+        0,
+        0,
+        2,
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        2,
+        1
+      ],
+      "anosComHistorico": 3
+    },
+    {
       "ticker": "CEEB3",
       "nome": "Coelba",
       "setor": "Energia elétrica: distribuição",
@@ -820,6 +1062,26 @@
         2,
         0,
         2
+      ],
+      "anosComHistorico": 3
+    },
+    {
+      "ticker": "CEGR3",
+      "nome": "CEG (Gás Natural Rio)",
+      "setor": "Distribuição de combustíveis e etanol",
+      "meses": [
+        0,
+        0,
+        0,
+        3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        3
       ],
       "anosComHistorico": 3
     },
@@ -920,6 +1182,26 @@
         1,
         2,
         1
+      ],
+      "anosComHistorico": 3
+    },
+    {
+      "ticker": "COCE3",
+      "nome": "Coelce",
+      "setor": "Energia elétrica: distribuição",
+      "meses": [
+        0,
+        0,
+        0,
+        3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
       ],
       "anosComHistorico": 3
     },
@@ -1104,6 +1386,26 @@
       "anosComHistorico": 3
     },
     {
+      "ticker": "CSUD3",
+      "nome": "CSU Digital",
+      "setor": "Bolsa, holdings e serviços financeiros",
+      "meses": [
+        1,
+        0,
+        2,
+        3,
+        0,
+        3,
+        0,
+        0,
+        2,
+        1,
+        0,
+        3
+      ],
+      "anosComHistorico": 3
+    },
+    {
       "ticker": "CURY3",
       "nome": "Cury",
       "setor": "Construção civil e incorporação",
@@ -1184,6 +1486,26 @@
       "anosComHistorico": 3
     },
     {
+      "ticker": "DEXP3",
+      "nome": "Dexxos",
+      "setor": "Química e petroquímica",
+      "meses": [
+        0,
+        0,
+        0,
+        3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        3
+      ],
+      "anosComHistorico": 3
+    },
+    {
       "ticker": "DIRR3",
       "nome": "Direcional",
       "setor": "Construção civil e incorporação",
@@ -1200,6 +1522,26 @@
         0,
         0,
         2
+      ],
+      "anosComHistorico": 3
+    },
+    {
+      "ticker": "DOHL3",
+      "nome": "Döhler",
+      "setor": "Têxtil e eletrodomésticos",
+      "meses": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
       ],
       "anosComHistorico": 3
     },
@@ -1364,6 +1706,26 @@
       "anosComHistorico": 3
     },
     {
+      "ticker": "EQPA3",
+      "nome": "Equatorial Pará",
+      "setor": "Energia elétrica: distribuição",
+      "meses": [
+        1,
+        0,
+        0,
+        3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "anosComHistorico": 3
+    },
+    {
       "ticker": "EQTL3",
       "nome": "Equatorial",
       "setor": "Energia elétrica: distribuição",
@@ -1484,6 +1846,26 @@
       "anosComHistorico": 3
     },
     {
+      "ticker": "FASA3",
+      "nome": "FASA",
+      "setor": "Carnes e proteínas",
+      "meses": [
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "anosComHistorico": 3
+    },
+    {
       "ticker": "FESA4",
       "nome": "Ferbasa",
       "setor": "Siderurgia e metalurgia",
@@ -1500,6 +1882,26 @@
         0,
         1,
         2
+      ],
+      "anosComHistorico": 3
+    },
+    {
+      "ticker": "FIGE3",
+      "nome": "Investimentos Bemge",
+      "setor": "Bolsa, holdings e serviços financeiros",
+      "meses": [
+        0,
+        0,
+        0,
+        3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
       ],
       "anosComHistorico": 3
     },
@@ -1600,6 +2002,26 @@
         0,
         3,
         0
+      ],
+      "anosComHistorico": 3
+    },
+    {
+      "ticker": "GGPS3",
+      "nome": "GPS",
+      "setor": "Serviços e locação de equipamentos",
+      "meses": [
+        0,
+        0,
+        0,
+        3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
       ],
       "anosComHistorico": 3
     },
@@ -1864,6 +2286,26 @@
       "anosComHistorico": 3
     },
     {
+      "ticker": "JOPA3",
+      "nome": "Josapar",
+      "setor": "Alimentos e bebidas",
+      "meses": [
+        0,
+        0,
+        0,
+        3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "anosComHistorico": 3
+    },
+    {
       "ticker": "JSLG3",
       "nome": "JSL",
       "setor": "Transporte e infraestrutura",
@@ -1922,6 +2364,26 @@
         1
       ],
       "anosComHistorico": 1
+    },
+    {
+      "ticker": "LAND3",
+      "nome": "Terra Santa Agro",
+      "setor": "Agronegócio, açúcar e etanol",
+      "meses": [
+        0,
+        0,
+        1,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "anosComHistorico": 3
     },
     {
       "ticker": "LAVV3",
@@ -2000,6 +2462,26 @@
         0,
         1,
         2
+      ],
+      "anosComHistorico": 3
+    },
+    {
+      "ticker": "LPSB3",
+      "nome": "Lopes Brasil",
+      "setor": "Shoppings e imóveis comerciais",
+      "meses": [
+        0,
+        0,
+        0,
+        3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
       ],
       "anosComHistorico": 3
     },
@@ -2244,6 +2726,26 @@
       "anosComHistorico": 3
     },
     {
+      "ticker": "MSPA3",
+      "nome": "Melhoramentos",
+      "setor": "Papel, celulose e madeira",
+      "meses": [
+        0,
+        0,
+        0,
+        3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "anosComHistorico": 3
+    },
+    {
       "ticker": "MTRE3",
       "nome": "Mitre Realty",
       "setor": "Construção civil e incorporação",
@@ -2404,6 +2906,46 @@
       "anosComHistorico": 1
     },
     {
+      "ticker": "PASS3",
+      "nome": "Compass Gás e Energia",
+      "setor": "Distribuição de combustíveis e etanol",
+      "meses": [
+        1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        2,
+        1
+      ],
+      "anosComHistorico": 3
+    },
+    {
+      "ticker": "PATI3",
+      "nome": "Panatlântica",
+      "setor": "Siderurgia e metalurgia",
+      "meses": [
+        0,
+        0,
+        0,
+        2,
+        1,
+        0,
+        0,
+        0,
+        1,
+        2,
+        0,
+        0
+      ],
+      "anosComHistorico": 3
+    },
+    {
       "ticker": "PDTC3",
       "nome": "Padtec",
       "setor": "Hardware e eletrônicos",
@@ -2422,6 +2964,26 @@
         0
       ],
       "anosComHistorico": 2
+    },
+    {
+      "ticker": "PEAB3",
+      "nome": "Participações Aliança da Bahia",
+      "setor": "Bolsa, holdings e serviços financeiros",
+      "meses": [
+        0,
+        0,
+        1,
+        2,
+        0,
+        0,
+        0,
+        2,
+        0,
+        0,
+        1,
+        2
+      ],
+      "anosComHistorico": 3
     },
     {
       "ticker": "PETR4",
@@ -2864,6 +3426,26 @@
       "anosComHistorico": 3
     },
     {
+      "ticker": "REDE3",
+      "nome": "Rede Energia",
+      "setor": "Energia elétrica: distribuição",
+      "meses": [
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        1,
+        2,
+        0,
+        0,
+        3,
+        0
+      ],
+      "anosComHistorico": 3
+    },
+    {
       "ticker": "RENT3",
       "nome": "Localiza",
       "setor": "Locação de veículos e frotas",
@@ -2884,6 +3466,26 @@
       "anosComHistorico": 3
     },
     {
+      "ticker": "RIAA3",
+      "nome": "Riachuelo (Guararapes)",
+      "setor": "Moda e vestuário",
+      "meses": [
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      "anosComHistorico": 3
+    },
+    {
       "ticker": "ROMI3",
       "nome": "Romi",
       "setor": "Máquinas, equipamentos e aeroespacial",
@@ -2900,6 +3502,26 @@
         0,
         0,
         3
+      ],
+      "anosComHistorico": 3
+    },
+    {
+      "ticker": "RPAD3",
+      "nome": "Alfa Holdings",
+      "setor": "Bolsa, holdings e serviços financeiros",
+      "meses": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0
       ],
       "anosComHistorico": 3
     },
@@ -2964,6 +3586,46 @@
       "anosComHistorico": 3
     },
     {
+      "ticker": "SAUD3",
+      "nome": "Bradsaúde",
+      "setor": "Hospitais, planos e diagnósticos",
+      "meses": [
+        0,
+        0,
+        2,
+        3,
+        2,
+        3,
+        0,
+        2,
+        2,
+        1,
+        1,
+        3
+      ],
+      "anosComHistorico": 3
+    },
+    {
+      "ticker": "SBFG3",
+      "nome": "Grupo SBF (Centauro)",
+      "setor": "Calçados e artigos esportivos",
+      "meses": [
+        0,
+        0,
+        0,
+        3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "anosComHistorico": 3
+    },
+    {
       "ticker": "SBSP3",
       "nome": "Sabesp",
       "setor": "Saneamento e resíduos",
@@ -2980,6 +3642,26 @@
         0,
         0,
         1
+      ],
+      "anosComHistorico": 3
+    },
+    {
+      "ticker": "SCAR3",
+      "nome": "São Carlos Empreendimentos",
+      "setor": "Shoppings e imóveis comerciais",
+      "meses": [
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        2
       ],
       "anosComHistorico": 3
     },
@@ -3164,6 +3846,26 @@
       "anosComHistorico": 3
     },
     {
+      "ticker": "SYNE3",
+      "nome": "SYN",
+      "setor": "Shoppings e imóveis comerciais",
+      "meses": [
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "anosComHistorico": 3
+    },
+    {
       "ticker": "TAEE11",
       "nome": "Taesa",
       "setor": "Energia elétrica: transmissão",
@@ -3179,6 +3881,26 @@
         0,
         0,
         3,
+        0
+      ],
+      "anosComHistorico": 3
+    },
+    {
+      "ticker": "TASA3",
+      "nome": "Taurus Armas",
+      "setor": "Máquinas, equipamentos e aeroespacial",
+      "meses": [
+        0,
+        0,
+        0,
+        3,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
         0
       ],
       "anosComHistorico": 3
@@ -3304,6 +4026,26 @@
       "anosComHistorico": 3
     },
     {
+      "ticker": "TPIS3",
+      "nome": "Triunfo",
+      "setor": "Transporte e infraestrutura",
+      "meses": [
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        2
+      ],
+      "anosComHistorico": 3
+    },
+    {
       "ticker": "TRIS3",
       "nome": "Trisul",
       "setor": "Construção civil e incorporação",
@@ -3360,6 +4102,26 @@
         1,
         0,
         1
+      ],
+      "anosComHistorico": 3
+    },
+    {
+      "ticker": "UCAS3",
+      "nome": "Unicasa",
+      "setor": "Materiais de construção e acabamento",
+      "meses": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        2
       ],
       "anosComHistorico": 3
     },
@@ -3544,6 +4306,66 @@
       "anosComHistorico": 3
     },
     {
+      "ticker": "VLID3",
+      "nome": "Valid",
+      "setor": "Software e serviços de TI",
+      "meses": [
+        1,
+        0,
+        1,
+        1,
+        2,
+        0,
+        1,
+        1,
+        0,
+        1,
+        2,
+        2
+      ],
+      "anosComHistorico": 3
+    },
+    {
+      "ticker": "VSTE3",
+      "nome": "Veste",
+      "setor": "Moda e vestuário",
+      "meses": [
+        0,
+        0,
+        0,
+        2,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "anosComHistorico": 3
+    },
+    {
+      "ticker": "VTRU3",
+      "nome": "Vitru Educação",
+      "setor": "Educação",
+      "meses": [
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "anosComHistorico": 1
+    },
+    {
       "ticker": "VULC3",
       "nome": "Vulcabras",
       "setor": "Calçados e artigos esportivos",
@@ -3572,6 +4394,26 @@
         0,
         0,
         1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "anosComHistorico": 3
+    },
+    {
+      "ticker": "WDCN3",
+      "nome": "WDC Networks",
+      "setor": "Software e serviços de TI",
+      "meses": [
+        0,
+        0,
+        0,
+        2,
         0,
         0,
         0,
@@ -3639,6 +4481,26 @@
         0,
         0,
         0,
+        1
+      ],
+      "anosComHistorico": 3
+    },
+    {
+      "ticker": "WLMM3",
+      "nome": "WLM",
+      "setor": "Autopeças e veículos",
+      "meses": [
+        1,
+        2,
+        0,
+        3,
+        0,
+        0,
+        0,
+        2,
+        1,
+        0,
+        2,
         1
       ],
       "anosComHistorico": 3
