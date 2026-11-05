@@ -457,7 +457,8 @@ describe('SimuleOpcoes: aba Estratégias (monte sua estratégia)', () => {
     expect(screen.getByText('Ganho máximo (estimado)')).toBeDefined()
     expect(txt('ganho-maximo')).not.toBe('Sem limite')
     expect(txt('perda-maxima')).toBe('−R$ 130,00') // o débito: longe do strike as duas opções valem zero
-    expect(screen.getByText(/Débito ao montar as opções:/).textContent).toContain('130,00') // 4,10 menos 2,80, vezes 100
+    expect(screen.getByText(/Débito ao montar as opções:/)).toBeTruthy()
+    expect(screen.getByTestId('credito-debito-valor').textContent).toContain('130,00') // 4,10 menos 2,80, vezes 100
   })
 
   it('trava diagonal de calls usa strikes e vencimentos diferentes', () => {
