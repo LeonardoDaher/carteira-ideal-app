@@ -7,6 +7,7 @@ import {
 import type { Posicao } from '../domain/simulaOpcoes'
 import { reais } from '../domain/mercadoOficial'
 import { CampoNumero } from '../ui/CampoNumero'
+import { DestaqueCreditoDebito } from '../ui/DestaqueCreditoDebito'
 import { GraficoPayoff } from '../ui/GraficoPayoff'
 import { MarcaDaLinha } from '../ui/GraficoPorStrike'
 
@@ -100,6 +101,8 @@ export function PainelDaPosicao({ posicao: posicaoEntrada, precoAtivo, dias: dia
           </div>
         )}
 
+        <DestaqueCreditoDebito custo={dados.custo} nota={nota} testid={'credito-debito' + sufixo} />
+
         <div className="row" style={{ gap: 10, alignItems: 'stretch', flexWrap: 'wrap' }}>
           <div className="col" style={{ ...caixa, gap: 2, flex: '1 1 120px' }}>
             <span className="tiny muted">Ganho máximo{multi ? ' (estimado)' : ''}</span>
@@ -117,11 +120,6 @@ export function PainelDaPosicao({ posicao: posicaoEntrada, precoAtivo, dias: dia
           </div>
         </div>
 
-        <div className="tiny muted justify">
-          {dados.custo >= 0 ? 'Crédito' : 'Débito'} ao montar as opções: <strong>{reais(Math.abs(dados.custo))}</strong>
-          {dados.custo >= 0 ? ' (você recebe o prêmio).' : ' (você paga o prêmio).'}
-          {nota ? ` ${nota}` : ''}
-        </div>
         {posicao.realizado ? (
           <div className="tiny muted justify" data-testid={'realizado' + sufixo}>
             Resultado já realizado nas pernas encerradas: <strong>{dinheiro(posicao.realizado)}</strong>. Ele já está somado nos números e no gráfico.

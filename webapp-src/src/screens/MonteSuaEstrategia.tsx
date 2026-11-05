@@ -5,7 +5,9 @@ import {
   GRUPOS_DE_MODELOS, MODELOS, escadaDeStrikes, indiceDoMaisPerto, montarPosicaoDoModelo, seriesPadrao, validarModelo, vencimentosDoModelo,
 } from '../domain/modelosDeEstrategia'
 import type { Modelo, ModeloId, PernaMontada } from '../domain/modelosDeEstrategia'
+import { custoDeMontagem } from '../domain/simulaOpcoes'
 import type { Lado, Perna, Posicao } from '../domain/simulaOpcoes'
+import { DestaqueCreditoDebito } from '../ui/DestaqueCreditoDebito'
 import { formatarData } from '../domain/rendaFii'
 import { reais } from '../domain/mercadoOficial'
 import { CampoNumero } from '../ui/CampoNumero'
@@ -353,6 +355,8 @@ function Montagem({ ativo, escolha, hoje }: { ativo: AtivoComOpcoes; escolha: Es
             ))}
           </div>
         )}
+
+        {posicao && <DestaqueCreditoDebito custo={custoDeMontagem(posicao)} rotulo="da operação" testid="credito-debito-pernas" />}
       </div>
 
       {erro || !posicao ? (
