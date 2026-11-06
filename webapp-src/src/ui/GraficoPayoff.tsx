@@ -1,4 +1,5 @@
 import { useId } from 'react'
+import type { PointerEvent } from 'react'
 import type { PontoCurva } from '../domain/simulaOpcoes'
 
 export interface CurvaPayoff {
@@ -28,13 +29,22 @@ const compacto = (v: number) => {
  * (no vencimento) pinta de verde o que é lucro e de vermelho o que é prejuízo; as outras mostram a posição antes do
  * vencimento. A linha vertical é o preço do ativo hoje, e os pontos na linha do zero são os equilíbrios.
  */
+export interface CursorPayoff {
+  /** Preço simulado do ativo, que o usuário arrasta no gráfico. */
+  preco: number
+  aoMudar: (preco: number) => void
+  /** Resultado exato em cada curva (na mesma ordem de `curvas`) ao preço simulado. */
+  valores: number[]
+}
+
 export function GraficoPayoff({
-  curvas, precoAtivo, equilibrios, descricao,
+  curvas, precoAtivo, equilibrios, descricao, cursor,
 }: {
   curvas: CurvaPayoff[]
   precoAtivo: number
   equilibrios: number[]
   descricao: string
+  cursor?: CursorPayoff
 }) {
   const id = useId().replace(/:/g, '')
   const todos = curvas.flatMap((c) => c.pontos)
@@ -57,8 +67,23 @@ export function GraficoPayoff({
   const ticksX = [0, 0.25, 0.5, 0.75, 1].map((f) => xMin + (xMax - xMin) * f)
   const ticksY = [yMinBruto, 0, yMaxBruto].filter((v, i, a) => a.indexOf(v) === i)
 
+  // Arrastar (mouse ou toque) move o preço simulado; a rolagem vertical da página continua livre (touch-action: pan-y).
+  const mover = (ev: PointerEvent<SVGSVGElement>) => {
+    if (!cursor || (ev.type === 'pointermove' && ev.buttons === 0 && ev.pointerType === 'mouse')) return
+    const caixa = ev.currentTarget.getBoundingClientRect()
+    if (caixa.width === 0) return
+    const vx = ((ev.clientX - caixa.left) / caixa.width) * W
+    const s = xMin + ((vx - L) / (W - L - R)) * (xMax - xMin)
+    cursor.aoMudar(Math.round(Math.min(xMax, Math.max(xMin, s)) * 100) / 100)
+  }
+
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={descricao} style={{ width: '100%', height: 'auto', display: 'block' }}>
+    <svg
+      viewBox={`0 0 ${W} ${H}`} role="img" aria-label={descricao}
+      style={{ width: '100%', height: 'auto', display: 'block', touchAction: cursor ? 'pan-y' : undefined, cursor: cursor ? 'ew-resize' : undefined }}
+      onPointerDown={cursor ? (ev) => { ev.currentTarget.setPointerCapture?.(ev.pointerId); mover(ev) } : undefined}
+      onPointerMove={cursor ? mover : undefined}
+    >
       <defs>
         <clipPath id={`${id}-acima`}><rect x={L} y={0} width={W - L - R} height={zero} /></clipPath>
         <clipPath id={`${id}-abaixo`}><rect x={L} y={zero} width={W - L - R} height={H - zero} /></clipPath>
@@ -90,6 +115,18 @@ export function GraficoPayoff({
       {equilibrios.filter((s) => s >= xMin && s <= xMax).map((s) => (
         <circle key={`e${s}`} cx={x(s)} cy={zero} r="3.6" className="grafico-juros-ponto" fill="var(--grafico-selic)" />
       ))}
+
+      {cursor && (
+        <g data-testid="cursor-preco">
+          <line x1={x(cursor.preco)} x2={x(cursor.preco)} y1={T} y2={H - B} stroke="var(--text)" strokeWidth="1.4" />
+          <text x={x(cursor.preco)} y={H - B + 11} textAnchor="middle" className="grafico-juros-eixo" fontWeight="700">
+            {cursor.preco.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </text>
+          {curvas.map((c, i) => (cursor.valores[i] === undefined ? null : (
+            <circle key={c.rotulo} cx={x(cursor.preco)} cy={y(cursor.valores[i])} r="4.4" fill={c === principal ? 'var(--grafico-selic)' : 'var(--grafico-ipca)'} stroke="var(--bg)" strokeWidth="1.4" />
+          )))}
+        </g>
+      )}
     </svg>
   )
 }

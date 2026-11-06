@@ -32,4 +32,14 @@ describe('SimuleOpcoes: aba Custo zero', () => {
     expect(lista).not.toMatch(/PETRL600/)
     expect(screen.getByTestId('custozero-saldo').textContent).toMatch(/crédito/)
   })
+
+  it('o preço simulado do gráfico mexe no resultado mostrado', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    fireEvent.click(screen.getByRole('tab', { name: /Custo zero/ }))
+    const controle = screen.getByLabelText(/Mova o preço do ativo/) as HTMLInputElement
+    fireEvent.change(controle, { target: { value: '70' } })
+    // compra call 66 a 1,50 e vende put 56 a 1,52 (100 un.): com o ativo a 70, ganho = (4 − 1,5 + 1,52) × 100 = 402
+    expect((screen.getByTestId('sim-resultado-venc-custozero').textContent ?? '').replace(/\s/g, ' ')).toMatch(/402,00/)
+    expect(screen.getByTestId('cursor-preco')).toBeDefined()
+  })
 })

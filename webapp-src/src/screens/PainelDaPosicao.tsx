@@ -32,6 +32,8 @@ export function PainelDaPosicao({ posicao: posicaoEntrada, precoAtivo, dias: dia
   const [juros, setJuros] = useState(jurosPadrao)
   const [vol, setVol] = useState(35)
   const [diasPassados, setDiasPassados] = useState(0)
+  /** Preço do ativo escolhido no gráfico (arrastando ou no controle deslizante); null = preço de hoje. */
+  const [precoSim, setPrecoSim] = useState<number | null>(null)
 
   const r = Math.log(1 + juros / 100)
   // Pernas com vencimentos diferentes: o resultado só é exato até o primeiro vencimento. Cada perna leva a volatilidade
@@ -69,11 +71,17 @@ export function PainelDaPosicao({ posicao: posicaoEntrada, precoAtivo, dias: dia
     const antes = passados < mercado.dias && vol > 0 ? curva((s) => resultadoAntesDoVencimento(posicao, s, mercado, passados), faixa.min, faixa.max) : null
     const g = vol > 0 && mercado.dias - passados > 0 ? gregasDaPosicao(posicao, precoAtivo, mercado, passados) : null
     return {
-      analise, noVenc, antes, g,
+      faixa, analise, noVenc, antes, g,
       custo: custoDeMontagem(posicao),
       hoje: antes ? resultadoAntesDoVencimento(posicao, precoAtivo, mercado, passados) : resultadoNoVencimento(posicao, precoAtivo),
     }
   }, [posicao, precoAtivo, mercado, passados, vol, multi])
+
+  // Resultado exato ao preço simulado, no vencimento e no dia escolhido na passagem do tempo.
+  const sim = precoSim === null ? precoAtivo : Math.min(dados.faixa.max, Math.max(dados.faixa.min, precoSim))
+  const simNoVenc = multi ? resultadoAntesDoVencimento(posicao, sim, mercado, mercado.dias) : resultadoNoVencimento(posicao, sim)
+  const simAntes = dados.antes ? resultadoAntesDoVencimento(posicao, sim, mercado, passados) : null
+  const simVariacao = (sim / precoAtivo - 1) * 100
 
   const rotuloCurva = passados === 0 ? 'Hoje' : `Daqui a ${passados} ${passados === 1 ? 'dia' : 'dias'}`
   const caixa = { padding: '10px 12px', borderRadius: 12, background: 'var(--surface2)' } as const
@@ -134,6 +142,7 @@ export function PainelDaPosicao({ posicao: posicaoEntrada, precoAtivo, dias: dia
             ]}
             precoAtivo={precoAtivo}
             equilibrios={dados.analise.equilibrios}
+            cursor={{ preco: sim, aoMudar: setPrecoSim, valores: simAntes === null ? [simNoVenc] : [simNoVenc, simAntes] }}
             descricao={`Lucro e prejuízo da ${titulo.toLowerCase()} por preço do ativo no vencimento. Ganho máximo ${semLimite(dados.analise.ganhoMaximo)}, perda máxima ${semLimite(dados.analise.perdaMaxima)}.`}
           />
         </div>
@@ -142,6 +151,36 @@ export function PainelDaPosicao({ posicao: posicaoEntrada, precoAtivo, dias: dia
           {dados.antes && <span><MarcaDaLinha cor="var(--grafico-ipca)" traco="7 3.5" />{rotuloCurva}</span>}
           <span>┆ Preço de hoje</span>
           <span>○ Equilíbrio</span>
+        </div>
+
+        <div className="col" style={{ gap: 6 }} data-testid={'simulador-preco' + sufixo}>
+          <label htmlFor={'preco-simulado' + sufixo} className="small" style={{ fontWeight: 600 }}>
+            Mova o preço do ativo: {reais(sim)} ({simVariacao >= 0 ? '+' : '−'}{Math.abs(simVariacao).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}% sobre hoje)
+          </label>
+          <input
+            id={'preco-simulado' + sufixo}
+            type="range"
+            min={dados.faixa.min}
+            max={dados.faixa.max}
+            step={0.01}
+            value={sim}
+            onChange={(ev) => setPrecoSim(Number(ev.target.value))}
+            style={{ width: '100%' }}
+          />
+          <span className="tiny muted justify">Você também pode arrastar o dedo ou o mouse direto sobre o gráfico.</span>
+          <div className="row" style={{ gap: 10, flexWrap: 'wrap' }}>
+            <div className="col" style={{ ...caixa, gap: 2, flex: '1 1 150px' }}>
+              <span className="tiny muted">{multi ? 'No 1º vencimento (estimado)' : 'No vencimento'}</span>
+              <span style={{ fontWeight: 700, fontSize: 16, color: simNoVenc < 0 ? 'var(--danger)' : undefined }} data-testid={'sim-resultado-venc' + sufixo}>{dinheiro(simNoVenc)}</span>
+            </div>
+            {simAntes !== null && (
+              <div className="col" style={{ ...caixa, gap: 2, flex: '1 1 150px' }}>
+                <span className="tiny muted">{rotuloCurva}</span>
+                <span style={{ fontWeight: 700, fontSize: 16, color: simAntes < 0 ? 'var(--danger)' : undefined }} data-testid={'sim-resultado-dia' + sufixo}>{dinheiro(simAntes)}</span>
+              </div>
+            )}
+            <button className="chip" style={{ alignSelf: 'center' }} onClick={() => setPrecoSim(null)} disabled={precoSim === null}>Voltar ao preço de hoje</button>
+          </div>
         </div>
 
         {mercado.dias > 0 && vol > 0 && (
