@@ -24,14 +24,15 @@ import { MonteSuaEstrategia } from './MonteSuaEstrategia'
 import { PorVisaoOpcoes } from './PorVisaoOpcoes'
 import { RodaOpcoes } from './RodaOpcoes'
 import { CustoZeroOpcoes } from './CustoZeroOpcoes'
+import { ImpostoOpcoes } from './ImpostoOpcoes'
 import { TopPremiosOpcoes } from './TopPremiosOpcoes'
 import { FaixaDeStrike } from '../ui/FaixaDeStrike'
 import type { AppCtx } from '../state/useAppState'
 
-type Aba = 'series' | 'premios' | 'visao' | 'graficos' | 'roda' | 'custozero' | 'estrategias' | 'posicao'
+type Aba = 'series' | 'premios' | 'visao' | 'graficos' | 'roda' | 'custozero' | 'estrategias' | 'posicao' | 'imposto'
 
 /** Abas que, ao abrir, criam uma entrada no histórico: o "voltar" do navegador as fecha em vez de sair da tela. */
-const ABAS_COM_HISTORICO: Aba[] = ['premios', 'visao', 'graficos', 'roda', 'custozero', 'estrategias', 'posicao']
+const ABAS_COM_HISTORICO: Aba[] = ['premios', 'visao', 'graficos', 'roda', 'custozero', 'estrategias', 'posicao', 'imposto']
 
 const LINHAS_POR_PAGINA = 100
 const ATALHOS_PERTO = [5, 10, 20] as const
@@ -187,6 +188,7 @@ export function SimuleOpcoes({ snapshot, endividadas, carregarBaratas, armazenam
           { id: 'custozero', emoji: '⚖️', titulo: 'Custo zero', descricao: 'Uma ponta paga a outra' },
           { id: 'estrategias', emoji: '📈', titulo: 'Estratégias', descricao: 'Monte sua estratégia' },
           { id: 'posicao', emoji: '📌', titulo: 'Minha posição', descricao: 'Acompanhe e ajuste' },
+          { id: 'imposto', emoji: '🧾', titulo: 'Imposto', descricao: 'DARF mensal das opções' },
         ] as const}
       >
         {aba === 'series' ? (
@@ -197,6 +199,8 @@ export function SimuleOpcoes({ snapshot, endividadas, carregarBaratas, armazenam
           comDados((d) => <MinhaPosicaoOpcoes snapshot={d} ativo={ativoAtual} onEscolher={setTicker} dataPregao={d.dataPregao} />)
         ) : aba === 'roda' ? (
           comDados((d) => <RodaOpcoes snapshot={d} ativo={ativoAtual} onEscolher={setTicker} dataPregao={d.dataPregao} />)
+        ) : aba === 'imposto' ? (
+          <ImpostoOpcoes />
         ) : aba === 'custozero' ? (
           comDados((d) => <CustoZeroOpcoes snapshot={d} ativo={ativoAtual} onEscolher={setTicker} dataPregao={d.dataPregao} />)
         ) : aba === 'visao' ? (
