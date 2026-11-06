@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
+import { apurarNegocios, juntarLeituras, lerMatrizesDoArquivo, lerNegociosOpcoes } from '../domain/extratoOpcoesB3'
+import type { NegocioOpcao } from '../domain/extratoOpcoesB3'
 import { apurarMeses, ALIQUOTA, DARF_MINIMO, IRRF_DAYTRADE, IRRF_SWING } from '../domain/impostoOpcoes'
 import type { CategoriaIr, OperacaoIr } from '../domain/impostoOpcoes'
 import { formatarData } from '../domain/rendaFii'
@@ -9,6 +11,29 @@ const CHAVE = 'carteira-ideal:imposto-opcoes:v1'
 const dinheiro = (v: number) => (v < 0 ? `−${reais(-v)}` : reais(v))
 const NOMES_MESES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro']
 const nomeMes = (mes: string) => `${NOMES_MESES[Number(mes.slice(5, 7)) - 1]} de ${mes.slice(0, 4)}`
+
+const CHAVE_B3 = 'carteira-ideal:imposto-opcoes-b3:v1'
+interface ExtratoSalvo { negocios: NegocioOpcao[]; exercidas: string[]; ignoradas: number; arquivos: string[]; avisos: string[] }
+const EXTRATO_VAZIO: ExtratoSalvo = { negocios: [], exercidas: [], ignoradas: 0, arquivos: [], avisos: [] }
+
+function lerExtrato(): ExtratoSalvo {
+  try {
+    const b = JSON.parse(window.localStorage.getItem(CHAVE_B3) ?? 'null')
+    return b && Array.isArray(b.negocios) ? { ...EXTRATO_VAZIO, ...b } : EXTRATO_VAZIO
+  } catch {
+    return EXTRATO_VAZIO
+  }
+}
+
+async function bytesDe(f: File): Promise<ArrayBuffer> {
+  if (typeof f.arrayBuffer === 'function') return f.arrayBuffer()
+  return new Promise((ok, erro) => {
+    const r = new FileReader()
+    r.onload = () => ok(r.result as ArrayBuffer)
+    r.onerror = () => erro(r.error)
+    r.readAsArrayBuffer(f)
+  })
+}
 
 function ler(): OperacaoIr[] {
   try {
@@ -25,7 +50,10 @@ function ler(): OperacaoIr[] {
  * Os lançamentos ficam só neste aparelho (localStorage). Educacional: não substitui contador nem a apuração da corretora.
  */
 export function ImpostoOpcoes() {
-  const [operacoes, setOperacoes] = useState<OperacaoIr[]>(ler)
+  const [manuais, setOperacoes] = useState<OperacaoIr[]>(ler)
+  const [extrato, setExtrato] = useState<ExtratoSalvo>(lerExtrato)
+  const [lendo, setLendo] = useState(false)
+  const [erroArquivo, setErroArquivo] = useState<string | null>(null)
   const [data, setData] = useState(() => new Date().toISOString().slice(0, 10))
   const [categoria, setCategoria] = useState<CategoriaIr>('swing')
   const [descricao, setDescricao] = useState('')
@@ -34,15 +62,51 @@ export function ImpostoOpcoes() {
   const [vendido, setVendido] = useState(0)
 
   useEffect(() => {
-    try { window.localStorage.setItem(CHAVE, JSON.stringify(operacoes)) } catch { /* sem armazenamento: segue só na memória */ }
-  }, [operacoes])
+    try { window.localStorage.setItem(CHAVE, JSON.stringify(manuais)) } catch { /* sem armazenamento: segue só na memória */ }
+  }, [manuais])
+  useEffect(() => {
+    try { window.localStorage.setItem(CHAVE_B3, JSON.stringify(extrato)) } catch { /* idem */ }
+  }, [extrato])
 
+  const hoje = new Date().toISOString().slice(0, 10)
+  const apuracao = useMemo(() => apurarNegocios(extrato.negocios, hoje, new Set(extrato.exercidas)), [extrato, hoje])
+  const operacoes = useMemo(
+    () => [...manuais, ...apuracao.operacoes].sort((a, b) => a.data.localeCompare(b.data)),
+    [manuais, apuracao],
+  )
   const meses = useMemo(() => apurarMeses(operacoes), [operacoes])
+
+  const enviar = async (arquivos: File[]) => {
+    if (arquivos.length === 0) return
+    setLendo(true)
+    setErroArquivo(null)
+    try {
+      const leituras = []
+      for (const f of arquivos) {
+        const mats = await lerMatrizesDoArquivo(f.name, await bytesDe(f))
+        leituras.push(...mats.map(lerNegociosOpcoes))
+      }
+      const junto = juntarLeituras(leituras)
+      if (!junto.reconhecido) {
+        setErroArquivo('Não encontrei o extrato de Negociação da B3 neste arquivo. Na Área do Investidor, abra Extratos → Negociação, filtre o período e baixe em Excel.')
+      } else if (junto.negocios.length === 0) {
+        setErroArquivo('O extrato foi lido, mas não tem negócios com opções neste período.')
+      } else {
+        setExtrato({ negocios: junto.negocios, exercidas: [], ignoradas: junto.ignoradas, arquivos: arquivos.map((f) => f.name), avisos: junto.erros })
+      }
+    } catch (e) {
+      setErroArquivo(e instanceof Error ? e.message : 'Não consegui abrir este arquivo.')
+    } finally {
+      setLendo(false)
+    }
+  }
+  const alternarExercida = (codigo: string) =>
+    setExtrato((a) => ({ ...a, exercidas: a.exercidas.includes(codigo) ? a.exercidas.filter((c) => c !== codigo) : [...a.exercidas, codigo] }))
   const caixa = { padding: '10px 12px', borderRadius: 12, background: 'var(--surface2)' } as const
 
   const adicionar = () => {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(data) || valor <= 0) return
-    const nova: OperacaoIr = { id: `${Date.now()}-${operacoes.length}`, data, categoria, descricao: descricao.trim(), resultado: perdeu ? -valor : valor, vendido }
+    const nova: OperacaoIr = { id: `${Date.now()}-${manuais.length}`, data, categoria, descricao: descricao.trim(), resultado: perdeu ? -valor : valor, vendido }
     setOperacoes((atual) => [...atual, nova].sort((a, b) => a.data.localeCompare(b.data)))
     setDescricao('')
     setValor(0)
@@ -61,6 +125,55 @@ export function ImpostoOpcoes() {
           pagar. Swing trade paga <strong>{ALIQUOTA.swing * 100}%</strong> e day trade <strong>{ALIQUOTA.daytrade * 100}%</strong> sobre o ganho líquido do mês, sem a isenção dos R$ 20 mil
           (que vale só para ações à vista). Prejuízos abatem ganhos futuros da mesma categoria.
         </span>
+      </div>
+
+      <div className="card col" style={{ gap: 10 }} data-testid="imposto-extrato">
+        <span style={{ fontWeight: 700 }}>Enviar o extrato da B3</span>
+        <span className="muted small justify">
+          Na Área do Investidor da B3 (Extratos → Negociação), baixe o período inteiro em Excel (.xlsx) ou CSV e envie aqui. O app separa as opções, apura day trade e swing
+          e calcula o imposto mês a mês. O arquivo é lido no seu aparelho e não é enviado a nenhum servidor.
+        </span>
+        <label className="chip" style={{ alignSelf: 'flex-start', cursor: 'pointer' }}>
+          {lendo ? 'Lendo…' : 'Escolher arquivo(s)'}
+          <input
+            type="file" multiple accept=".xlsx,.csv,.txt" aria-label="Enviar extrato da B3" style={{ display: 'none' }}
+            onChange={(ev) => { const f = [...(ev.target.files ?? [])]; ev.target.value = ''; void enviar(f) }}
+          />
+        </label>
+        {erroArquivo && <span className="small" style={{ color: 'var(--danger)' }} role="alert" data-testid="imposto-erro">{erroArquivo}</span>}
+        {extrato.negocios.length > 0 && (
+          <div className="col" style={{ gap: 6 }} data-testid="imposto-resumo-extrato">
+            <span className="small">
+              <strong>{extrato.negocios.length}</strong> negócios com opções lidos de {extrato.arquivos.join(', ') || 'extrato salvo'}
+              {apuracao.periodo ? ` (${formatarData(apuracao.periodo.de)} a ${formatarData(apuracao.periodo.ate)})` : ''}; {extrato.ignoradas} linhas de outros mercados foram ignoradas.
+            </span>
+            {extrato.avisos.slice(0, 5).map((a) => <span key={a} className="tiny" style={{ color: 'var(--danger)' }}>{a}</span>)}
+            {apuracao.abertas.length > 0 && (
+              <div className="col" style={{ gap: 4 }} data-testid="imposto-abertas">
+                <span className="small" style={{ fontWeight: 600 }}>Posições que não foram zeradas no extrato</span>
+                {apuracao.abertas.map((p) => (
+                  <div key={p.codigo} className="row" style={{ gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                    <span className="small">
+                      {p.codigo}: {p.quantidade.toLocaleString('pt-BR')} {p.lado} a {reais(p.precoMedio)}
+                      {p.vencimento ? ` · vence ${formatarData(p.vencimento)}` : ' · vencimento não identificado'}
+                      {p.vencida ? (p.exercida ? ' · exercida (fora da conta)' : ' · venceu sem valor') : ' · em aberto (fora da conta)'}
+                    </span>
+                    {p.vencida && (
+                      <button className="chip" aria-pressed={p.exercida} onClick={() => alternarExercida(p.codigo)}>
+                        {p.exercida ? 'Foi sem valor' : 'Foi exercida'}
+                      </button>
+                    )}
+                  </div>
+                ))}
+                <span className="tiny muted justify">
+                  O extrato não diz se a opção foi exercida. Se a série venceu valendo dinheiro e virou compra ou venda da ação, marque "Foi exercida": ela sai do cálculo das opções.
+                  Posições ainda em aberto só entram no imposto quando forem encerradas.
+                </span>
+              </div>
+            )}
+            <button className="chip" style={{ alignSelf: 'flex-start' }} onClick={() => setExtrato(EXTRATO_VAZIO)}>Remover o extrato enviado</button>
+          </div>
+        )}
       </div>
 
       <div className="card col" style={{ gap: 12 }} data-testid="imposto-form">
@@ -160,7 +273,11 @@ export function ImpostoOpcoes() {
                 </span>
                 <span className="row" style={{ gap: 8, alignItems: 'center' }}>
                   <strong className="small" style={{ color: o.resultado < 0 ? 'var(--danger)' : undefined }}>{dinheiro(o.resultado)}</strong>
-                  <button className="chip" aria-label={`Remover lançamento de ${formatarData(o.data)}`} onClick={() => setOperacoes((a) => a.filter((x) => x.id !== o.id))}>Remover</button>
+                  {o.origem === 'b3' ? (
+                    <span className="tiny muted">extrato</span>
+                  ) : (
+                    <button className="chip" aria-label={`Remover lançamento de ${formatarData(o.data)}`} onClick={() => setOperacoes((a) => a.filter((x) => x.id !== o.id))}>Remover</button>
+                  )}
                 </span>
               </div>
             ))}

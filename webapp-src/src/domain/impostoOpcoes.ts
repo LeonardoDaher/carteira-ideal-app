@@ -23,6 +23,8 @@ export interface OperacaoIr {
   resultado: number
   /** Valor vendido (prêmio recebido) em reais, base do IRRF de 0,005% nas operações comuns. */
   vendido: number
+  /** 'b3' = veio do extrato enviado; ausente = lançado à mão. */
+  origem?: 'b3'
 }
 
 export const ALIQUOTA: Record<CategoriaIr, number> = { swing: 0.15, daytrade: 0.2 }
