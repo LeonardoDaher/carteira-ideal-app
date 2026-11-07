@@ -1,9 +1,9 @@
 {
   "ticker": "IGTI11",
-  "geradoEm": "2026-10-31T23:00:33.116Z",
+  "geradoEm": "2026-11-07T13:16:38.200Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
   "de": "2021-11-22",
-  "ate": "2026-10-30",
+  "ate": "2026-11-06",
   "ajustes": [{"data":"2021-12-27","fator":10,"origem":"b3"}],
   "saltosRestantes": [],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
@@ -1242,6 +1242,10 @@
     ["2026-10-27",24.52,25.12,23.86,23.86,362449],
     ["2026-10-28",23.71,23.77,22.27,22.64,361995],
     ["2026-10-29",22.56,22.73,21.83,22.2,183319],
-    ["2026-10-30",21.83,22.08,21.33,21.79,226694]
+    ["2026-10-30",21.83,22.08,21.33,21.79,226694],
+    ["2026-11-03",21.4,21.63,21.19,21.57,94310],
+    ["2026-11-04",21.86,22.91,21.69,22.85,188138],
+    ["2026-11-05",22.95,23.4,22.62,22.81,103743],
+    ["2026-11-06",22.81,23.54,22.59,23.35,138087]
   ]
 }

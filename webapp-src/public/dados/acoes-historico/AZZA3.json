@@ -1,9 +1,9 @@
 {
   "ticker": "AZZA3",
-  "geradoEm": "2026-10-31T12:46:38.489Z",
+  "geradoEm": "2026-11-07T13:16:38.200Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
   "de": "2024-08-01",
-  "ate": "2026-10-30",
+  "ate": "2026-11-06",
   "ajustes": [],
   "saltosRestantes": [],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
@@ -569,6 +569,10 @@
     ["2026-10-27",17.4,17.42,16.04,16.6,163549],
     ["2026-10-28",16.64,16.72,14.73,15,100733],
     ["2026-10-29",15.01,15.3,14.15,14.16,60441],
-    ["2026-10-30",14.01,14.33,13.38,14.33,70450]
+    ["2026-10-30",14.01,14.33,13.38,14.33,70450],
+    ["2026-11-03",14.01,14.27,13.47,13.6,68688],
+    ["2026-11-04",13.97,14,13.29,13.97,72626],
+    ["2026-11-05",14.2,14.62,13.92,14.06,46127],
+    ["2026-11-06",14,15.19,13.8,14.76,61123]
   ]
 }

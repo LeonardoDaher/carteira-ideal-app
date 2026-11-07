@@ -1,9 +1,9 @@
 {
   "ticker": "AXIA3",
-  "geradoEm": "2026-10-31T23:00:33.116Z",
+  "geradoEm": "2026-11-07T13:16:38.200Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
   "de": "2025-11-10",
-  "ate": "2026-10-30",
+  "ate": "2026-11-06",
   "ajustes": [{"data":"2025-12-22","fator":1.262838,"origem":"b3"}],
   "saltosRestantes": [],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
@@ -249,6 +249,10 @@
     ["2026-10-27",50.8,51.62,49.98,50.88,1499206],
     ["2026-10-28",50.4,50.73,47.89,48.23,1377041],
     ["2026-10-29",48.39,48.53,47.05,47.68,758181],
-    ["2026-10-30",47.4,47.62,46.5,47.43,719690]
+    ["2026-10-30",47.4,47.62,46.5,47.43,719690],
+    ["2026-11-03",46.69,46.89,46.21,46.39,713054],
+    ["2026-11-04",46.59,47.58,46.57,47.58,781399],
+    ["2026-11-05",47.26,49.3,46.96,47.69,952454],
+    ["2026-11-06",47.59,48.68,47.27,48.29,646747]
   ]
 }
