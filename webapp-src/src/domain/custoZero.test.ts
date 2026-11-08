@@ -46,6 +46,13 @@ describe('custo zero', () => {
     expect(`${r[0].compra.codigo}/${r[0].venda.codigo}`).toBe('P56/C62')
     expect(r.every((x) => x.saldo >= 0 && x.compra.tipo === 'put' && x.venda.tipo === 'call')).toBe(true)
   })
+  it('modo margem: pontas fora do dinheiro e put vendida o mais longe possível', () => {
+    const sem = { strikeMin: null, strikeMax: null }
+    const lista = [s('CA', 'call', 66, 0.5), s('CB', 'call', 64, 0.9), s('PA', 'put', 54, 0.52), s('PB', 'put', 57, 0.92), s('PX', 'put', 62, 0.5)]
+    const r = buscarParesCustoZero(lista, 'alta', '2026-12-18', 60, 0, 10, sem, 'margem')
+    expect(r.map((x) => `${x.compra.codigo}/${x.venda.codigo}`)).toEqual(['CA/PA', 'CA/PB', 'CB/PB']) // PA (−10%) antes de PB (−5%), e no empate o maior crédito; PX está dentro do dinheiro
+    expect(r[0].saldo).toBe(0.02)
+  })
   it('lista vencimentos com call e put', () => {
     expect(vencimentosComCallEPut([...series, s('C1', 'call', 60, 1, '2027-01-15')])).toEqual(['2026-12-18'])
   })

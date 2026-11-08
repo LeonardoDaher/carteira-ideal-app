@@ -125,8 +125,15 @@ function Busca({ ativo, hoje }: { ativo: AtivoComOpcoes; hoje: string }) {
         <span className="small" style={{ fontWeight: 600 }}>O que procurar</span>
         <div className="row" style={{ gap: 6, flexWrap: 'wrap' }}>
           <button className={`chip ${modo === 'credito' ? 'selected' : ''}`} aria-pressed={modo === 'credito'} onClick={() => mudar(() => setModo('credito'))}>Recebo para montar (crédito)</button>
+          <button className={`chip ${modo === 'margem' ? 'selected' : ''}`} aria-pressed={modo === 'margem'} onClick={() => mudar(() => setModo('margem'))}>Mais margem (strikes afastados)</button>
           <button className={`chip ${modo === 'zero' ? 'selected' : ''}`} aria-pressed={modo === 'zero'} onClick={() => mudar(() => setModo('zero'))}>Custo zero (prêmios iguais)</button>
         </div>
+        {modo === 'margem' && (
+          <span className="tiny muted justify" data-testid="custozero-dica-margem">
+            Pares com as duas pontas fora do dinheiro (put abaixo e call acima do preço), do strike vendido mais afastado para o mais próximo. Paga pouco, mas o ativo
+            tem espaço para andar antes de a ponta vendida ser exercida. Confira os negócios de cada série: strikes muito afastados costumam ter pouca liquidez.
+          </span>
+        )}
         {modo === 'credito' && (
           <span className="tiny muted justify">
             Mostra os pares em que o prêmio recebido é maior que o pago, do maior crédito para o menor. Atenção: crédito alto costuma vir de vender uma opção mais perto do preço
@@ -136,7 +143,7 @@ function Busca({ ativo, hoje }: { ativo: AtivoComOpcoes; hoje: string }) {
       </div>
 
       <div className="col" style={{ gap: 6 }} role="group" aria-label="Diferença aceita">
-        <span className="small" style={{ fontWeight: 600 }}>{modo === 'credito' ? 'Débito máximo aceito, se houver (por ação)' : 'Diferença aceita entre os prêmios (por ação)'}</span>
+        <span className="small" style={{ fontWeight: 600 }}>{modo !== 'zero' ? 'Débito máximo aceito, se houver (por ação)' :'Diferença aceita entre os prêmios (por ação)'}</span>
         <div className="row" style={{ gap: 6, flexWrap: 'wrap' }}>
           {TOLERANCIAS_CUSTO_ZERO.map((t) => (
             <button key={t} className={`chip ${tolerancia === t ? 'selected' : ''}`} aria-pressed={tolerancia === t} onClick={() => mudar(() => setTolerancia(t))}>
@@ -171,7 +178,7 @@ function Busca({ ativo, hoje }: { ativo: AtivoComOpcoes; hoje: string }) {
       </div>
 
       <div className="card col" style={{ gap: 12 }} data-testid="custozero-lista">
-        <span style={{ fontWeight: 700 }}>{modo === 'credito' ? 'Pares em que você recebe para montar' : 'Pares de custo zero'} ({pares.length}{pares.length === 10 ? ', os 10 melhores' : ''})</span>
+        <span style={{ fontWeight: 700 }}>{modo === 'credito' ? 'Pares em que você recebe para montar' : modo === 'margem' ? 'Pares com mais margem' : 'Pares de custo zero'} ({pares.length}{pares.length === 10 ? ', os 10 melhores' : ''})</span>
         {pares.length === 0 ? (
           <span className="small muted justify" role="status">Nenhum par fecha dentro dessa diferença neste vencimento. Aumente a diferença aceita ou troque o vencimento.</span>
         ) : (
@@ -184,7 +191,7 @@ function Busca({ ativo, hoje }: { ativo: AtivoComOpcoes; hoje: string }) {
                     Compra {p.compra.codigo} (strike {num(p.compra.strike)}, {num(p.compra.ultimo)}) · Vende {p.venda.codigo} (strike {num(p.venda.strike)}, {num(p.venda.ultimo)})
                   </span>
                   <span className="tiny" style={{ color: p.saldo > 0.005 ? 'var(--grafico-con)' : undefined }}>
-                    {saldoTexto(p.saldo)} · strikes {pctDe(p.compra.strike, ativo.cotacao)} / {pctDe(p.venda.strike, ativo.cotacao)} do preço
+                    {saldoTexto(p.saldo)} · strikes {pctDe(p.compra.strike, ativo.cotacao)} / {pctDe(p.venda.strike, ativo.cotacao)} do preço · negócios {p.compra.negocios}/{p.venda.negocios}
                   </span>
                 </button>
               )

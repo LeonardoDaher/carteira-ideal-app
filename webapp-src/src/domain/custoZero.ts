@@ -16,7 +16,8 @@ export interface ParCustoZero {
   saldo: number
 }
 
-export type ModoCustoZero = 'zero' | 'credito'
+/** 'zero': prêmios iguais; 'credito': maior crédito primeiro; 'margem': pontas fora do dinheiro e strike vendido o mais longe possível do preço. */
+export type ModoCustoZero = 'zero' | 'credito' | 'margem'
 
 export const TOLERANCIAS_CUSTO_ZERO = [0.02, 0.05, 0.1, 0.2] as const
 
@@ -48,13 +49,26 @@ export function buscarParesCustoZero(
       if (p.strike > c.strike) continue
       const [compra, venda] = direcao === 'alta' ? [c, p] : [p, c]
       const saldo = Math.round((venda.ultimo - compra.ultimo) * 100) / 100
-      const serve = modo === 'credito' ? saldo >= -tolerancia - 1e-9 : Math.abs(saldo) <= tolerancia + 1e-9
+      // Mais margem: as duas pontas fora do dinheiro (put abaixo e call acima do preço), com a zona entre elas o mais larga possível.
+      if (modo === 'margem' && (p.strike > cotacao || c.strike < cotacao)) continue
+      const serve = modo === 'zero' ? Math.abs(saldo) <= tolerancia + 1e-9 : saldo >= -tolerancia - 1e-9
       if (serve) pares.push({ compra, venda, saldo })
     }
   }
   const distancia = (x: ParCustoZero) => Math.abs(x.compra.strike - cotacao) + Math.abs(x.venda.strike - cotacao)
-  const ordem = modo === 'credito'
-    ? (a: ParCustoZero, b: ParCustoZero) => b.saldo - a.saldo || distancia(a) - distancia(b)
-    : (a: ParCustoZero, b: ParCustoZero) => Math.abs(a.saldo) - Math.abs(b.saldo) || distancia(a) - distancia(b)
+  const ordem =
+    modo === 'margem'
+      ? (a: ParCustoZero, b: ParCustoZero) => margemDaVenda(b, cotacao) - margemDaVenda(a, cotacao) || b.saldo - a.saldo
+      : modo === 'credito'
+        ? (a: ParCustoZero, b: ParCustoZero) => b.saldo - a.saldo || distancia(a) - distancia(b)
+        : (a: ParCustoZero, b: ParCustoZero) => Math.abs(a.saldo) - Math.abs(b.saldo) || distancia(a) - distancia(b)
   return pares.sort(ordem).slice(0, limite)
+}
+
+/**
+ * Folga da ponta vendida: quanto o ativo pode andar (em fração do preço) até o strike que você vendeu. Na alta é a queda até o strike da
+ * put vendida; na baixa, a alta até o strike da call vendida. Quanto maior, mais longe o exercício.
+ */
+export function margemDaVenda(par: ParCustoZero, cotacao: number): number {
+  return Math.abs(par.venda.strike - cotacao) / cotacao
 }
