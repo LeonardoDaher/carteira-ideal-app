@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
-  ESTRUTURAS, ESTRUTURAS_DA_VISAO, chanceDeLucro, descreverPernas, escolhaDaCandidata, gerarCandidatas, melhoresCandidatas,
+  ESTRUTURAS, ESTRUTURAS_DA_VISAO, ESTRUTURAS_DE_RISCO_ILIMITADO, chanceDeLucro, descreverPernas, escolhaDaCandidata, gerarCandidatas, melhoresCandidatas,
 } from './estrategiasPorVisao'
 import type { Candidata, EstruturaId, ParametrosIdeias } from './estrategiasPorVisao'
 import type { AtivoComOpcoes, SerieOpcao } from './opcoes'
@@ -128,7 +128,7 @@ describe('medidas de cada estrutura (contas conferidas à mão)', () => {
     expect(c.pernas[0].serie.strike).toBeLessThan(SPOT)
     expect(c.pernas[1].serie.strike).toBeGreaterThan(SPOT)
     const straddle = achar(candidatas('straddleComprado', 'oscilacao'), 'C1000+P1000')
-    expect(-c.perdaMaxima).toBeLessThan(-straddle.perdaMaxima)
+    expect(-(c.perdaMaxima as number)).toBeLessThan(-(straddle.perdaMaxima as number))
   })
 
   it('venda coberta: ganho = (strike − preço + prêmio), perda = preço − prêmio, e a estrutura inclui ter a ação', () => {
@@ -145,8 +145,13 @@ describe('medidas de cada estrutura (contas conferidas à mão)', () => {
     for (const [visao, ids] of Object.entries(ESTRUTURAS_DA_VISAO) as [Visao, EstruturaId[]][])
       for (const id of ids)
         for (const c of candidatas(id, visao)) {
+          if (ESTRUTURAS_DE_RISCO_ILIMITADO.includes(id)) {
+            expect(c.perdaMaxima).toBeNull()
+            expect(c.riscoReferencia).toBeGreaterThan(0)
+            continue
+          }
           expect(Number.isFinite(c.perdaMaxima)).toBe(true)
-          expect(c.perdaMaxima).toBeLessThan(0)
+          expect(c.perdaMaxima as number).toBeLessThan(0)
         }
   })
 })
@@ -214,7 +219,7 @@ describe('filtros e ordenação', () => {
     expect(porRetorno[0].retornoNoCenario).toBeGreaterThanOrEqual(porRetorno[1].retornoNoCenario)
 
     const porRisco = melhoresCandidatas(ativo, 'travaAltaDebito', 'alta', params, 'risco', 3)
-    expect(-porRisco[0].perdaMaxima).toBeLessThanOrEqual(-porRisco[1].perdaMaxima)
+    expect(-(porRisco[0].perdaMaxima as number)).toBeLessThanOrEqual(-(porRisco[1].perdaMaxima as number))
   })
 
   it('o cenário da visão de alta rende no ganho; o da lateral é o preço parado; o de baixa, na queda', () => {
@@ -321,5 +326,58 @@ describe('estruturas acrescentadas à Tendência (borboletas, condor de calls, p
     const coberta = candidatas('vendaCoberta', 'lateral')[0]
     expect(escolhaDaCandidata(ativo, coberta)).toMatchObject({ coberta: true })
     expect(escolhaDaCandidata(ativo, coberta)).not.toHaveProperty('modelo')
+  })
+})
+
+describe('Risk Reversal na aba Tendência', () => {
+  it('Bullish entra na alta e Bearish na baixa', () => {
+    expect(ESTRUTURAS_DA_VISAO.alta).toContain('bullishRiskReversal')
+    expect(ESTRUTURAS_DA_VISAO.baixa).toContain('bearishRiskReversal')
+    expect(ESTRUTURAS.bullishRiskReversal.titulo).toBe('Bullish Risk Reversal')
+    expect(ESTRUTURAS.bearishRiskReversal.titulo).toBe('Bearish Risk Reversal')
+  })
+
+  it('Bullish: vende a put abaixo e compra a call acima, com crédito ou quase, e perda limitada', () => {
+    const lista = candidatas('bullishRiskReversal', 'alta')
+    expect(lista.length).toBeGreaterThan(0)
+    for (const c of lista) {
+      const [venda, compra] = c.pernas
+      expect([venda.lado, venda.serie.tipo, compra.lado, compra.serie.tipo]).toEqual(['venda', 'put', 'compra', 'call'])
+      expect(venda.serie.strike).toBeLessThan(SPOT)
+      expect(compra.serie.strike).toBeGreaterThan(SPOT)
+      expect(c.credito).toBeGreaterThanOrEqual(-0.02 * c.quantidade - 1e-6)
+      expect(c.perdaMaxima as number).toBeLessThan(0)
+      expect(c.ganhoMaximo).toBeNull() // a call comprada não tem teto
+    }
+  })
+
+  it('Bearish: vende a call acima e compra a put abaixo; a perda não tem limite e o risco usa a alta de 50%', () => {
+    const lista = candidatas('bearishRiskReversal', 'baixa')
+    expect(lista.length).toBeGreaterThan(0)
+    expect(ESTRUTURAS_DE_RISCO_ILIMITADO).toEqual(['bearishRiskReversal'])
+    for (const c of lista) {
+      const [venda, compra] = c.pernas
+      expect([venda.lado, venda.serie.tipo, compra.lado, compra.serie.tipo]).toEqual(['venda', 'call', 'compra', 'put'])
+      expect(c.perdaMaxima).toBeNull()
+      // a call vendida perde (S − strike) por opção quando o ativo vai a 15; o ganho da put comprada é zero ali
+      expect(c.riscoReferencia).toBeCloseTo((SPOT * 1.5 - venda.serie.strike + venda.serie.ultimo * -1 + compra.serie.ultimo) * c.quantidade, 4)
+    }
+  })
+
+  it('ordenar por menor risco põe o Bearish (sem limite) depois dos de perda limitada', () => {
+    const todas = [...candidatas('bullishRiskReversal', 'alta'), ...candidatas('bearishRiskReversal', 'baixa')]
+    const porRisco = [...todas].sort((a, b) => (b.perdaMaxima ?? -1e12) - (a.perdaMaxima ?? -1e12))
+    expect(porRisco[porRisco.length - 1].perdaMaxima).toBeNull()
+  })
+
+  it('Simular abre o modelo Risk Reversal na aba Estratégias, com as séries na ordem das pernas', () => {
+    const c = candidatas('bullishRiskReversal', 'alta')[0]
+    const e = escolhaDaCandidata(ativo, c)
+    expect(e.modelo).toBe('bullishRiskReversal')
+    expect(e.coberta).toBe(false)
+    expect(e.series.map((s) => s.tipo)).toEqual(['put', 'call'])
+    const b = escolhaDaCandidata(ativo, candidatas('bearishRiskReversal', 'baixa')[0])
+    expect(b.modelo).toBe('bearishRiskReversal')
+    expect(b.series.map((s) => s.tipo)).toEqual(['call', 'put'])
   })
 })

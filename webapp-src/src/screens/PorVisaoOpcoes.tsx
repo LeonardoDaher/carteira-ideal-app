@@ -213,7 +213,7 @@ function PainelPorVisao({ snapshot, ativo, onSimular }: { snapshot: SnapshotOpco
               <strong>Séries.</strong> Só as do vencimento escolhido que negociaram no último pregão, com pelo menos {NEGOCIOS_MINIMOS_IDEIAS} negócios
               cada, e strikes perto do preço (cada estrutura tem a sua janela). O preço de cada perna é o do último negócio, e não o de
               compra e venda: o resultado real pode ser pior. Combinações incoerentes (débito acima da largura da trava, por
-              exemplo) saem. Estruturas de risco ilimitado não entram.
+              exemplo) saem. Estruturas de risco ilimitado não entram, exceto o Bearish Risk Reversal, que aparece marcado com perda “Sem limite” (o retorno dele é calculado sobre a perda com o ativo 50% acima).
             </span>
             <span className="muted">
               <strong>Chance de lucro.</strong> Modelo de Black-Scholes, neutro ao risco, com a volatilidade implícita média das séries
@@ -245,7 +245,7 @@ function LinhaCandidata({ c, onSimular }: { c: Candidata; onSimular: () => void 
       <td style={{ whiteSpace: 'normal', minWidth: 190 }}>{descreverPernas(c)}</td>
       <td className="num">{c.credito >= 0 ? 'Crédito' : 'Débito'} {reais(Math.abs(c.credito))}</td>
       <td className="num">{c.ganhoMaximo === null ? 'Sem teto' : dinheiro(c.ganhoMaximo)}</td>
-      <td className="num">{dinheiro(c.perdaMaxima)}</td>
+      <td className="num">{c.perdaMaxima === null ? <span style={{ color: 'var(--danger)', fontWeight: 700 }} title={`Sem limite se o ativo subir. Com o ativo 50% acima, a perda seria ${reais(c.riscoReferencia)}.`}>Sem limite</span> : dinheiro(c.perdaMaxima)}</td>
       <td className="num">{c.equilibrios.map((e) => num(e, 2)).join(' e ') || '—'}</td>
       <td className="num" style={{ fontWeight: 700 }}>{num(c.chanceDeLucro)}%</td>
       <td className="num">{num(c.retornoNoCenario, 0)}%</td>

@@ -20,6 +20,7 @@ export type EstruturaId =
   | 'straddleComprado' | 'strangleComprado'
   | 'borboletaPut' | 'borboletaFerro' | 'condorCall' | 'putOtimizada' | 'slidePut'
   | 'strangleFinanciado' | 'collar' | 'booster'
+  | 'bullishRiskReversal' | 'bearishRiskReversal'
 
 export interface InfoEstrutura {
   id: EstruturaId
@@ -49,19 +50,30 @@ export const ESTRUTURAS: Record<EstruturaId, InfoEstrutura> = {
   slidePut: { id: 'slidePut', titulo: 'Slide com put', descricao: 'Compra uma put de strike maior e vende duas de strikes menores. Sai com crédito ou custo baixo e lucra com o ativo parado ou caindo pouco; arrisca se ele cair abaixo dos strikes vendidos.', perfil: ['Crédito ou custo baixo', 'Perda limitada ao strike menos o crédito', '3 séries'] },
   strangleFinanciado: { id: 'strangleFinanciado', titulo: 'Strangle comprado financiado', descricao: 'Compra um strangle e vende opções mais afastadas para pagar parte dele: custa menos, mas o ganho também tem teto.', perfil: ['Débito', 'Ganho e perda limitados', '4 séries'] },
   collar: { id: 'collar', titulo: 'Collar', descricao: 'Para quem já tem a ação: compra uma put de proteção e vende uma call para pagar parte dela. Limita a perda e também o ganho.', perfil: ['Exige ter a ação', 'Ganho e perda limitados'] },
+  bullishRiskReversal: { id: 'bullishRiskReversal', titulo: 'Bullish Risk Reversal', descricao: 'Vende uma put abaixo do preço e compra uma call acima, no mesmo vencimento. Aposta na alta: costuma sair com crédito ou perto de zero, e o ativo tem espaço para andar entre os dois strikes. Ganha com a alta acima da call; abaixo da put vendida, a perda cresce até o ativo zerar.', perfil: ['Crédito ou custo baixo', 'Perda limitada ao strike menos o crédito', '2 séries'] },
+  bearishRiskReversal: { id: 'bearishRiskReversal', titulo: 'Bearish Risk Reversal', descricao: 'Vende uma call acima do preço e compra uma put abaixo, no mesmo vencimento. Aposta na queda: costuma sair com crédito ou perto de zero, e o ativo tem espaço entre os dois strikes. Ganha com a queda abaixo da put; acima da call vendida, a perda NÃO tem limite.', perfil: ['Crédito ou custo baixo', 'Perda sem limite se o ativo subir', '2 séries'] },
   booster: { id: 'booster', titulo: 'Booster', descricao: 'Para quem já tem a ação: compra uma call perto do preço, vende outra acima e paga o débito com uma put vendida abaixo. Dobra a alta dentro da faixa; abaixo da put, a perda aumenta.', perfil: ['Exige ter a ação', 'Débito próximo de zero', '3 séries'] },
 }
 
 /** Estruturas que combinam com cada visão, na ordem em que aparecem na tela. */
 export const ESTRUTURAS_DA_VISAO: Record<Visao, EstruturaId[]> = {
-  alta: ['compraCall', 'travaAltaDebito', 'travaAltaCredito', 'vendaPut', 'slidePut', 'booster'],
-  baixa: ['compraPut', 'travaBaixaDebito', 'travaBaixaCredito', 'collar'],
+  alta: ['compraCall', 'travaAltaDebito', 'travaAltaCredito', 'vendaPut', 'bullishRiskReversal', 'slidePut', 'booster'],
+  baixa: ['compraPut', 'travaBaixaDebito', 'travaBaixaCredito', 'bearishRiskReversal', 'collar'],
   lateral: ['condorDeFerro', 'borboleta', 'borboletaPut', 'borboletaFerro', 'condorCall', 'putOtimizada', 'vendaCoberta'],
   oscilacao: ['straddleComprado', 'strangleComprado', 'strangleFinanciado'],
 }
 
 /** Estruturas que, ao serem enviadas à aba Estratégias, abrem o modelo correspondente (as pernas seguem a ordem do modelo). */
-export const MODELO_DA_ESTRUTURA: Partial<Record<EstruturaId, 'collar' | 'booster'>> = { collar: 'collar', booster: 'booster' }
+export const MODELO_DA_ESTRUTURA: Partial<Record<EstruturaId, 'collar' | 'booster' | 'bullishRiskReversal' | 'bearishRiskReversal'>> = {
+  collar: 'collar', booster: 'booster', bullishRiskReversal: 'bullishRiskReversal', bearishRiskReversal: 'bearishRiskReversal',
+}
+
+/**
+ * Estruturas que, por definição, têm perda sem limite (call vendida sem ter o ativo). As demais só entram com risco limitado. O risco usado nas
+ * contas de retorno é, então, a perda com o ativo 50% acima do preço de hoje, e a tela mostra "Sem limite" na perda máxima.
+ */
+export const ESTRUTURAS_DE_RISCO_ILIMITADO: EstruturaId[] = ['bearishRiskReversal']
+export const ALTA_DE_REFERENCIA = 0.5
 
 export interface PernaCandidata {
   serie: SerieOpcao
@@ -81,8 +93,10 @@ export interface Candidata {
   /** Dinheiro ao montar as opções, em R$: positivo = recebe (crédito), negativo = paga (débito). */
   credito: number
   ganhoMaximo: number | null
-  /** Valor negativo; nas estruturas aceitas a perda é sempre limitada. */
-  perdaMaxima: number
+  /** Valor negativo; null (sem limite) só nas estruturas de ESTRUTURAS_DE_RISCO_ILIMITADO. */
+  perdaMaxima: number | null
+  /** Risco em R$ (positivo) usado no retorno no cenário: a perda máxima ou, sem limite, a perda com o ativo 50% acima. */
+  riscoReferencia: number
   equilibrios: number[]
   /** Chance de a operação terminar no lucro, em %, pelo modelo (neutro ao risco, com a volatilidade implícita das séries). */
   chanceDeLucro: number
@@ -363,6 +377,25 @@ function rascunhosDe(estrutura: EstruturaId, calls: SerieOpcao[], puts: SerieOpc
         }
       }
       break
+    case 'bullishRiskReversal':
+      for (const p of puts) {
+        if (m(p) < 0.85 || m(p) > 0.97) continue
+        for (const c of calls) {
+          if (m(c) < 1.03 || m(c) > 1.15) continue
+          // recebe para montar ou paga quase nada
+          if (p.ultimo - c.ultimo >= -0.02) add([venda(p), compra(c)])
+        }
+      }
+      break
+    case 'bearishRiskReversal':
+      for (const c of calls) {
+        if (m(c) < 1.03 || m(c) > 1.15) continue
+        for (const p of puts) {
+          if (m(p) < 0.85 || m(p) > 0.97) continue
+          if (c.ultimo - p.ultimo >= -0.02) add([venda(c), compra(p)])
+        }
+      }
+      break
     case 'straddleComprado':
       for (const c of calls) {
         if (m(c) < 0.97 || m(c) > 1.03) continue
@@ -408,8 +441,9 @@ export function gerarCandidatas(ativo: AtivoComOpcoes, estrutura: EstruturaId, v
     const volMedia = vols.reduce((a, b) => a + b, 0) / vols.length
     const posicao = posicaoDe({ pernas: r.pernas, comAcoes: r.comAcoes ?? false }, quantidade, ativo.cotacao)
     const analise = analisar(posicao)
-    if (analise.perdaMaxima === null) continue // só risco limitado
-    const risco = -analise.perdaMaxima
+    const semLimite = analise.perdaMaxima === null
+    if (semLimite && !ESTRUTURAS_DE_RISCO_ILIMITADO.includes(estrutura)) continue // só risco limitado, salvo as marcadas
+    const risco = semLimite ? -resultadoNoVencimento(posicao, ativo.cotacao * (1 + ALTA_DE_REFERENCIA)) : -analise.perdaMaxima!
     if (!(risco > 0)) continue
     if (analise.ganhoMaximo !== null && analise.ganhoMaximo < RETORNO_MINIMO_SOBRE_RISCO * risco) continue
     const credito = custoDeMontagem(posicao)
@@ -433,6 +467,7 @@ export function gerarCandidatas(ativo: AtivoComOpcoes, estrutura: EstruturaId, v
       credito,
       ganhoMaximo: analise.ganhoMaximo,
       perdaMaxima: analise.perdaMaxima,
+      riscoReferencia: risco,
       equilibrios: analise.equilibrios,
       chanceDeLucro: chanceDeLucro(posicao, ativo.cotacao, du, p.jurosAnual, sigma),
       volImplicita: volMedia,
@@ -448,7 +483,7 @@ export function gerarCandidatas(ativo: AtivoComOpcoes, estrutura: EstruturaId, v
 const CHAVE: Record<CriterioIdeia, (c: Candidata) => number> = {
   chance: (c) => c.chanceDeLucro,
   retorno: (c) => c.retornoNoCenario,
-  risco: (c) => c.perdaMaxima, // negativa: a maior (mais perto de zero) é a de menor risco
+  risco: (c) => c.perdaMaxima ?? -1e12, // negativa: a maior (mais perto de zero) é a de menor risco; sem limite fica por último
 }
 
 /** As `quantas` primeiras candidatas pelo critério. Desempate: mais negócios na série mais fraca, depois o código da primeira série. */
