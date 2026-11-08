@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { buscarParesCustoZero, TOLERANCIAS_CUSTO_ZERO, vencimentosComCallEPut } from '../domain/custoZero'
-import type { DirecaoCustoZero, ParCustoZero } from '../domain/custoZero'
+import type { DirecaoCustoZero, ModoCustoZero, ParCustoZero } from '../domain/custoZero'
 import { diasUteis, faixaPerto, limitesDeStrike, strikesDistintos, tipoVencimento } from '../domain/opcoes'
 import type { AtivoComOpcoes, SnapshotOpcoes } from '../domain/opcoes'
 import type { Posicao } from '../domain/simulaOpcoes'
@@ -13,6 +13,10 @@ import { EscolhaDeAtivo } from './EscolhaDeAtivo'
 import { PainelDaPosicao } from './PainelDaPosicao'
 
 const num = (v: number) => v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+const pctDe = (strike: number, cotacao: number) => {
+  const p = (strike / cotacao - 1) * 100
+  return `${p >= 0 ? '+' : '−'}${Math.abs(p).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%`
+}
 const saldoTexto = (v: number) => (Math.abs(v) < 0.005 ? 'R$ 0,00' : v > 0 ? `crédito de ${reais(v)}` : `débito de ${reais(-v)}`)
 
 /**
@@ -55,6 +59,7 @@ function Busca({ ativo, hoje }: { ativo: AtivoComOpcoes; hoje: string }) {
   const [direcao, setDirecao] = useState<DirecaoCustoZero>('alta')
   const [vencimento, setVencimento] = useState(() => vencimentos.find((v) => tipoVencimento(v) === 'mensal' && diasUteis(v, hoje) >= 10) ?? vencimentos[0] ?? '')
   const [tolerancia, setTolerancia] = useState<number>(0.05)
+  const [modo, setModo] = useState<ModoCustoZero>('credito')
   const [quantidade, setQuantidade] = useState(lote)
   const [escolhido, setEscolhido] = useState<string | null>(null)
 
@@ -64,8 +69,8 @@ function Busca({ ativo, hoje }: { ativo: AtivoComOpcoes; hoje: string }) {
   const strikes = useMemo(() => strikesDistintos(doVencimento), [doVencimento])
   const limites = useMemo(() => limitesDeStrike(doVencimento), [doVencimento])
   const pares = useMemo(
-    () => (vencimento ? buscarParesCustoZero(ativo.series, direcao, vencimento, ativo.cotacao, tolerancia, 10, faixa) : []),
-    [ativo, direcao, vencimento, tolerancia, faixa],
+    () => (vencimento ? buscarParesCustoZero(ativo.series, direcao, vencimento, ativo.cotacao, tolerancia, 10, faixa, modo) : []),
+    [ativo, direcao, vencimento, tolerancia, faixa, modo],
   )
   const faixaAtiva = (pct: number) => {
     const f = faixaPerto(ativo.cotacao, pct)
@@ -116,8 +121,22 @@ function Busca({ ativo, hoje }: { ativo: AtivoComOpcoes; hoje: string }) {
         </div>
       </div>
 
+      <div className="col" style={{ gap: 6 }} role="group" aria-label="O que procurar">
+        <span className="small" style={{ fontWeight: 600 }}>O que procurar</span>
+        <div className="row" style={{ gap: 6, flexWrap: 'wrap' }}>
+          <button className={`chip ${modo === 'credito' ? 'selected' : ''}`} aria-pressed={modo === 'credito'} onClick={() => mudar(() => setModo('credito'))}>Recebo para montar (crédito)</button>
+          <button className={`chip ${modo === 'zero' ? 'selected' : ''}`} aria-pressed={modo === 'zero'} onClick={() => mudar(() => setModo('zero'))}>Custo zero (prêmios iguais)</button>
+        </div>
+        {modo === 'credito' && (
+          <span className="tiny muted justify">
+            Mostra os pares em que o prêmio recebido é maior que o pago, do maior crédito para o menor. Atenção: crédito alto costuma vir de vender uma opção mais perto do preço
+            do ativo, que tem mais chance de ser exercida. Compare a distância dos strikes antes de escolher.
+          </span>
+        )}
+      </div>
+
       <div className="col" style={{ gap: 6 }} role="group" aria-label="Diferença aceita">
-        <span className="small" style={{ fontWeight: 600 }}>Diferença aceita entre os prêmios (por ação)</span>
+        <span className="small" style={{ fontWeight: 600 }}>{modo === 'credito' ? 'Débito máximo aceito, se houver (por ação)' : 'Diferença aceita entre os prêmios (por ação)'}</span>
         <div className="row" style={{ gap: 6, flexWrap: 'wrap' }}>
           {TOLERANCIAS_CUSTO_ZERO.map((t) => (
             <button key={t} className={`chip ${tolerancia === t ? 'selected' : ''}`} aria-pressed={tolerancia === t} onClick={() => mudar(() => setTolerancia(t))}>
@@ -152,7 +171,7 @@ function Busca({ ativo, hoje }: { ativo: AtivoComOpcoes; hoje: string }) {
       </div>
 
       <div className="card col" style={{ gap: 12 }} data-testid="custozero-lista">
-        <span style={{ fontWeight: 700 }}>Pares encontrados ({pares.length})</span>
+        <span style={{ fontWeight: 700 }}>{modo === 'credito' ? 'Pares em que você recebe para montar' : 'Pares de custo zero'} ({pares.length}{pares.length === 10 ? ', os 10 melhores' : ''})</span>
         {pares.length === 0 ? (
           <span className="small muted justify" role="status">Nenhum par fecha dentro dessa diferença neste vencimento. Aumente a diferença aceita ou troque o vencimento.</span>
         ) : (
@@ -164,7 +183,9 @@ function Busca({ ativo, hoje }: { ativo: AtivoComOpcoes; hoje: string }) {
                   <span>
                     Compra {p.compra.codigo} (strike {num(p.compra.strike)}, {num(p.compra.ultimo)}) · Vende {p.venda.codigo} (strike {num(p.venda.strike)}, {num(p.venda.ultimo)})
                   </span>
-                  <span className="tiny muted">{saldoTexto(p.saldo)}</span>
+                  <span className="tiny" style={{ color: p.saldo > 0.005 ? 'var(--grafico-con)' : undefined }}>
+                    {saldoTexto(p.saldo)} · strikes {pctDe(p.compra.strike, ativo.cotacao)} / {pctDe(p.venda.strike, ativo.cotacao)} do preço
+                  </span>
                 </button>
               )
             })}

@@ -30,6 +30,22 @@ describe('custo zero', () => {
     expect(f(null, 64)).toEqual(['C62'])
     expect(f(55, 65)).toEqual(['C62'])
   })
+  it('modo crédito: aceita qualquer crédito e põe o maior primeiro', () => {
+    const sem = { strikeMin: null, strikeMax: null }
+    const r = buscarParesCustoZero(series, 'alta', '2026-12-18', 60, 0, 10, sem, 'credito')
+    expect(r.every((x) => x.saldo >= 0)).toBe(true)
+    expect(r[0].saldo).toBe(r.map((x) => x.saldo).sort((a, b) => b - a)[0])
+    expect(r.map((x) => `${x.compra.codigo}/${x.venda.codigo}`)).toContain('C66/P58') // crédito de 1,05
+    expect(r[0].saldo).toBeGreaterThan(1)
+    // no modo zero esse par não aparece
+    expect(buscarParesCustoZero(series, 'alta', '2026-12-18', 60, 0.05).some((x) => x.compra.codigo === 'C66' && x.venda.codigo === 'P58')).toBe(false)
+  })
+  it('modo crédito na baixa: compra put e vende call recebendo a diferença', () => {
+    const r = buscarParesCustoZero(series, 'baixa', '2026-12-18', 60, 0, 10, { strikeMin: null, strikeMax: null }, 'credito')
+    expect(r[0]).toMatchObject({ saldo: 1.08 })
+    expect(`${r[0].compra.codigo}/${r[0].venda.codigo}`).toBe('P56/C62')
+    expect(r.every((x) => x.saldo >= 0 && x.compra.tipo === 'put' && x.venda.tipo === 'call')).toBe(true)
+  })
   it('lista vencimentos com call e put', () => {
     expect(vencimentosComCallEPut([...series, s('C1', 'call', 60, 1, '2027-01-15')])).toEqual(['2026-12-18'])
   })

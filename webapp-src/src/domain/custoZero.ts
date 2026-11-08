@@ -16,6 +16,8 @@ export interface ParCustoZero {
   saldo: number
 }
 
+export type ModoCustoZero = 'zero' | 'credito'
+
 export const TOLERANCIAS_CUSTO_ZERO = [0.02, 0.05, 0.1, 0.2] as const
 
 /** Vencimentos que têm ao menos uma call e uma put. */
@@ -34,6 +36,8 @@ export function buscarParesCustoZero(
   series: SerieOpcao[], direcao: DirecaoCustoZero, vencimento: string, cotacao: number, tolerancia: number, limite = 10,
   /** Faixa de strike (null = sem limite): os dois strikes do par precisam estar dentro dela. */
   faixa: { strikeMin: number | null; strikeMax: number | null } = { strikeMin: null, strikeMax: null },
+  /** 'zero': saldo dentro da tolerância, para mais ou para menos. 'credito': qualquer crédito (e até um pequeno débito dentro da tolerância), maiores créditos primeiro. */
+  modo: ModoCustoZero = 'zero',
 ): ParCustoZero[] {
   const dentro = (s: SerieOpcao) => (faixa.strikeMin === null || s.strike >= faixa.strikeMin) && (faixa.strikeMax === null || s.strike <= faixa.strikeMax)
   const calls = series.filter((s) => s.tipo === 'call' && s.vencimento === vencimento && s.ultimo > 0 && dentro(s))
@@ -44,9 +48,13 @@ export function buscarParesCustoZero(
       if (p.strike > c.strike) continue
       const [compra, venda] = direcao === 'alta' ? [c, p] : [p, c]
       const saldo = Math.round((venda.ultimo - compra.ultimo) * 100) / 100
-      if (Math.abs(saldo) <= tolerancia + 1e-9) pares.push({ compra, venda, saldo })
+      const serve = modo === 'credito' ? saldo >= -tolerancia - 1e-9 : Math.abs(saldo) <= tolerancia + 1e-9
+      if (serve) pares.push({ compra, venda, saldo })
     }
   }
   const distancia = (x: ParCustoZero) => Math.abs(x.compra.strike - cotacao) + Math.abs(x.venda.strike - cotacao)
-  return pares.sort((a, b) => Math.abs(a.saldo) - Math.abs(b.saldo) || distancia(a) - distancia(b)).slice(0, limite)
+  const ordem = modo === 'credito'
+    ? (a: ParCustoZero, b: ParCustoZero) => b.saldo - a.saldo || distancia(a) - distancia(b)
+    : (a: ParCustoZero, b: ParCustoZero) => Math.abs(a.saldo) - Math.abs(b.saldo) || distancia(a) - distancia(b)
+  return pares.sort(ordem).slice(0, limite)
 }
