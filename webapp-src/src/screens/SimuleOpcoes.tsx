@@ -23,16 +23,16 @@ import { MinhaPosicaoOpcoes } from './MinhaPosicaoOpcoes'
 import { MonteSuaEstrategia } from './MonteSuaEstrategia'
 import { PorVisaoOpcoes } from './PorVisaoOpcoes'
 import { RodaOpcoes } from './RodaOpcoes'
-import { CustoZeroOpcoes } from './CustoZeroOpcoes'
+import { MontagensComCredito } from './MontagensComCredito'
 import { ImpostoOpcoes } from './ImpostoOpcoes'
 import { TopPremiosOpcoes } from './TopPremiosOpcoes'
 import { FaixaDeStrike } from '../ui/FaixaDeStrike'
 import type { AppCtx } from '../state/useAppState'
 
-type Aba = 'series' | 'premios' | 'visao' | 'graficos' | 'roda' | 'custozero' | 'estrategias' | 'posicao' | 'imposto'
+type Aba = 'series' | 'premios' | 'visao' | 'graficos' | 'roda' | 'montagens' | 'estrategias' | 'posicao' | 'imposto'
 
 /** Abas que, ao abrir, criam uma entrada no histórico: o "voltar" do navegador as fecha em vez de sair da tela. */
-const ABAS_COM_HISTORICO: Aba[] = ['premios', 'visao', 'graficos', 'roda', 'custozero', 'estrategias', 'posicao', 'imposto']
+const ABAS_COM_HISTORICO: Aba[] = ['premios', 'visao', 'graficos', 'roda', 'montagens', 'estrategias', 'posicao', 'imposto']
 
 const LINHAS_POR_PAGINA = 100
 const ATALHOS_PERTO = [5, 10, 20] as const
@@ -185,7 +185,7 @@ export function SimuleOpcoes({ snapshot, endividadas, carregarBaratas, armazenam
           { id: 'visao', emoji: '🧭', titulo: 'Tendência', descricao: 'Alta, baixa, lateral' },
           { id: 'graficos', emoji: '📊', titulo: 'Gráficos', descricao: 'Negócios por strike' },
           { id: 'roda', emoji: '🔄', titulo: 'Roda', descricao: 'Put, ação e call coberta' },
-          { id: 'custozero', emoji: '⚖️', titulo: 'Custo zero', descricao: 'Uma ponta paga a outra' },
+          { id: 'montagens', emoji: '💰', titulo: 'Receber p/ montar', descricao: 'Alta e baixa com margem' },
           { id: 'estrategias', emoji: '📈', titulo: 'Estratégias', descricao: 'Monte sua estratégia' },
           { id: 'posicao', emoji: '📌', titulo: 'Minha posição', descricao: 'Acompanhe e ajuste' },
           { id: 'imposto', emoji: '🧾', titulo: 'Imposto', descricao: 'DARF mensal das opções' },
@@ -201,8 +201,8 @@ export function SimuleOpcoes({ snapshot, endividadas, carregarBaratas, armazenam
           comDados((d) => <RodaOpcoes snapshot={d} ativo={ativoAtual} onEscolher={setTicker} dataPregao={d.dataPregao} />)
         ) : aba === 'imposto' ? (
           <ImpostoOpcoes />
-        ) : aba === 'custozero' ? (
-          comDados((d) => <CustoZeroOpcoes snapshot={d} ativo={ativoAtual} onEscolher={setTicker} dataPregao={d.dataPregao} />)
+        ) : aba === 'montagens' ? (
+          comDados((d) => <MontagensComCredito snapshot={d} onSimular={criarEstrategia} />)
         ) : aba === 'visao' ? (
           comDados((d) => <PorVisaoOpcoes snapshot={d} ativo={ativoAtual} onEscolher={setTicker} onSimular={criarEstrategia} />)
         ) : aba === 'premios' ? (
