@@ -36,15 +36,15 @@ export function MontagensComCredito({ snapshot, onSimular }: { snapshot: Snapsho
       <div className="col" style={{ gap: 4 }} data-testid="montagens-intro">
         <span style={{ fontWeight: 700, fontSize: 17 }}>Montagens em que você recebe</span>
         <span className="muted small justify">
-          Reversão de risco: você vende uma opção e compra outra do lado oposto, no mesmo vencimento, e ainda recebe a diferença. As duas ficam fora do dinheiro, então o ativo tem
-          pelo menos {MARGEM_MINIMA}% de espaço para subir ou cair antes de qualquer uma delas valer algo. Na <strong>alta</strong>, vende put e compra call; na <strong>baixa</strong>,
+          Risk Reversal (reversão de risco): você vende uma opção e compra outra do lado oposto, no mesmo vencimento, e ainda recebe a diferença. As duas ficam fora do dinheiro, então o ativo tem
+          pelo menos {MARGEM_MINIMA}% de espaço para subir ou cair antes de qualquer uma delas valer algo. No <strong>Bullish Risk Reversal</strong> (alta), vende put e compra call; no <strong>Bearish Risk Reversal</strong> (baixa),
           vende call e compra put. O ranking é do maior retorno (crédito sobre o strike vendido) para o menor, um por ativo.
         </span>
       </div>
 
       <div className="row" style={{ gap: 6, flexWrap: 'wrap' }} role="group" aria-label="Tendência">
-        <button className={`chip ${direcao === 'alta' ? 'selected' : ''}`} aria-pressed={direcao === 'alta'} onClick={() => setDirecao('alta')}>Tendência de alta: vende put, compra call</button>
-        <button className={`chip ${direcao === 'baixa' ? 'selected' : ''}`} aria-pressed={direcao === 'baixa'} onClick={() => setDirecao('baixa')}>Tendência de baixa: vende call, compra put</button>
+        <button className={`chip ${direcao === 'alta' ? 'selected' : ''}`} aria-pressed={direcao === 'alta'} onClick={() => setDirecao('alta')}>Bullish Risk Reversal (alta): vende put, compra call</button>
+        <button className={`chip ${direcao === 'baixa' ? 'selected' : ''}`} aria-pressed={direcao === 'baixa'} onClick={() => setDirecao('baixa')}>Bearish Risk Reversal (baixa): vende call, compra put</button>
       </div>
 
       <div className="row" style={{ gap: 6, flexWrap: 'wrap' }} role="group" aria-label="Vencimento">

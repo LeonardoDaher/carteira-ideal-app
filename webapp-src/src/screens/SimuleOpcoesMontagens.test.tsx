@@ -32,7 +32,7 @@ describe('SimuleOpcoes: aba Receber p/ montar', () => {
     expect(alta).toMatch(/Compra PETRL660/)
     expect(alta).toMatch(/R\$\s*70,00/)
 
-    fireEvent.click(screen.getByRole('button', { name: /Tendência de baixa/ }))
+    fireEvent.click(screen.getByRole('button', { name: /Bearish Risk Reversal/ }))
     const baixa = screen.getByTestId('montagem-PETR4').textContent ?? ''
     expect(baixa).toMatch(/Vende PETRL640/)
     expect(baixa).toMatch(/Compra PETRX540/)
