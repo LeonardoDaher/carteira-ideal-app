@@ -2,10 +2,11 @@ import { useMemo, useState } from 'react'
 import { jurosPadrao } from '../data/jurosOpcoes'
 import { diasUteis, limitarAosProximosMeses, tipoVencimento } from '../domain/opcoes'
 import type { EscolhaDeSeries, SnapshotOpcoes } from '../domain/opcoes'
-import { MARGEM_MINIMA, calcularTopMontagens, vencimentoPadraoMontagem, vencimentosDeMontagem } from '../domain/montagensComCredito'
+import { MARGEM_MINIMA, calcularMontagensDoAtivo, calcularTopMontagens, vencimentoPadraoMontagem, vencimentosDeMontagem } from '../domain/montagensComCredito'
 import type { DirecaoMontagem, LinhaMontagem } from '../domain/montagensComCredito'
 import { formatarData } from '../domain/rendaFii'
 import { reais } from '../domain/mercadoOficial'
+import { EscolhaDeAtivo } from './EscolhaDeAtivo'
 
 const num = (v: number, casas = 2) => v.toLocaleString('pt-BR', { minimumFractionDigits: casas, maximumFractionDigits: casas })
 
@@ -20,9 +21,19 @@ export function MontagensComCredito({ snapshot, onSimular }: { snapshot: Snapsho
   const vencimentos = useMemo(() => vencimentosDeMontagem(ativos, hoje), [ativos, hoje])
   const [direcao, setDirecao] = useState<DirecaoMontagem>('alta')
   const [escolhido, setEscolhido] = useState<string | null>(null)
+  /** null = ranking geral; um código = só as montagens desse ativo. */
+  const [ticker, setTicker] = useState<string | null>(null)
+  const ativoEscolhido = ticker ? snapshot.ativos.find((a) => a.ticker === ticker) ?? null : null
   const vencimento = escolhido && vencimentos.includes(escolhido) ? escolhido : vencimentoPadraoMontagem(vencimentos, hoje)
   const r = Math.log(1 + jurosPadrao() / 100)
-  const linhas = useMemo(() => (vencimento ? calcularTopMontagens(ativos, direcao, vencimento, hoje, r) : []), [ativos, direcao, vencimento, hoje, r])
+  const linhas = useMemo(() => {
+    if (!vencimento) return []
+    if (ativoEscolhido) {
+      const limitado = ativos.find((a) => a.ticker === ativoEscolhido.ticker)
+      return limitado ? calcularMontagensDoAtivo(limitado, direcao, vencimento, hoje, r) : []
+    }
+    return calcularTopMontagens(ativos, direcao, vencimento, hoje, r)
+  }, [ativos, ativoEscolhido, direcao, vencimento, hoje, r])
 
   const simular = (l: LinhaMontagem) =>
     onSimular({
@@ -42,6 +53,12 @@ export function MontagensComCredito({ snapshot, onSimular }: { snapshot: Snapsho
         </span>
       </div>
 
+      <div className="row" style={{ gap: 6, flexWrap: 'wrap' }} role="group" aria-label="Qual ativo">
+        <button className={`chip ${!ativoEscolhido ? 'selected' : ''}`} aria-pressed={!ativoEscolhido} onClick={() => setTicker(null)}>Ranking de todos os ativos</button>
+        <button className={`chip ${ativoEscolhido ? 'selected' : ''}`} aria-pressed={!!ativoEscolhido} onClick={() => setTicker(ativoEscolhido?.ticker ?? snapshot.ativos[0]?.ticker ?? null)}>Escolher um ativo</button>
+      </div>
+      {ativoEscolhido && <EscolhaDeAtivo snapshot={snapshot} ativo={ativoEscolhido} onEscolher={setTicker} />}
+
       <div className="row" style={{ gap: 6, flexWrap: 'wrap' }} role="group" aria-label="Tendência">
         <button className={`chip ${direcao === 'alta' ? 'selected' : ''}`} aria-pressed={direcao === 'alta'} onClick={() => setDirecao('alta')}>Bullish Risk Reversal (alta): vende put, compra call</button>
         <button className={`chip ${direcao === 'baixa' ? 'selected' : ''}`} aria-pressed={direcao === 'baixa'} onClick={() => setDirecao('baixa')}>Bearish Risk Reversal (baixa): vende call, compra put</button>
@@ -58,12 +75,12 @@ export function MontagensComCredito({ snapshot, onSimular }: { snapshot: Snapsho
       {linhas.length === 0 ? (
         <div className="card-outline small justify" role="status" data-testid="montagens-vazio">
           <strong>Nenhuma montagem encontrada.</strong>{' '}
-          <span className="muted">Neste vencimento, nenhum ativo tem puts e calls líquidas com {MARGEM_MINIMA}% de margem para os dois lados e crédito para montar. Tente outro vencimento.</span>
+          <span className="muted">Neste vencimento, {ativoEscolhido ? `${ativoEscolhido.ticker} não tem` : 'nenhum ativo tem'} puts e calls líquidas com {MARGEM_MINIMA}% de margem para os dois lados e crédito para montar. Tente outro vencimento.</span>
         </div>
       ) : (
         <div className="col" style={{ gap: 10 }} data-testid="montagens-lista">
           {linhas.map((l, i) => (
-            <div key={l.ativo.ticker} className="card col" style={{ gap: 8 }} data-testid={`montagem-${l.ativo.ticker}`}>
+            <div key={`${l.compra.codigo}/${l.venda.codigo}`} className="card col" style={{ gap: 8 }} data-testid={`montagem-${l.ativo.ticker}`}>
               <div className="row" style={{ justifyContent: 'space-between', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
                 <span style={{ fontWeight: 700 }}>{i + 1}. {l.ativo.ticker} <span className="muted small">a {reais(l.ativo.cotacao)}</span></span>
                 <span style={{ fontWeight: 700, color: 'var(--grafico-con)' }}>{num(l.retorno)}% <span className="tiny muted">(≈ {num(l.retornoMes)}% ao mês)</span></span>

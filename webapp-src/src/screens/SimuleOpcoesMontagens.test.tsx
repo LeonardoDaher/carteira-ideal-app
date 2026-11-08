@@ -22,6 +22,19 @@ const snapshot: SnapshotOpcoes = {
   ],
 }
 
+describe('SimuleOpcoes: aba Receber p/ montar, ativo escolhido', () => {
+  it('escolhendo um ativo, lista as várias combinações dele em ordem de retorno', () => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
+    fireEvent.click(screen.getByRole('tab', { name: /Receber p\/ montar/ }))
+    expect(screen.getAllByTestId('montagem-PETR4')).toHaveLength(1) // ranking geral: um por ativo
+    fireEvent.click(screen.getByRole('button', { name: 'Escolher um ativo' }))
+    const cartoes = screen.getAllByTestId('montagem-PETR4')
+    expect(cartoes).toHaveLength(2)
+    expect(cartoes[0].textContent).toMatch(/Vende PETRX560/)
+    expect(cartoes[1].textContent).toMatch(/Vende PETRX540/)
+  })
+})
+
 describe('SimuleOpcoes: aba Receber p/ montar', () => {
   it('mostra a melhor montagem de alta e a de baixa, e leva a simulação para as estratégias', () => {
     render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} />)
