@@ -158,7 +158,7 @@ describe('estruturas com vencimentos diferentes', () => {
   })
 })
 
-describe('estruturas de renda e proteção (Prefiro PUT)', () => {
+describe('estruturas de renda e proteção', () => {
   const montar = (id: string) => {
     const m = modelo(id)
     const escolhidas = seriesPadrao(series, m, '2026-11-19', 60)
@@ -201,6 +201,22 @@ describe('estruturas de renda e proteção (Prefiro PUT)', () => {
   })
 
   it('os quatro estão no grupo próprio', () => {
-    expect(MODELOS.filter((x) => x.grupo === 'Renda e proteção (Prefiro PUT)').map((x) => x.id)).toEqual(['slidePut', 'putOtimizada', 'strangleFinanciado', 'booster'])
+    expect(MODELOS.filter((x) => x.grupo === 'Renda e proteção').map((x) => x.id)).toEqual(['slidePut', 'putOtimizada', 'strangleFinanciado', 'booster'])
+  })
+})
+
+describe('Risk Reversal', () => {
+  it('Bullish: vende put abaixo e compra call acima; Bearish: o inverso', () => {
+    const bull = modelo('bullishRiskReversal')
+    const bear = modelo('bearishRiskReversal')
+    expect(bull.grupo).toBe('Risk Reversal')
+    expect(seriesPadrao(series, bull, '2026-11-19', 60).map((x) => `${x!.tipo}${x!.strike}`)).toEqual(['put56', 'call64'])
+    expect(bull.pernas.map((x) => `${x.tipo}:${x.lado}`)).toEqual(['put:venda', 'call:compra'])
+    expect(seriesPadrao(series, bear, '2026-11-19', 60).map((x) => `${x!.tipo}${x!.strike}`)).toEqual(['call64', 'put56'])
+    expect(bear.pernas.map((x) => `${x.tipo}:${x.lado}`)).toEqual(['call:venda', 'put:compra'])
+  })
+  it('o grupo vem logo depois das travas', async () => {
+    const { GRUPOS_DE_MODELOS } = await import('./modelosDeEstrategia')
+    expect(GRUPOS_DE_MODELOS.slice(0, 2)).toEqual(['Travas', 'Risk Reversal'])
   })
 })

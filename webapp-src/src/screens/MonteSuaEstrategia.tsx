@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { diasUteis, tipoVencimento, vencimentosDe } from '../domain/opcoes'
+import { diasUteis, faixaPerto, limitesDeStrike, strikesDistintos, tipoVencimento, vencimentosDe } from '../domain/opcoes'
 import type { AtivoComOpcoes, EscolhaDeSeries, SnapshotOpcoes } from '../domain/opcoes'
 import {
   GRUPOS_DE_MODELOS, MODELOS, escadaDeStrikes, indiceDoMaisPerto, montarPosicaoDoModelo, seriesPadrao, validarModelo, vencimentosDoModelo,
@@ -12,6 +12,7 @@ import { formatarData } from '../domain/rendaFii'
 import { reais } from '../domain/mercadoOficial'
 import { CampoNumero } from '../ui/CampoNumero'
 import { CampoReais } from '../ui/CampoReais'
+import { FaixaDeStrike } from '../ui/FaixaDeStrike'
 import { EscolhaDeAtivo } from './EscolhaDeAtivo'
 import { OBJETIVOS, perfilDoModelo } from '../domain/objetivosDeEstrategia'
 import type { ObjetivoId } from '../domain/objetivosDeEstrategia'
@@ -84,11 +85,16 @@ interface Configuracao {
 }
 
 /** Sem preferência, parte do primeiro vencimento mensal com pelo menos 10 dias úteis (o semanal a poucos dias paga pouco e muda rápido). */
-function configurar(ativo: AtivoComOpcoes, modelo: Modelo, vencimentoPreferido: string | null, hoje: string): Configuracao {
+interface FaixaStrike { strikeMin: number | null; strikeMax: number | null }
+const SEM_FAIXA: FaixaStrike = { strikeMin: null, strikeMax: null }
+const dentroDaFaixa = (strike: number, f: FaixaStrike) => (f.strikeMin === null || strike >= f.strikeMin) && (f.strikeMax === null || strike <= f.strikeMax)
+
+function configurar(ativo: AtivoComOpcoes, modelo: Modelo, vencimentoPreferido: string | null, hoje: string, faixa: FaixaStrike = SEM_FAIXA): Configuracao {
   const todos = vencimentosDe(ativo.series)
   const validos = vencimentosDoModelo(ativo.series, modelo, todos)
   const vencimento = vencimentoPreferido && validos.includes(vencimentoPreferido) ? vencimentoPreferido : (validos.find((v) => tipoVencimento(v) === 'mensal' && diasUteis(v, hoje) >= 10) ?? validos[0] ?? todos[0] ?? '')
-  const series = seriesPadrao(ativo.series, modelo, vencimento, ativo.cotacao)
+  // A faixa de strike limita as séries sugeridas para cada perna.
+  const series = seriesPadrao(ativo.series.filter((s) => dentroDaFaixa(s.strike, faixa)), modelo, vencimento, ativo.cotacao)
   return { modo: modelo.id, vencimento, codigos: series.map((s) => s?.codigo ?? null), premios: series.map((s) => s?.ultimo ?? 0) }
 }
 
@@ -115,14 +121,23 @@ function Montagem({ ativo, escolha, hoje }: { ativo: AtivoComOpcoes; escolha: Es
   const [quantidade, setQuantidade] = useState(lote)
   const [precoAtivo, setPrecoAtivo] = useState(ativo.cotacao)
   const [objetivoId, setObjetivoId] = useState<ObjetivoId | null>(null)
+  const [faixa, setFaixa] = useState<FaixaStrike>(SEM_FAIXA)
   const objetivo = OBJETIVOS.find((o) => o.id === objetivoId) ?? null
 
   const modelo = config.modo === 'livre' ? null : (MODELOS.find((m) => m.id === config.modo) ?? MODELOS[0])
   const vencimentos = useMemo(() => vencimentosDe(ativo.series), [ativo])
   const vencimentosValidos = useMemo(() => (modelo ? vencimentosDoModelo(ativo.series, modelo, vencimentos) : vencimentos), [ativo, modelo, vencimentos])
 
-  const escolherModelo = (m: Modelo) => setConfig(configurar(ativo, m, config.vencimento, hoje))
-  const escolherVencimento = (v: string) => modelo && setConfig(configurar(ativo, modelo, v, hoje))
+  const escolherModelo = (m: Modelo) => setConfig(configurar(ativo, m, config.vencimento, hoje, faixa))
+  const escolherVencimento = (v: string) => modelo && setConfig(configurar(ativo, modelo, v, hoje, faixa))
+  // Mudar a faixa de strike refaz a sugestão de séries de cada perna dentro dela.
+  const aplicarFaixa = (f: FaixaStrike) => {
+    setFaixa(f)
+    if (modelo) setConfig(configurar(ativo, modelo, config.vencimento, hoje, f))
+  }
+  const strikesDoVencimento = useMemo(() => strikesDistintos(ativo.series.filter((s) => s.vencimento === config.vencimento)), [ativo, config.vencimento])
+  const limitesDoVencimento = useMemo(() => limitesDeStrike(ativo.series.filter((s) => s.vencimento === config.vencimento)), [ativo, config.vencimento])
+  const faixaAtiva = (pct: number) => { const f = faixaPerto(ativo.cotacao, pct); return faixa.strikeMin === f.strikeMin && faixa.strikeMax === f.strikeMax }
   const trocarSerie = (i: number, codigo: string) => {
     const serie = ativo.series.find((s) => s.codigo === codigo)
     setConfig((c) => ({
@@ -282,6 +297,32 @@ function Montagem({ ativo, escolha, hoje }: { ativo: AtivoComOpcoes; escolha: Es
         </div>
       )}
 
+      {modelo && (
+        <div className="col" style={{ gap: 8 }} data-testid="faixa-estrategia">
+          <span className="small" style={{ fontWeight: 600 }}>Faixa de strike</span>
+          <FaixaDeStrike strikes={strikesDoVencimento} min={faixa.strikeMin} max={faixa.strikeMax} onMudar={aplicarFaixa} />
+          <div className="row" style={{ gap: 10, flexWrap: 'wrap' }}>
+            <div style={{ flex: '1 1 130px' }}>
+              <CampoReais rotulo="Strike mínimo" valor={faixa.strikeMin ?? 0} onMudar={(v) => aplicarFaixa({ ...faixa, strikeMin: v > 0 ? v : null })} />
+            </div>
+            <div style={{ flex: '1 1 130px' }}>
+              <CampoReais rotulo="Strike máximo" valor={faixa.strikeMax ?? 0} onMudar={(v) => aplicarFaixa({ ...faixa, strikeMax: v > 0 ? v : null })} />
+            </div>
+          </div>
+          <div className="row" style={{ gap: 6, flexWrap: 'wrap' }} role="group" aria-label="Atalhos de strike">
+            {[5, 10, 20].map((pct) => (
+              <button key={pct} className={`chip ${faixaAtiva(pct) ? 'selected' : ''}`} aria-pressed={faixaAtiva(pct)} onClick={() => aplicarFaixa(faixaPerto(ativo.cotacao, pct))}>
+                Perto do preço (±{pct}%)
+              </button>
+            ))}
+            {(faixa.strikeMin !== null || faixa.strikeMax !== null) && <button className="chip" onClick={() => aplicarFaixa(SEM_FAIXA)}>Sem limite de strike</button>}
+          </div>
+          <span className="tiny muted">
+            As séries sugeridas para cada perna ficam dentro da faixa{limitesDoVencimento ? ` (strikes disponíveis neste vencimento: de ${reais(limitesDoVencimento.min)} a ${reais(limitesDoVencimento.max)})` : ''}.
+          </span>
+        </div>
+      )}
+
       <div className="card col" style={{ gap: 12 }}>
         <span style={{ fontWeight: 700 }}>Pernas da estratégia</span>
         <CampoReais rotulo="Preço do ativo hoje" valor={precoAtivo} onMudar={setPrecoAtivo} />
@@ -309,7 +350,7 @@ function Montagem({ ativo, escolha, hoje }: { ativo: AtivoComOpcoes; escolha: Es
                   <label className="col" style={{ gap: 4 }}>
                     <span className="small" style={{ fontWeight: 600 }}>Série da perna {i + 1}</span>
                     <select value={atual ?? ''} onChange={(ev) => trocarSerie(i, ev.target.value)} aria-label={`Série da perna ${i + 1}`}>
-                      {escada.map((s) => (
+                      {escada.filter((s) => dentroDaFaixa(s.strike, faixa) || s.codigo === atual).map((s) => (
                         <option key={s.codigo} value={s.codigo}>
                           {s.codigo}, strike {num(s.strike)}, último {num(s.ultimo)}
                         </option>

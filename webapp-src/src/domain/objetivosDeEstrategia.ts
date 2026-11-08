@@ -52,6 +52,7 @@ export const OBJETIVOS: Objetivo[] = [
     modelos: [
       { id: 'travaAltaCall', porque: 'Compra uma call e vende outra mais alta: custa menos que a call seca; ganho e perda limitados.' },
       { id: 'travaAltaPut', porque: 'Vende uma put e compra outra mais baixa: ganha se o ativo subir ou ficar parado, e recebe crédito.' },
+      { id: 'bullishRiskReversal', porque: 'Vende uma put abaixo e compra uma call acima: costuma sair com crédito ou sem custo e deixa espaço para o ativo andar; arrisca se ele cair abaixo da put vendida.' },
       { id: 'diagonalCall', porque: 'Compra uma call longa e vende uma curta mais alta: combina a trava de alta com a colheita do valor de tempo.' },
       { id: 'booster', porque: 'Para quem já tem as ações: dobra o ganho dentro de uma faixa de alta, financiado por uma put vendida.' },
       { id: 'slidePut', porque: 'Lucra com o ativo parado ou subindo; tem risco se ele cair abaixo dos strikes vendidos.' },
@@ -64,6 +65,7 @@ export const OBJETIVOS: Objetivo[] = [
     modelos: [
       { id: 'travaBaixaPut', porque: 'Compra uma put e vende outra mais baixa: custa menos que a put seca; ganho e perda limitados.' },
       { id: 'travaBaixaCall', porque: 'Vende uma call e compra outra mais alta: ganha se o ativo cair ou ficar parado, e recebe crédito.' },
+      { id: 'bearishRiskReversal', porque: 'Vende uma call acima e compra uma put abaixo: costuma sair com crédito ou sem custo e deixa espaço para o ativo andar; arrisca se ele subir acima da call vendida.' },
       { id: 'diagonalPut', porque: 'Compra uma put longa e vende uma curta mais baixa: trava de baixa com a colheita do valor de tempo.' },
       { id: 'collar', porque: 'Para quem tem as ações e teme a queda: a put limita a perda.' },
     ],

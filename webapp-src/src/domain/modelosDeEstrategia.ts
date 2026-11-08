@@ -13,6 +13,7 @@ export type ModeloId =
   | 'straddleComprado' | 'strangleComprado' | 'straddleVendido' | 'strangleVendido'
   | 'vendaCoberta' | 'collar'
   | 'thlCall' | 'thlPut' | 'diagonalCall' | 'diagonalPut'
+  | 'bullishRiskReversal' | 'bearishRiskReversal'
   | 'slidePut' | 'putOtimizada' | 'strangleFinanciado' | 'booster'
 
 export interface PernaDoModelo {
@@ -29,7 +30,7 @@ export interface PernaDoModelo {
 export interface Modelo {
   id: ModeloId
   titulo: string
-  grupo: 'Travas' | 'Borboletas e condors' | 'Volatilidade' | 'Com ações' | 'Vários vencimentos' | 'Renda e proteção (Prefiro PUT)'
+  grupo: 'Travas' | 'Risk Reversal' | 'Borboletas e condors' | 'Volatilidade' | 'Com ações' | 'Vários vencimentos' | 'Renda e proteção'
   /** Uma frase sobre quando faz sentido e como o resultado é limitado. */
   descricao: string
   pernas: PernaDoModelo[]
@@ -55,6 +56,8 @@ export const MODELOS: Modelo[] = [
   { id: 'travaAltaPut', titulo: 'Trava de alta (com puts)', grupo: 'Travas', descricao: 'Vende uma put e compra outra de strike menor. Ganha se o ativo ficar parado ou subir, com ganho e perda limitados. Começa com crédito.', pernas: [p('venda', 0), p('compra', -2)] },
   { id: 'travaBaixaPut', titulo: 'Trava de baixa (com puts)', grupo: 'Travas', descricao: 'Compra uma put e vende outra de strike menor. Ganha se o ativo cair, com ganho e perda limitados. Começa com débito.', pernas: [p('compra', 0), p('venda', -2)] },
   { id: 'travaBaixaCall', titulo: 'Trava de baixa (com calls)', grupo: 'Travas', descricao: 'Vende uma call e compra outra de strike maior. Ganha se o ativo ficar parado ou cair, com ganho e perda limitados. Começa com crédito.', pernas: [c('venda', 0), c('compra', 2)] },
+  { id: 'bullishRiskReversal', titulo: 'Bullish Risk Reversal (vende put, compra call)', grupo: 'Risk Reversal', descricao: 'Vende uma put abaixo do preço e compra uma call acima, no mesmo vencimento. Aposta na alta: costuma sair com crédito ou perto de zero, e o ativo tem espaço para andar entre os dois strikes sem custo. Ganha com a alta acima da call; abaixo da put vendida, a perda cresce até zero.' + NOTA_LEITURA, pernas: [p('venda', -2), c('compra', 2)], aviso: AVISO_PUT_SEM_PROTECAO },
+  { id: 'bearishRiskReversal', titulo: 'Bearish Risk Reversal (vende call, compra put)', grupo: 'Risk Reversal', descricao: 'Vende uma call acima do preço e compra uma put abaixo, no mesmo vencimento. Aposta na baixa: costuma sair com crédito ou perto de zero, e o ativo tem espaço entre os dois strikes. Ganha com a queda abaixo da put; acima da call vendida, a perda não tem limite.' + NOTA_LEITURA, pernas: [c('venda', 2), p('compra', -2)], aviso: AVISO_DESCOBERTA },
   { id: 'borboletaCall', titulo: 'Borboleta de calls', grupo: 'Borboletas e condors', descricao: 'Compra uma call abaixo, vende duas no meio e compra uma acima. Aposta que o ativo termina perto do strike do meio; ganho e perda limitados.', pernas: [c('compra', -2), c('venda', 0, 2), c('compra', 2)] },
   { id: 'borboletaPut', titulo: 'Borboleta de puts', grupo: 'Borboletas e condors', descricao: 'Mesma ideia da borboleta de calls, feita com puts: o ganho é máximo se o ativo terminar no strike do meio.', pernas: [p('compra', 2), p('venda', 0, 2), p('compra', -2)] },
   { id: 'borboletaFerro', titulo: 'Borboleta de ferro', grupo: 'Borboletas e condors', descricao: 'Vende uma call e uma put no mesmo strike e compra uma call acima e uma put abaixo como proteção. Começa com crédito; ganho máximo com o ativo parado.', pernas: [p('compra', -2), p('venda', 0), c('venda', 0), c('compra', 2)] },
@@ -70,13 +73,13 @@ export const MODELOS: Modelo[] = [
   { id: 'thlPut', titulo: 'Trava horizontal de puts (THL)', grupo: 'Vários vencimentos', descricao: 'Mesma ideia com puts: compra a de vencimento mais longo e vende a mais curta no mesmo strike. A perda é no máximo o débito pago.', pernas: [pl('compra', 0), p('venda', 0)] },
   { id: 'diagonalCall', titulo: 'Trava diagonal de calls', grupo: 'Vários vencimentos', descricao: 'Compra uma call de vencimento mais longo e vende outra, de strike maior, de vencimento mais curto. Combina a trava de alta com a colheita do valor de tempo.', pernas: [cl('compra', 0), c('venda', 2)] },
   { id: 'diagonalPut', titulo: 'Trava diagonal de puts', grupo: 'Vários vencimentos', descricao: 'Compra uma put de vencimento mais longo e vende outra, de strike menor, de vencimento mais curto. Combina a trava de baixa com a colheita do valor de tempo.', pernas: [pl('compra', 0), p('venda', -2)] },
-  { id: 'slidePut', titulo: 'Slide com put', grupo: 'Renda e proteção (Prefiro PUT)', descricao: 'Compra uma put de strike maior e vende duas puts de strikes menores (uma intermediária e uma inferior). Costuma sair com crédito ou sem custo e lucra com o ativo parado ou caindo pouco, mas tem risco se ele cair abaixo dos strikes vendidos.' + NOTA_LEITURA, pernas: [p('compra', 0), p('venda', -2), p('venda', -3)], aviso: AVISO_PUT_SEM_PROTECAO },
-  { id: 'putOtimizada', titulo: 'Put vendida otimizada (put + trava de baixa com calls)', grupo: 'Renda e proteção (Prefiro PUT)', descricao: 'Vende uma put e, junto, uma trava de baixa com calls (vende uma call e compra outra de strike maior). O crédito das calls soma ao da put, sem aumentar o risco do lado de baixo, que continua o da put vendida.' + NOTA_LEITURA, pernas: [p('venda', -2), c('venda', 2), c('compra', 4)], aviso: AVISO_PUT_SEM_PROTECAO },
-  { id: 'strangleFinanciado', titulo: 'Strangle comprado financiado (risco menor)', grupo: 'Renda e proteção (Prefiro PUT)', descricao: 'Compra um strangle (put abaixo e call acima) e vende opções mais afastadas para pagar parte dele. Custa menos e o prejuízo máximo é o débito, mas o ganho também fica limitado: é uma aposta em movimento grande para qualquer lado, sem os extremos.' + NOTA_LEITURA, pernas: [p('compra', -2), p('venda', -4), c('compra', 2), c('venda', 4)] },
-  { id: 'booster', titulo: 'Booster (ações + trava de alta financiada por put)', grupo: 'Renda e proteção (Prefiro PUT)', descricao: 'Tem as ações, compra uma call perto do preço e vende outra acima (trava de alta), pagando o débito com o prêmio de uma put vendida abaixo. Dentro da faixa entre os dois strikes das calls, o ganho é cerca do dobro do da ação sozinha; abaixo da put vendida, a perda aumenta.' + NOTA_LEITURA, pernas: [c('compra', 0), c('venda', 2), p('venda', -2)], comAcoes: true, aviso: AVISO_PUT_SEM_PROTECAO },
+  { id: 'slidePut', titulo: 'Slide com put', grupo: 'Renda e proteção', descricao: 'Compra uma put de strike maior e vende duas puts de strikes menores (uma intermediária e uma inferior). Costuma sair com crédito ou sem custo e lucra com o ativo parado ou caindo pouco, mas tem risco se ele cair abaixo dos strikes vendidos.' + NOTA_LEITURA, pernas: [p('compra', 0), p('venda', -2), p('venda', -3)], aviso: AVISO_PUT_SEM_PROTECAO },
+  { id: 'putOtimizada', titulo: 'Put vendida otimizada (put + trava de baixa com calls)', grupo: 'Renda e proteção', descricao: 'Vende uma put e, junto, uma trava de baixa com calls (vende uma call e compra outra de strike maior). O crédito das calls soma ao da put, sem aumentar o risco do lado de baixo, que continua o da put vendida.' + NOTA_LEITURA, pernas: [p('venda', -2), c('venda', 2), c('compra', 4)], aviso: AVISO_PUT_SEM_PROTECAO },
+  { id: 'strangleFinanciado', titulo: 'Strangle comprado financiado (risco menor)', grupo: 'Renda e proteção', descricao: 'Compra um strangle (put abaixo e call acima) e vende opções mais afastadas para pagar parte dele. Custa menos e o prejuízo máximo é o débito, mas o ganho também fica limitado: é uma aposta em movimento grande para qualquer lado, sem os extremos.' + NOTA_LEITURA, pernas: [p('compra', -2), p('venda', -4), c('compra', 2), c('venda', 4)] },
+  { id: 'booster', titulo: 'Booster (ações + trava de alta financiada por put)', grupo: 'Renda e proteção', descricao: 'Tem as ações, compra uma call perto do preço e vende outra acima (trava de alta), pagando o débito com o prêmio de uma put vendida abaixo. Dentro da faixa entre os dois strikes das calls, o ganho é cerca do dobro do da ação sozinha; abaixo da put vendida, a perda aumenta.' + NOTA_LEITURA, pernas: [c('compra', 0), c('venda', 2), p('venda', -2)], comAcoes: true, aviso: AVISO_PUT_SEM_PROTECAO },
 ]
 
-export const GRUPOS_DE_MODELOS: Modelo['grupo'][] = ['Travas', 'Borboletas e condors', 'Volatilidade', 'Com ações', 'Vários vencimentos', 'Renda e proteção (Prefiro PUT)']
+export const GRUPOS_DE_MODELOS: Modelo['grupo'][] = ['Travas', 'Risk Reversal', 'Borboletas e condors', 'Volatilidade', 'Com ações', 'Vários vencimentos', 'Renda e proteção']
 
 /**
  * Escada de strikes de um tipo no vencimento: uma série por strike, a mais negociada quando há americana e europeia no
