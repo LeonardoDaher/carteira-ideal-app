@@ -274,14 +274,30 @@ export function calcularTendencia(fechamentos, pregoes) {
   }
 }
 
-/** Mapa ticker -> tendência, a partir dos arquivos de histórico dos outros jobs (os que existirem). */
-export function tendenciasDosHistoricos(historicos) {
+/**
+ * Mapa ticker -> tendência, a partir dos arquivos de histórico dos outros jobs (os que existirem).
+ *
+ * O histórico pode estar atrasado em relação ao COTAHIST que este job acabou de ler (o job das ações roda depois do das opções, ou falhou
+ * naquela noite). Para a tendência partir sempre do preço mais novo, os pregões do COTAHIST (`pregoesCotahist`, em qualquer ordem) que
+ * são mais novos que o último do histórico entram no fim da série, com o fechamento do papel nesse dia (sem negócio = null).
+ */
+export function tendenciasDosHistoricos(historicos, pregoesCotahist = []) {
   const mapa = new Map()
+  const novos = [...pregoesCotahist].filter((p) => p?.data).sort((a, b) => a.data.localeCompare(b.data))
   for (const h of historicos) {
     if (!h?.pregoes || !h?.ativos) continue
+    const ultimaData = h.pregoes[h.pregoes.length - 1]
+    const maisNovos = novos.filter((p) => !ultimaData || p.data > ultimaData)
     for (const [ticker, serie] of Object.entries(h.ativos)) {
-      const t = calcularTendencia(serie.map((x) => (Array.isArray(x) ? x[0] : null)), h.pregoes)
-      if (t) mapa.set(ticker.toUpperCase(), t)
+      const codigo = ticker.toUpperCase()
+      const fechamentos = serie.map((x) => (Array.isArray(x) ? x[0] : null))
+      const datas = [...h.pregoes]
+      for (const p of maisNovos) {
+        fechamentos.push(p.vista?.get(codigo)?.ultimo ?? null)
+        datas.push(p.data)
+      }
+      const t = calcularTendencia(fechamentos, datas)
+      if (t) mapa.set(codigo, t)
     }
   }
   return mapa
@@ -372,6 +388,7 @@ export async function principal() {
           return null // histórico ausente: o ativo fica só sem tendência
         }
       }),
+      pregoes, // o histórico pode estar um dia atrás: a tendência parte do fechamento do pregão que acabou de sair
     )
     for (const a of snapshot.ativos) {
       const t = tendencias.get(a.ticker)

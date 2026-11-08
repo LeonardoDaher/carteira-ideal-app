@@ -206,4 +206,20 @@ describe('calcularTendencia', () => {
     assert.deepEqual([...mapa.keys()].sort(), ['BOVA11', 'PETR4'])
     assert.equal(mapa.get('PETR4').fechamento, 12)
   })
+
+  it('histórico um dia atrás: o fechamento do COTAHIST mais novo entra no fim da série', () => {
+    const hist = { pregoes: datas(100), ativos: { PETR4: rampa(100, 10, 12).map((v) => [v, v, v, 1]), SEMNEGOCIO3: rampa(100, 10, 12).map((v) => [v, v, v, 1]) } }
+    const ultima = hist.pregoes[99]
+    const nova = (dia, fechamentos) => ({ data: dia, vista: new Map(Object.entries(fechamentos).map(([c, ultimo]) => [c, { ultimo }])) })
+    const dia1 = 'e1'
+    const dia2 = 'e2'
+    const mapa = tendenciasDosHistoricos([hist], [nova(dia2, { PETR4: 15 }), nova(dia1, { PETR4: 14, SEMNEGOCIO3: 13 }), nova(ultima, { PETR4: 999 })])
+    assert.equal(mapa.get('PETR4').fechamento, 15)
+    assert.equal(mapa.get('PETR4').data, dia2)
+    // sem negócio no último pregão, vale o anterior (a série ignora o dia nulo)
+    assert.equal(mapa.get('SEMNEGOCIO3').fechamento, 13)
+    assert.equal(mapa.get('SEMNEGOCIO3').data, dia1)
+    // o dia que o histórico já tem não é contado duas vezes
+    assert.equal(tendenciasDosHistoricos([hist], [nova(ultima, { PETR4: 999 })]).get('PETR4').fechamento, 12)
+  })
 })
