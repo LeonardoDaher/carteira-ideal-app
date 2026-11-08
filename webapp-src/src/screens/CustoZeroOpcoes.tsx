@@ -1,12 +1,14 @@
 import { useMemo, useState } from 'react'
 import { buscarParesCustoZero, TOLERANCIAS_CUSTO_ZERO, vencimentosComCallEPut } from '../domain/custoZero'
 import type { DirecaoCustoZero, ParCustoZero } from '../domain/custoZero'
-import { diasUteis, tipoVencimento } from '../domain/opcoes'
+import { diasUteis, faixaPerto, limitesDeStrike, strikesDistintos, tipoVencimento } from '../domain/opcoes'
 import type { AtivoComOpcoes, SnapshotOpcoes } from '../domain/opcoes'
 import type { Posicao } from '../domain/simulaOpcoes'
 import { formatarData } from '../domain/rendaFii'
 import { reais } from '../domain/mercadoOficial'
 import { CampoNumero } from '../ui/CampoNumero'
+import { CampoReais } from '../ui/CampoReais'
+import { FaixaDeStrike } from '../ui/FaixaDeStrike'
 import { EscolhaDeAtivo } from './EscolhaDeAtivo'
 import { PainelDaPosicao } from './PainelDaPosicao'
 
@@ -56,10 +58,19 @@ function Busca({ ativo, hoje }: { ativo: AtivoComOpcoes; hoje: string }) {
   const [quantidade, setQuantidade] = useState(lote)
   const [escolhido, setEscolhido] = useState<string | null>(null)
 
+  const [faixa, setFaixa] = useState<{ strikeMin: number | null; strikeMax: number | null }>({ strikeMin: null, strikeMax: null })
+
+  const doVencimento = useMemo(() => ativo.series.filter((s) => s.vencimento === vencimento), [ativo, vencimento])
+  const strikes = useMemo(() => strikesDistintos(doVencimento), [doVencimento])
+  const limites = useMemo(() => limitesDeStrike(doVencimento), [doVencimento])
   const pares = useMemo(
-    () => (vencimento ? buscarParesCustoZero(ativo.series, direcao, vencimento, ativo.cotacao, tolerancia) : []),
-    [ativo, direcao, vencimento, tolerancia],
+    () => (vencimento ? buscarParesCustoZero(ativo.series, direcao, vencimento, ativo.cotacao, tolerancia, 10, faixa) : []),
+    [ativo, direcao, vencimento, tolerancia, faixa],
   )
+  const faixaAtiva = (pct: number) => {
+    const f = faixaPerto(ativo.cotacao, pct)
+    return faixa.strikeMin === f.strikeMin && faixa.strikeMax === f.strikeMax
+  }
 
   if (vencimentos.length === 0) {
     return (
@@ -114,6 +125,30 @@ function Busca({ ativo, hoje }: { ativo: AtivoComOpcoes; hoje: string }) {
             </button>
           ))}
         </div>
+      </div>
+
+      <div className="col" style={{ gap: 8 }} data-testid="custozero-faixa">
+        <span className="small" style={{ fontWeight: 600 }}>Faixa de strike</span>
+        <FaixaDeStrike strikes={strikes} min={faixa.strikeMin} max={faixa.strikeMax} onMudar={(f) => mudar(() => setFaixa(f))} />
+        <div className="row" style={{ gap: 10, flexWrap: 'wrap' }}>
+          <div style={{ flex: '1 1 130px' }}>
+            <CampoReais rotulo="Strike mínimo" valor={faixa.strikeMin ?? 0} onMudar={(v) => mudar(() => setFaixa((f) => ({ ...f, strikeMin: v > 0 ? v : null })))} />
+          </div>
+          <div style={{ flex: '1 1 130px' }}>
+            <CampoReais rotulo="Strike máximo" valor={faixa.strikeMax ?? 0} onMudar={(v) => mudar(() => setFaixa((f) => ({ ...f, strikeMax: v > 0 ? v : null })))} />
+          </div>
+        </div>
+        <div className="row" style={{ gap: 6, flexWrap: 'wrap' }} role="group" aria-label="Atalhos de strike">
+          {[5, 10, 20].map((pct) => (
+            <button key={pct} className={`chip ${faixaAtiva(pct) ? 'selected' : ''}`} aria-pressed={faixaAtiva(pct)} onClick={() => mudar(() => setFaixa(faixaPerto(ativo.cotacao, pct)))}>
+              Perto do preço (±{pct}%)
+            </button>
+          ))}
+          {(faixa.strikeMin !== null || faixa.strikeMax !== null) && (
+            <button className="chip" onClick={() => mudar(() => setFaixa({ strikeMin: null, strikeMax: null }))}>Sem limite de strike</button>
+          )}
+        </div>
+        {limites && <span className="tiny muted">Strikes disponíveis neste vencimento: de {reais(limites.min)} a {reais(limites.max)}. Os dois strikes do par ficam dentro da faixa.</span>}
       </div>
 
       <div className="card col" style={{ gap: 12 }} data-testid="custozero-lista">

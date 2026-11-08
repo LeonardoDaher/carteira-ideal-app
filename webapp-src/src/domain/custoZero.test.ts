@@ -23,6 +23,13 @@ describe('custo zero', () => {
     expect(r[0].compra.tipo).toBe('put')
     expect(r[0].venda.tipo).toBe('call')
   })
+  it('respeita a faixa de strike nas duas pontas', () => {
+    const f = (min: number | null, max: number | null) => buscarParesCustoZero(series, 'alta', '2026-12-18', 60, 0.05, 10, { strikeMin: min, strikeMax: max }).map((x) => x.compra.codigo)
+    expect(f(null, null)).toEqual(['C66', 'C62'])
+    expect(f(60, null)).toEqual([]) // as puts 56 e 58 ficam fora
+    expect(f(null, 64)).toEqual(['C62'])
+    expect(f(55, 65)).toEqual(['C62'])
+  })
   it('lista vencimentos com call e put', () => {
     expect(vencimentosComCallEPut([...series, s('C1', 'call', 60, 1, '2027-01-15')])).toEqual(['2026-12-18'])
   })

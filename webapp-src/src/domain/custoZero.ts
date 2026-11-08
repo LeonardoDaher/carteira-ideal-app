@@ -32,9 +32,12 @@ export function vencimentosComCallEPut(series: SerieOpcao[]): string[] {
  */
 export function buscarParesCustoZero(
   series: SerieOpcao[], direcao: DirecaoCustoZero, vencimento: string, cotacao: number, tolerancia: number, limite = 10,
+  /** Faixa de strike (null = sem limite): os dois strikes do par precisam estar dentro dela. */
+  faixa: { strikeMin: number | null; strikeMax: number | null } = { strikeMin: null, strikeMax: null },
 ): ParCustoZero[] {
-  const calls = series.filter((s) => s.tipo === 'call' && s.vencimento === vencimento && s.ultimo > 0)
-  const puts = series.filter((s) => s.tipo === 'put' && s.vencimento === vencimento && s.ultimo > 0)
+  const dentro = (s: SerieOpcao) => (faixa.strikeMin === null || s.strike >= faixa.strikeMin) && (faixa.strikeMax === null || s.strike <= faixa.strikeMax)
+  const calls = series.filter((s) => s.tipo === 'call' && s.vencimento === vencimento && s.ultimo > 0 && dentro(s))
+  const puts = series.filter((s) => s.tipo === 'put' && s.vencimento === vencimento && s.ultimo > 0 && dentro(s))
   const pares: ParCustoZero[] = []
   for (const c of calls) {
     for (const p of puts) {
