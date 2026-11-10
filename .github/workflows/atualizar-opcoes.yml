@@ -9,7 +9,7 @@
 # falha SEM alterar os arquivos: o app continua com o último dia bom e o GitHub envia um e-mail avisando. Feriado da B3
 # (arquivo ausente) ou pregão já processado: nada muda, sem commit e sem deploy.
 
-# O job das ações tem 3 horários (22h22, 00h22 e 9h25 de Brasília) e cada término dispara este. Rodar de novo sem pregão novo não altera
+# O job das ações tem 5 horários (22h22, 00h22, 02h32, 07h32 e 9h25 de Brasília) e cada término dispara este, sempre DEPOIS dele. Rodar de novo sem pregão novo não altera
 # nada (sem commit e sem deploy). O horário abaixo é só uma rede de segurança, caso o gatilho seja perdido.
 name: Atualizar Opções
 
@@ -67,5 +67,14 @@ jobs:
           git config user.email "${{ vars.COMMIT_AUTOR_EMAIL || '41898283+github-actions[bot]@users.noreply.github.com' }}"
           git add webapp-src/public/dados/opcoes.json
           git commit -m "dados: Opções ($(date -u +%Y-%m-%d))"
-          git pull --rebase
-          git push
+          # Tenta até 5 vezes: se outro job publicou no mesmo instante, refaz o rebase e envia de novo.
+          for tentativa in 1 2 3 4 5; do
+            if git pull --rebase && git push; then
+              exit 0
+            fi
+            git rebase --abort 2>/dev/null || true
+            echo "Push recusado (tentativa $tentativa de 5); aguardando e tentando de novo."
+            sleep $((RANDOM % 10 + 5))
+          done
+          echo "Não foi possível publicar após 5 tentativas."
+          exit 1
