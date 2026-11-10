@@ -27,6 +27,8 @@ on:
     - cron: '52 0 * * 2-6' # terça a sábado, 00h52 UTC = segunda a sexta, 21h52 de Brasília
     - cron: '52 2 * * 2-6' # 23h52 de Brasília (repetição)
     - cron: '15 12 * * 2-6' # 9h15 de Brasília (passada antes da abertura)
+    - cron: '12 5 * * 2-6' # 02h12 de Brasília (reforço da madrugada: o GitHub chegou a perder as passadas da noite)
+    - cron: '12 10 * * 2-6' # 07h12 de Brasília (reforço antes da abertura)
   workflow_dispatch: {}
 
 permissions:
@@ -66,5 +68,14 @@ jobs:
           git config user.email "${{ vars.COMMIT_AUTOR_EMAIL || '41898283+github-actions[bot]@users.noreply.github.com' }}"
           git add historico/fiis.json webapp-src/src/data/fiisPreco.json
           git commit -m "dados: preço diário dos FIIs ($(date -u +%Y-%m-%d))"
-          git pull --rebase
-          git push
+          # Tenta até 5 vezes: se outro job publicou no mesmo instante, refaz o rebase e envia de novo.
+          for tentativa in 1 2 3 4 5; do
+            if git pull --rebase && git push; then
+              exit 0
+            fi
+            git rebase --abort 2>/dev/null || true
+            echo "Push recusado (tentativa $tentativa de 5); aguardando e tentando de novo."
+            sleep $((RANDOM % 10 + 5))
+          done
+          echo "Não foi possível publicar após 5 tentativas."
+          exit 1
