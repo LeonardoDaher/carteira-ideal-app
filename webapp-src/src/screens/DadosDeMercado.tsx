@@ -164,27 +164,6 @@ function CartaoFluxo({ snapshot }: { snapshot?: SnapshotFluxo }) {
             </div>
           )}
 
-          <div className="tabela-bdr small" role="group" aria-label="Fluxo por tipo de investidor no último pregão">
-            <table style={{ width: '100%' }}>
-              <caption className="tiny muted" style={{ textAlign: 'left' }}>Todos os investidores em {dataBR(ultimo.data)}</caption>
-              <tbody>
-                {(
-                  [
-                    ['Estrangeiro', ultimo.estrangeiro],
-                    ['Institucional', ultimo.institucional],
-                    ['Pessoa física', ultimo.pessoaFisica],
-                    ['Inst. financeira', ultimo.instFinanceira],
-                    ['Outros', ultimo.outros],
-                  ] as const
-                ).map(([rotulo, v]) => (
-                  <tr key={rotulo}>
-                    <th scope="row" style={{ textAlign: 'left', fontWeight: 400 }}>{rotulo}</th>
-                    <td style={{ textAlign: 'right', color: v >= 0 ? 'var(--success)' : 'var(--danger)' }}>{formatarMilhoes(v)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
           <Fonte texto={dados.fonte} atualizado={dados.geradoEm} />
         </>
       )}
