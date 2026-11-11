@@ -1,13 +1,14 @@
 import { useMemo, useState } from 'react'
 import { useArquivoDados } from '../data/useArquivoDados'
 import {
-  ROTULO_PERIODO, dataBR, formatarMilhoes, formatarReaisCurto, maisAlugadas, mediaMovel, pesoNoTotal, recortar, rotuloMes, sequenciaAtual, somar, totaisPorMes,
+  ROTULO_PERIODO, dataBR, formatarMilhoes, formatarReaisCurto, maisAlugadas, mediaMovel, pesoNoTotal, recortar, correlacao, mesmoSentido, parear, rotuloMes, semPrimeiroMesIncompleto, sequenciaAtual, somar, totaisPorMes, variacaoMensal,
 } from '../domain/dadosDeMercado'
-import type { Periodo, RegistroFluxo, SnapshotAluguel, SnapshotFluxo, TotalMes } from '../domain/dadosDeMercado'
+import type { BarraIndice, Periodo, RegistroFluxo, SnapshotAluguel, SnapshotFluxo, ParMes, TotalMes } from '../domain/dadosDeMercado'
 import { EstadoDoArquivo } from '../ui/BlocosDeAnalise'
 
 export const CAMINHO_FLUXO = 'dados/fluxoEstrangeiro.json'
 export const CAMINHO_ALUGUEL = 'dados/emprestimoAtivos.json'
+export const CAMINHO_IBOV = 'dados/indices-historico/IBOV.json'
 
 const PERIODOS: Periodo[] = ['mes', 'ano', '30', '90']
 const JANELA_MEDIA = 28
@@ -171,6 +172,85 @@ function CartaoFluxo({ snapshot }: { snapshot?: SnapshotFluxo }) {
   )
 }
 
+/** Barras da variação mensal do Ibovespa (%), com as mesmas colunas do gráfico do estrangeiro para lerem lado a lado. */
+function GraficoIbovMensal({ pares }: { pares: ParMes[] }) {
+  const W = 340
+  const H = 150
+  const topo = 18
+  const base = H - 22
+  const n = pares.length
+  const max = Math.max(0, ...pares.map((p) => p.variacao))
+  const min = Math.min(0, ...pares.map((p) => p.variacao))
+  const y = (v: number) => topo + ((max - v) / (max - min || 1)) * (base - topo)
+  const larg = (W - 8) / Math.max(n, 4)
+  const pct = (v: number) => `${v > 0 ? '+' : v < 0 ? '−' : ''}${Math.abs(v * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1, minimumFractionDigits: 1 })}%`
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Variação do Ibovespa por mês, de ${rotuloMes(pares[0].mes)} a ${rotuloMes(pares[n - 1].mes)}.`} style={{ width: '100%', height: 'auto', maxHeight: 200, display: 'block' }}>
+      <line x1={4} x2={W - 4} y1={y(0)} y2={y(0)} stroke="var(--border)" strokeWidth={1} />
+      {pares.map((p, i) => {
+        const cx = 4 + larg * (i + 0.5)
+        const alt = Math.max(2, Math.abs(y(p.variacao) - y(0)))
+        return (
+          <g key={p.mes}>
+            <rect x={cx - larg * 0.34} y={Math.min(y(p.variacao), y(0))} width={larg * 0.68} height={alt} rx={2} fill={p.variacao < 0 ? 'var(--danger)' : 'var(--success)'} opacity={0.9} />
+            <text x={cx} y={p.variacao < 0 ? y(p.variacao) + alt + 11 : y(p.variacao) - 4} textAnchor="middle" style={{ fill: 'var(--text)', fontSize: 9, fontWeight: 600 }}>{pct(p.variacao)}</text>
+            <text x={cx} y={H - 6} textAnchor="middle" style={{ fill: 'var(--text-muted)', fontSize: 10 }}>{rotuloMes(p.mes)}</text>
+          </g>
+        )
+      })}
+    </svg>
+  )
+}
+
+function CartaoRelacao({ fluxo }: { fluxo?: SnapshotFluxo }) {
+  const [estadoF, recarregarF] = useArquivoDados<SnapshotFluxo>(CAMINHO_FLUXO, true, fluxo)
+  const [estadoI, recarregarI] = useArquivoDados<{ barras: BarraIndice[] }>(CAMINHO_IBOV, true)
+  const f = estadoF.tipo === 'pronto' ? estadoF.dados : null
+  const i = estadoI.tipo === 'pronto' ? estadoI.dados : null
+  const pares = useMemo(() => {
+    if (!f || !i || !f.registros.length) return []
+    const regs = semPrimeiroMesIncompleto(f.registros)
+    const totais = totaisPorMes(regs, 12)
+    const ate = f.registros[f.registros.length - 1].data
+    return parear(totais, variacaoMensal(i.barras, totais.map((t) => t.mes), ate))
+  }, [f, i])
+  const r = correlacao(pares)
+  const sentido = mesmoSentido(pares)
+
+  return (
+    <section className="card col" style={{ gap: 12 }} aria-labelledby="titulo-relacao">
+      <div className="col" style={{ gap: 2 }}>
+        <h2 id="titulo-relacao" style={{ fontSize: 17 }}>📈 Bolsa × estrangeiro</h2>
+        <span className="small muted justify">Em cima, quanto o estrangeiro pôs ou tirou da bolsa em cada mês. Embaixo, quanto o Ibovespa subiu ou caiu no mesmo mês.</span>
+      </div>
+      {!f || !i ? (
+        <EstadoDoArquivo estado={(() => { const t = !f ? estadoF.tipo : estadoI.tipo; return t === 'pronto' ? 'ocioso' : t })()} aoTentarDeNovo={() => { recarregarF(); recarregarI() }} nome="a relação entre a bolsa e o estrangeiro" />
+      ) : pares.length < 2 ? (
+        <SemDados nome="fluxo e Ibovespa" />
+      ) : (
+        <>
+          <div className="col" style={{ gap: 2 }}>
+            <span className="tiny muted">Estrangeiro (R$ mi = milhões, bi = bilhões)</span>
+            <GraficoMensal meses={pares.map((p) => ({ mes: p.mes, estrangeiro: p.fluxo }))} />
+          </div>
+          <div className="col" style={{ gap: 2 }}>
+            <span className="tiny muted">Ibovespa no mês</span>
+            <GraficoIbovMensal pares={pares} />
+          </div>
+          <div className="small justify" role="note" data-testid="relacao-resumo">
+            Em <strong>{sentido.iguais} de {sentido.total} meses</strong> o Ibovespa andou no mesmo sentido do estrangeiro (entrou e subiu, ou saiu e caiu)
+            {r !== null ? <>. Correlação de <strong>{r.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong> (de −1 a +1; perto de 0 é pouca relação)</> : null}.
+          </div>
+          <div className="tiny muted justify" style={{ lineHeight: 1.5 }}>
+            Ter relação não quer dizer que um causa o outro: o estrangeiro pode comprar porque a bolsa sobe, e a bolsa pode subir porque o estrangeiro compra. O último mês é parcial. Poucos meses de histórico: leia como tendência, não como regra.
+          </div>
+          <Fonte texto="B3 e Dados de Mercado (fluxo), B3 (Ibovespa)" atualizado={f.geradoEm} />
+        </>
+      )}
+    </section>
+  )
+}
+
 function CartaoAluguel({ snapshot }: { snapshot?: SnapshotAluguel }) {
   const [estado, recarregar] = useArquivoDados<SnapshotAluguel>(CAMINHO_ALUGUEL, true, snapshot)
   const dados = estado.tipo === 'pronto' ? estado.dados : null
@@ -232,6 +312,7 @@ export function DadosDeMercado({ fluxo, aluguel }: { fluxo?: SnapshotFluxo; alug
   return (
     <div className="col" style={{ gap: 14 }}>
       <CartaoFluxo snapshot={fluxo} />
+      <CartaoRelacao fluxo={fluxo} />
       <CartaoAluguel snapshot={aluguel} />
       <div className="card-outline small muted justify" style={{ lineHeight: 1.5 }} role="note">
         <strong>Informação, não recomendação.</strong> Fluxo de capital e posição no aluguel descrevem o que já aconteceu; não garantem o que vai acontecer com o preço de nenhuma ação.

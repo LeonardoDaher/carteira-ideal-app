@@ -73,3 +73,24 @@ describe('mês a mês', () => {
     expect(rotuloMes('2026-11')).toBe('nov/26')
   })
 })
+
+describe('relação com o índice', () => {
+  it('variação mensal, pares, sentido e correlação', async () => {
+    const m = await import('./dadosDeMercado')
+    const barras = [['2026-09-30', 0, 0, 0, 100, 0], ['2026-10-15', 0, 0, 0, 120, 0], ['2026-10-31', 0, 0, 0, 110, 0], ['2026-11-05', 0, 0, 0, 99, 0], ['2026-11-09', 0, 0, 0, 50, 0]] as import('./dadosDeMercado').BarraIndice[]
+    const v = m.variacaoMensal(barras, ['2026-09', '2026-10', '2026-11'], '2026-11-06')
+    expect(v.has('2026-09')).toBe(false)
+    expect(v.get('2026-10')).toBeCloseTo(0.1)
+    expect(v.get('2026-11')).toBeCloseTo(-0.1)
+    const pares = m.parear([{ mes: '2026-10', estrangeiro: 500 }, { mes: '2026-11', estrangeiro: -400 }, { mes: '2026-12', estrangeiro: 1 }], v)
+    expect(pares).toHaveLength(2)
+    expect(m.mesmoSentido(pares)).toEqual({ iguais: 2, total: 2 })
+    expect(m.correlacao(pares)).toBeNull()
+    expect(m.correlacao([{ mes: 'a', fluxo: 1, variacao: 0.01 }, { mes: 'b', fluxo: 2, variacao: 0.02 }, { mes: 'c', fluxo: 3, variacao: 0.03 }])).toBeCloseTo(1)
+  })
+  it('descarta primeiro mês incompleto', async () => {
+    const m = await import('./dadosDeMercado')
+    expect(m.semPrimeiroMesIncompleto(REGS.slice(1))).toHaveLength(4)
+    expect(m.semPrimeiroMesIncompleto([dia('2025-11-11', 1), dia('2025-12-01', 2)]).map((r) => r.data)).toEqual(['2025-12-01'])
+  })
+})

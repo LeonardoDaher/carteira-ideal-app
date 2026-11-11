@@ -135,3 +135,56 @@ export function rotuloMes(mes: string): string {
   const [a, m] = mes.split('-')
   return `${MESES[Number(m) - 1]}/${a.slice(2)}`
 }
+
+/** Candle diário do índice: [data, abertura, máxima, mínima, fechamento, volume]. */
+export type BarraIndice = [string, number, number, number, number, number]
+
+/** Remove o primeiro mês quando a série começa no meio dele (o saldo ficaria incompleto frente ao índice). */
+export function semPrimeiroMesIncompleto(registros: RegistroFluxo[]): RegistroFluxo[] {
+  const primeiro = registros[0]
+  if (!primeiro || Number(primeiro.data.slice(8, 10)) <= 7) return registros
+  return registros.filter((r) => r.data.slice(0, 7) !== primeiro.data.slice(0, 7))
+}
+
+/** Variação do índice em cada mês: fechamento do último pregão do mês ÷ fechamento do último pregão do mês anterior − 1 (usa só barras até `ate`). */
+export function variacaoMensal(barras: BarraIndice[], meses: string[], ate: string): Map<string, number> {
+  const fech = barras.filter((b) => b[0] <= ate).sort((a, b) => a[0].localeCompare(b[0]))
+  const out = new Map<string, number>()
+  for (const mes of meses) {
+    const noMes = fech.filter((b) => b[0].slice(0, 7) === mes)
+    const antes = fech.filter((b) => b[0].slice(0, 7) < mes)
+    if (!noMes.length || !antes.length) continue
+    out.set(mes, noMes[noMes.length - 1][4] / antes[antes.length - 1][4] - 1)
+  }
+  return out
+}
+
+export interface ParMes {
+  mes: string
+  /** Saldo do estrangeiro, R$ milhões. */
+  fluxo: number
+  /** Variação do índice no mês (fração). */
+  variacao: number
+}
+
+/** Só os meses que têm fluxo e índice. */
+export function parear(totais: TotalMes[], variacoes: Map<string, number>): ParMes[] {
+  return totais.filter((t) => variacoes.has(t.mes)).map((t) => ({ mes: t.mes, fluxo: t.estrangeiro, variacao: variacoes.get(t.mes) as number }))
+}
+
+/** Correlação de Pearson entre fluxo e variação (precisa de 3 meses ou mais). */
+export function correlacao(pares: ParMes[]): number | null {
+  const n = pares.length
+  if (n < 3) return null
+  const mx = pares.reduce((s, p) => s + p.fluxo, 0) / n
+  const my = pares.reduce((s, p) => s + p.variacao, 0) / n
+  let sxy = 0, sxx = 0, syy = 0
+  for (const p of pares) { sxy += (p.fluxo - mx) * (p.variacao - my); sxx += (p.fluxo - mx) ** 2; syy += (p.variacao - my) ** 2 }
+  return sxx > 0 && syy > 0 ? sxy / Math.sqrt(sxx * syy) : null
+}
+
+/** Em quantos meses o índice andou no mesmo sentido do estrangeiro (entrou e subiu, ou saiu e caiu). */
+export function mesmoSentido(pares: ParMes[]): { iguais: number; total: number } {
+  const validos = pares.filter((p) => p.fluxo !== 0 && p.variacao !== 0)
+  return { iguais: validos.filter((p) => p.fluxo > 0 === p.variacao > 0).length, total: validos.length }
+}
