@@ -3,15 +3,15 @@
   "acessoRestrito": false,
   "instagram": null,
   "versaoMetodologia": "1.1.0",
-  "geradoEm": "2026-11-10T18:23:03.682Z",
-  "dataExecucao": "2026-11-10",
-  "ultimoPregao": "2026-11-09",
+  "geradoEm": "2026-11-11T08:23:45.057Z",
+  "dataExecucao": "2026-11-11",
+  "ultimoPregao": "2026-11-10",
   "pastaAuditoria": "auditoria/top15-bdrs-negociados/2026-11-03",
-  "hashResultado": "6dbd275e5c6c218388c856e49c98fec7a4e04488a0112e8f184644491f5832c8",
-  "hashInsumos": "52284338fd0988fb9382f3d73b2fcc483e887f72148e4f037479069d297e95fa",
+  "hashResultado": "6cc3548e1def680521ddb9ffce71e1281c7f393faaa2f20d39634d3d9cb161e9",
+  "hashInsumos": "b3ef7e79749b053a5982072a7912dcbed36dc487afffa37c1b56c498a3df22f4",
   "hashConfig": "ce9d56f42d354d228f56032152af56397eea51b0fa493dac5d81ef5addc4c09d",
   "tamanhoDaLista": 15,
-  "universo": 965,
+  "universo": 966,
   "elegiveis": 99,
   "aviso": "Não é recomendação de investimento. “Mais negociado” significa apenas maior volume financeiro diário (mediana dos últimos 21 pregões): é liquidez, e não indica qualidade da empresa, preço baixo nem bom momento de compra. O preço do BDR depende da ação lá fora e do câmbio, e o BDR de ETF tem as características do fundo que ele representa. Os números vêm do Boletim de Preços da B3, são do passado e podem conter erros. Rentabilidade passada não garante rentabilidade futura e BDRs podem causar perda de parte ou de todo o dinheiro aplicado. Converse com um profissional certificado antes de investir.",
   "parametros": {
@@ -26,15 +26,15 @@
   },
   "geral": [
     {
-      "ticker": "MELI34",
-      "nome": "MercadoLibre, Inc.",
-      "categoria": "Varejo e e-commerce",
-      "volumeMediano": 131106807,
-      "volumeMedio": 181950345,
+      "ticker": "AURA33",
+      "nome": "Aura Minerals Inc",
+      "categoria": "Mineração de ouro",
+      "volumeMediano": 123012127,
+      "volumeMedio": 128844415,
       "diasNegociados": 21,
-      "cotacao": 70.5,
-      "dataCotacao": "2026-11-09",
-      "variacao3m": -7.8,
+      "cotacao": 152.04,
+      "dataCotacao": "2026-11-10",
+      "variacao3m": 17.8,
       "posicaoGeral": 1
     },
     {
@@ -42,47 +42,47 @@
       "nome": "NVIDIA Corporation",
       "categoria": "Semicondutores e hardware",
       "volumeMediano": 122367016,
-      "volumeMedio": 156976023,
+      "volumeMedio": 176882375,
       "diasNegociados": 21,
-      "cotacao": 20.49,
-      "dataCotacao": "2026-11-09",
-      "variacao3m": -13,
+      "cotacao": 19.9,
+      "dataCotacao": "2026-11-10",
+      "variacao3m": -13.9,
       "posicaoGeral": 2
     },
     {
-      "ticker": "AURA33",
-      "nome": "Aura Minerals Inc",
-      "categoria": "Mineração de ouro",
-      "volumeMediano": 109900669,
-      "volumeMedio": 125899802,
+      "ticker": "MELI34",
+      "nome": "MercadoLibre, Inc.",
+      "categoria": "Varejo e e-commerce",
+      "volumeMediano": 121340932,
+      "volumeMedio": 181387449,
       "diasNegociados": 21,
-      "cotacao": 158.21,
-      "dataCotacao": "2026-11-09",
-      "variacao3m": 26.3,
+      "cotacao": 69.27,
+      "dataCotacao": "2026-11-10",
+      "variacao3m": -10.3,
       "posicaoGeral": 3
     },
     {
       "ticker": "MUTC34",
       "nome": "Micron Technology Inc",
       "categoria": "Semicondutores e hardware",
-      "volumeMediano": 78569899,
-      "volumeMedio": 102125950,
+      "volumeMediano": 77035311,
+      "volumeMedio": 100619482,
       "diasNegociados": 21,
-      "cotacao": 675.64,
-      "dataCotacao": "2026-11-09",
-      "variacao3m": -8.8,
+      "cotacao": 675,
+      "dataCotacao": "2026-11-10",
+      "variacao3m": -8.3,
       "posicaoGeral": 4
     },
     {
       "ticker": "SPCX34",
       "nome": "Space Exploration Technologies Corp.",
       "categoria": "Telecomunicações e mídia",
-      "volumeMediano": 72134958,
-      "volumeMedio": 83520142,
+      "volumeMediano": 70889688,
+      "volumeMedio": 82756970,
       "diasNegociados": 21,
-      "cotacao": 51.8,
-      "dataCotacao": "2026-11-09",
-      "variacao3m": 15.5,
+      "cotacao": 52.82,
+      "dataCotacao": "2026-11-10",
+      "variacao3m": 12.3,
       "posicaoGeral": 5
     },
     {
@@ -90,11 +90,11 @@
       "nome": "Tesla, Inc.",
       "categoria": "Automóveis e bens duráveis",
       "volumeMediano": 70263160,
-      "volumeMedio": 83889275,
+      "volumeMedio": 82104220,
       "diasNegociados": 21,
-      "cotacao": 65.17,
-      "dataCotacao": "2026-11-09",
-      "variacao3m": 24.6,
+      "cotacao": 65.96,
+      "dataCotacao": "2026-11-10",
+      "variacao3m": 25.4,
       "posicaoGeral": 6
     },
     {
@@ -102,47 +102,47 @@
       "nome": "Alphabet Inc",
       "categoria": "Software e internet",
       "volumeMediano": 52318262,
-      "volumeMedio": 66526910,
+      "volumeMedio": 66698356,
       "diasNegociados": 21,
-      "cotacao": 133.03,
-      "dataCotacao": "2026-11-09",
-      "variacao3m": -11.5,
+      "cotacao": 133.54,
+      "dataCotacao": "2026-11-10",
+      "variacao3m": -11.9,
       "posicaoGeral": 7
+    },
+    {
+      "ticker": "M1TA34",
+      "nome": "Meta Platforms Inc",
+      "categoria": "Software e internet",
+      "volumeMediano": 52294088,
+      "volumeMedio": 55144570,
+      "diasNegociados": 21,
+      "cotacao": 127.61,
+      "dataCotacao": "2026-11-10",
+      "variacao3m": 17.6,
+      "posicaoGeral": 8
     },
     {
       "ticker": "AMZO34",
       "nome": "Amazon.com, Inc.",
       "categoria": "Varejo e e-commerce",
       "volumeMediano": 48760641,
-      "volumeMedio": 73714300,
+      "volumeMedio": 73423861,
       "diasNegociados": 21,
-      "cotacao": 73.44,
-      "dataCotacao": "2026-11-09",
-      "variacao3m": 5.6,
-      "posicaoGeral": 8
+      "cotacao": 75.78,
+      "dataCotacao": "2026-11-10",
+      "variacao3m": 7.3,
+      "posicaoGeral": 9
     },
     {
       "ticker": "MSFT34",
       "nome": "Microsoft Corp",
       "categoria": "Software e internet",
       "volumeMediano": 46286075,
-      "volumeMedio": 58847133,
+      "volumeMedio": 58373235,
       "diasNegociados": 21,
-      "cotacao": 125.44,
-      "dataCotacao": "2026-11-09",
-      "variacao3m": 19,
-      "posicaoGeral": 9
-    },
-    {
-      "ticker": "M1TA34",
-      "nome": "Meta Platforms Inc",
-      "categoria": "Software e internet",
-      "volumeMediano": 46093000,
-      "volumeMedio": 53747060,
-      "diasNegociados": 21,
-      "cotacao": 127,
-      "dataCotacao": "2026-11-09",
-      "variacao3m": 17.8,
+      "cotacao": 124.5,
+      "dataCotacao": "2026-11-10",
+      "variacao3m": 16.1,
       "posicaoGeral": 10
     },
     {
@@ -150,10 +150,10 @@
       "nome": "Inter & Co., Inc.",
       "categoria": "Financeiro",
       "volumeMediano": 45658597,
-      "volumeMedio": 58208022,
-      "diasNegociados": 15,
-      "cotacao": 22.06,
-      "dataCotacao": "2026-11-09",
+      "volumeMedio": 60136733,
+      "diasNegociados": 16,
+      "cotacao": 22.09,
+      "dataCotacao": "2026-11-10",
       "variacao3m": null,
       "posicaoGeral": 11
     },
@@ -161,104 +161,65 @@
       "ticker": "TSMC34",
       "nome": "Taiwan Semiconductor Manufacturing Co., Ltd. ADR",
       "categoria": "Semicondutores e hardware",
-      "volumeMediano": 45311801,
-      "volumeMedio": 60166535,
+      "volumeMediano": 43396981,
+      "volumeMedio": 59230849,
       "diasNegociados": 21,
-      "cotacao": 269.35,
-      "dataCotacao": "2026-11-09",
-      "variacao3m": 0.4,
+      "cotacao": 277.6,
+      "dataCotacao": "2026-11-10",
+      "variacao3m": 3.6,
       "posicaoGeral": 12
     },
     {
       "ticker": "ITLC34",
       "nome": "Intel Corporation",
       "categoria": "Semicondutores e hardware",
-      "volumeMediano": 37742824,
-      "volumeMedio": 41278835,
+      "volumeMediano": 37383049,
+      "volumeMedio": 39346840,
       "diasNegociados": 21,
-      "cotacao": 54.86,
-      "dataCotacao": "2026-11-09",
-      "variacao3m": -36.1,
+      "cotacao": 54.29,
+      "dataCotacao": "2026-11-10",
+      "variacao3m": -34.9,
       "posicaoGeral": 13
     },
     {
       "ticker": "AAPL34",
       "nome": "Apple Inc.",
       "categoria": "Semicondutores e hardware",
-      "volumeMediano": 34914899,
-      "volumeMedio": 46621926,
+      "volumeMediano": 32165353,
+      "volumeMedio": 45570721,
       "diasNegociados": 21,
-      "cotacao": 96.34,
-      "dataCotacao": "2026-11-09",
-      "variacao3m": 21.5,
+      "cotacao": 98,
+      "dataCotacao": "2026-11-10",
+      "variacao3m": 24.9,
       "posicaoGeral": 14
     },
     {
       "ticker": "A1MD34",
       "nome": "Advanced Micro Devices, Inc.",
       "categoria": "Semicondutores e hardware",
-      "volumeMediano": 25958558,
-      "volumeMedio": 37680200,
+      "volumeMediano": 27387940,
+      "volumeMedio": 38568681,
       "diasNegociados": 21,
-      "cotacao": 350.55,
-      "dataCotacao": "2026-11-09",
-      "variacao3m": 14.6,
+      "cotacao": 360.4,
+      "dataCotacao": "2026-11-10",
+      "variacao3m": 19.9,
       "posicaoGeral": 15
     }
   ],
   "porCategoria": {
-    "Varejo e e-commerce": [
+    "Mineração de ouro": [
       {
-        "ticker": "MELI34",
-        "nome": "MercadoLibre, Inc.",
-        "categoria": "Varejo e e-commerce",
-        "volumeMediano": 131106807,
-        "volumeMedio": 181950345,
+        "ticker": "AURA33",
+        "nome": "Aura Minerals Inc",
+        "categoria": "Mineração de ouro",
+        "volumeMediano": 123012127,
+        "volumeMedio": 128844415,
         "diasNegociados": 21,
-        "cotacao": 70.5,
-        "dataCotacao": "2026-11-09",
-        "variacao3m": -7.8,
+        "cotacao": 152.04,
+        "dataCotacao": "2026-11-10",
+        "variacao3m": 17.8,
         "posicaoGeral": 1,
         "posicaoNaCategoria": 1
-      },
-      {
-        "ticker": "AMZO34",
-        "nome": "Amazon.com, Inc.",
-        "categoria": "Varejo e e-commerce",
-        "volumeMediano": 48760641,
-        "volumeMedio": 73714300,
-        "diasNegociados": 21,
-        "cotacao": 73.44,
-        "dataCotacao": "2026-11-09",
-        "variacao3m": 5.6,
-        "posicaoGeral": 8,
-        "posicaoNaCategoria": 2
-      },
-      {
-        "ticker": "BABA34",
-        "nome": "Alibaba Group Holding Limited ADR",
-        "categoria": "Varejo e e-commerce",
-        "volumeMediano": 5923120,
-        "volumeMedio": 8490327,
-        "diasNegociados": 21,
-        "cotacao": 20.65,
-        "dataCotacao": "2026-11-09",
-        "variacao3m": -11.7,
-        "posicaoGeral": 28,
-        "posicaoNaCategoria": 3
-      },
-      {
-        "ticker": "WALM34",
-        "nome": "WALM34",
-        "categoria": "Varejo e e-commerce",
-        "volumeMediano": 1637346,
-        "volumeMedio": 2134607,
-        "diasNegociados": 21,
-        "cotacao": 43,
-        "dataCotacao": "2026-11-09",
-        "variacao3m": 20.6,
-        "posicaoGeral": 58,
-        "posicaoNaCategoria": 4
       }
     ],
     "Semicondutores e hardware": [
@@ -267,11 +228,11 @@
         "nome": "NVIDIA Corporation",
         "categoria": "Semicondutores e hardware",
         "volumeMediano": 122367016,
-        "volumeMedio": 156976023,
+        "volumeMedio": 176882375,
         "diasNegociados": 21,
-        "cotacao": 20.49,
-        "dataCotacao": "2026-11-09",
-        "variacao3m": -13,
+        "cotacao": 19.9,
+        "dataCotacao": "2026-11-10",
+        "variacao3m": -13.9,
         "posicaoGeral": 2,
         "posicaoNaCategoria": 1
       },
@@ -279,12 +240,12 @@
         "ticker": "MUTC34",
         "nome": "Micron Technology Inc",
         "categoria": "Semicondutores e hardware",
-        "volumeMediano": 78569899,
-        "volumeMedio": 102125950,
+        "volumeMediano": 77035311,
+        "volumeMedio": 100619482,
         "diasNegociados": 21,
-        "cotacao": 675.64,
-        "dataCotacao": "2026-11-09",
-        "variacao3m": -8.8,
+        "cotacao": 675,
+        "dataCotacao": "2026-11-10",
+        "variacao3m": -8.3,
         "posicaoGeral": 4,
         "posicaoNaCategoria": 2
       },
@@ -292,12 +253,12 @@
         "ticker": "TSMC34",
         "nome": "Taiwan Semiconductor Manufacturing Co., Ltd. ADR",
         "categoria": "Semicondutores e hardware",
-        "volumeMediano": 45311801,
-        "volumeMedio": 60166535,
+        "volumeMediano": 43396981,
+        "volumeMedio": 59230849,
         "diasNegociados": 21,
-        "cotacao": 269.35,
-        "dataCotacao": "2026-11-09",
-        "variacao3m": 0.4,
+        "cotacao": 277.6,
+        "dataCotacao": "2026-11-10",
+        "variacao3m": 3.6,
         "posicaoGeral": 12,
         "posicaoNaCategoria": 3
       },
@@ -305,12 +266,12 @@
         "ticker": "ITLC34",
         "nome": "Intel Corporation",
         "categoria": "Semicondutores e hardware",
-        "volumeMediano": 37742824,
-        "volumeMedio": 41278835,
+        "volumeMediano": 37383049,
+        "volumeMedio": 39346840,
         "diasNegociados": 21,
-        "cotacao": 54.86,
-        "dataCotacao": "2026-11-09",
-        "variacao3m": -36.1,
+        "cotacao": 54.29,
+        "dataCotacao": "2026-11-10",
+        "variacao3m": -34.9,
         "posicaoGeral": 13,
         "posicaoNaCategoria": 4
       },
@@ -318,29 +279,68 @@
         "ticker": "AAPL34",
         "nome": "Apple Inc.",
         "categoria": "Semicondutores e hardware",
-        "volumeMediano": 34914899,
-        "volumeMedio": 46621926,
+        "volumeMediano": 32165353,
+        "volumeMedio": 45570721,
         "diasNegociados": 21,
-        "cotacao": 96.34,
-        "dataCotacao": "2026-11-09",
-        "variacao3m": 21.5,
+        "cotacao": 98,
+        "dataCotacao": "2026-11-10",
+        "variacao3m": 24.9,
         "posicaoGeral": 14,
         "posicaoNaCategoria": 5
       }
     ],
-    "Mineração de ouro": [
+    "Varejo e e-commerce": [
       {
-        "ticker": "AURA33",
-        "nome": "Aura Minerals Inc",
-        "categoria": "Mineração de ouro",
-        "volumeMediano": 109900669,
-        "volumeMedio": 125899802,
+        "ticker": "MELI34",
+        "nome": "MercadoLibre, Inc.",
+        "categoria": "Varejo e e-commerce",
+        "volumeMediano": 121340932,
+        "volumeMedio": 181387449,
         "diasNegociados": 21,
-        "cotacao": 158.21,
-        "dataCotacao": "2026-11-09",
-        "variacao3m": 26.3,
+        "cotacao": 69.27,
+        "dataCotacao": "2026-11-10",
+        "variacao3m": -10.3,
         "posicaoGeral": 3,
         "posicaoNaCategoria": 1
+      },
+      {
+        "ticker": "AMZO34",
+        "nome": "Amazon.com, Inc.",
+        "categoria": "Varejo e e-commerce",
+        "volumeMediano": 48760641,
+        "volumeMedio": 73423861,
+        "diasNegociados": 21,
+        "cotacao": 75.78,
+        "dataCotacao": "2026-11-10",
+        "variacao3m": 7.3,
+        "posicaoGeral": 9,
+        "posicaoNaCategoria": 2
+      },
+      {
+        "ticker": "BABA34",
+        "nome": "Alibaba Group Holding Limited ADR",
+        "categoria": "Varejo e e-commerce",
+        "volumeMediano": 5923120,
+        "volumeMedio": 8603080,
+        "diasNegociados": 21,
+        "cotacao": 20.62,
+        "dataCotacao": "2026-11-10",
+        "variacao3m": -14.5,
+        "posicaoGeral": 29,
+        "posicaoNaCategoria": 3
+      },
+      {
+        "ticker": "WALM34",
+        "nome": "WALM34",
+        "categoria": "Varejo e e-commerce",
+        "volumeMediano": 1559281,
+        "volumeMedio": 2074916,
+        "diasNegociados": 21,
+        "cotacao": 43.64,
+        "dataCotacao": "2026-11-10",
+        "variacao3m": 21.9,
+        "posicaoGeral": 62,
+        "posicaoNaCategoria": 4
       }
     ],
     "Telecomunicações e mídia": [
@@ -348,12 +348,12 @@
         "ticker": "SPCX34",
         "nome": "Space Exploration Technologies Corp.",
         "categoria": "Telecomunicações e mídia",
-        "volumeMediano": 72134958,
-        "volumeMedio": 83520142,
+        "volumeMediano": 70889688,
+        "volumeMedio": 82756970,
         "diasNegociados": 21,
-        "cotacao": 51.8,
-        "dataCotacao": "2026-11-09",
-        "variacao3m": 15.5,
+        "cotacao": 52.82,
+        "dataCotacao": "2026-11-10",
+        "variacao3m": 12.3,
         "posicaoGeral": 5,
         "posicaoNaCategoria": 1
       }
@@ -364,11 +364,11 @@
         "nome": "Tesla, Inc.",
         "categoria": "Automóveis e bens duráveis",
         "volumeMediano": 70263160,
-        "volumeMedio": 83889275,
+        "volumeMedio": 82104220,
         "diasNegociados": 21,
-        "cotacao": 65.17,
-        "dataCotacao": "2026-11-09",
-        "variacao3m": 24.6,
+        "cotacao": 65.96,
+        "dataCotacao": "2026-11-10",
+        "variacao3m": 25.4,
         "posicaoGeral": 6,
         "posicaoNaCategoria": 1
       }
@@ -379,37 +379,37 @@
         "nome": "Alphabet Inc",
         "categoria": "Software e internet",
         "volumeMediano": 52318262,
-        "volumeMedio": 66526910,
+        "volumeMedio": 66698356,
         "diasNegociados": 21,
-        "cotacao": 133.03,
-        "dataCotacao": "2026-11-09",
-        "variacao3m": -11.5,
+        "cotacao": 133.54,
+        "dataCotacao": "2026-11-10",
+        "variacao3m": -11.9,
         "posicaoGeral": 7,
         "posicaoNaCategoria": 1
+      },
+      {
+        "ticker": "M1TA34",
+        "nome": "Meta Platforms Inc",
+        "categoria": "Software e internet",
+        "volumeMediano": 52294088,
+        "volumeMedio": 55144570,
+        "diasNegociados": 21,
+        "cotacao": 127.61,
+        "dataCotacao": "2026-11-10",
+        "variacao3m": 17.6,
+        "posicaoGeral": 8,
+        "posicaoNaCategoria": 2
       },
       {
         "ticker": "MSFT34",
         "nome": "Microsoft Corp",
         "categoria": "Software e internet",
         "volumeMediano": 46286075,
-        "volumeMedio": 58847133,
+        "volumeMedio": 58373235,
         "diasNegociados": 21,
-        "cotacao": 125.44,
-        "dataCotacao": "2026-11-09",
-        "variacao3m": 19,
-        "posicaoGeral": 9,
-        "posicaoNaCategoria": 2
-      },
-      {
-        "ticker": "M1TA34",
-        "nome": "Meta Platforms Inc",
-        "categoria": "Software e internet",
-        "volumeMediano": 46093000,
-        "volumeMedio": 53747060,
-        "diasNegociados": 21,
-        "cotacao": 127,
-        "dataCotacao": "2026-11-09",
-        "variacao3m": 17.8,
+        "cotacao": 124.5,
+        "dataCotacao": "2026-11-10",
+        "variacao3m": 16.1,
         "posicaoGeral": 10,
         "posicaoNaCategoria": 3
       },
@@ -417,12 +417,12 @@
         "ticker": "ORCL34",
         "nome": "Oracle Corp",
         "categoria": "Software e internet",
-        "volumeMediano": 17605880,
-        "volumeMedio": 20399415,
+        "volumeMediano": 17595906,
+        "volumeMedio": 19752542,
         "diasNegociados": 21,
-        "cotacao": 109.51,
-        "dataCotacao": "2026-11-09",
-        "variacao3m": -11.7,
+        "cotacao": 110.39,
+        "dataCotacao": "2026-11-10",
+        "variacao3m": -14.8,
         "posicaoGeral": 17,
         "posicaoNaCategoria": 4
       },
@@ -430,13 +430,13 @@
         "ticker": "NFLX34",
         "nome": "Netflix, Inc.",
         "categoria": "Software e internet",
-        "volumeMediano": 8724576,
-        "volumeMedio": 9055310,
+        "volumeMediano": 9122729,
+        "volumeMedio": 9074269,
         "diasNegociados": 21,
         "cotacao": 7.07,
-        "dataCotacao": "2026-11-09",
-        "variacao3m": -5.9,
-        "posicaoGeral": 23,
+        "dataCotacao": "2026-11-10",
+        "variacao3m": -9.2,
+        "posicaoGeral": 22,
         "posicaoNaCategoria": 5
       }
     ],
@@ -446,10 +446,10 @@
         "nome": "Inter & Co., Inc.",
         "categoria": "Financeiro",
         "volumeMediano": 45658597,
-        "volumeMedio": 58208022,
-        "diasNegociados": 15,
-        "cotacao": 22.06,
-        "dataCotacao": "2026-11-09",
+        "volumeMedio": 60136733,
+        "diasNegociados": 16,
+        "cotacao": 22.09,
+        "dataCotacao": "2026-11-10",
         "variacao3m": null,
         "posicaoGeral": 11,
         "posicaoNaCategoria": 1
@@ -458,12 +458,12 @@
         "ticker": "M2ST34",
         "nome": "Strategy Inc -A",
         "categoria": "Financeiro",
-        "volumeMediano": 25249399,
-        "volumeMedio": 30911662,
+        "volumeMediano": 26632671,
+        "volumeMedio": 31728011,
         "diasNegociados": 21,
-        "cotacao": 10.02,
-        "dataCotacao": "2026-11-09",
-        "variacao3m": 38.8,
+        "cotacao": 9.71,
+        "dataCotacao": "2026-11-10",
+        "variacao3m": 37.1,
         "posicaoGeral": 16,
         "posicaoNaCategoria": 2
       },
@@ -472,12 +472,12 @@
         "nome": "Berkshire Hathaway Inc. B",
         "categoria": "Financeiro",
         "volumeMediano": 8974365,
-        "volumeMedio": 10809760,
+        "volumeMedio": 10970981,
         "diasNegociados": 21,
-        "cotacao": 156.81,
-        "dataCotacao": "2026-11-09",
-        "variacao3m": 18.9,
-        "posicaoGeral": 22,
+        "cotacao": 165,
+        "dataCotacao": "2026-11-10",
+        "variacao3m": 22.3,
+        "posicaoGeral": 23,
         "posicaoNaCategoria": 3
       },
       {
@@ -485,53 +485,53 @@
         "nome": "JPMorgan Chase & Co.",
         "categoria": "Financeiro",
         "volumeMediano": 6006268,
-        "volumeMedio": 8937998,
+        "volumeMedio": 8998566,
         "diasNegociados": 21,
-        "cotacao": 187.74,
-        "dataCotacao": "2026-11-09",
-        "variacao3m": 2.9,
-        "posicaoGeral": 27,
+        "cotacao": 193.2,
+        "dataCotacao": "2026-11-10",
+        "variacao3m": 5.3,
+        "posicaoGeral": 28,
         "posicaoNaCategoria": 4
       },
       {
         "ticker": "BOAC34",
         "nome": "Bank of America Corp",
         "categoria": "Financeiro",
-        "volumeMediano": 4172519,
-        "volumeMedio": 5485712,
+        "volumeMediano": 3844333,
+        "volumeMedio": 5347771,
         "diasNegociados": 21,
-        "cotacao": 70.15,
-        "dataCotacao": "2026-11-09",
-        "variacao3m": -12.8,
+        "cotacao": 70.3,
+        "dataCotacao": "2026-11-10",
+        "variacao3m": -14.1,
         "posicaoGeral": 32,
         "posicaoNaCategoria": 5
       }
     ],
     "Saúde e farmacêuticas": [
       {
-        "ticker": "LILY34",
-        "nome": "Eli Lilly & Co",
+        "ticker": "M1RN34",
+        "nome": "Moderna, Inc.",
         "categoria": "Saúde e farmacêuticas",
-        "volumeMediano": 10704966,
-        "volumeMedio": 12223459,
+        "volumeMediano": 10192079,
+        "volumeMedio": 11612932,
         "diasNegociados": 21,
-        "cotacao": 260.65,
-        "dataCotacao": "2026-11-09",
-        "variacao3m": 29,
+        "cotacao": 69.77,
+        "dataCotacao": "2026-11-10",
+        "variacao3m": 369.2,
         "posicaoGeral": 19,
         "posicaoNaCategoria": 1
       },
       {
-        "ticker": "M1RN34",
-        "nome": "Moderna, Inc.",
+        "ticker": "LILY34",
+        "nome": "Eli Lilly & Co",
         "categoria": "Saúde e farmacêuticas",
-        "volumeMediano": 9718708,
-        "volumeMedio": 11183243,
+        "volumeMediano": 9132366,
+        "volumeMedio": 11925990,
         "diasNegociados": 21,
-        "cotacao": 75.39,
-        "dataCotacao": "2026-11-09",
-        "variacao3m": 411.8,
-        "posicaoGeral": 20,
+        "cotacao": 267.4,
+        "dataCotacao": "2026-11-10",
+        "variacao3m": 27.3,
+        "posicaoGeral": 21,
         "posicaoNaCategoria": 2
       },
       {
@@ -539,12 +539,12 @@
         "nome": "JNJB34",
         "categoria": "Saúde e farmacêuticas",
         "volumeMediano": 896425,
-        "volumeMedio": 918758,
+        "volumeMedio": 897985,
         "diasNegociados": 21,
-        "cotacao": 105,
-        "dataCotacao": "2026-11-09",
-        "variacao3m": 19.7,
-        "posicaoGeral": 74,
+        "cotacao": 103.11,
+        "dataCotacao": "2026-11-10",
+        "variacao3m": 16.9,
+        "posicaoGeral": 75,
         "posicaoNaCategoria": 3
       },
       {
@@ -552,12 +552,12 @@
         "nome": "N1VO34",
         "categoria": "Saúde e farmacêuticas",
         "volumeMediano": 452081,
-        "volumeMedio": 671502,
+        "volumeMedio": 671495,
         "diasNegociados": 21,
-        "cotacao": 28.69,
-        "dataCotacao": "2026-11-09",
-        "variacao3m": -4.3,
-        "posicaoGeral": 89,
+        "cotacao": 28.2,
+        "dataCotacao": "2026-11-10",
+        "variacao3m": -6.5,
+        "posicaoGeral": 90,
         "posicaoNaCategoria": 4
       }
     ],
@@ -567,11 +567,11 @@
         "nome": "iShares Silver Trust",
         "categoria": "BDRs de ETF",
         "volumeMediano": 3438290,
-        "volumeMedio": 5601456,
+        "volumeMedio": 5550193,
         "diasNegociados": 21,
-        "cotacao": 87.51,
-        "dataCotacao": "2026-11-09",
-        "variacao3m": -10.1,
+        "cotacao": 86,
+        "dataCotacao": "2026-11-10",
+        "variacao3m": -15.2,
         "posicaoGeral": 34,
         "posicaoNaCategoria": 1
       },
@@ -579,52 +579,52 @@
         "ticker": "BEWY39",
         "nome": "iShares MSCI South Korea Capped ETF",
         "categoria": "BDRs de ETF",
-        "volumeMediano": 2933678,
-        "volumeMedio": 3757241,
+        "volumeMediano": 2872736,
+        "volumeMedio": 3666422,
         "diasNegociados": 21,
-        "cotacao": 98.15,
-        "dataCotacao": "2026-11-09",
-        "variacao3m": -6.9,
-        "posicaoGeral": 38,
+        "cotacao": 97.29,
+        "dataCotacao": "2026-11-10",
+        "variacao3m": -9.2,
+        "posicaoGeral": 37,
         "posicaoNaCategoria": 2
       },
       {
         "ticker": "IBIT39",
         "nome": "IShares Bitcoin Trust",
         "categoria": "BDRs de ETF",
-        "volumeMediano": 2528011,
-        "volumeMedio": 3394098,
+        "volumeMediano": 2318321,
+        "volumeMedio": 3323690,
         "diasNegociados": 21,
-        "cotacao": 77.91,
-        "dataCotacao": "2026-11-09",
-        "variacao3m": 24.8,
-        "posicaoGeral": 45,
+        "cotacao": 77.55,
+        "dataCotacao": "2026-11-10",
+        "variacao3m": 25.6,
+        "posicaoGeral": 48,
         "posicaoNaCategoria": 3
       },
       {
         "ticker": "GDXB39",
         "nome": "VanEck Gold Miners ETF",
         "categoria": "BDRs de ETF",
-        "volumeMediano": 2209046,
-        "volumeMedio": 2943968,
+        "volumeMediano": 2247454,
+        "volumeMedio": 2960054,
         "diasNegociados": 21,
-        "cotacao": 167.28,
-        "dataCotacao": "2026-11-09",
-        "variacao3m": 10.1,
-        "posicaoGeral": 49,
+        "cotacao": 161.52,
+        "dataCotacao": "2026-11-10",
+        "variacao3m": 3.8,
+        "posicaoGeral": 50,
         "posicaoNaCategoria": 4
       },
       {
-        "ticker": "BIVB39",
-        "nome": "ISHARES CORE S&P 500 ETF",
+        "ticker": "BSOX39",
+        "nome": "iShares Semiconductor ETF",
         "categoria": "BDRs de ETF",
-        "volumeMediano": 2105077,
-        "volumeMedio": 2939135,
+        "volumeMediano": 2114458,
+        "volumeMedio": 3871885,
         "diasNegociados": 21,
-        "cotacao": 104.37,
-        "dataCotacao": "2026-11-09",
-        "variacao3m": 5.6,
-        "posicaoGeral": 50,
+        "cotacao": 21.5,
+        "dataCotacao": "2026-11-10",
+        "variacao3m": -68.5,
+        "posicaoGeral": 51,
         "posicaoNaCategoria": 5
       }
     ],
@@ -633,13 +633,13 @@
         "ticker": "COCA34",
         "nome": "Coca-Cola Company",
         "categoria": "Consumo não durável",
-        "volumeMediano": 3205704,
-        "volumeMedio": 4861476,
+        "volumeMediano": 3113737,
+        "volumeMedio": 4701562,
         "diasNegociados": 21,
-        "cotacao": 87.31,
-        "dataCotacao": "2026-11-09",
-        "variacao3m": 18.5,
-        "posicaoGeral": 35,
+        "cotacao": 91.05,
+        "dataCotacao": "2026-11-10",
+        "variacao3m": 23.4,
+        "posicaoGeral": 36,
         "posicaoNaCategoria": 1
       },
       {
@@ -647,66 +647,25 @@
         "nome": "NIKE34",
         "categoria": "Consumo não durável",
         "volumeMediano": 2690289,
-        "volumeMedio": 2931018,
+        "volumeMedio": 2903713,
         "diasNegociados": 21,
-        "cotacao": 109.04,
-        "dataCotacao": "2026-11-09",
-        "variacao3m": 410.5,
-        "posicaoGeral": 42,
+        "cotacao": 107.9,
+        "dataCotacao": "2026-11-10",
+        "variacao3m": 406.3,
+        "posicaoGeral": 40,
         "posicaoNaCategoria": 2
       },
       {
         "ticker": "PEPB34",
         "nome": "PEPB34",
         "categoria": "Consumo não durável",
-        "volumeMediano": 442619,
-        "volumeMedio": 637721,
+        "volumeMediano": 319974,
+        "volumeMedio": 545212,
         "diasNegociados": 21,
-        "cotacao": 53.32,
-        "dataCotacao": "2026-11-09",
-        "variacao3m": 12.5,
-        "posicaoGeral": 90,
-        "posicaoNaCategoria": 3
-      }
-    ],
-    "Mineração e metais": [
-      {
-        "ticker": "FCXO34",
-        "nome": "Freeport-McMoRan, Inc.",
-        "categoria": "Mineração e metais",
-        "volumeMediano": 2530589,
-        "volumeMedio": 3335357,
-        "diasNegociados": 21,
-        "cotacao": 115.05,
-        "dataCotacao": "2026-11-09",
-        "variacao3m": -2.7,
-        "posicaoGeral": 44,
-        "posicaoNaCategoria": 1
-      },
-      {
-        "ticker": "S2GM34",
-        "nome": "S2GM34",
-        "categoria": "Mineração e metais",
-        "volumeMediano": 753253,
-        "volumeMedio": 822510,
-        "diasNegociados": 21,
-        "cotacao": 11.2,
-        "dataCotacao": "2026-11-09",
-        "variacao3m": -43.1,
-        "posicaoGeral": 80,
-        "posicaoNaCategoria": 2
-      },
-      {
-        "ticker": "N1EM34",
-        "nome": "N1EM34",
-        "categoria": "Mineração e metais",
-        "volumeMediano": 438827,
-        "volumeMedio": 512494,
-        "diasNegociados": 21,
-        "cotacao": 706.99,
-        "dataCotacao": "2026-11-09",
-        "variacao3m": 23.2,
-        "posicaoGeral": 91,
+        "cotacao": 53.41,
+        "dataCotacao": "2026-11-10",
+        "variacao3m": 13.9,
+        "posicaoGeral": 99,
         "posicaoNaCategoria": 3
       }
     ],
@@ -716,12 +675,12 @@
         "nome": "A1MT34",
         "categoria": "Indústria",
         "volumeMediano": 2496736,
-        "volumeMedio": 4531586,
+        "volumeMedio": 4581544,
         "diasNegociados": 21,
-        "cotacao": 205.35,
-        "dataCotacao": "2026-11-09",
-        "variacao3m": -24.5,
-        "posicaoGeral": 46,
+        "cotacao": 207.4,
+        "dataCotacao": "2026-11-10",
+        "variacao3m": -20.2,
+        "posicaoGeral": 42,
         "posicaoNaCategoria": 1
       },
       {
@@ -729,12 +688,12 @@
         "nome": "CATP34",
         "categoria": "Indústria",
         "volumeMediano": 1755481,
-        "volumeMedio": 2111227,
+        "volumeMedio": 2084442,
         "diasNegociados": 21,
-        "cotacao": 205.49,
-        "dataCotacao": "2026-11-09",
-        "variacao3m": -23.9,
-        "posicaoGeral": 54,
+        "cotacao": 204.05,
+        "dataCotacao": "2026-11-10",
+        "variacao3m": -24,
+        "posicaoGeral": 57,
         "posicaoNaCategoria": 2
       },
       {
@@ -742,12 +701,53 @@
         "nome": "L1RC34",
         "categoria": "Indústria",
         "volumeMediano": 1608638,
-        "volumeMedio": 3567745,
+        "volumeMedio": 3539416,
         "diasNegociados": 21,
-        "cotacao": 27.25,
-        "dataCotacao": "2026-11-09",
-        "variacao3m": -24.7,
+        "cotacao": 27.92,
+        "dataCotacao": "2026-11-10",
+        "variacao3m": -21.8,
         "posicaoGeral": 60,
+        "posicaoNaCategoria": 3
+      }
+    ],
+    "Mineração e metais": [
+      {
+        "ticker": "FCXO34",
+        "nome": "Freeport-McMoRan, Inc.",
+        "categoria": "Mineração e metais",
+        "volumeMediano": 2484440,
+        "volumeMedio": 3140219,
+        "diasNegociados": 21,
+        "cotacao": 112.08,
+        "dataCotacao": "2026-11-10",
+        "variacao3m": -6.9,
+        "posicaoGeral": 43,
+        "posicaoNaCategoria": 1
+      },
+      {
+        "ticker": "S2GM34",
+        "nome": "S2GM34",
+        "categoria": "Mineração e metais",
+        "volumeMediano": 753253,
+        "volumeMedio": 812835,
+        "diasNegociados": 21,
+        "cotacao": 10.12,
+        "dataCotacao": "2026-11-10",
+        "variacao3m": -49.7,
+        "posicaoGeral": 79,
+        "posicaoNaCategoria": 2
+      },
+      {
+        "ticker": "N1EM34",
+        "nome": "N1EM34",
+        "categoria": "Mineração e metais",
+        "volumeMediano": 499530,
+        "volumeMedio": 561367,
+        "diasNegociados": 21,
+        "cotacao": 661,
+        "dataCotacao": "2026-11-10",
+        "variacao3m": 9.9,
+        "posicaoGeral": 88,
         "posicaoNaCategoria": 3
       }
     ],
@@ -757,23 +757,23 @@
         "nome": "U1BE34",
         "categoria": "Transporte e logística",
         "volumeMediano": 1959341,
-        "volumeMedio": 3491565,
+        "volumeMedio": 3462057,
         "diasNegociados": 21,
         "cotacao": 98.64,
-        "dataCotacao": "2026-11-09",
-        "variacao3m": 3.8,
-        "posicaoGeral": 52,
+        "dataCotacao": "2026-11-10",
+        "variacao3m": -0.8,
+        "posicaoGeral": 53,
         "posicaoNaCategoria": 1
       },
       {
         "ticker": "AALL34",
         "nome": "AALL34",
         "categoria": "Transporte e logística",
-        "volumeMediano": 362819,
-        "volumeMedio": 617075,
+        "volumeMediano": 337727,
+        "volumeMedio": 576617,
         "diasNegociados": 21,
-        "cotacao": 77.73,
-        "dataCotacao": "2026-11-09",
+        "cotacao": 78.72,
+        "dataCotacao": "2026-11-10",
         "variacao3m": null,
         "posicaoGeral": 97,
         "posicaoNaCategoria": 2
@@ -785,12 +785,12 @@
         "nome": "BKNG34",
         "categoria": "Turismo, lazer e serviços",
         "volumeMediano": 1663464,
-        "volumeMedio": 2778297,
+        "volumeMedio": 2509732,
         "diasNegociados": 21,
-        "cotacao": 5.1,
-        "dataCotacao": "2026-11-09",
-        "variacao3m": -17.7,
-        "posicaoGeral": 56,
+        "cotacao": 5.08,
+        "dataCotacao": "2026-11-10",
+        "variacao3m": -18.5,
+        "posicaoGeral": 58,
         "posicaoNaCategoria": 1
       },
       {
@@ -798,11 +798,11 @@
         "nome": "DISB34",
         "categoria": "Turismo, lazer e serviços",
         "volumeMediano": 1582002,
-        "volumeMedio": 2457201,
+        "volumeMedio": 2494494,
         "diasNegociados": 21,
-        "cotacao": 43.4,
-        "dataCotacao": "2026-11-09",
-        "variacao3m": 22.4,
+        "cotacao": 43.78,
+        "dataCotacao": "2026-11-10",
+        "variacao3m": 24.8,
         "posicaoGeral": 61,
         "posicaoNaCategoria": 2
       },
@@ -811,40 +811,40 @@
         "nome": "MCDC34",
         "categoria": "Turismo, lazer e serviços",
         "volumeMediano": 1076799,
-        "volumeMedio": 1411213,
+        "volumeMedio": 1402828,
         "diasNegociados": 21,
-        "cotacao": 76.51,
-        "dataCotacao": "2026-11-09",
-        "variacao3m": 12.3,
-        "posicaoGeral": 71,
+        "cotacao": 78.64,
+        "dataCotacao": "2026-11-10",
+        "variacao3m": 13,
+        "posicaoGeral": 70,
         "posicaoNaCategoria": 3
       }
     ],
     "Petróleo e gás": [
       {
-        "ticker": "EXXO34",
-        "nome": "EXXO34",
-        "categoria": "Petróleo e gás",
-        "volumeMediano": 1220146,
-        "volumeMedio": 3782015,
-        "diasNegociados": 21,
-        "cotacao": 112.51,
-        "dataCotacao": "2026-11-09",
-        "variacao3m": 16.8,
-        "posicaoGeral": 65,
-        "posicaoNaCategoria": 1
-      },
-      {
         "ticker": "CHVX34",
         "nome": "CHVX34",
         "categoria": "Petróleo e gás",
-        "volumeMediano": 1215512,
-        "volumeMedio": 2965253,
+        "volumeMediano": 1363437,
+        "volumeMedio": 3112118,
         "diasNegociados": 21,
-        "cotacao": 116.67,
-        "dataCotacao": "2026-11-09",
-        "variacao3m": 23.1,
-        "posicaoGeral": 66,
+        "cotacao": 120,
+        "dataCotacao": "2026-11-10",
+        "variacao3m": 20.4,
+        "posicaoGeral": 63,
+        "posicaoNaCategoria": 1
+      },
+      {
+        "ticker": "EXXO34",
+        "nome": "EXXO34",
+        "categoria": "Petróleo e gás",
+        "volumeMediano": 1342965,
+        "volumeMedio": 3817932,
+        "diasNegociados": 21,
+        "cotacao": 117.23,
+        "dataCotacao": "2026-11-10",
+        "variacao3m": 14.8,
+        "posicaoGeral": 64,
         "posicaoNaCategoria": 2
       }
     ],
@@ -853,13 +853,13 @@
         "ticker": "UNHH34",
         "nome": "UNHH34",
         "categoria": "Serviços de saúde",
-        "volumeMediano": 482304,
-        "volumeMedio": 595315,
+        "volumeMediano": 649007,
+        "volumeMedio": 617054,
         "diasNegociados": 21,
-        "cotacao": 31.35,
-        "dataCotacao": "2026-11-09",
-        "variacao3m": 5.7,
-        "posicaoGeral": 88,
+        "cotacao": 32.23,
+        "dataCotacao": "2026-11-10",
+        "variacao3m": 7.6,
+        "posicaoGeral": 83,
         "posicaoNaCategoria": 1
       }
     ],
@@ -869,12 +869,12 @@
         "nome": "V1ST34",
         "categoria": "Energia elétrica e saneamento",
         "volumeMediano": 385721,
-        "volumeMedio": 729776,
+        "volumeMedio": 802997,
         "diasNegociados": 21,
-        "cotacao": 52.7,
-        "dataCotacao": "2026-11-09",
-        "variacao3m": 2.5,
-        "posicaoGeral": 96,
+        "cotacao": 51.07,
+        "dataCotacao": "2026-11-10",
+        "variacao3m": -3,
+        "posicaoGeral": 95,
         "posicaoNaCategoria": 1
       }
     ],
@@ -883,13 +883,13 @@
         "ticker": "PYPL34",
         "nome": "PYPL34",
         "categoria": "Serviços e meios de pagamento",
-        "volumeMediano": 339707,
-        "volumeMedio": 1075064,
+        "volumeMediano": 380386,
+        "volumeMedio": 1087591,
         "diasNegociados": 21,
-        "cotacao": 16.4,
-        "dataCotacao": "2026-11-09",
-        "variacao3m": 9.3,
-        "posicaoGeral": 98,
+        "cotacao": 16.66,
+        "dataCotacao": "2026-11-10",
+        "variacao3m": 11.7,
+        "posicaoGeral": 96,
         "posicaoNaCategoria": 1
       }
     ]
@@ -907,14 +907,14 @@
       "nome": "A1CR34",
       "categoria": "Química e agroindústria",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "A1DC34",
       "nome": "A1DC34",
       "categoria": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 204 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 209 por dia (mínimo 300.000)."
     },
     {
       "ticker": "A1DI34",
@@ -935,35 +935,35 @@
       "nome": "A1EG34",
       "categoria": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 264 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 308 por dia (mínimo 300.000)."
     },
     {
       "ticker": "A1EN34",
       "nome": "A1EN34",
       "categoria": "Energia elétrica e saneamento",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 8 pregões (máximo 5)."
+      "motivo": "Último negócio há 9 pregões (máximo 5)."
     },
     {
       "ticker": "A1EP34",
       "nome": "A1EP34",
       "categoria": "Energia elétrica e saneamento",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 832 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 920 por dia (mínimo 300.000)."
     },
     {
       "ticker": "A1ES34",
       "nome": "A1ES34",
       "categoria": "Energia elétrica e saneamento",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "A1FL34",
       "nome": "A1FL34",
       "categoria": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 7 pregões (máximo 5)."
+      "motivo": "Último negócio há 8 pregões (máximo 5)."
     },
     {
       "ticker": "A1GI34",
@@ -977,21 +977,21 @@
       "nome": "A1GN34",
       "categoria": "Automóveis e bens duráveis",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 7 pregões (máximo 5)."
+      "motivo": "Último negócio há 8 pregões (máximo 5)."
     },
     {
       "ticker": "A1GT34",
       "nome": "A1GT34",
       "categoria": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 18 pregões (máximo 5)."
+      "motivo": "Último negócio há 19 pregões (máximo 5)."
     },
     {
       "ticker": "A1IV34",
       "nome": "A1IV34",
       "categoria": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 6.311 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 5.400 por dia (mínimo 300.000)."
     },
     {
       "ticker": "A1JG34",
@@ -1019,14 +1019,14 @@
       "nome": "A1LK34",
       "categoria": "Transporte e logística",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 5 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "A1LL34",
       "nome": "A1LL34",
       "categoria": "Financeiro",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 11 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "A1LN34",
@@ -1040,35 +1040,35 @@
       "nome": "A1ME34",
       "categoria": "Indústria",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 11 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "A1MP34",
       "nome": "A1MP34",
       "categoria": "Financeiro",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "A1ON34",
       "nome": "A1ON34",
       "categoria": "Financeiro",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 11 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "A1OS34",
       "nome": "A1OS34",
       "categoria": "Indústria",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 18 pregões (máximo 5)."
+      "motivo": "Último negócio há 19 pregões (máximo 5)."
     },
     {
       "ticker": "A1PA34",
       "nome": "A1PA34",
       "categoria": "Petróleo e gás",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 6 pregões (máximo 5)."
+      "motivo": "Último negócio há 7 pregões (máximo 5)."
     },
     {
       "ticker": "A1PD34",
@@ -1089,21 +1089,21 @@
       "nome": "A1PL34",
       "categoria": "Software e internet",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 41.407 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 37.679 por dia (mínimo 300.000)."
     },
     {
       "ticker": "A1PO34",
       "nome": "A1PO34",
       "categoria": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 87.047 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 85.970 por dia (mínimo 300.000)."
     },
     {
       "ticker": "A1PP34",
       "nome": "A1PP34",
       "categoria": "Software e internet",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 80.435 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 86.972 por dia (mínimo 300.000)."
     },
     {
       "ticker": "A1RC34",
@@ -1152,14 +1152,14 @@
       "nome": "A1TM34",
       "categoria": "Energia elétrica e saneamento",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 15 pregões (máximo 5)."
+      "motivo": "Último negócio há 16 pregões (máximo 5)."
     },
     {
       "ticker": "A1TT34",
       "nome": "A1TT34",
       "categoria": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 2.153 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 1.974 por dia (mínimo 300.000)."
     },
     {
       "ticker": "A1UT34",
@@ -1180,7 +1180,7 @@
       "nome": "A1ZN34",
       "categoria": "Saúde e farmacêuticas",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 124.867 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 130.735 por dia (mínimo 300.000)."
     },
     {
       "ticker": "A2FY34",
@@ -1194,14 +1194,14 @@
       "nome": "A2LC34",
       "categoria": "Saúde e farmacêuticas",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "A2MB34",
       "nome": "A2MB34",
       "categoria": "Semicondutores e hardware",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 16.543 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 15.315 por dia (mínimo 300.000)."
     },
     {
       "ticker": "A2RE34",
@@ -1222,7 +1222,7 @@
       "nome": "A2RW34",
       "categoria": "Distribuição",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 161 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 362 por dia (mínimo 300.000)."
     },
     {
       "ticker": "A2SO34",
@@ -1236,28 +1236,28 @@
       "nome": "A2XO34",
       "categoria": "Semicondutores e hardware",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 11.000 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 12.594 por dia (mínimo 300.000)."
     },
     {
       "ticker": "A2ZT34",
       "nome": "A2ZT34",
       "categoria": "Serviços de saúde",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "AADA39",
       "nome": "21SHARES CARDANO ETP",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 464 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 275 por dia (mínimo 300.000)."
     },
     {
       "ticker": "ABBV34",
       "nome": "ABBV34",
       "categoria": "Saúde e farmacêuticas",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 44.902 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 54.229 por dia (mínimo 300.000)."
     },
     {
       "ticker": "ABGD39",
@@ -1271,7 +1271,7 @@
       "nome": "ABTT34",
       "categoria": "Saúde e farmacêuticas",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 4.340 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 5.103 por dia (mínimo 300.000)."
     },
     {
       "ticker": "ABUD34",
@@ -1292,21 +1292,21 @@
       "nome": "ISHARES MSCI ACWI EX U.S. ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 1.409 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 1.069 por dia (mínimo 300.000)."
     },
     {
       "ticker": "ADPR34",
       "nome": "ADPR34",
       "categoria": "Software e internet",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 12 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 11 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "AETH39",
       "nome": "21SHARES ETHEREUM STAKING ETP",
       "categoria": "BDRs de ETF",
-      "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 11 pregões (máximo 5)."
+      "codigo": "poucos_dias_negociados",
+      "motivo": "Negociou em 2 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "AIGB34",
@@ -1320,28 +1320,28 @@
       "nome": "AIRB34",
       "categoria": "Turismo, lazer e serviços",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 216.185 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 221.658 por dia (mínimo 300.000)."
     },
     {
       "ticker": "AMGN34",
       "nome": "AMGN34",
       "categoria": "Saúde e farmacêuticas",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 22.979 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 14.069 por dia (mínimo 300.000)."
     },
     {
       "ticker": "ANGV39",
       "nome": "VANECK FALLEN ANGEL HIGH YIELD BOND ETF",
       "categoria": "BDRs de ETF",
-      "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 13 dos últimos 21 pregões (mínimo 15)."
+      "codigo": "cotacao_defasada",
+      "motivo": "Último negócio há 6 pregões (máximo 5)."
     },
     {
       "ticker": "APTV34",
       "nome": "APTV34",
       "categoria": "Indústria",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 2 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 3 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "ARGT39",
@@ -1355,14 +1355,14 @@
       "nome": "ARMT34",
       "categoria": "Mineração e metais",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 62.808 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 72.600 por dia (mínimo 300.000)."
     },
     {
       "ticker": "ARNC34",
       "nome": "ARNC34",
       "categoria": "Semicondutores e hardware",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 22.686 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 32.317 por dia (mínimo 300.000)."
     },
     {
       "ticker": "ATTB34",
@@ -1376,7 +1376,7 @@
       "nome": "AWII34",
       "categoria": "Indústria",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 8 pregões (máximo 5)."
+      "motivo": "Último negócio há 9 pregões (máximo 5)."
     },
     {
       "ticker": "AXPB34",
@@ -1390,7 +1390,7 @@
       "nome": "21SHARES XRP ETP",
       "categoria": "BDRs de ETF",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 6 pregões (máximo 5)."
+      "motivo": "Último negócio há 7 pregões (máximo 5)."
     },
     {
       "ticker": "AZOI34",
@@ -1404,14 +1404,14 @@
       "nome": "B1AM34",
       "categoria": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 146.606 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 137.655 por dia (mínimo 300.000)."
     },
     {
       "ticker": "B1AX34",
       "nome": "B1AX34",
       "categoria": "Saúde e farmacêuticas",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 11 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 12 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "B1BT34",
@@ -1439,14 +1439,14 @@
       "nome": "B1DX34",
       "categoria": "Saúde e farmacêuticas",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 12 pregões (máximo 5)."
+      "motivo": "Último negócio há 13 pregões (máximo 5)."
     },
     {
       "ticker": "B1FC34",
       "nome": "B1FC34",
       "categoria": "Consumo não durável",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 6 pregões (máximo 5)."
+      "motivo": "Último negócio há 7 pregões (máximo 5)."
     },
     {
       "ticker": "B1IL34",
@@ -1460,14 +1460,14 @@
       "nome": "B1KR34",
       "categoria": "Serviços industriais",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 5 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "B1LL34",
       "nome": "B1LL34",
       "categoria": "Química e agroindústria",
-      "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
+      "codigo": "cotacao_defasada",
+      "motivo": "Último negócio há 6 pregões (máximo 5)."
     },
     {
       "ticker": "B1ME34",
@@ -1488,7 +1488,7 @@
       "nome": "B1NT34",
       "categoria": "Saúde e farmacêuticas",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 14.934 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 6.331 por dia (mínimo 300.000)."
     },
     {
       "ticker": "B1PP34",
@@ -1523,42 +1523,42 @@
       "nome": "B1TI34",
       "categoria": "Consumo não durável",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 104.273 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 117.816 por dia (mínimo 300.000)."
     },
     {
       "ticker": "B1WA34",
       "nome": "B1WA34",
       "categoria": "Indústria",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "B1ZE34",
       "nome": "B1ZE34",
       "categoria": "Software e internet",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "B2AH34",
       "nome": "B2AH34",
       "categoria": "Serviços e meios de pagamento",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "B2AP34",
       "nome": "B2AP34",
       "categoria": "Financeiro",
-      "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 7 pregões (máximo 5)."
+      "codigo": "poucos_dias_negociados",
+      "motivo": "Negociou em 4 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "B2HI34",
       "nome": "B2HI34",
       "categoria": "Software e internet",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 1.900 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 2.159 por dia (mínimo 300.000)."
     },
     {
       "ticker": "B2LN34",
@@ -1593,7 +1593,7 @@
       "nome": "B2YN34",
       "categoria": "Consumo não durável",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 5.020 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 4.971 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BAER39",
@@ -1607,14 +1607,14 @@
       "nome": "ISHARES CORE U.S. AGGREGATE BOND ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 5.621 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 7.344 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BAIQ39",
       "nome": "GLOBAL X ARTIFICIAL INTELLIGENCE & TECHNOLOGY ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 97.144 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 129.300 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BAOA39",
@@ -1627,8 +1627,8 @@
       "ticker": "BAOK39",
       "nome": "ISHARES CORE 30/70 CONSERVATIVE ALLOCATION ETF",
       "categoria": "BDRs de ETF",
-      "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 10 pregões (máximo 5)."
+      "codigo": "poucos_dias_negociados",
+      "motivo": "Negociou em 2 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "BAOM39",
@@ -1642,7 +1642,7 @@
       "nome": "ISHARES CORE 60/40 BALANCED ALLOCATION ETF",
       "categoria": "BDRs de ETF",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 3 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 4 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "BARY39",
@@ -1656,7 +1656,7 @@
       "nome": "21SHARES CRYPTO BASKET INDEX ETP",
       "categoria": "BDRs de ETF",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 18 pregões (máximo 5)."
+      "motivo": "Último negócio há 19 pregões (máximo 5)."
     },
     {
       "ticker": "BBAX39",
@@ -1677,14 +1677,14 @@
       "nome": "ISHARES USD GREEN BOND ETF",
       "categoria": "BDRs de ETF",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 9 pregões (máximo 5)."
+      "motivo": "Último negócio há 10 pregões (máximo 5)."
     },
     {
       "ticker": "BBIL39",
       "nome": "JPMORGAN BETABUILDERS INTERNATIONAL EQUITY ETF",
       "categoria": "BDRs de ETF",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 6 pregões (máximo 5)."
+      "motivo": "Último negócio há 7 pregões (máximo 5)."
     },
     {
       "ticker": "BBJP39",
@@ -1705,7 +1705,7 @@
       "nome": "GLOBAL X CYBERSECURITY ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 141.715 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 137.050 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BBUS39",
@@ -1733,7 +1733,7 @@
       "nome": "ISHARES MSCI CHINA ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 29.837 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 38.304 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BCHQ39",
@@ -1747,7 +1747,7 @@
       "nome": "FIRST TRUST NASDAQ CYBERSECURITY ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 9.958 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 18.480 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BCLO39",
@@ -1768,21 +1768,21 @@
       "nome": "ISHARES GSCI COMMODITY DYNAMIC ROLL STRATEGY ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 38.301 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 32.418 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BCSA34",
       "nome": "BCSA34",
       "categoria": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 75.940 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 65.637 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BCTE39",
       "nome": "GLOBAL X CLIMATETECH ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 697 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 708 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BCWV39",
@@ -1796,14 +1796,14 @@
       "nome": "GLOBAL X AUTONOMOUS & ELECTRIC VEHICLES ETF",
       "categoria": "BDRs de ETF",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 11 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "BDVD39",
       "nome": "GLOBAL X SUPERDIVIDEND US ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 265 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 286 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BDVE39",
@@ -1817,7 +1817,7 @@
       "nome": "ISHARES SELECT DIVIDEND ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 6.878 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 4.632 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BECH39",
@@ -1831,35 +1831,35 @@
       "nome": "ISHARES MSCI EMERGING MARKETS ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 118.633 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 171.074 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BEFA39",
       "nome": "ISHARES MSCI EAFE ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 6.768 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 5.902 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BEFG39",
       "nome": "ISHARES MSCI EAFE GROWTH ETF",
       "categoria": "BDRs de ETF",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "BEFV39",
       "nome": "ISHARES MSCI EAFE VALUE ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 1.122 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 912 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BEGD39",
       "nome": "ISHARES ESG AWARE MSCI EAFE ETF",
       "categoria": "BDRs de ETF",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 14 pregões (máximo 5)."
+      "motivo": "Último negócio há 15 pregões (máximo 5)."
     },
     {
       "ticker": "BEGE39",
@@ -1873,7 +1873,7 @@
       "nome": "ISHARES ESG AWARE MSCI USA ETF",
       "categoria": "BDRs de ETF",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 13 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 14 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "BEIS39",
@@ -1887,7 +1887,7 @@
       "nome": "ISHARES MSCI EMERGING MARKETS EX CHINA ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 74.920 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 37.732 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BEMV39",
@@ -1901,35 +1901,35 @@
       "nome": "ISHARES MSCI PACIFIC EX JAPAN ETF",
       "categoria": "BDRs de ETF",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "BEPU39",
       "nome": "ISHARES MSCI PERU AND GLOBAL EXPOSURE ETF",
       "categoria": "BDRs de ETF",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 13 pregões (máximo 5)."
+      "motivo": "Último negócio há 14 pregões (máximo 5)."
     },
     {
       "ticker": "BEUW39",
       "nome": "ISHARES MSCI USA EQUAL WEIGHTED ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 101.724 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 64.649 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BEWA39",
       "nome": "ISHARES MSCI AUSTRALIA ETF",
       "categoria": "BDRs de ETF",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "BEWC39",
       "nome": "ISHARES MSCI CANADA ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 20.198 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 2.423 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BEWD39",
@@ -1943,7 +1943,7 @@
       "nome": "ISHARES MSCI GERMANY ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 3.213 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 3.524 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BEWH39",
@@ -1964,7 +1964,7 @@
       "nome": "ISHARES MSCI JAPAN ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 77.386 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 76.676 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BEWL39",
@@ -1985,14 +1985,14 @@
       "nome": "ISHARES MSCI NETHERLANDS ETF",
       "categoria": "BDRs de ETF",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "BEWO39",
       "nome": "ISHARES MSCI AUSTRIA ETF",
       "categoria": "BDRs de ETF",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 1 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 2 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "BEWP39",
@@ -2006,7 +2006,7 @@
       "nome": "ISHARES MSCI FRANCE ETF",
       "categoria": "BDRs de ETF",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 7 pregões (máximo 5)."
+      "motivo": "Último negócio há 8 pregões (máximo 5)."
     },
     {
       "ticker": "BEWS39",
@@ -2027,14 +2027,14 @@
       "nome": "ISHARES MSCI UNITED KINGDOM ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 867 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 691 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BEWW39",
       "nome": "ISHARES MSCI MEXICO ETF",
       "categoria": "BDRs de ETF",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "BEWZ39",
@@ -2048,14 +2048,14 @@
       "nome": "ISHARES MSCI SOUTH AFRICA ETF",
       "categoria": "BDRs de ETF",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 4 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 3 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "BEZU39",
       "nome": "ISHARES MSCI EUROZONE ETF",
       "categoria": "BDRs de ETF",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "BFAV39",
@@ -2068,8 +2068,8 @@
       "ticker": "BFBI39",
       "nome": "FIRST TRUST NYSE ARCA BIOTECHNOLOGY INDEX FUND",
       "categoria": "BDRs de ETF",
-      "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 2 dos últimos 21 pregões (mínimo 15)."
+      "codigo": "cotacao_defasada",
+      "motivo": "Último negócio há 6 pregões (máximo 5)."
     },
     {
       "ticker": "BFCG39",
@@ -2079,18 +2079,25 @@
       "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
     },
     {
+      "ticker": "BFDN39",
+      "nome": "FIRST TRUST DOW JONES INTERNET INDEX FUND",
+      "categoria": "BDRs de ETF",
+      "codigo": "poucos_dias_negociados",
+      "motivo": "Negociou em 2 dos últimos 21 pregões (mínimo 15)."
+    },
+    {
       "ticker": "BFNX39",
       "nome": "GLOBAL X FINTECH ETF",
       "categoria": "BDRs de ETF",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 10 pregões (máximo 5)."
+      "motivo": "Último negócio há 11 pregões (máximo 5)."
     },
     {
       "ticker": "BFTC39",
       "nome": "FIRST TRUST LARGE CAP GROWTH ALPHADEX FUND",
       "categoria": "BDRs de ETF",
-      "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 2 dos últimos 21 pregões (mínimo 15)."
+      "codigo": "cotacao_defasada",
+      "motivo": "Último negócio há 6 pregões (máximo 5)."
     },
     {
       "ticker": "BFXI39",
@@ -2104,7 +2111,7 @@
       "nome": "ISHARES MSCI USA QUALITY GARP ETF",
       "categoria": "BDRs de ETF",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 12 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 13 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "BGLC39",
@@ -2132,14 +2139,14 @@
       "nome": "ISHARES 25 YEAR TREASURY STRIPS BOND ETF",
       "categoria": "BDRs de ETF",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "BGRI39",
       "nome": "FIRST TRUST NASDAQ CLEANEDGE SMART GRID INFRA FUND",
       "categoria": "BDRs de ETF",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 10 pregões (máximo 5)."
+      "motivo": "Último negócio há 11 pregões (máximo 5)."
     },
     {
       "ticker": "BGRT39",
@@ -2160,7 +2167,7 @@
       "nome": "ISHARES CORE HIGH DIVIDEND ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 549 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 821 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BHEF39",
@@ -2184,13 +2191,6 @@
       "motivo": "Negociou em 5 dos últimos 21 pregões (mínimo 15)."
     },
     {
-      "ticker": "BHYC39",
-      "nome": "ISHARES 0-5 YEAR HIGH YIELD CORPORATE BOND ETF",
-      "categoria": "BDRs de ETF",
-      "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 20 pregões (máximo 5)."
-    },
-    {
       "ticker": "BHYG39",
       "nome": "ISHARES IBOXX HIGH YIELD CORPORATE BOND ETF",
       "categoria": "BDRs de ETF",
@@ -2201,8 +2201,8 @@
       "ticker": "BIAG39",
       "nome": "ISHARES CORE INTERNATIONAL AGGREGATE BOND ETF",
       "categoria": "BDRs de ETF",
-      "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 4 dos últimos 21 pregões (mínimo 15)."
+      "codigo": "cotacao_defasada",
+      "motivo": "Último negócio há 6 pregões (máximo 5)."
     },
     {
       "ticker": "BIAI39",
@@ -2223,7 +2223,7 @@
       "nome": "ISHARES BIOTECHNOLOGY ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 15.391 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 38.718 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BICL39",
@@ -2237,28 +2237,28 @@
       "nome": "ISHARES CONVERTIBLE BOND ETF",
       "categoria": "BDRs de ETF",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 17 pregões (máximo 5)."
+      "motivo": "Último negócio há 18 pregões (máximo 5)."
     },
     {
       "ticker": "BIDN39",
       "nome": "ISHARES GENOMICS IMMUNOLOGY AND HEALTHCARE ETF",
       "categoria": "BDRs de ETF",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 10 pregões (máximo 5)."
+      "motivo": "Último negócio há 11 pregões (máximo 5)."
     },
     {
       "ticker": "BIDR39",
       "nome": "ISHARES SELF-DRIVING EV AND TECH ETF",
       "categoria": "BDRs de ETF",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "BIDU34",
       "nome": "BIDU34",
       "categoria": "Software e internet",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 178.444 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 135.263 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BIDV39",
@@ -2286,21 +2286,21 @@
       "nome": "ISHARES CORE MSCI EMERGING MARKETS ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 257.753 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 163.517 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BIEO39",
       "nome": "ISHARES US OIL & GAS EXPLORATION & PRODUCTION ETF",
       "categoria": "BDRs de ETF",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 11 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 12 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "BIET39",
       "nome": "ISHARES EXPANDED TECH-SOFTWARE SECTOR ETF",
       "categoria": "BDRs de ETF",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 7 pregões (máximo 5)."
+      "motivo": "Último negócio há 8 pregões (máximo 5)."
     },
     {
       "ticker": "BIEV39",
@@ -2321,7 +2321,7 @@
       "nome": "ISHARES US INFRASTRUCTURE ETF",
       "categoria": "BDRs de ETF",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 8 pregões (máximo 5)."
+      "motivo": "Último negócio há 9 pregões (máximo 5)."
     },
     {
       "ticker": "BIGF39",
@@ -2335,7 +2335,7 @@
       "nome": "ISHARES INTERNATIONAL TREASURY BOND ETF",
       "categoria": "BDRs de ETF",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 11 pregões (máximo 5)."
+      "motivo": "Último negócio há 12 pregões (máximo 5)."
     },
     {
       "ticker": "BIGS39",
@@ -2348,29 +2348,29 @@
       "ticker": "BIHA39",
       "nome": "ISHARES CYBERSECURITY AND TECH ETF",
       "categoria": "BDRs de ETF",
-      "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
+      "codigo": "cotacao_defasada",
+      "motivo": "Último negócio há 6 pregões (máximo 5)."
     },
     {
       "ticker": "BIHE39",
       "nome": "ISHARES US PHARMACEUTICALS ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 1.795 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 2.450 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BIHF39",
       "nome": "ISHARES U.S. HEALTHCARE PROVIDERS ETF",
       "categoria": "BDRs de ETF",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "BIHI39",
       "nome": "ISHARES U.S. MEDICAL DEVICES ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 5.925 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 6.067 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BIIB34",
@@ -2384,21 +2384,21 @@
       "nome": "ISHARES CORE S&P MID-CAP ETF",
       "categoria": "BDRs de ETF",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 12 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 11 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "BIJR39",
       "nome": "ISHARES CORE S&P SMALL-CAP ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 2.411 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 2.959 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BIJS39",
       "nome": "ISHARES S&P SMALL-CAP 600 VALUE ETF",
       "categoria": "BDRs de ETF",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 6 pregões (máximo 5)."
+      "motivo": "Último negócio há 7 pregões (máximo 5)."
     },
     {
       "ticker": "BIJT39",
@@ -2412,21 +2412,21 @@
       "nome": "BILB34",
       "categoria": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 1.650 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 1.624 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BILF39",
       "nome": "ISHARES LATIN AMERICA 40 ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 2.033 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 2.001 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BIPC39",
       "nome": "ISHARES CORE MSCI PACIFIC ETF",
       "categoria": "BDRs de ETF",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 8 pregões (máximo 5)."
+      "motivo": "Último negócio há 9 pregões (máximo 5)."
     },
     {
       "ticker": "BIVE39",
@@ -2440,14 +2440,14 @@
       "nome": "ISHARES S&P 500 GROWTH ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 36.618 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 26.738 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BIWF39",
       "nome": "ISHARES RUSSELL 1000 GROWTH ETF",
       "categoria": "BDRs de ETF",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "BIWM39",
@@ -2461,35 +2461,35 @@
       "nome": "ISHARES GLOBAL ENERGY ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 3.168 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 5.289 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BIXG39",
       "nome": "ISHARES GLOBAL FINANCIALS ETF",
       "categoria": "BDRs de ETF",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 8 pregões (máximo 5)."
+      "motivo": "Último negócio há 9 pregões (máximo 5)."
     },
     {
       "ticker": "BIXJ39",
       "nome": "ISHARES GLOBAL HEALTHCARE ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 16.643 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 20.756 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BIXN39",
       "nome": "ISHARES GLOBAL TECH ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 31.719 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 35.949 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BIXU39",
       "nome": "ISHARES CORE MSCI TOTAL INTERNATIONAL STOCK ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 29.181 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 19.411 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BIYC39",
@@ -2503,7 +2503,7 @@
       "nome": "ISHARES U.S. ENERGY ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 119.788 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 103.675 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BIYF39",
@@ -2517,21 +2517,21 @@
       "nome": "ISHARES U.S. FINANCIAL SERVICES ETF",
       "categoria": "BDRs de ETF",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "BIYJ39",
       "nome": "ISHARES U.S. INDUSTRIALS ETF",
       "categoria": "BDRs de ETF",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 3 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 2 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "BIYP39",
       "nome": "ISHARES US TRANSPORTATION ETF",
       "categoria": "BDRs de ETF",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 5 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "BIYT39",
@@ -2545,7 +2545,7 @@
       "nome": "ISHARES US TECHNOLOGY ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 28.754 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 28.744 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BIYZ39",
@@ -2566,28 +2566,28 @@
       "nome": "ISHARES MSCI SAUDI ARABIA ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 1.772 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 1.486 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BKWB39",
       "nome": "KRANESHARES CSI CHINA INTERNET ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 93.056 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 186.451 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BKXI39",
       "nome": "ISHARES GLOBAL CONSUMER STAPLES ETF",
       "categoria": "BDRs de ETF",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 15 pregões (máximo 5)."
+      "motivo": "Último negócio há 16 pregões (máximo 5)."
     },
     {
       "ticker": "BKYY39",
       "nome": "FIRST TRUST CLOUD COMPUTING ETF",
       "categoria": "BDRs de ETF",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 4 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 3 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "BLAK34",
@@ -2601,7 +2601,7 @@
       "nome": "GLOBAL X LITHIUM & BATTERY TECH ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 11.319 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 11.071 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BLPA39",
@@ -2622,21 +2622,21 @@
       "nome": "ISHARES IBOXX INVESTMENT GRADE CORPORATE BOND ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 10.720 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 11.051 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BLTP39",
       "nome": "PIMCO 15 YEAR U.S. TIPS INDEX EXCHANGE-TF",
       "categoria": "BDRs de ETF",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 7 pregões (máximo 5)."
+      "motivo": "Último negócio há 8 pregões (máximo 5)."
     },
     {
       "ticker": "BMBB39",
       "nome": "ISHARES MBS ETF",
       "categoria": "BDRs de ETF",
-      "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 14 dos últimos 21 pregões (mínimo 15)."
+      "codigo": "liquidez_baixa",
+      "motivo": "Volume mediano de R$ 238 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BMIL39",
@@ -2650,7 +2650,7 @@
       "nome": "ISHARES MSCI USA MOMENTUM FACTOR ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 75.986 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 75.448 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BMYB34",
@@ -2664,14 +2664,14 @@
       "nome": "ISHARES MSCI INDIA ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 51.064 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 50.409 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BOEF39",
       "nome": "ISHARES S&P 100 ETF",
       "categoria": "BDRs de ETF",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 13 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 12 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "BOEI34",
@@ -2684,8 +2684,8 @@
       "ticker": "BONY34",
       "nome": "BONY34",
       "categoria": "Financeiro",
-      "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 23.676 por dia (mínimo 300.000)."
+      "codigo": "poucos_dias_negociados",
+      "motivo": "Negociou em 14 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "BOTZ39",
@@ -2713,14 +2713,14 @@
       "nome": "GLOBAL X US INFRASTRUCTURE DEVELOPMENT ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 1.513 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 1.787 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BQCL39",
       "nome": "FIRST TRUST NASDAQ CLEAN EDGE GREEN ENERGY INDEX",
       "categoria": "BDRs de ETF",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 6 pregões (máximo 5)."
+      "motivo": "Último negócio há 7 pregões (máximo 5)."
     },
     {
       "ticker": "BQLT39",
@@ -2741,42 +2741,42 @@
       "nome": "ISHARES MSCI USA QUALITY FACTOR ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 3.681 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 3.275 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BQYL39",
       "nome": "GLOBAL X NASDAQ 100 COVERED CALL ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 2.015 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 1.932 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BROB39",
       "nome": "FIRST TRUST NASDAQ AI AND ROBOTICS ETF",
       "categoria": "BDRs de ETF",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 7 pregões (máximo 5)."
+      "motivo": "Último negócio há 8 pregões (máximo 5)."
     },
     {
       "ticker": "BSCZ39",
       "nome": "ISHARES MSCI EAFE SMALL-CAP ETF",
       "categoria": "BDRs de ETF",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 6 pregões (máximo 5)."
+      "motivo": "Último negócio há 7 pregões (máximo 5)."
     },
     {
       "ticker": "BSDV39",
       "nome": "GLOBAL X SUPERDIVIDEND ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 5.855 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 6.108 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BSHV39",
       "nome": "ISHARES 0-1 YEAR TREASURY BOND ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 225.069 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 246.651 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BSHY39",
@@ -2790,35 +2790,35 @@
       "nome": "ISHARES MSCI USA SIZE FACTOR ETF",
       "categoria": "BDRs de ETF",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 19 pregões (máximo 5)."
+      "motivo": "Último negócio há 20 pregões (máximo 5)."
     },
     {
       "ticker": "BSNS39",
       "nome": "GLOBAL X INTERNET OF THINGS ETF",
       "categoria": "BDRs de ETF",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 18 pregões (máximo 5)."
+      "motivo": "Último negócio há 19 pregões (máximo 5)."
     },
     {
       "ticker": "BSRE39",
       "nome": "GLOBAL X SUPERDIVIDEND REIT ETF",
       "categoria": "BDRs de ETF",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 12 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 11 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "BSTI39",
       "nome": "ISHARES 0-5 YEAR TIPS BOND ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 16.420 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 32.868 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BTCV39",
       "nome": "VALOUR BITCOIN (BTC) ZERO SEK",
       "categoria": "BDRs de ETF",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 16 pregões (máximo 5)."
+      "motivo": "Último negócio há 17 pregões (máximo 5)."
     },
     {
       "ticker": "BTFL39",
@@ -2832,21 +2832,21 @@
       "nome": "ISHARES MSCI THAILAND ETF",
       "categoria": "BDRs de ETF",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 4 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 3 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "BTIP39",
       "nome": "ISHARES TIPS BOND ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 5.216 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 1.531 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BTLH39",
       "nome": "ISHARES 10-20 YEAR TREASURY BOND ETF",
       "categoria": "BDRs de ETF",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 6 pregões (máximo 5)."
+      "motivo": "Último negócio há 7 pregões (máximo 5)."
     },
     {
       "ticker": "BUAE39",
@@ -2867,35 +2867,35 @@
       "nome": "ISHARES MSCI USA MIN VOL FACTOR ETF",
       "categoria": "BDRs de ETF",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 11 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 12 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "BUSR39",
       "nome": "ISHARES CORE US REIT ETF",
       "categoria": "BDRs de ETF",
-      "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 316 por dia (mínimo 300.000)."
+      "codigo": "poucos_dias_negociados",
+      "motivo": "Negociou em 14 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "BUTL39",
       "nome": "ISHARES US UTILITIES ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 3.165 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 7.313 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BVLU39",
       "nome": "ISHARES MSCI USA VALUE FACTOR ETF",
       "categoria": "BDRs de ETF",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 12 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 13 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "BXTC39",
       "nome": "ISHARES FUTURE EXPONENTIAL TECHNOLOGIES ETF",
       "categoria": "BDRs de ETF",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 12 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 11 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "BZRO39",
@@ -2909,14 +2909,14 @@
       "nome": "C1AB34",
       "categoria": "Turismo, lazer e serviços",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 9.154 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 6.496 por dia (mínimo 300.000)."
     },
     {
       "ticker": "C1AG34",
       "nome": "C1AG34",
       "categoria": "Consumo não durável",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 5 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "C1AH34",
@@ -2937,28 +2937,28 @@
       "nome": "C1BO34",
       "categoria": "Financeiro",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 12 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 11 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "C1BR34",
       "nome": "C1BR34",
       "categoria": "Financeiro",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "C1CI34",
       "nome": "C1CI34",
       "categoria": "Financeiro",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "C1CJ34",
       "nome": "C1CJ34",
       "categoria": "Mineração e metais",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 149.347 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 137.225 por dia (mínimo 300.000)."
     },
     {
       "ticker": "C1CL34",
@@ -2972,7 +2972,7 @@
       "nome": "C1DP34",
       "categoria": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 9 pregões (máximo 5)."
+      "motivo": "Último negócio há 10 pregões (máximo 5)."
     },
     {
       "ticker": "C1DW34",
@@ -2986,14 +2986,14 @@
       "nome": "C1FG34",
       "categoria": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 7 pregões (máximo 5)."
+      "motivo": "Último negócio há 8 pregões (máximo 5)."
     },
     {
       "ticker": "C1FI34",
       "nome": "C1FI34",
       "categoria": "Química e agroindústria",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "C1GP34",
@@ -3007,7 +3007,7 @@
       "nome": "C1HR34",
       "categoria": "Transporte e logística",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 5 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "C1HT34",
@@ -3021,14 +3021,14 @@
       "nome": "C1IC34",
       "categoria": "Serviços de saúde",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 12 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 11 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "C1MG34",
       "nome": "C1MG34",
       "categoria": "Turismo, lazer e serviços",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 9.349 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 7.968 por dia (mínimo 300.000)."
     },
     {
       "ticker": "C1MI34",
@@ -3042,49 +3042,49 @@
       "nome": "C1MS34",
       "categoria": "Energia elétrica e saneamento",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 17 pregões (máximo 5)."
+      "motivo": "Último negócio há 18 pregões (máximo 5)."
     },
     {
       "ticker": "C1NC34",
       "nome": "C1NC34",
       "categoria": "Serviços de saúde",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 5 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "C1NP34",
       "nome": "C1NP34",
       "categoria": "Energia elétrica e saneamento",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 8 pregões (máximo 5)."
+      "motivo": "Último negócio há 9 pregões (máximo 5)."
     },
     {
       "ticker": "C1NS34",
       "nome": "C1NS34",
       "categoria": "Química e agroindústria",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 7 pregões (máximo 5)."
+      "motivo": "Último negócio há 8 pregões (máximo 5)."
     },
     {
       "ticker": "C1OO34",
       "nome": "C1OO34",
       "categoria": "Saúde e farmacêuticas",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "C1PB34",
       "nome": "C1PB34",
       "categoria": "Consumo não durável",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 7 pregões (máximo 5)."
+      "motivo": "Último negócio há 8 pregões (máximo 5)."
     },
     {
       "ticker": "C1PR34",
       "nome": "C1PR34",
       "categoria": "Varejo e e-commerce",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 16.284 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 11.757 por dia (mínimo 300.000)."
     },
     {
       "ticker": "C1RB34",
@@ -3112,7 +3112,7 @@
       "nome": "C1TA34",
       "categoria": "Serviços e meios de pagamento",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 13 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 14 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "C1TV34",
@@ -3126,14 +3126,14 @@
       "nome": "C2AC34",
       "categoria": "Software e internet",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 103 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 108 por dia (mínimo 300.000)."
     },
     {
       "ticker": "C2CA34",
       "nome": "C2CA34",
       "categoria": "Consumo não durável",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 12 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 13 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "C2EM34",
@@ -3147,14 +3147,14 @@
       "nome": "C2GN34",
       "categoria": "Semicondutores e hardware",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "C2HD34",
       "nome": "C2HD34",
       "categoria": "Turismo, lazer e serviços",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 14 pregões (máximo 5)."
+      "motivo": "Último negócio há 15 pregões (máximo 5)."
     },
     {
       "ticker": "C2HP34",
@@ -3168,35 +3168,35 @@
       "nome": "C2OL34",
       "categoria": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 12.215 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 8.249 por dia (mínimo 300.000)."
     },
     {
       "ticker": "C2OU34",
       "nome": "C2OU34",
       "categoria": "Serviços e meios de pagamento",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "C2PT34",
       "nome": "C2PT34",
       "categoria": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 11 pregões (máximo 5)."
+      "motivo": "Último negócio há 12 pregões (máximo 5)."
     },
     {
       "ticker": "C2RN34",
       "nome": "C2RN34",
       "categoria": "Software e internet",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 6 pregões (máximo 5)."
+      "motivo": "Último negócio há 7 pregões (máximo 5)."
     },
     {
       "ticker": "C2RS34",
       "nome": "C2RS34",
       "categoria": "Saúde e farmacêuticas",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 14 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 13 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "C2ZR34",
@@ -3210,7 +3210,7 @@
       "nome": "CAON34",
       "categoria": "Financeiro",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "CAPH34",
@@ -3238,14 +3238,14 @@
       "nome": "CHCM34",
       "categoria": "Turismo, lazer e serviços",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 160.188 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 162.809 por dia (mínimo 300.000)."
     },
     {
       "ticker": "CHME34",
       "nome": "CHME34",
       "categoria": "Financeiro",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 13 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 14 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "CHPX39",
@@ -3266,7 +3266,7 @@
       "nome": "CLXC34",
       "categoria": "Consumo não durável",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "CMCS34",
@@ -3301,7 +3301,7 @@
       "nome": "GLOBAL X MSCI COLOMBIA ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 2.176 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 1.246 por dia (mínimo 300.000)."
     },
     {
       "ticker": "COPH34",
@@ -3315,35 +3315,35 @@
       "nome": "COTY34",
       "categoria": "Consumo não durável",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 309 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 401 por dia (mínimo 300.000)."
     },
     {
       "ticker": "COWC34",
       "nome": "COWC34",
       "categoria": "Varejo e e-commerce",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 127.020 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 105.685 por dia (mínimo 300.000)."
     },
     {
       "ticker": "CPRL34",
       "nome": "CPRL34",
       "categoria": "Transporte e logística",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "CRDA34",
       "nome": "CRDA34",
       "categoria": "Financeiro",
-      "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 1 dos últimos 21 pregões (mínimo 15)."
+      "codigo": "cotacao_defasada",
+      "motivo": "Último negócio há 6 pregões (máximo 5)."
     },
     {
       "ticker": "CRIN34",
       "nome": "CRIN34",
       "categoria": "Varejo e e-commerce",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "CRIP34",
@@ -3357,42 +3357,42 @@
       "nome": "CSCO34",
       "categoria": "Semicondutores e hardware",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 229.974 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 262.112 por dia (mínimo 300.000)."
     },
     {
       "ticker": "CSXC34",
       "nome": "CSXC34",
       "categoria": "Transporte e logística",
-      "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 11 pregões (máximo 5)."
+      "codigo": "poucos_dias_negociados",
+      "motivo": "Negociou em 2 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "CTSH34",
       "nome": "CTSH34",
       "categoria": "Software e internet",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "CVSH34",
       "nome": "CVSH34",
       "categoria": "Varejo e e-commerce",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 9.724 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 6.326 por dia (mínimo 300.000)."
     },
     {
       "ticker": "D1EX34",
       "nome": "D1EX34",
       "categoria": "Saúde e farmacêuticas",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 430 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 499 por dia (mínimo 300.000)."
     },
     {
       "ticker": "D1HI34",
       "nome": "D1HI34",
       "categoria": "Automóveis e bens duráveis",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 8 pregões (máximo 5)."
+      "motivo": "Último negócio há 9 pregões (máximo 5)."
     },
     {
       "ticker": "D1LR34",
@@ -3406,28 +3406,28 @@
       "nome": "D1OC34",
       "categoria": "Software e internet",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 2.350 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 941 por dia (mínimo 300.000)."
     },
     {
       "ticker": "D1OM34",
       "nome": "D1OM34",
       "categoria": "Energia elétrica e saneamento",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "D1OW34",
       "nome": "D1OW34",
       "categoria": "Química e agroindústria",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 2.125 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 2.244 por dia (mínimo 300.000)."
     },
     {
       "ticker": "D1RI34",
       "nome": "D1RI34",
       "categoria": "Turismo, lazer e serviços",
-      "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 1 dos últimos 21 pregões (mínimo 15)."
+      "codigo": "cotacao_defasada",
+      "motivo": "Último negócio há 6 pregões (máximo 5)."
     },
     {
       "ticker": "D1TE34",
@@ -3448,7 +3448,7 @@
       "nome": "D1XC34",
       "categoria": "Software e internet",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 18 pregões (máximo 5)."
+      "motivo": "Último negócio há 19 pregões (máximo 5)."
     },
     {
       "ticker": "D2AR34",
@@ -3472,13 +3472,6 @@
       "motivo": "Negociou em 13 dos últimos 21 pregões (mínimo 15)."
     },
     {
-      "ticker": "D2KS34",
-      "nome": "D2KS34",
-      "categoria": "Varejo e e-commerce",
-      "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 20 pregões (máximo 5)."
-    },
-    {
       "ticker": "D2OC34",
       "nome": "D2OC34",
       "categoria": "Software e internet",
@@ -3490,35 +3483,28 @@
       "nome": "D2OX34",
       "categoria": "Software e internet",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "D2PZ34",
       "nome": "D2PZ34",
       "categoria": "Turismo, lazer e serviços",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 984 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 202 por dia (mínimo 300.000)."
     },
     {
       "ticker": "D2TC34",
       "nome": "D2TC34",
       "categoria": "Software e internet",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 5.766 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 5.406 por dia (mínimo 300.000)."
     },
     {
       "ticker": "DBAG34",
       "nome": "DBAG34",
       "categoria": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 26.352 por dia (mínimo 300.000)."
-    },
-    {
-      "ticker": "DDNB34",
-      "nome": "DDNB34",
-      "categoria": "Química e agroindústria",
-      "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 20 pregões (máximo 5)."
+      "motivo": "Volume mediano de R$ 19.902 por dia (mínimo 300.000)."
     },
     {
       "ticker": "DEAI34",
@@ -3532,21 +3518,21 @@
       "nome": "DEEC34",
       "categoria": "Indústria",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 241.421 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 215.442 por dia (mínimo 300.000)."
     },
     {
       "ticker": "DEFT31",
       "nome": "DEFI TECHNOLOGIES INC",
       "categoria": "Financeiro",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 11 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 12 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "DEOP34",
       "nome": "DEOP34",
       "categoria": "Consumo não durável",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 38.716 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 37.841 por dia (mínimo 300.000)."
     },
     {
       "ticker": "DGCO34",
@@ -3560,14 +3546,14 @@
       "nome": "DHER34",
       "categoria": "Saúde e farmacêuticas",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 11.881 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 11.899 por dia (mínimo 300.000)."
     },
     {
       "ticker": "DTCR39",
       "nome": "GLOBAL X DATA CENTER & DIGITAL INFRASTRUCTURE ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 18.357 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 17.311 por dia (mínimo 300.000)."
     },
     {
       "ticker": "DUKB34",
@@ -3581,21 +3567,21 @@
       "nome": "DUOL34",
       "categoria": "Software e internet",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 23.026 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 27.682 por dia (mínimo 300.000)."
     },
     {
       "ticker": "DVAI34",
       "nome": "DVAI34",
       "categoria": "Serviços de saúde",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 2.063 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 3.980 por dia (mínimo 300.000)."
     },
     {
       "ticker": "E1CL34",
       "nome": "E1CL34",
       "categoria": "Química e agroindústria",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 12 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 13 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "E1CO34",
@@ -3609,7 +3595,7 @@
       "nome": "E1DI34",
       "categoria": "Energia elétrica e saneamento",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 17 pregões (máximo 5)."
+      "motivo": "Último negócio há 18 pregões (máximo 5)."
     },
     {
       "ticker": "E1DU34",
@@ -3623,21 +3609,21 @@
       "nome": "E1IX34",
       "categoria": "Energia elétrica e saneamento",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 11 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "E1LV34",
       "nome": "E1LV34",
       "categoria": "Serviços de saúde",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 19 pregões (máximo 5)."
+      "motivo": "Último negócio há 20 pregões (máximo 5)."
     },
     {
       "ticker": "E1MN34",
       "nome": "E1MN34",
       "categoria": "Química e agroindústria",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 2 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 3 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "E1MR34",
@@ -3651,7 +3637,7 @@
       "nome": "E1OG34",
       "categoria": "Petróleo e gás",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 11 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "E1QN34",
@@ -3672,21 +3658,21 @@
       "nome": "E1SS34",
       "categoria": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 17 pregões (máximo 5)."
+      "motivo": "Último negócio há 18 pregões (máximo 5)."
     },
     {
       "ticker": "E1TN34",
       "nome": "E1TN34",
       "categoria": "Indústria",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 58.001 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 76.545 por dia (mínimo 300.000)."
     },
     {
       "ticker": "E1WL34",
       "nome": "E1WL34",
       "categoria": "Saúde e farmacêuticas",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 19 pregões (máximo 5)."
+      "motivo": "Último negócio há 20 pregões (máximo 5)."
     },
     {
       "ticker": "E1XC34",
@@ -3700,14 +3686,14 @@
       "nome": "E1XR34",
       "categoria": "Financeiro",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "E2AG34",
       "nome": "E2AG34",
       "categoria": "Mineração e metais",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 2 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 1 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "E2EF34",
@@ -3728,21 +3714,21 @@
       "nome": "E2NO34",
       "categoria": "Saúde e farmacêuticas",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 4 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 3 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "E2NP34",
       "nome": "E2NP34",
       "categoria": "Indústria",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 22.306 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 16.547 por dia (mínimo 300.000)."
     },
     {
       "ticker": "E2NT34",
       "nome": "E2NT34",
       "categoria": "Indústria",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 6 pregões (máximo 5)."
+      "motivo": "Último negócio há 7 pregões (máximo 5)."
     },
     {
       "ticker": "E2PA34",
@@ -3763,14 +3749,14 @@
       "nome": "E2TS34",
       "categoria": "Varejo e e-commerce",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "EART39",
       "nome": "GLOBAL X RARE EARTH & CRITICAL MATERIALS ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 12.104 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 11.309 por dia (mínimo 300.000)."
     },
     {
       "ticker": "EBAY34",
@@ -3784,14 +3770,14 @@
       "nome": "ISHARES MSCI DENMARK ETF",
       "categoria": "BDRs de ETF",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 10 pregões (máximo 5)."
+      "motivo": "Último negócio há 11 pregões (máximo 5)."
     },
     {
       "ticker": "EIDO39",
       "nome": "ISHARES MSCI INDONESIA ETF",
       "categoria": "BDRs de ETF",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 13 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 14 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "ELCI34",
@@ -3805,14 +3791,14 @@
       "nome": "ISHARES MSCI PHILIPPINES ETF",
       "categoria": "BDRs de ETF",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 3 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 2 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "EPOL39",
       "nome": "ISHARES MSCI POLAND ETF",
       "categoria": "BDRs de ETF",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 5 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 4 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "EQIX34",
@@ -3833,35 +3819,35 @@
       "nome": "EVERTEC INC",
       "categoria": "Serviços e meios de pagamento",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 6.908 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 6.689 por dia (mínimo 300.000)."
     },
     {
       "ticker": "EWJV39",
       "nome": "ISHARES MSCI JAPAN VALUE ETF",
       "categoria": "BDRs de ETF",
-      "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 13 pregões (máximo 5)."
+      "codigo": "poucos_dias_negociados",
+      "motivo": "Negociou em 2 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "EXGR34",
       "nome": "EXGR34",
       "categoria": "Turismo, lazer e serviços",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "F1AN34",
       "nome": "F1AN34",
       "categoria": "Petróleo e gás",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "F1BH34",
       "nome": "F1BH34",
       "categoria": "Indústria",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 9 pregões (máximo 5)."
+      "motivo": "Último negócio há 10 pregões (máximo 5)."
     },
     {
       "ticker": "F1EC34",
@@ -3875,14 +3861,14 @@
       "nome": "F1FI34",
       "categoria": "Software e internet",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "F1IS34",
       "nome": "F1IS34",
       "categoria": "Serviços e meios de pagamento",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 3.320 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 3.314 por dia (mínimo 300.000)."
     },
     {
       "ticker": "F1MC34",
@@ -3903,7 +3889,7 @@
       "nome": "F1RA34",
       "categoria": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 15 pregões (máximo 5)."
+      "motivo": "Último negócio há 16 pregões (máximo 5)."
     },
     {
       "ticker": "F1SL34",
@@ -3917,7 +3903,7 @@
       "nome": "F2IC34",
       "categoria": "Serviços e meios de pagamento",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 50.565 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 52.888 por dia (mínimo 300.000)."
     },
     {
       "ticker": "F2IV34",
@@ -3931,7 +3917,7 @@
       "nome": "F2NV34",
       "categoria": "Mineração e metais",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 8.343 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 8.039 por dia (mínimo 300.000)."
     },
     {
       "ticker": "F2RS34",
@@ -3944,29 +3930,29 @@
       "ticker": "F2RT34",
       "nome": "F2RT34",
       "categoria": "Financeiro",
-      "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 1 dos últimos 21 pregões (mínimo 15)."
+      "codigo": "cotacao_defasada",
+      "motivo": "Último negócio há 6 pregões (máximo 5)."
     },
     {
       "ticker": "F2VR34",
       "nome": "F2VR34",
       "categoria": "Software e internet",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 94 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 92 por dia (mínimo 300.000)."
     },
     {
       "ticker": "FASL34",
       "nome": "FASL34",
       "categoria": "Distribuição",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 2 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 3 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "FDMO34",
       "nome": "FDMO34",
       "categoria": "Automóveis e bens duráveis",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 28.989 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 29.935 por dia (mínimo 300.000)."
     },
     {
       "ticker": "FDXB34",
@@ -3987,7 +3973,7 @@
       "nome": "FMXB34",
       "categoria": "Consumo não durável",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 7 pregões (máximo 5)."
+      "motivo": "Último negócio há 8 pregões (máximo 5)."
     },
     {
       "ticker": "FOXC34",
@@ -4001,7 +3987,7 @@
       "nome": "FSLR34",
       "categoria": "Semicondutores e hardware",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 105.450 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 106.918 por dia (mínimo 300.000)."
     },
     {
       "ticker": "G1AM34",
@@ -4015,21 +4001,21 @@
       "nome": "G1AR34",
       "categoria": "Software e internet",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "G1DS34",
       "nome": "G1DS34",
       "categoria": "Software e internet",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 3.521 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 3.398 por dia (mínimo 300.000)."
     },
     {
       "ticker": "G1FI34",
       "nome": "G1FI34",
       "categoria": "Mineração e metais",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 51.664 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 110.914 por dia (mínimo 300.000)."
     },
     {
       "ticker": "G1LO34",
@@ -4042,36 +4028,36 @@
       "ticker": "G1MI34",
       "nome": "G1MI34",
       "categoria": "Consumo não durável",
-      "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 892 por dia (mínimo 300.000)."
+      "codigo": "poucos_dias_negociados",
+      "motivo": "Negociou em 14 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "G1PI34",
       "nome": "G1PI34",
       "categoria": "Financeiro",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "G1RM34",
       "nome": "G1RM34",
       "categoria": "Semicondutores e hardware",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "G1SK34",
       "nome": "G1SK34",
       "categoria": "Saúde e farmacêuticas",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 785 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 502 por dia (mínimo 300.000)."
     },
     {
       "ticker": "G1TR39",
       "nome": "ABRDN PHYSICAL PRECIOUS METALS BASKET SHARES ETF",
       "categoria": "BDRs de ETF",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 11 pregões (máximo 5)."
+      "motivo": "Último negócio há 12 pregões (máximo 5)."
     },
     {
       "ticker": "G1WW34",
@@ -4099,14 +4085,14 @@
       "nome": "G2EV34",
       "categoria": "Indústria",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 175.163 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 178.103 por dia (mínimo 300.000)."
     },
     {
       "ticker": "G2ME34",
       "nome": "G2ME34",
       "categoria": "Saúde e farmacêuticas",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 2 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 3 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "G2NT34",
@@ -4120,42 +4106,42 @@
       "nome": "G2WR34",
       "categoria": "Software e internet",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 11 pregões (máximo 5)."
+      "motivo": "Último negócio há 12 pregões (máximo 5)."
     },
     {
       "ticker": "GDBR34",
       "nome": "GDBR34",
       "categoria": "Semicondutores e hardware",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 13 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 14 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "GEHC34",
       "nome": "GEHC34",
       "categoria": "Saúde e farmacêuticas",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 9 pregões (máximo 5)."
+      "motivo": "Último negócio há 10 pregões (máximo 5)."
     },
     {
       "ticker": "GEOO34",
       "nome": "GEOO34",
       "categoria": "Semicondutores e hardware",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 140.511 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 101.896 por dia (mínimo 300.000)."
     },
     {
       "ticker": "GILD34",
       "nome": "GILD34",
       "categoria": "Saúde e farmacêuticas",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 3.782 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 4.296 por dia (mínimo 300.000)."
     },
     {
       "ticker": "GMCO34",
       "nome": "GMCO34",
       "categoria": "Automóveis e bens duráveis",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 106.247 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 131.138 por dia (mínimo 300.000)."
     },
     {
       "ticker": "GOEX39",
@@ -4197,7 +4183,7 @@
       "nome": "H1AS34",
       "categoria": "Automóveis e bens duráveis",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "H1BA34",
@@ -4225,7 +4211,7 @@
       "nome": "H1EI34",
       "categoria": "Semicondutores e hardware",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 349 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 959 por dia (mínimo 300.000)."
     },
     {
       "ticker": "H1FC34",
@@ -4253,14 +4239,14 @@
       "nome": "H1II34",
       "categoria": "Semicondutores e hardware",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 72 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 40 por dia (mínimo 300.000)."
     },
     {
       "ticker": "H1LT34",
       "nome": "H1LT34",
       "categoria": "Turismo, lazer e serviços",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 5 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "H1OG34",
@@ -4274,14 +4260,14 @@
       "nome": "H1PE34",
       "categoria": "Semicondutores e hardware",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 58.808 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 66.550 por dia (mínimo 300.000)."
     },
     {
       "ticker": "H1RB34",
       "nome": "H1RB34",
       "categoria": "Turismo, lazer e serviços",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 11 pregões (máximo 5)."
+      "motivo": "Último negócio há 12 pregões (máximo 5)."
     },
     {
       "ticker": "H1RL34",
@@ -4295,28 +4281,35 @@
       "nome": "H1SB34",
       "categoria": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 57.737 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 56.085 por dia (mínimo 300.000)."
+    },
+    {
+      "ticker": "H1SI34",
+      "nome": "H1SI34",
+      "categoria": "Distribuição",
+      "codigo": "poucos_dias_negociados",
+      "motivo": "Negociou em 1 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "H1ST34",
       "nome": "H1ST34",
       "categoria": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 1.476 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 1.700 por dia (mínimo 300.000)."
     },
     {
       "ticker": "H1TH34",
       "nome": "H1TH34",
       "categoria": "Turismo, lazer e serviços",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 7 pregões (máximo 5)."
+      "motivo": "Último negócio há 8 pregões (máximo 5)."
     },
     {
       "ticker": "H1UM34",
       "nome": "H1UM34",
       "categoria": "Serviços de saúde",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 556 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 968 por dia (mínimo 300.000)."
     },
     {
       "ticker": "H2TA34",
@@ -4330,28 +4323,35 @@
       "nome": "H2UB34",
       "categoria": "Software e internet",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 365 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 486 por dia (mínimo 300.000)."
     },
     {
       "ticker": "HALI34",
       "nome": "HALI34",
       "categoria": "Serviços industriais",
-      "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 6 pregões (máximo 5)."
+      "codigo": "poucos_dias_negociados",
+      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
+    },
+    {
+      "ticker": "HIWP34",
+      "nome": "HIWP34",
+      "categoria": "Financeiro",
+      "codigo": "poucos_dias_negociados",
+      "motivo": "Negociou em 1 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "HMRN31",
       "nome": "HOMERUN RESOURCES INC",
       "categoria": "Serviços industriais",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "HOME34",
       "nome": "HOME34",
       "categoria": "Varejo e e-commerce",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 55.329 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 62.762 por dia (mínimo 300.000)."
     },
     {
       "ticker": "HONB34",
@@ -4365,7 +4365,7 @@
       "nome": "HOND34",
       "categoria": "Automóveis e bens duráveis",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 3.745 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 4.289 por dia (mínimo 300.000)."
     },
     {
       "ticker": "HPQB34",
@@ -4379,7 +4379,7 @@
       "nome": "HSHY34",
       "categoria": "Consumo não durável",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 13 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 14 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "HYEM39",
@@ -4393,7 +4393,7 @@
       "nome": "I1BN34",
       "categoria": "Financeiro",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 11 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 12 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "I1CE34",
@@ -4420,15 +4420,15 @@
       "ticker": "I1HG34",
       "nome": "I1HG34",
       "categoria": "Turismo, lazer e serviços",
-      "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 2 dos últimos 21 pregões (mínimo 15)."
+      "codigo": "cotacao_defasada",
+      "motivo": "Último negócio há 6 pregões (máximo 5)."
     },
     {
       "ticker": "I1LM34",
       "nome": "I1LM34",
       "categoria": "Saúde e farmacêuticas",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 17.668 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 18.484 por dia (mínimo 300.000)."
     },
     {
       "ticker": "I1NC34",
@@ -4449,7 +4449,7 @@
       "nome": "I1PG34",
       "categoria": "Semicondutores e hardware",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 2 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 3 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "I1QV34",
@@ -4470,7 +4470,7 @@
       "nome": "I1RM34",
       "categoria": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 264 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 104 por dia (mínimo 300.000)."
     },
     {
       "ticker": "I1RP34",
@@ -4491,14 +4491,14 @@
       "nome": "I1VZ34",
       "categoria": "Financeiro",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "I1XC34",
       "nome": "I1XC34",
       "categoria": "Financeiro",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 5 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "I2ND34",
@@ -4519,14 +4519,14 @@
       "nome": "I2NV34",
       "categoria": "Financeiro",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 11 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "I2RS34",
       "nome": "I2RS34",
       "categoria": "Indústria",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "IBKR34",
@@ -4540,7 +4540,7 @@
       "nome": "IBMB34",
       "categoria": "Software e internet",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 218.099 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 217.637 por dia (mínimo 300.000)."
     },
     {
       "ticker": "ICLR34",
@@ -4561,7 +4561,7 @@
       "nome": "INGG34",
       "categoria": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 1.753 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 1.306 por dia (mínimo 300.000)."
     },
     {
       "ticker": "INTU34",
@@ -4575,56 +4575,56 @@
       "nome": "J1BH34",
       "categoria": "Transporte e logística",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 10 pregões (máximo 5)."
+      "motivo": "Último negócio há 11 pregões (máximo 5)."
     },
     {
       "ticker": "J1CI34",
       "nome": "J1CI34",
       "categoria": "Indústria",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 13 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 12 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "J1EF34",
       "nome": "J1EF34",
       "categoria": "Financeiro",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "J1EG34",
       "nome": "J1EG34",
       "categoria": "Software e internet",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 14 pregões (máximo 5)."
+      "motivo": "Último negócio há 15 pregões (máximo 5)."
     },
     {
       "ticker": "J1KH34",
       "nome": "J1KH34",
       "categoria": "Software e internet",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 7 pregões (máximo 5)."
+      "motivo": "Último negócio há 8 pregões (máximo 5)."
     },
     {
       "ticker": "J2AZ34",
       "nome": "J2AZ34",
       "categoria": "Saúde e farmacêuticas",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 715 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 2.063 por dia (mínimo 300.000)."
     },
     {
       "ticker": "J2BL34",
       "nome": "J2BL34",
       "categoria": "Indústria",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 17.571 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 19.432 por dia (mínimo 300.000)."
     },
     {
       "ticker": "J2WA34",
       "nome": "J2WA34",
       "categoria": "Turismo, lazer e serviços",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 8 pregões (máximo 5)."
+      "motivo": "Último negócio há 9 pregões (máximo 5)."
     },
     {
       "ticker": "JBSS32",
@@ -4638,28 +4638,28 @@
       "nome": "JDCO34",
       "categoria": "Varejo e e-commerce",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 50.867 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 69.396 por dia (mínimo 300.000)."
     },
     {
       "ticker": "JEPI39",
       "nome": "JPMORGAN EQUITY PREMIUM INCOME ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 71.426 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 70.683 por dia (mínimo 300.000)."
     },
     {
       "ticker": "JGLO39",
       "nome": "JPMORGAN GLOBAL SELECT EQUITY ETF",
       "categoria": "BDRs de ETF",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 10 pregões (máximo 5)."
+      "motivo": "Último negócio há 11 pregões (máximo 5)."
     },
     {
       "ticker": "JIVE39",
       "nome": "JPMORGAN INTERNATIONAL VALUE ETF",
       "categoria": "BDRs de ETF",
-      "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 10 pregões (máximo 5)."
+      "codigo": "poucos_dias_negociados",
+      "motivo": "Negociou em 3 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "JPIN39",
@@ -4670,7 +4670,7 @@
     },
     {
       "ticker": "JQUA39",
-      "nome": "JQUA39",
+      "nome": "JPMORGAN US QUALITY FACTOR ETF",
       "categoria": "BDRs de ETF",
       "codigo": "poucos_dias_negociados",
       "motivo": "Negociou em 1 dos últimos 21 pregões (mínimo 15)."
@@ -4680,28 +4680,28 @@
       "nome": "JPMORGAN US TECH LEADERS ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 11.501 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 6.945 por dia (mínimo 300.000)."
     },
     {
       "ticker": "K1BF34",
       "nome": "K1BF34",
       "categoria": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 2.314 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 1.819 por dia (mínimo 300.000)."
     },
     {
       "ticker": "K1EY34",
       "nome": "K1EY34",
       "categoria": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 15 pregões (máximo 5)."
+      "motivo": "Último negócio há 16 pregões (máximo 5)."
     },
     {
       "ticker": "K1IM34",
       "nome": "K1IM34",
       "categoria": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 8 pregões (máximo 5)."
+      "motivo": "Último negócio há 9 pregões (máximo 5)."
     },
     {
       "ticker": "K1RC34",
@@ -4715,14 +4715,14 @@
       "nome": "K1RG34",
       "categoria": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 8 pregões (máximo 5)."
+      "motivo": "Último negócio há 9 pregões (máximo 5)."
     },
     {
       "ticker": "K1SG34",
       "nome": "K1SG34",
       "categoria": "Semicondutores e hardware",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 1.802 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 2.691 por dia (mínimo 300.000)."
     },
     {
       "ticker": "K1SS34",
@@ -4742,8 +4742,8 @@
       "ticker": "K1YS34",
       "nome": "K1YS34",
       "categoria": "Saúde e farmacêuticas",
-      "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 3 dos últimos 21 pregões (mínimo 15)."
+      "codigo": "cotacao_defasada",
+      "motivo": "Último negócio há 6 pregões (máximo 5)."
     },
     {
       "ticker": "K2CG34",
@@ -4757,14 +4757,14 @@
       "nome": "K2RC34",
       "categoria": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 11 pregões (máximo 5)."
+      "motivo": "Último negócio há 12 pregões (máximo 5)."
     },
     {
       "ticker": "KHCB34",
       "nome": "KHCB34",
       "categoria": "Consumo não durável",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 18.044 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 16.576 por dia (mínimo 300.000)."
     },
     {
       "ticker": "KMBB34",
@@ -4778,7 +4778,7 @@
       "nome": "KMIC34",
       "categoria": "Serviços industriais",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 6.277 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 5.400 por dia (mínimo 300.000)."
     },
     {
       "ticker": "L1DO34",
@@ -4792,14 +4792,14 @@
       "nome": "L1EN34",
       "categoria": "Automóveis e bens duráveis",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 2.844 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 3.185 por dia (mínimo 300.000)."
     },
     {
       "ticker": "L1HX34",
       "nome": "L1HX34",
       "categoria": "Semicondutores e hardware",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "L1KQ34",
@@ -4813,7 +4813,7 @@
       "nome": "L1MN34",
       "categoria": "Telecomunicações e mídia",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 30.106 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 27.000 por dia (mínimo 300.000)."
     },
     {
       "ticker": "L1NC34",
@@ -4827,7 +4827,14 @@
       "nome": "L1NE34",
       "categoria": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 9 pregões (máximo 5)."
+      "motivo": "Último negócio há 10 pregões (máximo 5)."
+    },
+    {
+      "ticker": "L1OE34",
+      "nome": "L1OE34",
+      "categoria": "Financeiro",
+      "codigo": "poucos_dias_negociados",
+      "motivo": "Negociou em 1 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "L1TM34",
@@ -4841,7 +4848,7 @@
       "nome": "L1UL34",
       "categoria": "Consumo não durável",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 40.950 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 47.198 por dia (mínimo 300.000)."
     },
     {
       "ticker": "L1VS34",
@@ -4855,7 +4862,7 @@
       "nome": "L1WH34",
       "categoria": "Consumo não durável",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 4 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 5 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "L1YB34",
@@ -4869,14 +4876,14 @@
       "nome": "L1YG34",
       "categoria": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 9.141 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 6.803 por dia (mínimo 300.000)."
     },
     {
       "ticker": "L1YV34",
       "nome": "L1YV34",
       "categoria": "Turismo, lazer e serviços",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 10 pregões (máximo 5)."
+      "motivo": "Último negócio há 11 pregões (máximo 5)."
     },
     {
       "ticker": "L2IV34",
@@ -4890,7 +4897,7 @@
       "nome": "L2PL34",
       "categoria": "Financeiro",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "L2RN34",
@@ -4904,28 +4911,28 @@
       "nome": "LKFT34",
       "categoria": "Saúde e farmacêuticas",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 12 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 13 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "LMTB34",
       "nome": "LMTB34",
       "categoria": "Semicondutores e hardware",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 174.442 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 155.413 por dia (mínimo 300.000)."
     },
     {
       "ticker": "LOWC34",
       "nome": "LOWC34",
       "categoria": "Varejo e e-commerce",
-      "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 14 dos últimos 21 pregões (mínimo 15)."
+      "codigo": "liquidez_baixa",
+      "motivo": "Volume mediano de R$ 760 por dia (mínimo 300.000)."
     },
     {
       "ticker": "M1AA34",
       "nome": "M1AA34",
       "categoria": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 6 pregões (máximo 5)."
+      "motivo": "Último negócio há 7 pregões (máximo 5)."
     },
     {
       "ticker": "M1CB34",
@@ -4939,7 +4946,7 @@
       "nome": "M1CH34",
       "categoria": "Semicondutores e hardware",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 29.301 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 40.653 por dia (mínimo 300.000)."
     },
     {
       "ticker": "M1CK34",
@@ -4960,7 +4967,7 @@
       "nome": "M1GM34",
       "categoria": "Turismo, lazer e serviços",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 7 pregões (máximo 5)."
+      "motivo": "Último negócio há 8 pregões (máximo 5)."
     },
     {
       "ticker": "M1HK34",
@@ -4974,7 +4981,7 @@
       "nome": "M1KC34",
       "categoria": "Consumo não durável",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "M1KT34",
@@ -5030,7 +5037,7 @@
       "nome": "M1SI34",
       "categoria": "Semicondutores e hardware",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 12 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 11 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "M1TC34",
@@ -5079,14 +5086,14 @@
       "nome": "M2PT34",
       "categoria": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 3.626 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 2.978 por dia (mínimo 300.000)."
     },
     {
       "ticker": "MACY34",
       "nome": "MACY34",
       "categoria": "Varejo e e-commerce",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "MCOR34",
@@ -5107,7 +5114,7 @@
       "nome": "MDTC34",
       "categoria": "Saúde e farmacêuticas",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 2.371 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 1.117 por dia (mínimo 300.000)."
     },
     {
       "ticker": "METB34",
@@ -5128,7 +5135,7 @@
       "nome": "MMMC34",
       "categoria": "Indústria",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 31.896 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 32.339 por dia (mínimo 300.000)."
     },
     {
       "ticker": "MOOO34",
@@ -5142,14 +5149,14 @@
       "nome": "MOSC34",
       "categoria": "Química e agroindústria",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 155.772 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 169.928 por dia (mínimo 300.000)."
     },
     {
       "ticker": "MOTB39",
       "nome": "VANECK MORNINGSTAR WIDE MOAT ETF",
       "categoria": "BDRs de ETF",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 18 pregões (máximo 5)."
+      "motivo": "Último negócio há 19 pregões (máximo 5)."
     },
     {
       "ticker": "MRCK34",
@@ -5170,14 +5177,14 @@
       "nome": "N1BI34",
       "categoria": "Saúde e farmacêuticas",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 2.537 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 3.209 por dia (mínimo 300.000)."
     },
     {
       "ticker": "N1CL34",
       "nome": "N1CL34",
       "categoria": "Turismo, lazer e serviços",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 12 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 13 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "N1DA34",
@@ -5225,8 +5232,8 @@
       "ticker": "N1TR34",
       "nome": "N1TR34",
       "categoria": "Financeiro",
-      "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 2 dos últimos 21 pregões (mínimo 15)."
+      "codigo": "cotacao_defasada",
+      "motivo": "Último negócio há 6 pregões (máximo 5)."
     },
     {
       "ticker": "N1UE34",
@@ -5240,7 +5247,7 @@
       "nome": "N1VR34",
       "categoria": "Automóveis e bens duráveis",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 9 pregões (máximo 5)."
+      "motivo": "Último negócio há 10 pregões (máximo 5)."
     },
     {
       "ticker": "N1VS34",
@@ -5254,14 +5261,14 @@
       "nome": "N1WG34",
       "categoria": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 9.046 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 8.398 por dia (mínimo 300.000)."
     },
     {
       "ticker": "N1WL34",
       "nome": "N1WL34",
       "categoria": "Indústria",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 15 pregões (máximo 5)."
+      "motivo": "Último negócio há 16 pregões (máximo 5)."
     },
     {
       "ticker": "N1WS34",
@@ -5282,21 +5289,21 @@
       "nome": "N2LY34",
       "categoria": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 5.760 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 7.216 por dia (mínimo 300.000)."
     },
     {
       "ticker": "N2TN34",
       "nome": "N2TN34",
       "categoria": "Software e internet",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 7 pregões (máximo 5)."
+      "motivo": "Último negócio há 8 pregões (máximo 5)."
     },
     {
       "ticker": "N2VC34",
       "nome": "N2VC34",
       "categoria": "Saúde e farmacêuticas",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 5 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "NETE34",
@@ -5310,14 +5317,14 @@
       "nome": "NEXT34",
       "categoria": "Energia elétrica e saneamento",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 123.104 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 126.256 por dia (mínimo 300.000)."
     },
     {
       "ticker": "NMRH34",
       "nome": "NMRH34",
       "categoria": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 6 pregões (máximo 5)."
+      "motivo": "Último negócio há 7 pregões (máximo 5)."
     },
     {
       "ticker": "NOCG34",
@@ -5331,7 +5338,7 @@
       "nome": "NOKI34",
       "categoria": "Semicondutores e hardware",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 293.327 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 209.503 por dia (mínimo 300.000)."
     },
     {
       "ticker": "NTST34",
@@ -5345,7 +5352,7 @@
       "nome": "O1DF34",
       "categoria": "Transporte e logística",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 8 pregões (máximo 5)."
+      "motivo": "Último negócio há 9 pregões (máximo 5)."
     },
     {
       "ticker": "O1KE34",
@@ -5359,7 +5366,7 @@
       "nome": "O1MC34",
       "categoria": "Serviços e meios de pagamento",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "O1TI34",
@@ -5373,14 +5380,14 @@
       "nome": "O1UT34",
       "categoria": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 7 pregões (máximo 5)."
+      "motivo": "Último negócio há 8 pregões (máximo 5)."
     },
     {
       "ticker": "O2HI34",
       "nome": "O2HI34",
       "categoria": "Financeiro",
-      "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 14 pregões (máximo 5)."
+      "codigo": "poucos_dias_negociados",
+      "motivo": "Negociou em 3 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "O2LE34",
@@ -5394,14 +5401,14 @@
       "nome": "O2NS34",
       "categoria": "Semicondutores e hardware",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 5.922 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 6.639 por dia (mínimo 300.000)."
     },
     {
       "ticker": "ORBX39",
       "nome": "GLOBAL X SPACE TECH ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 1.095 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 1.135 por dia (mínimo 300.000)."
     },
     {
       "ticker": "ORLY34",
@@ -5415,7 +5422,7 @@
       "nome": "OXYP34",
       "categoria": "Petróleo e gás",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 73.978 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 69.235 por dia (mínimo 300.000)."
     },
     {
       "ticker": "P1AC34",
@@ -5443,21 +5450,21 @@
       "nome": "P1DT34",
       "categoria": "Financeiro",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 5 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "P1EA34",
       "nome": "P1EA34",
       "categoria": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 3.209 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 4.289 por dia (mínimo 300.000)."
     },
     {
       "ticker": "P1EG34",
       "nome": "P1EG34",
       "categoria": "Energia elétrica e saneamento",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 18 pregões (máximo 5)."
+      "motivo": "Último negócio há 19 pregões (máximo 5)."
     },
     {
       "ticker": "P1GR34",
@@ -5478,7 +5485,7 @@
       "nome": "P1HM34",
       "categoria": "Automóveis e bens duráveis",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 9 pregões (máximo 5)."
+      "motivo": "Último negócio há 10 pregões (máximo 5)."
     },
     {
       "ticker": "P1KX34",
@@ -5492,14 +5499,14 @@
       "nome": "P1LD34",
       "categoria": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 32.856 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 28.647 por dia (mínimo 300.000)."
     },
     {
       "ticker": "P1PG34",
       "nome": "P1PG34",
       "categoria": "Química e agroindústria",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 13 pregões (máximo 5)."
+      "motivo": "Último negócio há 14 pregões (máximo 5)."
     },
     {
       "ticker": "P1RG34",
@@ -5513,21 +5520,21 @@
       "nome": "P1SA34",
       "categoria": "Financeiro",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "P1SX34",
       "nome": "P1SX34",
       "categoria": "Petróleo e gás",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 14 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 13 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "P1UK34",
       "nome": "P1UK34",
       "categoria": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 6 pregões (máximo 5)."
+      "motivo": "Último negócio há 7 pregões (máximo 5)."
     },
     {
       "ticker": "P1YC34",
@@ -5569,7 +5576,7 @@
       "nome": "P2EN34",
       "categoria": "Turismo, lazer e serviços",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 11 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "P2IN34",
@@ -5583,28 +5590,28 @@
       "nome": "P2LN34",
       "categoria": "Turismo, lazer e serviços",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 7 pregões (máximo 5)."
+      "motivo": "Último negócio há 8 pregões (máximo 5)."
     },
     {
       "ticker": "P2OD34",
       "nome": "P2OD34",
       "categoria": "Saúde e farmacêuticas",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 6 pregões (máximo 5)."
+      "motivo": "Último negócio há 7 pregões (máximo 5)."
     },
     {
       "ticker": "P2ST34",
       "nome": "P2ST34",
       "categoria": "Semicondutores e hardware",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 1.074 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 1.241 por dia (mínimo 300.000)."
     },
     {
       "ticker": "P2TC34",
       "nome": "P2TC34",
       "categoria": "Software e internet",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "PAGS34",
@@ -5618,7 +5625,7 @@
       "nome": "PFIZ34",
       "categoria": "Saúde e farmacêuticas",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 290.652 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 283.743 por dia (mínimo 300.000)."
     },
     {
       "ticker": "PGCO34",
@@ -5639,35 +5646,35 @@
       "nome": "PHMO34",
       "categoria": "Consumo não durável",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 1.611 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 1.723 por dia (mínimo 300.000)."
     },
     {
       "ticker": "PNCS34",
       "nome": "PNCS34",
       "categoria": "Financeiro",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "PPLI34",
       "nome": "PPLI34",
       "categoria": "Software e internet",
-      "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 2 dos últimos 21 pregões (mínimo 15)."
+      "codigo": "cotacao_defasada",
+      "motivo": "Último negócio há 6 pregões (máximo 5)."
     },
     {
       "ticker": "PRXB31",
       "nome": "PROSUS N.V.",
       "categoria": "Software e internet",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 2.783 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 1.477 por dia (mínimo 300.000)."
     },
     {
       "ticker": "PSKY34",
       "nome": "PSKY34",
       "categoria": "Turismo, lazer e serviços",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 19 pregões (máximo 5)."
+      "motivo": "Último negócio há 20 pregões (máximo 5)."
     },
     {
       "ticker": "Q1UA34",
@@ -5709,7 +5716,7 @@
       "nome": "R1DY34",
       "categoria": "Saúde e farmacêuticas",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "R1EG34",
@@ -5730,14 +5737,14 @@
       "nome": "R1FC34",
       "categoria": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 17 pregões (máximo 5)."
+      "motivo": "Último negócio há 18 pregões (máximo 5)."
     },
     {
       "ticker": "R1HI34",
       "nome": "R1HI34",
       "categoria": "Serviços e meios de pagamento",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "R1IN34",
@@ -5765,28 +5772,28 @@
       "nome": "R1LC34",
       "categoria": "Consumo não durável",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 5 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "R1MD34",
       "nome": "R1MD34",
       "categoria": "Saúde e farmacêuticas",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 18 pregões (máximo 5)."
+      "motivo": "Último negócio há 19 pregões (máximo 5)."
     },
     {
       "ticker": "R1OK34",
       "nome": "R1OK34",
       "categoria": "Indústria",
-      "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 15 pregões (máximo 5)."
+      "codigo": "poucos_dias_negociados",
+      "motivo": "Negociou em 2 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "R1OL34",
       "nome": "R1OL34",
       "categoria": "Serviços e meios de pagamento",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 6 pregões (máximo 5)."
+      "motivo": "Último negócio há 7 pregões (máximo 5)."
     },
     {
       "ticker": "R1OP34",
@@ -5820,22 +5827,22 @@
       "ticker": "R2AR34",
       "nome": "R2AR34",
       "categoria": "Saúde e farmacêuticas",
-      "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 22 por dia (mínimo 300.000)."
+      "codigo": "poucos_dias_negociados",
+      "motivo": "Negociou em 14 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "R2BL34",
       "nome": "R2BL34",
       "categoria": "Software e internet",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 120.363 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 84.851 por dia (mínimo 300.000)."
     },
     {
       "ticker": "R2GE34",
       "nome": "R2GE34",
       "categoria": "Saúde e farmacêuticas",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "R2HH34",
@@ -5870,14 +5877,14 @@
       "nome": "RIGG34",
       "categoria": "Serviços industriais",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 116.911 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 93.046 por dia (mínimo 300.000)."
     },
     {
       "ticker": "RIOT34",
       "nome": "RIOT34",
       "categoria": "Mineração e metais",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 240.154 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 250.343 por dia (mínimo 300.000)."
     },
     {
       "ticker": "ROST34",
@@ -5898,28 +5905,28 @@
       "nome": "GLOBAL X RUSSELL 2000 ETF",
       "categoria": "BDRs de ETF",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "RYTT34",
       "nome": "RYTT34",
       "categoria": "Semicondutores e hardware",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 137.472 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 145.801 por dia (mínimo 300.000)."
     },
     {
       "ticker": "S1AK34",
       "nome": "S1AK34",
       "categoria": "Turismo, lazer e serviços",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 12 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 11 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "S1BA34",
       "nome": "S1BA34",
       "categoria": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 18 pregões (máximo 5)."
+      "motivo": "Último negócio há 19 pregões (máximo 5)."
     },
     {
       "ticker": "S1BS34",
@@ -5932,15 +5939,15 @@
       "ticker": "S1HW34",
       "nome": "S1HW34",
       "categoria": "Química e agroindústria",
-      "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 14 dos últimos 21 pregões (mínimo 15)."
+      "codigo": "liquidez_baixa",
+      "motivo": "Volume mediano de R$ 636 por dia (mínimo 300.000)."
     },
     {
       "ticker": "S1JM34",
       "nome": "S1JM34",
       "categoria": "Consumo não durável",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 1 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 2 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "S1KM34",
@@ -5954,7 +5961,7 @@
       "nome": "S1LG34",
       "categoria": "Financeiro",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 11 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "S1MF34",
@@ -5962,13 +5969,6 @@
       "categoria": "Financeiro",
       "codigo": "poucos_dias_negociados",
       "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
-    },
-    {
-      "ticker": "S1NA34",
-      "nome": "S1NA34",
-      "categoria": "Automóveis e bens duráveis",
-      "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 20 pregões (máximo 5)."
     },
     {
       "ticker": "S1NN34",
@@ -5982,14 +5982,14 @@
       "nome": "S1OU34",
       "categoria": "Transporte e logística",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 9 pregões (máximo 5)."
+      "motivo": "Último negócio há 10 pregões (máximo 5)."
     },
     {
       "ticker": "S1PO34",
       "nome": "S1PO34",
       "categoria": "Software e internet",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 251.425 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 233.848 por dia (mínimo 300.000)."
     },
     {
       "ticker": "S1RE34",
@@ -6003,7 +6003,7 @@
       "nome": "S1RP34",
       "categoria": "Saúde e farmacêuticas",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 225 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 85 por dia (mínimo 300.000)."
     },
     {
       "ticker": "S1SL34",
@@ -6017,14 +6017,14 @@
       "nome": "S1TT34",
       "categoria": "Financeiro",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "S1WK34",
       "nome": "S1WK34",
       "categoria": "Automóveis e bens duráveis",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 4 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 5 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "S1YF34",
@@ -6038,7 +6038,7 @@
       "nome": "S1YK34",
       "categoria": "Saúde e farmacêuticas",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 14 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 13 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "S1YY34",
@@ -6052,35 +6052,35 @@
       "nome": "S2CH34",
       "categoria": "Química e agroindústria",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "S2EA34",
       "nome": "S2EA34",
       "categoria": "Varejo e e-commerce",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 242.314 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 243.619 por dia (mínimo 300.000)."
     },
     {
       "ticker": "S2ED34",
       "nome": "S2ED34",
       "categoria": "Indústria",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 48.382 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 46.215 por dia (mínimo 300.000)."
     },
     {
       "ticker": "S2EI34",
       "nome": "S2EI34",
       "categoria": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 9 pregões (máximo 5)."
+      "motivo": "Último negócio há 10 pregões (máximo 5)."
     },
     {
       "ticker": "S2FM34",
       "nome": "S2FM34",
       "categoria": "Varejo e e-commerce",
-      "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 14 dos últimos 21 pregões (mínimo 15)."
+      "codigo": "liquidez_baixa",
+      "motivo": "Volume mediano de R$ 771 por dia (mínimo 300.000)."
     },
     {
       "ticker": "S2GI34",
@@ -6114,15 +6114,15 @@
       "ticker": "S2RE34",
       "nome": "S2RE34",
       "categoria": "Transporte e logística",
-      "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
+      "codigo": "cotacao_defasada",
+      "motivo": "Último negócio há 6 pregões (máximo 5)."
     },
     {
       "ticker": "S2TA34",
       "nome": "S2TA34",
       "categoria": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 4.292 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 4.335 por dia (mínimo 300.000)."
     },
     {
       "ticker": "S2TW34",
@@ -6136,7 +6136,7 @@
       "nome": "S2UI34",
       "categoria": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 500 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 478 por dia (mínimo 300.000)."
     },
     {
       "ticker": "SAPP34",
@@ -6150,7 +6150,7 @@
       "nome": "SBUB34",
       "categoria": "Turismo, lazer e serviços",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 98.871 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 32.365 por dia (mínimo 300.000)."
     },
     {
       "ticker": "SCHW34",
@@ -6164,14 +6164,14 @@
       "nome": "GLOBAL X DEFENSE TECH ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 2.188 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 2.402 por dia (mínimo 300.000)."
     },
     {
       "ticker": "SIMN34",
       "nome": "SIMN34",
       "categoria": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 10.394 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 12.786 por dia (mínimo 300.000)."
     },
     {
       "ticker": "SIVR39",
@@ -6185,14 +6185,14 @@
       "nome": "SK1D34",
       "categoria": "Turismo, lazer e serviços",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "SLBG34",
       "nome": "SLBG34",
       "categoria": "Serviços industriais",
-      "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 12 dos últimos 21 pregões (mínimo 15)."
+      "codigo": "cotacao_defasada",
+      "motivo": "Último negócio há 6 pregões (máximo 5)."
     },
     {
       "ticker": "SNEC34",
@@ -6206,14 +6206,14 @@
       "nome": "SPGI34",
       "categoria": "Serviços e meios de pagamento",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 135.103 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 134.806 por dia (mínimo 300.000)."
     },
     {
       "ticker": "STMN34",
       "nome": "STMN34",
       "categoria": "Semicondutores e hardware",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 5.382 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 5.065 por dia (mínimo 300.000)."
     },
     {
       "ticker": "STOC34",
@@ -6241,14 +6241,14 @@
       "nome": "T1AM34",
       "categoria": "Software e internet",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 23.450 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 27.779 por dia (mínimo 300.000)."
     },
     {
       "ticker": "T1CH34",
       "nome": "T1CH34",
       "categoria": "Saúde e farmacêuticas",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 11 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "T1DG34",
@@ -6269,21 +6269,21 @@
       "nome": "T1EL34",
       "categoria": "Semicondutores e hardware",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 4.150 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 5.840 por dia (mínimo 300.000)."
     },
     {
       "ticker": "T1EV34",
       "nome": "T1EV34",
       "categoria": "Saúde e farmacêuticas",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "T1FX34",
       "nome": "T1FX34",
       "categoria": "Saúde e farmacêuticas",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 16 pregões (máximo 5)."
+      "motivo": "Último negócio há 17 pregões (máximo 5)."
     },
     {
       "ticker": "T1LK34",
@@ -6297,7 +6297,7 @@
       "nome": "T1MU34",
       "categoria": "Telecomunicações e mídia",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 17.546 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 10.720 por dia (mínimo 300.000)."
     },
     {
       "ticker": "T1OW34",
@@ -6318,7 +6318,7 @@
       "nome": "T1RO34",
       "categoria": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 12 pregões (máximo 5)."
+      "motivo": "Último negócio há 13 pregões (máximo 5)."
     },
     {
       "ticker": "T1SC34",
@@ -6360,7 +6360,7 @@
       "nome": "T2ER34",
       "categoria": "Semicondutores e hardware",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 48.558 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 63.788 por dia (mínimo 300.000)."
     },
     {
       "ticker": "T2ND34",
@@ -6388,7 +6388,7 @@
       "nome": "GLOBAL X 1-3 MONTH T-BILL ETF",
       "categoria": "BDRs de ETF",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 189.710 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 215.712 por dia (mínimo 300.000)."
     },
     {
       "ticker": "TEXA34",
@@ -6430,21 +6430,21 @@
       "nome": "ISHARES TOP 20 US STOCKS ETF",
       "categoria": "BDRs de ETF",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 7 pregões (máximo 5)."
+      "motivo": "Último negócio há 8 pregões (máximo 5)."
     },
     {
       "ticker": "TOST34",
       "nome": "TOST34",
       "categoria": "Software e internet",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 17 pregões (máximo 5)."
+      "motivo": "Último negócio há 18 pregões (máximo 5)."
     },
     {
       "ticker": "TPRY34",
       "nome": "TPRY34",
       "categoria": "Varejo e e-commerce",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 6 pregões (máximo 5)."
+      "motivo": "Último negócio há 7 pregões (máximo 5)."
     },
     {
       "ticker": "TRVC34",
@@ -6465,7 +6465,7 @@
       "nome": "ISHARES MSCI TURKEY ETF",
       "categoria": "BDRs de ETF",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 15 pregões (máximo 5)."
+      "motivo": "Último negócio há 16 pregões (máximo 5)."
     },
     {
       "ticker": "TXSA34",
@@ -6486,14 +6486,14 @@
       "nome": "U1AL34",
       "categoria": "Transporte e logística",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 13.669 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 17.886 por dia (mínimo 300.000)."
     },
     {
       "ticker": "U1DR34",
       "nome": "U1DR34",
       "categoria": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 7 pregões (máximo 5)."
+      "motivo": "Último negócio há 8 pregões (máximo 5)."
     },
     {
       "ticker": "U1HS34",
@@ -6507,7 +6507,7 @@
       "nome": "U1LT34",
       "categoria": "Varejo e e-commerce",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 1.722 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 1.050 por dia (mínimo 300.000)."
     },
     {
       "ticker": "U1MH34",
@@ -6521,7 +6521,7 @@
       "nome": "U1NM34",
       "categoria": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 8 pregões (máximo 5)."
+      "motivo": "Último negócio há 9 pregões (máximo 5)."
     },
     {
       "ticker": "U1RI34",
@@ -6555,8 +6555,8 @@
       "ticker": "U2TH34",
       "nome": "U2TH34",
       "categoria": "Saúde e farmacêuticas",
-      "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 4 dos últimos 21 pregões (mínimo 15)."
+      "codigo": "cotacao_defasada",
+      "motivo": "Último negócio há 6 pregões (máximo 5)."
     },
     {
       "ticker": "UBSG34",
@@ -6598,7 +6598,7 @@
       "nome": "ISHARES BROAD USD INVESTMENT GRADE CORP BOND ETF",
       "categoria": "BDRs de ETF",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 17 pregões (máximo 5)."
+      "motivo": "Último negócio há 18 pregões (máximo 5)."
     },
     {
       "ticker": "V1IP34",
@@ -6611,22 +6611,22 @@
       "ticker": "V1MC34",
       "nome": "V1MC34",
       "categoria": "Mineração e metais",
-      "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 14 dos últimos 21 pregões (mínimo 15)."
+      "codigo": "liquidez_baixa",
+      "motivo": "Volume mediano de R$ 146 por dia (mínimo 300.000)."
     },
     {
       "ticker": "V1NO34",
       "nome": "V1NO34",
       "categoria": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 13 pregões (máximo 5)."
+      "motivo": "Último negócio há 14 pregões (máximo 5)."
     },
     {
       "ticker": "V1OD34",
       "nome": "V1OD34",
       "categoria": "Telecomunicações e mídia",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 6.324 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 7.116 por dia (mínimo 300.000)."
     },
     {
       "ticker": "V1RS34",
@@ -6640,7 +6640,7 @@
       "nome": "V1TA34",
       "categoria": "Financeiro",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "V2EE34",
@@ -6675,14 +6675,14 @@
       "nome": "VLOE34",
       "categoria": "Petróleo e gás",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 15.025 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 13.862 por dia (mínimo 300.000)."
     },
     {
       "ticker": "VLYB34",
       "nome": "VLYB34",
       "categoria": "Financeiro",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 5 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "VMRK34",
@@ -6696,35 +6696,42 @@
       "nome": "VRTX34",
       "categoria": "Saúde e farmacêuticas",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 2.306 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 2.853 por dia (mínimo 300.000)."
     },
     {
       "ticker": "VSOL39",
       "nome": "VALOUR SOLANA (SOL) SEK",
       "categoria": "BDRs de ETF",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 16 pregões (máximo 5)."
+      "motivo": "Último negócio há 17 pregões (máximo 5)."
     },
     {
       "ticker": "W1AB34",
       "nome": "W1AB34",
       "categoria": "Indústria",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 11 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 12 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "W1BO34",
       "nome": "W1BO34",
       "categoria": "Software e internet",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 863 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 828 por dia (mínimo 300.000)."
     },
     {
       "ticker": "W1DA34",
       "nome": "W1DA34",
       "categoria": "Software e internet",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 11 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 12 dos últimos 21 pregões (mínimo 15)."
+    },
+    {
+      "ticker": "W1EC34",
+      "nome": "W1EC34",
+      "categoria": "Energia elétrica e saneamento",
+      "codigo": "poucos_dias_negociados",
+      "motivo": "Negociou em 1 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "W1EL34",
@@ -6745,14 +6752,14 @@
       "nome": "W1IX34",
       "categoria": "Software e internet",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 10.701 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 12.038 por dia (mínimo 300.000)."
     },
     {
       "ticker": "W1LT34",
       "nome": "W1LT34",
       "categoria": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 7 pregões (máximo 5)."
+      "motivo": "Último negócio há 8 pregões (máximo 5)."
     },
     {
       "ticker": "W1MB34",
@@ -6773,14 +6780,14 @@
       "nome": "W1MG34",
       "categoria": "Serviços e meios de pagamento",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 11 pregões (máximo 5)."
+      "motivo": "Último negócio há 12 pregões (máximo 5)."
     },
     {
       "ticker": "W1PP34",
       "nome": "W1PP34",
       "categoria": "Serviços e meios de pagamento",
-      "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 292 por dia (mínimo 300.000)."
+      "codigo": "poucos_dias_negociados",
+      "motivo": "Negociou em 14 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "W1RB34",
@@ -6815,28 +6822,28 @@
       "nome": "W2YF34",
       "categoria": "Varejo e e-commerce",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 11 pregões (máximo 5)."
+      "motivo": "Último negócio há 12 pregões (máximo 5)."
     },
     {
       "ticker": "WABC34",
       "nome": "WABC34",
       "categoria": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 18 pregões (máximo 5)."
+      "motivo": "Último negócio há 19 pregões (máximo 5)."
     },
     {
       "ticker": "WUNI34",
       "nome": "WUNI34",
       "categoria": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 13.826 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 19.437 por dia (mínimo 300.000)."
     },
     {
       "ticker": "X1EL34",
       "nome": "X1EL34",
       "categoria": "Energia elétrica e saneamento",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 7 pregões (máximo 5)."
+      "motivo": "Último negócio há 8 pregões (máximo 5)."
     },
     {
       "ticker": "X1YL34",
@@ -6871,7 +6878,7 @@
       "nome": "VALOUR RIPPLE (XRP) SEK",
       "categoria": "BDRs de ETF",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 18 pregões (máximo 5)."
+      "motivo": "Último negócio há 19 pregões (máximo 5)."
     },
     {
       "ticker": "XRXB34",
@@ -6892,14 +6899,14 @@
       "nome": "YUMR34",
       "categoria": "Turismo, lazer e serviços",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 6 pregões (máximo 5)."
+      "motivo": "Último negócio há 7 pregões (máximo 5)."
     },
     {
       "ticker": "Z1BH34",
       "nome": "Z1BH34",
       "categoria": "Saúde e farmacêuticas",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 2 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 3 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "Z1BR34",
@@ -6913,7 +6920,7 @@
       "nome": "Z1OM34",
       "categoria": "Software e internet",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 12.500 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 14.943 por dia (mínimo 300.000)."
     },
     {
       "ticker": "Z1TA34",
@@ -6927,14 +6934,14 @@
       "nome": "Z1TO34",
       "categoria": "Transporte e logística",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "Z1TS34",
       "nome": "Z1TS34",
       "categoria": "Saúde e farmacêuticas",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 24.753 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 15.129 por dia (mínimo 300.000)."
     },
     {
       "ticker": "Z2DV34",
@@ -6948,14 +6955,14 @@
       "nome": "Z2IT34",
       "categoria": "Software e internet",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 171 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 727 por dia (mínimo 300.000)."
     },
     {
       "ticker": "Z2LL34",
       "nome": "Z2LL34",
       "categoria": "Software e internet",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 11 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
     }
   ],
   "modoAuditoria": "diaria",
