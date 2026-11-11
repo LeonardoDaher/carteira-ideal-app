@@ -22,6 +22,7 @@ import { ConfluenciaAcao } from './ConfluenciaAcao'
 import { PrecoTetoAcoes } from './PrecoTetoAcoes'
 import { AgendaDeBalancos } from './AgendaDeBalancos'
 import { AgendaDeDividendos } from './AgendaDeDividendos'
+import { DadosDeMercado } from './DadosDeMercado'
 import { SNAPSHOT_ACOES_DIVIDENDOS } from '../data/snapshotAcoesDividendos'
 import { SNAPSHOT_ACOES_ENDIVIDADAS } from '../data/snapshotAcoesEndividadas'
 import { SNAPSHOT_ACOES_MAIS_NEGOCIADAS } from '../data/snapshotAcoesMaisNegociadas'
@@ -50,7 +51,7 @@ type Selecao = { origem: 'lista'; acao: Acao; setor: string } | { origem: 'busca
 /** Radares que valem para ações. */
 const SELOS_ACOES = ['dividendos', 'radar', 'maisNegociado', 'indice', 'endividada'] as const satisfies readonly (keyof DestaquesDoAtivo)[]
 
-type AbaAcoes = 'simulador' | 'top15' | 'negociadas' | 'ibov' | 'endividadas' | 'dividendos' | 'tecnica' | 'fundamentalista' | 'confluencia' | 'top15confluencia' | 'precoteto' | 'radar' | 'balancos' | 'ibovTecnica'
+type AbaAcoes = 'simulador' | 'top15' | 'negociadas' | 'ibov' | 'endividadas' | 'dividendos' | 'tecnica' | 'fundamentalista' | 'confluencia' | 'top15confluencia' | 'precoteto' | 'radar' | 'balancos' | 'ibovTecnica' | 'mercado'
 
 /** Os Top 15 de ações ficam todos dentro de um cartão só ("Top 15"), com um cartãozinho para cada lista. */
 const ABAS_TOP15 = [
@@ -183,6 +184,7 @@ export function SimuleAcoes({
             { id: 'precoteto', emoji: '🎯', titulo: 'Preço teto de compra', descricao: 'Bazin, Graham e radar' },
             { id: 'radar', emoji: '📅', titulo: 'Agenda de dividendos', descricao: 'O que já foi anunciado, mês a mês' },
             { id: 'balancos', emoji: '📑', titulo: 'Balanços', descricao: 'Datas de divulgação e análise' },
+            { id: 'mercado', emoji: '🌎', titulo: 'Dados de mercado', descricao: 'Estrangeiro e aluguel de ações' },
           ] as const
         ).map((c) => {
           const grupo = c.id === 'grupotop15'
@@ -306,6 +308,8 @@ export function SimuleAcoes({
         <Top15Dividendos />
       ) : aba === 'radar' ? (
         <AgendaDeDividendos />
+      ) : aba === 'mercado' ? (
+        <DadosDeMercado />
       ) : aba === 'balancos' ? (
         <AgendaDeBalancos />
       ) : aba === 'precoteto' ? (
