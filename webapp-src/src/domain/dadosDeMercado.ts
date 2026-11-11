@@ -114,3 +114,24 @@ export function dataBR(iso: string): string {
   const [a, m, d] = iso.split('-')
   return `${d}/${m}/${a}`
 }
+
+export interface TotalMes {
+  /** AAAA-MM */
+  mes: string
+  /** Saldo do estrangeiro no mês, em R$ milhões (positivo = entrada). */
+  estrangeiro: number
+}
+
+/** Saldo do estrangeiro mês a mês; os `quantos` meses mais recentes, do mais antigo para o mais novo. */
+export function totaisPorMes(registros: RegistroFluxo[], quantos = 12): TotalMes[] {
+  const mapa = new Map<string, number>()
+  for (const r of registros) mapa.set(r.data.slice(0, 7), (mapa.get(r.data.slice(0, 7)) ?? 0) + r.estrangeiro)
+  return [...mapa.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([mes, estrangeiro]) => ({ mes, estrangeiro })).slice(-quantos)
+}
+
+const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez']
+/** "2026-11" em "nov/26". */
+export function rotuloMes(mes: string): string {
+  const [a, m] = mes.split('-')
+  return `${MESES[Number(m) - 1]}/${a.slice(2)}`
+}

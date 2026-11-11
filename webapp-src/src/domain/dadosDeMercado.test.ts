@@ -64,3 +64,12 @@ describe('aluguel', () => {
     expect(pesoNoTotal([]).size).toBe(0)
   })
 })
+
+describe('mês a mês', () => {
+  it('soma por mês e rotula', async () => {
+    const { totaisPorMes, rotuloMes } = await import('./dadosDeMercado')
+    expect(totaisPorMes(REGS)).toEqual([{ mes: '2025-12', estrangeiro: 100 }, { mes: '2026-10', estrangeiro: -300 }, { mes: '2026-11', estrangeiro: -1950 }])
+    expect(totaisPorMes(REGS, 1)).toHaveLength(1)
+    expect(rotuloMes('2026-11')).toBe('nov/26')
+  })
+})

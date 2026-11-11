@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react'
 import { useArquivoDados } from '../data/useArquivoDados'
 import {
-  ROTULO_PERIODO, dataBR, formatarMilhoes, formatarReaisCurto, maisAlugadas, mediaMovel, pesoNoTotal, recortar, sequenciaAtual, somar,
+  ROTULO_PERIODO, dataBR, formatarMilhoes, formatarReaisCurto, maisAlugadas, mediaMovel, pesoNoTotal, recortar, rotuloMes, sequenciaAtual, somar, totaisPorMes,
 } from '../domain/dadosDeMercado'
-import type { Periodo, RegistroFluxo, SnapshotAluguel, SnapshotFluxo } from '../domain/dadosDeMercado'
+import type { Periodo, RegistroFluxo, SnapshotAluguel, SnapshotFluxo, TotalMes } from '../domain/dadosDeMercado'
 import { EstadoDoArquivo } from '../ui/BlocosDeAnalise'
 
 export const CAMINHO_FLUXO = 'dados/fluxoEstrangeiro.json'
@@ -65,8 +65,41 @@ function GraficoFluxo({ registros, serie }: { registros: RegistroFluxo[]; serie:
   )
 }
 
+/** Uma barra por mês: verde = o estrangeiro pôs dinheiro, vermelho = tirou. O valor vai escrito em cada barra. */
+function GraficoMensal({ meses }: { meses: TotalMes[] }) {
+  const W = 340
+  const H = 200
+  const topo = 22
+  const base = H - 22
+  const n = meses.length
+  const max = Math.max(0, ...meses.map((m) => m.estrangeiro))
+  const min = Math.min(0, ...meses.map((m) => m.estrangeiro))
+  const y = (v: number) => topo + ((max - v) / (max - min || 1)) * (base - topo)
+  const larg = (W - 8) / Math.max(n, 4)
+  const total = meses.reduce((s, m) => s + m.estrangeiro, 0)
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Saldo do investidor estrangeiro por mês, de ${rotuloMes(meses[0].mes)} a ${rotuloMes(meses[n - 1].mes)}. Soma: ${formatarMilhoes(total)}.`} style={{ width: '100%', height: 'auto', maxHeight: 260, display: 'block' }}>
+      <line x1={4} x2={W - 4} y1={y(0)} y2={y(0)} stroke="var(--border)" strokeWidth={1} />
+      {meses.map((m, i) => {
+        const cx = 4 + larg * (i + 0.5)
+        const v = m.estrangeiro
+        const saiu = v < 0
+        return (
+          <g key={m.mes}>
+            <rect x={cx - larg * 0.34} y={Math.min(y(v), y(0))} width={larg * 0.68} height={Math.max(2, Math.abs(y(v) - y(0)))} rx={2} fill={saiu ? 'var(--danger)' : 'var(--success)'} opacity={0.9} />
+            <text x={cx} y={saiu ? y(v) + Math.max(2, Math.abs(y(v) - y(0))) + 11 : y(v) - 4} textAnchor="middle" style={{ fill: 'var(--text)', fontSize: 9, fontWeight: 600 }}>{formatarMilhoes(v, false).replace('R$ ', '')}</text>
+            <text x={cx} y={H - 6} textAnchor="middle" style={{ fill: 'var(--text-muted)', fontSize: 10 }}>{rotuloMes(m.mes)}</text>
+          </g>
+        )
+      })}
+    </svg>
+  )
+}
+
 function CartaoFluxo({ snapshot }: { snapshot?: SnapshotFluxo }) {
-  const [periodo, setPeriodo] = useState<Periodo>('mes')
+  const [visao, setVisao] = useState<'meses' | Periodo>('meses')
+  const periodo: Periodo = visao === 'meses' ? 'mes' : visao
+  const setPeriodo = setVisao
   const [estado, recarregar] = useArquivoDados<SnapshotFluxo>(CAMINHO_FLUXO, true, snapshot)
   const dados = estado.tipo === 'pronto' ? estado.dados : null
   const recorte = useMemo(() => (dados ? recortar(dados.registros, periodo) : []), [dados, periodo])
@@ -101,14 +134,20 @@ function CartaoFluxo({ snapshot }: { snapshot?: SnapshotFluxo }) {
           </div>
 
           <div role="group" aria-label="Período do gráfico" className="row" style={{ gap: 6, flexWrap: 'wrap' }}>
+            <button className={`chip ${visao === 'meses' ? 'selected' : ''}`} aria-pressed={visao === 'meses'} onClick={() => setVisao('meses')}>Mês a mês</button>
             {PERIODOS.map((p) => (
-              <button key={p} className={`chip ${periodo === p ? 'selected' : ''}`} aria-pressed={periodo === p} onClick={() => setPeriodo(p)}>
+              <button key={p} className={`chip ${visao === p ? 'selected' : ''}`} aria-pressed={visao === p} onClick={() => setPeriodo(p)}>
                 {ROTULO_PERIODO[p]}
               </button>
             ))}
           </div>
 
-          {recorte.length >= 2 ? (
+          {visao === 'meses' ? (
+            <>
+              <GraficoMensal meses={totaisPorMes(dados.registros)} />
+              <div className="tiny muted justify">Valores em R$ (mi = milhões, bi = bilhões). O último mês é parcial, até o último pregão disponível.</div>
+            </>
+          ) : recorte.length >= 2 ? (
             <GraficoFluxo registros={recorte} serie={recorte.map((r) => r.estrangeiro)} />
           ) : (
             <div className="small muted">Poucos pregões neste período para desenhar o gráfico.</div>
