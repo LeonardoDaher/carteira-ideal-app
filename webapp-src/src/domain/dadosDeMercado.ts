@@ -188,3 +188,27 @@ export function mesmoSentido(pares: ParMes[]): { iguais: number; total: number }
   const validos = pares.filter((p) => p.fluxo !== 0 && p.variacao !== 0)
   return { iguais: validos.filter((p) => p.fluxo > 0 === p.variacao > 0).length, total: validos.length }
 }
+
+export type TipoInvestidor = 'estrangeiro' | 'institucional' | 'pessoaFisica' | 'instFinanceira' | 'outros'
+
+export const TIPOS_INVESTIDOR: { campo: TipoInvestidor; rotulo: string }[] = [
+  { campo: 'estrangeiro', rotulo: 'Estrangeiro' },
+  { campo: 'institucional', rotulo: 'Institucional' },
+  { campo: 'pessoaFisica', rotulo: 'Pessoa física' },
+  { campo: 'instFinanceira', rotulo: 'Inst. financeira' },
+  { campo: 'outros', rotulo: 'Outros' },
+]
+
+export type TotalMesTodos = { mes: string } & Record<TipoInvestidor, number>
+
+/** Saldo de cada tipo de investidor por mês (R$ milhões); os `quantos` meses mais recentes, do mais antigo para o mais novo. */
+export function totaisPorMesTodos(registros: RegistroFluxo[], quantos = 12): TotalMesTodos[] {
+  const mapa = new Map<string, TotalMesTodos>()
+  for (const r of registros) {
+    const mes = r.data.slice(0, 7)
+    const t = mapa.get(mes) ?? { mes, estrangeiro: 0, institucional: 0, pessoaFisica: 0, instFinanceira: 0, outros: 0 }
+    for (const { campo } of TIPOS_INVESTIDOR) t[campo] += r[campo]
+    mapa.set(mes, t)
+  }
+  return [...mapa.values()].sort((a, b) => a.mes.localeCompare(b.mes)).slice(-quantos)
+}

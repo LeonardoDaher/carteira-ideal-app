@@ -1,22 +1,6 @@
 {
- "geradoEm": "2026-11-11T12:59:37.058Z",
- "fonte": "Dados de Mercado (dadosdemercado.com.br), a partir de dados da B3; dias recentes: B3, Boletim Diário do Mercado",
- "acumulados": {
-  "2026-11-04": {
-   "institucional": 526.704,
-   "instFinanceira": 152.464,
-   "estrangeiro": -2058.206,
-   "pessoaFisica": 1190.548,
-   "outros": 188.488
-  },
-  "2026-11-06": {
-   "estrangeiro": -4252.14,
-   "institucional": 1258.75,
-   "pessoaFisica": 2060.19,
-   "instFinanceira": 549.33,
-   "outros": 383.86
-  }
- },
+ "geradoEm": "2026-11-13T12:12:36.124Z",
+ "fonte": "Dados de Mercado (dadosdemercado.com.br), a partir da participação de investidores da B3",
  "registros": [
   {
    "data": "2025-11-11",
@@ -1977,6 +1961,30 @@
    "pessoaFisica": 80.33,
    "instFinanceira": 196.35,
    "outros": 154.51
+  },
+  {
+   "data": "2026-11-09",
+   "estrangeiro": -85.91,
+   "institucional": -478.71,
+   "pessoaFisica": -34.74,
+   "instFinanceira": 599.44,
+   "outros": -0.08
+  },
+  {
+   "data": "2026-11-10",
+   "estrangeiro": -696.81,
+   "institucional": -13.61,
+   "pessoaFisica": 327.98,
+   "instFinanceira": 268.71,
+   "outros": 113.73
+  },
+  {
+   "data": "2026-11-11",
+   "estrangeiro": -370.02,
+   "institucional": 228.04,
+   "pessoaFisica": 56.89,
+   "instFinanceira": 127.12,
+   "outros": -42.02
   }
  ]
 }

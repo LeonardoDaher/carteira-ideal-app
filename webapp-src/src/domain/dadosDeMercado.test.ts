@@ -94,3 +94,18 @@ describe('relação com o índice', () => {
     expect(m.semPrimeiroMesIncompleto([dia('2025-11-11', 1), dia('2025-12-01', 2)]).map((r) => r.data)).toEqual(['2025-12-01'])
   })
 })
+
+describe('todos os tipos por mês', () => {
+  it('soma cada tipo no mês', async () => {
+    const { totaisPorMesTodos } = await import('./dadosDeMercado')
+    const regs = [
+      { data: '2026-10-30', estrangeiro: -10, institucional: 4, pessoaFisica: 5, instFinanceira: 1, outros: 0 },
+      { data: '2026-11-03', estrangeiro: -20, institucional: 8, pessoaFisica: 10, instFinanceira: 2, outros: 0 },
+      { data: '2026-11-04', estrangeiro: 5, institucional: -2, pessoaFisica: -3, instFinanceira: 0, outros: 0 },
+    ]
+    const t = totaisPorMesTodos(regs)
+    expect(t.map((x) => x.mes)).toEqual(['2026-10', '2026-11'])
+    expect(t[1]).toEqual({ mes: '2026-11', estrangeiro: -15, institucional: 6, pessoaFisica: 7, instFinanceira: 2, outros: 0 })
+    expect(totaisPorMesTodos(regs, 1)).toHaveLength(1)
+  })
+})

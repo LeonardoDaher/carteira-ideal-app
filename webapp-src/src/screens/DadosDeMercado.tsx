@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useArquivoDados } from '../data/useArquivoDados'
 import {
-  ROTULO_PERIODO, dataBR, formatarMilhoes, formatarReaisCurto, maisAlugadas, mediaMovel, pesoNoTotal, recortar, correlacao, mesmoSentido, parear, rotuloMes, semPrimeiroMesIncompleto, sequenciaAtual, somar, totaisPorMes, variacaoMensal,
+  ROTULO_PERIODO, dataBR, formatarMilhoes, formatarReaisCurto, maisAlugadas, mediaMovel, pesoNoTotal, recortar, correlacao, mesmoSentido, parear, rotuloMes, semPrimeiroMesIncompleto, TIPOS_INVESTIDOR, totaisPorMesTodos, sequenciaAtual, somar, totaisPorMes, variacaoMensal,
 } from '../domain/dadosDeMercado'
 import type { BarraIndice, Periodo, RegistroFluxo, SnapshotAluguel, SnapshotFluxo, ParMes, TotalMes } from '../domain/dadosDeMercado'
 import { EstadoDoArquivo } from '../ui/BlocosDeAnalise'
@@ -172,6 +172,62 @@ function CartaoFluxo({ snapshot }: { snapshot?: SnapshotFluxo }) {
   )
 }
 
+/** Quadro mês a mês: cada coluna é um tipo de investidor; verde = pôs dinheiro na bolsa, vermelho = tirou. */
+function CartaoQuem({ fluxo }: { fluxo?: SnapshotFluxo }) {
+  const [estado, recarregar] = useArquivoDados<SnapshotFluxo>(CAMINHO_FLUXO, true, fluxo)
+  const dados = estado.tipo === 'pronto' ? estado.dados : null
+  const meses = useMemo(() => (dados ? totaisPorMesTodos(semPrimeiroMesIncompleto(dados.registros), 12).reverse() : []), [dados])
+  const maximo = useMemo(() => TIPOS_INVESTIDOR.map(({ campo }) => Math.max(1, ...meses.map((m) => Math.abs(m[campo])))), [meses])
+  return (
+    <section className="card col" style={{ gap: 12 }} aria-labelledby="titulo-quem">
+      <div className="col" style={{ gap: 2 }}>
+        <h2 id="titulo-quem" style={{ fontSize: 17 }}>⚖️ Quem comprou e quem vendeu</h2>
+        <span className="small muted justify">Para cada real que um tipo de investidor tira da bolsa, outro coloca. Veja o saldo de cada um, mês a mês: verde = colocou, vermelho = tirou.</span>
+      </div>
+      {!dados ? (
+        <EstadoDoArquivo estado={estado.tipo === 'pronto' ? 'ocioso' : estado.tipo} aoTentarDeNovo={recarregar} nome="o fluxo por tipo de investidor" />
+      ) : !meses.length ? (
+        <SemDados nome="fluxo por tipo de investidor" />
+      ) : (
+        <>
+          <div className="tabela-bdr small" role="group" aria-label="Saldo por tipo de investidor em cada mês" style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 2 }}>
+              <thead>
+                <tr>
+                  <th scope="col" className="tiny muted" style={{ textAlign: 'left', fontWeight: 400 }}>Mês</th>
+                  {TIPOS_INVESTIDOR.map(({ campo, rotulo }) => (
+                    <th key={campo} scope="col" className="tiny muted" style={{ textAlign: 'right', fontWeight: 400 }}>{rotulo}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {meses.map((m) => (
+                  <tr key={m.mes}>
+                    <th scope="row" style={{ textAlign: 'left', fontWeight: 400, whiteSpace: 'nowrap' }}>{rotuloMes(m.mes)}</th>
+                    {TIPOS_INVESTIDOR.map(({ campo }, i) => {
+                      const v = m[campo]
+                      const forca = Math.min(1, Math.abs(v) / maximo[i])
+                      return (
+                        <td key={campo} style={{ textAlign: 'right', whiteSpace: 'nowrap', padding: '4px 6px', borderRadius: 6, fontSize: 11, background: `color-mix(in srgb, ${v < 0 ? 'var(--danger)' : 'var(--success)'} ${Math.round(forca * 45)}%, transparent)` }}>
+                          {formatarMilhoes(v, false).replace('R$ ', '')}
+                        </td>
+                      )
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="tiny muted justify" style={{ lineHeight: 1.5 }}>
+            Valores em R$ (mi = milhões, bi = bilhões); o sinal de menos (−) indica saída. A cor é relativa ao maior valor de cada coluna. O último mês é parcial.
+          </div>
+          <Fonte texto={dados.fonte} atualizado={dados.geradoEm} />
+        </>
+      )}
+    </section>
+  )
+}
+
 /** Barras da variação mensal do Ibovespa (%), com as mesmas colunas do gráfico do estrangeiro para lerem lado a lado. */
 function GraficoIbovMensal({ pares }: { pares: ParMes[] }) {
   const W = 340
@@ -312,6 +368,7 @@ export function DadosDeMercado({ fluxo, aluguel }: { fluxo?: SnapshotFluxo; alug
   return (
     <div className="col" style={{ gap: 14 }}>
       <CartaoFluxo snapshot={fluxo} />
+      <CartaoQuem fluxo={fluxo} />
       <CartaoRelacao fluxo={fluxo} />
       <CartaoAluguel snapshot={aluguel} />
       <div className="card-outline small muted justify" style={{ lineHeight: 1.5 }} role="note">

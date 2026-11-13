@@ -1,0 +1,68 @@
+# Atualiza nos dias úteis o fluxo de investimento na B3 por tipo de investidor (estrangeiro, institucional, pessoa física,
+# instituição financeira e outros) para a aba "Dados de mercado" do Simule Ações.
+#
+# Fonte: tabela pública https://www.dadosdemercado.com.br/fluxo (participação de investidores da B3, atraso de D+2), sem secret.
+# Se a página mudar de layout ou vier incompleta, o script falha SEM alterar o arquivo, e o job fica vermelho.
+# Nada muda (sem commit e sem deploy) quando não há pregão novo.
+#
+# ATENÇÃO: o GitHub atrasa ou até perde disparos agendados (principalmente em minutos redondos). Por isso há 3 horários fora do minuto cheio.
+name: Atualizar fluxo de investidores
+
+on:
+  schedule:
+    - cron: '17 11 * * 2-6' # terça a sábado, 11h17 UTC = 8h17 de Brasília
+    - cron: '17 15 * * 2-6' # 12h17 de Brasília (repetição)
+    - cron: '37 22 * * 1-5' # 19h37 de Brasília (passada da noite)
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: fluxo
+  cancel-in-progress: false
+
+jobs:
+  atualizar:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Testes do job
+        run: node --test scripts/atualizar-fluxo.test.mjs
+
+      - name: Buscar o fluxo e atualizar o arquivo
+        run: node scripts/atualizar-fluxo.mjs
+
+      - name: Conferir se o site compila com os dados novos
+        run: |
+          npm ci
+          npm run build
+
+      - name: Publicar (commit) se houver mudança
+        run: |
+          if [ -z "$(git status --porcelain webapp-src/public/dados/fluxoEstrangeiro.json)" ]; then
+            echo "Sem mudanças nos dados."
+            exit 0
+          fi
+          git config user.name "${{ vars.COMMIT_AUTOR_NOME || 'github-actions[bot]' }}"
+          git config user.email "${{ vars.COMMIT_AUTOR_EMAIL || '41898283+github-actions[bot]@users.noreply.github.com' }}"
+          git add webapp-src/public/dados/fluxoEstrangeiro.json
+          git commit -m "dados: Fluxo de investidores ($(date -u +%Y-%m-%d))"
+          # Tenta até 5 vezes: se outro job publicou no mesmo instante, refaz o rebase e envia de novo.
+          for tentativa in 1 2 3 4 5; do
+            if git pull --rebase && git push; then
+              exit 0
+            fi
+            git rebase --abort 2>/dev/null || true
+            echo "Push recusado (tentativa $tentativa de 5); aguardando e tentando de novo."
+            sleep $((RANDOM % 10 + 5))
+          done
+          echo "Não foi possível publicar após 5 tentativas."
+          exit 1

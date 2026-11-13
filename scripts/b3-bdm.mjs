@@ -1,6 +1,5 @@
-// Lê um Boletim Diário do Mercado (BDM) da B3 já baixado (PDF completo, BDI_00_AAAAMMDD.pdf) e atualiza os dois
-// arquivos da aba "Dados de mercado" do Simule Ações:
-//   webapp-src/public/dados/fluxoEstrangeiro.json   (Participação dos investidores, acumulado do mês -> fluxo diário)
+// Lê um Boletim Diário do Mercado (BDM) da B3 já baixado (PDF completo, BDI_00_AAAAMMDD.pdf) e atualiza o arquivo do aluguel
+// da aba "Dados de mercado" do Simule Ações (o fluxo dos investidores é atualizado por atualizar-fluxo.mjs):
 //   webapp-src/public/dados/emprestimoAtivos.json   (Empréstimos de ativos, posições em aberto -> ações mais alugadas)
 // Não baixa nada da B3: só processa o arquivo que você passar. Requer `pdftotext` (poppler/xpdf) no PATH.
 // Uso: node scripts/b3-bdm.mjs "C:\caminho\BDI_00_20261106.pdf"
@@ -10,9 +9,7 @@ import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const RAIZ = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-const ARQ_FLUXO = resolve(RAIZ, 'webapp-src/public/dados/fluxoEstrangeiro.json')
 const ARQ_ALUGUEL = resolve(RAIZ, 'webapp-src/public/dados/emprestimoAtivos.json')
-const FONTE_FLUXO = 'B3, Boletim Diário do Mercado (Participação dos investidores)'
 const FONTE_ALUGUEL = 'B3, Boletim Diário do Mercado (Empréstimos de ativos, posições em aberto)'
 
 const num = (s) => Number(s.replace(/\./g, '').replace(',', '.'))
@@ -75,16 +72,7 @@ function principal(pdf) {
   const texto = execFileSync('pdftotext', ['-raw', '-enc', 'UTF-8', pdf, '-'], { maxBuffer: 2 ** 30 }).toString('utf8')
   const agora = new Date().toISOString()
 
-  const part = lerParticipacao(texto)
-  if (part) {
-    const atual = ler(ARQ_FLUXO, { registros: [] })
-    const acumulados = { ...(atual.acumulados ?? {}), [part.data]: part.acumulado }
-    const registros = (atual.registros ?? []).filter((r) => r.data !== part.data)
-    registros.push(fluxoDoDia(part.data, part.acumulado, atual.acumulados ?? {}))
-    registros.sort((x, y) => x.data.localeCompare(y.data))
-    writeFileSync(ARQ_FLUXO, JSON.stringify({ geradoEm: agora, fonte: FONTE_FLUXO, acumulados, registros }, null, 1) + '\n')
-    console.log(`fluxo: acumulado até ${part.data}, estrangeiro no mês ${part.acumulado.estrangeiro.toFixed(1)} mi (${registros.length} dias no arquivo)`)
-  } else console.warn('fluxo: tabela "Participação dos investidores" não encontrada')
+  // O fluxo por tipo de investidor agora vem de scripts/atualizar-fluxo.mjs (job diário); aqui só o aluguel.
 
   const { dataReferencia, registros } = lerPosicoesEmAberto(texto)
   if (dataReferencia && registros.length) {
