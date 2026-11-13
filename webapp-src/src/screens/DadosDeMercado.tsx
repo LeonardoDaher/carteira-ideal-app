@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useArquivoDados } from '../data/useArquivoDados'
 import {
-  ROTULO_PERIODO, dataBR, formatarMilhoes, formatarReaisCurto, maisAlugadas, mediaMovel, pesoNoTotal, recortar, correlacao, mesmoSentido, parear, rotuloMes, semPrimeiroMesIncompleto, TIPOS_INVESTIDOR, totaisPorMesTodos, sequenciaAtual, somar, totaisPorMes, variacaoMensal,
+  ROTULO_PERIODO, dataBR, formatarMilhoes, formatarReaisCurto, maisAlugadas, mediaMovel, pesoNoTotal, recortar, correlacao, mesmoSentido, parear, escalasAlinhadas, rotuloMes, semPrimeiroMesIncompleto, TIPOS_INVESTIDOR, totaisPorMesTodos, sequenciaAtual, somar, totaisPorMes, variacaoMensal,
 } from '../domain/dadosDeMercado'
 import type { BarraIndice, Periodo, RegistroFluxo, SnapshotAluguel, SnapshotFluxo, ParMes, TotalMes } from '../domain/dadosDeMercado'
 import { EstadoDoArquivo } from '../ui/BlocosDeAnalise'
@@ -9,6 +9,11 @@ import { EstadoDoArquivo } from '../ui/BlocosDeAnalise'
 export const CAMINHO_FLUXO = 'dados/fluxoEstrangeiro.json'
 export const CAMINHO_ALUGUEL = 'dados/emprestimoAtivos.json'
 export const CAMINHO_IBOV = 'dados/indices-historico/IBOV.json'
+
+/** Valor em R$ milhões escrito em bilhões, sem unidade ("−1,9", "26,3"): a unidade vai na legenda do gráfico. */
+function emBilhoes(valorEmMilhoes: number): string {
+  return `${valorEmMilhoes < 0 ? '−' : ''}${(Math.abs(valorEmMilhoes) / 1000).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}`
+}
 
 const PERIODOS: Periodo[] = ['mes', 'ano', '30', '90']
 const JANELA_MEDIA = 28
@@ -88,8 +93,8 @@ function GraficoMensal({ meses }: { meses: TotalMes[] }) {
         return (
           <g key={m.mes}>
             <rect x={cx - larg * 0.34} y={Math.min(y(v), y(0))} width={larg * 0.68} height={Math.max(2, Math.abs(y(v) - y(0)))} rx={2} fill={saiu ? 'var(--danger)' : 'var(--success)'} opacity={0.9} />
-            <text x={cx} y={saiu ? y(v) + Math.max(2, Math.abs(y(v) - y(0))) + 11 : y(v) - 4} textAnchor="middle" style={{ fill: 'var(--text)', fontSize: 9, fontWeight: 600 }}>{formatarMilhoes(v, false).replace('R$ ', '')}</text>
-            <text x={cx} y={H - 6} textAnchor="middle" style={{ fill: 'var(--text-muted)', fontSize: 10 }}>{rotuloMes(m.mes)}</text>
+            <text x={cx} y={saiu ? y(v) + Math.max(2, Math.abs(y(v) - y(0))) + 11 : y(v) - 4} textAnchor="middle" style={{ fill: 'var(--text)', fontSize: 8, fontWeight: 600 }}>{emBilhoes(v)}</text>
+            <text x={cx} y={H - 6} textAnchor="middle" style={{ fill: 'var(--text-muted)', fontSize: 8 }}>{rotuloMes(m.mes).split('/')[0]}</text>
           </g>
         )
       })}
@@ -146,7 +151,7 @@ function CartaoFluxo({ snapshot }: { snapshot?: SnapshotFluxo }) {
           {visao === 'meses' ? (
             <>
               <GraficoMensal meses={totaisPorMes(dados.registros)} />
-              <div className="tiny muted justify">Valores em R$ (mi = milhões, bi = bilhões). O último mês é parcial, até o último pregão disponível.</div>
+              <div className="tiny muted justify">Valores em R$ bilhões (o sinal − indica saída). O último mês é parcial, até o último pregão disponível.</div>
             </>
           ) : recorte.length >= 2 ? (
             <GraficoFluxo registros={recorte} serie={recorte.map((r) => r.estrangeiro)} />
@@ -203,7 +208,7 @@ function CartaoQuem({ fluxo }: { fluxo?: SnapshotFluxo }) {
               <tbody>
                 {meses.map((m) => (
                   <tr key={m.mes}>
-                    <th scope="row" style={{ textAlign: 'left', fontWeight: 400, whiteSpace: 'nowrap' }}>{rotuloMes(m.mes)}</th>
+                    <th scope="row" style={{ textAlign: 'left', fontWeight: 400, whiteSpace: 'nowrap' }}>{rotuloMes(m.mes).split('/')[0]}</th>
                     {TIPOS_INVESTIDOR.map(({ campo }, i) => {
                       const v = m[campo]
                       const forca = Math.min(1, Math.abs(v) / maximo[i])
@@ -228,32 +233,60 @@ function CartaoQuem({ fluxo }: { fluxo?: SnapshotFluxo }) {
   )
 }
 
-/** Barras da variação mensal do Ibovespa (%), com as mesmas colunas do gráfico do estrangeiro para lerem lado a lado. */
-function GraficoIbovMensal({ pares }: { pares: ParMes[] }) {
+/** Um gráfico só: barras = saldo do estrangeiro no mês (R$), linha amarela = variação do Ibovespa no mesmo mês (%). Cada série tem a sua escala, com o zero alinhado. */
+export function GraficoBolsaEstrangeiro({ pares }: { pares: ParMes[] }) {
   const W = 340
-  const H = 150
-  const topo = 18
-  const base = H - 22
+  const H = 212
+  const L = 6
+  const R = 36
+  const topo = 24
+  const base = 178
   const n = pares.length
-  const max = Math.max(0, ...pares.map((p) => p.variacao))
-  const min = Math.min(0, ...pares.map((p) => p.variacao))
-  const y = (v: number) => topo + ((max - v) / (max - min || 1)) * (base - topo)
-  const larg = (W - 8) / Math.max(n, 4)
+  const { p, spanA, spanB } = escalasAlinhadas(pares.map((q) => q.fluxo), pares.map((q) => q.variacao))
+  const yA = (v: number) => topo + (p - v / spanA) * (base - topo)
+  const yB = (v: number) => topo + (p - v / spanB) * (base - topo)
+  const larg = (W - L - R) / Math.max(n, 4)
+  const x = (i: number) => L + larg * (i + 0.5)
   const pct = (v: number) => `${v > 0 ? '+' : v < 0 ? '−' : ''}${Math.abs(v * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1, minimumFractionDigits: 1 })}%`
+  const pctCurto = (v: number) => `${v > 0 ? '+' : v < 0 ? '−' : ''}${Math.abs(v * 100).toLocaleString('pt-BR', { maximumFractionDigits: 0 })}%`
+  const maxAbs = Math.max(...pares.map((q) => Math.abs(q.variacao)), 0.01)
+  const passo = [0.01, 0.02, 0.05, 0.1, 0.2].find((s) => maxAbs / s <= 3) ?? 0.2
+  const marcas: number[] = []
+  for (let k = -4; k <= 4; k++) {
+    const v = k * passo
+    if (v <= p * spanB + 1e-9 && v >= -(1 - p) * spanB - 1e-9) marcas.push(v)
+  }
+  const linha = pares.map((q, i) => `${i === 0 ? 'M' : 'L'}${x(i).toFixed(1)} ${yB(q.variacao).toFixed(1)}`).join('')
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Variação do Ibovespa por mês, de ${rotuloMes(pares[0].mes)} a ${rotuloMes(pares[n - 1].mes)}.`} style={{ width: '100%', height: 'auto', maxHeight: 200, display: 'block' }}>
-      <line x1={4} x2={W - 4} y1={y(0)} y2={y(0)} stroke="var(--border)" strokeWidth={1} />
-      {pares.map((p, i) => {
-        const cx = 4 + larg * (i + 0.5)
-        const alt = Math.max(2, Math.abs(y(p.variacao) - y(0)))
+    <svg
+      viewBox={`0 0 ${W} ${H}`}
+      role="img"
+      aria-label={`Saldo do investidor estrangeiro (barras) e variação do Ibovespa (linha) em cada mês, de ${rotuloMes(pares[0].mes)} a ${rotuloMes(pares[n - 1].mes)}.`}
+      style={{ width: '100%', height: 'auto', maxHeight: 290, display: 'block' }}
+    >
+      {marcas.map((v) => (
+        <g key={v}>
+          <line x1={L} x2={W - R} y1={yB(v)} y2={yB(v)} stroke="var(--border)" strokeWidth={v === 0 ? 1 : 0.5} strokeDasharray={v === 0 ? undefined : '2 3'} />
+          <text x={W - R + 4} y={yB(v) + 3} style={{ fill: 'var(--text-muted)', fontSize: 9 }}>{v === 0 ? '0%' : pctCurto(v)}</text>
+        </g>
+      ))}
+      {pares.map((q, i) => {
+        const alt = Math.max(2, Math.abs(yA(q.fluxo) - yA(0)))
         return (
-          <g key={p.mes}>
-            <rect x={cx - larg * 0.34} y={Math.min(y(p.variacao), y(0))} width={larg * 0.68} height={alt} rx={2} fill={p.variacao < 0 ? 'var(--danger)' : 'var(--success)'} opacity={0.9} />
-            <text x={cx} y={p.variacao < 0 ? y(p.variacao) + alt + 11 : y(p.variacao) - 4} textAnchor="middle" style={{ fill: 'var(--text)', fontSize: 9, fontWeight: 600 }}>{pct(p.variacao)}</text>
-            <text x={cx} y={H - 6} textAnchor="middle" style={{ fill: 'var(--text-muted)', fontSize: 10 }}>{rotuloMes(p.mes)}</text>
+          <g key={q.mes}>
+            <rect x={x(i) - larg * 0.34} y={Math.min(yA(q.fluxo), yA(0))} width={larg * 0.68} height={alt} rx={2} fill={q.fluxo < 0 ? 'var(--danger)' : 'var(--success)'} opacity={0.75} />
+            <text x={x(i)} y={base + 14} textAnchor="middle" style={{ fill: 'var(--text-muted)', fontSize: 8 }}>{rotuloMes(q.mes).split('/')[0]}</text>
+            <text x={x(i)} y={base + 25} textAnchor="middle" style={{ fill: q.fluxo < 0 ? 'var(--danger)' : 'var(--success)', fontSize: 7.5, fontWeight: 600 }}>{emBilhoes(q.fluxo)}</text>
           </g>
         )
       })}
+      <path d={linha} fill="none" stroke="var(--accent)" strokeWidth={2.5} strokeLinejoin="round" />
+      {pares.map((q, i) => (
+        <g key={q.mes}>
+          <circle cx={x(i)} cy={yB(q.variacao)} r={3.6} fill="var(--accent)" stroke="var(--bg, #000)" strokeWidth={1.2} />
+          <text x={x(i)} y={i % 2 === 0 ? yB(q.variacao) - 7 : yB(q.variacao) + 14} textAnchor="middle" style={{ fill: 'var(--text)', fontSize: 9, fontWeight: 700, paintOrder: 'stroke', stroke: 'var(--bg, #000)', strokeWidth: 2.5 }}>{pct(q.variacao)}</text>
+        </g>
+      ))}
     </svg>
   )
 }
@@ -277,7 +310,7 @@ function CartaoRelacao({ fluxo }: { fluxo?: SnapshotFluxo }) {
     <section className="card col" style={{ gap: 12 }} aria-labelledby="titulo-relacao">
       <div className="col" style={{ gap: 2 }}>
         <h2 id="titulo-relacao" style={{ fontSize: 17 }}>📈 Bolsa × estrangeiro</h2>
-        <span className="small muted justify">Em cima, quanto o estrangeiro pôs ou tirou da bolsa em cada mês. Embaixo, quanto o Ibovespa subiu ou caiu no mesmo mês.</span>
+        <span className="small muted justify">As barras mostram quanto o estrangeiro pôs (verde) ou tirou (vermelho) da bolsa em cada mês. A linha amarela mostra quanto o Ibovespa subiu ou caiu no mesmo mês.</span>
       </div>
       {!f || !i ? (
         <EstadoDoArquivo estado={(() => { const t = !f ? estadoF.tipo : estadoI.tipo; return t === 'pronto' ? 'ocioso' : t })()} aoTentarDeNovo={() => { recarregarF(); recarregarI() }} nome="a relação entre a bolsa e o estrangeiro" />
@@ -285,13 +318,10 @@ function CartaoRelacao({ fluxo }: { fluxo?: SnapshotFluxo }) {
         <SemDados nome="fluxo e Ibovespa" />
       ) : (
         <>
-          <div className="col" style={{ gap: 2 }}>
-            <span className="tiny muted">Estrangeiro (R$ mi = milhões, bi = bilhões)</span>
-            <GraficoMensal meses={pares.map((p) => ({ mes: p.mes, estrangeiro: p.fluxo }))} />
-          </div>
-          <div className="col" style={{ gap: 2 }}>
-            <span className="tiny muted">Ibovespa no mês</span>
-            <GraficoIbovMensal pares={pares} />
+          <GraficoBolsaEstrangeiro pares={pares} />
+          <div className="tiny muted row" style={{ gap: 12, flexWrap: 'wrap' }}>
+            <span><span aria-hidden="true" style={{ color: 'var(--success)' }}>■</span> <span aria-hidden="true" style={{ color: 'var(--danger)' }}>■</span> barras: estrangeiro no mês (R$ bilhões)</span>
+            <span><span aria-hidden="true" style={{ color: 'var(--accent)' }}>●━●</span> linha amarela: Ibovespa no mês (%, escala à direita)</span>
           </div>
           <div className="small justify" role="note" data-testid="relacao-resumo">
             Em <strong>{sentido.iguais} de {sentido.total} meses</strong> o Ibovespa andou no mesmo sentido do estrangeiro (entrou e subiu, ou saiu e caiu)

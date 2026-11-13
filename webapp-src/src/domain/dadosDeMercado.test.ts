@@ -109,3 +109,17 @@ describe('todos os tipos por mês', () => {
     expect(totaisPorMesTodos(regs, 1)).toHaveLength(1)
   })
 })
+
+describe('escalas alinhadas', () => {
+  it('o zero fica na mesma altura e nenhum valor sai do quadro', async () => {
+    const { escalasAlinhadas } = await import('./dadosDeMercado')
+    const a = [26000, -18000, 5000]
+    const b = [0.126, -0.099, 0.03]
+    const { p, spanA, spanB } = escalasAlinhadas(a, b)
+    const pos = (v: number, s: number) => p - v / s
+    for (const v of a) expect(pos(v, spanA)).toBeGreaterThanOrEqual(-1e-9), expect(pos(v, spanA)).toBeLessThanOrEqual(1 + 1e-9)
+    for (const v of b) expect(pos(v, spanB)).toBeGreaterThanOrEqual(-1e-9), expect(pos(v, spanB)).toBeLessThanOrEqual(1 + 1e-9)
+    expect(pos(0, spanA)).toBeCloseTo(pos(0, spanB))
+    expect(escalasAlinhadas([0, 0], [0, 0]).p).toBeGreaterThan(0)
+  })
+})

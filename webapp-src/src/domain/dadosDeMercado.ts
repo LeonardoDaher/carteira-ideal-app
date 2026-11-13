@@ -212,3 +212,17 @@ export function totaisPorMesTodos(registros: RegistroFluxo[], quantos = 12): Tot
   }
   return [...mapa.values()].sort((a, b) => a.mes.localeCompare(b.mes)).slice(-quantos)
 }
+
+/**
+ * Duas séries no mesmo gráfico, cada uma com a sua escala, mas com o ZERO na mesma altura.
+ * `p` é a fração da altura que fica acima do zero; a posição de um valor é (p − valor/span), de 0 (topo) a 1 (base).
+ */
+export function escalasAlinhadas(a: number[], b: number[]): { p: number; spanA: number; spanB: number } {
+  const ext = (v: number[]) => ({ mx: Math.max(0, ...v), mn: Math.min(0, ...v) })
+  const ea = ext(a)
+  const eb = ext(b)
+  const frac = (e: { mx: number; mn: number }) => (e.mx - e.mn > 0 ? e.mx / (e.mx - e.mn) : 0.5)
+  const p = Math.min(0.9, Math.max(0.1, frac(ea), frac(eb)))
+  const span = (e: { mx: number; mn: number }) => Math.max(e.mx / p, -e.mn / (1 - p), 1e-9)
+  return { p, spanA: span(ea), spanB: span(eb) }
+}
