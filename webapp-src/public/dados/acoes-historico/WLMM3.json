@@ -1,15 +1,13 @@
 {
   "ticker": "WLMM3",
-  "geradoEm": "2026-11-07T13:16:38.200Z",
+  "geradoEm": "2026-11-14T13:39:56.743Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
-  "de": "2021-11-08",
-  "ate": "2026-11-05",
+  "de": "2021-11-16",
+  "ate": "2026-11-13",
   "ajustes": [],
   "saltosRestantes": [],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
   "barras": [
-    ["2021-11-08",32.73,33,32.71,32.71,26],
-    ["2021-11-10",32.74,32.74,32.71,32.71,13],
     ["2021-11-16",36,36.3,35.86,35.86,18],
     ["2021-11-19",35,35.43,35,35,11],
     ["2021-12-09",34.38,34.38,34.38,34.38,3],
@@ -182,6 +180,7 @@
     ["2026-10-21",16.03,16.03,16.03,16.03,2],
     ["2026-10-22",16.22,16.22,16.21,16.21,3],
     ["2026-10-30",15.78,15.78,15.78,15.78,3],
-    ["2026-11-05",16.8,16.8,16.8,16.8,3]
+    ["2026-11-05",16.8,16.8,16.8,16.8,3],
+    ["2026-11-13",15.51,16.49,15.51,16.29,8]
   ]
 }

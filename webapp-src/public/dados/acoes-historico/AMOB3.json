@@ -1,9 +1,9 @@
 {
   "ticker": "AMOB3",
-  "geradoEm": "2026-11-07T13:16:38.200Z",
+  "geradoEm": "2026-11-14T13:39:56.743Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
   "de": "2024-12-16",
-  "ate": "2026-11-06",
+  "ate": "2026-11-13",
   "ajustes": [{"data":"2025-05-29","fator":0.02,"origem":"b3"}],
   "saltosRestantes": [{"data":"2026-10-26","de":17.51,"para":10.49}],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
@@ -478,6 +478,11 @@
     ["2026-11-03",9.41,9.88,9.24,9.32,722],
     ["2026-11-04",9.32,10.02,9.32,9.71,968],
     ["2026-11-05",9.7,10.42,9.52,10.39,990],
-    ["2026-11-06",10.15,10.91,10.15,10.91,583]
+    ["2026-11-06",10.15,10.91,10.15,10.91,583],
+    ["2026-11-09",10.95,11.27,10.6,10.6,1155],
+    ["2026-11-10",10.88,11.18,10.2,10.56,646],
+    ["2026-11-11",10.56,10.85,10.5,10.54,306],
+    ["2026-11-12",10.54,10.83,10.17,10.79,791],
+    ["2026-11-13",10.84,10.84,10.47,10.55,588]
   ]
 }

@@ -1,9 +1,9 @@
 {
   "ticker": "ISAE3",
-  "geradoEm": "2026-11-07T13:16:38.200Z",
+  "geradoEm": "2026-11-14T13:39:56.743Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
   "de": "2024-11-18",
-  "ate": "2026-11-06",
+  "ate": "2026-11-13",
   "ajustes": [],
   "saltosRestantes": [],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
@@ -497,6 +497,11 @@
     ["2026-11-03",34.35,34.35,33.04,33.42,114],
     ["2026-11-04",33.89,34.9,33.43,34.6,99],
     ["2026-11-05",33.58,35.46,33.58,34.73,52],
-    ["2026-11-06",35.05,35.27,35.05,35.27,14]
+    ["2026-11-06",35.05,35.27,35.05,35.27,14],
+    ["2026-11-09",35.34,35.34,33.52,33.9,124],
+    ["2026-11-10",33.73,34.54,33.73,34.54,99],
+    ["2026-11-11",35.53,35.53,35.01,35.22,25],
+    ["2026-11-12",35.2,35.85,35.19,35.49,71],
+    ["2026-11-13",35.48,36.99,35.48,36.54,109]
   ]
 }

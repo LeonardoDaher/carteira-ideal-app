@@ -1,9 +1,9 @@
 {
   "ticker": "ETER3",
-  "geradoEm": "2026-11-07T13:16:38.200Z",
+  "geradoEm": "2026-11-14T13:39:56.743Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
   "de": "2024-08-12",
-  "ate": "2026-11-06",
+  "ate": "2026-11-13",
   "ajustes": [],
   "saltosRestantes": [],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
@@ -566,6 +566,11 @@
     ["2026-11-03",2.68,2.87,2.65,2.79,550],
     ["2026-11-04",2.77,3.05,2.77,2.9,556],
     ["2026-11-05",2.9,2.93,2.82,2.82,271],
-    ["2026-11-06",2.84,2.89,2.82,2.82,321]
+    ["2026-11-06",2.84,2.89,2.82,2.82,321],
+    ["2026-11-09",2.82,2.93,2.79,2.82,713],
+    ["2026-11-10",2.98,2.98,2.8,2.89,228],
+    ["2026-11-11",2.89,2.95,2.85,2.85,241],
+    ["2026-11-12",2.86,2.86,2.8,2.82,176],
+    ["2026-11-13",2.83,2.9,2.81,2.83,221]
   ]
 }

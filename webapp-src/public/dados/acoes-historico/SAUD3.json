@@ -1,9 +1,9 @@
 {
   "ticker": "SAUD3",
-  "geradoEm": "2026-11-07T13:16:38.200Z",
+  "geradoEm": "2026-11-14T13:39:56.743Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
   "de": "2026-05-05",
-  "ate": "2026-11-06",
+  "ate": "2026-11-13",
   "ajustes": [],
   "saltosRestantes": [],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
@@ -137,6 +137,11 @@
     ["2026-11-03",13.47,13.95,13.21,13.93,135544],
     ["2026-11-04",13.95,14.76,13.67,14.76,111530],
     ["2026-11-05",14.81,15.11,14.53,14.8,84146],
-    ["2026-11-06",14.91,15.22,14.72,15.07,74141]
+    ["2026-11-06",14.91,15.22,14.72,15.07,74141],
+    ["2026-11-09",15.07,15.79,15.06,15.75,64211],
+    ["2026-11-10",15.79,16.04,15.6,16.04,65531],
+    ["2026-11-11",16.11,16.52,16.08,16.52,84614],
+    ["2026-11-12",16.46,16.5,16,16.29,87733],
+    ["2026-11-13",16.26,16.52,16.03,16.43,73620]
   ]
 }

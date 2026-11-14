@@ -1,9 +1,9 @@
 {
   "ticker": "NATU3",
-  "geradoEm": "2026-11-07T13:16:38.200Z",
+  "geradoEm": "2026-11-14T13:39:56.743Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
   "de": "2025-07-02",
-  "ate": "2026-11-06",
+  "ate": "2026-11-13",
   "ajustes": [],
   "saltosRestantes": [],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
@@ -346,6 +346,11 @@
     ["2026-11-03",4.7,5.07,4.68,5.07,74423],
     ["2026-11-04",5.09,5.42,5.09,5.42,63716],
     ["2026-11-05",5.38,5.69,5.21,5.35,58191],
-    ["2026-11-06",5.35,5.47,5.17,5.17,70257]
+    ["2026-11-06",5.35,5.47,5.17,5.17,70257],
+    ["2026-11-09",5.22,5.73,5.08,5.71,76608],
+    ["2026-11-10",5.71,5.72,5.52,5.55,57813],
+    ["2026-11-11",5.6,5.68,5.55,5.62,40630],
+    ["2026-11-12",5.54,5.59,5.27,5.33,32775],
+    ["2026-11-13",5.57,5.68,5.04,5.13,114415]
   ]
 }

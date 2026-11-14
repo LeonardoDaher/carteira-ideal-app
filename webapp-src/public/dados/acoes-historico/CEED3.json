@@ -1,14 +1,13 @@
 {
   "ticker": "CEED3",
-  "geradoEm": "2026-11-07T13:16:38.200Z",
+  "geradoEm": "2026-11-14T13:39:56.743Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
-  "de": "2021-11-09",
-  "ate": "2026-11-04",
+  "de": "2021-11-22",
+  "ate": "2026-11-13",
   "ajustes": [],
   "saltosRestantes": [],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
   "barras": [
-    ["2021-11-09",45,45,45,45,5],
     ["2021-11-22",42,42,42,42,4],
     ["2021-11-23",40,40,40,40,4],
     ["2021-12-01",38.66,40.5,38.66,40.5,12],
@@ -180,6 +179,8 @@
     ["2026-10-27",10,10,10,10,1],
     ["2026-10-28",10,10,10,10,1],
     ["2026-10-30",10,10,10,10,1],
-    ["2026-11-04",10,10,10,10,1]
+    ["2026-11-04",10,10,10,10,1],
+    ["2026-11-12",9,9,9,9,1],
+    ["2026-11-13",9,9,9,9,1]
   ]
 }

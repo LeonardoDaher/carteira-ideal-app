@@ -1,9 +1,9 @@
 {
   "ticker": "BIED3",
-  "geradoEm": "2026-11-07T13:16:38.200Z",
+  "geradoEm": "2026-11-14T13:39:56.743Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
   "de": "2024-11-26",
-  "ate": "2026-11-06",
+  "ate": "2026-11-13",
   "ajustes": [],
   "saltosRestantes": [],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
@@ -406,6 +406,10 @@
     ["2026-10-23",5.14,5.5,5.09,5.5,29],
     ["2026-11-03",4.73,4.85,4.5,4.59,10],
     ["2026-11-05",4.9,4.9,4.49,4.71,4],
-    ["2026-11-06",4.54,4.54,4.54,4.54,0]
+    ["2026-11-06",4.54,4.54,4.54,4.54,0],
+    ["2026-11-10",4.68,4.76,4.68,4.76,1],
+    ["2026-11-11",4.83,4.83,4.62,4.72,5],
+    ["2026-11-12",4.64,4.64,4.64,4.64,3],
+    ["2026-11-13",4.5,4.5,4.47,4.48,6]
   ]
 }

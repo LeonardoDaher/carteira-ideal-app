@@ -1,14 +1,13 @@
 {
   "ticker": "CBEE3",
-  "geradoEm": "2026-11-07T13:16:38.200Z",
+  "geradoEm": "2026-11-14T13:39:56.743Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
-  "de": "2021-11-10",
-  "ate": "2026-10-29",
+  "de": "2021-11-18",
+  "ate": "2026-11-11",
   "ajustes": [],
   "saltosRestantes": [{"data":"2024-09-20","de":10,"para":19.99}],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
   "barras": [
-    ["2021-11-10",23,23,23,23,9],
     ["2021-11-18",23,23,23,23,28],
     ["2021-11-23",23,23,23,23,5],
     ["2021-11-24",23.01,23.01,23.01,23.01,2],
@@ -281,6 +280,7 @@
     ["2026-10-26",8.14,8.14,7.8,7.8,21],
     ["2026-10-27",7.8,7.8,7.8,7.8,1],
     ["2026-10-28",7.7,7.7,7.7,7.7,1],
-    ["2026-10-29",7.6,8.19,7.6,8.19,3]
+    ["2026-10-29",7.6,8.19,7.6,8.19,3],
+    ["2026-11-11",8.19,8.19,8.19,8.19,4]
   ]
 }

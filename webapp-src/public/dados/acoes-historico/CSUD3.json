@@ -1,9 +1,9 @@
 {
   "ticker": "CSUD3",
-  "geradoEm": "2026-11-07T13:16:38.200Z",
+  "geradoEm": "2026-11-14T13:39:56.743Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
   "de": "2022-09-15",
-  "ate": "2026-11-06",
+  "ate": "2026-11-13",
   "ajustes": [],
   "saltosRestantes": [],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
@@ -1041,6 +1041,11 @@
     ["2026-11-03",13.8,14.26,13.61,14.11,826],
     ["2026-11-04",14.1,14.64,13.71,13.97,1216],
     ["2026-11-05",14.65,14.81,14.02,14.02,900],
-    ["2026-11-06",13.98,14.78,13.98,14.45,526]
+    ["2026-11-06",13.98,14.78,13.98,14.45,526],
+    ["2026-11-09",14.23,14.61,14.2,14.4,384],
+    ["2026-11-10",14.63,14.63,13.91,13.91,706],
+    ["2026-11-11",14.24,14.24,13.84,14.09,260],
+    ["2026-11-12",13.85,14,13.63,13.87,778],
+    ["2026-11-13",13.87,14.29,13.82,14.29,518]
   ]
 }

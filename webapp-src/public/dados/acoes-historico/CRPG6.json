@@ -1,9 +1,9 @@
 {
   "ticker": "CRPG6",
-  "geradoEm": "2026-11-07T13:16:38.200Z",
+  "geradoEm": "2026-11-14T13:39:56.743Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
   "de": "2021-11-16",
-  "ate": "2026-10-30",
+  "ate": "2026-11-13",
   "ajustes": [],
   "saltosRestantes": [],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
@@ -748,6 +748,8 @@
     ["2026-10-22",9.05,9.6,9.01,9.06,12],
     ["2026-10-23",9.01,9.19,9.01,9.19,9],
     ["2026-10-26",8.98,8.99,8.98,8.99,3],
-    ["2026-10-30",7.52,8.97,7.52,8.97,11]
+    ["2026-10-30",7.52,8.97,7.52,8.97,11],
+    ["2026-11-12",8.02,8.4,8,8,8],
+    ["2026-11-13",8.49,8.7,8,8.45,13]
   ]
 }

@@ -1,9 +1,9 @@
 {
   "ticker": "MBRF3",
-  "geradoEm": "2026-11-07T13:16:38.200Z",
+  "geradoEm": "2026-11-14T13:39:56.743Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
   "de": "2025-09-23",
-  "ate": "2026-11-06",
+  "ate": "2026-11-13",
   "ajustes": [],
   "saltosRestantes": [],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
@@ -287,6 +287,11 @@
     ["2026-11-03",15.47,16.06,15.29,15.79,86798],
     ["2026-11-04",15.82,16.34,15.8,15.91,94427],
     ["2026-11-05",15.91,16.01,15.63,15.63,75602],
-    ["2026-11-06",15.76,15.87,15.56,15.61,66065]
+    ["2026-11-06",15.76,15.87,15.56,15.61,66065],
+    ["2026-11-09",15.7,17.69,15.67,17.61,196701],
+    ["2026-11-10",17.59,17.96,16.87,17.03,87748],
+    ["2026-11-11",17.12,17.76,17.12,17.76,54929],
+    ["2026-11-12",17.75,18.21,17.42,18.13,91560],
+    ["2026-11-13",18.91,18.99,18.13,18.25,109843]
   ]
 }

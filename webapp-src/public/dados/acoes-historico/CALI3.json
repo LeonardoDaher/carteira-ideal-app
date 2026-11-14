@@ -1,9 +1,9 @@
 {
   "ticker": "CALI3",
-  "geradoEm": "2026-11-07T13:16:38.200Z",
+  "geradoEm": "2026-11-14T13:39:56.743Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
   "de": "2022-06-13",
-  "ate": "2026-11-05",
+  "ate": "2026-11-11",
   "ajustes": [],
   "saltosRestantes": [{"data":"2022-06-22","de":10,"para":5.61},{"data":"2023-04-18","de":9.4,"para":15.19}],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
@@ -217,6 +217,8 @@
     ["2026-08-12",29.99,29.99,29.99,29.99,48],
     ["2026-10-23",31.5,31.5,31.5,31.5,3],
     ["2026-11-03",32.99,32.99,32.99,32.99,66],
-    ["2026-11-05",28.11,28.11,28.11,28.11,6]
+    ["2026-11-05",28.11,28.11,28.11,28.11,6],
+    ["2026-11-10",30.8,30.8,30.8,30.8,3],
+    ["2026-11-11",30.84,30.84,30.84,30.84,19]
   ]
 }

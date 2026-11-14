@@ -1,15 +1,13 @@
 {
   "ticker": "ENMT3",
-  "geradoEm": "2026-11-07T13:16:38.200Z",
+  "geradoEm": "2026-11-14T13:39:56.743Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
-  "de": "2021-11-09",
-  "ate": "2026-11-06",
+  "de": "2021-11-16",
+  "ate": "2026-11-13",
   "ajustes": [],
   "saltosRestantes": [],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
   "barras": [
-    ["2021-11-09",80.51,80.51,80.51,80.51,8],
-    ["2021-11-12",79.23,80.4,79,80.4,87],
     ["2021-11-16",82,82,79,80.4,96],
     ["2021-11-17",79.52,79.52,79.52,79.52,16],
     ["2021-11-19",79.01,79.99,79,79.9,32],
@@ -712,6 +710,7 @@
     ["2026-10-30",33,33.49,33,33.49,7],
     ["2026-11-03",31.51,31.51,30.06,30.06,15],
     ["2026-11-04",29.5,29.5,28,28.2,99],
-    ["2026-11-06",28.2,28.2,28.2,28.2,3]
+    ["2026-11-06",28.2,28.2,28.2,28.2,3],
+    ["2026-11-13",28.2,28.2,27.5,27.5,53]
   ]
 }

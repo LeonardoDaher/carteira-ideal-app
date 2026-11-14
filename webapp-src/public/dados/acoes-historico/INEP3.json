@@ -1,9 +1,9 @@
 {
   "ticker": "INEP3",
-  "geradoEm": "2026-11-07T13:16:38.200Z",
+  "geradoEm": "2026-11-14T13:39:56.743Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
   "de": "2022-11-18",
-  "ate": "2026-11-06",
+  "ate": "2026-11-13",
   "ajustes": [{"data":"2023-06-15","fator":0.2,"origem":"b3"}],
   "saltosRestantes": [],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
@@ -996,6 +996,11 @@
     ["2026-11-03",1.05,1.05,0.95,1,27],
     ["2026-11-04",0.96,1.05,0.96,1.02,13],
     ["2026-11-05",1,1.04,0.98,0.99,42],
-    ["2026-11-06",0.98,1.02,0.96,0.99,40]
+    ["2026-11-06",0.98,1.02,0.96,0.99,40],
+    ["2026-11-09",0.98,1.04,0.98,1,10],
+    ["2026-11-10",0.98,1.01,0.98,1,6],
+    ["2026-11-11",0.98,1.02,0.97,0.99,45],
+    ["2026-11-12",0.98,0.99,0.97,0.99,41],
+    ["2026-11-13",1,1,0.97,0.99,23]
   ]
 }
