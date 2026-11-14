@@ -110,6 +110,8 @@ test('trimestre provisório = acumulado da B3 menos os trimestres anteriores do 
   assert.equal(sem.dataAproximada, true)
   // CVM já tem o trimestre: não há provisório
   assert.equal(trimestreProvisorio({ trimestres: [...trimestres, t('2026-09-30', '3T26', 1, 1, 1)], b3: lerFinanceiro(RESUMO_VALE), dataCorte: '2026-10-30' }), null)
+  // B3 só com o individual e histórico consolidado (caso do BBAS3): misturaria bases, então não há provisório
+  assert.equal(trimestreProvisorio({ trimestres, b3: { ...lerFinanceiro(RESUMO_VALE), consolidacao: 'individual' }, dataCorte: '2026-10-30' }), null)
   // falta um trimestre do ano: não dá para isolar
   assert.equal(trimestreProvisorio({ trimestres: trimestres.slice(0, 3), b3: lerFinanceiro(RESUMO_VALE), dataCorte: '2026-10-30' }), null)
 })

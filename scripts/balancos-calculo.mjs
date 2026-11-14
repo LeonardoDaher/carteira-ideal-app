@@ -342,7 +342,8 @@ export function verificarSanidadeBalancos(saida, { minimoEmpresas = 100 } = {}) 
  * Balanço recém-divulgado que a CVM ainda não publicou em arquivo aberto : o resumo da B3 (acumulado do exercício) vira o
  * trimestre ISOLADO descontando os trimestres anteriores do mesmo exercício, que já estão nos dados da CVM. Só vale para o trimestre
  * IMEDIATAMENTE seguinte ao último da CVM e para exercício igual ao ano civil. Receita, lucro, ativo e patrimônio líquido; EBIT, caixa e dívida
- * ficam null até a CVM publicar. Devolve o trimestre (com `provisorio: true`) ou null quando não dá para montar com segurança.
+ * ficam null até a CVM publicar. Devolve o trimestre (com `provisorio: true`) ou null quando não dá para montar com segurança (inclusive
+ * quando a B3 traz só o individual e o histórico é consolidado).
  */
 export function trimestreProvisorio({ trimestres, b3, entrega, dataCorte }) {
   const ultimo = trimestres.at(-1)
@@ -350,6 +351,9 @@ export function trimestreProvisorio({ trimestres, b3, entrega, dataCorte }) {
   if (b3.periodo !== proximoPeriodo(ultimo.periodo)) return null
   const ano = b3.periodo.slice(0, 4)
   if (b3.acumuladoDesde !== `${ano}-01-01`) return null
+  // A B3 às vezes só traz o individual (bancos como o BBAS3): descontar trimestres consolidados de um acumulado individual dá lucro e
+  // receita sem sentido. Só vale quando a base é a mesma dos trimestres do histórico.
+  if (b3.consolidacao !== ultimo.consolidacao) return null
   const mesesNoAno = Number(b3.periodo.slice(5, 7))
   const anteriores = trimestres.filter((t) => t.periodo.slice(0, 4) === ano && t.periodo < b3.periodo)
   if (anteriores.length !== mesesNoAno / 3 - 1) return null
