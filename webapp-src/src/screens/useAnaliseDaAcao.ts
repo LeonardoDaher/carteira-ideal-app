@@ -12,11 +12,15 @@ import type { EstadoHistoricoLongo } from '../data/useHistoricoLongo'
 import { analisarConfluencia } from '../domain/confluencia'
 import type { Confluencia } from '../domain/confluencia'
 import type { SnapshotAcoes } from '../domain/acoes'
+import type { SnapshotBalancos } from '../domain/balancos'
+import { aplicarBalancoNovo } from '../domain/balancoProvisorio'
 import { SNAPSHOT_MERCADO } from '../data/snapshotMercado'
 import { SNAPSHOT_ACOES_DIVIDENDOS } from '../data/snapshotAcoesDividendos'
 
 export const CAMINHO_SERIES = 'dados/acoes-series.json'
 export const CAMINHO_FUNDAMENTOS = 'dados/fundamentos.json'
+const CAMINHO_BALANCOS = 'dados/balancos.json'
+const SEM_BALANCOS = { versao: '', geradoEm: '', dataCorte: '', fonte: '', excluidas: [], empresas: {} } satisfies SnapshotBalancos
 
 export interface DadosDaAnalise {
   series: EstadoArquivo<SnapshotSeries>
@@ -46,7 +50,7 @@ export function premissasDoMercado(): Partial<Premissas> {
  * quando uma das abas de análise está aberta. `precoDe` vem do arquivo de ações do app (cotação de fechamento por código).
  */
 export function useAnaliseDaAcao({
-  ticker, horizonte, ativo, precoDe, snapshot, seriesInjetadas, fundamentosInjetados, historicoInjetado, premissas,
+  ticker, horizonte, ativo, precoDe, snapshot, seriesInjetadas, fundamentosInjetados, balancosInjetados, historicoInjetado, premissas,
 }: {
   ticker: string | null
   horizonte: Horizonte
@@ -55,11 +59,14 @@ export function useAnaliseDaAcao({
   snapshot: SnapshotAcoes
   seriesInjetadas?: SnapshotSeries
   fundamentosInjetados?: SnapshotFundamentos
+  balancosInjetados?: SnapshotBalancos
   historicoInjetado?: Record<string, HistoricoLongo>
   premissas?: Partial<Premissas>
 }): DadosDaAnalise {
   const [series, recarregarSeries] = useArquivoDados<SnapshotSeries>(CAMINHO_SERIES, ativo, seriesInjetadas)
   const [fundamentos, recarregarFundamentos] = useArquivoDados<SnapshotFundamentos>(CAMINHO_FUNDAMENTOS, ativo, fundamentosInjetados)
+  // Balanços: só para pôr o trimestre novo da B3 (ou o aviso) nos fundamentos; se não carregar, a análise segue só com a CVM. Nos testes, sem arquivo injetado, não há balanço.
+  const [balancos] = useArquivoDados<SnapshotBalancos>(CAMINHO_BALANCOS, ativo, balancosInjetados ?? (fundamentosInjetados ? SEM_BALANCOS : undefined))
   const premissasEfetivas = useMemo(() => premissas ?? premissasDoMercado(), [premissas])
 
   const sequencia = series.tipo === 'pronto' && ticker ? series.dados.ativos[ticker] : undefined
@@ -76,7 +83,9 @@ export function useAnaliseDaAcao({
     return analisarTecnica({ ticker, pregoes: series.dados.pregoes, pontos: sequencia, referencia: series.dados.referencia, alertas: series.dados.alertas[ticker], horizonte })
   }, [series, ticker, sequencia, horizonte])
 
-  const empresa = fundamentos.tipo === 'pronto' && ticker ? fundamentos.dados.empresas[ticker] : undefined
+  const empresaDaCvm = fundamentos.tipo === 'pronto' && ticker ? fundamentos.dados.empresas[ticker] : undefined
+  const balancoDaEmpresa = balancos.tipo === 'pronto' && ticker ? balancos.dados.empresas[ticker] : undefined
+  const empresa = useMemo(() => (empresaDaCvm ? aplicarBalancoNovo(empresaDaCvm, balancoDaEmpresa) : undefined), [empresaDaCvm, balancoDaEmpresa])
   const fundamentalista = useMemo(() => {
     if (fundamentos.tipo !== 'pronto' || !empresa) return null
     return analisarFundamentos({

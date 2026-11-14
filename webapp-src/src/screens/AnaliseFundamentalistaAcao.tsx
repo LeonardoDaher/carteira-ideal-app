@@ -10,6 +10,25 @@ import { corDoSinal, dataLonga, formatarIndicador, fracaoEmPercentual, milReais,
 const tomDaCategoria = (c: CategoriaAnalise): Tom => (c === 'atrativa' || c === 'atrativa-com-ressalvas' ? 'positivo' : c === 'neutra' ? 'neutro' : 'negativo')
 const tomDaRecomendacao = (r: Recomendacao): Tom => (r === 'considerar-entrada' ? 'positivo' : r === 'manter-acompanhar' || r === 'aguardar-preco' ? 'neutro' : 'negativo')
 
+/** Selo e explicação de balanço novo que a CVM ainda não publicou: provisório da B3 (números já usados) ou só o aviso (bancos e casos sem como isolar o trimestre). */
+function AvisoDeBalancoNovo({ b, ultimoDocumento }: { b: NonNullable<AnaliseFundamentalista['dados']['balancoNovo']>; ultimoDocumento: string }) {
+  const quando = b.dtReceb ? `${b.aproximada ? 'até ' : 'em '}${dataLonga(b.dtReceb)}` : ''
+  const provisorio = b.situacao === 'provisorio-b3'
+  return (
+    <div className="card-outline col" style={{ gap: 4 }} role="status" data-testid="balanco-novo">
+      <div className="row" style={{ gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+        <Selo tom={provisorio ? 'neutro' : 'negativo'}>{provisorio ? `${b.rotulo} provisório (B3)` : `${b.rotulo} aguardando a CVM`}</Selo>
+        <span className="small">Balanço divulgado {quando}.</span>
+      </div>
+      <span className="tiny muted justify">
+        {provisorio
+          ? `Receita, lucro, ativo e patrimônio líquido já usam o resumo do balanço na B3, até a CVM publicar o arquivo aberto. EBIT, EBITDA, fluxo de caixa, caixa e dívida seguem o último documento da CVM (${ultimoDocumento}).`
+          : `Os números desta análise ainda são os do último documento da CVM (${ultimoDocumento}): o resumo da B3 não serve para montar o trimestre desta empresa (bancos: a B3 só traz o individual). Entram sozinhos quando a CVM publicar.`}
+      </span>
+    </div>
+  )
+}
+
 /** Aba "Análise fundamentalista": indicadores da CVM, valor justo por cenário, notas, alertas e leitura final, tudo calculado por regra. */
 export function AnaliseFundamentalistaAcao({ dados, ticker, nome }: { dados: DadosDaAnalise; ticker: string; nome: string | null }) {
   if (dados.fundamentos.tipo !== 'pronto') {
@@ -27,8 +46,9 @@ export function AnaliseFundamentalistaAcao({ dados, ticker, nome }: { dados: Dad
   return (
     <div className="col" style={{ gap: 14 }} data-testid="analise-fundamentalista">
       <ResumoFundamentalista f={f} nome={nome} />
+      {f.dados.balancoNovo && <AvisoDeBalancoNovo b={f.dados.balancoNovo} ultimoDocumento={f.dados.documento} />}
 
-      <Modulo titulo="Indicadores atuais" subtitulo={`12 meses até ${dataLonga(f.dados.ultimoTrimestre)}`} aberto>
+      <Modulo titulo="Indicadores atuais" subtitulo={`12 meses até ${dataLonga(f.dados.ultimoTrimestre)}${f.dados.balancoNovo?.situacao === 'provisorio-b3' ? ' (provisório)' : ''}`} aberto>
         <div className="col" style={{ gap: 14 }}>
           <Grupo titulo="Rentabilidade e eficiência" indicadores={f.rentabilidade} />
           <Grupo titulo={f.financeira ? 'Capitalização' : 'Endividamento e geração de caixa'} indicadores={f.endividamentoECaixa} />
@@ -148,7 +168,7 @@ export function AnaliseFundamentalistaAcao({ dados, ticker, nome }: { dados: Dad
 
       <Modulo titulo="Fontes, data de atualização e limitações">
         <div className="col" style={{ gap: 0 }}>
-          <Linha rotulo="Fonte" valor="CVM, dados abertos (DFP e ITR)" />
+          <Linha rotulo="Fonte" valor={f.dados.balancoNovo?.situacao === 'provisorio-b3' ? 'CVM, dados abertos (DFP e ITR), e resumo do balanço na B3 (provisório)' : 'CVM, dados abertos (DFP e ITR)'} />
           <Linha rotulo="Último exercício" valor={f.dados.ultimoExercicio ? dataLonga(f.dados.ultimoExercicio) : '—'} />
           <Linha rotulo="Último documento" valor={f.dados.documento} />
           <Linha rotulo="Fundamentos atualizados em" valor={f.dados.geradoEm ? dataLonga(f.dados.geradoEm.slice(0, 10)) : '—'} />

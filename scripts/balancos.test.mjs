@@ -52,7 +52,7 @@ test('sanidade recusa arquivo com poucas empresas', () => {
 })
 
 import { acharEntrega, lerAvisosDeDemonstracoes, lerFinanceiro, numeroB3 } from './b3-balancos.mjs'
-import { trimestreProvisorio } from './balancos-calculo.mjs'
+import { incorporarB3, trimestreProvisorio } from './balancos-calculo.mjs'
 
 const RESUMO_VALE = {
   consolidated: [
@@ -114,6 +114,19 @@ test('trimestre provisório = acumulado da B3 menos os trimestres anteriores do 
   assert.equal(trimestreProvisorio({ trimestres, b3: { ...lerFinanceiro(RESUMO_VALE), consolidacao: 'individual' }, dataCorte: '2026-10-30' }), null)
   // falta um trimestre do ano: não dá para isolar
   assert.equal(trimestreProvisorio({ trimestres: trimestres.slice(0, 3), b3: lerFinanceiro(RESUMO_VALE), dataCorte: '2026-10-30' }), null)
+})
+
+test('B3 só com o individual: sem provisório, mas a empresa fica marcada como aguardando a CVM', () => {
+  const t = (periodo, rotulo) => ({ periodo, rotulo, tipo: 'ITR', dtReceb: null, link: null, consolidacao: 'consolidada', receita: 1, ebit: 1, lucroLiquido: 1, lucroControladores: 1, ativoTotal: 1, patrimonioLiquido: 1, caixa: 1, divida: 1 })
+  const empresa = { ticker: 'XXXX3', trimestres: [t('2025-09-30', '3T25'), t('2025-12-31', '4T25'), t('2026-03-31', '1T26'), t('2026-06-30', '2T26')], proxima: null }
+  const b3 = { ...lerFinanceiro(RESUMO_VALE), consolidacao: 'individual' }
+  const nova = incorporarB3({ empresa, docs: [], b3, entrega: { dia: '2026-11-12', link: 'u' }, dataCorte: '2026-11-14' })
+  assert.equal(nova.trimestres.length, 4)
+  assert.deepEqual(nova.aguardandoCvm, { periodo: '2026-09-30', rotulo: '3T26', dtReceb: '2026-11-12' })
+  const aprox = incorporarB3({ empresa, docs: [], b3, entrega: null, dataCorte: '2026-11-14' })
+  assert.equal(aprox.aguardandoCvm.dataAproximada, true)
+  // sem balanço mais novo na B3, nada muda
+  assert.equal(incorporarB3({ empresa, docs: [], b3: { ...b3, periodo: '2026-06-30' }, entrega: null, dataCorte: '2026-11-14' }), empresa)
 })
 
 import { anoMesDoPeriodo, lerCadastro, lerCapital, raizDoCnpj, urlCapital } from './bcb-ifdata.mjs'

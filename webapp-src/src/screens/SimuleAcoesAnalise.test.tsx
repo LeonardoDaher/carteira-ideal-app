@@ -276,6 +276,20 @@ describe('Simule Ações: abas de análise', () => {
     expect(screen.getByText(/Margem de segurança = 1 − preço ÷ valor justo/)).toBeTruthy()
   })
 
+  it('balanço novo da B3 antes da CVM: selo de provisório, 12 meses atualizados e o aviso nas limitações; sem balanço novo, sem selo', () => {
+    const t = (periodo: string, rotulo: string, extra: object = {}) => ({ periodo, rotulo, tipo: 'ITR', dtReceb: '2025-11-10', link: null, consolidacao: 'consolidada', receita: 300_000, ebit: null, ebitda: null, fco: null, capex: null, dividendosPagos: null, lucroLiquido: 40_000, lucroControladores: 40_000, ativoTotal: 1_000_000, patrimonioLiquido: 800_000, plControladores: 800_000, caixa: null, divida: null, ...extra })
+    const balancos = { versao: '1', geradoEm: '', dataCorte: '', fonte: '', excluidas: [], empresas: { ALFA3: { ticker: 'ALFA3', nome: null, setor: null, financeira: false, cnpj: '1', proxima: null, trimestres: [t('2025-09-30', '3T25', { receita: 250_000, lucroLiquido: 30_000, lucroControladores: 30_000 }), t('2026-09-30', '3T26', { dtReceb: '2026-11-12', provisorio: true })] } } }
+    const { unmount } = render(<SimuleAcoes ctx={ctx} snapshot={snapshot} series={series} fundamentos={fundamentos} balancos={balancos as never} />)
+    fireEvent.click(screen.getByRole('tab', { name: /Análise fundamentalista/ }))
+    expect(screen.getByTestId('balanco-novo').textContent).toContain('3T26 provisório (B3)')
+    expect(screen.getByTestId('balanco-novo').textContent).toContain('12/11/2026')
+    expect(screen.getByTestId('analise-fundamentalista').textContent).toContain('12 meses até 30/09/2026 (provisório)')
+    expect(screen.getByTestId('analise-fundamentalista').textContent).toContain('Receita, lucro, ativo total e patrimônio líquido já são do 3T26')
+    unmount()
+    abrir(/Análise fundamentalista/)
+    expect(screen.queryByTestId('balanco-novo')).toBeNull()
+  })
+
   it('a fundamentalista não usa o horizonte (sem os botões de curto, médio e longo)', () => {
     abrir(/Análise fundamentalista/)
     expect(screen.queryByRole('group', { name: 'Horizonte da análise' })).toBeNull()

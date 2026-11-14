@@ -398,7 +398,15 @@ export function trimestreProvisorio({ trimestres, b3, entrega, dataCorte }) {
 /** Acrescenta o trimestre provisório (se houver) a uma empresa já montada e recalcula a próxima divulgação com a entrega real. */
 export function incorporarB3({ empresa, docs, b3, entrega, dataCorte }) {
   const q = trimestreProvisorio({ trimestres: empresa.trimestres, b3, entrega, dataCorte })
-  if (!q) return empresa
+  if (!q) {
+    // A B3 já mostra um balanço mais novo que a CVM, mas não dá para montar o trimestre com segurança (só o individual, falta trimestre
+    // do ano, holding...): o app avisa que há balanço novo aguardando a CVM, sem usar números.
+    const ultimo = empresa.trimestres.at(-1)
+    if (ultimo && b3 && b3.periodo > ultimo.periodo && b3.periodo === proximoPeriodo(ultimo.periodo)) {
+      return { ...empresa, aguardandoCvm: { periodo: b3.periodo, rotulo: rotuloDoTrimestre(b3.periodo), dtReceb: entrega?.dia ?? dataCorte, ...(entrega ? {} : { dataAproximada: true }) } }
+    }
+    return empresa
+  }
   return { ...empresa, trimestres: [...empresa.trimestres, q].slice(-MAXIMO_TRIMESTRES), proxima: proximaDivulgacao([...docs, { doc: q.tipo, dtRefer: q.periodo, dtReceb: q.dtReceb }], dataCorte) }
 }
 

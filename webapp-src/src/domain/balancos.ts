@@ -73,6 +73,8 @@ export interface EmpresaBalanco {
   cnpj: string
   trimestres: Trimestre[]
   proxima: ProximaDivulgacao | null
+  /** A B3 já mostra um balanço mais novo que a CVM, mas o trimestre não pôde ser montado (D137): só o aviso, sem números. */
+  aguardandoCvm?: { periodo: string; rotulo: string; dtReceb: string | null; dataAproximada?: boolean }
 }
 
 export interface SnapshotBalancos {

@@ -31,6 +31,7 @@ import { NosRadares } from '../ui/DestaquesDoAtivo'
 import { SNAPSHOT_RADAR_DIVIDENDOS } from '../data/snapshotRadarDividendos'
 import { indexarDestaques } from '../domain/destaquesRadares'
 import type { DestaquesDoAtivo, IndiceDeDestaques } from '../domain/destaquesRadares'
+import type { SnapshotBalancos } from '../domain/balancos'
 import { useAnaliseDaAcao } from './useAnaliseDaAcao'
 import { ROTULO_HORIZONTE } from '../domain/confluencia'
 import type { Horizonte, HistoricoLongo, SnapshotSeries } from '../domain/analiseTecnica'
@@ -80,6 +81,7 @@ export function SimuleAcoes({
   snapshot = SNAPSHOT_ACOES,
   series,
   fundamentos,
+  balancos,
   historico,
   destaques,
 }: {
@@ -90,6 +92,7 @@ export function SimuleAcoes({
   /** Só nos testes: séries de preço e fundamentos injetados (no app, baixados ao abrir uma aba de análise). */
   series?: SnapshotSeries
   fundamentos?: SnapshotFundamentos
+  balancos?: SnapshotBalancos
   /** Só nos testes: histórico longo (COTAHIST) por ticker; no app, um arquivo por ação baixado ao abrir a análise técnica. */
   historico?: Record<string, HistoricoLongo>
   /** Só nos testes: destaques dos radares por código; no app, vêm do Top 15 de dividendos, do de endividadas e do radar de dividendos. */
@@ -150,7 +153,7 @@ export function SimuleAcoes({
   }
 
   const selecionado = selecao?.acao.ticker
-  const dadosDaAnalise = useAnaliseDaAcao({ ticker: selecionado ?? null, horizonte, ativo: emAnalise, precoDe, snapshot, seriesInjetadas: series, fundamentosInjetados: fundamentos, historicoInjetado: historico })
+  const dadosDaAnalise = useAnaliseDaAcao({ ticker: selecionado ?? null, horizonte, ativo: emAnalise, precoDe, snapshot, seriesInjetadas: series, fundamentosInjetados: fundamentos, balancosInjetados: balancos, historicoInjetado: historico })
 
   // Na análise, escolher uma ação não rola a tela até o cartão de simulação.
   const escolherParaAnalise = (b: AcaoBusca) => {

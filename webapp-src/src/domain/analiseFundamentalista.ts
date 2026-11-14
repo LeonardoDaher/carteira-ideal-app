@@ -49,6 +49,17 @@ export interface ClasseDeAcao {
   precoAproximado: boolean
 }
 
+/** Balanço divulgado que a CVM ainda não publicou em arquivo aberto (D137). */
+export interface BalancoNovo {
+  /** provisorio-b3: receita, lucro, ativo e patrimônio dos 12 meses já usam o resumo da B3; aguardando-cvm: há balanço novo, mas os números seguem os da CVM. */
+  situacao: 'provisorio-b3' | 'aguardando-cvm'
+  periodo: string
+  rotulo: string
+  dtReceb: string | null
+  /** Sem o aviso da B3, a data é a da coleta (o balanço saiu até esse dia). */
+  aproximada: boolean
+}
+
 export interface EmpresaFundamentos {
   ticker: string
   nome: string
@@ -62,6 +73,8 @@ export interface EmpresaFundamentos {
   ttm: PeriodoFundamental | null
   acoes: { classes: ClasseDeAcao[]; documento: string; ajusteUnidade: string | null; ajusteDesdobramento: number | null; pvpImplicito: number | null } | null
   alertas: string[]
+  /** Preenchido pelo app (aplicarBalancoNovo), nunca pelo arquivo. */
+  balancoNovo?: BalancoNovo
 }
 
 export interface SnapshotFundamentos {
@@ -211,7 +224,7 @@ export interface AnaliseFundamentalista {
   setor: string
   financeira: boolean
   mercado: { preco: number | null; valorMercado: number | null; ev: number | null; acoes: number | null; aproximado: boolean }
-  dados: { ultimoExercicio: string | null; ultimoTrimestre: string; documento: string; dataCorte: string | null; geradoEm: string | null; exercicios: number; fonte: string; limitacoes: string[] }
+  dados: { ultimoExercicio: string | null; ultimoTrimestre: string; documento: string; dataCorte: string | null; geradoEm: string | null; exercicios: number; fonte: string; limitacoes: string[]; balancoNovo: BalancoNovo | null }
   historico: ColunaHistorica[]
   cagr: { receita: number | null; lucro: number | null; lpa: number | null; anos: number }
   rentabilidade: Indicador[]
@@ -683,7 +696,8 @@ export function analisarFundamentos(entrada: EntradaFundamentalista): AnaliseFun
     pesos: { ...PREMISSAS_PADRAO.pesos, ...entrada.premissas?.pesos },
   }
   const { precoDe } = entrada
-  const fonte = FONTE_CVM
+  const novo = e.balancoNovo ?? null
+  const fonte = novo?.situacao === 'provisorio-b3' ? `${FONTE_CVM}; ${novo.rotulo} provisório: resumo do balanço na B3` : FONTE_CVM
   const cols = colunas(e)
   const anuais = cols.filter((c) => !c.ttm)
   const atual = e.ttm ?? e.anual[e.anual.length - 1]
@@ -692,6 +706,8 @@ export function analisarFundamentos(entrada: EntradaFundamentalista): AnaliseFun
   const capitalSuspeito = e.alertas.includes('capital_implausivel')
   const mercado = valorDeMercado(e, precoDe)
   const limitacoes: string[] = [
+    ...(novo?.situacao === 'provisorio-b3' ? [`Receita, lucro, ativo total e patrimônio líquido já são do ${novo.rotulo}, pelo resumo do balanço na B3 (provisório, até a CVM publicar o arquivo aberto). EBIT, EBITDA, fluxo de caixa, caixa e dívida seguem os 12 meses até ${dataBr(e.ultimaDemonstracao.dtRefer)}.`] : []),
+    ...(novo?.situacao === 'aguardando-cvm' ? [`O balanço do ${novo.rotulo} já foi divulgado, mas a CVM ainda não publicou o arquivo aberto e o resumo da B3 não serve para esta empresa (${e.financeira ? 'instituição financeira: a B3 só traz o individual' : 'não dá para isolar o trimestre com segurança'}): os números abaixo seguem o último balanço da CVM, de ${dataBr(e.ultimaDemonstracao.dtRefer)}.`] : []),
     'Demonstrações da CVM (DFP e ITR), em base consolidada quando existe; lucro recorrente não é divulgado pela CVM, então o lucro é o reportado.',
     'Sem série de preços de 5 anos, o múltiplo atual não é comparado ao histórico da própria empresa.',
     'Sem IPCA no app: o crescimento é nominal, sem separar o efeito da inflação.',
@@ -1010,6 +1026,7 @@ export function analisarFundamentos(entrada: EntradaFundamentalista): AnaliseFun
       exercicios: e.anual.length,
       fonte,
       limitacoes,
+      balancoNovo: novo,
     },
     historico: cols,
     cagr: cg,
