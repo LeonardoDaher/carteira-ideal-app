@@ -208,7 +208,7 @@ function CartaoQuem({ fluxo }: { fluxo?: SnapshotFluxo }) {
               <tbody>
                 {meses.map((m) => (
                   <tr key={m.mes}>
-                    <th scope="row" style={{ textAlign: 'left', fontWeight: 400, whiteSpace: 'nowrap' }}>{rotuloMes(m.mes).split('/')[0]}</th>
+                    <th scope="row" style={{ textAlign: 'left', fontWeight: 400, whiteSpace: 'nowrap' }}>{rotuloMes(m.mes)}</th>
                     {TIPOS_INVESTIDOR.map(({ campo }, i) => {
                       const v = m[campo]
                       const forca = Math.min(1, Math.abs(v) / maximo[i])
@@ -371,7 +371,7 @@ function CartaoAluguel({ snapshot }: { snapshot?: SnapshotAluguel }) {
                     <div style={{ width: `${Math.max(2, (r.saldoFinanceiro / maior) * 100)}%`, height: '100%', borderRadius: 4, background: 'var(--accent)' }} />
                   </div>
                   <div className="tiny muted row" style={{ gap: 12, flexWrap: 'wrap' }}>
-                    <span>{((pesos.get(r.ticker) ?? 0) * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}% do total</span>
+                    <span>{((pesos.get(r.ticker) ?? 0) * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}% de todo o aluguel de ações</span>
                     {typeof v === 'number' && (
                       <span style={{ color: v > 0 ? 'var(--danger)' : v < 0 ? 'var(--success)' : undefined }}>
                         {v > 0 ? '▲' : v < 0 ? '▼' : '='} {Math.abs(v * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}% no dia
