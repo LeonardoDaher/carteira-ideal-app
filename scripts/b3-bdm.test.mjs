@@ -32,3 +32,16 @@ test('posições em aberto: só ações e units, linhas Total', () => {
   assert.equal(r.registros.length, 1)
   assert.deepEqual([r.registros[0].ticker, r.registros[0].saldoQuantidade, r.registros[0].saldoFinanceiro], ['PETR4', 210327379, 11278915319.73])
 })
+
+import { acrescentarHistorico } from './b3-bdm.mjs'
+
+test('histórico: acrescenta o retrato, mantém a ordem e substitui a mesma data', () => {
+  const r1 = [{ ticker: 'PETR4', saldoFinanceiro: 11278915319.73, saldoQuantidade: 210327379 }]
+  let h = acrescentarHistorico(undefined, '2026-11-06', r1)
+  assert.deepEqual(h.retratos[0], { data: '2026-11-06', acoes: { PETR4: [11278915320, 210327379] } })
+  h = acrescentarHistorico(h, '2026-10-30', [{ ticker: 'PETR4', saldoFinanceiro: 1000, saldoQuantidade: 5 }])
+  assert.deepEqual(h.retratos.map((x) => x.data), ['2026-10-30', '2026-11-06'])
+  h = acrescentarHistorico(h, '2026-11-06', [{ ticker: 'VALE3', saldoFinanceiro: 7, saldoQuantidade: null }])
+  assert.equal(h.retratos.length, 2)
+  assert.deepEqual(h.retratos[1].acoes, { VALE3: [7, null] })
+})

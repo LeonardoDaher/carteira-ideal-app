@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react'
 import { useArquivoDados } from '../data/useArquivoDados'
 import {
-  ROTULO_PERIODO, dataBR, formatarMilhoes, formatarReaisCurto, maisAlugadas, mediaMovel, pesoNoTotal, recortar, correlacao, mesmoSentido, parear, escalasAlinhadas, rotuloMes, semPrimeiroMesIncompleto, TIPOS_INVESTIDOR, totaisPorMesTodos, sequenciaAtual, somar, totaisPorMes, variacaoMensal,
+  ROTULO_PERIODO, dataBR, formatarMilhoes, formatarReaisCurto, maisAlugadas, mediaMovel, pesoNoTotal, recortar, correlacao, mesmoSentido, parear, escalasAlinhadas, rotuloMes, semPrimeiroMesIncompleto, TIPOS_INVESTIDOR, totaisPorMesTodos, sequenciaAtual, somar, totaisPorMes, variacaoMensal, resumoAluguelPreco, SALDO_MINIMO_COMPARACAO,
 } from '../domain/dadosDeMercado'
-import type { BarraIndice, Periodo, RegistroFluxo, SnapshotAluguel, SnapshotFluxo, ParMes, TotalMes } from '../domain/dadosDeMercado'
+import type { BarraIndice, RegistroAluguel, Periodo, RegistroFluxo, SnapshotAluguel, SnapshotFluxo, ParMes, TotalMes } from '../domain/dadosDeMercado'
 import { EstadoDoArquivo } from '../ui/BlocosDeAnalise'
 
 export const CAMINHO_FLUXO = 'dados/fluxoEstrangeiro.json'
@@ -343,6 +343,129 @@ function CartaoRelacao({ fluxo }: { fluxo?: SnapshotFluxo }) {
   )
 }
 
+const pctSinal = (v: number, casas = 1) => `${v > 0 ? '+' : v < 0 ? '−' : ''}${Math.abs(v * 100).toLocaleString('pt-BR', { minimumFractionDigits: casas, maximumFractionDigits: casas })}%`
+
+/** Uma bolinha por ação: eixo horizontal = dias de volume alugado, vertical = variação do preço na janela. Vermelho = caiu mais que o Ibovespa. */
+export function GraficoAluguelPreco({ pontos, ibov20 }: { pontos: RegistroAluguel[]; ibov20: number | null }) {
+  const W = 340
+  const H = 250
+  const L = 38
+  const R = 8
+  const topo = 10
+  const base = H - 30
+  const xs = pontos.map((p) => p.diasDeVolume as number).sort((a, b) => a - b)
+  const xMax = Math.max(1, Math.ceil((xs[Math.min(xs.length - 1, Math.floor(xs.length * 0.95))] ?? 1) * 1.05))
+  const ys = pontos.map((p) => p.var20 as number)
+  const yMax = Math.max(0.02, ...ys, ibov20 ?? 0)
+  const yMin = Math.min(-0.02, ...ys, ibov20 ?? 0)
+  const x = (v: number) => L + (Math.min(v, xMax) / xMax) * (W - L - R)
+  const y = (v: number) => topo + ((yMax - v) / (yMax - yMin)) * (base - topo)
+  const passo = [0.05, 0.1, 0.2, 0.25, 0.5].find((s) => (yMax - yMin) / s <= 6) ?? 0.5
+  const marcas: number[] = []
+  for (let v = Math.ceil(yMin / passo) * passo; v <= yMax + 1e-9; v += passo) marcas.push(+v.toFixed(4))
+  const rotulados = new Set([...pontos].sort((a, b) => b.saldoFinanceiro - a.saldoFinanceiro).slice(0, 7).map((p) => p.ticker))
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Cada ponto é uma ação. Horizontal: dias de volume alugado. Vertical: variação do preço nos últimos 20 pregões. Ibovespa na janela: ${ibov20 === null ? 'indisponível' : pctSinal(ibov20)}.`} style={{ width: '100%', height: 'auto', maxHeight: 320, display: 'block' }}>
+      {marcas.map((v) => (
+        <g key={v}>
+          <line x1={L} x2={W - R} y1={y(v)} y2={y(v)} stroke="var(--border)" strokeWidth={Math.abs(v) < 1e-9 ? 1 : 0.5} strokeDasharray={Math.abs(v) < 1e-9 ? undefined : '2 3'} />
+          <text x={L - 4} y={y(v) + 3} textAnchor="end" style={{ fill: 'var(--text-muted)', fontSize: 9 }}>{Math.abs(v) < 1e-9 ? '0%' : pctSinal(v, 0)}</text>
+        </g>
+      ))}
+      {ibov20 !== null && (
+        <g>
+          <line x1={L} x2={W - R} y1={y(ibov20)} y2={y(ibov20)} stroke="var(--accent)" strokeWidth={1.5} strokeDasharray="5 3" />
+          <text x={W - R} y={y(ibov20) - 4} textAnchor="end" style={{ fill: 'var(--accent)', fontSize: 9, fontWeight: 700 }}>Ibovespa {pctSinal(ibov20)}</text>
+        </g>
+      )}
+      {pontos.map((p) => (
+        <circle key={p.ticker} cx={x(p.diasDeVolume as number)} cy={y(p.var20 as number)} r={3.2} fill={ibov20 !== null && (p.var20 as number) < ibov20 ? 'var(--danger)' : 'var(--success)'} opacity={0.8} />
+      ))}
+      {pontos.filter((p) => rotulados.has(p.ticker)).map((p) => (
+        <text key={`t-${p.ticker}`} x={x(p.diasDeVolume as number) + 5} y={y(p.var20 as number) - 4} style={{ fill: 'var(--text)', fontSize: 8, fontWeight: 600, paintOrder: 'stroke', stroke: 'var(--bg, #000)', strokeWidth: 2.5 }}>{p.ticker}</text>
+      ))}
+      {[0, 0.25, 0.5, 0.75, 1].map((f) => (
+        <text key={f} x={L + f * (W - L - R)} y={base + 13} textAnchor={f === 0 ? 'start' : f === 1 ? 'end' : 'middle'} style={{ fill: 'var(--text-muted)', fontSize: 9 }}>{Math.round(xMax * f)}</text>
+      ))}
+      <text x={(L + W - R) / 2} y={H - 4} textAnchor="middle" style={{ fill: 'var(--text-muted)', fontSize: 9 }}>dias de volume alugado →</text>
+    </svg>
+  )
+}
+
+function CartaoAluguelPreco({ snapshot }: { snapshot?: SnapshotAluguel }) {
+  const [estado, recarregar] = useArquivoDados<SnapshotAluguel>(CAMINHO_ALUGUEL, true, snapshot)
+  const dados = estado.tipo === 'pronto' ? estado.dados : null
+  const ibov20 = dados?.janela?.ibov20 ?? null
+  const pontos = useMemo(
+    () => (dados ? dados.registros.filter((r) => typeof r.var20 === 'number' && typeof r.diasDeVolume === 'number' && r.saldoFinanceiro >= SALDO_MINIMO_COMPARACAO) : []),
+    [dados],
+  )
+  const resumo = useMemo(() => (dados ? resumoAluguelPreco(dados.registros, ibov20) : null), [dados, ibov20])
+  const lista = useMemo(() => (dados ? maisAlugadas(dados.registros.filter((r) => typeof r.var20 === 'number'), 15) : []), [dados])
+
+  return (
+    <section className="card col" style={{ gap: 12 }} aria-labelledby="titulo-aluguel-preco">
+      <div className="col" style={{ gap: 2 }}>
+        <h2 id="titulo-aluguel-preco" style={{ fontSize: 17 }}>🔎 Aluguel × preço</h2>
+        <span className="small muted justify">As ações mais alugadas caíram mais que o mercado? O preço é dos 20 pregões que terminam no mesmo dia do aluguel.</span>
+      </div>
+      {!dados ? (
+        <EstadoDoArquivo estado={estado.tipo === 'pronto' ? 'ocioso' : estado.tipo} aoTentarDeNovo={recarregar} nome="o aluguel e o preço das ações" />
+      ) : !resumo || !resumo.universo || !dados.janela ? (
+        <SemDados nome="aluguel e preço das ações" />
+      ) : (
+        <>
+          <div className="small justify" role="note" data-testid="aluguel-preco-resumo">
+            Entre as <strong>{resumo.grupo} mais alugadas</strong>, a variação mediana do preço foi de <strong>{pctSinal(resumo.medianaGrupo ?? 0)}</strong>
+            {resumo.medianaDemais !== null ? <>, contra <strong>{pctSinal(resumo.medianaDemais)}</strong> das outras {resumo.universo - resumo.grupo}</> : null}. O Ibovespa variou <strong>{pctSinal(dados.janela.ibov20)}</strong> no mesmo período ({dataBR(dados.janela.de).slice(0, 5)} a {dataBR(dados.janela.ate).slice(0, 5)}). {resumo.piorQueMercado} das {resumo.grupo} caíram mais que o Ibovespa.
+          </div>
+
+          {pontos.length >= 5 && <GraficoAluguelPreco pontos={pontos} ibov20={ibov20} />}
+          <div className="tiny muted row" style={{ gap: 12, flexWrap: 'wrap' }}>
+            <span><span aria-hidden="true" style={{ color: 'var(--danger)' }}>●</span> caiu mais que o Ibovespa</span>
+            <span><span aria-hidden="true" style={{ color: 'var(--success)' }}>●</span> caiu menos (ou subiu)</span>
+            <span>dias de volume = saldo alugado ÷ volume médio diário</span>
+          </div>
+
+          <div className="tabela-bdr small" role="group" aria-label="As 15 ações mais alugadas, com o preço na janela" style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', minWidth: 420, tableLayout: 'fixed', borderCollapse: 'separate', borderSpacing: 3 }}>
+              <colgroup>
+                <col style={{ width: '22%' }} /><col style={{ width: '19%' }} /><col style={{ width: '19%' }} /><col style={{ width: '20%' }} /><col style={{ width: '20%' }} />
+              </colgroup>
+              <thead>
+                <tr>
+                  {['Ação', '% do capital', 'Dias de volume', 'Preço 20 pregões', 'vs. Ibovespa'].map((t, i) => (
+                    <th key={t} scope="col" className="tiny muted" style={{ textAlign: i === 0 ? 'left' : 'center', fontWeight: 400, padding: '0 2px 4px', lineHeight: 1.2 }}>{t}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {lista.map((r) => {
+                  const v = r.var20 as number
+                  const rel = ibov20 === null ? null : v - ibov20
+                  return (
+                    <tr key={r.ticker}>
+                      <th scope="row" style={{ textAlign: 'left', fontWeight: 700 }}>{r.ticker}</th>
+                      <td style={{ textAlign: 'center' }}>{typeof r.capital === 'number' ? `${(r.capital * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1, minimumFractionDigits: 1 })}%` : '–'}</td>
+                      <td style={{ textAlign: 'center' }}>{typeof r.diasDeVolume === 'number' ? r.diasDeVolume.toLocaleString('pt-BR', { maximumFractionDigits: 1, minimumFractionDigits: 1 }) : '–'}</td>
+                      <td style={{ textAlign: 'center', color: v < 0 ? 'var(--danger)' : 'var(--success)', fontWeight: 600 }}>{pctSinal(v)}</td>
+                      <td style={{ textAlign: 'center', color: rel === null ? undefined : rel < 0 ? 'var(--danger)' : 'var(--success)' }}>{rel === null ? '–' : `${rel > 0 ? '+' : rel < 0 ? '−' : ''}${Math.abs(rel * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1, minimumFractionDigits: 1 })} pp`}</td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+          <div className="tiny muted justify" style={{ lineHeight: 1.5 }}>
+            "% do capital" é o que está alugado sobre todas as ações da empresa. "pp" = pontos percentuais acima (+) ou abaixo (−) do Ibovespa. A lista mostra as ações com saldo alugado de pelo menos R$ 50 milhões na comparação. Isto não mostra causa: o aluguel pode subir porque o preço já caiu, e boa parte do aluguel é arbitragem e proteção. Um único período, de queda geral do mercado; leia como retrato, não como regra.
+          </div>
+          <Fonte texto="B3 (aluguel, preço e volume)" atualizado={dados.dataReferencia ?? dados.geradoEm} />
+        </>
+      )}
+    </section>
+  )
+}
+
 function CartaoAluguel({ snapshot }: { snapshot?: SnapshotAluguel }) {
   const [estado, recarregar] = useArquivoDados<SnapshotAluguel>(CAMINHO_ALUGUEL, true, snapshot)
   const dados = estado.tipo === 'pronto' ? estado.dados : null
@@ -407,6 +530,7 @@ export function DadosDeMercado({ fluxo, aluguel }: { fluxo?: SnapshotFluxo; alug
       <CartaoFluxo snapshot={fluxo} />
       <CartaoRelacao fluxo={fluxo} />
       <CartaoAluguel snapshot={aluguel} />
+      <CartaoAluguelPreco snapshot={aluguel} />
       <div className="card-outline small muted justify" style={{ lineHeight: 1.5 }} role="note">
         <strong>Informação, não recomendação.</strong> Fluxo de capital e posição no aluguel descrevem o que já aconteceu; não garantem o que vai acontecer com o preço de nenhuma ação.
       </div>

@@ -123,3 +123,21 @@ describe('escalas alinhadas', () => {
     expect(escalasAlinhadas([0, 0], [0, 0]).p).toBeGreaterThan(0)
   })
 })
+
+describe('aluguel × preço', () => {
+  it('compara as mais alugadas com as demais e ignora saldo pequeno ou sem preço', async () => {
+    const { resumoAluguelPreco, mediana } = await import('./dadosDeMercado')
+    expect(mediana([])).toBeNull()
+    expect(mediana([3, 1, 2])).toBe(2)
+    expect(mediana([1, 2, 3, 4])).toBe(2.5)
+    const r = (ticker: string, saldo: number, var20: number | null) => ({ ticker, saldoFinanceiro: saldo, var20 })
+    const regs = [r('A', 900e6, -0.1), r('B', 800e6, -0.3), r('C', 700e6, 0.1), r('D', 400e6, -0.2), r('E', 100e6, 0), r('F', 10e6, -0.9), r('G', 600e6, null)]
+    const res = resumoAluguelPreco(regs, -0.15, 2)
+    expect(res.universo).toBe(5)
+    expect(res.grupo).toBe(2)
+    expect(res.medianaGrupo).toBeCloseTo(-0.2)
+    expect(res.medianaDemais).toBeCloseTo(0)
+    expect(res.piorQueMercado).toBe(1)
+    expect(res.cairam).toBe(2)
+  })
+})

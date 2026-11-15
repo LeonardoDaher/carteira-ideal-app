@@ -34,12 +34,20 @@ export interface RegistroAluguel {
   saldoQuantidade?: number | null
   /** Taxa média anual do aluguel (fração). */
   taxaMedia?: number | null
+  /** Fração do capital total da empresa que está alugada (todas as classes de ações). */
+  capital?: number | null
+  /** Quantos dias de volume financeiro médio (21 pregões) o saldo alugado equivale. */
+  diasDeVolume?: number | null
+  /** Variação do preço nos 20 pregões que terminam na data do aluguel (fração). */
+  var20?: number | null
 }
 
 export interface SnapshotAluguel {
   geradoEm: string | null
   dataReferencia: string | null
   fonte: string
+  /** Janela de 20 pregões usada na variação de preço e quanto o Ibovespa variou nela (fração). */
+  janela?: { de: string; ate: string; ibov20: number } | null
   registros: RegistroAluguel[]
 }
 
@@ -225,4 +233,44 @@ export function escalasAlinhadas(a: number[], b: number[]): { p: number; spanA: 
   const p = Math.min(0.9, Math.max(0.1, frac(ea), frac(eb)))
   const span = (e: { mx: number; mn: number }) => Math.max(e.mx / p, -e.mn / (1 - p), 1e-9)
   return { p, spanA: span(ea), spanB: span(eb) }
+}
+
+export function mediana(valores: number[]): number | null {
+  if (!valores.length) return null
+  const v = [...valores].sort((a, b) => a - b)
+  const m = Math.floor(v.length / 2)
+  return v.length % 2 ? v[m] : (v[m - 1] + v[m]) / 2
+}
+
+/** Ações com aluguel relevante (saldo mínimo) e preço na janela, para comparar as mais alugadas com as demais. */
+export const SALDO_MINIMO_COMPARACAO = 50_000_000
+
+export interface ResumoAluguelPreco {
+  /** Quantas ações entraram na comparação. */
+  universo: number
+  /** As `quantas` de maior saldo alugado. */
+  grupo: number
+  medianaGrupo: number | null
+  medianaDemais: number | null
+  /** Quantas do grupo caíram mais que o Ibovespa na janela (precisa de `ibov20`). */
+  piorQueMercado: number
+  /** Quantas do grupo caíram (variação negativa). */
+  cairam: number
+}
+
+export function resumoAluguelPreco(registros: RegistroAluguel[], ibov20: number | null, quantas = 30): ResumoAluguelPreco {
+  const base = registros
+    .filter((r) => typeof r.var20 === 'number' && Number.isFinite(r.saldoFinanceiro) && r.saldoFinanceiro >= SALDO_MINIMO_COMPARACAO)
+    .sort((a, b) => b.saldoFinanceiro - a.saldoFinanceiro || a.ticker.localeCompare(b.ticker))
+  const grupo = base.slice(0, quantas)
+  const demais = base.slice(quantas)
+  const v = (r: RegistroAluguel) => r.var20 as number
+  return {
+    universo: base.length,
+    grupo: grupo.length,
+    medianaGrupo: mediana(grupo.map(v)),
+    medianaDemais: mediana(demais.map(v)),
+    piorQueMercado: ibov20 === null ? 0 : grupo.filter((r) => v(r) < ibov20).length,
+    cairam: grupo.filter((r) => v(r) < 0).length,
+  }
 }

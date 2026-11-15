@@ -7,9 +7,11 @@ import { execFileSync } from 'node:child_process'
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { reprocessar } from './aluguel-preco.mjs'
 
 const RAIZ = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const ARQ_ALUGUEL = resolve(RAIZ, 'webapp-src/public/dados/emprestimoAtivos.json')
+const ARQ_HISTORICO = resolve(RAIZ, 'webapp-src/public/dados/aluguelHistorico.json')
 const FONTE_ALUGUEL = 'B3, Boletim Diário do Mercado (Empréstimos de ativos, posições em aberto)'
 
 const num = (s) => Number(s.replace(/\./g, '').replace(',', '.'))
@@ -64,6 +66,17 @@ export function lerPosicoesEmAberto(texto) {
   return { dataReferencia, registros }
 }
 
+/**
+ * Guarda cada retrato do aluguel (um por boletim processado, em qualquer frequência) para a evolução do saldo alugado por ação.
+ * Formato compacto: acoes[ticker] = [saldo em R$, saldo em quantidade]. A B3 não publica histórico, então o que não for guardado se perde.
+ */
+export function acrescentarHistorico(historico, dataReferencia, registros) {
+  const acoes = {}
+  for (const r of registros) acoes[r.ticker] = [Math.round(r.saldoFinanceiro), r.saldoQuantidade ?? null]
+  const outros = (historico?.retratos ?? []).filter((x) => x.data !== dataReferencia)
+  return { fonte: FONTE_ALUGUEL, retratos: [...outros, { data: dataReferencia, acoes }].sort((a, b) => a.data.localeCompare(b.data)) }
+}
+
 function ler(caminho, padrao) {
   try { return existsSync(caminho) ? JSON.parse(readFileSync(caminho, 'utf8')) : padrao } catch { return padrao }
 }
@@ -85,6 +98,8 @@ function principal(pdf) {
     registros.sort((x, y) => y.saldoFinanceiro - x.saldoFinanceiro)
     writeFileSync(ARQ_ALUGUEL, JSON.stringify({ geradoEm: agora, dataReferencia, fonte: FONTE_ALUGUEL, registros }, null, 1) + '\n')
     console.log(`aluguel: ${registros.length} ações em ${dataReferencia}; maior saldo ${registros[0].ticker} R$ ${(registros[0].saldoFinanceiro / 1e9).toFixed(2)} bi`)
+    writeFileSync(ARQ_HISTORICO, JSON.stringify(acrescentarHistorico(ler(ARQ_HISTORICO, { retratos: [] }), dataReferencia, registros)) + '\n')
+    reprocessar() // acrescenta % do capital, dias de volume e variação do preço (card "Aluguel × preço")
   } else console.warn('aluguel: posições em aberto não encontradas')
 }
 
