@@ -3,7 +3,7 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 import {
-  CONFIG, URL_COTAHIST, adicionarMeses, calcularTendencia, tendenciasDosHistoricos, URL_PEDIDO_CADASTRO, lerCadastro, lerLinha, lerPregao, montarSnapshot, motivoInvalido, numeroBr,
+  CONFIG, URL_COTAHIST, adicionarMeses, baixarCadastroDisponivel, calcularTendencia, tendenciasDosHistoricos, URL_PEDIDO_CADASTRO, lerCadastro, lerLinha, lerPregao, montarSnapshot, motivoInvalido, numeroBr,
 } from './atualizar-opcoes.mjs'
 
 const campo = (valor, tamanho, direita = false) => (direita ? String(valor).padStart(tamanho, '0') : String(valor).padEnd(tamanho, ' '))
@@ -221,5 +221,35 @@ describe('calcularTendencia', () => {
     assert.equal(mapa.get('SEMNEGOCIO3').data, dia1)
     // o dia que o histórico já tem não é contado duas vezes
     assert.equal(tendenciasDosHistoricos([hist], [nova(ultima, { PETR4: 999 })]).get('PETR4').fechamento, 12)
+  })
+})
+
+describe('baixarCadastroDisponivel', () => {
+  const pregoes = [{ data: '2026-11-13' }, { data: '2026-11-12' }, { data: '2026-11-11' }]
+  const erro = (status) => Object.assign(new Error('B3 respondeu ' + status), { status })
+
+  it('usa o cadastro do pregão mais novo quando existe', async () => {
+    const avisos = []
+    const texto = await baixarCadastroDisponivel(pregoes, async (d) => 'cad-' + d, (a) => avisos.push(a))
+    assert.equal(texto, 'cad-2026-11-13')
+    assert.equal(avisos.length, 0)
+  })
+
+  it('cai para o pregão anterior se a B3 responde 400 e avisa', async () => {
+    const avisos = []
+    const pedidos = []
+    const texto = await baixarCadastroDisponivel(pregoes, async (d) => { pedidos.push(d); if (d === '2026-11-13') throw erro(400); return 'cad-' + d }, (a) => avisos.push(a))
+    assert.equal(texto, 'cad-2026-11-12')
+    assert.deepEqual(pedidos, ['2026-11-13', '2026-11-12'])
+    assert.match(avisos[0], /cadastro de 2026-11-13 indisponível.*usando o de 2026-11-12/)
+  })
+
+  it('erro de rede ou 5xx não é escondido', async () => {
+    await assert.rejects(baixarCadastroDisponivel(pregoes, async () => { throw erro(503) }, () => {}), /503/)
+    await assert.rejects(baixarCadastroDisponivel(pregoes, async () => { throw new Error('fetch failed') }, () => {}), /fetch failed/)
+  })
+
+  it('falha se nenhum dos pregões tem cadastro', async () => {
+    await assert.rejects(baixarCadastroDisponivel(pregoes, async () => { throw erro(400) }, () => {}), /400/)
   })
 })

@@ -347,12 +347,32 @@ async function baixarCotahist(data, pasta, fetchImpl = fetch) {
 async function baixarCadastro(data, fetchImpl = fetch) {
   const opcoes = { headers: { 'User-Agent': 'carteira-ideal (github actions)' }, signal: AbortSignal.timeout(180_000) }
   const pedido = await fetchImpl(URL_PEDIDO_CADASTRO(data), opcoes)
-  if (!pedido.ok) throw new Error(`B3 respondeu ${pedido.status} ao pedir o cadastro de ${data}.`)
+  if (!pedido.ok) throw Object.assign(new Error(`B3 respondeu ${pedido.status} ao pedir o cadastro de ${data}.`), { status: pedido.status })
   const { token } = await pedido.json()
   if (!token) throw new Error('A B3 não devolveu o token do cadastro.')
   const arquivo = await fetchImpl(URL_CADASTRO(token), opcoes)
   if (!arquivo.ok) throw new Error(`B3 respondeu ${arquivo.status} ao baixar o cadastro de ${data}.`)
   return Buffer.from(await arquivo.arrayBuffer()).toString('latin1')
+}
+
+/**
+ * Cadastro do pregão mais novo; se a B3 ainda não publicou o arquivo dele (resposta 4xx, como o 400 de 13/11/2026, que ficou dias sem sair), usa o
+ * dos pregões anteriores, até `tentativas`. O cadastro muda pouco de um dia para o outro: só séries lançadas nos dias sem arquivo ficam de fora
+ * até ele sair. Erro de rede ou 5xx continua derrubando o job. `pregoes` vem do mais recente para o mais antigo.
+ */
+export async function baixarCadastroDisponivel(pregoes, baixar = baixarCadastro, aviso = console.warn, tentativas = 4) {
+  let ultimoErro = null
+  for (const p of pregoes.slice(0, tentativas)) {
+    try {
+      const texto = await baixar(p.data)
+      if (p !== pregoes[0]) aviso(`[aviso] cadastro de ${pregoes[0].data} indisponível na B3; usando o de ${p.data} (séries novas desses dias entram quando o arquivo sair).`)
+      return texto
+    } catch (erro) {
+      if (!(erro.status >= 400 && erro.status < 500)) throw erro
+      ultimoErro = erro
+    }
+  }
+  throw ultimoErro ?? new Error('Nenhum pregão para buscar o cadastro.')
 }
 
 export async function principal() {
@@ -378,7 +398,7 @@ export async function principal() {
       return
     }
 
-    const cadastro = lerCadastro(await baixarCadastro(pregoes[0].data), pregoes[0].data)
+    const cadastro = lerCadastro(await baixarCadastroDisponivel(pregoes), pregoes[0].data)
     const snapshot = montarSnapshot(cadastro, pregoes)
     const tendencias = tendenciasDosHistoricos(
       ARQUIVOS_HISTORICO.map((arquivo) => {
