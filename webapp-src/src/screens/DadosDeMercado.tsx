@@ -186,7 +186,7 @@ function CartaoQuem({ fluxo }: { fluxo?: SnapshotFluxo }) {
   return (
     <section className="card col" style={{ gap: 12 }} aria-labelledby="titulo-quem">
       <div className="col" style={{ gap: 2 }}>
-        <h2 id="titulo-quem" style={{ fontSize: 17 }}>⚖️ Quem comprou e quem vendeu</h2>
+        <h2 id="titulo-quem" style={{ fontSize: 17 }}>⚖️ Quem comprou e quem vendeu a bolsa brasileira</h2>
         <span className="small muted justify">Para cada real que um tipo de investidor tira da bolsa, outro coloca. Veja o saldo de cada um, mês a mês: verde = colocou, vermelho = tirou.</span>
       </div>
       {!dados ? (
@@ -196,12 +196,18 @@ function CartaoQuem({ fluxo }: { fluxo?: SnapshotFluxo }) {
       ) : (
         <>
           <div className="tabela-bdr small" role="group" aria-label="Saldo por tipo de investidor em cada mês" style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 2 }}>
+            <table style={{ width: '100%', minWidth: 460, tableLayout: 'fixed', borderCollapse: 'separate', borderSpacing: 3 }}>
+              <colgroup>
+                <col style={{ width: '16%' }} />
+                {TIPOS_INVESTIDOR.map(({ campo }) => (
+                  <col key={campo} style={{ width: '16.8%' }} />
+                ))}
+              </colgroup>
               <thead>
                 <tr>
                   <th scope="col" className="tiny muted" style={{ textAlign: 'left', fontWeight: 400 }}>Mês</th>
                   {TIPOS_INVESTIDOR.map(({ campo, rotulo }) => (
-                    <th key={campo} scope="col" className="tiny muted" style={{ textAlign: 'right', fontWeight: 400 }}>{rotulo}</th>
+                    <th key={campo} scope="col" className="tiny muted" style={{ textAlign: 'center', fontWeight: 400, padding: '0 2px 4px', lineHeight: 1.2 }}>{rotulo}</th>
                   ))}
                 </tr>
               </thead>
@@ -213,7 +219,7 @@ function CartaoQuem({ fluxo }: { fluxo?: SnapshotFluxo }) {
                       const v = m[campo]
                       const forca = Math.min(1, Math.abs(v) / maximo[i])
                       return (
-                        <td key={campo} style={{ textAlign: 'right', whiteSpace: 'nowrap', padding: '4px 6px', borderRadius: 6, fontSize: 11, background: `color-mix(in srgb, ${v < 0 ? 'var(--danger)' : 'var(--success)'} ${Math.round(forca * 45)}%, transparent)` }}>
+                        <td key={campo} style={{ textAlign: 'center', whiteSpace: 'nowrap', padding: '6px 4px', borderRadius: 6, fontSize: 12, fontVariantNumeric: 'tabular-nums', background: `color-mix(in srgb, ${v < 0 ? 'var(--danger)' : 'var(--success)'} ${Math.round(forca * 45)}%, transparent)` }}>
                           {formatarMilhoes(v, false).replace('R$ ', '')}
                         </td>
                       )
@@ -397,8 +403,8 @@ function CartaoAluguel({ snapshot }: { snapshot?: SnapshotAluguel }) {
 export function DadosDeMercado({ fluxo, aluguel }: { fluxo?: SnapshotFluxo; aluguel?: SnapshotAluguel }) {
   return (
     <div className="col" style={{ gap: 14 }}>
-      <CartaoFluxo snapshot={fluxo} />
       <CartaoQuem fluxo={fluxo} />
+      <CartaoFluxo snapshot={fluxo} />
       <CartaoRelacao fluxo={fluxo} />
       <CartaoAluguel snapshot={aluguel} />
       <div className="card-outline small muted justify" style={{ lineHeight: 1.5 }} role="note">
