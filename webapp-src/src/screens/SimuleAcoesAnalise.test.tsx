@@ -284,10 +284,13 @@ describe('Simule Ações: abas de análise', () => {
     expect(screen.getByTestId('balanco-novo').textContent).toContain('3T26 provisório (B3)')
     expect(screen.getByTestId('balanco-novo').textContent).toContain('12/11/2026')
     expect(screen.getByTestId('analise-fundamentalista').textContent).toContain('12 meses até 30/09/2026 (provisório)')
+    expect(screen.getByTestId('base-balanco-ALFA3').textContent).toBe('Base: 3T26 provisório · balanço de 30/09/2026')
     expect(screen.getByTestId('analise-fundamentalista').textContent).toContain('Receita, lucro, ativo total e patrimônio líquido já são do 3T26')
     unmount()
     abrir(/Análise fundamentalista/)
     expect(screen.queryByTestId('balanco-novo')).toBeNull()
+    // D162: sem balanço novo, o selo de data-base aparece mesmo assim, no topo, para qualquer empresa.
+    expect(screen.getByTestId('analise-fundamentalista').textContent).toMatch(/Base: \dT\d\d · balanço de \d\d\/\d\d\/\d{4}/)
   })
 
   it('a fundamentalista não usa o horizonte (sem os botões de curto, médio e longo)', () => {

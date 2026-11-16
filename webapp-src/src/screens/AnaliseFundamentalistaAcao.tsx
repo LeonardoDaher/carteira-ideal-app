@@ -3,7 +3,8 @@ import type { DadosDaAnalise } from './useAnaliseDaAcao'
 import { ROTULO_CATEGORIA, ROTULO_RECOMENDACAO } from '../domain/analiseFundamentalista'
 import type { AnaliseFundamentalista, CategoriaAnalise, ColunaHistorica, Indicador, Nota, Recomendacao, Risco } from '../domain/analiseFundamentalista'
 import { MiniGrafico } from '../ui/MiniGrafico'
-import { AvisoDaAnalise, BarraDeNota, EstadoDoArquivo, Linha, Modulo, Selo } from '../ui/BlocosDeAnalise'
+import { baseDoBalanco } from '../domain/baseDoBalanco'
+import { AvisoDaAnalise, BarraDeNota, EstadoDoArquivo, Linha, Modulo, Selo, SeloDaBase } from '../ui/BlocosDeAnalise'
 import type { Tom } from '../ui/BlocosDeAnalise'
 import { corDoSinal, dataLonga, formatarIndicador, fracaoEmPercentual, milReais, numero, percentual, reais } from '../ui/formatoAnalise'
 
@@ -200,6 +201,7 @@ function ResumoFundamentalista({ f, nome }: { f: AnaliseFundamentalista; nome: s
           <span className="tiny muted">Nota {f.pontuacao.total ?? '—'}{f.pontuacao.parcial ? ' (parcial)' : ''}</span>
         </div>
       </div>
+      <SeloDaBase base={baseDoBalanco(f.dados.ultimoTrimestre, f.dados.balancoNovo)} id={f.ticker} />
       <p className="small justify" style={{ lineHeight: 1.5, margin: 0 }}>{f.resumo}</p>
       <div className="row" style={{ gap: 10, alignItems: 'stretch', flexWrap: 'wrap' }}>
         <Caixa titulo="Preço" valor={f.mercado.preco === null ? '—' : reais(f.mercado.preco)} />

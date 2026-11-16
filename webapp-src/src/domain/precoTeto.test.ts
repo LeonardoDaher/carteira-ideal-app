@@ -116,6 +116,15 @@ describe('verde por Bazin e Graham, com a fundamentalista como selo (D129)', () 
     expect(r.entrada).toBeNull()
   })
 
+  it('o teto informa o balanço de onde saem os números (D162); cai na data da empresa; sem nenhuma data, vem null', () => {
+    const com = calcularPrecoTeto({ empresa: e, analise: { ...analise({ valorJusto: 60 }), dados: { ultimoTrimestre: '2026-06-30' } } as never, preco: 40 })
+    expect(com.baseBalanco).toEqual({ dataBase: '2026-06-30', rotulo: '2T26' })
+    const semDemonstracao = calcularPrecoTeto({ empresa: { ...e, ultimaDemonstracao: undefined } as never, analise: analise({ valorJusto: 60 }), preco: 40 })
+    expect(semDemonstracao.baseBalanco).toBeNull()
+    const dataDaEmpresa = calcularPrecoTeto({ empresa: e, analise: analise({ valorJusto: 60 }), preco: 40 })
+    expect(dataDaEmpresa.baseBalanco).toEqual({ dataBase: '2025-12-31', rotulo: '4T25' })
+  })
+
   it('a fundamentalista NÃO veta: com "evitar" ou valor justo abaixo do preço o verde continua, com o selo de alerta', () => {
     const evitar = calcularPrecoTeto({ empresa: e, analise: analise({ rec: 'evitar-novos', categoria: 'evitar', valorJusto: 30 }), preco: 40 })
     expect(evitar.status).toBe('abaixo-do-teto')

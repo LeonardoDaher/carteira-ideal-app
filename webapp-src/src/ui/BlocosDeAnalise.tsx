@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import type { BaseDoBalanco } from '../domain/baseDoBalanco'
 
 /** Módulo recolhível de uma análise (cartão com título clicável). */
 export function Modulo({ titulo, subtitulo, aberto = false, children, id }: { titulo: string; subtitulo?: ReactNode; aberto?: boolean; children: ReactNode; id?: string }) {
@@ -22,6 +23,23 @@ const CLASSE_DO_TOM: Record<Tom, string> = { positivo: 'badge badge-alta', neutr
 /** Selo colorido; o texto sempre diz o significado, a cor só reforça. */
 export function Selo({ tom, children }: { tom: Tom; children: ReactNode }) {
   return <span className={CLASSE_DO_TOM[tom]}>{children}</span>
+}
+
+/**
+ * Selo de data-base do balanço (D162): aparece no topo de TODO cartão de análise fundamentalista e de preço teto, igual para toda empresa.
+ * Diz de qual balanço saem os números e, se já saiu um mais novo que o app ainda não incorporou, avisa.
+ */
+export function SeloDaBase({ base, id }: { base: BaseDoBalanco | null; id?: string }) {
+  if (!base) return <div data-testid={id ? `base-balanco-${id}` : 'base-balanco'}><Selo tom="negativo">Base do balanço não informada</Selo></div>
+  const tom: Tom = base.estado === 'aguardando-cvm' ? 'negativo' : base.estado === 'provisorio' ? 'neutro' : 'positivo'
+  return (
+    <div className="col" style={{ gap: 2 }} data-testid={id ? `base-balanco-${id}` : 'base-balanco'}>
+      <div className="row" style={{ gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+        <Selo tom={tom}>{base.texto}</Selo>
+      </div>
+      {base.pendencia && <span className="tiny" style={{ color: 'var(--warning)', fontWeight: 700 }}>⚠ {base.pendencia}</span>}
+    </div>
+  )
 }
 
 /** Linha rótulo/valor das tabelas de números. */

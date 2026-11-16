@@ -6,6 +6,7 @@
 
 import { ROTULO_RECOMENDACAO } from './analiseFundamentalista'
 import type { AnaliseFundamentalista, EmpresaFundamentos, Recomendacao } from './analiseFundamentalista'
+import { rotuloDoPeriodo } from './baseDoBalanco'
 
 /** Retorno mínimo em dividendos que Décio Bazin exigia (6% ao ano). */
 export const TAXA_BAZIN_PADRAO = 0.06
@@ -70,6 +71,8 @@ export interface PrecoTeto {
   /** Ponto fraco do dado do teto que NÃO bloqueia o verde, mas aparece no cartão e na notificação. */
   ressalva: string | null
   status: StatusTeto
+  /** Balanço de onde saem os números do teto (D162): fim do período e rótulo, ex. '2T26'. Null se o dado não trouxer a data (a tela avisa). */
+  baseBalanco: { dataBase: string; rotulo: string } | null
   /** Preço ÷ teto do gatilho − 1: negativo é folga abaixo do teto. */
   distanciaPct: number | null
   /** Quanto o preço precisa cair para ficar abaixo dos tetos (o menor entre Bazin e Graham); `limitadoPor` diz qual deles está mais baixo. Null quando já está abaixo. */
@@ -232,7 +235,8 @@ export function calcularPrecoTeto({
     if (preco > menor.alvo) entrada = { alvo: menor.alvo, faltaCairPct: (1 - menor.alvo / preco) * 100, limitadoPor: menor.por }
   }
 
-  return { ticker: analise.ticker, nome: analise.nome, preco, bazin, graham, gatilho, tetoGatilho, grahamConfirma, valorJustoBase: ok(base) ? base : null, objecoes, ressalva, recomendacaoFund: rec, selo, status, distanciaPct, entrada, mensagem }
+  const dataBaseDoTeto: string | null = analise.dados?.ultimoTrimestre ?? empresa.ultimaDemonstracao?.dtRefer ?? null
+  return { ticker: analise.ticker, nome: analise.nome, preco, bazin, graham, gatilho, tetoGatilho, grahamConfirma, valorJustoBase: ok(base) ? base : null, objecoes, ressalva, recomendacaoFund: rec, selo, status, baseBalanco: dataBaseDoTeto ? { dataBase: dataBaseDoTeto, rotulo: rotuloDoPeriodo(dataBaseDoTeto) } : null, distanciaPct, entrada, mensagem }
 }
 
 /**

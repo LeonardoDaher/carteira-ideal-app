@@ -11,7 +11,8 @@ import type { SnapshotFundamentos } from '../domain/analiseFundamentalista'
 import { TAXA_BAZIN_PADRAO, tickersParaAvisar } from '../domain/precoTeto'
 import { aprovadasNos3Filtros, calcularItensPrecoTeto, textoDoAviso } from '../domain/precoTetoLote'
 import type { PrecoTeto, StatusTeto } from '../domain/precoTeto'
-import { EstadoDoArquivo } from '../ui/BlocosDeAnalise'
+import { baseDoBalanco } from '../domain/baseDoBalanco'
+import { EstadoDoArquivo, SeloDaBase } from '../ui/BlocosDeAnalise'
 import { CAMINHO_FUNDAMENTOS, premissasDoMercado } from './useAnaliseDaAcao'
 import { LogoAtivo } from '../ui/LogoAtivo'
 
@@ -365,6 +366,7 @@ function CartaoTeto({ ticker, nome, item, aoRemover, aoAcompanhar }: { ticker: s
       )}
       {item ? (
         <>
+          <SeloDaBase base={item.baseBalanco ? baseDoBalanco(item.baseBalanco.dataBase) : null} id={item.ticker} />
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 8 }}>
             <Numero titulo="Preço" valor={reais(item.preco)} />
             <Numero titulo={`Teto Bazin${item.bazin.curto ? ' (hist. curto)' : ''}`} valor={item.bazin.teto !== null ? reais(item.bazin.teto) : 'não se aplica'} />
