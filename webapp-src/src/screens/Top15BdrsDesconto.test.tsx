@@ -3,7 +3,6 @@ import { describe, expect, it, vi } from 'vitest'
 import { Top15BdrsDesconto } from './Top15BdrsDesconto'
 import { SimuleBdr } from './SimuleBdr'
 import type { ItemBdrTop, SnapshotBdrsDesconto } from '../domain/top15Mercado'
-import { CHAVE_CODIGO_TOP15, CHAVE_CODIGO_TOP15_BDRS, CHAVE_CODIGO_TOP15_FIIS } from '../domain/acessoTop15'
 import type { RespostaTop15Bdrs } from '../domain/acessoTop15'
 import type { AppCtx } from '../state/useAppState'
 
@@ -26,16 +25,6 @@ const snapshot = (o: Partial<SnapshotBdrsDesconto> = {}): SnapshotBdrsDesconto =
   ],
   ...o,
 })
-
-const memoria = (inicial: Record<string, string> = {}) => {
-  const d = new Map(Object.entries(inicial))
-  return {
-    d,
-    getItem: async (k: string) => d.get(k) ?? null,
-    setItem: async (k: string, v: string) => void d.set(k, v),
-    removeItem: async (k: string) => void d.delete(k),
-  }
-}
 
 describe('Top15BdrsDesconto (acesso aberto)', () => {
   it('sem aprovação ou sem lista mostra "em validação" e nenhum BDR', () => {
@@ -121,70 +110,21 @@ describe('Top15BdrsDesconto (acesso aberto)', () => {
   })
 })
 
-describe('Top15BdrsDesconto com acesso por código (D70)', () => {
+describe('Top15BdrsDesconto com a lista vinda do servidor (sem código)', () => {
   const cabecalho = () => snapshot({ acessoRestrito: true, ranking: [], aConferir: [], exclusoes: [] })
-  const completo = () => snapshot({ acessoRestrito: true })
-  const digitar = (valor: string) => fireEvent.change(screen.getByLabelText('Código do mês'), { target: { value: valor } })
 
-  it('sem código: pede o código, aponta o Instagram e NÃO mostra nenhum BDR', async () => {
-    render(<Top15BdrsDesconto snapshot={cabecalho()} carregar={vi.fn()} armazenamento={memoria()} />)
-    await screen.findByTestId('top15-bdrs-codigo')
-    expect(screen.getByText('Top 15 BDRs com maior desconto: acesso por código')).toBeTruthy()
-    expect(screen.getByRole('link', { name: '@acarteiraideal' }).getAttribute('href')).toBe('https://www.instagram.com/acarteiraideal/')
-    expect(screen.queryByTestId('top15-bdrs')).toBeNull()
-    expect(document.body.textContent).not.toMatch(/ORCL34|NFLX34/)
-    expect((screen.getByRole('button', { name: 'Ver a lista' }) as HTMLButtonElement).disabled).toBe(true)
-  })
-
-  it('código errado: mostra o aviso, não salva e não libera a lista', async () => {
-    const mem = memoria()
-    const carregar = vi.fn(async (): Promise<RespostaTop15Bdrs> => ({ ok: false, motivo: 'invalido' }))
-    render(<Top15BdrsDesconto snapshot={cabecalho()} carregar={carregar} armazenamento={mem} />)
-    await screen.findByTestId('top15-bdrs-codigo')
-    digitar('ciaaaabbbb')
-    fireEvent.click(screen.getByRole('button', { name: 'Ver a lista' }))
-    expect((await screen.findByRole('alert')).textContent).toContain('Código inválido ou vencido')
-    expect(carregar).toHaveBeenCalledWith('CIAAAABBBB')
-    expect(mem.d.size).toBe(0)
-    expect(screen.queryByTestId('top15-bdrs')).toBeNull()
-  })
-
-  it('código certo: libera a lista, salva na chave PRÓPRIA dos BDRs e oferece trocar', async () => {
-    const mem = memoria()
-    const carregar = vi.fn(async (): Promise<RespostaTop15Bdrs> => ({ ok: true, snapshot: completo() }))
-    render(<Top15BdrsDesconto snapshot={cabecalho()} carregar={carregar} armazenamento={mem} />)
-    await screen.findByTestId('top15-bdrs-codigo')
-    digitar('CI-AAAA-BBBB')
-    fireEvent.click(screen.getByRole('button', { name: 'Ver a lista' }))
+  it('abre a lista sozinha, sem pedir código', async () => {
+    const carregar = vi.fn(async (): Promise<RespostaTop15Bdrs> => ({ ok: true, snapshot: snapshot({ acessoRestrito: true }) }))
+    render(<Top15BdrsDesconto snapshot={cabecalho()} carregar={carregar} />)
     await screen.findByTestId('top15-bdrs')
     expect(screen.getByTestId('top15-bdrs-ORCL34')).toBeTruthy()
-    expect([...mem.d.keys()]).toEqual([CHAVE_CODIGO_TOP15_BDRS])
-    expect(mem.d.get(CHAVE_CODIGO_TOP15_BDRS)).toBe('CIAAAABBBB')
-    fireEvent.click(screen.getByRole('button', { name: 'Sair e trocar o código' }))
-    await screen.findByTestId('top15-bdrs-codigo')
-    expect(mem.d.has(CHAVE_CODIGO_TOP15_BDRS)).toBe(false)
+    expect(screen.queryByLabelText('Código do mês')).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Sair e trocar o código' })).toBeNull()
   })
 
-  it('o código salvo das AÇÕES ou dos FIIs não abre os BDRs: a tela pede o código e não consulta o servidor', async () => {
-    const carregar = vi.fn(async (): Promise<RespostaTop15Bdrs> => ({ ok: true, snapshot: completo() }))
-    render(<Top15BdrsDesconto snapshot={cabecalho()} carregar={carregar} armazenamento={memoria({ [CHAVE_CODIGO_TOP15]: 'CIACOESSSS', [CHAVE_CODIGO_TOP15_FIIS]: 'CIFIISFIIS' })} />)
-    await screen.findByTestId('top15-bdrs-codigo')
-    expect(carregar).not.toHaveBeenCalled()
-    expect(screen.queryByTestId('top15-bdrs')).toBeNull()
-  })
-
-  it('código dos BDRs já salvo abre a lista sozinho; se venceu, apaga só a chave dos BDRs, avisa e volta a pedir', async () => {
-    const carregar = vi.fn(async (): Promise<RespostaTop15Bdrs> => ({ ok: true, snapshot: completo() }))
-    const { unmount } = render(<Top15BdrsDesconto snapshot={cabecalho()} carregar={carregar} armazenamento={memoria({ [CHAVE_CODIGO_TOP15_BDRS]: 'CIAAAABBBB' })} />)
-    await screen.findByTestId('top15-bdrs')
-    expect(carregar).toHaveBeenCalledWith('CIAAAABBBB')
-    unmount()
-    const mem = memoria({ [CHAVE_CODIGO_TOP15_BDRS]: 'CIANTIGOXX', [CHAVE_CODIGO_TOP15]: 'CIACOESSSS' })
-    render(<Top15BdrsDesconto snapshot={cabecalho()} carregar={async () => ({ ok: false, motivo: 'invalido' })} armazenamento={mem} />)
-    await screen.findByTestId('top15-bdrs-codigo')
-    expect(screen.getByRole('alert').textContent).toContain('venceu')
-    expect(mem.d.has(CHAVE_CODIGO_TOP15_BDRS)).toBe(false)
-    expect(mem.d.get(CHAVE_CODIGO_TOP15)).toBe('CIACOESSSS')
+  it('se o servidor falha, mostra o aviso', async () => {
+    render(<Top15BdrsDesconto snapshot={cabecalho()} carregar={async () => ({ ok: false, motivo: 'rede' })} />)
+    expect((await screen.findByRole('alert')).textContent).toContain('conectar')
   })
 })
 

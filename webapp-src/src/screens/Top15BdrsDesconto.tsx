@@ -49,7 +49,7 @@ export function Top15BdrsDesconto({
         armazenamento={armazenamento}
         chaveArmazenamento={CHAVE_CODIGO_TOP15_BDRS}
         idDeTeste="top15-bdrs-codigo"
-        renderizar={(completo, sair) => <ListaBdrs snapshot={completo} aoTrocarCodigo={sair} />}
+        renderizar={(completo) => <ListaBdrs snapshot={completo} />}
       />
     )
   }

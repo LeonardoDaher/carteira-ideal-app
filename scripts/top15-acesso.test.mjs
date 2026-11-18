@@ -60,68 +60,7 @@ test('IP: usa o primeiro do x-forwarded-for; a chave guarda só hash, nunca o IP
   assert.notEqual(A.chaveDeFalhas('203.0.113.7', 'outro-sal'), k)
 })
 
-test('porta fechada: método errado, preflight, sem código configurado e código ausente', async () => {
-  const { handler } = montar()
-  assert.equal((await chamar(handler, {}, { metodo: 'GET' })).statusCode, 405)
-  assert.equal((await chamar(handler, {}, { metodo: 'OPTIONS' })).statusCode, 204)
-  const semConfig = montar({ codigos: () => undefined })
-  const r = await chamar(semConfig.handler, { codigo: 'CI-ABCD-EFGH' })
-  assert.equal(r.statusCode, 503)
-  assert.equal(r.corpo.motivo, 'nao_configurado', 'sem TOP15_CODIGOS a porta fica FECHADA, nunca aberta')
-  assert.equal((await chamar(montar({ codigos: () => 'abc' }).handler, { codigo: 'abc' })).statusCode, 503, 'código curto na configuração não abre a porta')
-  const vazio = await chamar(handler, {})
-  assert.deepEqual([vazio.statusCode, vazio.corpo.motivo], [400, 'codigo_vazio'])
-})
-
-test('código errado: 401, conta a falha, não devolve dado algum', async () => {
-  const { handler, eventos } = montar()
-  const r = await chamar(handler, { codigo: 'CI-ZZZZ-ZZZZ' })
-  assert.equal(r.statusCode, 401)
-  assert.equal(r.corpo.motivo, 'invalido')
-  assert.ok(!JSON.stringify(r.corpo).includes('AAAA3'))
-  assert.deepEqual(eventos, ['falha'])
-})
-
-test('código certo: 200 com a lista, sem cache; aceita minúsculas, espaços e corpo em texto', async () => {
-  const { handler, eventos } = montar()
-  const r = await chamar(handler, { codigo: 'ci-abcd efgh' })
-  assert.equal(r.statusCode, 200)
-  assert.deepEqual(r.corpo, DADOS)
-  assert.equal(r.cabecalhos['cache-control'], 'private, no-store')
-  assert.equal((await chamar(handler, JSON.stringify({ codigo: 'CIABCDEFGH' }))).statusCode, 200, 'corpo como string JSON')
-  assert.equal((await chamar(handler, '{quebrado')).statusCode, 400)
-  assert.deepEqual(eventos, ['ok', 'ok'])
-})
-
-test('virada do mês: dois códigos valem ao mesmo tempo', async () => {
-  const { handler } = montar({ codigos: () => 'CI-NOVO-2222,CI-ANTI-1111' })
-  assert.equal((await chamar(handler, { codigo: 'CI-NOVO-2222' })).statusCode, 200)
-  assert.equal((await chamar(handler, { codigo: 'CI-ANTI-1111' })).statusCode, 200)
-  const so = montar({ codigos: () => 'CI-NOVO-2222' })
-  assert.equal((await chamar(so.handler, { codigo: 'CI-ANTI-1111' })).statusCode, 401, 'depois de remover o antigo, ele deixa de valer')
-})
-
-test('limite: 10 erros por IP trancam por 15 minutos, inclusive para o código certo; outro IP não é afetado', async () => {
-  const { handler, eventos, avancar } = montar()
-  for (let i = 0; i < A.MAX_FALHAS; i++) assert.equal((await chamar(handler, { codigo: `CI-ERRO-${1000 + i}` })).statusCode, 401)
-  const trancado = await chamar(handler, { codigo: 'CI-ABCD-EFGH' })
-  assert.equal(trancado.statusCode, 429, 'mesmo o código certo é recusado durante a trava')
-  assert.equal(trancado.cabecalhos['retry-after'], String(A.JANELA_SEGUNDOS))
-  assert.equal(trancado.corpo.motivo, 'limite')
-  assert.ok(eventos.includes('bloqueado'))
-  assert.equal((await chamar(handler, { codigo: 'CI-ABCD-EFGH' }, { ip: '198.51.100.9' })).statusCode, 200, 'outro IP segue normal')
-  avancar(A.JANELA_SEGUNDOS + 1)
-  assert.equal((await chamar(handler, { codigo: 'CI-ABCD-EFGH' })).statusCode, 200, 'passada a janela, a trava expira')
-})
-
-test('privacidade: o IP em texto puro nunca chega ao limitador', async () => {
-  const { handler, chavesVistas } = montar()
-  await chamar(handler, { codigo: 'CI-ERRO-0000' })
-  assert.ok(chavesVistas.size > 0)
-  for (const k of chavesVistas) assert.ok(!k.includes('203.0.113'), k)
-})
-
-test('dados ainda não publicados: com o código certo, 503 "indisponivel"; falha interna dá 500 sem vazar detalhe', async () => {
+test('dados ainda não publicados: 503 "indisponivel"; falha interna dá 500 sem vazar detalhe', async () => {
   const sem = await chamar(montar({ lerDados: async () => null }).handler, { codigo: 'CI-ABCD-EFGH' })
   assert.deepEqual([sem.statusCode, sem.corpo.motivo], [503, 'indisponivel'])
   const naoPub = await chamar(montar({ lerDados: async () => ({ publicado: false }) }).handler, { codigo: 'CI-ABCD-EFGH' })
@@ -129,12 +68,6 @@ test('dados ainda não publicados: com o código certo, 503 "indisponivel"; falh
   const erro = await chamar(montar({ lerDados: async () => { throw new Error('segredo: /var/task/caminho-interno') } }).handler, { codigo: 'CI-ABCD-EFGH' })
   assert.equal(erro.statusCode, 500)
   assert.ok(!JSON.stringify(erro.corpo).includes('segredo'))
-})
-
-test('métrica que falha nunca derruba o acesso', async () => {
-  const { handler } = montar({ contar: async () => { throw new Error('redis fora') } })
-  assert.equal((await chamar(handler, { codigo: 'CI-ABCD-EFGH' })).statusCode, 200)
-  assert.equal((await chamar(handler, { codigo: 'CI-XXXX-XXXX' })).statusCode, 401)
 })
 
 test('limitador Redis: comandos usados e fallback em memória quando o Redis falha', async () => {
@@ -148,68 +81,6 @@ test('limitador Redis: comandos usados e fallback em memória quando o Redis fal
   const l = A.limitadorComReserva(quebrado, A.limitadorEmMemoria())
   for (let i = 0; i < A.MAX_FALHAS; i++) await l.registrarFalha('k')
   assert.ok((await l.falhas('k')) >= A.MAX_FALHAS, 'com o Redis fora, a reserva em memória ainda limita')
-})
-
-test('wiring real (top15.ts): sem TOP15_CODIGOS no ambiente a porta responde 503', async () => {
-  delete process.env.TOP15_CODIGOS
-  const r = await chamar(modulos['top15.ts'].default, { codigo: 'CI-ABCD-EFGH' })
-  assert.deepEqual([r.statusCode, r.corpo.motivo], [503, 'nao_configurado'])
-})
-
-test('FIIs (api/top15-fiis.ts): sem TOP15_FIIS_CODIGOS a porta responde 503; com o código certo lê dados-privados/fii-baratos.json; código errado dá 401 sem dado algum', async () => {
-  const fs = await import('node:fs')
-  const os = await import('node:os')
-  const h = modulos['top15-fiis.ts'].default
-  const anterior = { cwd: process.cwd(), codigos: process.env.TOP15_FIIS_CODIGOS, acoes: process.env.TOP15_CODIGOS }
-  const pasta = fs.mkdtempSync(path.join(os.tmpdir(), 'top15-fiis-'))
-  try {
-    delete process.env.TOP15_FIIS_CODIGOS
-    // o código das AÇÕES configurado não abre a porta dos FIIs: sem a variável própria ela fica fechada (D66)
-    process.env.TOP15_CODIGOS = 'CI-ACOE-SSSS'
-    const fechada = await chamar(h, { codigo: 'CI-ACOE-SSSS' })
-    assert.deepEqual([fechada.statusCode, fechada.corpo.motivo], [503, 'nao_configurado'])
-
-    process.env.TOP15_FIIS_CODIGOS = 'CI-ABCD-EFGH'
-    fs.mkdirSync(path.join(pasta, 'dados-privados'))
-    process.chdir(pasta)
-    // sem o arquivo ainda: 503 "indisponível" (e não 500)
-    const semArquivo = await chamar(h, { codigo: 'CI-ABCD-EFGH' }, { ip: '198.51.100.1' })
-    assert.deepEqual([semArquivo.statusCode, semArquivo.corpo.motivo], [503, 'indisponivel'])
-    // arquivo do app ainda "em validação": 503
-    fs.writeFileSync(path.join(pasta, 'dados-privados', 'fii-baratos.json'), JSON.stringify({ publicado: false }))
-    assert.equal((await chamar(h, { codigo: 'CI-ABCD-EFGH' }, { ip: '198.51.100.2' })).statusCode, 503)
-    // publicado: código certo devolve a lista dos FIIs (e NÃO a das ações), sem cache
-    const lista = { publicado: true, tijolo: [{ ticker: 'FIIT11' }], papel: [{ ticker: 'FIIP11' }], aConferir: [], exclusoes: [] }
-    fs.writeFileSync(path.join(pasta, 'dados-privados', 'fii-baratos.json'), JSON.stringify(lista))
-    fs.writeFileSync(path.join(pasta, 'dados-privados', 'acoes-baratas.json'), JSON.stringify({ publicado: true, ranking: [{ ticker: 'ACAO3' }] }))
-    const ok = await chamar(h, { codigo: 'ci abcd efgh' }, { ip: '198.51.100.3' })
-    assert.equal(ok.statusCode, 200)
-    assert.deepEqual(ok.corpo, lista)
-    assert.equal(ok.cabecalhos['cache-control'], 'private, no-store')
-    // isolamento (D66): o código das ações NÃO abre os FIIs, e o dos FIIs NÃO abre as ações
-    const doutra = await chamar(h, { codigo: 'CI-ACOE-SSSS' }, { ip: '198.51.100.5' })
-    assert.deepEqual([doutra.statusCode, doutra.corpo.motivo], [401, 'invalido'])
-    assert.ok(!JSON.stringify(doutra.corpo).includes('FIIT11'))
-    const acoes = modulos['top15.ts'].default
-    const dosFiisNasAcoes = await chamar(acoes, { codigo: 'CI-ABCD-EFGH' }, { ip: '198.51.100.6' })
-    assert.deepEqual([dosFiisNasAcoes.statusCode, dosFiisNasAcoes.corpo.motivo], [401, 'invalido'])
-    assert.ok(!JSON.stringify(dosFiisNasAcoes.corpo).includes('ACAO3'))
-    const certoNasAcoes = await chamar(acoes, { codigo: 'CI-ACOE-SSSS' }, { ip: '198.51.100.7' })
-    assert.equal(certoNasAcoes.statusCode, 200)
-    // código errado: 401, nenhum dado
-    const errado = await chamar(h, { codigo: 'CI-ZZZZ-ZZZZ' }, { ip: '198.51.100.4' })
-    assert.deepEqual([errado.statusCode, errado.corpo.motivo], [401, 'invalido'])
-    assert.ok(!JSON.stringify(errado.corpo).includes('FIIT11'))
-    // método errado
-    assert.equal((await chamar(h, {}, { metodo: 'GET' })).statusCode, 405)
-  } finally {
-    process.chdir(anterior.cwd)
-    if (anterior.codigos === undefined) delete process.env.TOP15_FIIS_CODIGOS
-    else process.env.TOP15_FIIS_CODIGOS = anterior.codigos
-    if (anterior.acoes === undefined) delete process.env.TOP15_CODIGOS
-    else process.env.TOP15_CODIGOS = anterior.acoes
-    fs.rmSync(pasta, { recursive: true, force: true })
-  }
 })
 
 test('vercel.json inclui dados-privados nas três funções do Top 15 (ações, FIIs e BDRs)', async () => {
@@ -243,97 +114,47 @@ test('gerador de código por classe (D66): --classe acoes|fiis aponta a variáve
   assert.throws(() => lerArgumentos(['--classe']), /Classe inválida/)
   assert.throws(() => lerArgumentos(['--classe', 'toString']), /Classe inválida/)
 })
-test('BDRs (api/top15-bdrs.ts): variável própria TOP15_BDRS_CODIGOS; os códigos das ações e dos FIIs não abrem, e vice-versa (D70)', async () => {
-  const fs = await import('node:fs')
-  const os = await import('node:os')
-  const bdrs = modulos['top15-bdrs.ts'].default
-  const fiis = modulos['top15-fiis.ts'].default
-  const acoes = modulos['top15.ts'].default
-  const anterior = { cwd: process.cwd(), b: process.env.TOP15_BDRS_CODIGOS, f: process.env.TOP15_FIIS_CODIGOS, a: process.env.TOP15_CODIGOS }
-  const pasta = fs.mkdtempSync(path.join(os.tmpdir(), 'top15-bdrs-'))
-  try {
-    delete process.env.TOP15_BDRS_CODIGOS
-    process.env.TOP15_CODIGOS = 'CI-ACOE-SSSS'
-    process.env.TOP15_FIIS_CODIGOS = 'CI-FIIS-FIIS'
-    // sem a variável própria, a porta fica fechada mesmo com os códigos das outras listas configurados
-    const fechada = await chamar(bdrs, { codigo: 'CI-ACOE-SSSS' })
-    assert.deepEqual([fechada.statusCode, fechada.corpo.motivo], [503, 'nao_configurado'])
-    const fechada2 = await chamar(bdrs, { codigo: 'CI-FIIS-FIIS' })
-    assert.deepEqual([fechada2.statusCode, fechada2.corpo.motivo], [503, 'nao_configurado'])
 
-    process.env.TOP15_BDRS_CODIGOS = 'CI-BDRS-BDRS'
-    fs.mkdirSync(path.join(pasta, 'dados-privados'))
-    process.chdir(pasta)
-    const semArquivo = await chamar(bdrs, { codigo: 'CI-BDRS-BDRS' }, { ip: '203.0.113.1' })
-    assert.deepEqual([semArquivo.statusCode, semArquivo.corpo.motivo], [503, 'indisponivel'])
-    fs.writeFileSync(path.join(pasta, 'dados-privados', 'bdr-desconto.json'), JSON.stringify({ publicado: false }))
-    assert.equal((await chamar(bdrs, { codigo: 'CI-BDRS-BDRS' }, { ip: '203.0.113.2' })).statusCode, 503)
-    const lista = { publicado: true, ranking: [{ ticker: 'BDRX34' }], aConferir: [], exclusoes: [] }
-    fs.writeFileSync(path.join(pasta, 'dados-privados', 'bdr-desconto.json'), JSON.stringify(lista))
-    fs.writeFileSync(path.join(pasta, 'dados-privados', 'fii-baratos.json'), JSON.stringify({ publicado: true, tijolo: [{ ticker: 'FIIT11' }], papel: [] }))
-    fs.writeFileSync(path.join(pasta, 'dados-privados', 'acoes-baratas.json'), JSON.stringify({ publicado: true, ranking: [{ ticker: 'ACAO3' }] }))
-
-    const ok = await chamar(bdrs, { codigo: 'ci bdrs bdrs' }, { ip: '203.0.113.3' })
-    assert.equal(ok.statusCode, 200)
-    assert.deepEqual(ok.corpo, lista)
-    assert.equal(ok.cabecalhos['cache-control'], 'private, no-store')
-
-    // isolamento nos dois sentidos: o código de cada lista só abre a própria
-    for (const [codigo, ip] of [['CI-ACOE-SSSS', '203.0.113.4'], ['CI-FIIS-FIIS', '203.0.113.5']]) {
-      const r = await chamar(bdrs, { codigo }, { ip })
-      assert.deepEqual([r.statusCode, r.corpo.motivo], [401, 'invalido'], `${codigo} não abre os BDRs`)
-      assert.ok(!JSON.stringify(r.corpo).includes('BDRX34'))
-    }
-    const doBdrNasAcoes = await chamar(acoes, { codigo: 'CI-BDRS-BDRS' }, { ip: '203.0.113.6' })
-    assert.deepEqual([doBdrNasAcoes.statusCode, doBdrNasAcoes.corpo.motivo], [401, 'invalido'])
-    assert.ok(!JSON.stringify(doBdrNasAcoes.corpo).includes('ACAO3'))
-    const doBdrNosFiis = await chamar(fiis, { codigo: 'CI-BDRS-BDRS' }, { ip: '203.0.113.7' })
-    assert.deepEqual([doBdrNosFiis.statusCode, doBdrNosFiis.corpo.motivo], [401, 'invalido'])
-    assert.ok(!JSON.stringify(doBdrNosFiis.corpo).includes('FIIT11'))
-
-    assert.equal((await chamar(bdrs, {}, { metodo: 'GET' })).statusCode, 405)
-  } finally {
-    process.chdir(anterior.cwd)
-    for (const [chave, valor] of [['TOP15_BDRS_CODIGOS', anterior.b], ['TOP15_FIIS_CODIGOS', anterior.f], ['TOP15_CODIGOS', anterior.a]]) {
-      if (valor === undefined) delete process.env[chave]
-      else process.env[chave] = valor
-    }
-    fs.rmSync(pasta, { recursive: true, force: true })
+test('lista aberta: sem código nem configuração, qualquer POST recebe 200 com a lista, sem cache', async () => {
+  const { handler, eventos } = montar({ codigos: undefined })
+  assert.equal((await chamar(handler, {}, { metodo: 'GET' })).statusCode, 405)
+  assert.equal((await chamar(handler, {}, { metodo: 'OPTIONS' })).statusCode, 204)
+  for (const corpo of [undefined, {}, { codigo: '' }, { codigo: 'qualquer-coisa' }]) {
+    const r = await chamar(handler, corpo)
+    assert.equal(r.statusCode, 200)
+    assert.deepEqual(r.corpo, DADOS)
+    assert.equal(r.cabecalhos['cache-control'], 'private, no-store')
   }
+  assert.deepEqual(eventos, ['ok', 'ok', 'ok', 'ok'])
 })
-test('Opções (api/top15-opcoes.ts): variável própria TOP15_OPCOES_CODIGOS; só confirma o código, sem devolver ranking; os outros códigos não abrem (D117)', async () => {
+
+test('métrica que falha nunca derruba o acesso', async () => {
+  const { handler } = montar({ contar: async () => { throw new Error('redis fora') } })
+  assert.equal((await chamar(handler, {})).statusCode, 200)
+})
+
+test('wiring real: ações, FIIs, BDRs e opções leem o próprio arquivo de dados-privados, sem código', async () => {
   const fs = await import('node:fs')
   const os = await import('node:os')
-  const opcoes = modulos['top15-opcoes.ts'].default
-  const anterior = { cwd: process.cwd(), o: process.env.TOP15_OPCOES_CODIGOS, b: process.env.TOP15_BDRS_CODIGOS, a: process.env.TOP15_CODIGOS }
-  const pasta = fs.mkdtempSync(path.join(os.tmpdir(), 'top15-opcoes-'))
+  const pasta = fs.mkdtempSync(path.join(os.tmpdir(), 'top15-aberto-'))
+  const cwd = process.cwd()
+  const arquivos = { 'top15.ts': 'acoes-baratas.json', 'top15-fiis.ts': 'fii-baratos.json', 'top15-bdrs.ts': 'bdr-desconto.json', 'top15-opcoes.ts': 'opcoes-premios.json' }
   try {
-    delete process.env.TOP15_OPCOES_CODIGOS
-    process.env.TOP15_CODIGOS = 'CI-ACOE-SSSS'
-    process.env.TOP15_BDRS_CODIGOS = 'CI-BDRS-BDRS'
-    const fechada = await chamar(opcoes, { codigo: 'CI-ACOE-SSSS' })
-    assert.deepEqual([fechada.statusCode, fechada.corpo.motivo], [503, 'nao_configurado'])
-
-    process.env.TOP15_OPCOES_CODIGOS = 'CI-OPCO-OPCO'
     fs.mkdirSync(path.join(pasta, 'dados-privados'))
     process.chdir(pasta)
-    const semArquivo = await chamar(opcoes, { codigo: 'CI-OPCO-OPCO' }, { ip: '203.0.113.21' })
-    assert.deepEqual([semArquivo.statusCode, semArquivo.corpo.motivo], [503, 'indisponivel'])
-    fs.writeFileSync(path.join(pasta, 'dados-privados', 'opcoes-premios.json'), JSON.stringify({ publicado: true }))
-    const ok = await chamar(opcoes, { codigo: 'ci opco opco' }, { ip: '203.0.113.22' })
-    assert.equal(ok.statusCode, 200)
-    assert.deepEqual(ok.corpo, { publicado: true })
-    for (const [codigo, ip] of [['CI-ACOE-SSSS', '203.0.113.23'], ['CI-BDRS-BDRS', '203.0.113.24']]) {
-      const r = await chamar(opcoes, { codigo }, { ip })
-      assert.deepEqual([r.statusCode, r.corpo.motivo], [401, 'invalido'], `${codigo} não abre as opções`)
+    for (const [modulo, arquivo] of Object.entries(arquivos)) {
+      const h = modulos[modulo].default
+      const sem = await chamar(h, {})
+      assert.deepEqual([sem.statusCode, sem.corpo.motivo], [503, 'indisponivel'], `${modulo} sem arquivo`)
+      const lista = { publicado: true, origem: modulo }
+      fs.writeFileSync(path.join(pasta, 'dados-privados', arquivo), JSON.stringify(lista))
+      const ok = await chamar(h, {})
+      assert.equal(ok.statusCode, 200, modulo)
+      assert.deepEqual(ok.corpo, lista)
+      assert.equal((await chamar(h, {}, { metodo: 'GET' })).statusCode, 405)
     }
-    assert.equal((await chamar(opcoes, {}, { metodo: 'GET' })).statusCode, 405)
   } finally {
-    process.chdir(anterior.cwd)
-    for (const [chave, valor] of [['TOP15_OPCOES_CODIGOS', anterior.o], ['TOP15_BDRS_CODIGOS', anterior.b], ['TOP15_CODIGOS', anterior.a]]) {
-      if (valor === undefined) delete process.env[chave]
-      else process.env[chave] = valor
-    }
+    process.chdir(cwd)
     fs.rmSync(pasta, { recursive: true, force: true })
   }
 })

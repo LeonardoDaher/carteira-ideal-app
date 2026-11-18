@@ -17,13 +17,13 @@ vi.mock('../data/snapshotAcoesBaratas', () => ({
 import { SimuleAcoes } from './SimuleAcoes'
 
 describe('Simule Ações inteiro, com o arquivo de dados no estado que o job grava (publicado + por código)', () => {
-  it('abre o Top 15 e PEDE O CÓDIGO, sem nenhuma ação na tela', async () => {
+  it('abre o Top 15 e NÃO pede código, sem nenhuma ação na tela', async () => {
     const ctx = { screen: 'simuleAcoes', setScreen: vi.fn() } as unknown as AppCtx
     render(<SimuleAcoes ctx={ctx} snapshot={{ geradoEm: null, dataPregao: null, setores: [], busca: [] }} />)
     fireEvent.click(screen.getByRole('tab', { name: /Rankings e triagens/ }))
     fireEvent.click(screen.getByRole('tab', { name: /Top 15 mais baratas/ }))
-    expect(await screen.findByTestId('top15-codigo')).toBeTruthy()
-    expect(screen.getByLabelText('Código do mês')).toBeTruthy()
+    await screen.findByText(/Carregando a lista|não está disponível|conectar|carregar a lista/)
+    expect(screen.queryByLabelText('Código do mês')).toBeNull()
     expect(screen.queryByTestId('top15-validacao')).toBeNull()
     expect(screen.queryByTestId('top15')).toBeNull()
   })

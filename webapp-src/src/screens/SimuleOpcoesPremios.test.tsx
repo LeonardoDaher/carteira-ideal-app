@@ -307,55 +307,22 @@ describe('SimuleOpcoes: Top 15 prêmios, escolha do vencimento (mensal e W1 a W5
   })
 })
 
-describe('SimuleOpcoes: Top 15 prêmios, acesso por código (D117)', () => {
-  const memoria = (inicial: string | null) => {
-    let valor = inicial
-    return {
-      getItem: vi.fn(async () => valor),
-      setItem: vi.fn(async (_c: string, v: string) => { valor = v }),
-      removeItem: vi.fn(async () => { valor = null }),
-    }
-  }
-  const abrir = (acesso: ReturnType<typeof memoria>, carregarAcesso: (c: string) => Promise<{ ok: true; snapshot: { publicado: true } } | { ok: false; motivo: 'invalido' }>) => {
-    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} carregarAcesso={carregarAcesso} armazenamentoDoAcesso={acesso} />)
+describe('SimuleOpcoes: Top 15 prêmios, lista aberta (sem código)', () => {
+  const abrir = (carregarAcesso: (c: string) => Promise<{ ok: true; snapshot: { publicado: true } } | { ok: false; motivo: 'rede' }>) => {
+    render(<SimuleOpcoes ctx={ctx} snapshot={snapshot} carregarAcesso={carregarAcesso} />)
     abrirTop()
   }
 
-  it('sem código salvo, pede o código e não mostra o ranking', async () => {
-    abrir(memoria(null), async () => ({ ok: false, motivo: 'invalido' }))
-    expect(await screen.findByTestId('top15-opcoes-codigo')).toBeDefined()
-    expect(screen.queryByRole('group', { name: 'Filtros do ranking de prêmios' })).toBeNull()
-    expect(linhas()).toHaveLength(0)
-  })
-
-  it('código errado mostra o aviso e segue fechado', async () => {
-    abrir(memoria(null), async () => ({ ok: false, motivo: 'invalido' }))
-    fireEvent.change(await screen.findByLabelText('Código do mês'), { target: { value: 'CIAAAABBBB' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Ver a lista' }))
-    expect((await screen.findByRole('alert')).textContent).toMatch(/Código inválido ou vencido/)
-    expect(linhas()).toHaveLength(0)
-  })
-
-  it('código certo abre o ranking, fica salvo, e "Sair" apaga o código e volta a pedir', async () => {
-    const acesso = memoria(null)
-    abrir(acesso, async () => ({ ok: true, snapshot: { publicado: true } }))
-    fireEvent.change(await screen.findByLabelText('Código do mês'), { target: { value: 'CIAAAABBBB' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Ver a lista' }))
+  it('abre o ranking direto, sem pedir código nem oferecer troca', async () => {
+    abrir(async () => ({ ok: true, snapshot: { publicado: true } }))
     expect(await screen.findByRole('group', { name: 'Filtros do ranking de prêmios' })).toBeDefined()
-    expect(acesso.setItem).toHaveBeenCalledWith('carteiraideal.top15opcoes.codigo', 'CIAAAABBBB')
-    fireEvent.click(screen.getByRole('button', { name: 'Sair e trocar o código' }))
-    expect(await screen.findByTestId('top15-opcoes-codigo')).toBeDefined()
-    expect(acesso.removeItem).toHaveBeenCalledWith('carteiraideal.top15opcoes.codigo')
+    expect(screen.queryByLabelText('Código do mês')).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Sair e trocar o código' })).toBeNull()
   })
 
-  it('com o código já salvo e válido, abre direto; se venceu, avisa e pede o novo', async () => {
-    abrir(memoria('CI-AAAA-BBBB'), async () => ({ ok: true, snapshot: { publicado: true } }))
-    expect(await screen.findByRole('group', { name: 'Filtros do ranking de prêmios' })).toBeDefined()
-  })
-
-  it('código salvo vencido: avisa e pede o novo', async () => {
-    abrir(memoria('CI-AAAA-BBBB'), async () => ({ ok: false, motivo: 'invalido' }))
-    expect((await screen.findByRole('alert')).textContent).toMatch(/venceu/)
-    expect(screen.getByTestId('top15-opcoes-codigo')).toBeDefined()
+  it('se o servidor falha, mostra o aviso e não mostra o ranking', async () => {
+    abrir(async () => ({ ok: false, motivo: 'rede' }))
+    expect((await screen.findByRole('alert')).textContent).toMatch(/conectar/)
+    expect(linhas()).toHaveLength(0)
   })
 })

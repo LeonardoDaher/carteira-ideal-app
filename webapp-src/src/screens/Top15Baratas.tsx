@@ -70,7 +70,7 @@ function PortaoDoCodigo({
       armazenamento={armazenamento}
       chaveArmazenamento={CHAVE_CODIGO_TOP15}
       idDeTeste="top15-codigo"
-      renderizar={(completo, sair) => <ListaTop15 snapshot={completo} aoTrocarCodigo={sair} />}
+      renderizar={(completo) => <ListaTop15 snapshot={completo} />}
     />
   )
 }

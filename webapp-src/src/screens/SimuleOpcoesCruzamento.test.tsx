@@ -73,13 +73,13 @@ describe('Top 15 prêmios cruzado com a dívida das empresas', () => {
   })
 })
 
-describe('Top 15 prêmios cruzado com o Top 15 mais baratas (lista restrita por código)', () => {
-  it('com o código já liberado neste aparelho, marca as empresas da lista e deixa filtrar por elas', async () => {
+describe('Top 15 prêmios cruzado com o Top 15 mais baratas (lista aberta)', () => {
+  it('marca as empresas da lista e deixa filtrar por elas', async () => {
     const carregar = baratasOk(['BBAS3'])
     render(<SimuleOpcoes semPortaoNoTop15 ctx={ctx} snapshot={snapshot} endividadas={endividadas} carregarBaratas={carregar} armazenamento={comCodigo} />)
     abrirTop()
     await waitFor(() => expect(screen.getAllByTestId('selo-barata')).toHaveLength(1))
-    expect(carregar).toHaveBeenCalledWith('CI-ABCD-EFGH')
+    expect(carregar).toHaveBeenCalledWith('')
     const linhaBbas = linhas().find((l) => within(l).queryByText('BBASW240'))!
     expect(within(linhaBbas).getByTestId('selo-barata').textContent).toBe('Top 15 mais baratas')
 
@@ -87,18 +87,7 @@ describe('Top 15 prêmios cruzado com o Top 15 mais baratas (lista restrita por 
     expect(series()).toEqual(['BBASW240'])
   })
 
-  it('sem código, nada é pedido ao servidor e a nota explica como liberar, sem mostrar a lista', async () => {
-    const carregar = baratasOk(['BBAS3'])
-    render(<SimuleOpcoes semPortaoNoTop15 ctx={ctx} snapshot={snapshot} endividadas={endividadas} carregarBaratas={carregar} armazenamento={semCodigo} />)
-    abrirTop()
-    const nota = await screen.findByTestId('nota-baratas')
-    expect(within(nota).getByRole('link', { name: 'Simule Ações' }).getAttribute('href')).toBe('./?tela=simuleAcoes')
-    expect(carregar).not.toHaveBeenCalled()
-    expect(screen.queryByTestId('selo-barata')).toBeNull()
-    expect(screen.queryByRole('checkbox', { name: /Top 15 mais baratas/ })).toBeNull()
-  })
-
-  it('código que o servidor recusa não quebra o ranking: só avisa que não conseguiu conferir', async () => {
+  it('falha do servidor não quebra o ranking: só avisa que não conseguiu conferir', async () => {
     const carregar = vi.fn().mockResolvedValue({ ok: false, motivo: 'invalido' } as RespostaTop15)
     render(<SimuleOpcoes semPortaoNoTop15 ctx={ctx} snapshot={snapshot} endividadas={endividadas} carregarBaratas={carregar} armazenamento={comCodigo} />)
     abrirTop()

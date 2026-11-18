@@ -1,123 +1,42 @@
-import { useEffect, useId, useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
-import { storage } from '../data/storage'
-import { formatarCodigo, limparCodigoDigitado, mensagemDaFalha } from '../domain/acessoTop15'
+import { mensagemDaFalha } from '../domain/acessoTop15'
 import type { RespostaLista } from '../domain/acessoTop15'
 
 /**
- * Portão do código do mês (D50), usado pelo Top 15 de ações e pelo Top 15 de FIIs (D65). Pede o código; ele
- * fica salvo neste aparelho, e quando vence o servidor o recusa e a tela volta a pedir. Nenhum dado da lista
- * existe no navegador antes de o código ser aceito. Cada lista tem o SEU código e a SUA chave de armazenamento
- * (D66): liberar as ações não libera os FIIs.
+ * Antes pedia o código do mês (D50). As listas Top 15 agora são abertas: o componente só busca a lista e a desenha,
+ * sem pedir código. Mantém o nome e as props de antes para não mexer nas telas.
  */
 export function PortaoPorCodigo<T>({
-  titulo, oQueLibera, instagram, carregar, armazenamento, chaveArmazenamento, idDeTeste, renderizar,
+  carregar, idDeTeste, renderizar,
 }: {
-  /** Ex.: "Top 15 mais baratas: acesso por código". */
-  titulo: string
-  /** Frase final do texto de apresentação: o que a pessoa passa a ver com o código. */
-  oQueLibera: string
-  instagram?: string | null
   carregar: (codigo: string) => Promise<RespostaLista<T>>
-  armazenamento: Pick<typeof storage, 'getItem' | 'setItem' | 'removeItem'>
-  /** Onde o código desta lista fica salvo neste aparelho (uma chave por classe de ativos). */
-  chaveArmazenamento: string
   idDeTeste: string
-  /** Desenha a lista liberada; `sair` apaga o código salvo e volta a pedir. */
-  renderizar: (dados: T, sair: () => void) => ReactNode
+  renderizar: (dados: T) => ReactNode
+  // Props antigas, ignoradas (lista aberta).
+  titulo?: string
+  oQueLibera?: string
+  instagram?: string | null
+  armazenamento?: unknown
+  chaveArmazenamento?: string
 }) {
   const [completo, setCompleto] = useState<T | null>(null)
-  const [fase, setFase] = useState<'verificando-salvo' | 'livre' | 'carregando'>('verificando-salvo')
   const [aviso, setAviso] = useState<string | null>(null)
-  const [codigo, setCodigo] = useState('')
-  const idCampo = useId()
-
-  const tentar = async (valor: string, doSalvo: boolean) => {
-    setFase(doSalvo ? 'verificando-salvo' : 'carregando')
-    setAviso(null)
-    const r = await carregar(valor)
-    if (r.ok) {
-      await armazenamento.setItem(chaveArmazenamento, valor)
-      setCompleto(r.snapshot)
-      return
-    }
-    if (r.motivo === 'invalido') await armazenamento.removeItem(chaveArmazenamento)
-    setAviso(doSalvo && r.motivo === 'invalido' ? 'O código salvo neste aparelho venceu. Digite o código mais recente.' : mensagemDaFalha(r))
-    setFase('livre')
-  }
 
   useEffect(() => {
     let cancelado = false
     void (async () => {
-      const salvo = await armazenamento.getItem(chaveArmazenamento)
+      const r = await carregar('')
       if (cancelado) return
-      if (!salvo) return setFase('livre')
-      const r = await carregar(salvo)
-      if (cancelado) return
-      if (r.ok) return setCompleto(r.snapshot)
-      if (r.motivo === 'invalido') await armazenamento.removeItem(chaveArmazenamento)
-      setAviso(r.motivo === 'invalido' ? 'O código salvo neste aparelho venceu. Digite o código mais recente.' : mensagemDaFalha(r))
-      setFase('livre')
+      if (r.ok) setCompleto(r.snapshot)
+      else setAviso(mensagemDaFalha(r))
     })()
     return () => {
       cancelado = true
     }
-  }, [armazenamento, carregar, chaveArmazenamento])
+  }, [carregar])
 
-  const sair = async () => {
-    await armazenamento.removeItem(chaveArmazenamento)
-    setCompleto(null)
-    setCodigo('')
-    setFase('livre')
-  }
-
-  if (completo) return <>{renderizar(completo, () => void sair())}</>
-
-  if (fase === 'verificando-salvo') {
-    return <div className="card small muted" role="status">Verificando o código salvo neste aparelho…</div>
-  }
-
-  const pronto = limparCodigoDigitado(codigo).length >= 8 && fase !== 'carregando'
-  return (
-    <div className="card col" style={{ gap: 10 }} data-testid={idDeTeste}>
-      <span style={{ fontWeight: 700 }}>{titulo}</span>
-      <span className="muted small justify" style={{ lineHeight: 1.5 }}>
-        A lista é liberada com o código do mês
-        {instagram ? (
-          <>
-            , divulgado no Instagram{' '}
-            <a href={`https://www.instagram.com/${instagram}/`} target="_blank" rel="noopener noreferrer">@{instagram}</a>
-          </>
-        ) : null}
-        . {oQueLibera}
-      </span>
-      <form
-        className="col"
-        style={{ gap: 8 }}
-        onSubmit={(e) => {
-          e.preventDefault()
-          if (pronto) void tentar(limparCodigoDigitado(codigo), false)
-        }}
-      >
-        <label htmlFor={idCampo} className="small" style={{ fontWeight: 600 }}>Código do mês</label>
-        <input
-          id={idCampo}
-          className="busca-fii"
-          placeholder="CI-XXXX-XXXX"
-          autoCapitalize="characters"
-          autoComplete="off"
-          autoCorrect="off"
-          spellCheck={false}
-          enterKeyHint="go"
-          value={codigo}
-          onChange={(e) => setCodigo(formatarCodigo(e.target.value))}
-        />
-        <button type="submit" className="btn" disabled={!pronto}>
-          {fase === 'carregando' ? 'Verificando…' : 'Ver a lista'}
-        </button>
-      </form>
-      {aviso && <div className="card-outline small justify" role="alert">{aviso}</div>}
-      <span className="tiny muted">O código fica salvo neste aparelho. Quando ele mudar, o app pede o novo.</span>
-    </div>
-  )
+  if (completo) return <>{renderizar(completo)}</>
+  if (aviso) return <div className="card-outline small justify" role="alert" data-testid={idDeTeste}>{aviso}</div>
+  return <div className="card small muted" role="status">Carregando a lista…</div>
 }

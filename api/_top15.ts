@@ -1,12 +1,6 @@
-// Porta de acesso ao "Top 15 ações mais baratas" (D50): lógica pura e testável.
-//
-// O ranking NÃO vai no arquivo do app. Ele fica em dados-privados/acoes-baratas.json, que só esta
-// função lê, e só devolve depois de conferir o código do mês. O código fica na variável de ambiente
-// TOP15_CODIGOS da Vercel (nunca no repositório): um ou mais códigos separados por vírgula. Dois
-// códigos ao mesmo tempo permitem a virada do mês sem derrubar ninguém.
-//
-// Defesas: comparação em tempo constante; limite de tentativas ERRADAS por IP (guardamos só um hash
-// do IP, por 15 minutos); resposta com "no-store"; sem código configurado, a porta fica FECHADA.
+// Porta do Top 15 (D50): a lista NÃO vai no arquivo do app; fica em dados-privados/ e só esta função a lê.
+// O acesso por código do mês foi REMOVIDO: a função devolve a lista a qualquer POST. As funções de código
+// abaixo (normalizar, comparar) ficam só como utilitários.
 import { createHash, timingSafeEqual } from 'node:crypto'
 import type { VercelRequest, VercelResponse } from './_tipos.js'
 import { aplicarCors } from './_cors.js'
@@ -115,7 +109,7 @@ export type EventoDeAcesso = 'ok' | 'falha' | 'bloqueado'
 
 export interface Dependencias {
   /** Conteúdo bruto da variável de códigos da lista (TOP15_CODIGOS nas ações, TOP15_FIIS_CODIGOS nos FIIs). */
-  codigos: () => string | undefined
+  codigos?: () => string | undefined
   /** Conteúdo de dados-privados/acoes-baratas.json, ou null se não existir. */
   lerDados: () => Promise<unknown>
   limitador: Limitador
@@ -150,34 +144,6 @@ export function criarHandler(dep: Dependencias) {
     }
 
     try {
-      const validos = listaDeCodigos(dep.codigos())
-      if (validos.length === 0) {
-        res.status(503).json({ erro: 'O acesso ao Top 15 ainda não foi configurado.', motivo: 'nao_configurado' })
-        return
-      }
-
-      const chave = chaveDeFalhas(ipDe(req.headers, req.socket?.remoteAddress), dep.sal)
-      if ((await dep.limitador.falhas(chave)) >= MAX_FALHAS) {
-        await contar('bloqueado')
-        res.setHeader('Retry-After', String(JANELA_SEGUNDOS))
-        res.status(429).json({ erro: 'Muitas tentativas com código errado. Tente novamente em alguns minutos.', motivo: 'limite', espera: JANELA_SEGUNDOS })
-        return
-      }
-
-      const corpo = (typeof req.body === 'string' ? safeParse(req.body) : req.body) as { codigo?: unknown } | undefined
-      const codigo = normalizarCodigo(corpo?.codigo)
-      if (codigo === '') {
-        res.status(400).json({ erro: 'Informe o código.', motivo: 'codigo_vazio' })
-        return
-      }
-
-      if (!codigoConfere(codigo, validos)) {
-        await dep.limitador.registrarFalha(chave)
-        await contar('falha')
-        res.status(401).json({ erro: 'Código inválido ou vencido.', motivo: 'invalido' })
-        return
-      }
-
       const dados = (await dep.lerDados()) as { publicado?: boolean } | null
       if (!dados || dados.publicado !== true) {
         res.status(503).json({ erro: 'A lista ainda não está disponível. Tente novamente mais tarde.', motivo: 'indisponivel' })
@@ -190,13 +156,5 @@ export function criarHandler(dep: Dependencias) {
       console.error('[api/top15] erro:', err instanceof Error ? err.message : err)
       res.status(500).json({ erro: 'Erro interno. Tente novamente em instantes.' })
     }
-  }
-}
-
-function safeParse(texto: string): unknown {
-  try {
-    return JSON.parse(texto)
-  } catch {
-    return undefined
   }
 }

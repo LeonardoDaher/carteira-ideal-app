@@ -3,7 +3,6 @@ import { describe, expect, it, vi } from 'vitest'
 import { Top15FiisBaratos } from './Top15FiisBaratos'
 import { SimuleFii } from './SimuleFii'
 import type { ItemFii, SnapshotFiiBaratos } from '../domain/fiiBaratos'
-import { CHAVE_CODIGO_TOP15, CHAVE_CODIGO_TOP15_FIIS } from '../domain/acessoTop15'
 import type { RespostaTop15Fiis } from '../domain/acessoTop15'
 import type { AppCtx } from '../state/useAppState'
 
@@ -35,16 +34,6 @@ const snapshot = (o: Partial<SnapshotFiiBaratos> = {}): SnapshotFiiBaratos => ({
   ],
   ...o,
 })
-
-const memoria = (inicial: Record<string, string> = {}) => {
-  const d = new Map(Object.entries(inicial))
-  return {
-    d,
-    getItem: async (k: string) => d.get(k) ?? null,
-    setItem: async (k: string, v: string) => void d.set(k, v),
-    removeItem: async (k: string) => void d.delete(k),
-  }
-}
 
 describe('Top15FiisBaratos', () => {
   it('sem aprovação (publicado=false) mostra "em validação" e nenhum fundo', () => {
@@ -159,80 +148,20 @@ describe('Top15FiisBaratos', () => {
   })
 })
 
-describe('Top15FiisBaratos com acesso por código (D50 e D65)', () => {
-  const cabecalho = () => snapshot({ acessoRestrito: true, instagram: 'acarteiraideal', tijolo: [], papel: [], aConferir: [], exclusoes: [] })
-  const completo = () => snapshot({ acessoRestrito: true, instagram: 'acarteiraideal' })
-  const digitar = (valor: string) => fireEvent.change(screen.getByLabelText('Código do mês'), { target: { value: valor } })
+describe('Top15FiisBaratos com a lista vinda do servidor (sem código)', () => {
+  const cabecalho = () => snapshot({ acessoRestrito: true, tijolo: [], papel: [], aConferir: [], exclusoes: [] })
 
-  it('sem código: pede o código, aponta o Instagram e NÃO mostra nenhum fundo', async () => {
-    render(<Top15FiisBaratos snapshot={cabecalho()} carregar={vi.fn()} armazenamento={memoria()} />)
-    await screen.findByTestId('top15-fiis-codigo')
-    expect(screen.getByText('Top 15 FIIs baratos: acesso por código')).toBeTruthy()
-    const link = screen.getByRole('link', { name: '@acarteiraideal' })
-    expect(link.getAttribute('href')).toBe('https://www.instagram.com/acarteiraideal/')
-    expect(screen.queryByTestId('top15-fiis')).toBeNull()
-    expect(document.body.textContent).not.toMatch(/AAAA11|MFII11/)
-    expect((screen.getByRole('button', { name: 'Ver a lista' }) as HTMLButtonElement).disabled).toBe(true)
-  })
-
-  it('código errado: mostra o aviso, não salva e não libera a lista', async () => {
-    const mem = memoria()
-    const carregar = vi.fn(async (): Promise<RespostaTop15Fiis> => ({ ok: false, motivo: 'invalido' }))
-    render(<Top15FiisBaratos snapshot={cabecalho()} carregar={carregar} armazenamento={mem} />)
-    await screen.findByTestId('top15-fiis-codigo')
-    digitar('ciaaaabbbb')
-    fireEvent.click(screen.getByRole('button', { name: 'Ver a lista' }))
-    expect((await screen.findByRole('alert')).textContent).toContain('Código inválido ou vencido')
-    expect(carregar).toHaveBeenCalledWith('CIAAAABBBB')
-    expect(mem.d.size).toBe(0)
-    expect(screen.queryByTestId('top15-fiis')).toBeNull()
-  })
-
-  it('código certo: libera a lista, salva o código (em chave própria dos FIIs) e oferece trocar', async () => {
-    const mem = memoria()
-    const carregar = vi.fn(async (): Promise<RespostaTop15Fiis> => ({ ok: true, snapshot: completo() }))
-    render(<Top15FiisBaratos snapshot={cabecalho()} carregar={carregar} armazenamento={mem} />)
-    await screen.findByTestId('top15-fiis-codigo')
-    digitar('CI-AAAA-BBBB')
-    expect((screen.getByLabelText('Código do mês') as HTMLInputElement).value).toBe('CI-AAAA-BBBB')
-    fireEvent.click(screen.getByRole('button', { name: 'Ver a lista' }))
+  it('abre a lista sozinha, sem pedir código', async () => {
+    const carregar = vi.fn(async (): Promise<RespostaTop15Fiis> => ({ ok: true, snapshot: snapshot({ acessoRestrito: true }) }))
+    render(<Top15FiisBaratos snapshot={cabecalho()} carregar={carregar} />)
     await screen.findByTestId('top15-fiis')
-    expect(screen.getByTestId('top15-fiis-AAAA11')).toBeTruthy()
-    expect(mem.d.get(CHAVE_CODIGO_TOP15_FIIS)).toBe('CIAAAABBBB')
-    fireEvent.click(screen.getByRole('button', { name: 'Sair e trocar o código' }))
-    await screen.findByTestId('top15-fiis-codigo')
-    expect(mem.d.has(CHAVE_CODIGO_TOP15_FIIS)).toBe(false)
-    expect(screen.queryByTestId('top15-fiis')).toBeNull()
+    expect(screen.queryByLabelText('Código do mês')).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Sair e trocar o código' })).toBeNull()
   })
 
-  it('o código salvo das AÇÕES não abre os FIIs (D66): a tela pede o código dos FIIs e não consulta o servidor com o outro', async () => {
-    const carregar = vi.fn(async (): Promise<RespostaTop15Fiis> => ({ ok: true, snapshot: completo() }))
-    render(<Top15FiisBaratos snapshot={cabecalho()} carregar={carregar} armazenamento={memoria({ [CHAVE_CODIGO_TOP15]: 'CIACOESSSS' })} />)
-    await screen.findByTestId('top15-fiis-codigo')
-    expect(carregar).not.toHaveBeenCalled()
-    expect(screen.queryByTestId('top15-fiis')).toBeNull()
-  })
-
-  it('código dos FIIs já salvo abre a lista sozinho, sem pedir de novo', async () => {
-    const carregar = vi.fn(async (): Promise<RespostaTop15Fiis> => ({ ok: true, snapshot: completo() }))
-    render(<Top15FiisBaratos snapshot={cabecalho()} carregar={carregar} armazenamento={memoria({ [CHAVE_CODIGO_TOP15_FIIS]: 'CIAAAABBBB' })} />)
-    await screen.findByTestId('top15-fiis')
-    expect(carregar).toHaveBeenCalledWith('CIAAAABBBB')
-    expect(screen.queryByTestId('top15-fiis-codigo')).toBeNull()
-  })
-
-  it('código salvo que venceu: apaga, avisa e volta a pedir; falha de rede com código salvo não apaga o código', async () => {
-    const mem = memoria({ [CHAVE_CODIGO_TOP15_FIIS]: 'CIANTIGOXX' })
-    const { unmount } = render(<Top15FiisBaratos snapshot={cabecalho()} carregar={async () => ({ ok: false, motivo: 'invalido' })} armazenamento={mem} />)
-    await screen.findByTestId('top15-fiis-codigo')
-    expect(screen.getByRole('alert').textContent).toContain('venceu')
-    expect(mem.d.has(CHAVE_CODIGO_TOP15_FIIS)).toBe(false)
-    unmount()
-    const mem2 = memoria({ [CHAVE_CODIGO_TOP15_FIIS]: 'CIBOMBOMXX' })
-    render(<Top15FiisBaratos snapshot={cabecalho()} carregar={async () => ({ ok: false, motivo: 'rede' })} armazenamento={mem2} />)
-    await screen.findByTestId('top15-fiis-codigo')
-    expect(mem2.d.get(CHAVE_CODIGO_TOP15_FIIS)).toBe('CIBOMBOMXX')
-    expect(screen.getByRole('alert').textContent).toContain('conectar')
+  it('se o servidor falha, mostra o aviso', async () => {
+    render(<Top15FiisBaratos snapshot={cabecalho()} carregar={async () => ({ ok: false, motivo: 'rede' })} />)
+    expect((await screen.findByRole('alert')).textContent).toContain('conectar')
   })
 })
 

@@ -54,7 +54,7 @@ export function Top15FiisBaratos({
         armazenamento={armazenamento}
         chaveArmazenamento={CHAVE_CODIGO_TOP15_FIIS}
         idDeTeste="top15-fiis-codigo"
-        renderizar={(completo, sair) => <ListaFiis snapshot={completo} aoTrocarCodigo={sair} />}
+        renderizar={(completo) => <ListaFiis snapshot={completo} />}
       />
     )
   }

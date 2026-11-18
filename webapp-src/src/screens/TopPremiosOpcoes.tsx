@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { jurosPadrao } from '../data/jurosOpcoes'
 import { SNAPSHOT_ACOES_ENDIVIDADAS } from '../data/snapshotAcoesEndividadas'
 import { storage } from '../data/storage'
-import { CHAVE_CODIGO_TOP15, CHAVE_CODIGO_TOP15_OPCOES, buscarTop15, buscarTop15Opcoes } from '../domain/acessoTop15'
+import { CHAVE_CODIGO_TOP15_OPCOES, buscarTop15, buscarTop15Opcoes } from '../domain/acessoTop15'
 import type { RespostaTop15, RespostaTop15Opcoes } from '../domain/acessoTop15'
 import type { SnapshotAcoesEndividadas } from '../domain/acoesEndividadas'
 import { LIMITES_DE_DIVIDA, fundamentoDoAtivo, montarIndiceFundamentos, raizDoTicker } from '../domain/fundamentosPremios'
@@ -25,7 +25,7 @@ const OPERACOES: { id: Operacao; titulo: string; descricao: string }[] = [
   { id: 'callCoberta', titulo: 'Vender call coberta', descricao: 'Você já tem a ação e pode ter de vendê-la pelo strike.' },
 ]
 
-type EstadoBaratas = { tipo: 'carregando' } | { tipo: 'sem_codigo' } | { tipo: 'falhou' } | { tipo: 'ok'; raizes: Set<string> }
+type EstadoBaratas = { tipo: 'carregando' } | { tipo: 'falhou' } | { tipo: 'ok'; raizes: Set<string> }
 type CarregarBaratas = (codigo: string) => Promise<RespostaTop15>
 type Armazenamento = Pick<typeof storage, 'getItem'>
 
@@ -41,9 +41,7 @@ function useBaratas(carregar: CarregarBaratas, armazenamento: Armazenamento): Es
   useEffect(() => {
     let vivo = true
     ;(async () => {
-      const codigo = await armazenamento.getItem(CHAVE_CODIGO_TOP15)
-      if (!vivo) return
-      if (!codigo) return setEstado({ tipo: 'sem_codigo' })
+      const codigo = ''
       const guardado = carregar === buscarTop15 ? CACHE_BARATAS.get(codigo) : undefined
       if (guardado) return setEstado({ tipo: 'ok', raizes: guardado })
       const resposta = await carregar(codigo)
@@ -92,14 +90,7 @@ export function TopPremiosOpcoes({
       armazenamento={armazenamentoDoAcesso}
       chaveArmazenamento={CHAVE_CODIGO_TOP15_OPCOES}
       idDeTeste="top15-opcoes-codigo"
-      renderizar={(_liberado, sair) => (
-        <>
-          <ListaDePremios {...resto} />
-          <button type="button" className="btn btn-outline" onClick={sair} style={{ alignSelf: 'flex-start' }}>
-            Sair e trocar o código
-          </button>
-        </>
-      )}
+      renderizar={() => <ListaDePremios {...resto} />}
     />
   )
 }
@@ -372,12 +363,6 @@ function ListaDePremios({
             <input type="checkbox" checked={filtro.soBaratas} onChange={(ev) => mudar({ soBaratas: ev.target.checked })} />
             Só as empresas do Top 15 mais baratas
           </label>
-        )}
-        {baratas.tipo === 'sem_codigo' && (
-          <span className="tiny muted justify" data-testid="nota-baratas">
-            Para marcar as empresas que estão no Top 15 mais baratas, libere essa lista com o código, na aba Top 15 do{' '}
-            <a href="./?tela=simuleAcoes">Simule Ações</a>. Sem o código, a lista continua restrita e não aparece aqui.
-          </span>
         )}
         {baratas.tipo === 'falhou' && (
           <span className="tiny muted" role="status">Não consegui conferir o Top 15 mais baratas agora; o ranking segue sem essa marca.</span>
