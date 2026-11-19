@@ -1,7 +1,7 @@
 {
   "versao": "1.0.0",
-  "geradoEm": "2026-11-18T14:09:57.288Z",
-  "dataCorte": "2026-11-18",
+  "geradoEm": "2026-11-19T14:29:10.122Z",
+  "dataCorte": "2026-11-19",
   "fonte": "CVM - Dados abertos (ITR e DFP de companhias abertas)",
   "_leia": "Balanços trimestrais isolados por empresa, gerados por scripts/atualizar-balancos.mjs a partir da CVM. Valores em R$ mil; ausente é null. A data da próxima divulgação é ESTIMADA pelo histórico da empresa. Não editar à mão.",
   "excluidas": [{"ticker":"DMMO3","motivo":"Código sem CNPJ no FCA da CVM."},{"ticker":"KLBN3","motivo":"Código sem CNPJ no FCA da CVM."},{"ticker":"PLAS3","motivo":"Código sem CNPJ no FCA da CVM."},{"ticker":"STBP3","motivo":"Código sem CNPJ no FCA da CVM."},{"ticker":"AESB3","motivo":"Código sem CNPJ no FCA da CVM."},{"ticker":"ALUP3","motivo":"Código sem CNPJ no FCA da CVM."},{"ticker":"EQPA3","motivo":"Código sem CNPJ no FCA da CVM."},{"ticker":"BPAC11","motivo":"Código sem CNPJ no FCA da CVM."},{"ticker":"DAYC4","motivo":"Código sem CNPJ no FCA da CVM."},{"ticker":"BPAC3","motivo":"Código sem CNPJ no FCA da CVM."},{"ticker":"APER3","motivo":"Código sem CNPJ no FCA da CVM."},{"ticker":"MAPT3","motivo":"Código sem CNPJ no FCA da CVM."},{"ticker":"OBTC3","motivo":"Código sem CNPJ no FCA da CVM."},{"ticker":"NORD3","motivo":"Código sem CNPJ no FCA da CVM."},{"ticker":"HAGA3","motivo":"Código sem CNPJ no FCA da CVM."},{"ticker":"AMAR3","motivo":"Código sem CNPJ no FCA da CVM."},{"ticker":"MBLY3","motivo":"Código sem CNPJ no FCA da CVM."},{"ticker":"MBRF3","motivo":"Código sem CNPJ no FCA da CVM."},{"ticker":"CRFB3","motivo":"Código sem CNPJ no FCA da CVM."},{"ticker":"KRSA3","motivo":"Código sem CNPJ no FCA da CVM."},{"ticker":"WDCN3","motivo":"Código sem CNPJ no FCA da CVM."},{"ticker":"BRIT3","motivo":"Código sem CNPJ no FCA da CVM."}],
