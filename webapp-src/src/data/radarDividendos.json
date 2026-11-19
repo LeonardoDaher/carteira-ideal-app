@@ -1,15 +1,14 @@
 {
-  "geradoEm": "2026-11-18T12:05:57.926Z",
+  "geradoEm": "2026-11-19T11:59:24.216Z",
   "publicado": true,
-  "dataReferencia": "2026-11-18",
+  "dataReferencia": "2026-11-19",
   "consultadas": 314,
   "comPagamento": 194,
   "falhas": [
     "DMMO3",
     "GUAR3",
     "MBLY3",
-    "ODPV3",
-    "REDE3"
+    "ODPV3"
   ],
   "pagamentos": [
     {
@@ -7309,6 +7308,18 @@
       "mes": "2026-11"
     },
     {
+      "ticker": "VTRU3",
+      "nome": "Vitru Educação",
+      "setor": "Educação",
+      "tipo": "DIVIDENDO",
+      "valor": 0.53320248531,
+      "dataCom": "2026-11-18",
+      "pagamentoEm": "2026-11-30",
+      "aprovadoEm": "2026-11-11",
+      "referencia": "3º Trimestre/2026",
+      "mes": "2026-11"
+    },
+    {
       "ticker": "BBDC4",
       "nome": "Bradesco",
       "setor": "Bancos",
@@ -7426,6 +7437,18 @@
       "pagamentoEm": "2026-12-10",
       "aprovadoEm": "2026-09-10",
       "referencia": "Anual/2026",
+      "mes": "2026-12"
+    },
+    {
+      "ticker": "REDE3",
+      "nome": "Rede Energia",
+      "setor": "Energia elétrica: distribuição",
+      "tipo": "DIVIDENDO",
+      "valor": 0.054512798,
+      "dataCom": "2026-11-13",
+      "pagamentoEm": "2026-12-10",
+      "aprovadoEm": "2026-11-10",
+      "referencia": "3º Trimestre/2026",
       "mes": "2026-12"
     },
     {
@@ -8249,7 +8272,7 @@
       "nome": "Sabesp",
       "setor": "Saneamento e resíduos",
       "tipo": "JRS CAP PROPRIO",
-      "valor": 0.74986562544,
+      "valor": 0.74985577021,
       "dataCom": "2026-11-10",
       "pagamentoEm": "2027-04-30",
       "aprovadoEm": "2026-11-05",

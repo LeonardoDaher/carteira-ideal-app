@@ -1,7 +1,7 @@
 {
-  "geradoEm": "2026-11-18T12:19:01.630Z",
+  "geradoEm": "2026-11-19T12:12:38.626Z",
   "publicado": true,
-  "dataReferencia": "2026-11-18",
+  "dataReferencia": "2026-11-19",
   "anos": 3,
   "minimoDeAnos": 2,
   "consultadas": 314,
@@ -20,6 +20,7 @@
     "DMVF3",
     "DOTZ3",
     "DTCY3",
+    "GGBR4",
     "GUAR3",
     "HAGA3",
     "HBSA3",
@@ -37,7 +38,6 @@
     "ONCO3",
     "ORVR3",
     "OSXB3",
-    "PRIO3",
     "RNEW3",
     "RVEE3",
     "SNSY3",
@@ -1987,26 +1987,6 @@
       "anosComHistorico": 3
     },
     {
-      "ticker": "GGBR4",
-      "nome": "Gerdau",
-      "setor": "Siderurgia e metalurgia",
-      "meses": [
-        0,
-        0,
-        3,
-        0,
-        3,
-        0,
-        0,
-        3,
-        0,
-        0,
-        3,
-        0
-      ],
-      "anosComHistorico": 3
-    },
-    {
       "ticker": "GGPS3",
       "nome": "GPS",
       "setor": "Serviços e locação de equipamentos",
@@ -3163,6 +3143,26 @@
         0,
         0,
         0
+      ],
+      "anosComHistorico": 3
+    },
+    {
+      "ticker": "PRIO3",
+      "nome": "PRIO",
+      "setor": "Petróleo e gás",
+      "meses": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
       ],
       "anosComHistorico": 3
     },
