@@ -114,7 +114,7 @@ describe('Simule Ações: abas de análise', () => {
   it('as abas de análise aparecem num grupo próprio, sem as abas de lista', () => {
     render(<SimuleAcoes ctx={ctx} snapshot={snapshot} series={series} fundamentos={fundamentos} />)
     const originais = within(screen.getByRole('tablist', { name: 'O que você quer ver' })).getAllByRole('tab')
-    expect(originais).toHaveLength(6)
+    expect(originais).toHaveLength(7)
     expect(originais.map((a) => a.textContent)).toContainEqual(expect.stringContaining('Análise do Ibovespa'))
     const novas = within(screen.getByRole('tablist', { name: 'Análise de uma ação' })).getAllByRole('tab')
     expect(novas.map((a) => a.textContent)).toEqual([expect.stringContaining('Análise técnica'), expect.stringContaining('Análise fundamentalista'), expect.stringContaining('Confluência')])

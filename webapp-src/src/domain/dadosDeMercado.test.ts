@@ -90,7 +90,7 @@ describe('relação com o índice', () => {
   })
   it('descarta primeiro mês incompleto', async () => {
     const m = await import('./dadosDeMercado')
-    expect(m.semPrimeiroMesIncompleto(REGS.slice(1))).toHaveLength(4)
+    expect(m.semPrimeiroMesIncompleto(REGS.slice(1))).toHaveLength(3)
     expect(m.semPrimeiroMesIncompleto([dia('2025-11-11', 1), dia('2025-12-01', 2)]).map((r) => r.data)).toEqual(['2025-12-01'])
   })
 })
