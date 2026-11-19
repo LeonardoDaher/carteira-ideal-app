@@ -3,7 +3,7 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 import {
-  CONFIG, URL_COTAHIST, adicionarMeses, baixarCadastroDisponivel, calcularTendencia, tendenciasDosHistoricos, URL_PEDIDO_CADASTRO, lerCadastro, lerLinha, lerPregao, montarSnapshot, motivoInvalido, numeroBr,
+  CONFIG, URL_COTAHIST, adicionarMeses, baixarCadastroDisponivel, diasUteisAnteriores, calcularTendencia, tendenciasDosHistoricos, URL_PEDIDO_CADASTRO, lerCadastro, lerLinha, lerPregao, montarSnapshot, motivoInvalido, numeroBr,
 } from './atualizar-opcoes.mjs'
 
 const campo = (valor, tamanho, direita = false) => (direita ? String(valor).padStart(tamanho, '0') : String(valor).padEnd(tamanho, ' '))
@@ -251,5 +251,29 @@ describe('baixarCadastroDisponivel', () => {
 
   it('falha se nenhum dos pregões tem cadastro', async () => {
     await assert.rejects(baixarCadastroDisponivel(pregoes, async () => { throw erro(400) }, () => {}), /400/)
+  })
+
+  it('segue para dias úteis antes da janela quando os pregões todos estão sem cadastro (caso de 19/11/2026)', async () => {
+    const janela = [{ data: '2026-11-18' }, { data: '2026-11-17' }, { data: '2026-11-16' }, { data: '2026-11-13' }, { data: '2026-11-12' }]
+    const avisos = []
+    const pedidos = []
+    // a B3 só tem cadastro até 12/11: o 12/11 ainda é pregão da janela, mas ao deslizar a janela ele sai dela
+    const so = ['2026-11-11', '2026-11-10']
+    const texto = await baixarCadastroDisponivel(janela.slice(0, 4), async (d) => { pedidos.push(d); if (!so.includes(d)) throw erro(400); return 'cad-' + d }, (a) => avisos.push(a))
+    assert.equal(texto, 'cad-2026-11-11')
+    assert.deepEqual(pedidos, ['2026-11-18', '2026-11-17', '2026-11-16', '2026-11-13', '2026-11-12', '2026-11-11'])
+    assert.match(avisos[0], /cadastro de 2026-11-18 indisponível.*usando o de 2026-11-11/)
+  })
+
+  it('para depois do limite de tentativas', async () => {
+    const pedidos = []
+    await assert.rejects(baixarCadastroDisponivel(pregoes, async (d) => { pedidos.push(d); throw erro(400) }, () => {}, 5), /400/)
+    assert.equal(pedidos.length, 5)
+  })
+})
+
+describe('diasUteisAnteriores', () => {
+  it('pula sábado e domingo', () => {
+    assert.deepEqual(diasUteisAnteriores('2026-11-16', 3), ['2026-11-13', '2026-11-12', '2026-11-11'])
   })
 })

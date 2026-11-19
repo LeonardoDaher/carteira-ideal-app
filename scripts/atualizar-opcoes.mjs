@@ -355,17 +355,34 @@ async function baixarCadastro(data, fetchImpl = fetch) {
   return Buffer.from(await arquivo.arrayBuffer()).toString('latin1')
 }
 
+/** Datas (AAAA-MM-DD) dos dias úteis anteriores a `data`, do mais recente para o mais antigo, ignorando sábado e domingo. */
+export function diasUteisAnteriores(data, quantidade) {
+  const dias = []
+  const d = new Date(`${data}T12:00:00Z`)
+  while (dias.length < quantidade) {
+    d.setUTCDate(d.getUTCDate() - 1)
+    if (d.getUTCDay() !== 0 && d.getUTCDay() !== 6) dias.push(d.toISOString().slice(0, 10))
+  }
+  return dias
+}
+
 /**
  * Cadastro do pregão mais novo; se a B3 ainda não publicou o arquivo dele (resposta 4xx, como o 400 de 13/11/2026, que ficou dias sem sair), usa o
- * dos pregões anteriores, até `tentativas`. O cadastro muda pouco de um dia para o outro: só séries lançadas nos dias sem arquivo ficam de fora
- * até ele sair. Erro de rede ou 5xx continua derrubando o job. `pregoes` vem do mais recente para o mais antigo.
+ * dos dias anteriores, até `tentativas` datas. As datas são os pregões da janela e, depois deles, os dias úteis anteriores ao mais antigo: sem isso,
+ * a cada dia a janela andava e o último cadastro bom saía da lista (o job passou a falhar todo dia desde 19/11). O cadastro muda pouco de um dia
+ * para o outro: só séries lançadas nos dias sem arquivo ficam de fora até ele sair. Erro de rede ou 5xx continua derrubando o job.
+ * `pregoes` vem do mais recente para o mais antigo.
  */
-export async function baixarCadastroDisponivel(pregoes, baixar = baixarCadastro, aviso = console.warn, tentativas = 4) {
+export async function baixarCadastroDisponivel(pregoes, baixar = baixarCadastro, aviso = console.warn, tentativas = 10) {
+  const datas = pregoes.map((p) => p.data)
+  if (datas.length > 0 && datas.length < tentativas) {
+    datas.push(...diasUteisAnteriores(datas[datas.length - 1], tentativas - datas.length))
+  }
   let ultimoErro = null
-  for (const p of pregoes.slice(0, tentativas)) {
+  for (const data of datas.slice(0, tentativas)) {
     try {
-      const texto = await baixar(p.data)
-      if (p !== pregoes[0]) aviso(`[aviso] cadastro de ${pregoes[0].data} indisponível na B3; usando o de ${p.data} (séries novas desses dias entram quando o arquivo sair).`)
+      const texto = await baixar(data)
+      if (data !== datas[0]) aviso(`[aviso] cadastro de ${datas[0]} indisponível na B3; usando o de ${data} (séries novas desses dias entram quando o arquivo sair).`)
       return texto
     } catch (erro) {
       if (!(erro.status >= 400 && erro.status < 500)) throw erro
