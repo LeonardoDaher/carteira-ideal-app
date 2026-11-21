@@ -1,14 +1,13 @@
 {
   "ticker": "PEAB3",
-  "geradoEm": "2026-11-14T13:39:56.743Z",
+  "geradoEm": "2026-11-21T14:47:05.041Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
-  "de": "2021-11-16",
-  "ate": "2026-11-03",
+  "de": "2021-12-23",
+  "ate": "2026-11-19",
   "ajustes": [],
   "saltosRestantes": [],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
   "barras": [
-    ["2021-11-16",81,81,76.3,79.5,48],
     ["2021-12-23",60.02,62,60.02,62,24],
     ["2021-12-27",62,62,62,62,12],
     ["2021-12-28",62,62,62,62,6],
@@ -351,6 +350,7 @@
     ["2026-09-30",36.01,36.86,36.01,36.86,15],
     ["2026-10-06",36.01,36.01,36.01,36.01,4],
     ["2026-10-07",36,36,36,36,43],
-    ["2026-11-03",36.3,36.5,35,35,85]
+    ["2026-11-03",36.3,36.5,35,35,85],
+    ["2026-11-19",33.25,33.25,33.25,33.25,13]
   ]
 }

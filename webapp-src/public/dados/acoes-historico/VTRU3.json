@@ -1,9 +1,9 @@
 {
   "ticker": "VTRU3",
-  "geradoEm": "2026-11-14T13:39:56.743Z",
+  "geradoEm": "2026-11-21T14:47:05.041Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
   "de": "2024-06-10",
-  "ate": "2026-11-13",
+  "ate": "2026-11-19",
   "ajustes": [],
   "saltosRestantes": [],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
@@ -616,6 +616,10 @@
     ["2026-11-10",13.4,13.65,12.84,13.16,10960],
     ["2026-11-11",13.27,13.99,13.25,13.7,16141],
     ["2026-11-12",15,15.2,14.04,14.37,39353],
-    ["2026-11-13",14.44,14.68,14.36,14.65,12666]
+    ["2026-11-13",14.44,14.68,14.36,14.65,12666],
+    ["2026-11-16",14.65,14.73,13.99,14.4,23521],
+    ["2026-11-17",14.42,14.68,14.04,14.54,11340],
+    ["2026-11-18",14.53,14.53,14.15,14.3,12833],
+    ["2026-11-19",13.83,13.83,13.24,13.45,13524]
   ]
 }

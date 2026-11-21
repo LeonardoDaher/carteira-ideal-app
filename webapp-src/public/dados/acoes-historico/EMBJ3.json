@@ -1,9 +1,9 @@
 {
   "ticker": "EMBJ3",
-  "geradoEm": "2026-11-14T13:39:56.743Z",
+  "geradoEm": "2026-11-21T14:47:05.041Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
   "de": "2025-11-03",
-  "ate": "2026-11-13",
+  "ate": "2026-11-19",
   "ajustes": [],
   "saltosRestantes": [],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
@@ -263,6 +263,10 @@
     ["2026-11-10",109.81,116.78,109.8,116.29,1412629],
     ["2026-11-11",116.48,116.5,112.09,114.92,614949],
     ["2026-11-12",113.93,115.65,112.27,113.25,476451],
-    ["2026-11-13",112.35,113.05,110.14,112.06,428064]
+    ["2026-11-13",112.35,113.05,110.14,112.06,428064],
+    ["2026-11-16",111.31,112.83,107.96,108.62,838585],
+    ["2026-11-17",108.87,111.6,107.59,109.98,573085],
+    ["2026-11-18",110.01,112.3,108.46,109.79,584320],
+    ["2026-11-19",109.85,112.12,109.39,110.15,608635]
   ]
 }

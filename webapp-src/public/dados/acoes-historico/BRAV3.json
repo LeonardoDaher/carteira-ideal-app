@@ -1,9 +1,9 @@
 {
   "ticker": "BRAV3",
-  "geradoEm": "2026-11-14T13:39:56.743Z",
+  "geradoEm": "2026-11-21T14:47:05.041Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
   "de": "2024-09-09",
-  "ate": "2026-11-13",
+  "ate": "2026-11-19",
   "ajustes": [],
   "saltosRestantes": [],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
@@ -551,6 +551,10 @@
     ["2026-11-10",14.86,14.89,14,14,100104],
     ["2026-11-11",14.17,14.54,13.9,14.06,70840],
     ["2026-11-12",14.09,14.8,13.91,14.51,77094],
-    ["2026-11-13",14.59,14.66,14.33,14.5,51230]
+    ["2026-11-13",14.59,14.66,14.33,14.5,51230],
+    ["2026-11-16",14.49,14.62,13.94,13.94,48135],
+    ["2026-11-17",13.95,14.18,13.71,13.71,49933],
+    ["2026-11-18",13.72,13.89,13.14,13.16,64973],
+    ["2026-11-19",13.21,13.27,12.66,12.83,68192]
   ]
 }

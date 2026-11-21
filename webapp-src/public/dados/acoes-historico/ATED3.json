@@ -1,9 +1,9 @@
 {
   "ticker": "ATED3",
-  "geradoEm": "2026-11-14T13:39:56.743Z",
+  "geradoEm": "2026-11-21T14:47:05.041Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
   "de": "2024-12-11",
-  "ate": "2026-11-13",
+  "ate": "2026-11-19",
   "ajustes": [],
   "saltosRestantes": [],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
@@ -477,6 +477,10 @@
     ["2026-11-10",0.87,0.87,0.86,0.86,0],
     ["2026-11-11",0.85,0.85,0.81,0.81,3],
     ["2026-11-12",0.83,0.83,0.83,0.83,0],
-    ["2026-11-13",0.8,0.85,0.76,0.85,3]
+    ["2026-11-13",0.8,0.85,0.76,0.85,3],
+    ["2026-11-16",0.84,0.85,0.77,0.82,2],
+    ["2026-11-17",0.76,0.81,0.7,0.73,13],
+    ["2026-11-18",0.72,0.73,0.72,0.72,1],
+    ["2026-11-19",0.72,0.72,0.72,0.72,0]
   ]
 }

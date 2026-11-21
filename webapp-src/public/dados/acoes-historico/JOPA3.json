@@ -1,16 +1,13 @@
 {
   "ticker": "JOPA3",
-  "geradoEm": "2026-11-14T13:39:56.743Z",
+  "geradoEm": "2026-11-21T14:47:05.041Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
-  "de": "2021-11-16",
+  "de": "2021-11-29",
   "ate": "2026-11-13",
   "ajustes": [],
   "saltosRestantes": [],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
   "barras": [
-    ["2021-11-16",31.01,31.01,31.01,31.01,3],
-    ["2021-11-17",31.01,31.01,31.01,31.01,3],
-    ["2021-11-19",31.99,31.99,31.99,31.99,19],
     ["2021-11-29",30,30,30,30,6],
     ["2021-11-30",28.5,28.5,28.5,28.5,6],
     ["2021-12-01",28,28,27,27,30],

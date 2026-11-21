@@ -1,9 +1,9 @@
 {
   "ticker": "AURE3",
-  "geradoEm": "2026-11-14T13:39:56.743Z",
+  "geradoEm": "2026-11-21T14:47:05.041Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
   "de": "2022-03-28",
-  "ate": "2026-11-13",
+  "ate": "2026-11-19",
   "ajustes": [],
   "saltosRestantes": [],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
@@ -1165,6 +1165,10 @@
     ["2026-11-10",11.97,11.97,11.55,11.75,53055],
     ["2026-11-11",11.85,11.97,11.29,11.8,70038],
     ["2026-11-12",11.78,11.96,11.51,11.8,67665],
-    ["2026-11-13",11.87,12.14,11.8,12.06,39233]
+    ["2026-11-13",11.87,12.14,11.8,12.06,39233],
+    ["2026-11-16",12.05,12.05,11.45,11.72,66299],
+    ["2026-11-17",11.83,12.17,11.6,12.01,44483],
+    ["2026-11-18",11.97,12.18,11.85,11.88,37799],
+    ["2026-11-19",11.96,12.04,11.8,11.91,58696]
   ]
 }

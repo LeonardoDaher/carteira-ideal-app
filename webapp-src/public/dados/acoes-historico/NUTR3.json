@@ -1,9 +1,9 @@
 {
   "ticker": "NUTR3",
-  "geradoEm": "2026-11-14T13:39:56.743Z",
+  "geradoEm": "2026-11-21T14:47:05.041Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
   "de": "2025-03-20",
-  "ate": "2026-11-13",
+  "ate": "2026-11-19",
   "ajustes": [],
   "saltosRestantes": [],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
@@ -421,6 +421,10 @@
     ["2026-11-10",2.57,2.76,2.57,2.75,6],
     ["2026-11-11",2.8,2.8,2.66,2.66,7],
     ["2026-11-12",2.75,3,2.69,2.92,11],
-    ["2026-11-13",2.99,3.23,2.79,2.79,16]
+    ["2026-11-13",2.99,3.23,2.79,2.79,16],
+    ["2026-11-16",2.96,3.1,2.9,2.9,9],
+    ["2026-11-17",2.91,3,2.81,2.93,8],
+    ["2026-11-18",2.85,2.9,2.68,2.85,12],
+    ["2026-11-19",2.92,2.97,2.67,2.97,11]
   ]
 }

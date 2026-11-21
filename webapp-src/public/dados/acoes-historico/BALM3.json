@@ -1,14 +1,13 @@
 {
   "ticker": "BALM3",
-  "geradoEm": "2026-11-14T13:39:56.743Z",
+  "geradoEm": "2026-11-21T14:47:05.041Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
-  "de": "2021-11-17",
-  "ate": "2026-11-04",
+  "de": "2021-11-24",
+  "ate": "2026-11-18",
   "ajustes": [],
   "saltosRestantes": [],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
   "barras": [
-    ["2021-11-17",15.8,15.8,15.8,15.8,5],
     ["2021-11-24",16.78,18.56,16.78,18.27,25],
     ["2021-11-25",18.26,18.26,16.98,17.18,5],
     ["2021-11-30",15.93,15.93,15.81,15.81,6],
@@ -284,6 +283,7 @@
     ["2026-10-21",22,22,22,22,2],
     ["2026-10-22",22,22,22,22,2],
     ["2026-10-23",22,22,22,22,2],
-    ["2026-11-04",22,22,22,22,2]
+    ["2026-11-04",22,22,22,22,2],
+    ["2026-11-18",22.01,22.01,22.01,22.01,4]
   ]
 }

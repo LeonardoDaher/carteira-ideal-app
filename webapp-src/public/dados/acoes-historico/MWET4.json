@@ -1,9 +1,9 @@
 {
   "ticker": "MWET4",
-  "geradoEm": "2026-10-31T12:46:38.489Z",
+  "geradoEm": "2026-11-21T14:47:05.041Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
   "de": "2022-10-20",
-  "ate": "2026-10-30",
+  "ate": "2026-11-18",
   "ajustes": [],
   "saltosRestantes": [],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
@@ -582,6 +582,9 @@
     ["2026-09-03",32.5,32.8,29.55,31.8,158],
     ["2026-09-04",32.89,32.89,30,31.89,47],
     ["2026-09-08",31.87,31.87,30.98,30.98,6],
-    ["2026-10-30",24.78,24.78,24.78,24.78,2]
+    ["2026-10-30",24.78,24.78,24.78,24.78,2],
+    ["2026-11-16",20,23.99,19.39,22,9],
+    ["2026-11-17",24.4,24.4,24.4,24.4,2],
+    ["2026-11-18",23.9,23.9,23.9,23.9,2]
   ]
 }
