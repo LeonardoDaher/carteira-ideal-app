@@ -1,19 +1,19 @@
 {
   "publicado": true,
   "versaoMetodologia": "1.1.0",
-  "geradoEm": "2026-11-20T11:40:16.465Z",
-  "dataExecucao": "2026-11-20",
+  "geradoEm": "2026-11-21T11:01:57.133Z",
+  "dataExecucao": "2026-11-21",
   "dataPrecos": "2026-11-19",
   "pastaAuditoria": "auditoria/acoes-dividendos/2026-11-03",
-  "hashResultado": "137168788bc79bad2374fe59a04e46966c27f4c2f116faf4c8453d18f999d060",
-  "hashInsumos": "c52420aa137f228a3b3952b281b828c8ea28786a000eb782d7f7679fe1eead51",
+  "hashResultado": "76ed565e34662f73d1c284eac27e1c301f1aad23a00655eb91eb06bc8ee9ee97",
+  "hashInsumos": "2a4f0ab58799c0af60cf7926658fe59426fc1f6a75c3ef51b419b404377a6b6e",
   "hashConfig": "f484e5d2dfa904f32eb1a3d137e710ecb515a1e5f96a46c9c18ea953516979c4",
   "modoAuditoria": "diaria",
   "auditoriaCompletaEm": "2026-11-03",
   "tamanhoDaLista": 15,
   "rankingAteOnde": 100,
   "universo": 229,
-  "avaliadas": 122,
+  "avaliadas": 121,
   "aviso": "Não é recomendação de investimento. Esta lista ordena as ações da B3 pelo dividend yield dos últimos 12 meses: os proventos em dinheiro por ação (dividendos e juros sobre capital próprio, brutos) com data com nos últimos 12 meses, divididos pelo preço de fechamento mais recente, com dados publicados pela B3, pela mesma fórmula para todas, sem nota nem opinião nossa. Dividend yield alto não quer dizer que a ação é boa nem que o pagamento vai se repetir: pode vir de um provento extraordinário, de preço em queda ou de lucro que não volta. O passado não garante o futuro. Rentabilidade passada não garante rentabilidade futura e investir em ações pode causar perda de parte ou de todo o dinheiro aplicado. Converse com um profissional certificado antes de investir.",
   "parametros": {
     "janelaDias": 365,
@@ -24,7 +24,7 @@
   },
   "contagens": {
     "ranking": 100,
-    "exclusoes": 107
+    "exclusoes": 108
   },
   "dyPorTicker": {
     "PETR4": 0.085667,
@@ -58,7 +58,6 @@
     "POMO4": 0.255274,
     "LEVE3": 0.097707,
     "RSUL4": 0.063096,
-    "MOTV3": 0.058873,
     "ECOR3": 0.051524,
     "RAIL3": 0.006453,
     "TGMA3": 0.114523,
@@ -199,12 +198,12 @@
       "id": "dados_b3",
       "descricao": "A B3 não tem proventos publicados para a empresa",
       "entram": 152,
-      "saem": 27
+      "saem": 28
     },
     {
       "id": "proventos",
       "descricao": "Não pagou proventos em dinheiro nos últimos 365 dias (2025-11-19 a 2026-11-19)",
-      "entram": 125,
+      "entram": 124,
       "saem": 3
     }
   ],
@@ -3357,43 +3356,6 @@
     },
     {
       "posicao": 65,
-      "ticker": "MOTV3",
-      "nome": "Motiva (ex-CCR)",
-      "setor": "Transporte e infraestrutura",
-      "classe": "ON",
-      "cotacao": 15.82,
-      "dataCotacao": "2026-11-19",
-      "dy": 0.058873,
-      "proventosPorAcao": 0.931374,
-      "dividendos": 0.208059,
-      "jcp": 0.723315,
-      "rendimentos": 0,
-      "pagamentos": 3,
-      "ultimaDataCom": "2026-09-04",
-      "primeiraDataCom": "2025-12-10",
-      "historicoParcial": false,
-      "ajustesAplicados": [],
-      "alertas": [],
-      "proventos": [
-        {
-          "dataCom": "2026-09-04",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.72331535
-        },
-        {
-          "dataCom": "2026-04-20",
-          "tipo": "DIVIDENDO",
-          "valor": 0.06170433
-        },
-        {
-          "dataCom": "2025-12-10",
-          "tipo": "DIVIDENDO",
-          "valor": 0.1463547
-        }
-      ]
-    },
-    {
-      "posicao": 66,
       "ticker": "SMFT3",
       "nome": "Smart Fit",
       "setor": "Turismo, lazer e restaurantes",
@@ -3435,7 +3397,7 @@
       ]
     },
     {
-      "posicao": 67,
+      "posicao": 66,
       "ticker": "VAMO3",
       "nome": "Vamos",
       "setor": "Locação de veículos e frotas",
@@ -3462,7 +3424,7 @@
       ]
     },
     {
-      "posicao": 68,
+      "posicao": 67,
       "ticker": "SOJA3",
       "nome": "Boa Safra Sementes",
       "setor": "Agronegócio, açúcar e etanol",
@@ -3496,7 +3458,7 @@
       ]
     },
     {
-      "posicao": 69,
+      "posicao": 68,
       "ticker": "MDIA3",
       "nome": "M. Dias Branco",
       "setor": "Alimentos e bebidas",
@@ -3578,7 +3540,7 @@
       ]
     },
     {
-      "posicao": 70,
+      "posicao": 69,
       "ticker": "KLBN11",
       "nome": "Klabin",
       "setor": "Papel, celulose e madeira",
@@ -3628,7 +3590,7 @@
       ]
     },
     {
-      "posicao": 71,
+      "posicao": 70,
       "ticker": "POSI3",
       "nome": "Positivo",
       "setor": "Hardware e eletrônicos",
@@ -3655,7 +3617,7 @@
       ]
     },
     {
-      "posicao": 72,
+      "posicao": 71,
       "ticker": "ABEV3",
       "nome": "Ambev",
       "setor": "Alimentos e bebidas",
@@ -3699,7 +3661,7 @@
       ]
     },
     {
-      "posicao": 73,
+      "posicao": 72,
       "ticker": "BEEF3",
       "nome": "Minerva",
       "setor": "Carnes e proteínas",
@@ -3731,7 +3693,7 @@
       ]
     },
     {
-      "posicao": 74,
+      "posicao": 73,
       "ticker": "RANI3",
       "nome": "Irani",
       "setor": "Papel, celulose e madeira",
@@ -3778,7 +3740,7 @@
       ]
     },
     {
-      "posicao": 75,
+      "posicao": 74,
       "ticker": "SBSP3",
       "nome": "Sabesp",
       "setor": "Saneamento e resíduos",
@@ -3830,7 +3792,7 @@
       ]
     },
     {
-      "posicao": 76,
+      "posicao": 75,
       "ticker": "ECOR3",
       "nome": "Ecorodovias",
       "setor": "Transporte e infraestrutura",
@@ -3857,7 +3819,7 @@
       ]
     },
     {
-      "posicao": 77,
+      "posicao": 76,
       "ticker": "HYPE3",
       "nome": "Hypera Pharma",
       "setor": "Medicamentos e saúde animal",
@@ -3899,7 +3861,7 @@
       ]
     },
     {
-      "posicao": 78,
+      "posicao": 77,
       "ticker": "BBAS3",
       "nome": "Banco do Brasil",
       "setor": "Bancos",
@@ -3971,7 +3933,7 @@
       ]
     },
     {
-      "posicao": 79,
+      "posicao": 78,
       "ticker": "SLCE3",
       "nome": "SLC Agrícola",
       "setor": "Agronegócio, açúcar e etanol",
@@ -4010,7 +3972,7 @@
       ]
     },
     {
-      "posicao": 80,
+      "posicao": 79,
       "ticker": "EGIE3",
       "nome": "Engie Brasil",
       "setor": "Energia elétrica: geração",
@@ -4047,7 +4009,7 @@
       ]
     },
     {
-      "posicao": 81,
+      "posicao": 80,
       "ticker": "PNVL3",
       "nome": "Panvel (Dimed)",
       "setor": "Farmácias, higiene e beleza",
@@ -4134,7 +4096,7 @@
       ]
     },
     {
-      "posicao": 82,
+      "posicao": 81,
       "ticker": "MULT3",
       "nome": "Multiplan",
       "setor": "Shoppings e imóveis comerciais",
@@ -4176,7 +4138,7 @@
       ]
     },
     {
-      "posicao": 83,
+      "posicao": 82,
       "ticker": "CMIN3",
       "nome": "CSN Mineração",
       "setor": "Mineração",
@@ -4213,7 +4175,7 @@
       ]
     },
     {
-      "posicao": 84,
+      "posicao": 83,
       "ticker": "KEPL3",
       "nome": "Kepler Weber",
       "setor": "Máquinas, equipamentos e aeroespacial",
@@ -4245,7 +4207,7 @@
       ]
     },
     {
-      "posicao": 85,
+      "posicao": 84,
       "ticker": "VIVA3",
       "nome": "Vivara",
       "setor": "Moda e vestuário",
@@ -4272,7 +4234,7 @@
       ]
     },
     {
-      "posicao": 86,
+      "posicao": 85,
       "ticker": "EVEN3",
       "nome": "Even",
       "setor": "Construção civil e incorporação",
@@ -4299,7 +4261,7 @@
       ]
     },
     {
-      "posicao": 87,
+      "posicao": 86,
       "ticker": "ALPA4",
       "nome": "Alpargatas (Havaianas)",
       "setor": "Calçados e artigos esportivos",
@@ -4331,7 +4293,7 @@
       ]
     },
     {
-      "posicao": 88,
+      "posicao": 87,
       "ticker": "MILS3",
       "nome": "Mills",
       "setor": "Serviços e locação de equipamentos",
@@ -4358,7 +4320,7 @@
       ]
     },
     {
-      "posicao": 89,
+      "posicao": 88,
       "ticker": "WEGE3",
       "nome": "WEG",
       "setor": "Máquinas, equipamentos e aeroespacial",
@@ -4420,7 +4382,7 @@
       ]
     },
     {
-      "posicao": 90,
+      "posicao": 89,
       "ticker": "VIVT3",
       "nome": "Vivo (Telefônica Brasil)",
       "setor": "Telecomunicações",
@@ -4497,7 +4459,7 @@
       ]
     },
     {
-      "posicao": 91,
+      "posicao": 90,
       "ticker": "TFCO4",
       "nome": "Track&Field",
       "setor": "Moda e vestuário",
@@ -4544,7 +4506,7 @@
       ]
     },
     {
-      "posicao": 92,
+      "posicao": 91,
       "ticker": "CSMG3",
       "nome": "Copasa",
       "setor": "Saneamento e resíduos",
@@ -4601,7 +4563,7 @@
       ]
     },
     {
-      "posicao": 93,
+      "posicao": 92,
       "ticker": "GOAU4",
       "nome": "Metalúrgica Gerdau",
       "setor": "Siderurgia e metalurgia",
@@ -4643,7 +4605,7 @@
       ]
     },
     {
-      "posicao": 94,
+      "posicao": 93,
       "ticker": "GGBR4",
       "nome": "Gerdau",
       "setor": "Siderurgia e metalurgia",
@@ -4685,7 +4647,7 @@
       ]
     },
     {
-      "posicao": 95,
+      "posicao": 94,
       "ticker": "RADL3",
       "nome": "RaiaDrogasil",
       "setor": "Farmácias, higiene e beleza",
@@ -4744,7 +4706,7 @@
       ]
     },
     {
-      "posicao": 96,
+      "posicao": 95,
       "ticker": "ANIM3",
       "nome": "Ânima",
       "setor": "Educação",
@@ -4771,7 +4733,7 @@
       ]
     },
     {
-      "posicao": 97,
+      "posicao": 96,
       "ticker": "SIMH3",
       "nome": "Simpar",
       "setor": "Locação de veículos e frotas",
@@ -4798,7 +4760,7 @@
       ]
     },
     {
-      "posicao": 98,
+      "posicao": 97,
       "ticker": "IGTI11",
       "nome": "Iguatemi",
       "setor": "Shoppings e imóveis comerciais",
@@ -4840,7 +4802,7 @@
       ]
     },
     {
-      "posicao": 99,
+      "posicao": 98,
       "ticker": "FRAS3",
       "nome": "Fras-le",
       "setor": "Autopeças e veículos",
@@ -4872,7 +4834,7 @@
       ]
     },
     {
-      "posicao": 100,
+      "posicao": 99,
       "ticker": "ALUP11",
       "nome": "Alupar",
       "setor": "Energia elétrica: transmissão",
@@ -4915,6 +4877,43 @@
           "dataCom": "2025-12-26",
           "tipo": "DIVIDENDO",
           "valor": 0.33
+        }
+      ]
+    },
+    {
+      "posicao": 100,
+      "ticker": "EZTC3",
+      "nome": "EZTEC",
+      "setor": "Construção civil e incorporação",
+      "classe": "ON",
+      "cotacao": 9.24,
+      "dataCotacao": "2026-11-19",
+      "dy": 0.029243,
+      "proventosPorAcao": 0.270209,
+      "dividendos": 0.270209,
+      "jcp": 0,
+      "rendimentos": 0,
+      "pagamentos": 3,
+      "ultimaDataCom": "2026-11-12",
+      "primeiraDataCom": "2026-05-14",
+      "historicoParcial": false,
+      "ajustesAplicados": [],
+      "alertas": [],
+      "proventos": [
+        {
+          "dataCom": "2026-11-12",
+          "tipo": "DIVIDENDO",
+          "valor": 0.07314516
+        },
+        {
+          "dataCom": "2026-08-13",
+          "tipo": "DIVIDENDO",
+          "valor": 0.09456614
+        },
+        {
+          "dataCom": "2026-05-14",
+          "tipo": "DIVIDENDO",
+          "valor": 0.1024972
         }
       ]
     }
@@ -5599,6 +5598,14 @@
       "etapa": "dados_b3",
       "codigo": "sem_dados_b3",
       "motivo": "A B3 não tem proventos publicados para a empresa."
+    },
+    {
+      "ticker": "MOTV3",
+      "nome": "Motiva (ex-CCR)",
+      "setor": "Transporte e infraestrutura",
+      "etapa": "dados_b3",
+      "codigo": "sem_dados_b3",
+      "motivo": "A B3 não tem cadastro para este código."
     },
     {
       "ticker": "HBSA3",
