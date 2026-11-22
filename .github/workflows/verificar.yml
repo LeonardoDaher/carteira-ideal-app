@@ -14,6 +14,7 @@ on:
       - 'historico/**'
       - 'auditoria/**'
       - 'dados-privados/**'
+      - '**.md'
   pull_request:
   workflow_dispatch:
 

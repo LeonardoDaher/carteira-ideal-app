@@ -15,7 +15,7 @@ name: Atualizar Balanços
 on:
   schedule:
     - cron: '23 5 * * 2-6' # terça a sábado, 05h23 UTC = 02h23 de Brasília (depois do job de Fundamentos)
-    - cron: '41 14 * * 2-6' # repetição, se a primeira foi perdida (o GitHub atrasa disparos)
+    # Repetição das 14h41 UTC removida (cota de minutos do GitHub): balanço muda por trimestre e a passada seguinte recupera uma perdida.
   workflow_dispatch: {}
 
 permissions:
