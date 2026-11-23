@@ -1,12 +1,12 @@
 {
   "publicado": true,
   "versaoMetodologia": "1.1.0",
-  "geradoEm": "2026-11-21T11:01:57.133Z",
-  "dataExecucao": "2026-11-21",
+  "geradoEm": "2026-11-23T12:12:04.125Z",
+  "dataExecucao": "2026-11-23",
   "dataPrecos": "2026-11-19",
   "pastaAuditoria": "auditoria/acoes-dividendos/2026-11-03",
-  "hashResultado": "76ed565e34662f73d1c284eac27e1c301f1aad23a00655eb91eb06bc8ee9ee97",
-  "hashInsumos": "2a4f0ab58799c0af60cf7926658fe59426fc1f6a75c3ef51b419b404377a6b6e",
+  "hashResultado": "26f93d432855b855d9a66fb5d7e9929d656d7231814ec1b366b268492bb49e42",
+  "hashInsumos": "5d798c33a72981483482e29657947209f7276edcdb9fd952bd97dc4e07a62edf",
   "hashConfig": "f484e5d2dfa904f32eb1a3d137e710ecb515a1e5f96a46c9c18ea953516979c4",
   "modoAuditoria": "diaria",
   "auditoriaCompletaEm": "2026-11-03",
@@ -35,7 +35,6 @@
     "UGPA3": 0.063776,
     "CGAS5": 0.041201,
     "VALE3": 0.095973,
-    "CMIN3": 0.043724,
     "BRAP4": 0.143909,
     "CBAV3": 0.003883,
     "GGBR4": 0.032869,
@@ -58,6 +57,7 @@
     "POMO4": 0.255274,
     "LEVE3": 0.097707,
     "RSUL4": 0.063096,
+    "MOTV3": 0.058873,
     "ECOR3": 0.051524,
     "RAIL3": 0.006453,
     "TGMA3": 0.114523,
@@ -107,7 +107,7 @@
     "B3SA3": 0.063209,
     "ITSA4": 0.085634,
     "MULT3": 0.043987,
-    "ALOS3": 0.124793,
+    "ALOS3": 0.13613,
     "IGTI11": 0.030897,
     "JHSF3": 0.082864,
     "LOGG3": 0.385618,
@@ -149,7 +149,7 @@
     "BEEF3": 0.052466,
     "ABEV3": 0.052637,
     "CAML3": 0.064723,
-    "MDIA3": 0.055536,
+    "MDIA3": 0.057334,
     "MNPR3": 0.037665,
     "SLCE3": 0.045931,
     "SMTO3": 0.012272,
@@ -865,83 +865,29 @@
     },
     {
       "posicao": 15,
-      "ticker": "UNIP6",
-      "nome": "Unipar",
-      "setor": "Química e petroquímica",
-      "classe": "PNB",
-      "cotacao": 48.4,
-      "dataCotacao": "2026-11-19",
-      "dy": 0.133818,
-      "proventosPorAcao": 6.476802,
-      "dividendos": 6.476802,
-      "jcp": 0,
-      "rendimentos": 0,
-      "pagamentos": 1,
-      "ultimaDataCom": "2025-12-05",
-      "primeiraDataCom": "2025-12-05",
-      "historicoParcial": false,
-      "ajustesAplicados": [],
-      "alertas": [],
-      "proventos": [
-        {
-          "dataCom": "2025-12-05",
-          "tipo": "DIVIDENDO",
-          "valor": 6.03042284
-        },
-        {
-          "dataCom": "2025-12-05",
-          "tipo": "DIVIDENDO",
-          "valor": 0.44637931
-        }
-      ]
-    },
-    {
-      "posicao": 16,
-      "ticker": "MOVI3",
-      "nome": "Movida",
-      "setor": "Locação de veículos e frotas",
-      "classe": "ON",
-      "cotacao": 5.64,
-      "dataCotacao": "2026-11-19",
-      "dy": 0.13331,
-      "proventosPorAcao": 0.751867,
-      "dividendos": 0,
-      "jcp": 0.751867,
-      "rendimentos": 0,
-      "pagamentos": 1,
-      "ultimaDataCom": "2025-12-19",
-      "primeiraDataCom": "2025-12-19",
-      "historicoParcial": false,
-      "ajustesAplicados": [],
-      "alertas": [],
-      "proventos": [
-        {
-          "dataCom": "2025-12-19",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.75186692
-        }
-      ]
-    },
-    {
-      "posicao": 17,
       "ticker": "ALOS3",
       "nome": "Allos",
       "setor": "Shoppings e imóveis comerciais",
       "classe": "ON",
       "cotacao": 25.75,
       "dataCotacao": "2026-11-19",
-      "dy": 0.124793,
-      "proventosPorAcao": 3.213428,
-      "dividendos": 2.920948,
+      "dy": 0.13613,
+      "proventosPorAcao": 3.505346,
+      "dividendos": 3.212866,
       "jcp": 0.29248,
       "rendimentos": 0,
-      "pagamentos": 11,
-      "ultimaDataCom": "2026-10-22",
+      "pagamentos": 12,
+      "ultimaDataCom": "2026-11-19",
       "primeiraDataCom": "2025-12-19",
       "historicoParcial": false,
       "ajustesAplicados": [],
       "alertas": [],
       "proventos": [
+        {
+          "dataCom": "2026-11-19",
+          "tipo": "DIVIDENDO",
+          "valor": 0.29191864
+        },
         {
           "dataCom": "2026-10-22",
           "tipo": "DIVIDENDO",
@@ -996,6 +942,65 @@
           "dataCom": "2025-12-19",
           "tipo": "DIVIDENDO",
           "valor": 0.29247921
+        }
+      ]
+    },
+    {
+      "posicao": 16,
+      "ticker": "UNIP6",
+      "nome": "Unipar",
+      "setor": "Química e petroquímica",
+      "classe": "PNB",
+      "cotacao": 48.4,
+      "dataCotacao": "2026-11-19",
+      "dy": 0.133818,
+      "proventosPorAcao": 6.476802,
+      "dividendos": 6.476802,
+      "jcp": 0,
+      "rendimentos": 0,
+      "pagamentos": 1,
+      "ultimaDataCom": "2025-12-05",
+      "primeiraDataCom": "2025-12-05",
+      "historicoParcial": false,
+      "ajustesAplicados": [],
+      "alertas": [],
+      "proventos": [
+        {
+          "dataCom": "2025-12-05",
+          "tipo": "DIVIDENDO",
+          "valor": 6.03042284
+        },
+        {
+          "dataCom": "2025-12-05",
+          "tipo": "DIVIDENDO",
+          "valor": 0.44637931
+        }
+      ]
+    },
+    {
+      "posicao": 17,
+      "ticker": "MOVI3",
+      "nome": "Movida",
+      "setor": "Locação de veículos e frotas",
+      "classe": "ON",
+      "cotacao": 5.64,
+      "dataCotacao": "2026-11-19",
+      "dy": 0.13331,
+      "proventosPorAcao": 0.751867,
+      "dividendos": 0,
+      "jcp": 0.751867,
+      "rendimentos": 0,
+      "pagamentos": 1,
+      "ultimaDataCom": "2025-12-19",
+      "primeiraDataCom": "2025-12-19",
+      "historicoParcial": false,
+      "ajustesAplicados": [],
+      "alertas": [],
+      "proventos": [
+        {
+          "dataCom": "2025-12-19",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.75186692
         }
       ]
     },
@@ -1964,9 +1969,11 @@
       "pagamentos": 4,
       "ultimaDataCom": "2026-08-21",
       "primeiraDataCom": "2025-12-22",
-      "historicoParcial": false,
+      "historicoParcial": true,
       "ajustesAplicados": [],
-      "alertas": [],
+      "alertas": [
+        "historico_parcial"
+      ],
       "proventos": [
         {
           "dataCom": "2026-08-21",
@@ -3356,6 +3363,43 @@
     },
     {
       "posicao": 65,
+      "ticker": "MOTV3",
+      "nome": "Motiva (ex-CCR)",
+      "setor": "Transporte e infraestrutura",
+      "classe": "ON",
+      "cotacao": 15.82,
+      "dataCotacao": "2026-11-19",
+      "dy": 0.058873,
+      "proventosPorAcao": 0.931374,
+      "dividendos": 0.208059,
+      "jcp": 0.723315,
+      "rendimentos": 0,
+      "pagamentos": 3,
+      "ultimaDataCom": "2026-09-04",
+      "primeiraDataCom": "2025-12-10",
+      "historicoParcial": false,
+      "ajustesAplicados": [],
+      "alertas": [],
+      "proventos": [
+        {
+          "dataCom": "2026-09-04",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.72331535
+        },
+        {
+          "dataCom": "2026-04-20",
+          "tipo": "DIVIDENDO",
+          "valor": 0.06170433
+        },
+        {
+          "dataCom": "2025-12-10",
+          "tipo": "DIVIDENDO",
+          "valor": 0.1463547
+        }
+      ]
+    },
+    {
+      "posicao": 66,
       "ticker": "SMFT3",
       "nome": "Smart Fit",
       "setor": "Turismo, lazer e restaurantes",
@@ -3397,86 +3441,30 @@
       ]
     },
     {
-      "posicao": 66,
-      "ticker": "VAMO3",
-      "nome": "Vamos",
-      "setor": "Locação de veículos e frotas",
-      "classe": "ON",
-      "cotacao": 2.49,
-      "dataCotacao": "2026-11-19",
-      "dy": 0.056507,
-      "proventosPorAcao": 0.140702,
-      "dividendos": 0,
-      "jcp": 0.140702,
-      "rendimentos": 0,
-      "pagamentos": 1,
-      "ultimaDataCom": "2025-12-18",
-      "primeiraDataCom": "2025-12-18",
-      "historicoParcial": false,
-      "ajustesAplicados": [],
-      "alertas": [],
-      "proventos": [
-        {
-          "dataCom": "2025-12-18",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.14070157
-        }
-      ]
-    },
-    {
       "posicao": 67,
-      "ticker": "SOJA3",
-      "nome": "Boa Safra Sementes",
-      "setor": "Agronegócio, açúcar e etanol",
-      "classe": "ON",
-      "cotacao": 5.04,
-      "dataCotacao": "2026-11-19",
-      "dy": 0.056263,
-      "proventosPorAcao": 0.283563,
-      "dividendos": 0,
-      "jcp": 0.283563,
-      "rendimentos": 0,
-      "pagamentos": 1,
-      "ultimaDataCom": "2025-12-18",
-      "primeiraDataCom": "2025-12-18",
-      "historicoParcial": false,
-      "ajustesAplicados": [
-        {
-          "data": "2025-12-19",
-          "fator": 1.048629
-        }
-      ],
-      "alertas": [
-        "ajustado_por_desdobramento"
-      ],
-      "proventos": [
-        {
-          "dataCom": "2025-12-18",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.28356339
-        }
-      ]
-    },
-    {
-      "posicao": 68,
       "ticker": "MDIA3",
       "nome": "M. Dias Branco",
       "setor": "Alimentos e bebidas",
       "classe": "ON",
       "cotacao": 16.68,
       "dataCotacao": "2026-11-19",
-      "dy": 0.055536,
-      "proventosPorAcao": 0.926333,
-      "dividendos": 0.926333,
+      "dy": 0.057334,
+      "proventosPorAcao": 0.956333,
+      "dividendos": 0.956333,
       "jcp": 0,
       "rendimentos": 0,
-      "pagamentos": 12,
-      "ultimaDataCom": "2026-10-22",
+      "pagamentos": 13,
+      "ultimaDataCom": "2026-11-19",
       "primeiraDataCom": "2025-12-18",
       "historicoParcial": false,
       "ajustesAplicados": [],
       "alertas": [],
       "proventos": [
+        {
+          "dataCom": "2026-11-19",
+          "tipo": "DIVIDENDO",
+          "valor": 0.03
+        },
         {
           "dataCom": "2026-10-22",
           "tipo": "DIVIDENDO",
@@ -3540,7 +3528,68 @@
       ]
     },
     {
+      "posicao": 68,
+      "ticker": "VAMO3",
+      "nome": "Vamos",
+      "setor": "Locação de veículos e frotas",
+      "classe": "ON",
+      "cotacao": 2.49,
+      "dataCotacao": "2026-11-19",
+      "dy": 0.056507,
+      "proventosPorAcao": 0.140702,
+      "dividendos": 0,
+      "jcp": 0.140702,
+      "rendimentos": 0,
+      "pagamentos": 1,
+      "ultimaDataCom": "2025-12-18",
+      "primeiraDataCom": "2025-12-18",
+      "historicoParcial": false,
+      "ajustesAplicados": [],
+      "alertas": [],
+      "proventos": [
+        {
+          "dataCom": "2025-12-18",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.14070157
+        }
+      ]
+    },
+    {
       "posicao": 69,
+      "ticker": "SOJA3",
+      "nome": "Boa Safra Sementes",
+      "setor": "Agronegócio, açúcar e etanol",
+      "classe": "ON",
+      "cotacao": 5.04,
+      "dataCotacao": "2026-11-19",
+      "dy": 0.056263,
+      "proventosPorAcao": 0.283563,
+      "dividendos": 0,
+      "jcp": 0.283563,
+      "rendimentos": 0,
+      "pagamentos": 1,
+      "ultimaDataCom": "2025-12-18",
+      "primeiraDataCom": "2025-12-18",
+      "historicoParcial": false,
+      "ajustesAplicados": [
+        {
+          "data": "2025-12-19",
+          "fator": 1.048629
+        }
+      ],
+      "alertas": [
+        "ajustado_por_desdobramento"
+      ],
+      "proventos": [
+        {
+          "dataCom": "2025-12-18",
+          "tipo": "JRS CAP PROPRIO",
+          "valor": 0.28356339
+        }
+      ]
+    },
+    {
+      "posicao": 70,
       "ticker": "KLBN11",
       "nome": "Klabin",
       "setor": "Papel, celulose e madeira",
@@ -3590,7 +3639,7 @@
       ]
     },
     {
-      "posicao": 70,
+      "posicao": 71,
       "ticker": "POSI3",
       "nome": "Positivo",
       "setor": "Hardware e eletrônicos",
@@ -3617,7 +3666,7 @@
       ]
     },
     {
-      "posicao": 71,
+      "posicao": 72,
       "ticker": "ABEV3",
       "nome": "Ambev",
       "setor": "Alimentos e bebidas",
@@ -3661,7 +3710,7 @@
       ]
     },
     {
-      "posicao": 72,
+      "posicao": 73,
       "ticker": "BEEF3",
       "nome": "Minerva",
       "setor": "Carnes e proteínas",
@@ -3693,7 +3742,7 @@
       ]
     },
     {
-      "posicao": 73,
+      "posicao": 74,
       "ticker": "RANI3",
       "nome": "Irani",
       "setor": "Papel, celulose e madeira",
@@ -3740,7 +3789,7 @@
       ]
     },
     {
-      "posicao": 74,
+      "posicao": 75,
       "ticker": "SBSP3",
       "nome": "Sabesp",
       "setor": "Saneamento e resíduos",
@@ -3792,7 +3841,7 @@
       ]
     },
     {
-      "posicao": 75,
+      "posicao": 76,
       "ticker": "ECOR3",
       "nome": "Ecorodovias",
       "setor": "Transporte e infraestrutura",
@@ -3819,7 +3868,7 @@
       ]
     },
     {
-      "posicao": 76,
+      "posicao": 77,
       "ticker": "HYPE3",
       "nome": "Hypera Pharma",
       "setor": "Medicamentos e saúde animal",
@@ -3861,7 +3910,7 @@
       ]
     },
     {
-      "posicao": 77,
+      "posicao": 78,
       "ticker": "BBAS3",
       "nome": "Banco do Brasil",
       "setor": "Bancos",
@@ -3933,7 +3982,7 @@
       ]
     },
     {
-      "posicao": 78,
+      "posicao": 79,
       "ticker": "SLCE3",
       "nome": "SLC Agrícola",
       "setor": "Agronegócio, açúcar e etanol",
@@ -3972,7 +4021,7 @@
       ]
     },
     {
-      "posicao": 79,
+      "posicao": 80,
       "ticker": "EGIE3",
       "nome": "Engie Brasil",
       "setor": "Energia elétrica: geração",
@@ -4009,7 +4058,7 @@
       ]
     },
     {
-      "posicao": 80,
+      "posicao": 81,
       "ticker": "PNVL3",
       "nome": "Panvel (Dimed)",
       "setor": "Farmácias, higiene e beleza",
@@ -4096,7 +4145,7 @@
       ]
     },
     {
-      "posicao": 81,
+      "posicao": 82,
       "ticker": "MULT3",
       "nome": "Multiplan",
       "setor": "Shoppings e imóveis comerciais",
@@ -4134,43 +4183,6 @@
           "dataCom": "2025-12-29",
           "tipo": "JRS CAP PROPRIO",
           "valor": 0.30654243
-        }
-      ]
-    },
-    {
-      "posicao": 82,
-      "ticker": "CMIN3",
-      "nome": "CSN Mineração",
-      "setor": "Mineração",
-      "classe": "ON",
-      "cotacao": 5.02,
-      "dataCotacao": "2026-11-19",
-      "dy": 0.043724,
-      "proventosPorAcao": 0.219495,
-      "dividendos": 0.189304,
-      "jcp": 0.030191,
-      "rendimentos": 0,
-      "pagamentos": 2,
-      "ultimaDataCom": "2026-04-16",
-      "primeiraDataCom": "2026-01-02",
-      "historicoParcial": false,
-      "ajustesAplicados": [],
-      "alertas": [],
-      "proventos": [
-        {
-          "dataCom": "2026-04-16",
-          "tipo": "DIVIDENDO",
-          "valor": 0.14149298
-        },
-        {
-          "dataCom": "2026-01-02",
-          "tipo": "DIVIDENDO",
-          "valor": 0.0478111
-        },
-        {
-          "dataCom": "2026-01-02",
-          "tipo": "JRS CAP PROPRIO",
-          "valor": 0.03019082
         }
       ]
     },
@@ -5552,6 +5564,14 @@
       "motivo": "A B3 não tem proventos publicados para a empresa."
     },
     {
+      "ticker": "CMIN3",
+      "nome": "CSN Mineração",
+      "setor": "Mineração",
+      "etapa": "dados_b3",
+      "codigo": "sem_dados_b3",
+      "motivo": "A B3 não tem cadastro para este código."
+    },
+    {
       "ticker": "CSNA3",
       "nome": "CSN",
       "setor": "Siderurgia e metalurgia",
@@ -5598,14 +5618,6 @@
       "etapa": "dados_b3",
       "codigo": "sem_dados_b3",
       "motivo": "A B3 não tem proventos publicados para a empresa."
-    },
-    {
-      "ticker": "MOTV3",
-      "nome": "Motiva (ex-CCR)",
-      "setor": "Transporte e infraestrutura",
-      "etapa": "dados_b3",
-      "codigo": "sem_dados_b3",
-      "motivo": "A B3 não tem cadastro para este código."
     },
     {
       "ticker": "HBSA3",
