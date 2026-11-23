@@ -1,14 +1,13 @@
 {
   "ticker": "LAVV3",
-  "geradoEm": "2026-11-21T14:47:05.041Z",
+  "geradoEm": "2026-11-23T12:09:26.928Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
-  "de": "2021-11-22",
+  "de": "2021-11-23",
   "ate": "2026-11-19",
   "ajustes": [],
   "saltosRestantes": [{"data":"2026-10-26","de":15.9,"para":9.34}],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
   "barras": [
-    ["2021-11-22",5.12,5.12,4.82,4.86,6336],
     ["2021-11-23",4.9,4.95,4.64,4.75,12195],
     ["2021-11-24",4.75,4.87,4.72,4.86,4697],
     ["2021-11-25",4.87,5.1,4.82,5.1,3327],

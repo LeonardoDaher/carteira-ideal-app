@@ -1,14 +1,13 @@
 {
   "ticker": "LJQQ3",
-  "geradoEm": "2026-11-21T14:47:05.041Z",
+  "geradoEm": "2026-11-23T12:09:26.928Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
-  "de": "2021-11-22",
+  "de": "2021-11-23",
   "ate": "2026-11-19",
   "ajustes": [],
   "saltosRestantes": [{"data":"2026-10-26","de":3.05,"para":1.1}],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
   "barras": [
-    ["2021-11-22",11.33,11.46,10.79,10.93,30310],
     ["2021-11-23",10.99,11,10.52,10.76,20321],
     ["2021-11-24",10.69,11.29,10.56,10.97,19134],
     ["2021-11-25",10.95,11.45,10.9,11.31,12187],

@@ -1,14 +1,13 @@
 {
   "ticker": "GEPA3",
-  "geradoEm": "2026-11-14T13:39:56.743Z",
+  "geradoEm": "2026-11-23T12:09:26.928Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
-  "de": "2021-11-22",
+  "de": "2021-11-26",
   "ate": "2026-10-29",
   "ajustes": [],
   "saltosRestantes": [],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
   "barras": [
-    ["2021-11-22",32.5,32.5,32.5,32.5,10],
     ["2021-11-26",32.5,32.5,32.5,32.5,7],
     ["2021-11-30",32,32,32,32,19],
     ["2021-12-01",32,32,32,32,13],

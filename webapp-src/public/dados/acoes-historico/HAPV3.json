@@ -1,14 +1,13 @@
 {
   "ticker": "HAPV3",
-  "geradoEm": "2026-11-21T14:47:05.041Z",
+  "geradoEm": "2026-11-23T12:09:26.928Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
-  "de": "2021-11-22",
+  "de": "2021-11-23",
   "ate": "2026-11-19",
   "ajustes": [{"data":"2025-06-06","fator":0.066667,"origem":"b3"}],
   "saltosRestantes": [{"data":"2025-11-13","de":32.69,"para":18.89},{"data":"2026-10-26","de":8.83,"para":3.98}],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
   "barras": [
-    ["2021-11-22",199.05,199.05,190.95,191.55,162034],
     ["2021-11-23",192.6,193.65,186.6,192.6,153115],
     ["2021-11-24",190.05,193.95,186.9,187.95,162300],
     ["2021-11-25",187.95,189.6,181.35,184.05,194994],

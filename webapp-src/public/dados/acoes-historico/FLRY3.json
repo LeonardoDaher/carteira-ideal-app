@@ -1,14 +1,13 @@
 {
   "ticker": "FLRY3",
-  "geradoEm": "2026-11-21T14:47:05.041Z",
+  "geradoEm": "2026-11-23T12:09:26.928Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
-  "de": "2021-11-22",
+  "de": "2021-11-23",
   "ate": "2026-11-19",
   "ajustes": [{"data":"2023-06-13","fator":1.05,"origem":"b3"}],
   "saltosRestantes": [],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
   "barras": [
-    ["2021-11-22",18.38,18.48,17.76,17.82,26727],
     ["2021-11-23",17.9,17.93,17.34,17.74,41514],
     ["2021-11-24",17.62,18.08,17.48,17.7,29835],
     ["2021-11-25",17.7,18.05,17.53,18.05,21496],

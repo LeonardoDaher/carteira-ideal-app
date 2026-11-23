@@ -1,14 +1,13 @@
 {
   "ticker": "CVCB3",
-  "geradoEm": "2026-11-21T14:47:05.041Z",
+  "geradoEm": "2026-11-23T12:09:26.928Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
-  "de": "2021-11-22",
+  "de": "2021-11-23",
   "ate": "2026-11-19",
   "ajustes": [],
   "saltosRestantes": [],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
   "barras": [
-    ["2021-11-22",15.36,15.63,14.58,14.83,142276],
     ["2021-11-23",14.91,15.39,14.55,15.39,165628],
     ["2021-11-24",15.01,15.9,14.94,15.73,122408],
     ["2021-11-25",15.62,17.1,15.58,16.81,209550],

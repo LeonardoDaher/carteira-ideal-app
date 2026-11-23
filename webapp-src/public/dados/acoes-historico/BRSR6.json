@@ -1,14 +1,13 @@
 {
   "ticker": "BRSR6",
-  "geradoEm": "2026-11-21T14:47:05.041Z",
+  "geradoEm": "2026-11-23T12:09:26.928Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
-  "de": "2021-11-22",
+  "de": "2021-11-23",
   "ate": "2026-11-19",
   "ajustes": [],
   "saltosRestantes": [],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
   "barras": [
-    ["2021-11-22",10.14,10.2,9.91,9.96,29126],
     ["2021-11-23",10.03,10.12,9.89,10.01,25501],
     ["2021-11-24",10.01,10.29,9.98,10.25,20303],
     ["2021-11-25",10.31,10.5,10.31,10.31,15020],

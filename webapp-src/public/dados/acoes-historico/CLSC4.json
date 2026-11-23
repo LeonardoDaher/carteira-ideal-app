@@ -1,14 +1,13 @@
 {
   "ticker": "CLSC4",
-  "geradoEm": "2026-11-21T14:47:05.041Z",
+  "geradoEm": "2026-11-23T12:09:26.928Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
-  "de": "2021-11-22",
+  "de": "2021-11-23",
   "ate": "2026-11-19",
   "ajustes": [],
   "saltosRestantes": [],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
   "barras": [
-    ["2021-11-22",69.8,69.8,68.51,68.51,83],
     ["2021-11-23",69.68,71,69.28,70.3,992],
     ["2021-11-24",70.5,71.4,70.5,71.4,36],
     ["2021-11-25",70.75,70.85,70.5,70.85,50],

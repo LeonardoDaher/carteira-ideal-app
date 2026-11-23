@@ -1,14 +1,13 @@
 {
   "ticker": "PDTC3",
-  "geradoEm": "2026-11-21T14:47:05.041Z",
+  "geradoEm": "2026-11-23T12:09:26.928Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
-  "de": "2021-11-22",
+  "de": "2021-11-23",
   "ate": "2026-11-19",
   "ajustes": [],
   "saltosRestantes": [],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
   "barras": [
-    ["2021-11-22",5.3,5.38,4.85,5.09,945],
     ["2021-11-23",5.09,5.09,4.85,4.89,456],
     ["2021-11-24",4.89,5,4.76,4.9,592],
     ["2021-11-25",4.9,5.05,4.88,4.99,561],

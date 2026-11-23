@@ -1,14 +1,13 @@
 {
   "ticker": "ESPA3",
-  "geradoEm": "2026-11-21T14:47:05.041Z",
+  "geradoEm": "2026-11-23T12:09:26.928Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
-  "de": "2021-11-22",
+  "de": "2021-11-23",
   "ate": "2026-11-19",
   "ajustes": [{"data":"2026-06-15","fator":0.1,"origem":"b3"}],
   "saltosRestantes": [],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
   "barras": [
-    ["2021-11-22",95.7,97.9,89.1,90.5,11920],
     ["2021-11-23",91.4,94.3,89.6,94,23565],
     ["2021-11-24",92.8,95.4,91,93,10570],
     ["2021-11-25",92.3,95.7,92.3,95.1,18996],

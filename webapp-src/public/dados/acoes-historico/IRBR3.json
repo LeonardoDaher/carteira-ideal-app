@@ -1,14 +1,13 @@
 {
   "ticker": "IRBR3",
-  "geradoEm": "2026-11-21T14:47:05.041Z",
+  "geradoEm": "2026-11-23T12:09:26.928Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
-  "de": "2021-11-22",
+  "de": "2021-11-23",
   "ate": "2026-11-19",
   "ajustes": [{"data":"2023-01-25","fator":0.033333,"origem":"b3"}],
   "saltosRestantes": [],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
   "barras": [
-    ["2021-11-22",124.5,125.1,119.7,120,65706],
     ["2021-11-23",121.2,123.6,118.8,122.7,61142],
     ["2021-11-24",122.1,126.9,121.5,126,48089],
     ["2021-11-25",125.7,128.1,125.4,127.5,26778],

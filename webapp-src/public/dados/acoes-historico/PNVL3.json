@@ -1,14 +1,13 @@
 {
   "ticker": "PNVL3",
-  "geradoEm": "2026-11-21T14:47:05.041Z",
+  "geradoEm": "2026-11-23T12:09:26.928Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
-  "de": "2021-11-22",
+  "de": "2021-11-23",
   "ate": "2026-11-19",
   "ajustes": [],
   "saltosRestantes": [],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
   "barras": [
-    ["2021-11-22",13.1,13.28,12.71,12.8,8548],
     ["2021-11-23",12.85,13.26,12.68,13.26,14199],
     ["2021-11-24",13.2,13.55,13.12,13.45,12227],
     ["2021-11-25",13.69,13.88,13.42,13.61,7640],

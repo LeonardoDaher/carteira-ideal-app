@@ -1,14 +1,13 @@
 {
   "ticker": "BRAP4",
-  "geradoEm": "2026-11-21T14:47:05.041Z",
+  "geradoEm": "2026-11-23T12:09:26.928Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
-  "de": "2021-11-22",
+  "de": "2021-11-23",
   "ate": "2026-11-19",
   "ajustes": [],
   "saltosRestantes": [{"data":"2021-12-17","de":55.78,"para":23.14}],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
   "barras": [
-    ["2021-11-22",46.73,48.72,46.56,48.03,197059],
     ["2021-11-23",49.64,51.3,48.75,49.14,208420],
     ["2021-11-24",49.24,49.99,48.91,49.81,119776],
     ["2021-11-25",50.18,50.5,49.18,50.04,128406],

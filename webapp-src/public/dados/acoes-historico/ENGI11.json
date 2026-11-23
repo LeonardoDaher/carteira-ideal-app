@@ -1,14 +1,13 @@
 {
   "ticker": "ENGI11",
-  "geradoEm": "2026-11-21T14:47:05.041Z",
+  "geradoEm": "2026-11-23T12:09:26.928Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
-  "de": "2021-11-22",
+  "de": "2021-11-23",
   "ate": "2026-11-19",
   "ajustes": [{"data":"2025-11-28","fator":1.1,"origem":"b3"}],
   "saltosRestantes": [],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
   "barras": [
-    ["2021-11-22",39.1,39.38,38.75,38.9,60330],
     ["2021-11-23",39.14,40.28,38.7,40.12,111478],
     ["2021-11-24",39.61,40.75,39.59,40.36,138031],
     ["2021-11-25",40.76,41.57,40.38,41.1,102580],

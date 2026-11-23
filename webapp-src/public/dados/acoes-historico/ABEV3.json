@@ -1,14 +1,13 @@
 {
   "ticker": "ABEV3",
-  "geradoEm": "2026-11-21T14:47:05.041Z",
+  "geradoEm": "2026-11-23T12:09:26.928Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
-  "de": "2021-11-22",
+  "de": "2021-11-23",
   "ate": "2026-11-19",
   "ajustes": [],
   "saltosRestantes": [],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
   "barras": [
-    ["2021-11-22",17.45,17.6,17.26,17.32,468715],
     ["2021-11-23",17.32,17.45,17.09,17.2,505884],
     ["2021-11-24",17.06,17.3,16.98,17.1,316612],
     ["2021-11-25",17.09,17.32,17,17.23,209223],

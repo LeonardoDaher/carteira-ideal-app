@@ -1,14 +1,13 @@
 {
   "ticker": "SYNE3",
-  "geradoEm": "2026-11-21T14:47:05.041Z",
+  "geradoEm": "2026-11-23T12:09:26.928Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
-  "de": "2021-11-22",
+  "de": "2021-11-23",
   "ate": "2026-11-19",
   "ajustes": [],
   "saltosRestantes": [{"data":"2021-12-20","de":16.84,"para":6.9},{"data":"2024-02-27","de":4.69,"para":8.01},{"data":"2024-12-09","de":8.21,"para":4.35}],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
   "barras": [
-    ["2021-11-22",13.31,13.39,12.52,12.87,3262],
     ["2021-11-23",12.99,12.99,12.41,12.55,4478],
     ["2021-11-24",12.48,12.81,12.39,12.55,4934],
     ["2021-11-25",12.56,12.92,12.42,12.66,2111],

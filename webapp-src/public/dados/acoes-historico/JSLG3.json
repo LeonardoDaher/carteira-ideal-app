@@ -1,14 +1,13 @@
 {
   "ticker": "JSLG3",
-  "geradoEm": "2026-11-21T14:47:05.041Z",
+  "geradoEm": "2026-11-23T12:09:26.928Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
-  "de": "2021-11-22",
+  "de": "2021-11-23",
   "ate": "2026-11-19",
   "ajustes": [],
   "saltosRestantes": [{"data":"2026-10-26","de":12.4,"para":6.16}],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
   "barras": [
-    ["2021-11-22",7.17,7.17,6.69,6.75,6437],
     ["2021-11-23",6.74,6.76,6.41,6.62,7834],
     ["2021-11-24",6.6,6.78,6.48,6.76,7756],
     ["2021-11-25",6.84,7.14,6.74,7.09,4835],

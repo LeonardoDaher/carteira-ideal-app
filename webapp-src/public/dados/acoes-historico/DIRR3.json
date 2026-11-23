@@ -1,14 +1,13 @@
 {
   "ticker": "DIRR3",
-  "geradoEm": "2026-11-21T14:47:05.041Z",
+  "geradoEm": "2026-11-23T12:09:26.928Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
-  "de": "2021-11-22",
+  "de": "2021-11-23",
   "ate": "2026-11-19",
   "ajustes": [{"data":"2025-08-11","fator":3,"origem":"b3"}],
   "saltosRestantes": [],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
   "barras": [
-    ["2021-11-22",3.61,3.66,3.41,3.47,16942],
     ["2021-11-23",3.5,3.5,3.35,3.38,17436],
     ["2021-11-24",3.37,3.53,3.33,3.46,16407],
     ["2021-11-25",3.5,3.6,3.47,3.59,12919],

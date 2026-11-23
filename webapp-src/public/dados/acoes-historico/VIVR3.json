@@ -1,14 +1,13 @@
 {
   "ticker": "VIVR3",
-  "geradoEm": "2026-11-21T14:47:05.041Z",
+  "geradoEm": "2026-11-23T12:09:26.928Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
-  "de": "2021-11-22",
+  "de": "2021-11-23",
   "ate": "2026-11-19",
   "ajustes": [{"data":"2026-06-11","fator":0.1,"origem":"b3"}],
   "saltosRestantes": [{"data":"2023-06-12","de":3.6,"para":34.2},{"data":"2026-10-13","de":2.36,"para":4.09},{"data":"2026-10-27","de":2.4,"para":4.08}],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
   "barras": [
-    ["2021-11-22",16.9,17.2,15,15.4,19145],
     ["2021-11-23",15.4,15.8,14.6,15,18328],
     ["2021-11-24",14.7,15.4,14.5,15.2,9441],
     ["2021-11-25",15.1,17,15.1,16.5,20793],
