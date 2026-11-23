@@ -8,7 +8,7 @@ name: Atualizar Agenda de Dividendos
 
 on:
   schedule:
-    - cron: '30 3 * * 2,4,6' # terça, quinta e sábado, 03h30 UTC = segunda, quarta e sexta, 00h30 de Brasília (3 vezes por semana para poupar a cota de minutos do GitHub)
+    - cron: '30 3 * * 2-6' # terça a sábado, 03h30 UTC = terça a sábado, 00h30 de Brasília (depois do Top 15 de dividendos)
   workflow_dispatch:
 
 permissions:
