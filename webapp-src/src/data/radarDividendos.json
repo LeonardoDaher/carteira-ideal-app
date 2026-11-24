@@ -1,11 +1,10 @@
 {
-  "geradoEm": "2026-11-23T12:17:57.167Z",
+  "geradoEm": "2026-11-24T14:07:37.202Z",
   "publicado": true,
-  "dataReferencia": "2026-11-23",
+  "dataReferencia": "2026-11-24",
   "consultadas": 314,
   "comPagamento": 194,
   "falhas": [
-    "BIOM3",
     "DMMO3",
     "GUAR3",
     "MBLY3",
@@ -7213,6 +7212,18 @@
       "mes": "2026-11"
     },
     {
+      "ticker": "PSSA3",
+      "nome": "Porto Seguro",
+      "setor": "Seguros e previdência",
+      "tipo": "DIVIDENDO",
+      "valor": 0.88610135766,
+      "dataCom": "2026-03-31",
+      "pagamentoEm": "2026-11-27",
+      "aprovadoEm": "2026-03-31",
+      "referencia": "2025",
+      "mes": "2026-11"
+    },
+    {
       "ticker": "BMOB3",
       "nome": "Bemobi",
       "setor": "Software e serviços de TI",
@@ -7270,18 +7281,6 @@
       "pagamentoEm": "2026-11-30",
       "aprovadoEm": "2025-12-12",
       "referencia": "Mensal/2026",
-      "mes": "2026-11"
-    },
-    {
-      "ticker": "PSSA3",
-      "nome": "Porto Seguro",
-      "setor": "Seguros e previdência",
-      "tipo": "DIVIDENDO",
-      "valor": 0.88610135766,
-      "dataCom": "2026-03-31",
-      "pagamentoEm": "2026-11-30",
-      "aprovadoEm": "2026-03-31",
-      "referencia": "2025",
       "mes": "2026-11"
     },
     {
@@ -7414,6 +7413,42 @@
       "pagamentoEm": "2026-12-02",
       "aprovadoEm": "2026-09-15",
       "referencia": "Mensal/2025",
+      "mes": "2026-12"
+    },
+    {
+      "ticker": "UGPA3",
+      "nome": "Ultrapar",
+      "setor": "Distribuição de combustíveis e etanol",
+      "tipo": "DIVIDENDO",
+      "valor": 1,
+      "dataCom": "2026-11-23",
+      "pagamentoEm": "2026-12-03",
+      "aprovadoEm": "2026-11-11",
+      "referencia": "2º Semestre/2026",
+      "mes": "2026-12"
+    },
+    {
+      "ticker": "BMGB4",
+      "nome": "Banco BMG",
+      "setor": "Bancos",
+      "tipo": "JRS CAP PROPRIO",
+      "valor": 0.1,
+      "dataCom": "2026-11-23",
+      "pagamentoEm": "2026-12-04",
+      "aprovadoEm": "2026-11-05",
+      "referencia": "3º Trimestre/2026",
+      "mes": "2026-12"
+    },
+    {
+      "ticker": "CAMB3",
+      "nome": "Cambuci",
+      "setor": "Calçados e artigos esportivos",
+      "tipo": "DIVIDENDO",
+      "valor": 0.1,
+      "dataCom": "2026-11-23",
+      "pagamentoEm": "2026-12-07",
+      "aprovadoEm": "2026-11-16",
+      "referencia": "3º Trimestre/2026",
       "mes": "2026-12"
     },
     {
