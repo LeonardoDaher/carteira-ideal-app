@@ -1,14 +1,15 @@
 {
-  "geradoEm": "2026-11-25T13:22:05.598Z",
+  "geradoEm": "2026-11-26T13:03:24.583Z",
   "publicado": true,
-  "dataReferencia": "2026-11-25",
+  "dataReferencia": "2026-11-26",
   "consultadas": 314,
-  "comPagamento": 194,
+  "comPagamento": 193,
   "falhas": [
     "DMMO3",
     "GUAR3",
     "MBLY3",
-    "ODPV3"
+    "ODPV3",
+    "RIAA3"
   ],
   "pagamentos": [
     {
@@ -7476,6 +7477,18 @@
       "mes": "2026-12"
     },
     {
+      "ticker": "ISAE4",
+      "nome": "ISA Energia",
+      "setor": "Energia elétrica: transmissão",
+      "tipo": "JRS CAP PROPRIO",
+      "valor": 0.188959,
+      "dataCom": "2026-11-25",
+      "pagamentoEm": "2026-12-07",
+      "aprovadoEm": "2026-09-29",
+      "referencia": "1º Semestre/2026",
+      "mes": "2026-12"
+    },
+    {
       "ticker": "GRND3",
       "nome": "Grendene",
       "setor": "Calçados e artigos esportivos",
@@ -7572,18 +7585,6 @@
       "mes": "2026-12"
     },
     {
-      "ticker": "VBBR3",
-      "nome": "Vibra Energia",
-      "setor": "Distribuição de combustíveis e etanol",
-      "tipo": "JRS CAP PROPRIO",
-      "valor": 0.76344892045,
-      "dataCom": "2025-11-25",
-      "pagamentoEm": "2026-12-16",
-      "aprovadoEm": "2025-11-19",
-      "referencia": "4º Trimestre/2025",
-      "mes": "2026-12"
-    },
-    {
       "ticker": "LEVE3",
       "nome": "Mahle Metal Leve",
       "setor": "Autopeças e veículos",
@@ -7653,18 +7654,6 @@
       "pagamentoEm": "2026-12-28",
       "aprovadoEm": "2025-12-22",
       "referencia": "3º Trimestre/2025",
-      "mes": "2026-12"
-    },
-    {
-      "ticker": "RIAA3",
-      "nome": "Riachuelo (Guararapes)",
-      "setor": "Moda e vestuário",
-      "tipo": "JRS CAP PROPRIO",
-      "valor": 0.07967127013,
-      "dataCom": "2026-05-13",
-      "pagamentoEm": "2026-12-28",
-      "aprovadoEm": "2026-05-08",
-      "referencia": "Complementar/2026",
       "mes": "2026-12"
     },
     {
@@ -9393,42 +9382,6 @@
       "pagamentoEm": null,
       "aprovadoEm": "2025-12-11",
       "referencia": "2º Semestre/2025",
-      "mes": null
-    },
-    {
-      "ticker": "RIAA3",
-      "nome": "Riachuelo (Guararapes)",
-      "setor": "Moda e vestuário",
-      "tipo": "JRS CAP PROPRIO",
-      "valor": 0.09964280525,
-      "dataCom": "2026-04-06",
-      "pagamentoEm": null,
-      "aprovadoEm": "2026-03-31",
-      "referencia": "1º Trimestre/2026",
-      "mes": null
-    },
-    {
-      "ticker": "RIAA3",
-      "nome": "Riachuelo (Guararapes)",
-      "setor": "Moda e vestuário",
-      "tipo": "JRS CAP PROPRIO",
-      "valor": 0.09958908766,
-      "dataCom": "2026-06-30",
-      "pagamentoEm": null,
-      "aprovadoEm": "2026-06-25",
-      "referencia": "2º Trimestre/2026",
-      "mes": null
-    },
-    {
-      "ticker": "RIAA3",
-      "nome": "Riachuelo (Guararapes)",
-      "setor": "Moda e vestuário",
-      "tipo": "JRS CAP PROPRIO",
-      "valor": 0.0596886783,
-      "dataCom": "2026-09-30",
-      "pagamentoEm": null,
-      "aprovadoEm": "2026-09-25",
-      "referencia": "3º Trimestre/2026",
       "mes": null
     },
     {
