@@ -1,0 +1,49 @@
+{
+  "_leia": "Parâmetros do 'Top 15 ações pagadoras de dividendos' (D122). ESTE ARQUIVO É A FONTE ÚNICA dos parâmetros desta lista; o cálculo (scripts/acoes-dividendos-calculo.mjs) e o documento docs/16-metodologia-acoes-dividendos.md citam estes valores. O universo é o cadastro de config/acoes.json (um código por empresa, a classe mais negociada). Os proventos vêm da B3 (API da aba 'Proventos em dinheiro' de cada empresa) e o preço, do Boletim de Preços já guardado em historico/acoes.json. Qualquer mudança aqui exige subir 'versaoMetodologia' e registrar o motivo em 'historicoDeVersoes'.",
+  "versaoMetodologia": "1.1.0",
+  "historicoDeVersoes": [
+    {
+      "versao": "1.0.0",
+      "data": "2026-10-25",
+      "mudanca": "Versão inicial (D122). Dividend yield dos últimos 12 meses = proventos em dinheiro por ação (dividendos, juros sobre capital próprio brutos e rendimentos) com data com nos últimos 365 dias ÷ preço de fechamento mais recente, na classe do código da empresa. Restituição de capital não conta. Publicação segura: aprovadoPeloResponsavel começa false."
+    },
+    {
+      "versao": "1.1.0",
+      "data": "2026-10-25",
+      "mudanca": "PUBLICAÇÃO (D122). O responsável aprovou publicar a lista no app, com acesso aberto (sem código) e o aviso proposto: aprovadoPeloResponsavel passa a true. Nenhuma regra de cálculo mudou."
+    }
+  ],
+  "tamanhoDaLista": 15,
+  "rankingAteOnde": 100,
+  "janelaDias": 365,
+  "liquidezMinimaDiariaReais": 3000000,
+  "sessoesLiquidez": 21,
+  "tiposQueEntram": [
+    "DIVIDENDO",
+    "JRS CAP PROPRIO",
+    "RENDIMENTO"
+  ],
+  "tiposQueNaoEntram": [
+    "REST CAP DIN"
+  ],
+  "alertaDyAcimaDe": 0.2,
+  "pausaEntreChamadasMs": 400,
+  "publicacao": {
+    "aprovadoPeloResponsavel": true,
+    "aprovacao": {
+      "por": "responsável pelo projeto (Leonardo Daher)",
+      "data": "2026-10-25",
+      "escopo": "Publicar o Top 15 ações pagadoras de dividendos (dividend yield de 12 meses) no app, com acesso aberto (sem código) e o aviso proposto.",
+      "forma": "autorização expressa no chat de desenvolvimento",
+      "parecerIndependente": false
+    },
+    "_leia": "Trava regulatória. Com aprovadoPeloResponsavel=false o job calcula e grava a auditoria, mas o app NÃO recebe a lista (mostra 'em validação'). Aprovado em 25/10/2026 pelo responsável, com acesso ABERTO, sem código. Sem parecer independente de terceiros (D22).",
+    "sanidade": {
+      "_leia": "Trava automática SÓ para a publicação: se o resultado vier claramente quebrado, o job grava a auditoria, FALHA e não atualiza o app.",
+      "minimoComProventos": 40,
+      "maximoFracaoSemDadosB3": 0.3,
+      "dyMaximoPlausivel": 1
+    },
+    "avisoProposto": "Não é recomendação de investimento. Esta lista ordena as ações da B3 pelo dividend yield dos últimos 12 meses: os proventos em dinheiro por ação (dividendos e juros sobre capital próprio, brutos) com data com nos últimos 12 meses, divididos pelo preço de fechamento mais recente, com dados publicados pela B3, pela mesma fórmula para todas, sem nota nem opinião nossa. Dividend yield alto não quer dizer que a ação é boa nem que o pagamento vai se repetir: pode vir de um provento extraordinário, de preço em queda ou de lucro que não volta. O passado não garante o futuro. Rentabilidade passada não garante rentabilidade futura e investir em ações pode causar perda de parte ou de todo o dinheiro aplicado. Converse com um profissional certificado antes de investir."
+  }
+}
