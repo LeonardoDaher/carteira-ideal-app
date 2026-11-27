@@ -1,9 +1,9 @@
 {
   "ticker": "CCTY3",
-  "geradoEm": "2026-11-14T13:39:56.743Z",
+  "geradoEm": "2026-11-27T11:26:26.890Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
   "de": "2025-04-29",
-  "ate": "2026-11-12",
+  "ate": "2026-11-25",
   "ajustes": [],
   "saltosRestantes": [{"data":"2025-05-05","de":0.77,"para":1.77},{"data":"2025-05-06","de":1.77,"para":6.72},{"data":"2025-05-07","de":6.72,"para":25.06},{"data":"2025-05-09","de":39.99,"para":20}],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
@@ -96,6 +96,7 @@
     ["2026-10-26",4.56,4.56,4.5,4.5,1],
     ["2026-11-06",4.3,4.3,4.3,4.3,0],
     ["2026-11-10",4.3,4.3,4.3,4.3,0],
-    ["2026-11-12",4.3,4.3,4.3,4.3,0]
+    ["2026-11-12",4.3,4.3,4.3,4.3,0],
+    ["2026-11-25",4.2,4.2,4.1,4.1,1]
   ]
 }

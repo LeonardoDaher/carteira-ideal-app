@@ -1,9 +1,9 @@
 {
   "ticker": "PATI3",
-  "geradoEm": "2026-11-21T14:47:05.041Z",
+  "geradoEm": "2026-11-27T11:26:26.890Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
   "de": "2021-11-29",
-  "ate": "2026-11-09",
+  "ate": "2026-11-26",
   "ajustes": [],
   "saltosRestantes": [],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
@@ -392,6 +392,7 @@
     ["2026-10-26",27.89,28,27.89,28,6],
     ["2026-10-27",28.8,29,28.8,29,14],
     ["2026-11-06",28.89,28.89,28.87,28.87,9],
-    ["2026-11-09",27.5,28.27,27.5,28.27,8]
+    ["2026-11-09",27.5,28.27,27.5,28.27,8],
+    ["2026-11-26",28,28,28,28,3]
   ]
 }

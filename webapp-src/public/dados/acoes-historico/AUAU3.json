@@ -1,9 +1,9 @@
 {
   "ticker": "AUAU3",
-  "geradoEm": "2026-11-21T14:47:05.041Z",
+  "geradoEm": "2026-11-27T11:26:26.890Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
   "de": "2026-01-05",
-  "ate": "2026-11-19",
+  "ate": "2026-11-26",
   "ajustes": [],
   "saltosRestantes": [],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
@@ -227,6 +227,10 @@
     ["2026-11-16",4.27,4.45,4.18,4.26,18314],
     ["2026-11-17",4.31,4.44,4.26,4.4,30367],
     ["2026-11-18",4.4,4.43,4.19,4.27,24932],
-    ["2026-11-19",4.3,4.33,4.13,4.23,22704]
+    ["2026-11-19",4.3,4.33,4.13,4.23,22704],
+    ["2026-11-23",4.17,4.23,4.07,4.16,11934],
+    ["2026-11-24",4.16,4.32,4.16,4.2,11043],
+    ["2026-11-25",4.22,4.29,4.12,4.27,20352],
+    ["2026-11-26",4.32,4.6,4.3,4.6,22410]
   ]
 }

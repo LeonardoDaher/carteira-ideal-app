@@ -1,9 +1,9 @@
 {
   "ticker": "BRST3",
-  "geradoEm": "2026-11-21T14:47:05.041Z",
+  "geradoEm": "2026-11-27T11:26:26.890Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
   "de": "2024-12-05",
-  "ate": "2026-11-19",
+  "ate": "2026-11-26",
   "ajustes": [],
   "saltosRestantes": [],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
@@ -494,6 +494,10 @@
     ["2026-11-16",2.72,2.72,2.52,2.52,1226],
     ["2026-11-17",2.52,2.6,2.52,2.58,261],
     ["2026-11-18",2.6,2.6,2.43,2.43,610],
-    ["2026-11-19",2.44,2.53,2.43,2.43,690]
+    ["2026-11-19",2.44,2.53,2.43,2.43,690],
+    ["2026-11-23",2.5,2.57,2.43,2.51,728],
+    ["2026-11-24",2.51,2.61,2.51,2.56,762],
+    ["2026-11-25",2.52,2.59,2.47,2.52,799],
+    ["2026-11-26",2.55,2.68,2.55,2.68,1294]
   ]
 }

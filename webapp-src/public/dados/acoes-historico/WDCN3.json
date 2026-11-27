@@ -1,9 +1,9 @@
 {
   "ticker": "WDCN3",
-  "geradoEm": "2026-11-21T14:47:05.041Z",
+  "geradoEm": "2026-11-27T11:26:26.890Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
   "de": "2025-10-01",
-  "ate": "2026-11-19",
+  "ate": "2026-11-26",
   "ajustes": [],
   "saltosRestantes": [],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
@@ -290,6 +290,10 @@
     ["2026-11-16",2.29,2.38,2.25,2.32,105],
     ["2026-11-17",2.37,2.52,2.3,2.52,70],
     ["2026-11-18",2.57,2.57,2.45,2.54,31],
-    ["2026-11-19",2.49,2.55,2.42,2.55,28]
+    ["2026-11-19",2.49,2.55,2.42,2.55,28],
+    ["2026-11-23",2.59,2.59,2.44,2.49,29],
+    ["2026-11-24",2.56,2.56,2.35,2.45,79],
+    ["2026-11-25",2.36,2.52,2.35,2.52,46],
+    ["2026-11-26",2.56,2.58,2.45,2.51,37]
   ]
 }

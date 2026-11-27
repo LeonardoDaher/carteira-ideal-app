@@ -1,9 +1,9 @@
 {
   "ticker": "PINE3",
-  "geradoEm": "2026-11-21T14:47:05.041Z",
+  "geradoEm": "2026-11-27T11:26:26.890Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
   "de": "2023-07-28",
-  "ate": "2026-11-19",
+  "ate": "2026-11-26",
   "ajustes": [],
   "saltosRestantes": [{"data":"2023-08-18","de":1.5,"para":4.15}],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
@@ -692,6 +692,10 @@
     ["2026-11-16",10.74,10.74,10,10.1,45],
     ["2026-11-17",10.1,10.6,9.72,9.72,69],
     ["2026-11-18",9.69,9.98,9.55,9.56,18],
-    ["2026-11-19",9.82,10.24,9.56,10.24,12]
+    ["2026-11-19",9.82,10.24,9.56,10.24,12],
+    ["2026-11-23",10.23,10.23,10.23,10.23,3],
+    ["2026-11-24",9.96,9.97,9.96,9.97,2],
+    ["2026-11-25",9.65,9.92,9.65,9.92,12],
+    ["2026-11-26",10.01,10.25,9.76,9.98,78]
   ]
 }

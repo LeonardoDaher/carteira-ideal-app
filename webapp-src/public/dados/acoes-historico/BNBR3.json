@@ -1,9 +1,9 @@
 {
   "ticker": "BNBR3",
-  "geradoEm": "2026-11-23T12:09:26.928Z",
+  "geradoEm": "2026-11-27T11:26:26.890Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
   "de": "2021-12-09",
-  "ate": "2026-11-19",
+  "ate": "2026-11-26",
   "ajustes": [],
   "saltosRestantes": [],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
@@ -528,6 +528,10 @@
     ["2026-11-13",103.99,104,103.99,104,21],
     ["2026-11-16",104,104,104,104,52],
     ["2026-11-18",103.75,103.75,103.75,103.75,10],
-    ["2026-11-19",103.75,107.5,103,107.5,74]
+    ["2026-11-19",103.75,107.5,103,107.5,74],
+    ["2026-11-23",103,103.5,103,103.5,21],
+    ["2026-11-24",102.4,102.4,102.25,102.25,31],
+    ["2026-11-25",101.5,101.5,101.5,101.5,10],
+    ["2026-11-26",100.6,103.78,100.6,103.78,51]
   ]
 }

@@ -1,9 +1,9 @@
 {
   "ticker": "ALOS3",
-  "geradoEm": "2026-11-21T14:47:05.041Z",
+  "geradoEm": "2026-11-27T11:26:26.890Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
   "de": "2023-10-25",
-  "ate": "2026-11-19",
+  "ate": "2026-11-26",
   "ajustes": [],
   "saltosRestantes": [],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
@@ -773,6 +773,10 @@
     ["2026-11-16",27.03,27.03,25.99,26.42,142987],
     ["2026-11-17",26.6,26.82,26.18,26.34,114436],
     ["2026-11-18",26.34,26.34,25.67,26.21,214342],
-    ["2026-11-19",26.39,26.41,25.53,25.75,174491]
+    ["2026-11-19",26.39,26.41,25.53,25.75,174491],
+    ["2026-11-23",25.08,25.62,24.88,25.5,116360],
+    ["2026-11-24",25.74,26.19,25.69,25.83,79104],
+    ["2026-11-25",25.82,26.49,25.8,26.23,273517],
+    ["2026-11-26",26.86,27.88,26.86,27.8,207846]
   ]
 }

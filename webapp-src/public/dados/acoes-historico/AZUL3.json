@@ -1,9 +1,9 @@
 {
   "ticker": "AZUL3",
-  "geradoEm": "2026-11-21T14:47:05.041Z",
+  "geradoEm": "2026-11-27T11:26:26.890Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
   "de": "2026-04-20",
-  "ate": "2026-11-19",
+  "ate": "2026-11-26",
   "ajustes": [],
   "saltosRestantes": [],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
@@ -155,6 +155,10 @@
     ["2026-11-16",12.8,12.88,11.45,11.45,2288],
     ["2026-11-17",11.76,11.76,11.03,11.1,1969],
     ["2026-11-18",11.26,11.63,10.86,10.95,2103],
-    ["2026-11-19",11.18,11.47,10.33,10.6,2133]
+    ["2026-11-19",11.18,11.47,10.33,10.6,2133],
+    ["2026-11-23",10.59,11.27,10.3,11.27,1644],
+    ["2026-11-24",11.37,11.44,10.87,11.05,1530],
+    ["2026-11-25",10.98,11.45,10.89,11.45,1398],
+    ["2026-11-26",11.59,11.71,11.08,11.08,1595]
   ]
 }

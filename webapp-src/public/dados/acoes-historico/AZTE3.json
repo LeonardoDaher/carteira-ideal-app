@@ -1,9 +1,9 @@
 {
   "ticker": "AZTE3",
-  "geradoEm": "2026-11-21T14:47:05.041Z",
+  "geradoEm": "2026-11-27T11:26:26.890Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
   "de": "2025-02-14",
-  "ate": "2026-11-19",
+  "ate": "2026-11-26",
   "ajustes": [{"data":"2026-07-09","fator":0.1,"origem":"b3"}],
   "saltosRestantes": [],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
@@ -447,6 +447,10 @@
     ["2026-11-16",0.7,0.75,0.64,0.67,740],
     ["2026-11-17",0.68,0.71,0.65,0.71,553],
     ["2026-11-18",0.69,0.7,0.63,0.66,252],
-    ["2026-11-19",0.69,0.69,0.6,0.6,455]
+    ["2026-11-19",0.69,0.69,0.6,0.6,455],
+    ["2026-11-23",0.6,0.64,0.6,0.61,461],
+    ["2026-11-24",0.64,0.64,0.59,0.59,618],
+    ["2026-11-25",0.59,0.62,0.57,0.6,538],
+    ["2026-11-26",0.61,0.74,0.59,0.72,2007]
   ]
 }

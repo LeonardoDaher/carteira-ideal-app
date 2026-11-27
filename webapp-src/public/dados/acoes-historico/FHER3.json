@@ -1,9 +1,9 @@
 {
   "ticker": "FHER3",
-  "geradoEm": "2026-11-21T14:47:05.041Z",
+  "geradoEm": "2026-11-27T11:26:26.890Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
   "de": "2022-03-25",
-  "ate": "2026-11-19",
+  "ate": "2026-11-26",
   "ajustes": [],
   "saltosRestantes": [{"data":"2024-12-04","de":4.44,"para":8.5}],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
@@ -1168,6 +1168,10 @@
     ["2026-11-16",2.65,2.65,2.5,2.58,5],
     ["2026-11-17",2.57,2.59,2.5,2.5,3],
     ["2026-11-18",2.52,2.52,2.52,2.52,12],
-    ["2026-11-19",2.5,2.58,2.44,2.53,10]
+    ["2026-11-19",2.5,2.58,2.44,2.53,10],
+    ["2026-11-23",2.58,2.58,2.44,2.5,10],
+    ["2026-11-24",2.57,2.57,2.57,2.57,0],
+    ["2026-11-25",2.5,2.55,2.5,2.5,2],
+    ["2026-11-26",2.63,2.63,2.51,2.57,2]
   ]
 }

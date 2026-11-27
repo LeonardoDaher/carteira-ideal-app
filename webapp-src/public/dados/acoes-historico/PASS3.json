@@ -1,9 +1,9 @@
 {
   "ticker": "PASS3",
-  "geradoEm": "2026-11-21T14:47:05.041Z",
+  "geradoEm": "2026-11-27T11:26:26.890Z",
   "fonte": "B3 - Séries Históricas de Cotações (COTAHIST)",
   "de": "2026-05-11",
-  "ate": "2026-11-19",
+  "ate": "2026-11-26",
   "ajustes": [],
   "saltosRestantes": [],
   "_leia": "Candles diários [data, abertura, máxima, mínima, fechamento, volume em R$ mil] do COTAHIST da B3, ajustados a desdobramentos e grupamentos (ver \"ajustes\"). Não ajusta dividendos. Gerado por scripts/atualizar-historico-acoes.mjs; não editar à mão.",
@@ -142,6 +142,10 @@
     ["2026-11-16",22.49,22.93,21.7,22.4,85379],
     ["2026-11-17",22.65,23.79,22.42,23.35,86779],
     ["2026-11-18",22.52,22.83,21.92,21.95,25354],
-    ["2026-11-19",22.12,22.73,21.87,22.1,138752]
+    ["2026-11-19",22.12,22.73,21.87,22.1,138752],
+    ["2026-11-23",22.15,22.67,21.95,22.21,28275],
+    ["2026-11-24",22.58,22.99,22.26,22.26,25647],
+    ["2026-11-25",22.31,22.88,22.31,22.67,53197],
+    ["2026-11-26",23.1,24.3,23.1,24,41813]
   ]
 }
