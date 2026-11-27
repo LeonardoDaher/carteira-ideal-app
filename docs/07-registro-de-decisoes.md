@@ -2416,3 +2416,13 @@ Pedido do responsável: o 3T26 do BBAS3 já tinha sido divulgado e a fundamental
 **O que mudou.** (1) `config/acoes.json`: SAPR4 entra como `"extra": true` no setor Saneamento e resíduos (vale para lista, busca, séries, fundamentos, balanços, análises e preço teto; fora dos rankings Top 15 e das medianas de pares, como os demais extras). (2) **Correção achada no caminho:** os códigos extras ficavam sem o dividend yield de 12 meses da B3 (o job de dividendos os pulava), então o Bazin deles usava só a média de 5 anos, sem a trava da D128 (o menor entre a média e os 12 meses). Agora o job baixa os proventos dos extras numa lista à parte (`somenteDy`), que alimenta apenas `dyPorTicker`; o universo, o ranking e as exclusões do Top 15 de dividendos não mudam.
 
 **Pendência conhecida (não corrigida aqui):** nas **units** (SAPR11, TAEE11, KLBN11, ENGI11, SANB11 etc.) o valor por ação (teto de Bazin e de Graham, valor justo) é comparado com o preço da unit, que reúne várias ações; o resultado fica errado. Exemplo: SAPR11 a R$ 35,97 contra teto de R$ 3,92 por ação.
+
+## D142 (27/11/2026): valor por unit na mesma base do preço da unit
+
+**Problema** (achado ao incluir a SAPR4, D141; responsável pediu a correção). Nas units, o valor justo, o teto de Bazin e o de Graham saíam **por ação** e eram comparados com o preço da **unit**, que reúne de 2 a 5 ações: SAPR11 a R$ 35,97 aparecia com teto de R$ 3,92. Além disso, quando faltava o preço de uma classe, o valor de mercado usava o preço da unit como se fosse o de uma ação.
+
+**Correção** (`analiseFundamentalista.ts`): tabela `ACOES_POR_UNIT`, conferida na lista de units da B3 (ALUP11 3, BPAC11 3, ENGI11 5, IGTI11 3, KLBN11 5, SANB11 2, SAPR11 5, TAEE11 3). `Mercado.porPapel` diz quantas ações há no papel; valor justo (fluxo descontado, P/VP e P/L), teto de Bazin, teto de Graham e dividendos por exercício passam a ser calculados **por unit**. O total de ações (usado em "ações em circulação" e na diluição) não muda, e o LPA da tabela de indicadores continua por ação. `units.test.ts` falha se aparecer uma unit no cadastro sem composição.
+
+**Efeito nos dados de 26/11/2026** (teto de Bazin / Graham / valor justo): SAPR11 R$ 9,21 / 39,53 / sem cálculo; TAEE11 52,07 / 23,83 / 43,11; KLBN11 15,05 / não se aplica / 26,93; ENGI11 8,33 / 56,71 / 48,78; ALUP11 16,50 / 45,43 / 41,56; SANB11 36,21 / 51,81 / 19,61 (verde, com alerta); IGTI11 5,06 / 26,75 / 7,82. BPAC11 não tem fundamentos no arquivo e continua sem análise.
+
+**Não alterado:** os rankings Top 15 de valor usam outro cálculo (auditado) e não foram revisados nesta decisão.

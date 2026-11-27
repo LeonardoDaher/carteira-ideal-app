@@ -168,7 +168,8 @@ export function calcularPrecoTeto({
   dyB3?: number | null
   taxaBazin?: number
 }): PrecoTeto {
-  const acoes = analise.mercado.acoes
+  // Papéis equivalentes: numa unit, dividendo, lucro e patrimônio por papel são os de várias ações (D142).
+  const acoes = analise.mercado.acoes === null ? null : analise.mercado.acoes / (analise.mercado.porPapel ?? 1)
   const bazin = tetoBazin(empresa, acoes, preco, dyB3, taxaBazin)
   const graham = tetoGraham(empresa, acoes)
   const gatilho: PrecoTeto['gatilho'] = bazin.aplicavel ? 'bazin' : graham.aplicavel ? 'graham' : null

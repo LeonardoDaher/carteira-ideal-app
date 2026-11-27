@@ -223,7 +223,7 @@ export interface AnaliseFundamentalista {
   nome: string
   setor: string
   financeira: boolean
-  mercado: { preco: number | null; valorMercado: number | null; ev: number | null; acoes: number | null; aproximado: boolean }
+  mercado: { preco: number | null; valorMercado: number | null; ev: number | null; acoes: number | null; porPapel: number; aproximado: boolean }
   dados: { ultimoExercicio: string | null; ultimoTrimestre: string; documento: string; dataCorte: string | null; geradoEm: string | null; exercicios: number; fonte: string; limitacoes: string[]; balancoNovo: BalancoNovo | null }
   historico: ColunaHistorica[]
   cagr: { receita: number | null; lucro: number | null; lpa: number | null; anos: number }
@@ -350,29 +350,52 @@ function colunas(e: EmpresaFundamentos): ColunaHistorica[] {
 // Mercado e múltiplos
 // ---------------------------------------------------------------------------------------
 
+/**
+ * Ações dentro de cada unit (ON + PN), pela lista de units da B3 (D142). O preço de uma unit é o de várias ações: todo valor "por ação"
+ * (valor justo, teto de Bazin e de Graham) precisa ser multiplicado por este número antes de ser comparado com o preço dela.
+ */
+export const ACOES_POR_UNIT: Record<string, number> = {
+  ALUP11: 3, // 1 ON + 2 PN
+  BPAC11: 3, // 1 ON + 2 PNA
+  ENGI11: 5, // 1 ON + 4 PN
+  IGTI11: 3, // 1 ON + 2 PN
+  KLBN11: 5, // 1 ON + 4 PN
+  SANB11: 2, // 1 ON + 1 PN
+  SAPR11: 5, // 1 ON + 4 PN
+  TAEE11: 3, // 1 ON + 2 PN
+}
+
+/** Ações por papel negociado: o da unit, ou 1 para ON e PN. */
+export const acoesPorPapel = (ticker: string): number => ACOES_POR_UNIT[ticker] ?? 1
+
 export interface Mercado {
   preco: number | null
   valorMercado: number | null
+  /** Total de ações da empresa (não de papéis): para valor por papel, dividir por `porPapel`. */
   acoes: number | null
+  /** Ações em cada papel negociado com este código (unit: 2 a 5; ação comum: 1). */
+  porPapel: number
   aproximado: boolean
 }
 
 /** Valor de mercado em R$ MIL: cada classe pelo próprio preço; sem preço da classe, usa o da outra (marcado como aproximado). */
 export function valorDeMercado(e: EmpresaFundamentos, precoDe: PrecoDe): Mercado {
   const preco = precoDe(e.ticker)
+  const porPapel = acoesPorPapel(e.ticker)
   // Quantidade de ações implausível frente ao patrimônio (provável erro de unidade na CVM): sem valor de mercado, sem múltiplos.
-  if (!e.acoes?.classes.length || e.alertas.includes('capital_implausivel')) return { preco, valorMercado: null, acoes: null, aproximado: false }
+  if (!e.acoes?.classes.length || e.alertas.includes('capital_implausivel')) return { preco, valorMercado: null, acoes: null, porPapel, aproximado: false }
   let total = 0
   let acoes = 0
   let aproximado = false
   for (const c of e.acoes.classes) {
-    const p = precoDe(c.ticker) ?? preco
-    if (!ok(p)) return { preco, valorMercado: null, acoes: null, aproximado: false }
+    // Sem o preço da classe, usa o do papel analisado, dividido pelas ações que ele reúne (unit).
+    const p = precoDe(c.ticker) ?? (ok(preco) ? preco / porPapel : null)
+    if (!ok(p)) return { preco, valorMercado: null, acoes: null, porPapel, aproximado: false }
     if (precoDe(c.ticker) === null || c.precoAproximado) aproximado = true
     total += (c.quantidade * p) / 1000
     acoes += c.quantidade
   }
-  return { preco, valorMercado: total, acoes, aproximado }
+  return { preco, valorMercado: total, acoes, porPapel, aproximado }
 }
 
 export interface MultiplosEmpresa {
@@ -494,7 +517,8 @@ export function descontarFluxo(fluxo0: number, g1: number, gt: number, r: number
 function calcularValorJusto(e: EmpresaFundamentos, m: Mercado, cols: ColunaHistorica[], cagrReceita: number | null, setor: MultiplosEmpresa, pr: Premissas, grupoPl: string | null = null): ValorJusto {
   const nada = (motivo: string): ValorJusto => ({ aplicavel: false, motivo, cenarios: [], faixa: null, confianca: 'baixa', confiancaMotivos: [], margemSegurancaPct: null, potencialBasePct: null, precoEntrada: null })
   if (!ok(m.preco) || !ok(m.acoes) || m.acoes <= 0) return nada('Dados insuficientes para conclusão: sem preço ou sem quantidade de ações confiável.')
-  const acoes = m.acoes
+  // Quantidade de PAPÉIS equivalentes (para a unit, total de ações ÷ ações por unit): o valor justo sai na mesma base do preço.
+  const acoes = m.acoes / m.porPapel
   const anuais = cols.filter((c) => !c.ttm)
   const ttm = cols.find((c) => c.ttm) ?? anuais[anuais.length - 1]
   const motivosConf: string[] = []
@@ -529,10 +553,11 @@ function calcularValorJusto(e: EmpresaFundamentos, m: Mercado, cols: ColunaHisto
 
     // Múltiplo do setor sobre o lucro por ação normalizado (média dos últimos 3 LPA positivos).
     const lpas = [ttm?.lpa, ...anuais.slice(-2).map((c) => c.lpa)].filter((x): x is number => ok(x))
-    const lpaNorm = media(lpas)
+    const lpaPorAcao = media(lpas)
+    const lpaNorm = lpaPorAcao === null ? null : lpaPorAcao * m.porPapel
     if (ok(setor.pl) && ok(lpaNorm) && lpaNorm > 0 && lpas.length >= 2) {
       const fator = cenario === 'pessimista' ? 0.8 : cenario === 'otimista' ? 1.2 : 1
-      metodos.push({ nome: grupoPl ? 'P/L do grupo B3' : 'P/L do setor', valor: lpaNorm * setor.pl * fator, premissas: `LPA normalizado de ${reais(lpaNorm)} × P/L de ${vezes(setor.pl * fator)} (mediana ${grupoPl ? `do grupo B3 "${grupoPl}", porque o setor tem poucos pares` : 'do setor'}${fator !== 1 ? `, ${fator < 1 ? '−' : '+'}20%` : ''}).` })
+      metodos.push({ nome: grupoPl ? 'P/L do grupo B3' : 'P/L do setor', valor: lpaNorm * setor.pl * fator, premissas: `LPA normalizado de ${reais(lpaNorm)}${m.porPapel > 1 ? ` por unit (${m.porPapel} ações)` : ''} × P/L de ${vezes(setor.pl * fator)} (mediana ${grupoPl ? `do grupo B3 "${grupoPl}", porque o setor tem poucos pares` : 'do setor'}${fator !== 1 ? `, ${fator < 1 ? '−' : '+'}20%` : ''}).` })
     }
     const validos = metodos.map((x) => x.valor).filter((x): x is number => ok(x))
     const valorJusto = validos.length ? (media(validos) as number) : null
@@ -1016,7 +1041,7 @@ export function analisarFundamentos(entrada: EntradaFundamentalista): AnaliseFun
     nome: e.nome,
     setor: e.setor,
     financeira: e.financeira,
-    mercado: { preco: mercado.preco, valorMercado: mercado.valorMercado, ev, acoes: mercado.acoes, aproximado: mercado.aproximado },
+    mercado: { preco: mercado.preco, valorMercado: mercado.valorMercado, ev, acoes: mercado.acoes, porPapel: mercado.porPapel, aproximado: mercado.aproximado },
     dados: {
       ultimoExercicio: e.anual.length ? (e.anual[e.anual.length - 1].exercicio ?? null) : null,
       ultimoTrimestre: ref,
