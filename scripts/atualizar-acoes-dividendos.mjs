@@ -87,19 +87,22 @@ O comando recalcula o resultado só com \`insumos.json.gz\` + \`config.json\` e 
 export function empresasDoCadastro({ cadastro, historico, cfg, lerAjustes = () => [] }) {
   const ultimoPregao = historico.pregoes.at(-1)
   const saida = []
+  const somenteDy = []
   for (const setor of cadastro.setores) {
     for (const e of setor.empresas) {
-      if (e.extra) continue // ações só da tela (D136): o universo do ranking de dividendos não muda
+      // Ações só da tela (D136) não entram no ranking (o universo dele não muda), mas precisam do DY de 12 meses para o preço teto
+      // e a análise fundamentalista (D141): vão para uma lista à parte.
+      const destino = e.extra ? somenteDy : saida
       const serie = historico.ativos?.[e.ticker] ?? []
       const ultimo = historico.ultimoNegocio?.[e.ticker]
       const recentes = serie.slice(-cfg.sessoesLiquidez)
       const liquidez = recentes.length ? recentes.reduce((s, c) => s + (c?.[3] ?? 0), 0) / cfg.sessoesLiquidez : 0
       // Só vale o preço de quem negociou nos últimos pregões: papel parado há meses não tem preço de referência.
       const cotacao = ultimo && ultimo[0] >= somarDias(ultimoPregao, -10) ? ultimo[1] : null
-      saida.push({ ticker: e.ticker, nome: e.nome, setor: setor.setor, cotacao, dataCotacao: cotacao ? ultimo[0] : null, liquidezDiaria: Math.round(liquidez), ajustes: lerAjustes(e.ticker) })
+      destino.push({ ticker: e.ticker, nome: e.nome, setor: setor.setor, cotacao, dataCotacao: cotacao ? ultimo[0] : null, liquidezDiaria: Math.round(liquidez), ajustes: lerAjustes(e.ticker) })
     }
   }
-  return { dataPrecos: ultimoPregao, empresas: saida }
+  return { dataPrecos: ultimoPregao, empresas: saida, somenteDy }
 }
 
 /**
@@ -108,12 +111,13 @@ export function empresasDoCadastro({ cadastro, historico, cfg, lerAjustes = () =
  * conjunto ainda serve.
  */
 export async function montarInsumos({ cadastro, historico, cfg, baixar = baixarProventosDaEmpresa, log = console.log, opcoesRede = {}, lerAjustes }) {
-  const { dataPrecos, empresas } = empresasDoCadastro({ cadastro, historico, cfg, lerAjustes })
+  const { dataPrecos, empresas, somenteDy } = empresasDoCadastro({ cadastro, historico, cfg, lerAjustes })
   const inicio = somarDias(dataPrecos, -cfg.janelaDias - 30)
   const cache = new Map()
   let feitas = 0
-  const alvo = empresas.filter((e) => e.cotacao > 0)
-  for (const emp of empresas) {
+  const todas = [...empresas, ...somenteDy]
+  const alvo = todas.filter((e) => e.cotacao > 0)
+  for (const emp of todas) {
     emp.eventos = []
     if (!alvo.includes(emp)) continue
     const raiz = emp.ticker.slice(0, 4)
@@ -135,7 +139,7 @@ export async function montarInsumos({ cadastro, historico, cfg, baixar = baixarP
     emp.eventos = r.eventos.filter((ev) => ev.dataCom >= inicio)
   }
   log(`B3: proventos baixados de ${feitas} empresas (${alvo.length} tickers no escopo).`)
-  return { esquema: ESQUEMA, fonte: 'B3, sistemaswebb3-listados.b3.com.br (GetListedSupplementCompany e GetListedCashDividends)', dataPrecos, empresas }
+  return { esquema: ESQUEMA, fonte: 'B3, sistemaswebb3-listados.b3.com.br (GetListedSupplementCompany e GetListedCashDividends)', dataPrecos, empresas, somenteDy }
 }
 
 /**

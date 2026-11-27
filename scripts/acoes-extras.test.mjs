@@ -22,14 +22,27 @@ test('cadastro: BBDC3, ITUB3, PETR3 e CMIG3 estão na lista, no mesmo setor da o
   }
 })
 
-test('cadastro: todo extra termina em 3, é código de ação e não repete', () => {
+test('cadastro: todo extra é código de ação ON ou PN e não repete', () => {
   assert.ok(extras.length >= 100)
   const vistos = new Set()
   for (const e of extras) {
-    assert.match(e.ticker, /^[A-Z]{4}3$/, e.ticker)
+    assert.match(e.ticker, /^[A-Z]{4}[34]$/, e.ticker)
     assert.ok(!vistos.has(e.ticker), `${e.ticker} repetido`)
     vistos.add(e.ticker)
   }
+})
+
+test('cadastro: SAPR4 está na lista, no setor da Sanepar (D141)', () => {
+  const cadastro = montarCadastro(config)
+  assert.equal(cadastro.get('SAPR4').setor, cadastro.get('SAPR11').setor)
+  assert.equal(todas.find((e) => e.ticker === 'SAPR4').extra, true)
+})
+
+test('dividendos: os extras ficam fora do ranking, mas entram na lista só do DY de 12 meses (D141)', () => {
+  const historico = { pregoes: ['2026-10-30'], ativos: {}, ultimoNegocio: {} }
+  const { empresas, somenteDy } = universoDeDividendos({ cadastro: config, historico, cfg: { sessoesLiquidez: 21 } })
+  assert.ok(!empresas.some((e) => e.ticker === 'SAPR4'))
+  assert.deepEqual(somenteDy.map((e) => e.ticker), extras.map((e) => e.ticker))
 })
 
 test('rankings: o universo da triagem de valor e o dos dividendos não mudam com os extras', () => {

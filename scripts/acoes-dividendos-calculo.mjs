@@ -123,7 +123,7 @@ export function calcularDividendos(insumos, cfg) {
   /** DY de toda empresa com preço e proventos da B3, sem o filtro de liquidez (ele só vale para o ranking); 0 se não pagou na janela. */
   function dyDeTodas() {
     const mapa = {}
-    for (const emp of insumos.empresas) {
+    for (const emp of [...insumos.empresas, ...(insumos.somenteDy ?? [])]) {
       const classe = classeDoTicker(emp.ticker)
       if (!classe || !(emp.cotacao > 0) || !emp.dataCotacao || !emp.eventos?.length) continue
       const total = ordenarEventos(emp.eventos.map((e) => ajustarPorDesdobramento(e, emp.ajustes)))
