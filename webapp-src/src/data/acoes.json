@@ -1,11 +1,11 @@
 {
-  "geradoEm": "2026-11-27T09:44:21.983Z",
+  "geradoEm": "2026-11-27T11:24:46.172Z",
   "dataPregao": "2026-11-26",
   "fonte": "B3 - Boletim de Preços (BVBG.086)",
-  "cadastroId": "87cf1af56c",
+  "cadastroId": "5e0ebe0419",
   "pregoesNoHistorico": 260,
   "sessoesLiquidez": 21,
-  "totais": {"setores":37,"empresas":315},
+  "totais": {"setores":37,"empresas":316},
   "gruposOrdem": ["Petróleo, Gás e Biocombustíveis","Materiais Básicos","Bens Industriais","Utilidade Pública","Financeiro","Consumo Cíclico","Consumo não Cíclico","Saúde","Tecnologia da Informação","Comunicações"],
   "setores": [
     {"setor": "Petróleo e gás", "grupoB3": "Petróleo, Gás e Biocombustíveis", "empresas": [
@@ -170,6 +170,7 @@
       {"ticker":"CSMG3","nome":"Copasa","cotacao":63.41,"dataCotacao":"2026-11-26","variacao3m":14.3,"variacaoDia":5.65,"volumeMedio":303068634,"minima52":37.34,"maxima52":67.82},
       {"ticker":"ORVR3","nome":"Orizon","cotacao":19.49,"dataCotacao":"2026-11-26","variacao3m":18.6,"variacaoDia":4.28,"volumeMedio":74847550,"minima52":null,"maxima52":null},
       {"ticker":"SAPR11","nome":"Sanepar","cotacao":35.97,"dataCotacao":"2026-11-26","variacao3m":6.9,"variacaoDia":4.17,"volumeMedio":61997771,"minima52":29.29,"maxima52":48.72},
+      {"ticker":"SAPR4","nome":"Sanepar PN","cotacao":6.95,"dataCotacao":"2026-11-26","variacao3m":null,"variacaoDia":3.89,"volumeMedio":13556438,"minima52":null,"maxima52":null},
       {"ticker":"SAPR3","nome":"Sanepar ON","cotacao":7.92,"dataCotacao":"2026-11-26","variacao3m":null,"variacaoDia":5.46,"volumeMedio":2307581,"minima52":null,"maxima52":null},
       {"ticker":"CASN3","nome":"Cesan","cotacao":4.64,"dataCotacao":"2026-11-23","variacao3m":null,"variacaoDia":null,"volumeMedio":1244,"minima52":null,"maxima52":null}
     ]},
@@ -719,7 +720,7 @@
     {"ticker":"SANB4","nome":null,"setor":"Outros","cotacao":13.88,"dataCotacao":"2026-11-26","volumeDia":2225386},
     {"ticker":"SAPR11","nome":"Sanepar","setor":"Saneamento e resíduos","cotacao":35.97,"dataCotacao":"2026-11-26","volumeDia":45289465},
     {"ticker":"SAPR3","nome":"Sanepar ON","setor":"Saneamento e resíduos","cotacao":7.92,"dataCotacao":"2026-11-26","volumeDia":2236508},
-    {"ticker":"SAPR4","nome":null,"setor":"Outros","cotacao":6.95,"dataCotacao":"2026-11-26","volumeDia":9589702},
+    {"ticker":"SAPR4","nome":"Sanepar PN","setor":"Saneamento e resíduos","cotacao":6.95,"dataCotacao":"2026-11-26","volumeDia":9589702},
     {"ticker":"SAUD3","nome":"Bradsaúde","setor":"Hospitais, planos e diagnósticos","cotacao":15.88,"dataCotacao":"2026-11-26","volumeDia":52943581},
     {"ticker":"SBFG3","nome":"Grupo SBF (Centauro)","setor":"Calçados e artigos esportivos","cotacao":4.75,"dataCotacao":"2026-11-26","volumeDia":46672697},
     {"ticker":"SBSP3","nome":"Sabesp","setor":"Saneamento e resíduos","cotacao":30.35,"dataCotacao":"2026-11-26","volumeDia":723487328},
