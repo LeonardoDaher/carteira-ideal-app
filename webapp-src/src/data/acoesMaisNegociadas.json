@@ -3,12 +3,12 @@
   "acessoRestrito": false,
   "instagram": null,
   "versaoMetodologia": "1.1.0",
-  "geradoEm": "2026-11-27T10:08:13.959Z",
+  "geradoEm": "2026-11-27T15:39:23.342Z",
   "dataExecucao": "2026-11-27",
   "ultimoPregao": "2026-11-26",
   "pastaAuditoria": "auditoria/top15-acoes/2026-11-03",
-  "hashResultado": "17180b3a5e64655a94aac490d9a8fc278d6d4ed6ecc4f1ab77f6dc37cf19f5d8",
-  "hashInsumos": "4488b78050526ef25b670967e4bf8f84e93907239b7f51eefe3584f49f938ba6",
+  "hashResultado": "f83fdc621856d3962b2216d68758a72c11577065fb7f93376409393b47c2bfe8",
+  "hashInsumos": "a6c229c7e6e5c3d3b2588686cea38a4d1a95955f05af7b50a1736df72f51436b",
   "hashConfig": "aacef27b68e500564375c495b0a99c2d658312026e876c5d96df38f635cc9ead",
   "tamanhoDaLista": 15,
   "universo": 399,
@@ -1108,16 +1108,16 @@
         "posicaoNaCategoria": 4
       },
       {
-        "ticker": "SAPR3",
-        "nome": "Sanepar ON",
+        "ticker": "SAPR4",
+        "nome": "Sanepar PN",
         "categoria": "Saneamento e resíduos",
-        "volumeMediano": 1664769,
-        "volumeMedio": 2307581,
+        "volumeMediano": 10223940,
+        "volumeMedio": 13556438,
         "diasNegociados": 21,
-        "cotacao": 7.92,
+        "cotacao": 6.95,
         "dataCotacao": "2026-11-26",
         "variacao3m": null,
-        "posicaoGeral": 185,
+        "posicaoGeral": 135,
         "posicaoNaCategoria": 5
       }
     ],
@@ -2270,19 +2270,6 @@
         "posicaoNaCategoria": 1
       },
       {
-        "ticker": "SAPR4",
-        "nome": "SAPR4",
-        "categoria": "Outros",
-        "volumeMediano": 10223940,
-        "volumeMedio": 13556438,
-        "diasNegociados": 21,
-        "cotacao": 6.95,
-        "dataCotacao": "2026-11-26",
-        "variacao3m": null,
-        "posicaoGeral": 135,
-        "posicaoNaCategoria": 2
-      },
-      {
         "ticker": "CYRE4",
         "nome": "CYRE4",
         "categoria": "Outros",
@@ -2293,7 +2280,7 @@
         "dataCotacao": "2026-11-26",
         "variacao3m": null,
         "posicaoGeral": 137,
-        "posicaoNaCategoria": 3
+        "posicaoNaCategoria": 2
       },
       {
         "ticker": "RENT4",
@@ -2306,7 +2293,7 @@
         "dataCotacao": "2026-11-26",
         "variacao3m": null,
         "posicaoGeral": 153,
-        "posicaoNaCategoria": 4
+        "posicaoNaCategoria": 3
       },
       {
         "ticker": "TAEE4",
@@ -2319,6 +2306,19 @@
         "dataCotacao": "2026-11-26",
         "variacao3m": null,
         "posicaoGeral": 163,
+        "posicaoNaCategoria": 4
+      },
+      {
+        "ticker": "TASA4",
+        "nome": "TASA4",
+        "categoria": "Outros",
+        "volumeMediano": 3558042,
+        "volumeMedio": 4391739,
+        "diasNegociados": 21,
+        "cotacao": 4.82,
+        "dataCotacao": "2026-11-26",
+        "variacao3m": null,
+        "posicaoGeral": 169,
         "posicaoNaCategoria": 5
       }
     ]
