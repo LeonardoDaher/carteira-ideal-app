@@ -3,15 +3,15 @@
   "acessoRestrito": true,
   "instagram": "acarteiraideal",
   "versaoMetodologia": "1.1.0",
-  "geradoEm": "2026-11-27T19:43:58.308Z",
-  "dataExecucao": "2026-11-27",
-  "ultimoPregao": "2026-11-26",
+  "geradoEm": "2026-11-28T09:27:57.406Z",
+  "dataExecucao": "2026-11-28",
+  "ultimoPregao": "2026-11-27",
   "pastaAuditoria": "auditoria/top15-bdrs/2026-11-03",
-  "hashResultado": "6acf83698af87ec20d6fe672f3aedd21ef76fba40ca516dbf08685ef116635da",
-  "hashInsumos": "bb660e7578ab44dcdcb007bbb31edd678262248df1734ac78d77e9cc7dfa0756",
+  "hashResultado": "e35c5ab5af7d8cfd253083fc38869111b534258771084daf5921e2ed7529ad2e",
+  "hashInsumos": "e5a11ede8ebb3cac7d7ca3b96cec6e403ff52d70e5e9602475e740683cbb6967",
   "hashConfig": "e7992464b62cc9f147361297a8c2d39a8c96fac5e528ac5d5ccf03e1e3b4c395",
   "tamanhoDaLista": 15,
-  "universo": 726,
+  "universo": 724,
   "elegiveis": 61,
   "aviso": "Não é recomendação de investimento. “Maior desconto” significa só que o preço do BDR está abaixo do maior fechamento dos últimos 12 meses. Isso não é desconto de valor: o preço do BDR depende da ação lá fora e do câmbio, e uma queda grande costuma refletir um problema real da empresa ou do setor, não uma pechincha. A triagem não analisa balanço, dívida nem lucro das empresas estrangeiras. Os números vêm do Boletim de Preços da B3, são do passado, podem conter erros, e desdobramentos ainda não confirmados podem distorcer o preço. Rentabilidade passada não garante rentabilidade futura e BDRs podem causar perda de parte ou de todo o dinheiro aplicado. Converse com um profissional certificado antes de investir.",
   "parametros": {
@@ -29,180 +29,180 @@
   },
   "contagens": {
     "ranking": 15,
-    "aConferir": 15,
-    "exclusoes": 650
+    "aConferir": 14,
+    "exclusoes": 649
   },
   "ranking": [
+    {
+      "ticker": "W1DC34",
+      "nome": "Western Digital Corporation",
+      "setor": "Semicondutores e hardware",
+      "cotacao": 1610.66,
+      "dataCotacao": "2026-11-27",
+      "maximaFechamento12m": 4000,
+      "dataMaxima": "2026-06-19",
+      "desconto": 0.5973,
+      "variacao3m": -32.9,
+      "volumeMediano": 3188158,
+      "diasNegociados": 21,
+      "pregoesComDado": 253,
+      "acoesPorBdr": 1,
+      "posicao": 1
+    },
     {
       "ticker": "C2OI34",
       "nome": "Coinbase Global, Inc.",
       "setor": "Financeiro",
-      "cotacao": 24.66,
-      "dataCotacao": "2026-11-26",
+      "cotacao": 24.32,
+      "dataCotacao": "2026-11-27",
       "maximaFechamento12m": 60.37,
       "dataMaxima": "2025-12-10",
-      "desconto": 0.5915,
-      "variacao3m": -35.2,
-      "volumeMediano": 2781807,
+      "desconto": 0.5972,
+      "variacao3m": -35.6,
+      "volumeMediano": 2736946,
       "diasNegociados": 21,
       "pregoesComDado": 253,
       "acoesPorBdr": 0.04,
-      "posicao": 1
+      "posicao": 2
     },
     {
       "ticker": "ITLC34",
       "nome": "Intel Corporation",
       "setor": "Semicondutores e hardware",
-      "cotacao": 53,
-      "dataCotacao": "2026-11-26",
+      "cotacao": 52.79,
+      "dataCotacao": "2026-11-27",
       "maximaFechamento12m": 121,
       "dataMaxima": "2026-06-22",
-      "desconto": 0.562,
-      "variacao3m": -29.5,
-      "volumeMediano": 31584737,
+      "desconto": 0.5637,
+      "variacao3m": -30.1,
+      "volumeMediano": 29039405,
       "diasNegociados": 21,
       "pregoesComDado": 253,
       "acoesPorBdr": 0.1667,
-      "posicao": 2
+      "posicao": 3
     },
     {
       "ticker": "M2ST34",
       "nome": "Strategy Inc -A",
       "setor": "Financeiro",
-      "cotacao": 6.85,
-      "dataCotacao": "2026-11-26",
-      "maximaFechamento12m": 15.51,
-      "dataMaxima": "2025-11-18",
-      "desconto": 0.5583,
-      "variacao3m": -26.3,
+      "cotacao": 6.49,
+      "dataCotacao": "2026-11-27",
+      "maximaFechamento12m": 14.78,
+      "dataMaxima": "2025-12-09",
+      "desconto": 0.5609,
+      "variacao3m": -28.4,
       "volumeMediano": 45052032,
       "diasNegociados": 21,
       "pregoesComDado": 253,
       "acoesPorBdr": null,
-      "posicao": 3
-    },
-    {
-      "ticker": "M2RV34",
-      "nome": "Marvell Technology, Inc.",
-      "setor": "Semicondutores e hardware",
-      "cotacao": 77.29,
-      "dataCotacao": "2026-11-26",
-      "maximaFechamento12m": 166.5,
-      "dataMaxima": "2026-06-19",
-      "desconto": 0.5358,
-      "variacao3m": -37.5,
-      "volumeMediano": 9503908,
-      "diasNegociados": 21,
-      "pregoesComDado": 253,
-      "acoesPorBdr": 0.1,
       "posicao": 4
     },
     {
       "ticker": "A1MT34",
       "nome": "Applied Materials, Inc.",
       "setor": "Indústria",
-      "cotacao": 181.11,
-      "dataCotacao": "2026-11-26",
+      "cotacao": 174.27,
+      "dataCotacao": "2026-11-27",
       "maximaFechamento12m": 380.31,
       "dataMaxima": "2026-06-30",
-      "desconto": 0.5238,
-      "variacao3m": -27,
-      "volumeMediano": 3477358,
+      "desconto": 0.5418,
+      "variacao3m": -29.7,
+      "volumeMediano": 2743701,
       "diasNegociados": 21,
       "pregoesComDado": 253,
       "acoesPorBdr": 0.1,
       "posicao": 5
     },
     {
-      "ticker": "ORCL34",
-      "nome": "Oracle Corp",
-      "setor": "Software e internet",
-      "cotacao": 102.12,
-      "dataCotacao": "2026-11-26",
-      "maximaFechamento12m": 207.1,
-      "dataMaxima": "2026-06-01",
-      "desconto": 0.5069,
-      "variacao3m": -17.7,
-      "volumeMediano": 15061197,
-      "diasNegociados": 21,
-      "pregoesComDado": 253,
-      "acoesPorBdr": 0.166666667,
-      "posicao": 6
-    },
-    {
       "ticker": "L1RC34",
       "nome": "L1RC34",
       "setor": "Indústria",
-      "cotacao": 25.9,
-      "dataCotacao": "2026-11-26",
+      "cotacao": 23.96,
+      "dataCotacao": "2026-11-27",
       "maximaFechamento12m": 51.35,
       "dataMaxima": "2026-06-30",
-      "desconto": 0.4956,
-      "variacao3m": -29.5,
+      "desconto": 0.5334,
+      "variacao3m": -34.6,
       "volumeMediano": 1680370,
       "diasNegociados": 21,
       "pregoesComDado": 253,
       "acoesPorBdr": null,
+      "posicao": 6
+    },
+    {
+      "ticker": "M2RV34",
+      "nome": "Marvell Technology, Inc.",
+      "setor": "Semicondutores e hardware",
+      "cotacao": 77.82,
+      "dataCotacao": "2026-11-27",
+      "maximaFechamento12m": 166.5,
+      "dataMaxima": "2026-06-19",
+      "desconto": 0.5326,
+      "variacao3m": -38.4,
+      "volumeMediano": 9503908,
+      "diasNegociados": 21,
+      "pregoesComDado": 253,
+      "acoesPorBdr": 0.1,
       "posicao": 7
+    },
+    {
+      "ticker": "ORCL34",
+      "nome": "Oracle Corp",
+      "setor": "Software e internet",
+      "cotacao": 97.62,
+      "dataCotacao": "2026-11-27",
+      "maximaFechamento12m": 207.1,
+      "dataMaxima": "2026-06-01",
+      "desconto": 0.5286,
+      "variacao3m": -24.2,
+      "volumeMediano": 15061197,
+      "diasNegociados": 21,
+      "pregoesComDado": 253,
+      "acoesPorBdr": 0.166666667,
+      "posicao": 8
     },
     {
       "ticker": "V1RT34",
       "nome": "V1RT34",
       "setor": "Semicondutores e hardware",
-      "cotacao": 100.6,
-      "dataCotacao": "2026-11-26",
+      "cotacao": 97.01,
+      "dataCotacao": "2026-11-27",
       "maximaFechamento12m": 192,
       "dataMaxima": "2026-06-19",
-      "desconto": 0.476,
-      "variacao3m": -23.7,
+      "desconto": 0.4947,
+      "variacao3m": -31.6,
       "volumeMediano": 404875,
-      "diasNegociados": 21,
-      "pregoesComDado": 253,
-      "acoesPorBdr": null,
-      "posicao": 8
-    },
-    {
-      "ticker": "BABA34",
-      "nome": "Alibaba Group Holding Limited ADR",
-      "setor": "Varejo e e-commerce",
-      "cotacao": 17.59,
-      "dataCotacao": "2026-11-26",
-      "maximaFechamento12m": 33.4,
-      "dataMaxima": "2026-01-22",
-      "desconto": 0.4734,
-      "variacao3m": -20,
-      "volumeMediano": 6923947,
       "diasNegociados": 21,
       "pregoesComDado": 253,
       "acoesPorBdr": null,
       "posicao": 9
     },
     {
-      "ticker": "NFLX34",
-      "nome": "Netflix, Inc.",
-      "setor": "Software e internet",
-      "cotacao": 6.81,
-      "dataCotacao": "2026-11-26",
-      "maximaFechamento12m": 12.18,
-      "dataMaxima": "2025-11-18",
-      "desconto": 0.4409,
-      "variacao3m": -19.2,
-      "volumeMediano": 8549712,
+      "ticker": "BABA34",
+      "nome": "Alibaba Group Holding Limited ADR",
+      "setor": "Varejo e e-commerce",
+      "cotacao": 17.76,
+      "dataCotacao": "2026-11-27",
+      "maximaFechamento12m": 33.4,
+      "dataMaxima": "2026-01-22",
+      "desconto": 0.4683,
+      "variacao3m": -19.5,
+      "volumeMediano": 8328225,
       "diasNegociados": 21,
       "pregoesComDado": 253,
-      "acoesPorBdr": 0.02,
+      "acoesPorBdr": null,
       "posicao": 10
     },
     {
       "ticker": "CATP34",
       "nome": "CATP34",
       "setor": "Indústria",
-      "cotacao": 200.35,
-      "dataCotacao": "2026-11-26",
+      "cotacao": 195.67,
+      "dataCotacao": "2026-11-27",
       "maximaFechamento12m": 354.33,
       "dataMaxima": "2026-06-25",
-      "desconto": 0.4346,
-      "variacao3m": -23.5,
+      "desconto": 0.4478,
+      "variacao3m": -26.2,
       "volumeMediano": 1764880,
       "diasNegociados": 21,
       "pregoesComDado": 253,
@@ -213,12 +213,12 @@
       "ticker": "MUTC34",
       "nome": "Micron Technology Inc",
       "setor": "Semicondutores e hardware",
-      "cotacao": 596.86,
-      "dataCotacao": "2026-11-26",
+      "cotacao": 590,
+      "dataCotacao": "2026-11-27",
       "maximaFechamento12m": 1040,
       "dataMaxima": "2026-06-25",
-      "desconto": 0.4261,
-      "variacao3m": -25.5,
+      "desconto": 0.4327,
+      "variacao3m": -26.9,
       "volumeMediano": 98346922,
       "diasNegociados": 21,
       "pregoesComDado": 253,
@@ -226,51 +226,51 @@
       "posicao": 12
     },
     {
+      "ticker": "NFLX34",
+      "nome": "Netflix, Inc.",
+      "setor": "Software e internet",
+      "cotacao": 6.79,
+      "dataCotacao": "2026-11-27",
+      "maximaFechamento12m": 11.7,
+      "dataMaxima": "2025-12-02",
+      "desconto": 0.4197,
+      "variacao3m": -18.6,
+      "volumeMediano": 9093893,
+      "diasNegociados": 21,
+      "pregoesComDado": 253,
+      "acoesPorBdr": 0.02,
+      "posicao": 13
+    },
+    {
       "ticker": "D1DG34",
       "nome": "Datadog, Inc.",
       "setor": "Software e internet",
-      "cotacao": 91.71,
-      "dataCotacao": "2026-11-26",
+      "cotacao": 91.67,
+      "dataCotacao": "2026-11-27",
       "maximaFechamento12m": 154,
       "dataMaxima": "2026-10-28",
-      "desconto": 0.4045,
-      "variacao3m": -20,
+      "desconto": 0.4047,
+      "variacao3m": -22.1,
       "volumeMediano": 2211742,
       "diasNegociados": 21,
       "pregoesComDado": 253,
       "acoesPorBdr": 0.1,
-      "posicao": 13
-    },
-    {
-      "ticker": "A1KA34",
-      "nome": "A1KA34",
-      "setor": "Software e internet",
-      "cotacao": 42.76,
-      "dataCotacao": "2026-11-25",
-      "maximaFechamento12m": 68.32,
-      "dataMaxima": "2026-06-03",
-      "desconto": 0.3741,
-      "variacao3m": -4.7,
-      "volumeMediano": 356498,
-      "diasNegociados": 20,
-      "pregoesComDado": 253,
-      "acoesPorBdr": null,
       "posicao": 14
     },
     {
-      "ticker": "FCXO34",
-      "nome": "Freeport-McMoRan, Inc.",
-      "setor": "Mineração e metais",
-      "cotacao": 91.46,
-      "dataCotacao": "2026-11-26",
-      "maximaFechamento12m": 136.55,
-      "dataMaxima": "2026-08-25",
-      "desconto": 0.3302,
-      "variacao3m": -33,
-      "volumeMediano": 3105198,
+      "ticker": "V1ST34",
+      "nome": "V1ST34",
+      "setor": "Energia elétrica e saneamento",
+      "cotacao": 48.83,
+      "dataCotacao": "2026-11-27",
+      "maximaFechamento12m": 74.93,
+      "dataMaxima": "2025-12-10",
+      "desconto": 0.3483,
+      "variacao3m": -9.4,
+      "volumeMediano": 300630,
       "diasNegociados": 21,
       "pregoesComDado": 253,
-      "acoesPorBdr": 0.3333333,
+      "acoesPorBdr": null,
       "posicao": 15
     }
   ],
@@ -280,11 +280,11 @@
       "nome": "Seagate Technology Holdings PLC",
       "setor": "Semicondutores e hardware",
       "cotacao": 50.81,
-      "dataCotacao": "2026-11-26",
+      "dataCotacao": "2026-11-27",
       "maximaFechamento12m": 5780,
       "dataMaxima": "2026-06-22",
       "desconto": 0.9912,
-      "variacao3m": -34,
+      "variacao3m": -36.1,
       "volumeMediano": 2746476,
       "diasNegociados": 21,
       "pregoesComDado": 253,
@@ -298,14 +298,33 @@
       "ticker": "K1LA34",
       "nome": "K1LA34",
       "setor": "Semicondutores e hardware",
-      "cotacao": 38.32,
-      "dataCotacao": "2026-11-25",
+      "cotacao": 38.81,
+      "dataCotacao": "2026-11-27",
       "maximaFechamento12m": 3000,
       "dataMaxima": "2026-06-11",
-      "desconto": 0.9872,
-      "variacao3m": -18.4,
+      "desconto": 0.9871,
+      "variacao3m": -17.8,
       "volumeMediano": 573555,
       "diasNegociados": 20,
+      "pregoesComDado": 253,
+      "acoesPorBdr": null,
+      "alertas": [
+        "salto_de_preco",
+        "desconto_extremo"
+      ]
+    },
+    {
+      "ticker": "BKNG34",
+      "nome": "BKNG34",
+      "setor": "Turismo, lazer e serviços",
+      "cotacao": 4.72,
+      "dataCotacao": "2026-11-27",
+      "maximaFechamento12m": 174.47,
+      "dataMaxima": "2025-12-26",
+      "desconto": 0.9729,
+      "variacao3m": -23.5,
+      "volumeMediano": 1663464,
+      "diasNegociados": 21,
       "pregoesComDado": 253,
       "acoesPorBdr": null,
       "alertas": [
@@ -317,13 +336,13 @@
       "ticker": "D1EL34",
       "nome": "Dell Technologies Inc",
       "setor": "Semicondutores e hardware",
-      "cotacao": 70.47,
-      "dataCotacao": "2026-11-26",
+      "cotacao": 69.72,
+      "dataCotacao": "2026-11-27",
       "maximaFechamento12m": 2550,
       "dataMaxima": "2026-08-13",
-      "desconto": 0.9724,
-      "variacao3m": -22.8,
-      "volumeMediano": 4692280,
+      "desconto": 0.9727,
+      "variacao3m": -27,
+      "volumeMediano": 5056489,
       "diasNegociados": 21,
       "pregoesComDado": 253,
       "acoesPorBdr": 0.04,
@@ -333,34 +352,15 @@
       ]
     },
     {
-      "ticker": "BKNG34",
-      "nome": "BKNG34",
-      "setor": "Turismo, lazer e serviços",
-      "cotacao": 5.16,
-      "dataCotacao": "2026-11-26",
-      "maximaFechamento12m": 174.47,
-      "dataMaxima": "2025-12-26",
-      "desconto": 0.9704,
-      "variacao3m": -17.7,
-      "volumeMediano": 1871361,
-      "diasNegociados": 21,
-      "pregoesComDado": 253,
-      "acoesPorBdr": null,
-      "alertas": [
-        "salto_de_preco",
-        "desconto_extremo"
-      ]
-    },
-    {
       "ticker": "C1DN34",
       "nome": "C1DN34",
       "setor": "Software e internet",
-      "cotacao": 50.56,
-      "dataCotacao": "2026-11-25",
+      "cotacao": 49.82,
+      "dataCotacao": "2026-11-27",
       "maximaFechamento12m": 1032.55,
       "dataMaxima": "2026-06-02",
-      "desconto": 0.951,
-      "variacao3m": 0.8,
+      "desconto": 0.9518,
+      "variacao3m": -1.3,
       "volumeMediano": 526185,
       "diasNegociados": 20,
       "pregoesComDado": 253,
@@ -374,12 +374,12 @@
       "ticker": "N1TA34",
       "nome": "N1TA34",
       "setor": "Semicondutores e hardware",
-      "cotacao": 68.01,
-      "dataCotacao": "2026-11-25",
+      "cotacao": 67.84,
+      "dataCotacao": "2026-11-27",
       "maximaFechamento12m": 1081.06,
       "dataMaxima": "2026-08-14",
-      "desconto": 0.9371,
-      "variacao3m": -0.9,
+      "desconto": 0.9372,
+      "variacao3m": -5.1,
       "volumeMediano": 410344,
       "diasNegociados": 20,
       "pregoesComDado": 253,
@@ -393,32 +393,13 @@
       "ticker": "S1NP34",
       "nome": "S1NP34",
       "setor": "Software e internet",
-      "cotacao": 56.51,
-      "dataCotacao": "2026-11-25",
+      "cotacao": 58.09,
+      "dataCotacao": "2026-11-27",
       "maximaFechamento12m": 713.96,
       "dataMaxima": "2026-01-12",
-      "desconto": 0.9208,
-      "variacao3m": 7.5,
+      "desconto": 0.9186,
+      "variacao3m": 10.2,
       "volumeMediano": 633041,
-      "diasNegociados": 20,
-      "pregoesComDado": 253,
-      "acoesPorBdr": null,
-      "alertas": [
-        "salto_de_preco",
-        "desconto_extremo"
-      ]
-    },
-    {
-      "ticker": "G1LW34",
-      "nome": "G1LW34",
-      "setor": "Semicondutores e hardware",
-      "cotacao": 142.15,
-      "dataCotacao": "2026-11-25",
-      "maximaFechamento12m": 1322.5,
-      "dataMaxima": "2026-06-29",
-      "desconto": 0.8925,
-      "variacao3m": -25.3,
-      "volumeMediano": 1215652,
       "diasNegociados": 20,
       "pregoesComDado": 253,
       "acoesPorBdr": null,
@@ -431,12 +412,12 @@
       "ticker": "N1OW34",
       "nome": "N1OW34",
       "setor": "Software e internet",
-      "cotacao": 10.41,
-      "dataCotacao": "2026-11-26",
+      "cotacao": 10.22,
+      "dataCotacao": "2026-11-27",
       "maximaFechamento12m": 93.42,
       "dataMaxima": "2025-12-11",
-      "desconto": 0.8886,
-      "variacao3m": -18.7,
+      "desconto": 0.8906,
+      "variacao3m": -21.1,
       "volumeMediano": 810438,
       "diasNegociados": 21,
       "pregoesComDado": 253,
@@ -447,16 +428,35 @@
       ]
     },
     {
+      "ticker": "G1LW34",
+      "nome": "G1LW34",
+      "setor": "Semicondutores e hardware",
+      "cotacao": 145.88,
+      "dataCotacao": "2026-11-27",
+      "maximaFechamento12m": 1322.5,
+      "dataMaxima": "2026-06-29",
+      "desconto": 0.8897,
+      "variacao3m": -25.3,
+      "volumeMediano": 847229,
+      "diasNegociados": 20,
+      "pregoesComDado": 252,
+      "acoesPorBdr": null,
+      "alertas": [
+        "salto_de_preco",
+        "desconto_extremo"
+      ]
+    },
+    {
       "ticker": "F1TN34",
       "nome": "Fortinet Inc",
       "setor": "Software e internet",
-      "cotacao": 63.04,
-      "dataCotacao": "2026-11-26",
+      "cotacao": 57.18,
+      "dataCotacao": "2026-11-27",
       "maximaFechamento12m": 432.6,
       "dataMaxima": "2026-08-04",
-      "desconto": 0.8543,
-      "variacao3m": -4,
-      "volumeMediano": 1056544,
+      "desconto": 0.8678,
+      "variacao3m": -15.5,
+      "volumeMediano": 718517,
       "diasNegociados": 21,
       "pregoesComDado": 253,
       "acoesPorBdr": 0.083333,
@@ -469,12 +469,12 @@
       "ticker": "S2GM34",
       "nome": "S2GM34",
       "setor": "Mineração e metais",
-      "cotacao": 7.95,
-      "dataCotacao": "2026-11-26",
+      "cotacao": 7.83,
+      "dataCotacao": "2026-11-27",
       "maximaFechamento12m": 38.84,
       "dataMaxima": "2026-05-07",
-      "desconto": 0.7953,
-      "variacao3m": -62,
+      "desconto": 0.7984,
+      "variacao3m": -62.6,
       "volumeMediano": 603122,
       "diasNegociados": 21,
       "pregoesComDado": 253,
@@ -487,12 +487,12 @@
       "ticker": "C2RW34",
       "nome": "CrowdStrike Holdings, Inc.",
       "setor": "Software e internet",
-      "cotacao": 54.64,
-      "dataCotacao": "2026-11-26",
+      "cotacao": 54.65,
+      "dataCotacao": "2026-11-27",
       "maximaFechamento12m": 186.96,
       "dataMaxima": "2026-06-01",
       "desconto": 0.7077,
-      "variacao3m": 26.8,
+      "variacao3m": 12.3,
       "volumeMediano": 4054052,
       "diasNegociados": 21,
       "pregoesComDado": 253,
@@ -503,33 +503,15 @@
       ]
     },
     {
-      "ticker": "W1DC34",
-      "nome": "Western Digital Corporation",
-      "setor": "Semicondutores e hardware",
-      "cotacao": 1580,
-      "dataCotacao": "2026-11-26",
-      "maximaFechamento12m": 4000,
-      "dataMaxima": "2026-06-19",
-      "desconto": 0.605,
-      "variacao3m": -31.2,
-      "volumeMediano": 3188158,
-      "diasNegociados": 21,
-      "pregoesComDado": 253,
-      "acoesPorBdr": 1,
-      "alertas": [
-        "desconto_extremo"
-      ]
-    },
-    {
       "ticker": "M1RN34",
       "nome": "Moderna, Inc.",
       "setor": "Saúde e farmacêuticas",
-      "cotacao": 64.3,
-      "dataCotacao": "2026-11-26",
+      "cotacao": 63.5,
+      "dataCotacao": "2026-11-27",
       "maximaFechamento12m": 75.39,
       "dataMaxima": "2026-11-09",
-      "desconto": 0.1471,
-      "variacao3m": 57,
+      "desconto": 0.1577,
+      "variacao3m": 65.1,
       "volumeMediano": 7529510,
       "diasNegociados": 21,
       "pregoesComDado": 253,
@@ -542,13 +524,13 @@
       "ticker": "NIKE34",
       "nome": "NIKE34",
       "setor": "Consumo não durável",
-      "cotacao": 106.59,
-      "dataCotacao": "2026-11-26",
+      "cotacao": 105,
+      "dataCotacao": "2026-11-27",
       "maximaFechamento12m": 110.57,
       "dataMaxima": "2026-11-16",
-      "desconto": 0.036,
-      "variacao3m": 425.9,
-      "volumeMediano": 1580386,
+      "desconto": 0.0504,
+      "variacao3m": 421.4,
+      "volumeMediano": 1451989,
       "diasNegociados": 21,
       "pregoesComDado": 253,
       "acoesPorBdr": null,
@@ -570,35 +552,35 @@
       "nome": "A1CR34",
       "setor": "Química e agroindústria",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 6 pregões (máximo 5)."
+      "motivo": "Último negócio há 7 pregões (máximo 5)."
     },
     {
       "ticker": "A1DC34",
       "nome": "A1DC34",
       "setor": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 564 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 531 por dia (mínimo 300.000)."
     },
     {
       "ticker": "A1DI34",
       "nome": "A1DI34",
       "setor": "Semicondutores e hardware",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 50.045 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 50.433 por dia (mínimo 300.000)."
     },
     {
       "ticker": "A1DM34",
       "nome": "A1DM34",
       "setor": "Química e agroindústria",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 3.685 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 4.138 por dia (mínimo 300.000)."
     },
     {
       "ticker": "A1EG34",
       "nome": "A1EG34",
       "setor": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 312 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 313 por dia (mínimo 300.000)."
     },
     {
       "ticker": "A1EN34",
@@ -612,21 +594,21 @@
       "nome": "A1EP34",
       "setor": "Energia elétrica e saneamento",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 621 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 920 por dia (mínimo 300.000)."
     },
     {
       "ticker": "A1ES34",
       "nome": "A1ES34",
       "setor": "Energia elétrica e saneamento",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "A1FL34",
       "nome": "A1FL34",
       "setor": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 19 pregões (máximo 5)."
+      "motivo": "Último negócio há 20 pregões (máximo 5)."
     },
     {
       "ticker": "A1GI34",
@@ -654,21 +636,28 @@
       "nome": "A1JG34",
       "setor": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 15 pregões (máximo 5)."
+      "motivo": "Último negócio há 16 pregões (máximo 5)."
+    },
+    {
+      "ticker": "A1KA34",
+      "nome": "A1KA34",
+      "setor": "Software e internet",
+      "codigo": "liquidez_baixa",
+      "motivo": "Volume mediano de R$ 245.896 por dia (mínimo 300.000)."
     },
     {
       "ticker": "A1LB34",
       "nome": "A1LB34",
       "setor": "Química e agroindústria",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 18.429 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 15.219 por dia (mínimo 300.000)."
     },
     {
       "ticker": "A1LG34",
       "nome": "A1LG34",
       "setor": "Saúde e farmacêuticas",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 11 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "A1LK34",
@@ -682,7 +671,7 @@
       "nome": "A1LL34",
       "setor": "Financeiro",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 13 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 12 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "A1LN34",
@@ -710,7 +699,7 @@
       "nome": "A1ON34",
       "setor": "Financeiro",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "A1OS34",
@@ -724,35 +713,35 @@
       "nome": "A1PA34",
       "setor": "Petróleo e gás",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 6 pregões (máximo 5)."
+      "motivo": "Último negócio há 7 pregões (máximo 5)."
     },
     {
       "ticker": "A1PD34",
       "nome": "A1PD34",
       "setor": "Química e agroindústria",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 12 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 13 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "A1PH34",
       "nome": "A1PH34",
       "setor": "Semicondutores e hardware",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 95.706 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 118.603 por dia (mínimo 300.000)."
     },
     {
       "ticker": "A1PL34",
       "nome": "A1PL34",
       "setor": "Software e internet",
       "codigo": "historico_curto",
-      "motivo": "Só 41 pregões de histórico (mínimo 240) para medir a máxima de 12 meses."
+      "motivo": "Só 42 pregões de histórico (mínimo 240) para medir a máxima de 12 meses."
     },
     {
       "ticker": "A1PO34",
       "nome": "A1PO34",
       "setor": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 43.797 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 40.193 por dia (mínimo 300.000)."
     },
     {
       "ticker": "A1PP34",
@@ -773,7 +762,7 @@
       "nome": "A1RE34",
       "setor": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 245 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 249 por dia (mínimo 300.000)."
     },
     {
       "ticker": "A1RG34",
@@ -787,28 +776,28 @@
       "nome": "A1SN34",
       "setor": "Saúde e farmacêuticas",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "A1SU34",
       "nome": "A1SU34",
       "setor": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 8 pregões (máximo 5)."
+      "motivo": "Último negócio há 9 pregões (máximo 5)."
     },
     {
       "ticker": "A1TH34",
       "nome": "A1TH34",
       "setor": "Software e internet",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 299 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 236 por dia (mínimo 300.000)."
     },
     {
       "ticker": "A1TM34",
       "nome": "A1TM34",
       "setor": "Energia elétrica e saneamento",
-      "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 2 dos últimos 21 pregões (mínimo 15)."
+      "codigo": "cotacao_defasada",
+      "motivo": "Último negócio há 6 pregões (máximo 5)."
     },
     {
       "ticker": "A1TT34",
@@ -836,14 +825,14 @@
       "nome": "A1ZN34",
       "setor": "Saúde e farmacêuticas",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 61.868 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 45.486 por dia (mínimo 300.000)."
     },
     {
       "ticker": "A2FY34",
       "nome": "A2FY34",
       "setor": "Turismo, lazer e serviços",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 75.089 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 59.368 por dia (mínimo 300.000)."
     },
     {
       "ticker": "A2LC34",
@@ -871,7 +860,7 @@
       "nome": "A2RR34",
       "setor": "Saúde e farmacêuticas",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 12 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 11 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "A2RW34",
@@ -892,49 +881,49 @@
       "nome": "A2XO34",
       "setor": "Semicondutores e hardware",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 13.257 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 12.941 por dia (mínimo 300.000)."
     },
     {
       "ticker": "A2ZT34",
       "nome": "A2ZT34",
       "setor": "Serviços de saúde",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "AALL34",
       "nome": "AALL34",
       "setor": "Transporte e logística",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 101.320 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 41.707 por dia (mínimo 300.000)."
     },
     {
       "ticker": "ABBV34",
       "nome": "ABBV34",
       "setor": "Saúde e farmacêuticas",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 111.045 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 77.761 por dia (mínimo 300.000)."
     },
     {
       "ticker": "ABTT34",
       "nome": "ABTT34",
       "setor": "Saúde e farmacêuticas",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 5.398 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 6.716 por dia (mínimo 300.000)."
     },
     {
       "ticker": "ABUD34",
       "nome": "ABUD34",
       "setor": "Consumo não durável",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 2.171 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 2.019 por dia (mínimo 300.000)."
     },
     {
       "ticker": "ACNB34",
       "nome": "ACNB34",
       "setor": "Software e internet",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 18.636 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 15.616 por dia (mínimo 300.000)."
     },
     {
       "ticker": "ADPR34",
@@ -955,7 +944,7 @@
       "nome": "AIRB34",
       "setor": "Turismo, lazer e serviços",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 213.794 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 197.641 por dia (mínimo 300.000)."
     },
     {
       "ticker": "AMGN34",
@@ -969,7 +958,7 @@
       "nome": "Anthropic, PBC",
       "setor": "Software e internet",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 5 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "APTV34",
@@ -997,7 +986,7 @@
       "nome": "ATTB34",
       "setor": "Telecomunicações e mídia",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 68.360 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 66.022 por dia (mínimo 300.000)."
     },
     {
       "ticker": "AWII34",
@@ -1018,14 +1007,14 @@
       "nome": "AZOI34",
       "setor": "Varejo e e-commerce",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 11 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "B1AM34",
       "nome": "B1AM34",
       "setor": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 101.875 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 91.768 por dia (mínimo 300.000)."
     },
     {
       "ticker": "B1AX34",
@@ -1046,7 +1035,7 @@
       "nome": "B1BW34",
       "setor": "Varejo e e-commerce",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 13 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 12 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "B1CS34",
@@ -1067,7 +1056,7 @@
       "nome": "B1FC34",
       "setor": "Consumo não durável",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 6 pregões (máximo 5)."
+      "motivo": "Último negócio há 7 pregões (máximo 5)."
     },
     {
       "ticker": "B1IL34",
@@ -1088,7 +1077,7 @@
       "nome": "B1LL34",
       "setor": "Química e agroindústria",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 8 pregões (máximo 5)."
+      "motivo": "Último negócio há 9 pregões (máximo 5)."
     },
     {
       "ticker": "B1ME34",
@@ -1109,14 +1098,14 @@
       "nome": "B1NT34",
       "setor": "Saúde e farmacêuticas",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 23.317 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 26.990 por dia (mínimo 300.000)."
     },
     {
       "ticker": "B1PP34",
       "nome": "B1PP34",
       "setor": "Petróleo e gás",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 19.458 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 13.972 por dia (mínimo 300.000)."
     },
     {
       "ticker": "B1RF34",
@@ -1130,7 +1119,7 @@
       "nome": "B1SA34",
       "setor": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 91 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 181 por dia (mínimo 300.000)."
     },
     {
       "ticker": "B1SX34",
@@ -1144,7 +1133,7 @@
       "nome": "B1TI34",
       "setor": "Consumo não durável",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 88.743 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 88.296 por dia (mínimo 300.000)."
     },
     {
       "ticker": "B1WA34",
@@ -1158,7 +1147,7 @@
       "nome": "B1ZE34",
       "setor": "Software e internet",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 7 pregões (máximo 5)."
+      "motivo": "Último negócio há 8 pregões (máximo 5)."
     },
     {
       "ticker": "B2AH34",
@@ -1172,7 +1161,7 @@
       "nome": "B2AP34",
       "setor": "Financeiro",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 5 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "B2HI34",
@@ -1193,7 +1182,7 @@
       "nome": "B2MB34",
       "setor": "Software e internet",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 144 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 124 por dia (mínimo 300.000)."
     },
     {
       "ticker": "B2RK34",
@@ -1214,7 +1203,7 @@
       "nome": "B2YN34",
       "setor": "Consumo não durável",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 5.353 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 5.650 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BBYY34",
@@ -1228,21 +1217,21 @@
       "nome": "BCSA34",
       "setor": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 53.630 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 52.907 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BHVN34",
       "nome": "BHVN34",
       "setor": "Saúde e farmacêuticas",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 4 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 3 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "BIDU34",
       "nome": "BIDU34",
       "setor": "Software e internet",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 76.101 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 75.301 por dia (mínimo 300.000)."
     },
     {
       "ticker": "BIIB34",
@@ -1283,15 +1272,15 @@
       "ticker": "BONY34",
       "nome": "BONY34",
       "setor": "Financeiro",
-      "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 1.742 por dia (mínimo 300.000)."
+      "codigo": "poucos_dias_negociados",
+      "motivo": "Negociou em 14 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "BOXP34",
       "nome": "BOXP34",
       "setor": "Financeiro",
-      "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 6 pregões (máximo 5)."
+      "codigo": "poucos_dias_negociados",
+      "motivo": "Negociou em 5 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "C1AB34",
@@ -1305,7 +1294,7 @@
       "nome": "C1AG34",
       "setor": "Consumo não durável",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 16 pregões (máximo 5)."
+      "motivo": "Último negócio há 17 pregões (máximo 5)."
     },
     {
       "ticker": "C1AH34",
@@ -1319,7 +1308,7 @@
       "nome": "C1BL34",
       "setor": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 8.287 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 10.094 por dia (mínimo 300.000)."
     },
     {
       "ticker": "C1BO34",
@@ -1333,21 +1322,21 @@
       "nome": "C1BR34",
       "setor": "Financeiro",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "C1CI34",
       "nome": "C1CI34",
       "setor": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 9 pregões (máximo 5)."
+      "motivo": "Último negócio há 10 pregões (máximo 5)."
     },
     {
       "ticker": "C1CJ34",
       "nome": "C1CJ34",
       "setor": "Mineração e metais",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 5.827 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 5.544 por dia (mínimo 300.000)."
     },
     {
       "ticker": "C1CL34",
@@ -1375,7 +1364,7 @@
       "nome": "C1FG34",
       "setor": "Financeiro",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 3 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 2 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "C1FI34",
@@ -1389,21 +1378,21 @@
       "nome": "C1GP34",
       "setor": "Software e internet",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 520 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 533 por dia (mínimo 300.000)."
     },
     {
       "ticker": "C1HK34",
       "nome": "C1HK34",
       "setor": "Software e internet",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 102.848 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 90.846 por dia (mínimo 300.000)."
     },
     {
       "ticker": "C1HR34",
       "nome": "C1HR34",
       "setor": "Transporte e logística",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 6 pregões (máximo 5)."
+      "motivo": "Último negócio há 7 pregões (máximo 5)."
     },
     {
       "ticker": "C1HT34",
@@ -1417,21 +1406,21 @@
       "nome": "C1IC34",
       "setor": "Serviços de saúde",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 12 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 11 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "C1MG34",
       "nome": "C1MG34",
       "setor": "Turismo, lazer e serviços",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 4.063 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 3.899 por dia (mínimo 300.000)."
     },
     {
       "ticker": "C1MI34",
       "nome": "C1MI34",
       "setor": "Indústria",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 6.579 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 9.163 por dia (mínimo 300.000)."
     },
     {
       "ticker": "C1NC34",
@@ -1445,21 +1434,21 @@
       "nome": "C1NP34",
       "setor": "Energia elétrica e saneamento",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 8 pregões (máximo 5)."
+      "motivo": "Último negócio há 9 pregões (máximo 5)."
     },
     {
       "ticker": "C1NS34",
       "nome": "C1NS34",
       "setor": "Química e agroindústria",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 19 pregões (máximo 5)."
+      "motivo": "Último negócio há 20 pregões (máximo 5)."
     },
     {
       "ticker": "C1OO34",
       "nome": "C1OO34",
       "setor": "Saúde e farmacêuticas",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 7 pregões (máximo 5)."
+      "motivo": "Último negócio há 8 pregões (máximo 5)."
     },
     {
       "ticker": "C1PB34",
@@ -1473,28 +1462,28 @@
       "nome": "C1PR34",
       "setor": "Varejo e e-commerce",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 7.137 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 2.398 por dia (mínimo 300.000)."
     },
     {
       "ticker": "C1RB34",
       "nome": "C1RB34",
       "setor": "Software e internet",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 15.236 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 16.506 por dia (mínimo 300.000)."
     },
     {
       "ticker": "C1RH34",
       "nome": "C1RH34",
       "setor": "Mineração e metais",
-      "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 1.370 por dia (mínimo 300.000)."
+      "codigo": "poucos_dias_negociados",
+      "motivo": "Negociou em 14 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "C1RR34",
       "nome": "C1RR34",
       "setor": "Indústria",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 12 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 11 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "C1TA34",
@@ -1515,14 +1504,14 @@
       "nome": "C2AC34",
       "setor": "Software e internet",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 134 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 127 por dia (mínimo 300.000)."
     },
     {
       "ticker": "C2CA34",
       "nome": "C2CA34",
       "setor": "Consumo não durável",
-      "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
+      "codigo": "cotacao_defasada",
+      "motivo": "Último negócio há 6 pregões (máximo 5)."
     },
     {
       "ticker": "C2EM34",
@@ -1536,49 +1525,49 @@
       "nome": "C2GN34",
       "setor": "Semicondutores e hardware",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 11 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "C2HP34",
       "nome": "C2HP34",
       "setor": "Indústria",
-      "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 132 por dia (mínimo 300.000)."
+      "codigo": "poucos_dias_negociados",
+      "motivo": "Negociou em 14 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "C2OL34",
       "nome": "C2OL34",
       "setor": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 4.292 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 4.674 por dia (mínimo 300.000)."
     },
     {
       "ticker": "C2OU34",
       "nome": "C2OU34",
       "setor": "Serviços e meios de pagamento",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 11 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "C2RN34",
       "nome": "C2RN34",
       "setor": "Software e internet",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 7 pregões (máximo 5)."
+      "motivo": "Último negócio há 8 pregões (máximo 5)."
     },
     {
       "ticker": "C2RS34",
       "nome": "C2RS34",
       "setor": "Saúde e farmacêuticas",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 11 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "C2ZR34",
       "nome": "C2ZR34",
       "setor": "Turismo, lazer e serviços",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 8 pregões (máximo 5)."
+      "motivo": "Último negócio há 9 pregões (máximo 5)."
     },
     {
       "ticker": "CAON34",
@@ -1592,7 +1581,7 @@
       "nome": "CAPH34",
       "setor": "Varejo e e-commerce",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 9 pregões (máximo 5)."
+      "motivo": "Último negócio há 10 pregões (máximo 5)."
     },
     {
       "ticker": "CEGG34",
@@ -1606,7 +1595,7 @@
       "nome": "CHCM34",
       "setor": "Turismo, lazer e serviços",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 122.310 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 100.413 por dia (mínimo 300.000)."
     },
     {
       "ticker": "CHME34",
@@ -1620,28 +1609,28 @@
       "nome": "CLOV34",
       "setor": "Financeiro",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 12 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 13 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "CLXC34",
       "nome": "CLXC34",
       "setor": "Consumo não durável",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 11 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "CMCS34",
       "nome": "CMCS34",
       "setor": "Turismo, lazer e serviços",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 77.564 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 96.852 por dia (mínimo 300.000)."
     },
     {
       "ticker": "CNIC34",
       "nome": "CNIC34",
       "setor": "Transporte e logística",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 12 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 13 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "COLD34",
@@ -1662,56 +1651,56 @@
       "nome": "COPH34",
       "setor": "Petróleo e gás",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 98.581 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 91.085 por dia (mínimo 300.000)."
     },
     {
       "ticker": "COTY34",
       "nome": "COTY34",
       "setor": "Consumo não durável",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 619 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 496 por dia (mínimo 300.000)."
     },
     {
       "ticker": "COWC34",
       "nome": "COWC34",
       "setor": "Varejo e e-commerce",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 296.965 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 150.512 por dia (mínimo 300.000)."
     },
     {
       "ticker": "CPRL34",
       "nome": "CPRL34",
       "setor": "Transporte e logística",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 9 pregões (máximo 5)."
+      "motivo": "Último negócio há 10 pregões (máximo 5)."
     },
     {
       "ticker": "CRDA34",
       "nome": "CRDA34",
       "setor": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 17 pregões (máximo 5)."
+      "motivo": "Último negócio há 18 pregões (máximo 5)."
     },
     {
       "ticker": "CRIN34",
       "nome": "CRIN34",
       "setor": "Varejo e e-commerce",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 11 pregões (máximo 5)."
+      "motivo": "Último negócio há 12 pregões (máximo 5)."
     },
     {
       "ticker": "CRIP34",
       "nome": "CRIP34",
       "setor": "Turismo, lazer e serviços",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 7 pregões (máximo 5)."
+      "motivo": "Último negócio há 8 pregões (máximo 5)."
     },
     {
       "ticker": "CSCO34",
       "nome": "CSCO34",
       "setor": "Semicondutores e hardware",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 182.702 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 173.922 por dia (mínimo 300.000)."
     },
     {
       "ticker": "CSXC34",
@@ -1725,14 +1714,14 @@
       "nome": "CTSH34",
       "setor": "Software e internet",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 5 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "CVSH34",
       "nome": "CVSH34",
       "setor": "Varejo e e-commerce",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 5.922 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 8.483 por dia (mínimo 300.000)."
     },
     {
       "ticker": "D1EX34",
@@ -1740,13 +1729,6 @@
       "setor": "Saúde e farmacêuticas",
       "codigo": "liquidez_baixa",
       "motivo": "Volume mediano de R$ 637 por dia (mínimo 300.000)."
-    },
-    {
-      "ticker": "D1HI34",
-      "nome": "D1HI34",
-      "setor": "Automóveis e bens duráveis",
-      "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 20 pregões (máximo 5)."
     },
     {
       "ticker": "D1LR34",
@@ -1760,7 +1742,7 @@
       "nome": "D1OC34",
       "setor": "Software e internet",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 445 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 430 por dia (mínimo 300.000)."
     },
     {
       "ticker": "D1OM34",
@@ -1781,21 +1763,21 @@
       "nome": "D1RI34",
       "setor": "Turismo, lazer e serviços",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 17 pregões (máximo 5)."
+      "motivo": "Último negócio há 18 pregões (máximo 5)."
     },
     {
       "ticker": "D1TE34",
       "nome": "D1TE34",
       "setor": "Energia elétrica e saneamento",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 14 pregões (máximo 5)."
+      "motivo": "Último negócio há 15 pregões (máximo 5)."
     },
     {
       "ticker": "D1VN34",
       "nome": "D1VN34",
       "setor": "Petróleo e gás",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "D1XC34",
@@ -1823,14 +1805,14 @@
       "nome": "D2KN34",
       "setor": "Turismo, lazer e serviços",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 540 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 541 por dia (mínimo 300.000)."
     },
     {
       "ticker": "D2OC34",
       "nome": "D2OC34",
       "setor": "Software e internet",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 12 pregões (máximo 5)."
+      "motivo": "Último negócio há 13 pregões (máximo 5)."
     },
     {
       "ticker": "D2OX34",
@@ -1858,7 +1840,7 @@
       "nome": "DBAG34",
       "setor": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 25.415 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 27.111 por dia (mínimo 300.000)."
     },
     {
       "ticker": "DEAI34",
@@ -1893,7 +1875,7 @@
       "nome": "DGCO34",
       "setor": "Varejo e e-commerce",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 357 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 157 por dia (mínimo 300.000)."
     },
     {
       "ticker": "DHER34",
@@ -1935,7 +1917,7 @@
       "nome": "E1CL34",
       "setor": "Química e agroindústria",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 12 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 13 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "E1CO34",
@@ -1956,7 +1938,7 @@
       "nome": "E1IX34",
       "setor": "Energia elétrica e saneamento",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "E1LV34",
@@ -1970,14 +1952,14 @@
       "nome": "E1MN34",
       "setor": "Química e agroindústria",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 9 pregões (máximo 5)."
+      "motivo": "Último negócio há 10 pregões (máximo 5)."
     },
     {
       "ticker": "E1MR34",
       "nome": "E1MR34",
       "setor": "Semicondutores e hardware",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "E1OG34",
@@ -1991,7 +1973,7 @@
       "nome": "E1QN34",
       "setor": "Petróleo e gás",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 15.298 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 13.984 por dia (mínimo 300.000)."
     },
     {
       "ticker": "E1RI34",
@@ -2019,7 +2001,7 @@
       "nome": "E1XR34",
       "setor": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 9 pregões (máximo 5)."
+      "motivo": "Último negócio há 10 pregões (máximo 5)."
     },
     {
       "ticker": "E2AG34",
@@ -2033,56 +2015,56 @@
       "nome": "E2EF34",
       "setor": "Serviços e meios de pagamento",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 130 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 117 por dia (mínimo 300.000)."
     },
     {
       "ticker": "E2LS34",
       "nome": "E2LS34",
       "setor": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 10 pregões (máximo 5)."
+      "motivo": "Último negócio há 11 pregões (máximo 5)."
     },
     {
       "ticker": "E2NO34",
       "nome": "E2NO34",
       "setor": "Saúde e farmacêuticas",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 7 pregões (máximo 5)."
+      "motivo": "Último negócio há 8 pregões (máximo 5)."
     },
     {
       "ticker": "E2NP34",
       "nome": "E2NP34",
       "setor": "Indústria",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 15.051 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 14.546 por dia (mínimo 300.000)."
     },
     {
       "ticker": "E2NT34",
       "nome": "E2NT34",
       "setor": "Indústria",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 18 pregões (máximo 5)."
+      "motivo": "Último negócio há 19 pregões (máximo 5)."
     },
     {
       "ticker": "E2PA34",
       "nome": "E2PA34",
       "setor": "Software e internet",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "E2ST34",
       "nome": "E2ST34",
       "setor": "Software e internet",
-      "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 14 pregões (máximo 5)."
+      "codigo": "poucos_dias_negociados",
+      "motivo": "Negociou em 4 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "E2TS34",
       "nome": "E2TS34",
       "setor": "Varejo e e-commerce",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 309 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 355 por dia (mínimo 300.000)."
     },
     {
       "ticker": "EBAY34",
@@ -2110,35 +2092,35 @@
       "nome": "EVE HOLDING. INC.",
       "setor": "Semicondutores e hardware",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 143.915 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 132.796 por dia (mínimo 300.000)."
     },
     {
       "ticker": "EVTC31",
       "nome": "EVERTEC INC",
       "setor": "Serviços e meios de pagamento",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 6.689 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 7.210 por dia (mínimo 300.000)."
     },
     {
       "ticker": "EXGR34",
       "nome": "EXGR34",
       "setor": "Turismo, lazer e serviços",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 10 pregões (máximo 5)."
+      "motivo": "Último negócio há 11 pregões (máximo 5)."
     },
     {
       "ticker": "EXPB31",
       "nome": "EXPERIAN PLC",
       "setor": "Serviços e meios de pagamento",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 6 pregões (máximo 5)."
+      "motivo": "Último negócio há 7 pregões (máximo 5)."
     },
     {
       "ticker": "F1AN34",
       "nome": "F1AN34",
       "setor": "Petróleo e gás",
-      "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
+      "codigo": "cotacao_defasada",
+      "motivo": "Último negócio há 6 pregões (máximo 5)."
     },
     {
       "ticker": "F1EC34",
@@ -2159,21 +2141,21 @@
       "nome": "F1IS34",
       "setor": "Serviços e meios de pagamento",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 1.700 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 1.046 por dia (mínimo 300.000)."
     },
     {
       "ticker": "F1MC34",
       "nome": "F1MC34",
       "setor": "Química e agroindústria",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 6.475 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 7.076 por dia (mínimo 300.000)."
     },
     {
       "ticker": "F1NI34",
       "nome": "F1NI34",
       "setor": "Software e internet",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 345 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 915 por dia (mínimo 300.000)."
     },
     {
       "ticker": "F1RA34",
@@ -2194,14 +2176,14 @@
       "nome": "F2IC34",
       "setor": "Serviços e meios de pagamento",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 63.596 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 57.421 por dia (mínimo 300.000)."
     },
     {
       "ticker": "F2IV34",
       "nome": "F2IV34",
       "setor": "Software e internet",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 5 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 4 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "F2NV34",
@@ -2221,15 +2203,15 @@
       "ticker": "F2RT34",
       "nome": "F2RT34",
       "setor": "Financeiro",
-      "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 17 pregões (máximo 5)."
+      "codigo": "poucos_dias_negociados",
+      "motivo": "Negociou em 2 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "F2VR34",
       "nome": "F2VR34",
       "setor": "Software e internet",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 175 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 68 por dia (mínimo 300.000)."
     },
     {
       "ticker": "FASL34",
@@ -2250,28 +2232,28 @@
       "nome": "FDXB34",
       "setor": "Transporte e logística",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 15 pregões (máximo 5)."
+      "motivo": "Último negócio há 16 pregões (máximo 5)."
     },
     {
       "ticker": "FMSC34",
       "nome": "FMSC34",
       "setor": "Serviços de saúde",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 8 pregões (máximo 5)."
+      "motivo": "Último negócio há 9 pregões (máximo 5)."
     },
     {
       "ticker": "FMXB34",
       "nome": "FMXB34",
       "setor": "Consumo não durável",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 19 pregões (máximo 5)."
+      "motivo": "Último negócio há 20 pregões (máximo 5)."
     },
     {
       "ticker": "FOXC34",
       "nome": "FOXC34",
       "setor": "Turismo, lazer e serviços",
-      "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 4 dos últimos 21 pregões (mínimo 15)."
+      "codigo": "cotacao_defasada",
+      "motivo": "Último negócio há 6 pregões (máximo 5)."
     },
     {
       "ticker": "FSLR34",
@@ -2285,28 +2267,28 @@
       "nome": "G1AM34",
       "setor": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 8 pregões (máximo 5)."
+      "motivo": "Último negócio há 9 pregões (máximo 5)."
     },
     {
       "ticker": "G1AR34",
       "nome": "G1AR34",
       "setor": "Software e internet",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 12 pregões (máximo 5)."
+      "motivo": "Último negócio há 13 pregões (máximo 5)."
     },
     {
       "ticker": "G1DS34",
       "nome": "G1DS34",
       "setor": "Software e internet",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 8.681 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 10.887 por dia (mínimo 300.000)."
     },
     {
       "ticker": "G1FI34",
       "nome": "G1FI34",
       "setor": "Mineração e metais",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 22.959 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 21.515 por dia (mínimo 300.000)."
     },
     {
       "ticker": "G1LO34",
@@ -2327,7 +2309,7 @@
       "nome": "G1PI34",
       "setor": "Financeiro",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "G1RM34",
@@ -2341,7 +2323,7 @@
       "nome": "G1SK34",
       "setor": "Saúde e farmacêuticas",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 235 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 270 por dia (mínimo 300.000)."
     },
     {
       "ticker": "G1WW34",
@@ -2355,7 +2337,7 @@
       "nome": "G2DD34",
       "setor": "Software e internet",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "G2DI33",
@@ -2369,21 +2351,21 @@
       "nome": "G2EV34",
       "setor": "Indústria",
       "codigo": "historico_curto",
-      "motivo": "Só 62 pregões de histórico (mínimo 240) para medir a máxima de 12 meses."
+      "motivo": "Só 63 pregões de histórico (mínimo 240) para medir a máxima de 12 meses."
     },
     {
       "ticker": "G2ME34",
       "nome": "G2ME34",
       "setor": "Saúde e farmacêuticas",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 6 pregões (máximo 5)."
+      "motivo": "Último negócio há 7 pregões (máximo 5)."
     },
     {
       "ticker": "G2NT34",
       "nome": "G2NT34",
       "setor": "Indústria",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 13 pregões (máximo 5)."
+      "motivo": "Último negócio há 14 pregões (máximo 5)."
     },
     {
       "ticker": "G2WR34",
@@ -2411,7 +2393,7 @@
       "nome": "GEOO34",
       "setor": "Semicondutores e hardware",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 99.598 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 85.606 por dia (mínimo 300.000)."
     },
     {
       "ticker": "GILD34",
@@ -2425,21 +2407,21 @@
       "nome": "GMCO34",
       "setor": "Automóveis e bens duráveis",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 53.483 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 53.062 por dia (mínimo 300.000)."
     },
     {
       "ticker": "GPRK34",
       "nome": "GPRK34",
       "setor": "Petróleo e gás",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 7.835 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 10.460 por dia (mínimo 300.000)."
     },
     {
       "ticker": "GPRO34",
       "nome": "GPRO34",
       "setor": "Automóveis e bens duráveis",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 8.566 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 10.983 por dia (mínimo 300.000)."
     },
     {
       "ticker": "GPSI34",
@@ -2453,7 +2435,7 @@
       "nome": "BRAZIL POTASH CORP.",
       "setor": "Mineração e metais",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 11.587 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 10.506 por dia (mínimo 300.000)."
     },
     {
       "ticker": "H1AS34",
@@ -2467,7 +2449,7 @@
       "nome": "H1BA34",
       "setor": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 7 pregões (máximo 5)."
+      "motivo": "Último negócio há 8 pregões (máximo 5)."
     },
     {
       "ticker": "H1CA34",
@@ -2481,14 +2463,14 @@
       "nome": "H1DB34",
       "setor": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 2.032 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 1.245 por dia (mínimo 300.000)."
     },
     {
       "ticker": "H1EI34",
       "nome": "H1EI34",
       "setor": "Semicondutores e hardware",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 14 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 13 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "H1FC34",
@@ -2501,29 +2483,29 @@
       "ticker": "H1HH34",
       "nome": "H1HH34",
       "setor": "Financeiro",
-      "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 180 por dia (mínimo 300.000)."
+      "codigo": "poucos_dias_negociados",
+      "motivo": "Negociou em 14 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "H1IG34",
       "nome": "H1IG34",
       "setor": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 8 pregões (máximo 5)."
+      "motivo": "Último negócio há 9 pregões (máximo 5)."
     },
     {
       "ticker": "H1II34",
       "nome": "H1II34",
       "setor": "Semicondutores e hardware",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 13 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 12 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "H1LT34",
       "nome": "H1LT34",
       "setor": "Turismo, lazer e serviços",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "H1OG34",
@@ -2537,14 +2519,14 @@
       "nome": "H1PE34",
       "setor": "Semicondutores e hardware",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 51.143 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 61.392 por dia (mínimo 300.000)."
     },
     {
       "ticker": "H1RL34",
       "nome": "H1RL34",
       "setor": "Consumo não durável",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 16 pregões (máximo 5)."
+      "motivo": "Último negócio há 17 pregões (máximo 5)."
     },
     {
       "ticker": "H1SB34",
@@ -2558,7 +2540,7 @@
       "nome": "H1SI34",
       "setor": "Distribuição",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 11 pregões (máximo 5)."
+      "motivo": "Último negócio há 12 pregões (máximo 5)."
     },
     {
       "ticker": "H1ST34",
@@ -2579,49 +2561,49 @@
       "nome": "H1UM34",
       "setor": "Serviços de saúde",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 894 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 402 por dia (mínimo 300.000)."
     },
     {
       "ticker": "H2TA34",
       "nome": "H2TA34",
       "setor": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 10 pregões (máximo 5)."
+      "motivo": "Último negócio há 11 pregões (máximo 5)."
     },
     {
       "ticker": "H2UB34",
       "nome": "H2UB34",
       "setor": "Software e internet",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 1.664 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 1.678 por dia (mínimo 300.000)."
     },
     {
       "ticker": "HALI34",
       "nome": "HALI34",
       "setor": "Serviços industriais",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "HIWP34",
       "nome": "HIWP34",
       "setor": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 14 pregões (máximo 5)."
+      "motivo": "Último negócio há 15 pregões (máximo 5)."
     },
     {
       "ticker": "HMRN31",
       "nome": "HOMERUN RESOURCES INC",
       "setor": "Serviços industriais",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 7 pregões (máximo 5)."
+      "motivo": "Último negócio há 8 pregões (máximo 5)."
     },
     {
       "ticker": "HOME34",
       "nome": "HOME34",
       "setor": "Varejo e e-commerce",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 169.936 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 140.860 por dia (mínimo 300.000)."
     },
     {
       "ticker": "HONB34",
@@ -2635,56 +2617,56 @@
       "nome": "HOND34",
       "setor": "Automóveis e bens duráveis",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 4.335 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 4.202 por dia (mínimo 300.000)."
     },
     {
       "ticker": "HPQB34",
       "nome": "HPQB34",
       "setor": "Software e internet",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 41.088 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 56.535 por dia (mínimo 300.000)."
     },
     {
       "ticker": "HSHY34",
       "nome": "HSHY34",
       "setor": "Consumo não durável",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 586 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 2.828 por dia (mínimo 300.000)."
     },
     {
       "ticker": "I1BN34",
       "nome": "I1BN34",
       "setor": "Financeiro",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "I1CE34",
       "nome": "I1CE34",
       "setor": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 703 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 559 por dia (mínimo 300.000)."
     },
     {
       "ticker": "I1DX34",
       "nome": "I1DX34",
       "setor": "Saúde e farmacêuticas",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "I1FO34",
       "nome": "I1FO34",
       "setor": "Software e internet",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "I1HG34",
       "nome": "I1HG34",
       "setor": "Turismo, lazer e serviços",
-      "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 17 pregões (máximo 5)."
+      "codigo": "poucos_dias_negociados",
+      "motivo": "Negociou em 2 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "I1LM34",
@@ -2698,14 +2680,14 @@
       "nome": "I1NC34",
       "setor": "Saúde e farmacêuticas",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 11 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "I1PC34",
       "nome": "I1PC34",
       "setor": "Química e agroindústria",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 7 pregões (máximo 5)."
+      "motivo": "Último negócio há 8 pregões (máximo 5)."
     },
     {
       "ticker": "I1PG34",
@@ -2719,7 +2701,7 @@
       "nome": "I1QV34",
       "setor": "Saúde e farmacêuticas",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 6 pregões (máximo 5)."
+      "motivo": "Último negócio há 7 pregões (máximo 5)."
     },
     {
       "ticker": "I1QY34",
@@ -2733,7 +2715,7 @@
       "nome": "I1RM34",
       "setor": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 104 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 98 por dia (mínimo 300.000)."
     },
     {
       "ticker": "I1RP34",
@@ -2747,21 +2729,21 @@
       "nome": "I1SR34",
       "setor": "Saúde e farmacêuticas",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 77.926 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 66.374 por dia (mínimo 300.000)."
     },
     {
       "ticker": "I1VZ34",
       "nome": "I1VZ34",
       "setor": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 14 pregões (máximo 5)."
+      "motivo": "Último negócio há 15 pregões (máximo 5)."
     },
     {
       "ticker": "I1XC34",
       "nome": "I1XC34",
       "setor": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 6 pregões (máximo 5)."
+      "motivo": "Último negócio há 7 pregões (máximo 5)."
     },
     {
       "ticker": "I2ND34",
@@ -2803,7 +2785,7 @@
       "nome": "IBMB34",
       "setor": "Software e internet",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 197.990 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 181.677 por dia (mínimo 300.000)."
     },
     {
       "ticker": "ICLR34",
@@ -2817,14 +2799,14 @@
       "nome": "Inter & Co., Inc.",
       "setor": "Financeiro",
       "codigo": "historico_curto",
-      "motivo": "Só 27 pregões de histórico (mínimo 240) para medir a máxima de 12 meses."
+      "motivo": "Só 28 pregões de histórico (mínimo 240) para medir a máxima de 12 meses."
     },
     {
       "ticker": "INGG34",
       "nome": "INGG34",
       "setor": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 1.306 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 1.648 por dia (mínimo 300.000)."
     },
     {
       "ticker": "INTU34",
@@ -2845,7 +2827,7 @@
       "nome": "J1CI34",
       "setor": "Indústria",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "J1EF34",
@@ -2858,15 +2840,15 @@
       "ticker": "J1KH34",
       "nome": "J1KH34",
       "setor": "Software e internet",
-      "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 19 pregões (máximo 5)."
+      "codigo": "poucos_dias_negociados",
+      "motivo": "Negociou em 2 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "J2AZ34",
       "nome": "J2AZ34",
       "setor": "Saúde e farmacêuticas",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 1.823 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 1.718 por dia (mínimo 300.000)."
     },
     {
       "ticker": "J2BL34",
@@ -2880,7 +2862,7 @@
       "nome": "J2WA34",
       "setor": "Turismo, lazer e serviços",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 4 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 3 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "JBSS32",
@@ -2904,32 +2886,25 @@
       "motivo": "Volume mediano de R$ 1.181 por dia (mínimo 300.000)."
     },
     {
-      "ticker": "K1IM34",
-      "nome": "K1IM34",
+      "ticker": "K1EY34",
+      "nome": "K1EY34",
       "setor": "Financeiro",
-      "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 20 pregões (máximo 5)."
+      "codigo": "poucos_dias_negociados",
+      "motivo": "Negociou em 1 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "K1RC34",
       "nome": "K1RC34",
       "setor": "Varejo e e-commerce",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
-    },
-    {
-      "ticker": "K1RG34",
-      "nome": "K1RG34",
-      "setor": "Financeiro",
-      "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 20 pregões (máximo 5)."
+      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "K1SG34",
       "nome": "K1SG34",
       "setor": "Semicondutores e hardware",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 4.862 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 3.023 por dia (mínimo 300.000)."
     },
     {
       "ticker": "K1SS34",
@@ -2950,14 +2925,14 @@
       "nome": "K1YS34",
       "setor": "Saúde e farmacêuticas",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 17 pregões (máximo 5)."
+      "motivo": "Último negócio há 18 pregões (máximo 5)."
     },
     {
       "ticker": "K2CG34",
       "nome": "K2CG34",
       "setor": "Software e internet",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 1.371 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 2.457 por dia (mínimo 300.000)."
     },
     {
       "ticker": "KHCB34",
@@ -2971,14 +2946,14 @@
       "nome": "KMBB34",
       "setor": "Consumo não durável",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 7 pregões (máximo 5)."
+      "motivo": "Último negócio há 8 pregões (máximo 5)."
     },
     {
       "ticker": "KMIC34",
       "nome": "KMIC34",
       "setor": "Serviços industriais",
-      "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 7 pregões (máximo 5)."
+      "codigo": "poucos_dias_negociados",
+      "motivo": "Negociou em 11 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "L1AM34",
@@ -2992,49 +2967,49 @@
       "nome": "L1DO34",
       "setor": "Software e internet",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 4 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 3 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "L1EN34",
       "nome": "L1EN34",
       "setor": "Automóveis e bens duráveis",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 1.705 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 1.440 por dia (mínimo 300.000)."
     },
     {
       "ticker": "L1HX34",
       "nome": "L1HX34",
       "setor": "Semicondutores e hardware",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 6 pregões (máximo 5)."
+      "motivo": "Último negócio há 7 pregões (máximo 5)."
     },
     {
       "ticker": "L1KQ34",
       "nome": "L1KQ34",
       "setor": "Automóveis e bens duráveis",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 5 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 4 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "L1MN34",
       "nome": "L1MN34",
       "setor": "Telecomunicações e mídia",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 9.880 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 7.917 por dia (mínimo 300.000)."
     },
     {
       "ticker": "L1NC34",
       "nome": "L1NC34",
       "setor": "Financeiro",
-      "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 12 pregões (máximo 5)."
+      "codigo": "poucos_dias_negociados",
+      "motivo": "Negociou em 3 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "L1OE34",
       "nome": "L1OE34",
       "setor": "Financeiro",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 4 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 5 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "L1TM34",
@@ -3048,56 +3023,56 @@
       "nome": "L1UL34",
       "setor": "Consumo não durável",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 27.717 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 28.248 por dia (mínimo 300.000)."
     },
     {
       "ticker": "L1VS34",
       "nome": "L1VS34",
       "setor": "Turismo, lazer e serviços",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 14 pregões (máximo 5)."
+      "motivo": "Último negócio há 15 pregões (máximo 5)."
     },
     {
       "ticker": "L1WH34",
       "nome": "L1WH34",
       "setor": "Consumo não durável",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 4 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 5 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "L1YB34",
       "nome": "L1YB34",
       "setor": "Química e agroindústria",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "L1YG34",
       "nome": "L1YG34",
       "setor": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 9.141 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 4.310 por dia (mínimo 300.000)."
     },
     {
       "ticker": "L2IV34",
       "nome": "L2IV34",
       "setor": "Saúde e farmacêuticas",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 6 pregões (máximo 5)."
+      "motivo": "Último negócio há 7 pregões (máximo 5)."
     },
     {
       "ticker": "L2PL34",
       "nome": "L2PL34",
       "setor": "Financeiro",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "L2RN34",
       "nome": "L2RN34",
       "setor": "Turismo, lazer e serviços",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 5 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 4 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "L2SC34",
@@ -3110,29 +3085,29 @@
       "ticker": "LKFT34",
       "nome": "LKFT34",
       "setor": "Saúde e farmacêuticas",
-      "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 60 por dia (mínimo 300.000)."
+      "codigo": "poucos_dias_negociados",
+      "motivo": "Negociou em 14 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "LMTB34",
       "nome": "LMTB34",
       "setor": "Semicondutores e hardware",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 90.541 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 67.316 por dia (mínimo 300.000)."
     },
     {
       "ticker": "LOWC34",
       "nome": "LOWC34",
       "setor": "Varejo e e-commerce",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "M1AA34",
       "nome": "M1AA34",
       "setor": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 18 pregões (máximo 5)."
+      "motivo": "Último negócio há 19 pregões (máximo 5)."
     },
     {
       "ticker": "M1CB34",
@@ -3153,28 +3128,28 @@
       "nome": "M1CK34",
       "setor": "Distribuição",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 12.310 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 13.232 por dia (mínimo 300.000)."
     },
     {
       "ticker": "M1DB34",
       "nome": "M1DB34",
       "setor": "Software e internet",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 6.524 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 6.941 por dia (mínimo 300.000)."
     },
     {
       "ticker": "M1GM34",
       "nome": "M1GM34",
       "setor": "Turismo, lazer e serviços",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "M1HK34",
       "nome": "M1HK34",
       "setor": "Indústria",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "M1KC34",
@@ -3188,7 +3163,7 @@
       "nome": "M1KT34",
       "setor": "Financeiro",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "M1LC34",
@@ -3209,7 +3184,7 @@
       "nome": "M1MC34",
       "setor": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 513 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 528 por dia (mínimo 300.000)."
     },
     {
       "ticker": "M1NS34",
@@ -3223,7 +3198,7 @@
       "nome": "M1PC34",
       "setor": "Petróleo e gás",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 2.846 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 1.936 por dia (mínimo 300.000)."
     },
     {
       "ticker": "M1SC34",
@@ -3265,7 +3240,7 @@
       "nome": "M1UF34",
       "setor": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 238 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 1.883 por dia (mínimo 300.000)."
     },
     {
       "ticker": "M2KS34",
@@ -3286,21 +3261,21 @@
       "nome": "M2PR34",
       "setor": "Semicondutores e hardware",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 39.247 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 39.609 por dia (mínimo 300.000)."
     },
     {
       "ticker": "M2PT34",
       "nome": "M2PT34",
       "setor": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 3.770 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 5.707 por dia (mínimo 300.000)."
     },
     {
       "ticker": "MACY34",
       "nome": "MACY34",
       "setor": "Varejo e e-commerce",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 12 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 13 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "MCOR34",
@@ -3314,7 +3289,7 @@
       "nome": "MDLZ34",
       "setor": "Consumo não durável",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 1.979 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 1.818 por dia (mínimo 300.000)."
     },
     {
       "ticker": "MDTC34",
@@ -3328,28 +3303,28 @@
       "nome": "METB34",
       "setor": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 11 pregões (máximo 5)."
+      "motivo": "Último negócio há 12 pregões (máximo 5)."
     },
     {
       "ticker": "MKLC34",
       "nome": "MKLC34",
       "setor": "Financeiro",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 11 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "MMMC34",
       "nome": "MMMC34",
       "setor": "Indústria",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 67.202 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 49.164 por dia (mínimo 300.000)."
     },
     {
       "ticker": "MOOO34",
       "nome": "MOOO34",
       "setor": "Consumo não durável",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 3.747 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 2.117 por dia (mínimo 300.000)."
     },
     {
       "ticker": "MOSC34",
@@ -3363,28 +3338,28 @@
       "nome": "MSBR34",
       "setor": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 227.799 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 287.143 por dia (mínimo 300.000)."
     },
     {
       "ticker": "N1BI34",
       "nome": "N1BI34",
       "setor": "Saúde e farmacêuticas",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 34.090 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 10.394 por dia (mínimo 300.000)."
     },
     {
       "ticker": "N1CL34",
       "nome": "N1CL34",
       "setor": "Turismo, lazer e serviços",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 7 pregões (máximo 5)."
+      "motivo": "Último negócio há 8 pregões (máximo 5)."
     },
     {
       "ticker": "N1DA34",
       "nome": "N1DA34",
       "setor": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 25.503 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 25.100 por dia (mínimo 300.000)."
     },
     {
       "ticker": "N1GG34",
@@ -3412,21 +3387,21 @@
       "nome": "N1MR34",
       "setor": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 16 pregões (máximo 5)."
+      "motivo": "Último negócio há 17 pregões (máximo 5)."
     },
     {
       "ticker": "N1RG34",
       "nome": "N1RG34",
       "setor": "Energia elétrica e saneamento",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 14.912 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 8.770 por dia (mínimo 300.000)."
     },
     {
       "ticker": "N1TR34",
       "nome": "N1TR34",
       "setor": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 17 pregões (máximo 5)."
+      "motivo": "Último negócio há 18 pregões (máximo 5)."
     },
     {
       "ticker": "N1UE34",
@@ -3447,14 +3422,14 @@
       "nome": "N1VS34",
       "setor": "Saúde e farmacêuticas",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 13.526 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 12.533 por dia (mínimo 300.000)."
     },
     {
       "ticker": "N1WG34",
       "nome": "N1WG34",
       "setor": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 5.840 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 9.046 por dia (mínimo 300.000)."
     },
     {
       "ticker": "N1WL34",
@@ -3475,7 +3450,7 @@
       "nome": "N1XP34",
       "setor": "Semicondutores e hardware",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 635 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 303 por dia (mínimo 300.000)."
     },
     {
       "ticker": "N2LY34",
@@ -3489,7 +3464,7 @@
       "nome": "N2TN34",
       "setor": "Software e internet",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 19 pregões (máximo 5)."
+      "motivo": "Último negócio há 20 pregões (máximo 5)."
     },
     {
       "ticker": "N2VC34",
@@ -3510,28 +3485,28 @@
       "nome": "NEXT34",
       "setor": "Energia elétrica e saneamento",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 123.104 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 110.558 por dia (mínimo 300.000)."
     },
     {
       "ticker": "NMRH34",
       "nome": "NMRH34",
       "setor": "Financeiro",
-      "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 3 dos últimos 21 pregões (mínimo 15)."
+      "codigo": "cotacao_defasada",
+      "motivo": "Último negócio há 6 pregões (máximo 5)."
     },
     {
       "ticker": "NOCG34",
       "nome": "NOCG34",
       "setor": "Semicondutores e hardware",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 3.672 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 3.056 por dia (mínimo 300.000)."
     },
     {
       "ticker": "NOKI34",
       "nome": "NOKI34",
       "setor": "Semicondutores e hardware",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 202.059 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 184.692 por dia (mínimo 300.000)."
     },
     {
       "ticker": "NTST34",
@@ -3545,21 +3520,21 @@
       "nome": "O1DF34",
       "setor": "Transporte e logística",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 4 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 3 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "O1KE34",
       "nome": "O1KE34",
       "setor": "Serviços industriais",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 5 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 4 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "O1MC34",
       "nome": "O1MC34",
       "setor": "Serviços e meios de pagamento",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 11 pregões (máximo 5)."
+      "motivo": "Último negócio há 12 pregões (máximo 5)."
     },
     {
       "ticker": "O1TI34",
@@ -3573,7 +3548,7 @@
       "nome": "O1UT34",
       "setor": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 19 pregões (máximo 5)."
+      "motivo": "Último negócio há 20 pregões (máximo 5)."
     },
     {
       "ticker": "O2HI34",
@@ -3587,7 +3562,7 @@
       "nome": "O2LE34",
       "setor": "Semicondutores e hardware",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 12 pregões (máximo 5)."
+      "motivo": "Último negócio há 13 pregões (máximo 5)."
     },
     {
       "ticker": "O2NS34",
@@ -3601,42 +3576,42 @@
       "nome": "ORLY34",
       "setor": "Varejo e e-commerce",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 3.617 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 5.344 por dia (mínimo 300.000)."
     },
     {
       "ticker": "OXYP34",
       "nome": "OXYP34",
       "setor": "Petróleo e gás",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 39.080 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 36.438 por dia (mínimo 300.000)."
     },
     {
       "ticker": "P1AC34",
       "nome": "P1AC34",
       "setor": "Indústria",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 12 pregões (máximo 5)."
+      "motivo": "Último negócio há 13 pregões (máximo 5)."
     },
     {
       "ticker": "P1AY34",
       "nome": "P1AY34",
       "setor": "Software e internet",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 6 pregões (máximo 5)."
+      "motivo": "Último negócio há 7 pregões (máximo 5)."
     },
     {
       "ticker": "P1DD34",
       "nome": "P1DD34",
       "setor": "Varejo e e-commerce",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 119.620 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 111.996 por dia (mínimo 300.000)."
     },
     {
       "ticker": "P1DT34",
       "nome": "P1DT34",
       "setor": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 7 pregões (máximo 5)."
+      "motivo": "Último negócio há 8 pregões (máximo 5)."
     },
     {
       "ticker": "P1EA34",
@@ -3650,7 +3625,7 @@
       "nome": "P1GR34",
       "setor": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 6.173 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 3.159 por dia (mínimo 300.000)."
     },
     {
       "ticker": "P1HC34",
@@ -3670,8 +3645,8 @@
       "ticker": "P1KX34",
       "nome": "P1KX34",
       "setor": "Mineração e metais",
-      "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 6 pregões (máximo 5)."
+      "codigo": "poucos_dias_negociados",
+      "motivo": "Negociou em 4 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "P1LD34",
@@ -3685,7 +3660,7 @@
       "nome": "P1RG34",
       "setor": "Saúde e farmacêuticas",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 16 pregões (máximo 5)."
+      "motivo": "Último negócio há 17 pregões (máximo 5)."
     },
     {
       "ticker": "P1SA34",
@@ -3720,7 +3695,7 @@
       "nome": "P2AT34",
       "setor": "Software e internet",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 9.344 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 13.407 por dia (mínimo 300.000)."
     },
     {
       "ticker": "P2AX34",
@@ -3734,42 +3709,42 @@
       "nome": "P2CF34",
       "setor": "Transporte e logística",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 890 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 1.216 por dia (mínimo 300.000)."
     },
     {
       "ticker": "P2CY34",
       "nome": "P2CY34",
       "setor": "Software e internet",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 7 pregões (máximo 5)."
+      "motivo": "Último negócio há 8 pregões (máximo 5)."
     },
     {
       "ticker": "P2EN34",
       "nome": "P2EN34",
       "setor": "Turismo, lazer e serviços",
-      "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 6 pregões (máximo 5)."
+      "codigo": "poucos_dias_negociados",
+      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "P2IN34",
       "nome": "P2IN34",
       "setor": "Software e internet",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "P2LN34",
       "nome": "P2LN34",
       "setor": "Turismo, lazer e serviços",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 19 pregões (máximo 5)."
+      "motivo": "Último negócio há 20 pregões (máximo 5)."
     },
     {
       "ticker": "P2OD34",
       "nome": "P2OD34",
       "setor": "Saúde e farmacêuticas",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 18 pregões (máximo 5)."
+      "motivo": "Último negócio há 19 pregões (máximo 5)."
     },
     {
       "ticker": "P2ST34",
@@ -3793,18 +3768,11 @@
       "motivo": "Empresa de origem ou operação brasileira, fora da lista por decisão registrada em config/bdrs.json (D19)."
     },
     {
-      "ticker": "PEPB34",
-      "nome": "PEPB34",
-      "setor": "Consumo não durável",
-      "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 225.547 por dia (mínimo 300.000)."
-    },
-    {
       "ticker": "PFIZ34",
       "nome": "PFIZ34",
       "setor": "Saúde e farmacêuticas",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 290.652 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 292.538 por dia (mínimo 300.000)."
     },
     {
       "ticker": "PGCO34",
@@ -3825,28 +3793,28 @@
       "nome": "PHMO34",
       "setor": "Consumo não durável",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 2.454 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 1.723 por dia (mínimo 300.000)."
     },
     {
       "ticker": "PNCS34",
       "nome": "PNCS34",
       "setor": "Financeiro",
-      "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 5 dos últimos 21 pregões (mínimo 15)."
+      "codigo": "cotacao_defasada",
+      "motivo": "Último negócio há 6 pregões (máximo 5)."
     },
     {
       "ticker": "PPLI34",
       "nome": "PPLI34",
       "setor": "Software e internet",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 7 pregões (máximo 5)."
+      "motivo": "Último negócio há 8 pregões (máximo 5)."
     },
     {
       "ticker": "PRXB31",
       "nome": "PROSUS N.V.",
       "setor": "Software e internet",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 20.769 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 22.976 por dia (mínimo 300.000)."
     },
     {
       "ticker": "Q1UA34",
@@ -3867,28 +3835,28 @@
       "nome": "Q2SC34",
       "setor": "Indústria",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 5.476 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 4.308 por dia (mínimo 300.000)."
     },
     {
       "ticker": "QUBT34",
       "nome": "QUBT34",
       "setor": "Software e internet",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 55.957 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 51.146 por dia (mínimo 300.000)."
     },
     {
       "ticker": "R1CL34",
       "nome": "R1CL34",
       "setor": "Turismo, lazer e serviços",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 8.316 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 8.447 por dia (mínimo 300.000)."
     },
     {
       "ticker": "R1DY34",
       "nome": "R1DY34",
       "setor": "Saúde e farmacêuticas",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "R1EG34",
@@ -3902,14 +3870,14 @@
       "nome": "R1EL34",
       "setor": "Serviços e meios de pagamento",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 14 pregões (máximo 5)."
+      "motivo": "Último negócio há 15 pregões (máximo 5)."
     },
     {
       "ticker": "R1HI34",
       "nome": "R1HI34",
       "setor": "Serviços e meios de pagamento",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 12 pregões (máximo 5)."
+      "motivo": "Último negócio há 13 pregões (máximo 5)."
     },
     {
       "ticker": "R1IN34",
@@ -3930,14 +3898,14 @@
       "nome": "R1KU34",
       "setor": "Software e internet",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 13 pregões (máximo 5)."
+      "motivo": "Último negócio há 14 pregões (máximo 5)."
     },
     {
       "ticker": "R1LC34",
       "nome": "R1LC34",
       "setor": "Consumo não durável",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 7 pregões (máximo 5)."
+      "motivo": "Último negócio há 8 pregões (máximo 5)."
     },
     {
       "ticker": "R1MD34",
@@ -3958,7 +3926,7 @@
       "nome": "R1OL34",
       "setor": "Serviços e meios de pagamento",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "R1OP34",
@@ -3979,7 +3947,7 @@
       "nome": "R1VT34",
       "setor": "Saúde e farmacêuticas",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 7 pregões (máximo 5)."
+      "motivo": "Último negócio há 8 pregões (máximo 5)."
     },
     {
       "ticker": "R1YA34",
@@ -3992,50 +3960,50 @@
       "ticker": "R2AR34",
       "nome": "R2AR34",
       "setor": "Saúde e farmacêuticas",
-      "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 45 por dia (mínimo 300.000)."
+      "codigo": "poucos_dias_negociados",
+      "motivo": "Negociou em 14 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "R2BL34",
       "nome": "R2BL34",
       "setor": "Software e internet",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 84.851 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 75.457 por dia (mínimo 300.000)."
     },
     {
       "ticker": "R2GE34",
       "nome": "R2GE34",
       "setor": "Saúde e farmacêuticas",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 10 pregões (máximo 5)."
+      "motivo": "Último negócio há 11 pregões (máximo 5)."
     },
     {
       "ticker": "R2HH34",
       "nome": "R2HH34",
       "setor": "Varejo e e-commerce",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "R2NG34",
       "nome": "R2NG34",
       "setor": "Software e internet",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 12 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 11 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "R2PD34",
       "nome": "R2PD34",
       "setor": "Software e internet",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 24.691 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 24.348 por dia (mínimo 300.000)."
     },
     {
       "ticker": "REGN34",
       "nome": "REGN34",
       "setor": "Saúde e farmacêuticas",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 10.013 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 5.876 por dia (mínimo 300.000)."
     },
     {
       "ticker": "RGTI34",
@@ -4049,21 +4017,21 @@
       "nome": "RIGG34",
       "setor": "Serviços industriais",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 117.757 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 96.404 por dia (mínimo 300.000)."
     },
     {
       "ticker": "RIOT34",
       "nome": "RIOT34",
       "setor": "Mineração e metais",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 250.343 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 263.327 por dia (mínimo 300.000)."
     },
     {
       "ticker": "ROST34",
       "nome": "ROST34",
       "setor": "Varejo e e-commerce",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 12 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 13 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "ROXO34",
@@ -4083,8 +4051,8 @@
       "ticker": "S1AK34",
       "nome": "S1AK34",
       "setor": "Turismo, lazer e serviços",
-      "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 9 pregões (máximo 5)."
+      "codigo": "poucos_dias_negociados",
+      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "S1BS34",
@@ -4098,14 +4066,14 @@
       "nome": "S1HW34",
       "setor": "Química e agroindústria",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 3.142 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 2.358 por dia (mínimo 300.000)."
     },
     {
       "ticker": "S1JM34",
       "nome": "S1JM34",
       "setor": "Consumo não durável",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 11 pregões (máximo 5)."
+      "motivo": "Último negócio há 12 pregões (máximo 5)."
     },
     {
       "ticker": "S1KM34",
@@ -4119,21 +4087,21 @@
       "nome": "S1LG34",
       "setor": "Financeiro",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "S1MF34",
       "nome": "S1MF34",
       "setor": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 6 pregões (máximo 5)."
+      "motivo": "Último negócio há 7 pregões (máximo 5)."
     },
     {
       "ticker": "S1NN34",
       "nome": "S1NN34",
       "setor": "Saúde e farmacêuticas",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 16 pregões (máximo 5)."
+      "motivo": "Último negócio há 17 pregões (máximo 5)."
     },
     {
       "ticker": "S1OU34",
@@ -4147,21 +4115,21 @@
       "nome": "S1PO34",
       "setor": "Software e internet",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 201.925 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 175.832 por dia (mínimo 300.000)."
     },
     {
       "ticker": "S1RE34",
       "nome": "S1RE34",
       "setor": "Energia elétrica e saneamento",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 16 pregões (máximo 5)."
+      "motivo": "Último negócio há 17 pregões (máximo 5)."
     },
     {
       "ticker": "S1RP34",
       "nome": "S1RP34",
       "setor": "Saúde e farmacêuticas",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 27 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 63 por dia (mínimo 300.000)."
     },
     {
       "ticker": "S1SL34",
@@ -4174,8 +4142,8 @@
       "ticker": "S1TT34",
       "nome": "S1TT34",
       "setor": "Financeiro",
-      "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 8 pregões (máximo 5)."
+      "codigo": "poucos_dias_negociados",
+      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "S1WK34",
@@ -4210,7 +4178,7 @@
       "nome": "S1YY34",
       "setor": "Distribuição",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "S2CH34",
@@ -4224,42 +4192,42 @@
       "nome": "S2EA34",
       "setor": "Varejo e e-commerce",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 174.049 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 179.973 por dia (mínimo 300.000)."
     },
     {
       "ticker": "S2ED34",
       "nome": "S2ED34",
       "setor": "Indústria",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 41.052 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 31.420 por dia (mínimo 300.000)."
     },
     {
       "ticker": "S2FM34",
       "nome": "S2FM34",
       "setor": "Varejo e e-commerce",
-      "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 771 por dia (mínimo 300.000)."
+      "codigo": "poucos_dias_negociados",
+      "motivo": "Negociou em 14 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "S2GI34",
       "nome": "S2GI34",
       "setor": "Automóveis e bens duráveis",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 7 pregões (máximo 5)."
+      "motivo": "Último negócio há 8 pregões (máximo 5)."
     },
     {
       "ticker": "S2HO34",
       "nome": "S2HO34",
       "setor": "Serviços e meios de pagamento",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 68.339 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 67.085 por dia (mínimo 300.000)."
     },
     {
       "ticker": "S2MP34",
       "nome": "S2MP34",
       "setor": "Consumo não durável",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 15 pregões (máximo 5)."
+      "motivo": "Último negócio há 16 pregões (máximo 5)."
     },
     {
       "ticker": "S2NA34",
@@ -4273,21 +4241,21 @@
       "nome": "S2RE34",
       "setor": "Transporte e logística",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "S2TA34",
       "nome": "S2TA34",
       "setor": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 3.459 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 1.712 por dia (mínimo 300.000)."
     },
     {
       "ticker": "S2TW34",
       "nome": "S2TW34",
       "setor": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 278 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 258 por dia (mínimo 300.000)."
     },
     {
       "ticker": "S2UI34",
@@ -4301,7 +4269,7 @@
       "nome": "S2YN34",
       "setor": "Semicondutores e hardware",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 1 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 2 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "SAPP34",
@@ -4322,7 +4290,7 @@
       "nome": "SCHW34",
       "setor": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 31.141 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 28.861 por dia (mínimo 300.000)."
     },
     {
       "ticker": "SIMN34",
@@ -4343,35 +4311,42 @@
       "nome": "SK hynix Inc.",
       "setor": "Semicondutores e hardware",
       "codigo": "historico_curto",
-      "motivo": "Só 75 pregões de histórico (mínimo 240) para medir a máxima de 12 meses."
+      "motivo": "Só 76 pregões de histórico (mínimo 240) para medir a máxima de 12 meses."
     },
     {
       "ticker": "SLBG34",
       "nome": "SLBG34",
       "setor": "Serviços industriais",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "SNEC34",
       "nome": "SNEC34",
       "setor": "Semicondutores e hardware",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 33.360 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 35.964 por dia (mínimo 300.000)."
     },
     {
       "ticker": "SPCX34",
       "nome": "Space Exploration Technologies Corp.",
       "setor": "Telecomunicações e mídia",
       "codigo": "historico_curto",
-      "motivo": "Só 116 pregões de histórico (mínimo 240) para medir a máxima de 12 meses."
+      "motivo": "Só 117 pregões de histórico (mínimo 240) para medir a máxima de 12 meses."
     },
     {
       "ticker": "SPGI34",
       "nome": "SPGI34",
       "setor": "Serviços e meios de pagamento",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 23.823 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 24.064 por dia (mínimo 300.000)."
+    },
+    {
+      "ticker": "SSFO34",
+      "nome": "SSFO34",
+      "setor": "Software e internet",
+      "codigo": "liquidez_baixa",
+      "motivo": "Volume mediano de R$ 283.615 por dia (mínimo 300.000)."
     },
     {
       "ticker": "STMN34",
@@ -4420,7 +4395,7 @@
       "nome": "T1DG34",
       "setor": "Semicondutores e hardware",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 9.861 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 32.678 por dia (mínimo 300.000)."
     },
     {
       "ticker": "T1EC34",
@@ -4441,14 +4416,14 @@
       "nome": "T1EV34",
       "setor": "Saúde e farmacêuticas",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 11 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 12 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "T1LK34",
       "nome": "T1LK34",
       "setor": "Telecomunicações e mídia",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 6 pregões (máximo 5)."
+      "motivo": "Último negócio há 7 pregões (máximo 5)."
     },
     {
       "ticker": "T1MU34",
@@ -4468,29 +4443,29 @@
       "ticker": "T1RI34",
       "nome": "T1RI34",
       "setor": "Turismo, lazer e serviços",
-      "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 14 dos últimos 21 pregões (mínimo 15)."
+      "codigo": "liquidez_baixa",
+      "motivo": "Volume mediano de R$ 134 por dia (mínimo 300.000)."
     },
     {
       "ticker": "T1SC34",
       "nome": "T1SC34",
       "setor": "Varejo e e-commerce",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 11 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 12 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "T1SO34",
       "nome": "T1SO34",
       "setor": "Energia elétrica e saneamento",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "T1SS34",
       "nome": "T1SS34",
       "setor": "Mineração e metais",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "T1WL34",
@@ -4546,56 +4521,56 @@
       "nome": "TEXA34",
       "setor": "Semicondutores e hardware",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 57.713 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 37.875 por dia (mínimo 300.000)."
     },
     {
       "ticker": "TGTB34",
       "nome": "TGTB34",
       "setor": "Varejo e e-commerce",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 12 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 13 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "TJXC34",
       "nome": "TJXC34",
       "setor": "Varejo e e-commerce",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 808 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 1.179 por dia (mínimo 300.000)."
     },
     {
       "ticker": "TMCO34",
       "nome": "TMCO34",
       "setor": "Automóveis e bens duráveis",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 73.863 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 66.899 por dia (mínimo 300.000)."
     },
     {
       "ticker": "TMOS34",
       "nome": "TMOS34",
       "setor": "Saúde e farmacêuticas",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 85.514 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 80.322 por dia (mínimo 300.000)."
     },
     {
       "ticker": "TOST34",
       "nome": "TOST34",
       "setor": "Software e internet",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 1 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 2 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "TPRY34",
       "nome": "TPRY34",
       "setor": "Varejo e e-commerce",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 4 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 3 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "TRVC34",
       "nome": "TRVC34",
       "setor": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 10.877 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 13.050 por dia (mínimo 300.000)."
     },
     {
       "ticker": "TSNF34",
@@ -4619,18 +4594,25 @@
       "motivo": "Negociou em 8 dos últimos 21 pregões (mínimo 15)."
     },
     {
+      "ticker": "U1AL34",
+      "nome": "U1AL34",
+      "setor": "Transporte e logística",
+      "codigo": "liquidez_baixa",
+      "motivo": "Volume mediano de R$ 286.336 por dia (mínimo 300.000)."
+    },
+    {
       "ticker": "U1DR34",
       "nome": "U1DR34",
       "setor": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 19 pregões (máximo 5)."
+      "motivo": "Último negócio há 20 pregões (máximo 5)."
     },
     {
       "ticker": "U1HS34",
       "nome": "U1HS34",
       "setor": "Serviços de saúde",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 7 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "U1LT34",
@@ -4644,14 +4626,14 @@
       "nome": "U1MH34",
       "setor": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 16 pregões (máximo 5)."
+      "motivo": "Último negócio há 17 pregões (máximo 5)."
     },
     {
       "ticker": "U1NM34",
       "nome": "U1NM34",
       "setor": "Financeiro",
-      "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 7 pregões (máximo 5)."
+      "codigo": "poucos_dias_negociados",
+      "motivo": "Negociou em 2 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "U1RI34",
@@ -4686,56 +4668,56 @@
       "nome": "U2ST34",
       "setor": "Software e internet",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 22.930 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 25.350 por dia (mínimo 300.000)."
     },
     {
       "ticker": "U2TH34",
       "nome": "U2TH34",
       "setor": "Saúde e farmacêuticas",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 17 pregões (máximo 5)."
+      "motivo": "Último negócio há 18 pregões (máximo 5)."
     },
     {
       "ticker": "UBSG34",
       "nome": "UBSG34",
       "setor": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 4.321 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 6.631 por dia (mínimo 300.000)."
     },
     {
       "ticker": "ULEV34",
       "nome": "ULEV34",
       "setor": "Consumo não durável",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 12.058 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 15.146 por dia (mínimo 300.000)."
     },
     {
       "ticker": "UPAC34",
       "nome": "UPAC34",
       "setor": "Transporte e logística",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 1.299 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 10.785 por dia (mínimo 300.000)."
     },
     {
       "ticker": "UPSS34",
       "nome": "UPSS34",
       "setor": "Transporte e logística",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 2.266 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 1.386 por dia (mínimo 300.000)."
     },
     {
       "ticker": "USBC34",
       "nome": "USBC34",
       "setor": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 9.504 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 9.571 por dia (mínimo 300.000)."
     },
     {
       "ticker": "V1IP34",
       "nome": "V1IP34",
       "setor": "Varejo e e-commerce",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 8 pregões (máximo 5)."
+      "motivo": "Último negócio há 9 pregões (máximo 5)."
     },
     {
       "ticker": "V1MC34",
@@ -4749,28 +4731,21 @@
       "nome": "V1OD34",
       "setor": "Telecomunicações e mídia",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 915 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 434 por dia (mínimo 300.000)."
     },
     {
       "ticker": "V1RS34",
       "nome": "V1RS34",
       "setor": "Software e internet",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 11 dos últimos 21 pregões (mínimo 15)."
-    },
-    {
-      "ticker": "V1ST34",
-      "nome": "V1ST34",
-      "setor": "Energia elétrica e saneamento",
-      "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 295.857 por dia (mínimo 300.000)."
+      "motivo": "Negociou em 12 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "V1TA34",
       "nome": "V1TA34",
       "setor": "Financeiro",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 5 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 6 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "V2EE34",
@@ -4784,21 +4759,21 @@
       "nome": "V2RN34",
       "setor": "Software e internet",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 99.635 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 54.809 por dia (mínimo 300.000)."
     },
     {
       "ticker": "V2TX34",
       "nome": "V2TX34",
       "setor": "Software e internet",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 3.163 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 3.663 por dia (mínimo 300.000)."
     },
     {
       "ticker": "VERZ34",
       "nome": "VERZ34",
       "setor": "Telecomunicações e mídia",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 170.473 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 167.754 por dia (mínimo 300.000)."
     },
     {
       "ticker": "VFCO34",
@@ -4812,14 +4787,14 @@
       "nome": "VLOE34",
       "setor": "Petróleo e gás",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 8.855 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 8.326 por dia (mínimo 300.000)."
     },
     {
       "ticker": "VLYB34",
       "nome": "VLYB34",
       "setor": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 6 pregões (máximo 5)."
+      "motivo": "Último negócio há 7 pregões (máximo 5)."
     },
     {
       "ticker": "VMRK34",
@@ -4833,21 +4808,21 @@
       "nome": "VRTX34",
       "setor": "Saúde e farmacêuticas",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 16.762 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 24.583 por dia (mínimo 300.000)."
     },
     {
       "ticker": "W1AB34",
       "nome": "W1AB34",
       "setor": "Indústria",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 8 pregões (máximo 5)."
+      "motivo": "Último negócio há 9 pregões (máximo 5)."
     },
     {
       "ticker": "W1BO34",
       "nome": "W1BO34",
       "setor": "Software e internet",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 828 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 863 por dia (mínimo 300.000)."
     },
     {
       "ticker": "W1DA34",
@@ -4861,7 +4836,7 @@
       "nome": "W1EC34",
       "setor": "Energia elétrica e saneamento",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 12 pregões (máximo 5)."
+      "motivo": "Último negócio há 13 pregões (máximo 5)."
     },
     {
       "ticker": "W1EL34",
@@ -4875,21 +4850,21 @@
       "nome": "W1HR34",
       "setor": "Automóveis e bens duráveis",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 14 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 13 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "W1IX34",
       "nome": "W1IX34",
       "setor": "Software e internet",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 12.934 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 12.371 por dia (mínimo 300.000)."
     },
     {
       "ticker": "W1LT34",
       "nome": "W1LT34",
       "setor": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 19 pregões (máximo 5)."
+      "motivo": "Último negócio há 20 pregões (máximo 5)."
     },
     {
       "ticker": "W1MB34",
@@ -4917,7 +4892,7 @@
       "nome": "W1PP34",
       "setor": "Serviços e meios de pagamento",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "W1RB34",
@@ -4938,14 +4913,14 @@
       "nome": "W1YC34",
       "setor": "Financeiro",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 16 pregões (máximo 5)."
+      "motivo": "Último negócio há 17 pregões (máximo 5)."
     },
     {
       "ticker": "W1YN34",
       "nome": "W1YN34",
       "setor": "Turismo, lazer e serviços",
-      "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 2 dos últimos 21 pregões (mínimo 15)."
+      "codigo": "cotacao_defasada",
+      "motivo": "Último negócio há 6 pregões (máximo 5)."
     },
     {
       "ticker": "W2ST34",
@@ -4958,36 +4933,36 @@
       "ticker": "W2YF34",
       "nome": "W2YF34",
       "setor": "Varejo e e-commerce",
-      "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 2 dos últimos 21 pregões (mínimo 15)."
+      "codigo": "cotacao_defasada",
+      "motivo": "Último negócio há 6 pregões (máximo 5)."
     },
     {
       "ticker": "WFCO34",
       "nome": "WFCO34",
       "setor": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 200.840 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 169.261 por dia (mínimo 300.000)."
     },
     {
       "ticker": "WUNI34",
       "nome": "WUNI34",
       "setor": "Financeiro",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 20.131 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 19.437 por dia (mínimo 300.000)."
     },
     {
       "ticker": "X1EL34",
       "nome": "X1EL34",
       "setor": "Energia elétrica e saneamento",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 19 pregões (máximo 5)."
+      "motivo": "Último negócio há 20 pregões (máximo 5)."
     },
     {
       "ticker": "X1YL34",
       "nome": "X1YL34",
       "setor": "Indústria",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "X1YZ34",
@@ -5008,14 +4983,14 @@
       "nome": "XRAY34",
       "setor": "Saúde e farmacêuticas",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 15 pregões (máximo 5)."
+      "motivo": "Último negócio há 16 pregões (máximo 5)."
     },
     {
       "ticker": "XRXB34",
       "nome": "XRXB34",
       "setor": "Semicondutores e hardware",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 14.313 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 15.585 por dia (mínimo 300.000)."
     },
     {
       "ticker": "Y2PF34",
@@ -5029,7 +5004,7 @@
       "nome": "YUMR34",
       "setor": "Turismo, lazer e serviços",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 18 pregões (máximo 5)."
+      "motivo": "Último negócio há 19 pregões (máximo 5)."
     },
     {
       "ticker": "Z1BH34",
@@ -5043,7 +5018,7 @@
       "nome": "Z1BR34",
       "setor": "Semicondutores e hardware",
       "codigo": "cotacao_defasada",
-      "motivo": "Último negócio há 9 pregões (máximo 5)."
+      "motivo": "Último negócio há 10 pregões (máximo 5)."
     },
     {
       "ticker": "Z1IO34",
@@ -5085,7 +5060,7 @@
       "nome": "Z2DV34",
       "setor": "Software e internet",
       "codigo": "poucos_dias_negociados",
-      "motivo": "Negociou em 10 dos últimos 21 pregões (mínimo 15)."
+      "motivo": "Negociou em 9 dos últimos 21 pregões (mínimo 15)."
     },
     {
       "ticker": "Z2IT34",
@@ -5106,7 +5081,7 @@
       "nome": "Z2SC34",
       "setor": "Software e internet",
       "codigo": "liquidez_baixa",
-      "motivo": "Volume mediano de R$ 223.221 por dia (mínimo 300.000)."
+      "motivo": "Volume mediano de R$ 201.981 por dia (mínimo 300.000)."
     }
   ],
   "modoAuditoria": "diaria",
